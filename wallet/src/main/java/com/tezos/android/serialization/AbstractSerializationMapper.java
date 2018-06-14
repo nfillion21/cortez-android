@@ -7,8 +7,10 @@ import com.tezos.android.errors.exceptions.HttpException;
 import com.tezos.android.models.AbstractModel;
 import com.tezos.android.models.CustomTheme;
 import com.tezos.android.requests.AbstractRequest;
+import com.tezos.android.requests.order.PaymentPageRequest;
 import com.tezos.android.serialization.interfaces.CustomThemeSerialization;
 import com.tezos.android.serialization.interfaces.ISerialization;
+import com.tezos.android.serialization.interfaces.order.PaymentPageRequestSerialization;
 
 import java.util.Map;
 
@@ -65,15 +67,21 @@ public abstract class AbstractSerializationMapper {
 
     private void initSerializing(AbstractModel model) {
 
-        if (model instanceof CustomTheme) {
-
+        if (model instanceof CustomTheme)
+        {
             CustomTheme customTheme = (CustomTheme) model;
             this.setSerialization(new CustomThemeSerialization(customTheme));
-
         }
     }
 
     private void initSerializing(AbstractRequest request) {
+
+        if (request instanceof PaymentPageRequest) {
+
+            PaymentPageRequest paymentPageRequest = (PaymentPageRequest)request;
+            this.setSerialization(new PaymentPageRequestSerialization(paymentPageRequest));
+
+        }
     }
 
     protected ISerialization getSerialization()

@@ -4,14 +4,15 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.tezos.android.R;
 import com.tezos.android.models.CustomTheme;
@@ -51,6 +52,9 @@ public class PaymentFormActivity extends AppCompatActivity
         initToolbar();
 
         /*
+        Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+
+        CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
         mProgressBar = (ProgressBar) findViewById(R.id.progress);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mProgressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(this, customTheme.getTextColorPrimaryId())));
@@ -101,7 +105,7 @@ public class PaymentFormActivity extends AppCompatActivity
         //mToolbarBack.setColorFilter((ContextCompat.getColor(this,
                 //getCustomTheme().getTextColorPrimaryId())));
 
-        mToolbarBack.setOnClickListener(mOnClickListener);
+        //mToolbarBack.setOnClickListener(mOnClickListener);
         //TextView titleView = findViewById(R.id.payment_product_title);
 
         //titleView.setText("title");
