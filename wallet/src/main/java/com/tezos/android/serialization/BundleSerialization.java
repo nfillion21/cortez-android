@@ -2,7 +2,7 @@ package com.tezos.android.serialization;
 
 import android.os.Bundle;
 
-import com.tezos.app.utils.Utils;
+import com.tezos.android.utils.Utils;
 
 import java.net.URL;
 import java.util.Date;

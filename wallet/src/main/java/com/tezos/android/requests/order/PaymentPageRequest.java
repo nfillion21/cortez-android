@@ -2,8 +2,8 @@ package com.tezos.android.requests.order;
 
 import android.os.Bundle;
 
-import com.tezos.app.mapper.interfaces.BundleMapper;
-import com.tezos.app.serialization.AbstractSerializationMapper;
+import com.tezos.android.mapper.interfaces.BundleMapper;
+import com.tezos.android.serialization.AbstractSerializationMapper;
 
 import java.net.URL;
 import java.util.Arrays;

@@ -3,10 +3,8 @@ package com.tezos.android.mapper.interfaces;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.hipay.fullservice.core.utils.DataExtractor;
-import com.hipay.fullservice.core.utils.Utils;
-import com.tezos.app.utils.DataExtractor;
-import com.tezos.app.utils.Utils;
+import com.tezos.android.utils.DataExtractor;
+import com.tezos.android.utils.Utils;
 
 import org.json.JSONObject;
 

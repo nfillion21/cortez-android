@@ -2,9 +2,9 @@ package com.tezos.android.models;
 
 import android.os.Bundle;
 
-import com.tezos.app.mapper.AbstractMapper;
-import com.tezos.app.mapper.interfaces.BundleMapper;
-import com.tezos.app.serialization.AbstractSerializationMapper;
+import com.tezos.android.mapper.AbstractMapper;
+import com.tezos.android.mapper.interfaces.BundleMapper;
+import com.tezos.android.serialization.AbstractSerializationMapper;
 
 /**
  * Created by nfillion on 29/03/16.
