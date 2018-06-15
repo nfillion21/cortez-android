@@ -7,8 +7,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import com.tezos.android.R;
-import com.tezos.android.models.CustomTheme;
 import com.tezos.android.requests.order.PaymentPageRequest;
+import com.tezos.core.models.CustomTheme;
 
 /**
  * Created by nfillion on 21/12/2016.

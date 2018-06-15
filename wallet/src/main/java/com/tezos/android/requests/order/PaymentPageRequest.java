@@ -2,13 +2,9 @@ package com.tezos.android.requests.order;
 
 import android.os.Bundle;
 
-import com.tezos.android.mapper.interfaces.BundleMapper;
-import com.tezos.android.serialization.AbstractSerializationMapper;
-
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import com.tezos.core.mapper.interfaces.BundleMapper;
+import com.tezos.core.requests.order.OrderRelatedRequest;
+import com.tezos.core.serialization.AbstractSerializationMapper;
 
 /**
  * Created by nfillion on 03/02/16.

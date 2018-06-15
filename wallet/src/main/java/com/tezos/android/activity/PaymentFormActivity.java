@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,9 +13,10 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
 import com.tezos.android.R;
-import com.tezos.android.models.CustomTheme;
+import com.tezos.android.fragment.AbstractPaymentFormFragment;
 import com.tezos.android.requests.order.PaymentPageRequest;
-import com.tezos.android.utils.ApiLevelHelper;
+import com.tezos.core.models.CustomTheme;
+import com.tezos.core.utils.ApiLevelHelper;
 
 /**
  * Created by nfillion on 29/02/16.
@@ -63,6 +62,14 @@ public class PaymentFormActivity extends AppCompatActivity
             mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, customTheme.getTextColorPrimaryId()), PorterDuff.Mode.SRC_IN);
         }
         */
+
+        if (savedInstanceState == null) {
+
+            Bundle paymentPageRequestBundle = getIntent().getBundleExtra(PaymentPageRequest.TAG);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(paymentPageRequestBundle)).commit();
+        }
     }
 
     @Override
