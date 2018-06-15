@@ -1,9 +1,8 @@
-package com.tezos.android.requests.order;
+package com.tezos.core.requests.order;
 
 import android.os.Bundle;
 
 import com.tezos.core.mapper.interfaces.BundleMapper;
-import com.tezos.core.requests.order.OrderRelatedRequest;
 import com.tezos.core.serialization.AbstractSerializationMapper;
 
 /**

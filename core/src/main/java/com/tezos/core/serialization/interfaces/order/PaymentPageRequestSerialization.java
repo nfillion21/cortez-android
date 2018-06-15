@@ -1,9 +1,9 @@
-package com.tezos.android.serialization.interfaces.order;
+package com.tezos.core.serialization.interfaces.order;
 
 import android.os.Bundle;
 
-import com.tezos.android.requests.order.PaymentPageRequest;
-import com.tezos.android.utils.Utils;
+import com.tezos.core.requests.order.PaymentPageRequest;
+import com.tezos.core.utils.Utils;
 
 import java.util.Map;
 

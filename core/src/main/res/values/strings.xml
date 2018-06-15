@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">core</string>
+
+    <string-array name="card_products_list" translatable="false">
+        <item>visa</item>
+        <item>mastercard</item>
+        <item>diners</item>
+        <item>american_express</item>
+        <item>maestro</item>
+    </string-array>
 </resources>

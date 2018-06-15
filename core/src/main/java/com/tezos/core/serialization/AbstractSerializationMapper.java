@@ -7,8 +7,10 @@ import com.tezos.core.errors.exceptions.HttpException;
 import com.tezos.core.models.AbstractModel;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.AbstractRequest;
+import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.core.serialization.interfaces.CustomThemeSerialization;
 import com.tezos.core.serialization.interfaces.ISerialization;
+import com.tezos.core.serialization.interfaces.order.PaymentPageRequestSerialization;
 
 import java.util.Map;
 
@@ -74,14 +76,12 @@ public abstract class AbstractSerializationMapper {
 
     private void initSerializing(AbstractRequest request) {
 
-        /*
         if (request instanceof PaymentPageRequest) {
 
             PaymentPageRequest paymentPageRequest = (PaymentPageRequest)request;
             this.setSerialization(new PaymentPageRequestSerialization(paymentPageRequest));
 
         }
-        */
     }
 
     protected ISerialization getSerialization()

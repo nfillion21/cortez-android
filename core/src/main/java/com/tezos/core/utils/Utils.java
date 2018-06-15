@@ -460,4 +460,9 @@ public class Utils {
         } while (throwable != null);
     }
     */
+
+    public static String formatCardNumber(String numStr)
+    {
+        return null;
+    }
 }

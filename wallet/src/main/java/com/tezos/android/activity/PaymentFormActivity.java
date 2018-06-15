@@ -14,7 +14,7 @@ import android.widget.ProgressBar;
 
 import com.tezos.android.R;
 import com.tezos.android.fragment.AbstractPaymentFormFragment;
-import com.tezos.android.requests.order.PaymentPageRequest;
+import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.ApiLevelHelper;
 
@@ -51,7 +51,6 @@ public class PaymentFormActivity extends AppCompatActivity
         initToolbar();
 
         /*
-        Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
 
         CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
         mProgressBar = (ProgressBar) findViewById(R.id.progress);
@@ -66,9 +65,10 @@ public class PaymentFormActivity extends AppCompatActivity
         if (savedInstanceState == null) {
 
             Bundle paymentPageRequestBundle = getIntent().getBundleExtra(PaymentPageRequest.TAG);
+            Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
 
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(paymentPageRequestBundle)).commit();
+                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(paymentPageRequestBundle, customThemeBundle)).commit();
         }
     }
 

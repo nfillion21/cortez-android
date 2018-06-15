@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.tezos.core.R;
+import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
 
 /**
@@ -96,12 +96,14 @@ public abstract class AbstractPaymentFormFragment extends Fragment {
     {
         super.onAttach(context);
 
+        /*
         try {
             mCallback = (OnCallbackOrderListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
             + " must implement OnCallbackOrderListener");
         }
+        */
     }
 
     @Override
