@@ -21,7 +21,24 @@
 
         style="@style/PaymentScreens.ScanButton"
 
-        android:text="@string/scan_card"
+        android:text="@string/select_source"
+
+        android:paddingLeft="@dimen/spacing_double"
+        android:paddingRight="@dimen/spacing_double"
+
+        android:layout_marginBottom="@dimen/spacing_double" />
+
+    <Button
+        android:id="@+id/scan_button2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:drawableLeft="@drawable/ic_photo_camera_black"
+        android:drawableStart="@drawable/ic_photo_camera_black"
+
+        style="@style/PaymentScreens.ScanButton"
+
+        android:text="@string/select_destination"
 
         android:paddingLeft="@dimen/spacing_double"
         android:paddingRight="@dimen/spacing_double"
@@ -29,30 +46,28 @@
         android:layout_marginBottom="@dimen/spacing_double" />
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/card_owner_support"
+        android:id="@+id/tez_amount_support"
         app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?android:attr/actionBarSize"
-        android:hint="@string/card_owner"
+        android:hint="@string/amount_default"
         android:clipToPadding="false"
         android:transitionGroup="true"
         tools:ignore="UnusedAttribute,NewApi">
 
         <android.support.design.widget.TextInputEditText
-            android:id="@+id/card_owner"
+            android:id="@+id/tez_amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/card_owner_placeholder"
-            android:drawableRight="@drawable/ic_person_black"
-            android:drawableEnd="@drawable/ic_person_black"
-            android:drawablePadding="@dimen/spacing_double"
-            android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            android:maxLength="30"
-            android:maxLines="1"
-            android:textColorHint="@color/hpf_placeholder"
             android:imeOptions="actionNext"
-            android:inputType="textPersonName|textCapWords|textNoSuggestions"
+            android:drawableRight="@drawable/ic_credit_card_black"
+            android:drawableEnd="@drawable/ic_credit_card_black"
+            android:drawablePadding="@dimen/spacing_double"
+            android:inputType="numberDecimal"
+            android:textColorHint="@color/hpf_placeholder"
+            android:maxLength="10"
+            android:digits="0123456789.,"
             android:textSize="@dimen/size_edit_text" />
     </android.support.design.widget.TextInputLayout>
 

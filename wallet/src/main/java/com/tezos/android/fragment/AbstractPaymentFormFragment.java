@@ -45,7 +45,6 @@ public abstract class AbstractPaymentFormFragment extends Fragment {
         void dismissDialogs();
     }
 
-    protected TextInputEditText mCardOwner;
     protected TextInputEditText mCardNumber;
     protected TextInputEditText mCardExpiration;
     protected TextInputEditText mCardCVV;
@@ -53,7 +52,6 @@ public abstract class AbstractPaymentFormFragment extends Fragment {
     protected TextInputLayout mCardCVVLayout;
     protected TextInputLayout mCardNumberLayout;
     protected TextInputLayout mCardExpirationLayout;
-    protected TextInputLayout mCardOwnerLayout;
 
     protected LinearLayout mSecurityCodeInfoLayout;
     protected TextView mSecurityCodeInfoTextview;

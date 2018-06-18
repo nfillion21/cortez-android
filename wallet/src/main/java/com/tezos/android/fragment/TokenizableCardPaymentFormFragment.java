@@ -64,7 +64,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
     private String mCardNumberCache;
     private String mMonthExpiryCache;
     private String mYearExpiryCache;
-    private String mCardOwnerCache;
     private String mCardCVVCache;
 
     @Override
@@ -131,11 +130,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 
         View.OnFocusChangeListener focusChangeListener = this.focusChangeListener();
 
-        mCardOwner = (TextInputEditText) view.findViewById(R.id.card_owner);
-
-        mCardOwner.setOnFocusChangeListener(focusChangeListener);
-        mCardOwner.addTextChangedListener(new GenericTextWatcher(mCardOwner));
-
         mCardNumber = (TextInputEditText) view.findViewById(R.id.card_number);
         mCardNumber.addTextChangedListener(new GenericTextWatcher(mCardNumber));
         mCardNumber.setOnFocusChangeListener(focusChangeListener);
@@ -149,11 +143,9 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         mCardCVV.addTextChangedListener(new GenericTextWatcher(mCardCVV));
 
         mCardCVVLayout = (TextInputLayout) view.findViewById(R.id.card_cvv_support);
-        mCardOwnerLayout = (TextInputLayout) view.findViewById(R.id.card_owner_support);
         mCardExpirationLayout = (TextInputLayout) view.findViewById(R.id.card_expiration_support);
         mCardNumberLayout = (TextInputLayout) view.findViewById(R.id.card_number_support);
 
-        mCardOwnerLayout.setError(" ");
         mCardNumberLayout.setError(" ");
         mCardExpirationLayout.setError(" ");
         mCardCVVLayout.setError(" ");
@@ -175,12 +167,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         }
 
         //mCardBehaviour.updateForm(mCardNumber, mCardCVV, mCardExpiration, mCardCVVLayout, mSecurityCodeInfoTextview, mSecurityCodeInfoImageview, isPaymentCardStorageSwitchVisible ? mCardStorageSwitchLayout : null, false, getActivity());
-
-        //CustomerInfoRequest customerInfoRequest = paymentPageRequest.getCustomer();
-        //String displayName = customerInfoRequest.getDisplayName();
-        //if (displayName != null) {
-            mCardOwner.setText("Nico");
-        //}
 
         mCardNumber.requestFocus();
 
@@ -204,7 +190,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
                 mPayButtonLayout.setVisibility(View.GONE);
                 mProgressBar.setVisibility(View.VISIBLE);
 
-                mCardOwner.setEnabled(false);
                 mCardCVV.setEnabled(false);
                 mCardExpiration.setEnabled(false);
                 mCardNumber.setEnabled(false);
@@ -215,7 +200,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
                 mPayButtonLayout.setVisibility(View.VISIBLE);
                 mProgressBar.setVisibility(View.GONE);
 
-                mCardOwner.setEnabled(true);
                 mCardCVV.setEnabled(true);
                 mCardExpiration.setEnabled(true);
                 mCardNumber.setEnabled(true);
@@ -236,11 +220,7 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
             {
                 int i = v.getId();
 
-                if (i == R.id.card_owner) {
-
-                    putCardOwnerInRed(hasFocus);
-
-                } else if (i == R.id.card_cvv) {
+                if (i == R.id.card_cvv) {
 
                     putCVVInRed(!hasFocus);
 
@@ -295,16 +275,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         }
     }
 
-    public void fillCardNumber(String cardNumberText, Date expiryDate) {
-
-        mCardNumber.setFilters( new InputFilter[] { new InputFilter.LengthFilter(Integer.MAX_VALUE)});
-        mCardNumber.setText(Utils.formatCardNumber(cardNumberText));
-
-        if (expiryDate != null) {
-            mCardExpiration.setText(Utils.getPaymentFormStringFromDate(expiryDate));
-        }
-    }
-
     private StateListDrawable makeSelector(CustomTheme theme) {
         StateListDrawable res = new StateListDrawable();
         res.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(ContextCompat.getColor(getActivity(), theme.getColorPrimaryDarkId())));
@@ -350,11 +320,7 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 
             String version = editable.toString();
 
-            if (i == R.id.card_owner) {
-
-                putCardOwnerInRed(false);
-
-            } else if (i == R.id.card_cvv) {
+            if (i == R.id.card_cvv) {
 
                 // the condition to say it is wrong
                 putCVVInRed(false);
@@ -414,17 +380,12 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
                 mCardCVVCache = mCardCVV.getText().toString();
             }
 
-            if (mCardOwnerCache == null) {
-                mCardOwnerCache = mCardOwner.getText().toString();
-            }
-
         } else {
 
             mCardNumberCache = null;
             mMonthExpiryCache = null;
             mYearExpiryCache = null;
             mCardCVVCache = null;
-            mCardOwnerCache = null;
         }
     }
 
@@ -543,7 +504,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         if (
                 this.isExpiryDateValid() &&
                 this.isCVVValid() &&
-                this.isCardOwnerValid() &&
                 this.isCardNumberValid()
 
                 ) {
@@ -592,14 +552,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
     protected boolean hasSecurityCode() {
 
         return mCardBehaviour.hasSecurityCode();
-    }
-
-    protected boolean isCardOwnerValid() {
-
-        if (!TextUtils.isEmpty(mCardOwner.getText())) {
-            return true;
-        }
-        return false;
     }
 
     protected boolean hasSpaceAtIndex(int index) {
@@ -670,7 +622,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 
         this.putExpiryDateInRed(true);
         this.putCVVInRed(true);
-        this.putCardOwnerInRed(true);
         this.putCardNumberInRed(true);
     }
 
@@ -701,19 +652,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         }
 
         this.mCardCVV.setTextColor(ContextCompat.getColor(getActivity(), color));
-    }
-    private void putCardOwnerInRed(boolean red) {
-
-        int color;
-
-        if (red && !this.isCardOwnerValid()) {
-            color = R.color.hpf_error;
-
-        } else {
-            color = R.color.hpf_accent;
-        }
-
-        this.mCardOwner.setTextColor(ContextCompat.getColor(getActivity(), color));
     }
 
     private void putCardNumberInRed(boolean red) {
