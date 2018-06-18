@@ -72,7 +72,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?android:attr/actionBarSize"
-        android:hint="@string/card_number"
+        android:hint="@string/fees"
         android:clipToPadding="false"
         android:transitionGroup="true"
         tools:ignore="UnusedAttribute,NewApi">
@@ -85,7 +85,7 @@
             android:drawableRight="@drawable/ic_credit_card_black"
             android:drawableEnd="@drawable/ic_credit_card_black"
             android:drawablePadding="@dimen/spacing_double"
-            android:hint="@string/card_number"
+            android:hint="@string/fees_default"
             android:inputType="number"
             android:textColorHint="@color/hpf_placeholder"
             android:maxLength="23"

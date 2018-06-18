@@ -6,11 +6,12 @@
     <string name="card_owner_placeholder" translatable="false">Martin Dupont</string>
     <string name="card_expiration">Expiry date</string>
     <string name="amount_default" translatable="false">0.1</string>
-    <string name="amount">Amount in ꜩ</string>
+    <string name="amount">Transfer amount in ꜩ</string>
+    <string name="fees">Fees amount in ꜩ</string>
+    <string name="fees_default">0.001</string>
     <string name="card_expiration_placeholder">MM / AA</string>
     <string name="card_cvv">Security code</string>
     <string name="content_description" translatable="false">Content description</string>
     <string name="card_security_code_description_cvv">The CVV is the three-digit number on the back of your payment card.</string>
     <string name="card_storage_switch_description">Store this card for future use</string>
-    <string name="card_number">Number</string>
 </resources>

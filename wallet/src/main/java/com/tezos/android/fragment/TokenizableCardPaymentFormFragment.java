@@ -18,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import com.tezos.android.R;
 import com.tezos.android.fragment.interfaces.CardBehaviour;
@@ -38,8 +37,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 {
     private Button mPayButton;
     private FrameLayout mPayButtonLayout;
-
-    private String inferedPaymentProduct;
 
     private CardBehaviour mCardBehaviour;
 
@@ -82,6 +79,7 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 
         mCardInfoLayout.setVisibility(View.VISIBLE);
 
+        //TODO handle the arguments
         Bundle args = getArguments();
         //final PaymentPageRequest paymentPageRequest = PaymentPageRequest.fromBundle(args.getBundle(PaymentPageRequest.TAG));
 
@@ -111,14 +109,14 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         mAmount.addTextChangedListener(new GenericTextWatcher(mAmount));
         mAmount.setOnFocusChangeListener(focusChangeListener);
 
-        mCardNumber = view.findViewById(R.id.card_number);
-        mCardNumber.addTextChangedListener(new GenericTextWatcher(mCardNumber));
-        mCardNumber.setOnFocusChangeListener(focusChangeListener);
+        mFees = view.findViewById(R.id.card_number);
+        mFees.addTextChangedListener(new GenericTextWatcher(mFees));
+        mFees.setOnFocusChangeListener(focusChangeListener);
 
-        mCardNumberLayout = view.findViewById(R.id.card_number_support);
+        mFeesLayout = view.findViewById(R.id.card_number_support);
         mAmountLayout = view.findViewById(R.id.tez_amount_support);
 
-        mCardNumberLayout.setError(" ");
+        mFeesLayout.setError(" ");
         mAmountLayout.setError(" ");
 
         if (mCardBehaviour == null) {
@@ -126,7 +124,7 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
             mCardBehaviour = new CardBehaviour();
         }
 
-        //mCardBehaviour.updateForm(mCardNumber, mCardCVV, mCardExpiration, mCardCVVLayout, mSecurityCodeInfoTextview, mSecurityCodeInfoImageview, isPaymentCardStorageSwitchVisible ? mCardStorageSwitchLayout : null, false, getActivity());
+        //mCardBehaviour.updateForm(mFees, mCardCVV, mCardExpiration, mCardCVVLayout, mSecurityCodeInfoTextview, mSecurityCodeInfoImageview, isPaymentCardStorageSwitchVisible ? mCardStorageSwitchLayout : null, false, getActivity());
 
         mAmount.requestFocus();
 
@@ -150,14 +148,14 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
                 mPayButtonLayout.setVisibility(View.GONE);
                 mProgressBar.setVisibility(View.VISIBLE);
 
-                mCardNumber.setEnabled(false);
+                mFees.setEnabled(false);
 
             } else {
 
                 mPayButtonLayout.setVisibility(View.VISIBLE);
                 mProgressBar.setVisibility(View.GONE);
 
-                mCardNumber.setEnabled(true);
+                mFees.setEnabled(true);
             }
         }
 
@@ -175,14 +173,9 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 
                 if (i == R.id.card_number)
                 {
-                    putCardNumberInRed(!hasFocus);
-
-                } else if (i == R.id.tez_amount)
-                {
-                    //TODO change method
-                    putCardNumberInRed(!hasFocus);
-
-                } else
+                    //putCardNumberInRed(!hasFocus);
+                }
+                else
                 {
                     throw new UnsupportedOperationException(
                             "onFocusChange has not been implemented for " + getResources().
@@ -303,7 +296,7 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         {
             if (mCardNumberCache == null)
             {
-                mCardNumberCache = mCardNumber.getText().toString().replaceAll(" ", "");
+                mCardNumberCache = mFees.getText().toString().replaceAll(" ", "");
             }
 
         } else
@@ -418,7 +411,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
     protected boolean isInputDataValid() {
 
         if (
-                this.isExpiryDateValid() &&
                 this.isCVVValid() &&
                 this.isCardNumberValid()
 
@@ -432,15 +424,15 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 
     protected boolean isCardNumberValid() {
 
-        if (!TextUtils.isEmpty(mCardNumber.getText())) {
+        if (!TextUtils.isEmpty(mFees.getText())) {
 
             //luhn first
-            if (!FormHelper.luhnTest(mCardNumber.getText().toString().replaceAll(" ", ""))) {
+            if (!FormHelper.luhnTest(mFees.getText().toString().replaceAll(" ", ""))) {
                 return false;
             }
 
             //format then
-            Set<String> paymentProducts = FormHelper.getPaymentProductCodes(mCardNumber.getText().toString(), getActivity());
+            Set<String> paymentProducts = FormHelper.getPaymentProductCodes(mFees.getText().toString(), getActivity());
             if (paymentProducts.isEmpty()) {
                 return false;
             }
@@ -449,7 +441,7 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 
                 String[] things = paymentProducts.toArray(new String[1]);
 
-                if (FormHelper.hasValidCardLength(mCardNumber.getText().toString(), things[0], getActivity())) {
+                if (FormHelper.hasValidCardLength(mFees.getText().toString(), things[0], getActivity())) {
 
                     return true;
                 }
@@ -490,68 +482,11 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         return false;
     }
 
-    private boolean isPaymentCardStorageEnabled()
-    {
-        String paymentProduct;
-
-        if (inferedPaymentProduct != null) {
-            paymentProduct = inferedPaymentProduct;
-        } else {
-            paymentProduct = mCardBehaviour.getProductCode();
-        }
-
-        return true;
-    }
-
-    protected boolean isExpiryDateValid() {
-
-        return true;
-
-        /*
-        if (!TextUtils.isEmpty(mCardExpiration.getText())) {
-
-            String expiryDateString = mCardExpiration.getText().toString().trim();
-
-            if (expiryDateString.length() == 5 && expiryDateString.charAt(2) == '/') {
-
-                String firstPart = expiryDateString.substring(0, 2);
-                String secondPart = expiryDateString.substring(3,5);
-
-                StringBuilder stringBuilder = new StringBuilder(firstPart).append(secondPart);
-                String expiryDate = stringBuilder.toString();
-
-                if (TextUtils.isDigitsOnly(expiryDate)) {
-
-                    return FormHelper.validateExpiryDate(expiryDate);
-                }
-
-            } else if (expiryDateString.length() == 4 && TextUtils.isDigitsOnly(expiryDateString)) {
-
-                return FormHelper.validateExpiryDate(expiryDateString);
-            }
-        }
-        return false;
-        */
-    }
-
     protected void putEverythingInRed() {
 
-        this.putExpiryDateInRed(true);
         this.putCVVInRed(true);
-        this.putCardNumberInRed(true);
     }
 
-    private void putExpiryDateInRed(boolean red) {
-
-        int color;
-
-        boolean expiryDateValid = this.isExpiryDateValid();
-        if (red && !expiryDateValid) {
-            color = R.color.hpf_error;
-        } else {
-            color = R.color.hpf_accent;
-        }
-    }
     private void putCVVInRed(boolean red) {
 
         int color;
@@ -564,58 +499,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         } else {
             color = R.color.hpf_accent;
         }
-    }
-
-    private void putCardNumberInRed(boolean red) {
-
-        int color;
-
-        if (red && !this.isCardNumberValid()) {
-            color = R.color.hpf_error;
-
-        } else {
-
-            color = R.color.hpf_accent;
-
-            //every time the user types
-            if (!TextUtils.isEmpty(mCardNumber.getText()) && inferedPaymentProduct != null) {
-
-                Set<String> paymentProductCodes = FormHelper.getPaymentProductCodes(mCardNumber.getText().toString(), getActivity());
-                if (paymentProductCodes.size() == 1 && !paymentProductCodes.contains(inferedPaymentProduct)) {
-
-                    String[] things = paymentProductCodes.toArray(new String[1]);
-
-                    inferedPaymentProduct = things[0];
-
-                    // we do pass switchLayout as a parameter if config is enabled
-                    LinearLayout switchLayout = this.isPaymentCardStorageConfigEnabled() ? null : null;
-
-                    if (isDomesticNetwork(inferedPaymentProduct)) {
-
-                        //on garde le inferedPaymentProduct (VISA) mais on met l'image et titre de CB
-                        //mCallback.updatePaymentProduct(basicPaymentProduct.getPaymentProductDescription());
-                        mCardBehaviour.updatePaymentProduct(inferedPaymentProduct);
-
-                    } else {
-
-                        mCallback.updatePaymentProduct(inferedPaymentProduct);
-                        mCardBehaviour.updatePaymentProduct(inferedPaymentProduct);
-                    }
-
-                    this.putEverythingInRed();
-
-                }
-
-                // on va essayer d'atteindre la taille max.
-
-            } else {
-
-                //textfield is empty
-            }
-
-        }
-
-        this.mCardNumber.setTextColor(ContextCompat.getColor(getActivity(), color));
     }
 
     private boolean isInferedOrCardDomesticNetwork(String product) {

@@ -47,9 +47,9 @@ public abstract class AbstractPaymentFormFragment extends Fragment {
 
     protected TextInputEditText mAmount;
 
-    protected TextInputEditText mCardNumber;
+    protected TextInputEditText mFees;
 
-    protected TextInputLayout mCardNumberLayout;
+    protected TextInputLayout mFeesLayout;
     protected TextInputLayout mAmountLayout;
 
     protected abstract boolean isInputDataValid();
@@ -78,7 +78,8 @@ public abstract class AbstractPaymentFormFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
 
         this.setLoadingMode(mLoadingMode, false);
@@ -299,12 +300,14 @@ public abstract class AbstractPaymentFormFragment extends Fragment {
     */
 
     @Override
-    public void onPause() {
+    public void onPause()
+    {
         super.onPause();
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
 
         //this.cancelOperations();
