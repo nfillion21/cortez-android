@@ -6,8 +6,8 @@
     <string name="card_owner_placeholder" translatable="false">Martin Dupont</string>
     <string name="card_expiration">Expiry date</string>
     <string name="amount_default" translatable="false">0.1</string>
-    <string name="amount">Transfer amount in ꜩ</string>
-    <string name="fees">Fees amount in ꜩ</string>
+    <string name="amount">Transfer amount (min 0.1 ꜩ)</string>
+    <string name="fees">Fees amount (min 0.01 ꜩ)</string>
     <string name="fees_default">0.001</string>
     <string name="card_expiration_placeholder">MM / AA</string>
     <string name="card_cvv">Security code</string>

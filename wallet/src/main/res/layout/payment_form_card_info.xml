@@ -62,7 +62,7 @@
             android:inputType="numberDecimal"
             android:textColorHint="@color/hpf_placeholder"
             android:maxLength="10"
-            android:digits="0123456789.,"
+            android:digits="0123456789."
             android:textSize="@dimen/size_edit_text" />
     </android.support.design.widget.TextInputLayout>
 
@@ -86,10 +86,10 @@
             android:drawableEnd="@drawable/ic_credit_card_black"
             android:drawablePadding="@dimen/spacing_double"
             android:hint="@string/fees_default"
-            android:inputType="number"
+            android:inputType="numberDecimal"
             android:textColorHint="@color/hpf_placeholder"
-            android:maxLength="23"
-            android:digits="0123456789 "
+            android:maxLength="10"
+            android:digits="0123456789."
             android:textSize="@dimen/size_edit_text" />
     </android.support.design.widget.TextInputLayout>
 

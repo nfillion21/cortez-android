@@ -1,6 +1,5 @@
 package com.tezos.android.fragment;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,20 +16,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.tezos.android.R;
-import com.tezos.android.fragment.interfaces.CardBehaviour;
 import com.tezos.core.client.AbstractClient;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.order.PaymentPageRequest;
-import com.tezos.core.utils.FormHelper;
 
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * Created by nfillion on 20/04/16.
@@ -39,8 +34,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 {
     private Button mPayButton;
     private FrameLayout mPayButtonLayout;
-
-    private CardBehaviour mCardBehaviour;
 
     private String mCardNumberCache;
 
@@ -121,13 +114,6 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         mFeesLayout.setError(" ");
         mAmountLayout.setError(" ");
 
-        if (mCardBehaviour == null) {
-            //mCardBehaviour = new CardBehaviour(paymentProduct);
-            mCardBehaviour = new CardBehaviour();
-        }
-
-        //mCardBehaviour.updateForm(mFees, mCardCVV, mCardExpiration, mCardCVVLayout, mSecurityCodeInfoTextview, mSecurityCodeInfoImageview, isPaymentCardStorageSwitchVisible ? mCardStorageSwitchLayout : null, false, getActivity());
-
         mAmount.requestFocus();
 
         setElementsCache(true);
@@ -135,12 +121,11 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         validatePayButton(isInputDataValid());
 
         putEverythingInRed();
-
     }
 
     @Override
-    public void setLoadingMode(boolean loadingMode, boolean delay) {
-
+    public void setLoadingMode(boolean loadingMode, boolean delay)
+    {
         setElementsCache(loadingMode);
 
         if (!delay) {
@@ -175,11 +160,11 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 
                 if (i == R.id.amount_transfer)
                 {
-                    //putCardNumberInRed(!hasFocus);
+                    putAmountInRed(!hasFocus);
                 }
                 else if (i == R.id.fees_transfer)
                 {
-                    //putCardNumberInRed(!hasFocus);
+                    putFeesInRed(!hasFocus);
                 }
                 else
                 {
@@ -266,17 +251,16 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         {
             int i = v.getId();
 
-            String version = editable.toString();
-
             if (i == R.id.amount_transfer)
             {
-                //mFees.requestFocus();
+                putAmountInRed(false);
             }
             else if (i == R.id.fees_transfer)
             {
+                putFeesInRed(false);
             }
-
-            else {
+            else
+            {
                 throw new UnsupportedOperationException(
                         "OnClick has not been implemented for " + getResources().
                                 getResourceName(v.getId()));
@@ -409,120 +393,103 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
         */
     }
 
-    private String getMonthFromExpiry(String expiryString) {
-
-        if (expiryString != null && !expiryString.isEmpty()) {
-            return expiryString.substring(0,2);
-        }
-
-        return null;
-    }
-
     @Override
-    protected boolean isInputDataValid() {
-
+    protected boolean isInputDataValid()
+    {
         if (
-                this.isCVVValid() &&
-                this.isCardNumberValid()
-
-                ) {
-
+                this.isTransferAmountValid() &&
+                this.isFeesAmountValid()
+                )
+        {
             return true;
         }
 
         return false;
     }
 
-    protected boolean isCardNumberValid() {
-
-        if (!TextUtils.isEmpty(mFees.getText())) {
-
-            //luhn first
-            if (!FormHelper.luhnTest(mFees.getText().toString().replaceAll(" ", ""))) {
-                return false;
-            }
-
-            //format then
-            Set<String> paymentProducts = FormHelper.getPaymentProductCodes(mFees.getText().toString(), getActivity());
-            if (paymentProducts.isEmpty()) {
-                return false;
-            }
-
-            if (paymentProducts.size() == 1) {
-
-                String[] things = paymentProducts.toArray(new String[1]);
-
-                if (FormHelper.hasValidCardLength(mFees.getText().toString(), things[0], getActivity())) {
-
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    protected boolean isCVVValid() {
-
-        //return mCardBehaviour.isSecurityCodeValid(mCardCVV);
-        return true;
-    }
-
-    protected boolean hasSecurityCode() {
-
-        return mCardBehaviour.hasSecurityCode();
-    }
-
-    protected boolean hasSpaceAtIndex(int index) {
-
-        return mCardBehaviour.hasSpaceAtIndex(index, getActivity());
-    }
-
-    private boolean isPaymentCardStorageConfigEnabled()
+    protected void putEverythingInRed()
     {
-        /*
-        boolean paymentCardEnabled = ClientConfig.getInstance().isPaymentCardStorageEnabled();
-
-        Bundle args = getArguments();
-        PaymentPageRequest paymentPageRequest = PaymentPageRequest.fromBundle(args.getBundle(PaymentPageRequest.TAG));
-        boolean paymentPageRequestECI = paymentPageRequest.getEci() == Transaction.ECI.SecureECommerce ? true : false;
-
-        return paymentCardEnabled && paymentPageRequestECI;
-        */
-
-        return false;
+        this.putAmountInRed(true);
+        this.putFeesInRed(true);
     }
 
-    protected void putEverythingInRed() {
+    // put everything in RED
 
-        this.putCVVInRed(true);
-    }
-
-    private void putCVVInRed(boolean red) {
+    private void putAmountInRed(boolean red) {
 
         int color;
 
-        boolean securityCodeValid = this.isCVVValid();
+        boolean amountValid = this.isTransferAmountValid();
 
-        if (red && !securityCodeValid) {
-            color = R.color.hpf_error;
+        if (red && !amountValid) {
+            color = R.color.tz_error;
 
         } else {
-            color = R.color.hpf_accent;
+            color = R.color.tz_accent;
         }
+
+        this.mAmount.setTextColor(ContextCompat.getColor(getActivity(), color));
     }
 
-    private boolean isInferedOrCardDomesticNetwork(String product) {
-        return true;
+    private void putFeesInRed(boolean red) {
+
+        int color;
+
+        boolean feesAmountValid = this.isFeesAmountValid();
+
+        if (red && !feesAmountValid) {
+            color = R.color.tz_error;
+
+        } else {
+            color = R.color.tz_accent;
+        }
+
+        this.mFees.setTextColor(ContextCompat.getColor(getActivity(), color));
     }
 
-    private boolean isDomesticNetwork() {
-        return true;
+    private boolean isTransferAmountValid()
+    {
+        boolean isAmountValid = false;
+
+        if (!TextUtils.isEmpty(mAmount.getText()))
+        {
+            try
+            {
+                float amount = Float.parseFloat(mAmount.getText().toString());
+                if (amount >= 0.1f)
+                {
+                    return true;
+                }
+            }
+            catch (NumberFormatException e)
+            {
+                return false;
+            }
+        }
+
+        return isAmountValid;
     }
 
-    private boolean isDomesticNetwork(String paymentProductCode) {
+    private boolean isFeesAmountValid()
+    {
+        boolean isFeesValid = false;
 
-        return false;
+        if (!TextUtils.isEmpty(mFees.getText()))
+        {
+            try
+            {
+                float fees = Float.parseFloat(mFees.getText().toString());
+                if (fees >= 0.001f)
+                {
+                    return true;
+                }
+            }
+            catch (NumberFormatException e)
+            {
+                return false;
+            }
+        }
+        return isFeesValid;
     }
 }
 
