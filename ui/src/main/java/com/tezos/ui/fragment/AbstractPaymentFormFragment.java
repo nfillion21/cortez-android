@@ -1,4 +1,4 @@
-package com.tezos.android.fragment;
+package com.tezos.ui.fragment;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -13,20 +13,18 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.ui.R;
 
 /**
  * Created by nfillion on 29/02/16.
  */
 
-public abstract class AbstractPaymentFormFragment extends Fragment {
-
+public abstract class AbstractPaymentFormFragment extends Fragment
+{
     //private static final String STATE_IS_LOADING = "isLoading";
     //private static final String CURRENT_LOADER_ID = "currentLoaderId";
 

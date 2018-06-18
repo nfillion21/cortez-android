@@ -17,7 +17,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.PaymentFormActivity"/>
+            android:name="com.tezos.ui.activity.PaymentFormActivity"/>
     </application>
 
 </manifest>

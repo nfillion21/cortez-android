@@ -2,7 +2,7 @@ package com.tezos.android
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.tezos.android.activity.PaymentScreenActivity
+import com.tezos.ui.activity.PaymentScreenActivity
 
 class MainActivity : AppCompatActivity() {
 

@@ -1,4 +1,4 @@
-package com.tezos.android.fragment;
+package com.tezos.ui.fragment;
 
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
@@ -19,10 +19,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
-import com.tezos.android.R;
 import com.tezos.core.client.AbstractClient;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.order.PaymentPageRequest;
+import com.tezos.ui.R;
 
 import java.text.NumberFormat;
 import java.util.Locale;

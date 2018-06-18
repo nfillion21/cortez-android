@@ -65,7 +65,7 @@
             android:drawablePadding="@dimen/spacing_double"
             android:hint="@string/amount_default"
             android:inputType="numberDecimal"
-            android:textColorHint="@color/hpf_placeholder"
+            android:textColorHint="@color/tz_placeholder"
             android:maxLength="10"
             android:digits="0123456789."
             android:textSize="@dimen/size_edit_text" />
@@ -92,7 +92,7 @@
             android:drawablePadding="@dimen/spacing_double"
             android:hint="@string/fees_default"
             android:inputType="numberDecimal"
-            android:textColorHint="@color/hpf_placeholder"
+            android:textColorHint="@color/tz_placeholder"
             android:maxLength="10"
             android:digits="0123456789."
             android:textSize="@dimen/size_edit_text" />

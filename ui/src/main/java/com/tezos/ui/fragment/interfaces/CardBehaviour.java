@@ -1,4 +1,4 @@
-package com.tezos.android.fragment.interfaces;
+package com.tezos.ui.fragment.interfaces;
 
 import android.content.Context;
 import android.support.design.widget.TextInputLayout;

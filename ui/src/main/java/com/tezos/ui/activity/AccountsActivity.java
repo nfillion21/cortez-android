@@ -16,6 +16,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Window;
 import android.widget.TextView;
 
+import com.tezos.core.models.CustomTheme;
+import com.tezos.core.requests.order.PaymentPageRequest;
+import com.tezos.core.utils.ApiLevelHelper;
 import com.tezos.ui.R;
 
 /**
@@ -57,10 +60,9 @@ public class AccountsActivity
 
         if (theme == null)
         {
-            theme = new CustomTheme(R.color.hpf_primary,R.color.hpf_primary_dark,R.color.hpf_light);
+            theme = new CustomTheme(R.color.tz_primary,R.color.tz_primary_dark,R.color.tz_light);
         }
         starter.putExtra(CustomTheme.TAG, theme.toBundle());
-        starter.putExtra(GatewayClient.SIGNATURE_TAG, signature);
 
         return starter;
     }

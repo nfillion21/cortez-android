@@ -1,4 +1,4 @@
-package com.tezos.android.activity;
+package com.tezos.ui.activity;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -12,8 +12,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
-import com.tezos.android.R;
-import com.tezos.android.fragment.AbstractPaymentFormFragment;
+import com.tezos.ui.R;
+import com.tezos.ui.fragment.AbstractPaymentFormFragment;
 import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.ApiLevelHelper;
