@@ -45,17 +45,12 @@ public abstract class AbstractPaymentFormFragment extends Fragment {
         void dismissDialogs();
     }
 
+    protected TextInputEditText mAmount;
+
     protected TextInputEditText mCardNumber;
-    protected TextInputEditText mCardExpiration;
-    protected TextInputEditText mCardCVV;
 
-    protected TextInputLayout mCardCVVLayout;
     protected TextInputLayout mCardNumberLayout;
-    protected TextInputLayout mCardExpirationLayout;
-
-    protected LinearLayout mSecurityCodeInfoLayout;
-    protected TextView mSecurityCodeInfoTextview;
-    protected ImageView mSecurityCodeInfoImageview;
+    protected TextInputLayout mAmountLayout;
 
     protected abstract boolean isInputDataValid();
 

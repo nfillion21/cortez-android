@@ -6,7 +6,7 @@
     <string name="card_owner_placeholder" translatable="false">Martin Dupont</string>
     <string name="card_expiration">Expiry date</string>
     <string name="amount_default" translatable="false">0.1</string>
-    <string name="amount_and_currency">Amount and currency</string>
+    <string name="amount">Amount in ꜩ</string>
     <string name="card_expiration_placeholder">MM / AA</string>
     <string name="card_cvv">Security code</string>
     <string name="content_description" translatable="false">Content description</string>
