@@ -56,7 +56,7 @@ public abstract class AbstractPaymentFormFragment extends Fragment
     {
         AbstractPaymentFormFragment fragment;
 
-        fragment = new TokenizableCardPaymentFormFragment();
+        fragment = new PaymentFormFragment();
 
         Bundle args = new Bundle();
         args.putBundle(CustomTheme.TAG, customTheme);

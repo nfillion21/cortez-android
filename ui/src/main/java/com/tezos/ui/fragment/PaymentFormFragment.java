@@ -30,7 +30,7 @@ import java.util.Locale;
 /**
  * Created by nfillion on 20/04/16.
  */
-public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragment
+public class PaymentFormFragment extends AbstractPaymentFormFragment
 {
     private Button mPayButton;
     private FrameLayout mPayButtonLayout;

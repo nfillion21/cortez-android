@@ -1,34 +1,29 @@
 package com.tezos.ui.activity;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
-import android.view.Window;
-import android.widget.TextView;
+import android.support.v7.app.AppCompatActivity;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.order.PaymentPageRequest;
-import com.tezos.core.utils.ApiLevelHelper;
 import com.tezos.ui.R;
+import com.tezos.ui.fragment.PaymentAccountsFragment;
 
 /**
  * Created by nfillion on 25/02/16.
  */
-public class AccountsActivity
+public class AccountsActivity extends AppCompatActivity
 {
-    public static void start(Activity activity, PaymentPageRequest paymentPageRequest, String signature, CustomTheme theme)
+    public static void start(Activity activity, CustomTheme theme)
     {
-        Intent starter = getStartIntent(activity, paymentPageRequest, signature, theme);
+        Intent starter = getStartIntent(activity, theme);
 
         ActivityOptionsCompat activityOptions = ActivityOptionsCompat
                 .makeSceneTransitionAnimation(activity, null);
@@ -55,9 +50,6 @@ public class AccountsActivity
     {
         Intent starter = new Intent(context, AccountsActivity.class);
 
-        Bundle bundle = paymentPageRequest.toBundle();
-        starter.putExtra(PaymentPageRequest.TAG, bundle);
-
         if (theme == null)
         {
             theme = new CustomTheme(R.color.tz_primary,R.color.tz_primary_dark,R.color.tz_light);
@@ -73,6 +65,7 @@ public class AccountsActivity
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PaymentPageRequest.REQUEST_ORDER)
         {
+            /*
             if (resultCode == R.id.transaction_succeed)
             {
                 setResult(R.id.transaction_succeed, data);
@@ -96,6 +89,7 @@ public class AccountsActivity
                     }
                 }
             }
+            */
         }
     }
 
@@ -104,57 +98,29 @@ public class AccountsActivity
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_payment_products);
+        setContentView(R.layout.activity_payment_accounts);
 
         Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
 
-        this.setCustomTheme(customTheme);
-
-        setUpToolbar();
         if (savedInstanceState == null)
         {
-            attachProductGridFragment();
+            attachAccountGridFragment();
         }
 
         //useful when this activity is gonna be called with makeTransition
         supportPostponeEnterTransition();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void setUpToolbar()
-    {
-        if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP))
-        {
-            Window window = getWindow();
-            window.setStatusBarColor(ContextCompat.getColor(this,
-                    this.getCustomTheme().getColorPrimaryDarkId()));
-        }
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_payment_products);
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, this.getCustomTheme().getColorPrimaryId()));
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        TextView textView = toolbar.findViewById(R.id.title);
-        textView.setText(R.string.payment_products_title);
-        textView.setTextColor(ContextCompat.getColor(this, this.getCustomTheme().getTextColorPrimaryId()));
-    }
-
-    private void attachProductGridFragment()
+    private void attachAccountGridFragment()
     {
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.payment_products_container);
-        if (!(fragment instanceof PaymentProductsFragment))
+        if (!(fragment instanceof PaymentAccountsFragment))
         {
-            Bundle paymentPageRequestBundle = getIntent().getBundleExtra(PaymentPageRequest.TAG);
-
             Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
 
-            String signature = getIntent().getStringExtra(GatewayClient.SIGNATURE_TAG);
-
-            fragment = PaymentProductsFragment.newInstance(paymentPageRequestBundle, signature, customThemeBundle);
+            fragment = PaymentAccountsFragment.newInstance(customThemeBundle);
 
             //fragment.setArguments(paymentPageRequestBundle);
         }
