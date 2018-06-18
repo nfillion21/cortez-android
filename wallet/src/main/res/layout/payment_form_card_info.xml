@@ -21,9 +21,14 @@
         android:text="@string/select_source"
 
         android:paddingLeft="@dimen/spacing_double"
-        android:paddingRight="@dimen/spacing_double"
+        android:paddingRight="@dimen/spacing_double" />
 
-        android:layout_marginBottom="@dimen/spacing_double" />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_arrow_drop_down_black"
+        android:layout_gravity="center_horizontal"
+        />
 
     <Button
         android:id="@+id/scan_button2"
