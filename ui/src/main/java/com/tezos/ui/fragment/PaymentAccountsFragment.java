@@ -1,7 +1,6 @@
 package com.tezos.ui.fragment;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,11 +9,8 @@ import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -22,35 +18,29 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
-import com.hipay.fullservice.R;
-import com.hipay.fullservice.core.client.AbstractClient;
-import com.hipay.fullservice.core.client.GatewayClient;
-import com.hipay.fullservice.core.client.interfaces.callbacks.PaymentProductsCallback;
-import com.hipay.fullservice.core.models.PaymentProduct;
-import com.hipay.fullservice.core.requests.order.PaymentPageRequest;
-import com.hipay.fullservice.screen.activity.PaymentFormActivity;
-import com.hipay.fullservice.screen.adapter.PaymentProductsAdapter;
-import com.hipay.fullservice.screen.helper.TransitionHelper;
-import com.hipay.fullservice.screen.model.CustomTheme;
-import com.hipay.fullservice.screen.widget.OffsetDecoration;
+import com.tezos.core.client.GatewayClient;
+import com.tezos.core.models.Account;
+import com.tezos.core.models.CustomTheme;
+import com.tezos.ui.R;
+import com.tezos.ui.adapter.PaymentAccountsAdapter;
+import com.tezos.ui.widget.OffsetDecoration;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * Created by nfillion on 26/02/16.
  */
 
-public class PaymentAccountsFragment extends Fragment implements PaymentProductsAdapter.OnItemClickListener
+public class PaymentAccountsFragment extends Fragment implements PaymentAccountsAdapter.OnItemClickListener
 {
     private static final String STATE_IS_LOADING = "isLoading";
 
-    private PaymentProductsAdapter mAdapter;
+    private PaymentAccountsAdapter mAdapter;
     private GatewayClient mGatewayClient;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
 
-    private List<PaymentProduct> paymentProducts;
+    private List<Account> accountList;
 
     protected boolean mLoadingMode;
     protected int mCurrentLoading = -1;
@@ -60,10 +50,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentProducts
         PaymentAccountsFragment fragment = new PaymentAccountsFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putBundle(PaymentPageRequest.TAG, paymentPageRequestBundle);
-
         bundle.putBundle(CustomTheme.TAG, customTheme);
-        bundle.putString(GatewayClient.SIGNATURE_TAG, signature);
 
         fragment.setArguments(bundle);
         return fragment;
@@ -120,9 +107,9 @@ public class PaymentAccountsFragment extends Fragment implements PaymentProducts
 
                 if (pProducts != null && !pProducts.isEmpty())
                 {
-                    paymentProducts = updatedPaymentProducts(pProducts, paymentPageRequest.isPaymentCardGroupingEnabled());
-                    if (paymentProducts != null) {
-                        mAdapter.updatePaymentProducts(paymentProducts);
+                    accountList = updatedPaymentProducts(pProducts, paymentPageRequest.isPaymentCardGroupingEnabled());
+                    if (accountList != null) {
+                        mAdapter.updatePaymentProducts(accountList);
                     }
 
                 }
@@ -258,7 +245,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentProducts
         }
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.products);
-        setUpProductGrid(mRecyclerView);
+        setUpAccountGrid(mRecyclerView);
 
         if (savedInstanceState == null)
         {
@@ -266,9 +253,9 @@ public class PaymentAccountsFragment extends Fragment implements PaymentProducts
         }
         else
         {
-            if (paymentProducts != null && !paymentProducts.isEmpty())
+            if (accountList != null && !accountList.isEmpty())
             {
-                mAdapter.updatePaymentProducts(paymentProducts);
+                mAdapter.updateAccounts(accountList);
             }
         }
     }
@@ -289,32 +276,16 @@ public class PaymentAccountsFragment extends Fragment implements PaymentProducts
         mLoadingMode = loadingMode;
     }
 
-    private void setUpProductGrid(final RecyclerView categoriesView)
+    private void setUpAccountGrid(final RecyclerView categoriesView)
     {
         final int spacing = getContext().getResources()
                 .getDimensionPixelSize(R.dimen.spacing_nano);
         categoriesView.addItemDecoration(new OffsetDecoration(spacing));
 
-        mAdapter = new PaymentProductsAdapter(getActivity());
+        mAdapter = new PaymentAccountsAdapter(getActivity());
         mAdapter.setOnItemClickListener(this);
 
         categoriesView.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void onClick(View view, PaymentProduct paymentProduct) {
-
-        final Bundle paymentPageRequestBundle = getArguments().getBundle(PaymentPageRequest.TAG);
-        final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
-        final String signature = getArguments().getString(GatewayClient.SIGNATURE_TAG);
-
-        Activity activity = getActivity();
-        startPaymentFormActivityWithTransition(activity, view == null ? null :
-                        view.findViewById(R.id.payment_product_title),
-                paymentPageRequestBundle,
-                customThemeBundle,
-                paymentProduct,
-                signature);
     }
 
     @Override
@@ -327,45 +298,22 @@ public class PaymentAccountsFragment extends Fragment implements PaymentProducts
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void startPaymentFormActivityWithTransition(Activity activity, View toolbar, Bundle paymentPageRequestBundle, Bundle customThemeBundle,
-                                                        PaymentProduct paymentProduct, String signature) {
-
-        Bundle transitionBundle = null;
-
-        if (toolbar != null) {
-            final Pair[] pairs = TransitionHelper.createSafeTransitionParticipants(activity, false,
-                    new Pair<>(toolbar, activity.getString(R.string.transition_toolbar)));
-            @SuppressWarnings("unchecked")
-            ActivityOptionsCompat sceneTransitionAnimation = ActivityOptionsCompat
-                    .makeSceneTransitionAnimation(activity, pairs);
-
-            //Start the activity with the participants, animating from one to the other.
-            transitionBundle = sceneTransitionAnimation.toBundle();
-        }
-
-        Intent startIntent = PaymentFormActivity.getStartIntent(activity, paymentPageRequestBundle, customThemeBundle, paymentProduct, signature);
-        ActivityCompat.startActivityForResult(activity,
-                startIntent,
-                PaymentPageRequest.REQUEST_ORDER,
-                //transitionBundle);
-                //avoid glitch problem
-                null);
-    }
-
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState)
+    {
         super.onSaveInstanceState(outState);
-
         outState.putBoolean(STATE_IS_LOADING, mLoadingMode);
     }
 
-    public void cancelOperations() {
-
-        if (mGatewayClient != null) {
+    public void cancelOperations()
+    {
+        if (mGatewayClient != null)
+        {
             mGatewayClient.cancelOperation(getActivity());
             mGatewayClient = null;
         }
@@ -373,11 +321,14 @@ public class PaymentAccountsFragment extends Fragment implements PaymentProducts
         setLoadingMode(false);
     }
 
-    public List<PaymentProduct> getPaymentProducts() {
-        return paymentProducts;
+    public List<Account> getAccountList() {
+        return accountList;
     }
 
-    public void setPaymentProducts(List<PaymentProduct> paymentProducts) {
-        this.paymentProducts = paymentProducts;
+    public void setAccountList(List<Account> accountList) {
+        this.accountList = accountList;
     }
+
+    @Override
+    public void onClick(View view, Account paymentProduct) {}
 }

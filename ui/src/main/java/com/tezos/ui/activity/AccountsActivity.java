@@ -82,7 +82,7 @@ public class AccountsActivity extends AppCompatActivity
                 if (fragment != null)
                 {
                     PaymentProductsFragment paymentProductsFragment = (PaymentProductsFragment) fragment;
-                    List<PaymentProduct> paymentProducts = paymentProductsFragment.getPaymentProducts();
+                    List<PaymentProduct> paymentProducts = paymentProductsFragment.getAccountList();
                     if (paymentProducts == null || paymentProducts.isEmpty())
                     {
                         finish();
