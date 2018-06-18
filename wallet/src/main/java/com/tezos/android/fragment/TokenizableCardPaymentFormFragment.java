@@ -1,5 +1,6 @@
 package com.tezos.android.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
@@ -105,16 +107,16 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
 
         View.OnFocusChangeListener focusChangeListener = this.focusChangeListener();
 
-        mAmount = view.findViewById(R.id.tez_amount);
+        mAmount = view.findViewById(R.id.amount_transfer);
         mAmount.addTextChangedListener(new GenericTextWatcher(mAmount));
         mAmount.setOnFocusChangeListener(focusChangeListener);
 
-        mFees = view.findViewById(R.id.card_number);
+        mFees = view.findViewById(R.id.fees_transfer);
         mFees.addTextChangedListener(new GenericTextWatcher(mFees));
         mFees.setOnFocusChangeListener(focusChangeListener);
 
-        mFeesLayout = view.findViewById(R.id.card_number_support);
-        mAmountLayout = view.findViewById(R.id.tez_amount_support);
+        mFeesLayout = view.findViewById(R.id.fees_transfer_support);
+        mAmountLayout = view.findViewById(R.id.amount_transfer_support);
 
         mFeesLayout.setError(" ");
         mAmountLayout.setError(" ");
@@ -171,7 +173,11 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
             {
                 int i = v.getId();
 
-                if (i == R.id.card_number)
+                if (i == R.id.amount_transfer)
+                {
+                    //putCardNumberInRed(!hasFocus);
+                }
+                else if (i == R.id.fees_transfer)
                 {
                     //putCardNumberInRed(!hasFocus);
                 }
@@ -256,16 +262,21 @@ public class TokenizableCardPaymentFormFragment extends AbstractPaymentFormFragm
             currentLength = s.length();
         }
 
-        public void afterTextChanged(Editable editable) {
-
+        public void afterTextChanged(Editable editable)
+        {
             int i = v.getId();
 
             String version = editable.toString();
 
-            if (i == R.id.card_number)
+            if (i == R.id.amount_transfer)
             {
+                //mFees.requestFocus();
+            }
+            else if (i == R.id.fees_transfer)
+            {
+            }
 
-            } else {
+            else {
                 throw new UnsupportedOperationException(
                         "OnClick has not been implemented for " + getResources().
                                 getResourceName(v.getId()));

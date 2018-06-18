@@ -40,7 +40,7 @@
         android:layout_marginBottom="@dimen/spacing_double" />
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/tez_amount_support"
+        android:id="@+id/amount_transfer_support"
         app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
         tools:ignore="UnusedAttribute,NewApi">
 
         <android.support.design.widget.TextInputEditText
-            android:id="@+id/tez_amount"
+            android:id="@+id/amount_transfer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionNext"
@@ -67,7 +67,7 @@
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/card_number_support"
+        android:id="@+id/fees_transfer_support"
         app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -78,10 +78,10 @@
         tools:ignore="UnusedAttribute,NewApi">
 
         <android.support.design.widget.TextInputEditText
-            android:id="@+id/card_number"
+            android:id="@+id/fees_transfer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionDone"
             android:drawableRight="@drawable/ic_credit_card_black"
             android:drawableEnd="@drawable/ic_credit_card_black"
             android:drawablePadding="@dimen/spacing_double"
