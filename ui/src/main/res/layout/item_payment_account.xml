@@ -17,19 +17,26 @@
             android:layout_height="wrap_content"
             android:padding="@dimen/spacing_double"
             android:orientation="vertical">
+            <ImageView
+                android:id="@+id/payment_account_key_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/vpn_key_black"
+                android:paddingBottom="@dimen/spacing_micro"
+                android:contentDescription="@string/content_description" />
             <TextView
                 android:id="@+id/payment_account_pub_key_hash_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
                 android:textStyle="bold"
-                android:text="Public Key Hash:"/>
+                android:text="@string/public_key_hash"/>
             <TextView
                 android:id="@+id/payment_account_pub_key_hash"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
-                android:layout_marginTop="@dimen/spacing_normal"
                 android:maxLines="2"
                 android:ellipsize="end"
                  />

@@ -130,7 +130,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
                     };
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle(R.string.error_title_default)
+                    builder.setDescription(R.string.error_title_default)
                             .setMessage(R.string.error_body_payment_products)
                             .setNegativeButton(R.string.error_button_dismiss, dialogClickListener)
                             .setCancelable(false)
@@ -159,7 +159,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
                     };
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle(R.string.error_title_default)
+                    builder.setDescription(R.string.error_title_default)
                             .setMessage(R.string.error_body_default)
                             .setNegativeButton(R.string.error_button_dismiss, dialogClickListener)
                             .setCancelable(false)

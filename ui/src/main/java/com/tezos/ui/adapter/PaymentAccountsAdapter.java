@@ -8,12 +8,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
-import com.tezos.ui.activity.PaymentAccountsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,14 +43,15 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         mLayoutInflater = LayoutInflater.from(activity.getApplicationContext());
 
         mAccounts = new ArrayList<>();
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 5; i++)
         {
             Account account = new Account();
-            account.setTitle("My account " + i );
-            if (i == 5)
-            account.setPubKeyHash("ttz1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1srtz1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1srtz1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1srz1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr");
-            else
+            account.setDescription("My account " + i );
             account.setPubKeyHash("tz1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr");
+            if (i%3 == 0)
+            {
+                account.setPrivateKeyHash("TZ1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr");
+            }
             mAccounts.add(account);
         }
 
@@ -74,7 +75,7 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         //PaymentAccountsActivity activity = (PaymentAccountsActivity)mActivity;
 
         //holder.itemView.setBackgroundColor(getColor(android.R.color.background_light));
-        //holder.title.setText(account.getTitle());
+        //holder.description.setText(account.getDescription());
 
         CustomTheme theme = null;
         if (theme == null)
@@ -82,9 +83,18 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
             theme = new CustomTheme(R.color.tz_primary,R.color.tz_primary_dark,R.color.tz_light);
         }
 
+        if (account.getPrivateKeyHash() != null)
+        {
+            holder.keyIcon.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            holder.keyIcon.setVisibility(View.INVISIBLE);
+        }
+
         holder.pubKeyHash.setText(account.getPubKeyHash());
 
-        holder.title.setText(account.getTitle());
+        holder.title.setText(account.getDescription());
         holder.title.setTextColor(getColor(theme.getTextColorPrimaryId()));
         holder.title.setBackgroundColor(getColor(theme.getColorPrimaryId()));
 
@@ -136,12 +146,14 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     {
         final TextView title;
         final TextView pubKeyHash;
+        final ImageView keyIcon;
 
         public ViewHolder(View container)
         {
             super(container);
             title = container.findViewById(R.id.payment_account_title);
             pubKeyHash = container.findViewById(R.id.payment_account_pub_key_hash);
+            keyIcon = container.findViewById(R.id.payment_account_key_icon);
         }
     }
 }
