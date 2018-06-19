@@ -2,15 +2,24 @@ package com.tezos.core.models;
 
 public class Account
 {
-    protected Integer title;
+    protected String title;
+    protected String pubKeyHash;
 
     public Account() {}
 
-    public Integer getTitle() {
+    public String getTitle() {
         return title;
     }
 
-    public void setTitle(Integer title) {
+    public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getPubKeyHash() {
+        return pubKeyHash;
+    }
+
+    public void setPubKeyHash(String pubKeyHash) {
+        this.pubKeyHash = pubKeyHash;
     }
 }

@@ -16,13 +16,16 @@
         android:id="@+id/transfer_src_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         style="@style/PaymentScreens.ScanButton"
-
-        android:text="@string/select_source"
-
+        android:drawableLeft="@drawable/vpn_key_black"
+        android:drawableStart="@drawable/vpn_key_black"
         android:paddingLeft="@dimen/spacing_double"
-        android:paddingRight="@dimen/spacing_double" />
+        android:paddingRight="40dp"
+        android:text="@string/select_source"
+        />
+    <!--
+    android:drawablePadding="@dimen/spacing_double"
+    -->
 
     <ImageView
         android:layout_width="wrap_content"
