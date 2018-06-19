@@ -55,8 +55,26 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
             mAccounts.add(account);
         }
 
-        //updateAccounts(activity);
-        //emptyPaymentProducts();
+        removeStandardAccounts(mAccounts);
+
+        /*
+        // sort messages by date, oldest last.
+        Collections.sort(mAccounts, new Comparator<Account>()
+        {
+            @Override
+            public int compare(Account o1, Account o2)
+            {
+                if (o1.getPrivateKeyHash() == null) {
+                    return (o2.getPrivateKeyHash() == null) ? 0 : -1;
+                }
+                if (o2.getPrivateKeyHash() == null)
+                {
+                    return 1;
+                }
+                return o1.getPrivateKeyHash().compareTo(o2.getPrivateKeyHash());
+            }
+        });
+        */
     }
 
     @Override
@@ -140,6 +158,22 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
      */
     private int getColor(@ColorRes int colorRes) {
         return ContextCompat.getColor(mActivity, colorRes);
+    }
+
+    private void removeStandardAccounts(List<Account> accountList)
+    {
+        int size = accountList.size();
+        List<Account> itemsToRemove = new ArrayList<>(size);
+
+        for (Account a: accountList)
+        {
+            if (a.getPrivateKeyHash() == null)
+            {
+                itemsToRemove.add(a);
+            }
+        }
+
+        accountList.removeAll(itemsToRemove);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder
