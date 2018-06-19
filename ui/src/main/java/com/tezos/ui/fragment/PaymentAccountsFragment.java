@@ -86,11 +86,12 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        return inflater.inflate(R.layout.fragment_payment_products, container, false);
+        return inflater.inflate(R.layout.fragment_payment_accounts, container, false);
     }
 
     private void launchRequest()
     {
+        /*
         setLoadingMode(true);
 
         final Bundle paymentPageRequestBundle = getArguments().getBundle(PaymentPageRequest.TAG);
@@ -107,7 +108,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
 
                 if (pProducts != null && !pProducts.isEmpty())
                 {
-                    accountList = updatedPaymentProducts(pProducts, paymentPageRequest.isPaymentCardGroupingEnabled());
+                    accountList = updatedAccounts(pProducts, paymentPageRequest.isPaymentCardGroupingEnabled());
                     if (accountList != null) {
                         mAdapter.updatePaymentProducts(accountList);
                     }
@@ -165,16 +166,18 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
                 }
             }
         });
+        */
     }
 
-    private List<PaymentProduct> updatedPaymentProducts(List<PaymentProduct> paymentProducts, Boolean isGroupingCard)
+    private List<Account> updatedAccounts(List<Account> accounts)
     {
+        /*
         boolean atLeastOneCard = false;
         boolean atLeastOneNoCard = false;
 
         if (isGroupingCard != null && isGroupingCard.equals(Boolean.TRUE))
         {
-            Iterator<PaymentProduct> iter = paymentProducts.iterator();
+            Iterator<PaymentProduct> iter = accounts.iterator();
             while (iter.hasNext())
             {
                 PaymentProduct p = iter.next();
@@ -199,7 +202,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
                 // there are other payment products
                 if (atLeastOneNoCard)
                 {
-                    paymentProducts.add(0, cardProduct);
+                    accounts.add(0, cardProduct);
 
                 }
                 else
@@ -213,9 +216,9 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         else
         {
             // do something only if there is one tokenizable
-            if (paymentProducts.size() == 1)
+            if (accounts.size() == 1)
             {
-                PaymentProduct paymentProduct = paymentProducts.get(0);
+                PaymentProduct paymentProduct = accounts.get(0);
                 if (paymentProduct.isTokenizable())
                 {
                     onClick(null, paymentProduct);
@@ -223,8 +226,8 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
                 }
             }
         }
-
-        return paymentProducts;
+*/
+        return accounts;
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -233,18 +236,18 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     {
         super.onViewCreated(view, savedInstanceState);
 
-        mProgressBar = (ProgressBar)view.findViewById(R.id.progress);
+        mProgressBar = view.findViewById(R.id.progress);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
         {
-            mProgressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity(), R.color.hpf_light)));
+            mProgressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity(), R.color.tz_light)));
         }
         else
         {
-            mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.hpf_light), PorterDuff.Mode.SRC_IN);
+            mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.tz_light), PorterDuff.Mode.SRC_IN);
         }
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.products);
+        mRecyclerView = view.findViewById(R.id.products);
         setUpAccountGrid(mRecyclerView);
 
         if (savedInstanceState == null)

@@ -2,20 +2,17 @@ package com.tezos.ui.adapter;
 
 import android.app.Activity;
 import android.content.res.Resources;
-import android.graphics.PorterDuff;
 import android.support.annotation.ColorRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tezos.core.models.Account;
-import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
-import com.tezos.ui.activity.AccountsActivity;
+import com.tezos.ui.activity.PaymentAccountsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +62,7 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     {
         Account account = mAccounts.get(holder.getAdapterPosition());
 
-        AccountsActivity activity = (AccountsActivity)mActivity;
+        PaymentAccountsActivity activity = (PaymentAccountsActivity)mActivity;
 
         // break this dependency
         //CustomTheme theme = activity.getCustomTheme();

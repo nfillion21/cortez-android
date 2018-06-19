@@ -19,36 +19,36 @@ import com.tezos.ui.fragment.PaymentAccountsFragment;
 /**
  * Created by nfillion on 25/02/16.
  */
-public class AccountsActivity extends AppCompatActivity
+public class PaymentAccountsActivity extends AppCompatActivity
 {
     public static void start(Activity activity, CustomTheme theme)
     {
         Intent starter = getStartIntent(activity, theme);
 
-        ActivityOptionsCompat activityOptions = ActivityOptionsCompat
-                .makeSceneTransitionAnimation(activity, null);
+        //ActivityOptionsCompat activityOptions = ActivityOptionsCompat
+                //.makeSceneTransitionAnimation(activity, null);
+        //ActivityCompat.startActivityForResult(activity, starter, PaymentPageRequest.REQUEST_ORDER, activityOptions.toBundle());
 
-        ActivityCompat.startActivityForResult(activity, starter, PaymentPageRequest.REQUEST_ORDER, activityOptions.toBundle());
+        //TODO handle to receiver needed.
+        ActivityCompat.startActivityForResult(activity, starter, PaymentPageRequest.REQUEST_ORDER, null);
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
-        //no-op
     }
 
     @Override
     protected void onStop()
     {
         super.onStop();
-        //no-op
     }
 
     @NonNull
     static Intent getStartIntent(Context context, CustomTheme theme)
     {
-        Intent starter = new Intent(context, AccountsActivity.class);
+        Intent starter = new Intent(context, PaymentAccountsActivity.class);
 
         if (theme == null)
         {
