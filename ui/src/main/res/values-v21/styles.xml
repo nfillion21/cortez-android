@@ -1,0 +1,14 @@
+<resources>
+    <style name="PaymentScreens" parent="PaymentScreens.Base">
+        <item name="android:spinnerStyle">@style/Base.Widget.AppCompat.Spinner.Underlined</item>
+    </style>
+
+    <style name="PaymentScreens.PaymentAccountsActivity">
+        <item name="android:windowBackground">@color/tz_blank</item>
+
+    </style>
+
+    <style name="PaymentScreens.PaymentFormActivity">
+        <item name="android:windowBackground">@color/tz_light</item>
+    </style>
+</resources>

@@ -13,7 +13,7 @@
     tools:showIn="@layout/fragment_payment_form">
 
     <Button
-        android:id="@+id/scan_button"
+        android:id="@+id/transfer_src_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 
@@ -32,7 +32,7 @@
         />
 
     <Button
-        android:id="@+id/scan_button2"
+        android:id="@+id/transfer_dst_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 

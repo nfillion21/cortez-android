@@ -38,6 +38,9 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
     private String mCardNumberCache;
 
+    private Button mSrcButton;
+    private Button mDestButton;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
@@ -68,6 +71,26 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     {
         super.initContentViews(view);
 
+        mSrcButton = view.findViewById(R.id.transfer_src_button);
+        mSrcButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                PaymentAccountsActivity.start(getActivity(), null);
+            }
+        });
+
+        mDestButton = view.findViewById(R.id.transfer_dst_button);
+        mDestButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                PaymentAccountsActivity.start(getActivity(), null);
+            }
+        });
+
         mPayButton = view.findViewById(R.id.pay_button);
         mPayButtonLayout = view.findViewById(R.id.pay_button_layout);
 
@@ -96,8 +119,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
             {
                 //setLoadingMode(true,false);
                 //launchRequest();
-
-                PaymentAccountsActivity.start(getActivity(), null);
             }
         });
 

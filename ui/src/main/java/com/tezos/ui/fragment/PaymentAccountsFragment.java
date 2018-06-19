@@ -2,7 +2,6 @@ package com.tezos.ui.fragment;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
@@ -11,7 +10,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +23,7 @@ import com.tezos.ui.R;
 import com.tezos.ui.adapter.PaymentAccountsAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -91,6 +90,8 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
 
     private void launchRequest()
     {
+        //mAdapter.updateAccounts(accountList);
+
         /*
         setLoadingMode(true);
 
@@ -333,5 +334,24 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     }
 
     @Override
-    public void onClick(View view, Account paymentProduct) {}
+    public void onClick(View view, Account account)
+    {
+        if (getActivity() != null)
+        {
+            getActivity().finish();
+        }
+        /*
+        final Bundle paymentPageRequestBundle = getArguments().getBundle(PaymentPageRequest.TAG);
+        final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
+        final String signature = getArguments().getString(GatewayClient.SIGNATURE_TAG);
+
+        Activity activity = getActivity();
+        startPaymentFormActivityWithTransition(activity, view == null ? null :
+                        view.findViewById(R.id.payment_product_title),
+                paymentPageRequestBundle,
+                customThemeBundle,
+                paymentProduct,
+                signature);
+                */
+    }
 }

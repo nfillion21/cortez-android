@@ -23,10 +23,7 @@ import java.util.List;
 
 public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccountsAdapter.ViewHolder>
 {
-    public static final String DRAWABLE = "drawable";
-    private static final String ICON_PAYMENT_PRODUCTS = "icon_product_";
     private final Resources mResources;
-    private final String mPackageName;
     private LayoutInflater mLayoutInflater;
     private Activity mActivity;
     private List<Account> mAccounts;
@@ -42,10 +39,14 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     {
         mActivity = activity;
         mResources = mActivity.getResources();
-        mPackageName = mActivity.getPackageName();
         mLayoutInflater = LayoutInflater.from(activity.getApplicationContext());
 
         mAccounts = new ArrayList<>();
+        for (int i = 0; i < 55; i++)
+        {
+            Account account = new Account();
+            mAccounts.add(account);
+        }
 
         //updateAccounts(activity);
         //emptyPaymentProducts();
@@ -62,17 +63,18 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     {
         Account account = mAccounts.get(holder.getAdapterPosition());
 
-        PaymentAccountsActivity activity = (PaymentAccountsActivity)mActivity;
+        //PaymentAccountsActivity activity = (PaymentAccountsActivity)mActivity;
 
         // break this dependency
         //CustomTheme theme = activity.getCustomTheme();
 
-        holder.itemView.setBackgroundColor(getColor(android.R.color.background_light));
-        holder.title.setText(account.getTitle());
+        //holder.itemView.setBackgroundColor(getColor(android.R.color.background_light));
+        //holder.title.setText(account.getTitle());
 
         //holder.title.setTextColor(getColor(theme.getTextColorPrimaryId()));
         //holder.title.setBackgroundColor(getColor(theme.getColorPrimaryId()));
 
+        holder.itemView.setBackgroundColor(getColor(android.R.color.background_light));
         holder.itemView.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -81,13 +83,6 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
                 mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition()));
             }
         });
-    }
-
-    @Override
-    public long getItemId(int position)
-    {
-        return -1;
-        //return mAccounts.get(position).getId().hashCode();
     }
 
     @Override
