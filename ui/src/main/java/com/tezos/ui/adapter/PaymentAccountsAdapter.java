@@ -55,7 +55,7 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
             mAccounts.add(account);
         }
 
-        removeStandardAccounts(mAccounts);
+        //removeStandardAccounts(mAccounts);
 
         /*
         // sort messages by date, oldest last.
@@ -88,12 +88,8 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     {
         Account account = mAccounts.get(holder.getAdapterPosition());
 
-
         // break this dependency
         //PaymentAccountsActivity activity = (PaymentAccountsActivity)mActivity;
-
-        //holder.itemView.setBackgroundColor(getColor(android.R.color.background_light));
-        //holder.description.setText(account.getDescription());
 
         CustomTheme theme = null;
         if (theme == null)
@@ -103,11 +99,11 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
 
         if (account.getPrivateKeyHash() != null)
         {
-            holder.keyIcon.setVisibility(View.VISIBLE);
+            holder.keyIcon.setImageResource(R.drawable.vpn_key_black);
         }
         else
         {
-            holder.keyIcon.setVisibility(View.INVISIBLE);
+            holder.keyIcon.setImageResource(R.drawable.baseline_redeem_black);
         }
 
         holder.pubKeyHash.setText(account.getPubKeyHash());

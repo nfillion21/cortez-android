@@ -2,8 +2,8 @@
     <string name="app_name">ui</string>
     <string name="content_description" translatable="false">Content description</string>
     <string name="pay">Pay %1$s</string>
-    <string name="select_source">Select source</string>
-    <string name="select_destination">Select destination</string>
+    <string name="select_source">Select source transfer</string>
+    <string name="select_destination">Select destination transfer</string>
     <string name="card_owner">Card holder</string>
     <string name="card_owner_placeholder" translatable="false">Martin Dupont</string>
     <string name="card_expiration">Expiry date</string>
@@ -11,5 +11,5 @@
     <string name="amount">Transfer amount (min 0.1 ꜩ)</string>
     <string name="fees">Fees amount (min 0.01 ꜩ)</string>
     <string name="fees_default">0.001</string>
-    <string name="public_key_hash">Public Key Hash:</string>
+    <string name="public_key_hash">Public Key Hash</string>
 </resources>

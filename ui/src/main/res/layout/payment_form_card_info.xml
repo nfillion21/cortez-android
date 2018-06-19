@@ -12,6 +12,52 @@
     android:focusableInTouchMode="true"
     tools:showIn="@layout/fragment_payment_form">
 
+    <LinearLayout
+        android:id="@+id/transfer_source_filled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:background="@drawable/selector_rect_layout">
+
+        <ImageView
+            android:layout_weight="0"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_double"
+            android:layout_marginLeft="@dimen/spacing_double"
+            android:src="@drawable/vpn_key_black"
+            android:contentDescription="@string/content_description"
+            />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_double"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/payment_account_pub_key_hash_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:text="@string/public_key_hash"/>
+            <TextView
+                android:id="@+id/payment_account_pub_key_hash"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+                android:text="TZ1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr"
+                android:maxLines="2"
+                android:ellipsize="end"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
     <Button
         android:id="@+id/transfer_src_button"
         android:layout_width="match_parent"
@@ -22,10 +68,8 @@
         android:paddingLeft="@dimen/spacing_double"
         android:paddingRight="40dp"
         android:text="@string/select_source"
+        android:visibility="visible"
         />
-    <!--
-    android:drawablePadding="@dimen/spacing_double"
-    -->
 
     <ImageView
         android:layout_width="wrap_content"
@@ -41,10 +85,12 @@
 
         style="@style/PaymentScreens.ScanButton"
 
+        android:drawableLeft="@drawable/baseline_redeem_black"
+        android:drawableStart="@drawable/baseline_redeem_black"
         android:text="@string/select_destination"
 
         android:paddingLeft="@dimen/spacing_double"
-        android:paddingRight="@dimen/spacing_double"
+        android:paddingRight="40dp"
 
         android:layout_marginBottom="@dimen/spacing_double" />
 
