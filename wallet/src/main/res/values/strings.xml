@@ -1,17 +1,2 @@
 <resources>
-    <string name="app_name">Tezos Wallet</string>
-    <string name="select_source">Select source</string>
-    <string name="select_destination">Select destination</string>
-    <string name="card_owner">Card holder</string>
-    <string name="card_owner_placeholder" translatable="false">Martin Dupont</string>
-    <string name="card_expiration">Expiry date</string>
-    <string name="amount_default" translatable="false">0.1</string>
-    <string name="amount">Transfer amount (min 0.1 ꜩ)</string>
-    <string name="fees">Fees amount (min 0.01 ꜩ)</string>
-    <string name="fees_default">0.001</string>
-    <string name="card_expiration_placeholder">MM / AA</string>
-    <string name="card_cvv">Security code</string>
-    <string name="content_description" translatable="false">Content description</string>
-    <string name="card_security_code_description_cvv">The CVV is the three-digit number on the back of your payment card.</string>
-    <string name="card_storage_switch_description">Store this card for future use</string>
 </resources>

@@ -23,6 +23,7 @@ import com.tezos.core.client.AbstractClient;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.ui.R;
+import com.tezos.ui.activity.PaymentAccountsActivity;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -93,8 +94,10 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
             @Override
             public void onClick(View v)
             {
-                setLoadingMode(true,false);
-                launchRequest();
+                //setLoadingMode(true,false);
+                //launchRequest();
+
+                PaymentAccountsActivity.start(getActivity(), null);
             }
         });
 
@@ -113,8 +116,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
         mFeesLayout.setError(" ");
         mAmountLayout.setError(" ");
-
-        mAmount.requestFocus();
 
         setElementsCache(true);
 

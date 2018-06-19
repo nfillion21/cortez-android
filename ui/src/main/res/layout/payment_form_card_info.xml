@@ -9,6 +9,7 @@
     android:paddingLeft="@dimen/spacing_double"
     android:paddingRight="@dimen/spacing_double"
     android:paddingTop="@dimen/spacing_double"
+    android:focusableInTouchMode="true"
     tools:showIn="@layout/fragment_payment_form">
 
     <Button
