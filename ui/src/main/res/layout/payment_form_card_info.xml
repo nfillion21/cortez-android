@@ -101,6 +101,7 @@
         android:minHeight="?attr/actionBarSize"
         android:orientation="horizontal"
         android:visibility="gone"
+        android:layout_marginBottom="@dimen/spacing_double"
         android:background="@drawable/selector_rect_layout">
 
         <ImageView
@@ -110,7 +111,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_double"
             android:layout_marginLeft="@dimen/spacing_double"
-            android:src="@drawable/vpn_key_black"
+            android:src="@drawable/baseline_redeem_black"
             android:contentDescription="@string/content_description"
             />
 

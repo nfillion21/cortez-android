@@ -23,7 +23,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:src="@drawable/vpn_key_black"
-                android:paddingBottom="@dimen/spacing_micro"
+                android:paddingBottom="@dimen/spacing_normal"
                 android:contentDescription="@string/content_description" />
             <TextView
                 android:id="@+id/src_payment_account_pub_key_hash_title"

@@ -151,38 +151,46 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
         if (requestCode == PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE)
         {
-            if (resultCode == R.id.transfer_src_selection_succeed)
+            if (data != null && data.hasExtra(Account.TAG))
             {
-                if (data != null && data.hasExtra(Account.TAG))
+                Bundle accountBundle = data.getBundleExtra(Account.TAG);
+                Account account = Account.fromBundle(accountBundle);
+
+                if (resultCode == R.id.transfer_src_selection_succeed)
                 {
-                    Bundle accountBundle = data.getBundleExtra(Account.TAG);
-                    Account srcAccount = Account.fromBundle(accountBundle);
-                    switchSource(srcAccount);
+                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionSource, account);
                 }
-            }
-            else
-            if (resultCode == R.id.transfer_dst_selection_succeed)
-            {
-                if (data != null && data.hasExtra(Account.TAG))
+                else
+                if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
-                    Bundle accountBundle = data.getBundleExtra(Account.TAG);
-                    Account dstAccount = Account.fromBundle(accountBundle);
-                    switchDestination(dstAccount);
+                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionDestination, account);
                 }
             }
         }
     }
 
-    private void switchSource(Account account)
+    private void switchButtonAndLayout(PaymentAccountsActivity.Selection selection, Account account)
     {
-        mSrcButton.setVisibility(View.GONE);
-        mTransferSrcFilled.setVisibility(View.VISIBLE);
-    }
+        switch (selection)
+        {
+            case SelectionSource:
+            {
+                mSrcButton.setVisibility(View.GONE);
+                mTransferSrcFilled.setVisibility(View.VISIBLE);
+            }
+            break;
 
-    private void switchDestination(Account account)
-    {
-        mDstButton.setVisibility(View.GONE);
-        mTransferDstFilled.setVisibility(View.VISIBLE);
+            case SelectionDestination:
+            {
+                mDstButton.setVisibility(View.GONE);
+                mTransferDstFilled.setVisibility(View.VISIBLE);
+            }
+            break;
+
+            default:
+                //no-op
+                break;
+        }
     }
 
     @Override

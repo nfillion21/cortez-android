@@ -20,7 +20,7 @@ import com.tezos.ui.fragment.PaymentAccountsFragment;
  */
 public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener
 {
-    public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey"; // arbitrary int
+    public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
 
     public static void start(Activity activity, CustomTheme theme, Selection selection)
     {
@@ -77,7 +77,7 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
         }
 
         //useful when this activity is gonna be called with makeTransition
-        supportPostponeEnterTransition();
+        //supportPostponeEnterTransition();
     }
 
     private void attachAccountGridFragment()
@@ -88,7 +88,9 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
         {
             Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
 
-            fragment = PaymentAccountsFragment.newInstance(customThemeBundle);
+            Intent intent = getIntent();
+            String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
+            fragment = PaymentAccountsFragment.newInstance(customThemeBundle, Selection.fromStringValue(selectionString));
         }
 
         supportFragmentManager.beginTransaction()
@@ -99,7 +101,6 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     @Override
     public void onCardClicked(Account account)
     {
-
         Intent intent = getIntent();
         String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
 

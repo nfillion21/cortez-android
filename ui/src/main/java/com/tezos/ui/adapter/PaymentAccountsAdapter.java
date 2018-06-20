@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.activity.PaymentAccountsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         void onClick(View view, Account paymentProduct);
     }
 
-    public PaymentAccountsAdapter(Activity activity)
+    public PaymentAccountsAdapter(Activity activity, PaymentAccountsActivity.Selection selection)
     {
         mActivity = activity;
         mResources = mActivity.getResources();
@@ -55,7 +56,10 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
             mAccounts.add(account);
         }
 
-        //removeStandardAccounts(mAccounts);
+        if (selection.equals(PaymentAccountsActivity.Selection.SelectionSource))
+        {
+            removeStandardAccounts(mAccounts);
+        }
 
         /*
         // sort messages by date, oldest last.

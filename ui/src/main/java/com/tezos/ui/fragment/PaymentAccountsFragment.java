@@ -20,10 +20,12 @@ import com.tezos.core.client.GatewayClient;
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.activity.PaymentAccountsActivity;
 import com.tezos.ui.adapter.PaymentAccountsAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
 
 import java.util.List;
+
 
 /**
  * Created by nfillion on 26/02/16.
@@ -50,12 +52,13 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         void onCardClicked(Account account);
     }
 
-    public static PaymentAccountsFragment newInstance(Bundle customTheme)
+    public static PaymentAccountsFragment newInstance(Bundle customTheme, PaymentAccountsActivity.Selection selection)
     {
         PaymentAccountsFragment fragment = new PaymentAccountsFragment();
 
         Bundle bundle = new Bundle();
         bundle.putBundle(CustomTheme.TAG, customTheme);
+        bundle.putString(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
 
         fragment.setArguments(bundle);
         return fragment;
@@ -105,149 +108,6 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         return inflater.inflate(R.layout.fragment_payment_accounts, container, false);
     }
 
-    private void launchRequest()
-    {
-        //mAdapter.updateAccounts(accountList);
-
-        /*
-        setLoadingMode(true);
-
-        final Bundle paymentPageRequestBundle = getArguments().getBundle(PaymentPageRequest.TAG);
-        final PaymentPageRequest paymentPageRequest = PaymentPageRequest.fromBundle(paymentPageRequestBundle);
-
-        mGatewayClient = new GatewayClient(getActivity());
-        mCurrentLoading = AbstractClient.RequestLoaderId.PaymentProductsReqLoaderId.getIntegerValue();
-        mGatewayClient.getPaymentProducts(paymentPageRequest, new PaymentProductsCallback()
-        {
-            @Override
-            public void onSuccess(List<PaymentProduct> pProducts)
-            {
-                cancelOperations();
-
-                if (pProducts != null && !pProducts.isEmpty())
-                {
-                    accountList = updatedAccounts(pProducts, paymentPageRequest.isPaymentCardGroupingEnabled());
-                    if (accountList != null) {
-                        mAdapter.updatePaymentProducts(accountList);
-                    }
-
-                }
-                else
-                {
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-
-                            if (getActivity() != null)
-                            {
-                                getActivity().finish();
-                            }
-                        }
-                    };
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setDescription(R.string.error_title_default)
-                            .setMessage(R.string.error_body_payment_products)
-                            .setNegativeButton(R.string.error_button_dismiss, dialogClickListener)
-                            .setCancelable(false)
-                            .show();
-                }
-            }
-
-            @Override
-            public void onError(Exception error)
-            {
-                // an error occurred
-                cancelOperations();
-
-                if (getActivity() != null)
-                {
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-
-                            if (getActivity() != null)
-                            {
-                                getActivity().finish();
-                            }
-                        }
-                    };
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setDescription(R.string.error_title_default)
-                            .setMessage(R.string.error_body_default)
-                            .setNegativeButton(R.string.error_button_dismiss, dialogClickListener)
-                            .setCancelable(false)
-                            .show();
-                }
-            }
-        });
-        */
-    }
-
-    private List<Account> updatedAccounts(List<Account> accounts)
-    {
-        /*
-        boolean atLeastOneCard = false;
-        boolean atLeastOneNoCard = false;
-
-        if (isGroupingCard != null && isGroupingCard.equals(Boolean.TRUE))
-        {
-            Iterator<PaymentProduct> iter = accounts.iterator();
-            while (iter.hasNext())
-            {
-                PaymentProduct p = iter.next();
-                if (p.isTokenizable())
-                {
-                    iter.remove();
-                    atLeastOneCard = true;
-                }
-                else
-                {
-                    atLeastOneNoCard = true;
-                }
-            }
-
-            if (atLeastOneCard)
-            {
-                PaymentProduct cardProduct = new PaymentProduct();
-                cardProduct.setCode(PaymentProduct.PaymentProductCategoryCodeCard);
-                cardProduct.setPaymentProductDescription(getActivity().getString(R.string.payment_product_card_description));
-                cardProduct.setTokenizable(true);
-
-                // there are other payment products
-                if (atLeastOneNoCard)
-                {
-                    accounts.add(0, cardProduct);
-
-                }
-                else
-                {
-                    // just one card, represented by card product
-                    onClick(null, cardProduct);
-                    return null;
-                }
-            }
-        }
-        else
-        {
-            // do something only if there is one tokenizable
-            if (accounts.size() == 1)
-            {
-                PaymentProduct paymentProduct = accounts.get(0);
-                if (paymentProduct.isTokenizable())
-                {
-                    onClick(null, paymentProduct);
-                    return null;
-                }
-            }
-        }
-*/
-        return accounts;
-    }
-
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
@@ -270,7 +130,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
 
         if (savedInstanceState == null)
         {
-            launchRequest();
+            //launchRequest();
         }
         else
         {
@@ -303,7 +163,11 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
                 .getDimensionPixelSize(R.dimen.spacing_nano);
         categoriesView.addItemDecoration(new OffsetDecoration(spacing));
 
-        mAdapter = new PaymentAccountsAdapter(getActivity());
+        Bundle args = getArguments();
+        String selectionString = args.getString(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
+
+        mAdapter = new PaymentAccountsAdapter(getActivity(), PaymentAccountsActivity.Selection.fromStringValue(selectionString));
+
         mAdapter.setOnItemClickListener(this);
 
         categoriesView.setAdapter(mAdapter);
