@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -30,7 +29,7 @@ public class PaymentAccountsActivity extends AppCompatActivity
         //ActivityCompat.startActivityForResult(activity, starter, PaymentPageRequest.REQUEST_ORDER, activityOptions.toBundle());
 
         //TODO handle to receiver needed.
-        ActivityCompat.startActivityForResult(activity, starter, PaymentPageRequest.REQUEST_ORDER, null);
+        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SRC_REQUEST_CODE, null);
     }
 
     @Override
@@ -63,15 +62,15 @@ public class PaymentAccountsActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
+                /*
         if (requestCode == PaymentPageRequest.REQUEST_ORDER)
         {
-            /*
-            if (resultCode == R.id.transaction_succeed)
+            if (resultCode == R.id.transfer_src_selection_succeed)
             {
                 setResult(R.id.transaction_succeed, data);
                 finish();
             }
-            else if (resultCode == R.id.transaction_failed)
+            else if (resultCode == R.id.transfer_dst_selection_succeed)
             {
                 setResult(R.id.transaction_failed, data);
                 finish();
@@ -89,8 +88,8 @@ public class PaymentAccountsActivity extends AppCompatActivity
                     }
                 }
             }
-            */
         }
+                */
     }
 
     @Override

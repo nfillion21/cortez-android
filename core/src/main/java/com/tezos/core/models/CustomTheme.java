@@ -115,10 +115,5 @@ public class CustomTheme extends AbstractModel
 
             return customTheme;
         }
-
-        @Override
-        protected Object mappedObjectFromUri() {
-            return null;
-        }
     }
 }

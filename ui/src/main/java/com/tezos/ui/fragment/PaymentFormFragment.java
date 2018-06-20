@@ -20,10 +20,12 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.tezos.core.client.AbstractClient;
+import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.ui.R;
 import com.tezos.ui.activity.PaymentAccountsActivity;
+import com.tezos.ui.activity.PaymentFormActivity;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -58,12 +60,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     public void onPause()
     {
         super.onPause();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -143,6 +139,46 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         validatePayButton(isInputDataValid());
 
         putEverythingInRed();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PaymentFormActivity.TRANSFER_SRC_REQUEST_CODE)
+        {
+            if (resultCode == R.id.transfer_src_selection_succeed)
+            {
+                //
+                if (data != null && data.hasExtra(Account.TAG))
+                {
+                    Bundle accountBundle = data.getBundleExtra(Account.TAG);
+                    Account srcAccount = Account.fromBundle(accountBundle);
+                }
+            }
+            else
+            {
+                //
+            }
+        }
+        else
+        if (requestCode == PaymentFormActivity.TRANSFER_DST_REQUEST_CODE)
+        {
+            if (resultCode == R.id.transfer_dst_selection_succeed)
+            {
+                //
+                if (data != null && data.hasExtra(Account.TAG))
+                {
+                    Bundle accountBundle = data.getBundleExtra(Account.TAG);
+                    Account destAccount = Account.fromBundle(accountBundle);
+                }
+            }
+            else
+            {
+                //
+            }
+        }
     }
 
     @Override

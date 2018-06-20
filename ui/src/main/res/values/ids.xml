@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="transfer_src_selection_succeed" type="id" />
+    <item name="transfer_src_selection_failed" type="id" />
+    <item name="transfer_dst_selection_succeed" type="id" />
+    <item name="transfer_dst_selection_failed" type="id" />
+</resources>

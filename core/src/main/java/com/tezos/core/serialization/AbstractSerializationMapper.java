@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.tezos.core.errors.exceptions.ApiException;
 import com.tezos.core.errors.exceptions.HttpException;
 import com.tezos.core.models.AbstractModel;
+import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.AbstractRequest;
 import com.tezos.core.requests.order.PaymentPageRequest;
@@ -71,6 +72,11 @@ public abstract class AbstractSerializationMapper {
         {
             CustomTheme customTheme = (CustomTheme) model;
             this.setSerialization(new CustomThemeSerialization(customTheme));
+
+        } else if (model instanceof Account) {
+
+            Account account = (Account) model;
+            this.setSerialization(new Account.AccountSerialization(account));
         }
     }
 
@@ -80,7 +86,6 @@ public abstract class AbstractSerializationMapper {
 
             PaymentPageRequest paymentPageRequest = (PaymentPageRequest)request;
             this.setSerialization(new PaymentPageRequestSerialization(paymentPageRequest));
-
         }
     }
 

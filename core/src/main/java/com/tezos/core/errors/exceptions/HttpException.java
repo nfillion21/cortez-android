@@ -97,11 +97,6 @@ public class HttpException extends AbstractException {
 
             return object;
         }
-
-        @Override
-        protected Object mappedObjectFromUri() {
-            return null;
-        }
     }
 
     public static class HttpExceptionSerialization extends AbstractSerialization {

@@ -25,7 +25,6 @@ public abstract class AbstractMapper<T> {
 
     protected abstract Object mappedObject();
     protected abstract Object mappedObjectFromBundle();
-    protected abstract Object mappedObjectFromUri();
     protected abstract boolean isValid();
 
     public AbstractMapper(T rawData) {

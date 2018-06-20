@@ -293,9 +293,9 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     }
 
     @Override
-    public void onResume() {
-
-        getActivity().supportStartPostponedEnterTransition();
+    public void onResume()
+    {
+        //getActivity().supportStartPostponedEnterTransition();
         super.onResume();
 
         setLoadingMode(mLoadingMode);
@@ -325,11 +325,13 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         setLoadingMode(false);
     }
 
-    public List<Account> getAccountList() {
+    public List<Account> getAccountList()
+    {
         return accountList;
     }
 
-    public void setAccountList(List<Account> accountList) {
+    public void setAccountList(List<Account> accountList)
+    {
         this.accountList = accountList;
     }
 
@@ -338,6 +340,14 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     {
         if (getActivity() != null)
         {
+            // I guess I can throw directly to activity
+            //TODO check where I did that clean in hipay
+
+            Intent intent = getActivity().getIntent();
+
+            //TODO put account to a bundle
+            intent.putExtra(Account.TAG, account.toBundle());
+            getActivity().setResult(R.id.transfer_src_selection_succeed, intent);
             getActivity().finish();
         }
         /*
