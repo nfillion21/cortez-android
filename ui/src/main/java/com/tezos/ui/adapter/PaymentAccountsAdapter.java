@@ -182,7 +182,7 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         {
             super(container);
             title = container.findViewById(R.id.payment_account_title);
-            pubKeyHash = container.findViewById(R.id.payment_account_pub_key_hash);
+            pubKeyHash = container.findViewById(R.id.src_payment_account_pub_key_hash);
             keyIcon = container.findViewById(R.id.payment_account_key_icon);
         }
     }

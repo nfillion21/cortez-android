@@ -23,7 +23,6 @@ import com.tezos.ui.R;
 import com.tezos.ui.adapter.PaymentAccountsAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +31,8 @@ import java.util.List;
 
 public class PaymentAccountsFragment extends Fragment implements PaymentAccountsAdapter.OnItemClickListener
 {
+    private OnCardSelectedListener mCallback;
+
     private static final String STATE_IS_LOADING = "isLoading";
 
     private PaymentAccountsAdapter mAdapter;
@@ -43,6 +44,11 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
 
     protected boolean mLoadingMode;
     protected int mCurrentLoading = -1;
+
+    public interface OnCardSelectedListener
+    {
+        void onCardClicked(Account account);
+    }
 
     public static PaymentAccountsFragment newInstance(Bundle customTheme)
     {
@@ -60,9 +66,20 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     {
         super.onAttach(context);
 
+        /*
         if (mGatewayClient != null)
         {
             mGatewayClient.reLaunchOperations(mCurrentLoading);
+        }
+        */
+        try
+        {
+            mCallback = (OnCardSelectedListener) context;
+        }
+        catch (ClassCastException e)
+        {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnCardSelectedListener");
         }
     }
 
@@ -338,30 +355,9 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     @Override
     public void onClick(View view, Account account)
     {
-        if (getActivity() != null)
+        if (mCallback != null)
         {
-            // I guess I can throw directly to activity
-            //TODO check where I did that clean in hipay
-
-            Intent intent = getActivity().getIntent();
-
-            //TODO put account to a bundle
-            intent.putExtra(Account.TAG, account.toBundle());
-            getActivity().setResult(R.id.transfer_src_selection_succeed, intent);
-            getActivity().finish();
+            mCallback.onCardClicked(account);
         }
-        /*
-        final Bundle paymentPageRequestBundle = getArguments().getBundle(PaymentPageRequest.TAG);
-        final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
-        final String signature = getArguments().getString(GatewayClient.SIGNATURE_TAG);
-
-        Activity activity = getActivity();
-        startPaymentFormActivityWithTransition(activity, view == null ? null :
-                        view.findViewById(R.id.payment_product_title),
-                paymentPageRequestBundle,
-                customThemeBundle,
-                paymentProduct,
-                signature);
-                */
     }
 }

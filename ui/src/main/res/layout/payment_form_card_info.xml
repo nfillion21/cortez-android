@@ -39,7 +39,7 @@
             android:padding="@dimen/spacing_double"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/payment_account_pub_key_hash_title"
+                android:id="@+id/src_payment_account_pub_key_hash_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
@@ -47,7 +47,7 @@
                 android:maxLines="1"
                 android:text="@string/public_key_hash"/>
             <TextView
-                android:id="@+id/payment_account_pub_key_hash"
+                android:id="@+id/src_payment_account_pub_key_hash"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
@@ -93,6 +93,53 @@
         android:paddingRight="40dp"
 
         android:layout_marginBottom="@dimen/spacing_double" />
+
+    <LinearLayout
+        android:id="@+id/transfer_destination_filled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:background="@drawable/selector_rect_layout">
+
+        <ImageView
+            android:layout_weight="0"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_double"
+            android:layout_marginLeft="@dimen/spacing_double"
+            android:src="@drawable/vpn_key_black"
+            android:contentDescription="@string/content_description"
+            />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_double"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/dst_payment_account_pub_key_hash_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:text="@string/public_key_hash"/>
+            <TextView
+                android:id="@+id/dst_payment_account_pub_key_hash"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+                android:text="TZ1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr"
+                android:maxLines="2"
+                android:ellipsize="end"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/amount_transfer_support"

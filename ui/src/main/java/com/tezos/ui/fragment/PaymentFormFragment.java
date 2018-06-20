@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.tezos.core.client.AbstractClient;
 import com.tezos.core.models.Account;
@@ -38,10 +39,11 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     private Button mPayButton;
     private FrameLayout mPayButtonLayout;
 
-    private String mCardNumberCache;
-
     private Button mSrcButton;
-    private Button mDestButton;
+    private Button mDstButton;
+
+    private LinearLayout mTransferSrcFilled;
+    private LinearLayout mTransferDstFilled;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
@@ -73,19 +75,22 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
             @Override
             public void onClick(View v)
             {
-                PaymentAccountsActivity.start(getActivity(), null);
+                PaymentAccountsActivity.start(getActivity(), null, PaymentAccountsActivity.Selection.SelectionSource);
             }
         });
 
-        mDestButton = view.findViewById(R.id.transfer_dst_button);
-        mDestButton.setOnClickListener(new View.OnClickListener()
+        mDstButton = view.findViewById(R.id.transfer_dst_button);
+        mDstButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                PaymentAccountsActivity.start(getActivity(), null);
+                PaymentAccountsActivity.start(getActivity(), null, PaymentAccountsActivity.Selection.SelectionDestination);
             }
         });
+
+        mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled);
+        mTransferDstFilled = view.findViewById(R.id.transfer_destination_filled);
 
         mPayButton = view.findViewById(R.id.pay_button);
         mPayButtonLayout = view.findViewById(R.id.pay_button_layout);
@@ -134,8 +139,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         mFeesLayout.setError(" ");
         mAmountLayout.setError(" ");
 
-        setElementsCache(true);
-
         validatePayButton(isInputDataValid());
 
         putEverythingInRed();
@@ -146,46 +149,45 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PaymentFormActivity.TRANSFER_SRC_REQUEST_CODE)
+        if (requestCode == PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE)
         {
             if (resultCode == R.id.transfer_src_selection_succeed)
             {
-                //
                 if (data != null && data.hasExtra(Account.TAG))
                 {
                     Bundle accountBundle = data.getBundleExtra(Account.TAG);
                     Account srcAccount = Account.fromBundle(accountBundle);
+                    switchSource(srcAccount);
                 }
             }
             else
-            {
-                //
-            }
-        }
-        else
-        if (requestCode == PaymentFormActivity.TRANSFER_DST_REQUEST_CODE)
-        {
             if (resultCode == R.id.transfer_dst_selection_succeed)
             {
-                //
                 if (data != null && data.hasExtra(Account.TAG))
                 {
                     Bundle accountBundle = data.getBundleExtra(Account.TAG);
-                    Account destAccount = Account.fromBundle(accountBundle);
+                    Account dstAccount = Account.fromBundle(accountBundle);
+                    switchDestination(dstAccount);
                 }
             }
-            else
-            {
-                //
-            }
         }
+    }
+
+    private void switchSource(Account account)
+    {
+        mSrcButton.setVisibility(View.GONE);
+        mTransferSrcFilled.setVisibility(View.VISIBLE);
+    }
+
+    private void switchDestination(Account account)
+    {
+        mDstButton.setVisibility(View.GONE);
+        mTransferDstFilled.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void setLoadingMode(boolean loadingMode, boolean delay)
     {
-        setElementsCache(loadingMode);
-
         if (!delay) {
 
             if (loadingMode) {
@@ -343,21 +345,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         Log.i("onCreate", "onCreate");
     }
 
-    private void setElementsCache(boolean bool)
-    {
-        if (bool)
-        {
-            if (mCardNumberCache == null)
-            {
-                mCardNumberCache = mFees.getText().toString().replaceAll(" ", "");
-            }
-
-        } else
-        {
-            mCardNumberCache = null;
-        }
-    }
-
     @Override
     public void launchRequest()
     {
@@ -368,8 +355,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
         //mSecureVaultClient = new SecureVaultClient(getActivity());
         mCurrentLoading = AbstractClient.RequestLoaderId.GenerateTokenReqLoaderId.getIntegerValue();
-
-        setElementsCache(true);
 
         /*
         mSecureVaultClient.generateToken(

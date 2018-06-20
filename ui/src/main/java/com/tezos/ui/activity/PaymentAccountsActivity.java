@@ -10,26 +10,22 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
-import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.PaymentAccountsFragment;
 
 /**
  * Created by nfillion on 25/02/16.
  */
-public class PaymentAccountsActivity extends AppCompatActivity
+public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener
 {
-    public static void start(Activity activity, CustomTheme theme)
+    public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey"; // arbitrary int
+
+    public static void start(Activity activity, CustomTheme theme, Selection selection)
     {
-        Intent starter = getStartIntent(activity, theme);
-
-        //ActivityOptionsCompat activityOptions = ActivityOptionsCompat
-                //.makeSceneTransitionAnimation(activity, null);
-        //ActivityCompat.startActivityForResult(activity, starter, PaymentPageRequest.REQUEST_ORDER, activityOptions.toBundle());
-
-        //TODO handle to receiver needed.
-        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SRC_REQUEST_CODE, null);
+        Intent starter = getStartIntent(activity, theme, selection);
+        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
     @Override
@@ -45,15 +41,16 @@ public class PaymentAccountsActivity extends AppCompatActivity
     }
 
     @NonNull
-    static Intent getStartIntent(Context context, CustomTheme theme)
+    static Intent getStartIntent(Context context, CustomTheme theme, Selection selection)
     {
         Intent starter = new Intent(context, PaymentAccountsActivity.class);
-
         if (theme == null)
         {
             theme = new CustomTheme(R.color.tz_primary,R.color.tz_primary_dark,R.color.tz_light);
         }
+
         starter.putExtra(CustomTheme.TAG, theme.toBundle());
+        starter.putExtra(SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
 
         return starter;
     }
@@ -62,34 +59,6 @@ public class PaymentAccountsActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-                /*
-        if (requestCode == PaymentPageRequest.REQUEST_ORDER)
-        {
-            if (resultCode == R.id.transfer_src_selection_succeed)
-            {
-                setResult(R.id.transaction_succeed, data);
-                finish();
-            }
-            else if (resultCode == R.id.transfer_dst_selection_succeed)
-            {
-                setResult(R.id.transaction_failed, data);
-                finish();
-            }
-            else
-            {
-                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.payment_products_container);
-                if (fragment != null)
-                {
-                    PaymentProductsFragment paymentProductsFragment = (PaymentProductsFragment) fragment;
-                    List<PaymentProduct> paymentProducts = paymentProductsFragment.getAccountList();
-                    if (paymentProducts == null || paymentProducts.isEmpty())
-                    {
-                        finish();
-                    }
-                }
-            }
-        }
-                */
     }
 
     @Override
@@ -120,13 +89,74 @@ public class PaymentAccountsActivity extends AppCompatActivity
             Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
 
             fragment = PaymentAccountsFragment.newInstance(customThemeBundle);
-
-            //fragment.setArguments(paymentPageRequestBundle);
         }
 
         supportFragmentManager.beginTransaction()
                 .replace(R.id.payment_products_container, fragment)
                 .commit();
     }
-}
 
+    @Override
+    public void onCardClicked(Account account)
+    {
+
+        Intent intent = getIntent();
+        String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
+
+        Selection selection = Selection.fromStringValue(selectionString);
+        intent.putExtra(Account.TAG, account.toBundle());
+
+        switch (selection)
+        {
+            case SelectionSource:
+            {
+                setResult(R.id.transfer_src_selection_succeed, intent);
+            }
+            break;
+
+            case SelectionDestination:
+            {
+                setResult(R.id.transfer_dst_selection_succeed, intent);
+            }
+            break;
+
+            default: //no-op;
+                break;
+        }
+
+        finish();
+    }
+
+    public enum Selection
+    {
+        SelectionSource ("SelectionSource"),
+        SelectionDestination ("SelectionDestination");
+
+        protected final String selection;
+        Selection(String method)
+        {
+            this.selection = method;
+        }
+
+        public String getStringValue()
+        {
+            return this.selection;
+        }
+
+        public static Selection fromStringValue(String value)
+        {
+            if (value == null) return null;
+
+            if (value.equalsIgnoreCase(SelectionSource.getStringValue()))
+            {
+                return SelectionSource;
+            }
+
+            if (value.equalsIgnoreCase(SelectionDestination.getStringValue()))
+            {
+                return SelectionDestination;
+            }
+            return null;
+        }
+    }
+}

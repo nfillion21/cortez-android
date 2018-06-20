@@ -18,8 +18,7 @@ import com.tezos.ui.fragment.AbstractPaymentFormFragment;
  */
 public class PaymentFormActivity extends AppCompatActivity
 {
-    public static int TRANSFER_SRC_REQUEST_CODE = 0x2100; // arbitrary int
-    public static int TRANSFER_DST_REQUEST_CODE = 0x2200; // arbitrary int
+    public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
 
     private AlertDialog mDialog;
 
