@@ -14,11 +14,13 @@ import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.PaymentAccountsFragment;
+import com.tezos.ui.interfaces.IConfirmCredentialHandler;
+import com.tezos.ui.utils.Utils;
 
 /**
  * Created by nfillion on 25/02/16.
  */
-public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener
+public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener, IConfirmCredentialHandler
 {
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
 
@@ -126,6 +128,12 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
         }
 
         finish();
+    }
+
+    @Override
+    public void launchConfirmCredential()
+    {
+        Utils.launchConfirmCredential(this);
     }
 
     public enum Selection

@@ -1,7 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tezos.ui">
 
-    <application>
+    <application
+        android:name=".utils.ArchLifecycleApp"
+        >
 
         <activity
             android:name=".activity.PaymentFormActivity"/>

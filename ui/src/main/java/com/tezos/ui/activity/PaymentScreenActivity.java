@@ -9,12 +9,14 @@ import android.support.v7.app.AppCompatActivity;
 import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.interfaces.IConfirmCredentialHandler;
+import com.tezos.ui.utils.Utils;
 
 /**
  * Created by nfillion on 21/12/2016.
  */
 
-public abstract class PaymentScreenActivity extends AppCompatActivity
+public abstract class PaymentScreenActivity extends AppCompatActivity implements IConfirmCredentialHandler
 {
     public static void start(Activity activity)
     {
@@ -51,5 +53,11 @@ public abstract class PaymentScreenActivity extends AppCompatActivity
         paymentPageRequest.setAmount(Float.parseFloat(amount));
 
         return paymentPageRequest;
+    }
+
+    @Override
+    public void launchConfirmCredential()
+    {
+        Utils.launchConfirmCredential(this);
     }
 }
