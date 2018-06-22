@@ -6,10 +6,15 @@
         >
 
         <activity
-            android:name=".activity.PaymentFormActivity"/>
+            android:name=".activity.PaymentFormActivity"
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activity.PaymentAccountsActivity"
             android:theme="@style/PaymentScreens.PaymentAccountsActivity"
+            />
+        <activity
+            android:name=".activity.AddAccountActivity"
+            android:theme="@style/PaymentScreens.AddAccountActivity"
             />
 
     </application>

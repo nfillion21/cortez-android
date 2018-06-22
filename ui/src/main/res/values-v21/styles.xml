@@ -5,7 +5,10 @@
 
     <style name="PaymentScreens.PaymentAccountsActivity">
         <item name="android:windowBackground">@color/tz_blank</item>
+    </style>
 
+    <style name="PaymentScreens.AddAccountActivity">
+        <item name="android:windowBackground">@color/tz_blank</item>
     </style>
 
     <style name="PaymentScreens.PaymentFormActivity">

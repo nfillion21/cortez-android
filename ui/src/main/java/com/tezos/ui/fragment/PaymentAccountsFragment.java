@@ -8,6 +8,7 @@ import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -20,6 +21,7 @@ import com.tezos.core.client.GatewayClient;
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.activity.AddAccountActivity;
 import com.tezos.ui.activity.PaymentAccountsActivity;
 import com.tezos.ui.adapter.PaymentAccountsAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
@@ -46,6 +48,8 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
 
     protected boolean mLoadingMode;
     protected int mCurrentLoading = -1;
+
+    private FloatingActionButton mAddFab;
 
     public interface OnCardSelectedListener
     {
@@ -115,6 +119,19 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         super.onViewCreated(view, savedInstanceState);
 
         mProgressBar = view.findViewById(R.id.progress);
+
+        mAddFab = view.findViewById(R.id.add);
+        mAddFab.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Bundle args = getArguments();
+
+                CustomTheme theme = CustomTheme.fromBundle(args.getBundle(CustomTheme.TAG));
+                AddAccountActivity.start(getActivity(), theme);
+            }
+        });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
         {
