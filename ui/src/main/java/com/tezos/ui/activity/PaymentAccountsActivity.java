@@ -15,7 +15,7 @@ import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.PaymentAccountsFragment;
 import com.tezos.ui.interfaces.IConfirmCredentialHandler;
-import com.tezos.ui.utils.Utils;
+import com.tezos.ui.utils.ConfirmCredentialHelper;
 
 /**
  * Created by nfillion on 25/02/16.
@@ -34,6 +34,7 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     protected void onResume()
     {
         super.onResume();
+        this.launchConfirmCredential();
     }
 
     @Override
@@ -133,7 +134,7 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     @Override
     public void launchConfirmCredential()
     {
-        Utils.launchConfirmCredential(this);
+        ConfirmCredentialHelper.launchConfirmCredential(this);
     }
 
     public enum Selection

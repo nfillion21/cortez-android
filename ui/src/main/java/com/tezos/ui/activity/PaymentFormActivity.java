@@ -1,23 +1,20 @@
 package com.tezos.ui.activity;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.AbstractPaymentFormFragment;
 import com.tezos.ui.interfaces.IConfirmCredentialHandler;
-import com.tezos.ui.utils.Utils;
+import com.tezos.ui.utils.ConfirmCredentialHelper;
 
 /**
  * Created by nfillion on 29/02/16.
@@ -80,9 +77,9 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
     {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Utils.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS)
+        if (requestCode == ConfirmCredentialHelper.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS)
         {
-            Utils.onActivityResult(requestCode, resultCode, data);
+            ConfirmCredentialHelper.onActivityResult(requestCode, resultCode, data);
         }
         else
         {
@@ -124,6 +121,6 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
     @Override
     public void launchConfirmCredential()
     {
-        Utils.launchConfirmCredential(this);
+        ConfirmCredentialHelper.launchConfirmCredential(this);
     }
 }

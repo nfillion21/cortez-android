@@ -31,7 +31,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-public class Utils
+public class ConfirmCredentialHelper
 {
     private static AppCompatActivity mContext;
     private static KeyguardManager mKeyguardManager;
@@ -41,7 +41,7 @@ public class Utils
     private static final int AUTHENTICATION_DURATION_SECONDS = 5;
     private static final byte[] SECRET_BYTE_ARRAY = new byte[] {1, 2, 3, 4, 5, 6};
 
-    @TargetApi(Build.VERSION_CODES.M)
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public static void launchConfirmCredential(AppCompatActivity context)
     {
         mContext = context;
@@ -109,7 +109,7 @@ public class Utils
      * Creates a symmetric key in the Android Key Store which can only be used after the user has
      * authenticated with device credentials within the last X seconds.
      */
-    @TargetApi(Build.VERSION_CODES.M)
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private static void createKey()
     {
         // Generate a key to decrypt payment credentials, tokens, etc.
@@ -142,7 +142,7 @@ public class Utils
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private static void showAuthenticationScreen()
     {
         // Create the Confirm Credentials screen. You can customize the title and description. Or
@@ -154,13 +154,15 @@ public class Utils
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    public static void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if (requestCode == Utils.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS) {
+    public static void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == ConfirmCredentialHelper.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS)
+        {
             // Challenge completed, proceed with using cipher
-            if (resultCode == Activity.RESULT_OK) {
-                if (tryEncrypt()) {
+            if (resultCode == Activity.RESULT_OK)
+            {
+                if (tryEncrypt())
+                {
                     //showPurchaseConfirmation();
                 }
             } else {
