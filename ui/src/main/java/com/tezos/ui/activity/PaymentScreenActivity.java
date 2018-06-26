@@ -6,8 +6,9 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 
-import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.core.requests.order.PaymentPageRequest;
+import com.tezos.core.utils.SeedManager;
 import com.tezos.core.utils.TezosUtils;
 import com.tezos.ui.R;
 
@@ -37,10 +38,6 @@ public abstract class PaymentScreenActivity extends AppCompatActivity
                 //avoid glitch problem
                 null);
                 */
-
-        String words = TezosUtils.generateNovaMnemonic();
-
-        byte[] seed = TezosUtils.generateNovaSeed(words);
 
         ActivityCompat.startActivity(activity, paymentFormIntent, null);
         //PaymentFormActivity.start(activity, paymentPageRequest, theme);

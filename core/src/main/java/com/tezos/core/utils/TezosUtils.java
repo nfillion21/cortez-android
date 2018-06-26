@@ -56,8 +56,8 @@ public class TezosUtils {
     {
         final byte[] seed = new SeedCalculator().calculateSeed(mnemonic, "");
 
-        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(seed, Bitcoin.MAIN_NET);
-        ExtendedPrivateKey root2 = ExtendedPrivateKey.fromSeed(seed, Bitcoin.MAIN_NET);
+        //ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(seed, Bitcoin.MAIN_NET);
+        //ExtendedPrivateKey root2 = ExtendedPrivateKey.fromSeed(seed, Bitcoin.MAIN_NET);
         return seed;
     }
 }
