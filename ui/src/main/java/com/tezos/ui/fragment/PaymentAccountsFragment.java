@@ -121,16 +121,16 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         mProgressBar = view.findViewById(R.id.progress);
 
         mAddFab = view.findViewById(R.id.add);
-        mAddFab.setOnClickListener(new View.OnClickListener()
+        mAddFab.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                Bundle args = getArguments();
+            Bundle args = getArguments();
 
-                CustomTheme theme = CustomTheme.fromBundle(args.getBundle(CustomTheme.TAG));
-                AddAccountActivity.start(getActivity(), theme);
-            }
+            CustomTheme theme = CustomTheme.fromBundle(args.getBundle(CustomTheme.TAG));
+            AddAccountActivity.start(getActivity(), theme);
+
+            //TODO add an account
+
+
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
