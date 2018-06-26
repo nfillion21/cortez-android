@@ -9,7 +9,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="orchard roof outside sustain\n
+        depth robot inherit across\n
+        coil hospital gravity guilt\n
+        feel napkin hire tank\n
+        yard mandate theme learn\n
+        hollow gravity permit undo"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

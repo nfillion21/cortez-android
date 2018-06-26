@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/email_login_form"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_normal"
+        android:background="@drawable/selector_rect_layout"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/mnemonics_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_double"
+            android:background="@drawable/selector_rect_layout">
+
+            <TextView
+                android:id="@+id/src_payment_account_pub_key_hash"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+                android:text="orchard roof outside sustain depth robot inherit across coil hospital gravity guilt feel napkin hire tank yard mandate theme learn hollow gravity permit undo"
+                />
+        </LinearLayout>
+
+    <!--
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:padding="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_micro"
+            android:maxLength="300"
+            android:hint="hello world"
+            android:textColorHint="@color/light_grey"
+            android:textColor="@color/tz_blank"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+            android:gravity="start|top"
+            android:inputType="textMultiLine"
+            style="@style/Widget.AppCompat.EditText"
+            android:background="@drawable/background_edittext"
+            android:maxLines="5" />
+
+        <FrameLayout
+            android:id="@+id/submit_button_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:background="@drawable/shadow_border"
+            style="@style/PaymentScreens.Button"
+            android:layout_gravity="end"
+            android:enabled="false">
+
+            <Button
+                android:id="@+id/submit_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:drawableTint="@color/white"
+                android:drawablePadding="@dimen/spacing_normal"
+                android:textAppearance="@style/CommonTheme.TextAppearance.MessageItem"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:enabled="false"
+
+                android:text="@string/action_submit_message"
+
+                android:background="@null"
+                android:clickable="false"
+                android:focusable="false"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+        </FrameLayout>
+        -->
+    </LinearLayout>
+</LinearLayout>

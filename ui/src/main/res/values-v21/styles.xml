@@ -11,6 +11,10 @@
         <item name="android:windowBackground">@color/tz_blank</item>
     </style>
 
+    <style name="PaymentScreens.CreateWalletActivity">
+        <item name="android:windowBackground">@color/tz_light</item>
+    </style>
+
     <style name="PaymentScreens.PaymentFormActivity">
         <item name="android:windowBackground">@color/tz_light</item>
     </style>

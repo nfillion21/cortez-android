@@ -17,6 +17,11 @@
             android:theme="@style/PaymentScreens.AddAccountActivity"
             />
 
+        <activity
+            android:name=".activity.CreateWalletActivity"
+            android:theme="@style/PaymentScreens.CreateWalletActivity"
+            />
+
     </application>
 
 </manifest>

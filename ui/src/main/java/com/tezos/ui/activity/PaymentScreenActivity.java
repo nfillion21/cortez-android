@@ -29,7 +29,8 @@ public abstract class PaymentScreenActivity extends AppCompatActivity
         PaymentPageRequest paymentPageRequest = buildPageRequest("1");
         Bundle paymentPageRequestBundle = paymentPageRequest.toBundle();
 
-        Intent paymentFormIntent = PaymentFormActivity.getStartIntent(activity, paymentPageRequestBundle, themeBundle);
+        //Intent paymentFormIntent = PaymentFormActivity.getStartIntent(activity, paymentPageRequestBundle, themeBundle);
+        Intent paymentFormIntent = CreateWalletActivity.getStartIntent(activity, themeBundle);
         /*
         ActivityCompat.startActivityForResult(activity,
                 startIntent,
