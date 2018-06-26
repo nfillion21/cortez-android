@@ -44,6 +44,6 @@
     </style>
 
     <style name="PaymentScreens.TextAppearance.WordItem" parent="TextAppearance.AppCompat.Medium">
-        <item name="android:textSize">@dimen/info_item_text_size</item>
+        <item name="android:textSize">@dimen/size_word_item</item>
     </style>
 </resources>

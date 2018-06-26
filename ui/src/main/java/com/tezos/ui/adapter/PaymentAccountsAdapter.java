@@ -107,7 +107,7 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         }
         else
         {
-            holder.keyIcon.setImageResource(R.drawable.baseline_redeem_black);
+            holder.keyIcon.setImageResource(R.drawable.redeem_black_24);
         }
 
         holder.pubKeyHash.setText(account.getPubKeyHash());

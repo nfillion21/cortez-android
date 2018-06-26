@@ -74,7 +74,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/baseline_arrow_drop_down_black"
+        android:src="@drawable/arrow_drop_down_black"
         android:layout_gravity="center_horizontal"
         />
 
@@ -85,8 +85,8 @@
 
         style="@style/PaymentScreens.ScanButton"
 
-        android:drawableLeft="@drawable/baseline_redeem_black"
-        android:drawableStart="@drawable/baseline_redeem_black"
+        android:drawableLeft="@drawable/redeem_black_24"
+        android:drawableStart="@drawable/redeem_black_24"
         android:text="@string/select_destination"
 
         android:paddingLeft="@dimen/spacing_double"
@@ -111,7 +111,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_double"
             android:layout_marginLeft="@dimen/spacing_double"
-            android:src="@drawable/baseline_redeem_black"
+            android:src="@drawable/redeem_black_24"
             android:contentDescription="@string/content_description"
             />
 
