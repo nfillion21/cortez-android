@@ -12,4 +12,7 @@
     <string name="fees">Fees amount (min 0.01 ꜩ)</string>
     <string name="fees_default">0.001</string>
     <string name="public_key_hash">Public Key Hash</string>
+    <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>
+    <string name="mnemonic_info_title">Here is your Wallet secret mnemonics</string>
+
 </resources>

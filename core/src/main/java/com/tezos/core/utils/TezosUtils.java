@@ -33,9 +33,8 @@ public class TezosUtils {
         return result;
     }
 
-    public static String generateNovaMnemonic()
+    public static String generateNovaMnemonics()
     {
-        /*
         StringBuilder sb = new StringBuilder();
         byte[] entropy = new byte[Words.TWENTY_FOUR.byteLength()];
         new SecureRandom().nextBytes(entropy);
@@ -47,9 +46,8 @@ public class TezosUtils {
         //MnemonicGenerator.Target target = sb::append;
 
         return sb.toString();
-        */
 
-        return "orchard roof outside sustain depth robot inherit across coil hospital gravity guilt feel napkin hire tank yard mandate theme learn hollow gravity permit undo";
+        //return "orchard roof outside sustain depth robot inherit across coil hospital gravity guilt feel napkin hire tank yard mandate theme learn hollow gravity permit undo";
     }
 
     public static byte[] generateNovaSeed(String mnemonic)
