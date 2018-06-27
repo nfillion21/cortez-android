@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.tezos.core.R;
@@ -19,13 +18,12 @@ import java.io.InputStreamReader;
 
 public class EnglishWordsDatabaseTable
 {
-    private static final String TAG = "DictionaryDatabase";
+    private static final String TAG = "EnglishWordsDatabase";
 
     //The columns we'll include in the dictionary table
     public static final String COL_WORD = "WORD";
-    public static final String COL_DEFINITION = "DEFINITION";
 
-    private static final String DATABASE_NAME = "DICTIONARY";
+    private static final String DATABASE_NAME = "ENGLISH_WORDS";
     public static final String FTS_VIRTUAL_TABLE = "FTS";
     private static final int DATABASE_VERSION = 1;
 
@@ -56,12 +54,37 @@ public class EnglishWordsDatabaseTable
         return cursor;
     }
 
+    public Cursor getWord(String rowId, String[] columns) {
+        String selection = "rowid = ?";
+        String[] selectionArgs = new String[] {rowId};
+
+        return query(selection, selectionArgs, columns);
+
+        /* This builds a query that looks like:
+         *     SELECT <columns> FROM <table> WHERE rowid = <rowId>
+         */
+    }
+
     public Cursor getWordMatches(String query, String[] columns)
     {
         String selection = COL_WORD + " MATCH ?";
         String[] selectionArgs = new String[] {query+"*"};
 
         return query(selection, selectionArgs, columns);
+
+        /* This builds a query that looks like:
+         *     SELECT <columns> FROM <table> WHERE <KEY_WORD> MATCH 'query*'
+         * which is an FTS3 search for the query text (plus a wildcard) inside the word column.
+         *
+         * - "rowid" is the unique id for all rows but we need this value for the "_id" column in
+         *    order for the Adapters to work, so the columns need to make "_id" an alias for "rowid"
+         * - "rowid" also needs to be used by the SUGGEST_COLUMN_INTENT_DATA alias in order
+         *   for suggestions to carry the proper intent data.
+         *   These aliases are defined in the DictionaryProvider when queries are made.
+         * - This can be revised to also search the definition text with FTS3 by changing
+         *   the selection clause to use FTS_VIRTUAL_TABLE instead of KEY_WORD (to search across
+         *   the entire table, but sorting the relevance could be difficult.
+         */
     }
 
     private static class DatabaseOpenHelper extends SQLiteOpenHelper
@@ -72,8 +95,7 @@ public class EnglishWordsDatabaseTable
         private static final String FTS_TABLE_CREATE =
                 "CREATE VIRTUAL TABLE " + FTS_VIRTUAL_TABLE +
                         " USING fts3 (" +
-                        COL_WORD + ", " +
-                        COL_DEFINITION + ")";
+                        COL_WORD + ")";
 
         DatabaseOpenHelper(Context context)
         {
@@ -88,21 +110,17 @@ public class EnglishWordsDatabaseTable
             mDatabase.execSQL(FTS_TABLE_CREATE);
         }
 
-
         private void loadDictionary()
         {
-            new Thread(new Runnable()
+            new Thread(() ->
             {
-                public void run()
+                try
                 {
-                    try
-                    {
-                        loadWords();
-                    }
-                    catch (IOException e)
-                    {
-                        throw new RuntimeException(e);
-                    }
+                    loadWords();
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException(e);
                 }
             }).start();
         }
@@ -117,14 +135,10 @@ public class EnglishWordsDatabaseTable
                 String line;
                 while ((line = reader.readLine()) != null)
                 {
-                    String[] strings = TextUtils.split(line, "-");
-                    if (strings.length < 2)
-                        continue;
-
-                    long id = addWord(strings[0].trim(), strings[1].trim());
+                    long id = addWord(line.trim());
                     if (id < 0)
                     {
-                        Log.e(TAG, "unable to add word: " + strings[0].trim());
+                        Log.e(TAG, "unable to add word: " + line.trim());
                     }
                 }
             }
@@ -132,13 +146,13 @@ public class EnglishWordsDatabaseTable
             {
                 reader.close();
             }
+            Log.d(TAG, "DONE loading words.");
         }
 
-        public long addWord(String word, String definition)
+        public long addWord(String word)
         {
             ContentValues initialValues = new ContentValues();
             initialValues.put(COL_WORD, word);
-            initialValues.put(COL_DEFINITION, definition);
 
             return mDatabase.insert(FTS_VIRTUAL_TABLE, null, initialValues);
         }

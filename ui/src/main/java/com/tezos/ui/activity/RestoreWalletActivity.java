@@ -33,7 +33,7 @@ public class RestoreWalletActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_create_wallet);
+        setContentView(R.layout.activity_restore_wallet);
 
         if (savedInstanceState == null) {}
         else {}
