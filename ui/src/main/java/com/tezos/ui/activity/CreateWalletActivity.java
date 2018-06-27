@@ -15,8 +15,10 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -27,13 +29,17 @@ import com.tezos.ui.R;
 public class CreateWalletActivity extends AppCompatActivity
 {
     private static final String MNEMONICS_KEY = "mnemonics_key";
+    private static final String BACKUP_CHECKBOX_KEY = "backup_checkbox_key";
 
     private FloatingActionButton mRenewFab;
     private TextView mMnemonicsTextview;
     private String mMnemonicsString;
 
     private Button mCreateButton;
+    private AppCompatCheckBox mBackupCheckbox;
     private FrameLayout mCreateButtonLayout;
+
+    private boolean mBackupChecked;
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -60,6 +66,20 @@ public class CreateWalletActivity extends AppCompatActivity
 
         mMnemonicsTextview = findViewById(R.id.mnemonics_textview);
 
+        mBackupCheckbox = findViewById(R.id.backup_checkbox);
+
+        /*
+        mBackupCheckbox.setOnClickListener(view ->
+        {
+            validateCreateButton(mBackupChecked, null);
+        });
+        */
+
+        mBackupCheckbox.setOnCheckedChangeListener((buttonView, isChecked) ->
+        {
+            mBackupChecked  = buttonView.isChecked();
+            validateCreateButton(isCreateButtonValid(), null);
+        });
 
         mCreateButton = findViewById(R.id.create_button);
         mCreateButtonLayout = findViewById(R.id.create_button_layout);
@@ -74,15 +94,14 @@ public class CreateWalletActivity extends AppCompatActivity
             //launchRequest();
         });
 
-        //TODO handle the theme colors thing
-        validateCreateButton(isInputDataValid(), null);
-
         mRenewFab = findViewById(R.id.renew);
         mRenewFab.setOnClickListener(v ->
         {
             int i = v.getId();
             if (i == R.id.renew)
             {
+                mBackupCheckbox.setEnabled(false);
+
                 mRenewFab.setEnabled(false);
                 removeDoneFab(() ->
                 {
@@ -121,6 +140,8 @@ public class CreateWalletActivity extends AppCompatActivity
             {
                 mMnemonicsTextview.setText(mMnemonicsString);
             }
+
+            mBackupChecked = false;
         }
         else
         {
@@ -129,22 +150,23 @@ public class CreateWalletActivity extends AppCompatActivity
             {
                 mMnemonicsTextview.setText(mMnemonicsString);
             }
+
+            mBackupChecked = savedInstanceState.getBoolean(BACKUP_CHECKBOX_KEY, false);
+            mBackupCheckbox.setChecked(mBackupChecked);
         }
+
+        //TODO handle the theme colors thing
+        validateCreateButton(isCreateButtonValid(), null);
     }
 
-    protected boolean isInputDataValid()
+    protected boolean isCreateButtonValid()
     {
-        /*
-        if (
-                this.isTransferAmountValid() &&
-                        this.isFeesAmountValid()
-                )
+        if (mBackupChecked)
         {
             return true;
         }
-        */
 
-        return true;
+        return false;
     }
 
     private void removeDoneFab(@Nullable Runnable endAction) {
@@ -159,7 +181,6 @@ public class CreateWalletActivity extends AppCompatActivity
 
     private void showDoneFab()
     {
-        mRenewFab.setEnabled(true);
 
         mRenewFab.show();
         mRenewFab.setScaleX(0f);
@@ -171,6 +192,10 @@ public class CreateWalletActivity extends AppCompatActivity
                 .setStartDelay(200)
                 .setInterpolator(new FastOutSlowInInterpolator())
                 .start();
+
+        mRenewFab.setEnabled(true);
+
+        mBackupCheckbox.setEnabled(true);
     }
 
     protected void validateCreateButton(boolean validate, CustomTheme theme)
@@ -192,7 +217,10 @@ public class CreateWalletActivity extends AppCompatActivity
             Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
-        } else
+            mRenewFab.setEnabled(false);
+            mRenewFab.hide();
+        }
+        else
         {
             mCreateButton.setTextColor(ContextCompat.getColor(this, android.R.color.white));
             mCreateButtonLayout.setEnabled(false);
@@ -203,6 +231,9 @@ public class CreateWalletActivity extends AppCompatActivity
             Drawable[] drawables = mCreateButton.getCompoundDrawables();
             Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white));
+
+            mRenewFab.show();
+            mRenewFab.setEnabled(true);
         }
     }
 
@@ -220,5 +251,6 @@ public class CreateWalletActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
 
         outState.putString(MNEMONICS_KEY, mMnemonicsString);
+        outState.putBoolean(BACKUP_CHECKBOX_KEY, mBackupChecked);
     }
 }

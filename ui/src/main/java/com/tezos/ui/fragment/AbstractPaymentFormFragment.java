@@ -190,7 +190,7 @@ public abstract class AbstractPaymentFormFragment extends Fragment
         }
         mCardInfoLayout = view.findViewById(R.id.card_info_layout);
 
-        //validatePayButton(isInputDataValid());
+        //validatePayButton(isCreateButtonValid());
     }
 
     /*

@@ -15,5 +15,6 @@
     <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
     <string name="create_wallet">Create Wallet</string>
+    <string name="mnemonics_backed_up">I wrote the 24 words on a piece of paper.</string>
 
 </resources>
