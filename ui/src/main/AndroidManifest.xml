@@ -22,6 +22,11 @@
             android:theme="@style/PaymentScreens.CreateWalletActivity"
             />
 
+        <activity
+            android:name=".activity.RestoreWalletActivity"
+            android:theme="@style/PaymentScreens.RestoreWalletActivity"
+            />
+
     </application>
 
 </manifest>

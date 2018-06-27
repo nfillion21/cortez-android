@@ -93,7 +93,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         catch (ClassCastException e)
         {
             throw new ClassCastException(context.toString()
-                    + " must implement OnCardSelectedListener");
+                    + " must implement OnWordSelectedListener");
         }
     }
 

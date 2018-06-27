@@ -12,7 +12,7 @@ import android.provider.BaseColumns;
 /**
  * Provides access to the dictionary database.
  */
-public class DictionaryProvider extends ContentProvider
+public class EnglishWordsProvider extends ContentProvider
 {
     String TAG = "EnglishWordsProvider";
 

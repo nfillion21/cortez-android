@@ -2,10 +2,13 @@ package com.tezos.core.utils;
 
 import java.security.SecureRandom;
 
-import io.github.novacrypto.bip32.networks.Bitcoin;
-import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip39.MnemonicGenerator;
+import io.github.novacrypto.bip39.MnemonicValidator;
 import io.github.novacrypto.bip39.SeedCalculator;
+import io.github.novacrypto.bip39.Validation.InvalidChecksumException;
+import io.github.novacrypto.bip39.Validation.InvalidWordCountException;
+import io.github.novacrypto.bip39.Validation.UnexpectedWhiteSpaceException;
+import io.github.novacrypto.bip39.Validation.WordNotFoundException;
 import io.github.novacrypto.bip39.Words;
 import io.github.novacrypto.bip39.wordlists.English;
 
@@ -57,5 +60,21 @@ public class TezosUtils {
         //ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(seed, Bitcoin.MAIN_NET);
         //ExtendedPrivateKey root2 = ExtendedPrivateKey.fromSeed(seed, Bitcoin.MAIN_NET);
         return seed;
+    }
+
+    public static void validateMnemonics(String mnemonic)
+    {
+        try
+        {
+            MnemonicValidator.ofWordList(English.INSTANCE).validate("hello world");
+        } catch (InvalidChecksumException e) {
+            e.printStackTrace();
+        } catch (InvalidWordCountException e) {
+            e.printStackTrace();
+        } catch (WordNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnexpectedWhiteSpaceException e) {
+            e.printStackTrace();
+        }
     }
 }

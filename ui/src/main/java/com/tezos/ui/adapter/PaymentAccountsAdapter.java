@@ -117,14 +117,7 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         holder.title.setBackgroundColor(getColor(theme.getColorPrimaryId()));
 
         holder.itemView.setBackgroundColor(getColor(android.R.color.background_light));
-        holder.itemView.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition()));
-            }
-        });
+        holder.itemView.setOnClickListener(v -> mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition())));
     }
 
     @Override
