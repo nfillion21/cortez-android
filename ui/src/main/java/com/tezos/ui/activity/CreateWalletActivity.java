@@ -3,13 +3,21 @@ package com.tezos.ui.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
@@ -23,6 +31,9 @@ public class CreateWalletActivity extends AppCompatActivity
     private FloatingActionButton mRenewFab;
     private TextView mMnemonicsTextview;
     private String mMnemonicsString;
+
+    private Button mCreateButton;
+    private FrameLayout mCreateButtonLayout;
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -48,6 +59,23 @@ public class CreateWalletActivity extends AppCompatActivity
         setContentView(R.layout.activity_create_wallet);
 
         mMnemonicsTextview = findViewById(R.id.mnemonics_textview);
+
+
+        mCreateButton = findViewById(R.id.create_button);
+        mCreateButtonLayout = findViewById(R.id.create_button_layout);
+
+        mCreateButtonLayout.setVisibility(View.VISIBLE);
+
+        mCreateButton.setText(R.string.create_wallet);
+
+        mCreateButtonLayout.setOnClickListener(v ->
+        {
+            //setLoadingMode(true,false);
+            //launchRequest();
+        });
+
+        //TODO handle the theme colors thing
+        validateCreateButton(isInputDataValid(), null);
 
         mRenewFab = findViewById(R.id.renew);
         mRenewFab.setOnClickListener(v ->
@@ -104,6 +132,21 @@ public class CreateWalletActivity extends AppCompatActivity
         }
     }
 
+    protected boolean isInputDataValid()
+    {
+        /*
+        if (
+                this.isTransferAmountValid() &&
+                        this.isFeesAmountValid()
+                )
+        {
+            return true;
+        }
+        */
+
+        return true;
+    }
+
     private void removeDoneFab(@Nullable Runnable endAction) {
         ViewCompat.animate(mRenewFab)
                 .scaleX(0)
@@ -128,6 +171,47 @@ public class CreateWalletActivity extends AppCompatActivity
                 .setStartDelay(200)
                 .setInterpolator(new FastOutSlowInInterpolator())
                 .start();
+    }
+
+    protected void validateCreateButton(boolean validate, CustomTheme theme)
+    {
+        if (validate)
+        {
+            if (theme == null)
+            {
+                theme = new CustomTheme(R.color.tz_primary,R.color.tz_primary_dark,R.color.tz_light);
+            }
+            //final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
+            //CustomTheme theme = CustomTheme.fromBundle(customThemeBundle);
+
+            mCreateButton.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+            mCreateButtonLayout.setEnabled(true);
+            mCreateButtonLayout.setBackground(makeSelector(theme));
+
+            Drawable[] drawables = mCreateButton.getCompoundDrawables();
+            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+
+        } else
+        {
+            mCreateButton.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+            mCreateButtonLayout.setEnabled(false);
+
+            CustomTheme greyTheme = new CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey);
+            mCreateButtonLayout.setBackground(makeSelector(greyTheme));
+
+            Drawable[] drawables = mCreateButton.getCompoundDrawables();
+            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white));
+        }
+    }
+
+    private StateListDrawable makeSelector(CustomTheme theme)
+    {
+        StateListDrawable res = new StateListDrawable();
+        res.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(ContextCompat.getColor(this, theme.getColorPrimaryDarkId())));
+        res.addState(new int[]{}, new ColorDrawable(ContextCompat.getColor(this, theme.getColorPrimaryId())));
+        return res;
     }
 
     @Override

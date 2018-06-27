@@ -60,7 +60,7 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
             Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
 
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(paymentPageRequestBundle, customThemeBundle)).commit();
+                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(customThemeBundle)).commit();
         }
     }
 

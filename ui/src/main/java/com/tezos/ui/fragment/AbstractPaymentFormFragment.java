@@ -52,7 +52,7 @@ public abstract class AbstractPaymentFormFragment extends Fragment
 
     protected abstract boolean isInputDataValid();
 
-    public static AbstractPaymentFormFragment newInstance(Bundle paymentPageRequestBundle, Bundle customTheme)
+    public static AbstractPaymentFormFragment newInstance(Bundle customTheme)
     {
         AbstractPaymentFormFragment fragment;
 
@@ -164,7 +164,8 @@ public abstract class AbstractPaymentFormFragment extends Fragment
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState)
+    {
         super.onSaveInstanceState(outState);
 
         //outState.putBoolean(STATE_IS_LOADING, mLoadingMode);
@@ -172,11 +173,10 @@ public abstract class AbstractPaymentFormFragment extends Fragment
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
         super.onViewCreated(view, savedInstanceState);
         initContentViews(view);
-
     }
 
     protected void initContentViews(View view) {
@@ -188,7 +188,7 @@ public abstract class AbstractPaymentFormFragment extends Fragment
         } else {
             mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorAccent), PorterDuff.Mode.SRC_IN);
         }
-        mCardInfoLayout = (LinearLayout) view.findViewById(R.id.card_info_layout);
+        mCardInfoLayout = view.findViewById(R.id.card_info_layout);
 
         //validatePayButton(isInputDataValid());
     }
@@ -307,7 +307,6 @@ public abstract class AbstractPaymentFormFragment extends Fragment
     public void onDestroy()
     {
         super.onDestroy();
-
         //this.cancelOperations();
     }
 }

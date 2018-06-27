@@ -70,24 +70,12 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         super.initContentViews(view);
 
         mSrcButton = view.findViewById(R.id.transfer_src_button);
-        mSrcButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                PaymentAccountsActivity.start(getActivity(), null, PaymentAccountsActivity.Selection.SelectionSource);
-            }
-        });
+        mSrcButton.setOnClickListener(v -> PaymentAccountsActivity.start(getActivity(), null, PaymentAccountsActivity.Selection.SelectionSource));
 
         mDstButton = view.findViewById(R.id.transfer_dst_button);
-        mDstButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                PaymentAccountsActivity.start(getActivity(), null, PaymentAccountsActivity.Selection.SelectionDestination);
-            }
-        });
+        mDstButton.setOnClickListener(v ->
+                PaymentAccountsActivity.start(getActivity(), null, PaymentAccountsActivity.Selection.SelectionDestination)
+        );
 
         mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled);
         mTransferDstFilled = view.findViewById(R.id.transfer_destination_filled);
@@ -113,14 +101,10 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
         mPayButton.setText(moneyString);
 
-        mPayButtonLayout.setOnClickListener(new View.OnClickListener()
+        mPayButtonLayout.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                //setLoadingMode(true,false);
-                //launchRequest();
-            }
+            //setLoadingMode(true,false);
+            //launchRequest();
         });
 
         View.OnFocusChangeListener focusChangeListener = this.focusChangeListener();
@@ -219,27 +203,22 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
     private View.OnFocusChangeListener focusChangeListener()
     {
-        return new View.OnFocusChangeListener()
-        {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus)
-            {
-                int i = v.getId();
+        return (v, hasFocus) -> {
+            int i = v.getId();
 
-                if (i == R.id.amount_transfer)
-                {
-                    putAmountInRed(!hasFocus);
-                }
-                else if (i == R.id.fees_transfer)
-                {
-                    putFeesInRed(!hasFocus);
-                }
-                else
-                {
-                    throw new UnsupportedOperationException(
-                            "onFocusChange has not been implemented for " + getResources().
-                                    getResourceName(v.getId()));
-                }
+            if (i == R.id.amount_transfer)
+            {
+                putAmountInRed(!hasFocus);
+            }
+            else if (i == R.id.fees_transfer)
+            {
+                putFeesInRed(!hasFocus);
+            }
+            else
+            {
+                throw new UnsupportedOperationException(
+                        "onFocusChange has not been implemented for " + getResources().
+                                getResourceName(v.getId()));
             }
         };
     }
