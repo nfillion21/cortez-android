@@ -18,7 +18,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -181,7 +180,6 @@ public class CreateWalletActivity extends AppCompatActivity
 
     private void showDoneFab()
     {
-
         mRenewFab.show();
         mRenewFab.setScaleX(0f);
         mRenewFab.setScaleY(0f);
