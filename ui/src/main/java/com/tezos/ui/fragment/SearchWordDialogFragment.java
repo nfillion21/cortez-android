@@ -14,6 +14,7 @@ import android.view.View;
 
 import com.tezos.ui.R;
 import com.tezos.ui.adapter.SearchWordsViewAdapter;
+import com.tezos.ui.widget.OffsetDecoration;
 
 /**
  * Created by nfillion on 3/9/18.
@@ -21,9 +22,8 @@ import com.tezos.ui.adapter.SearchWordsViewAdapter;
 
 public class SearchWordDialogFragment extends DialogFragment
 {
-
-    RecyclerView rv;
-    SearchWordsViewAdapter adapter;
+    RecyclerView mRecyclerView;
+    SearchWordsViewAdapter mAdapter;
 
     public interface ChangeIconListener
     {
@@ -73,18 +73,22 @@ public class SearchWordDialogFragment extends DialogFragment
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
         View dialogView = inflater.inflate(R.layout.dialog_search_word, null);
+        mRecyclerView = dialogView.findViewById(R.id.words_recyclerview);
+        final int spacing = getContext().getResources()
+                .getDimensionPixelSize(R.dimen.spacing_nano);
+        mRecyclerView.addItemDecoration(new OffsetDecoration(spacing));
 
-        rv= dialogView.findViewById(R.id.words_recyclerview);
-        rv.setLayoutManager(new LinearLayoutManager(this.getActivity()));
-
-        //ADAPTER
-        adapter=new SearchWordsViewAdapter(this.getActivity());
-        rv.setAdapter(adapter);
-
-        //this.getDialog().setTitle("TV Shows");
-
+        setUpWordGrid();
         builder.setView(dialogView);
 
         return builder.create();
+    }
+
+    private void setUpWordGrid()
+    {
+        //mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
+
+        mAdapter = new SearchWordsViewAdapter(this.getActivity());
+        mRecyclerView.setAdapter(mAdapter);
     }
 }

@@ -88,7 +88,7 @@ public class SearchWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public WordItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new WordItemViewHolder(mLayoutInflater
-                .inflate(R.layout.item_word, parent, false));
+                .inflate(R.layout.item_search_word, parent, false));
     }
 
     /**
