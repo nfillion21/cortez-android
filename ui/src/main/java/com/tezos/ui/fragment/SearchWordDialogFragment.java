@@ -5,9 +5,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -25,6 +29,8 @@ public class SearchWordDialogFragment extends DialogFragment implements SearchWo
 
     private RecyclerView mRecyclerView;
     private SearchWordsViewAdapter mAdapter;
+
+    private TextInputEditText mSearchWordEditText;
 
     public interface OnSearchWordSelectedListener
     {
@@ -78,6 +84,29 @@ public class SearchWordDialogFragment extends DialogFragment implements SearchWo
         final int spacing = getContext().getResources()
                 .getDimensionPixelSize(R.dimen.spacing_nano);
         mRecyclerView.addItemDecoration(new OffsetDecoration(spacing));
+
+        mSearchWordEditText = dialogView.findViewById(R.id.search_word_edittext);
+        mSearchWordEditText.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable)
+            {
+                // database change.
+                Log.i("database change", "database change");
+            }
+        });
 
         setUpSearchWordGrid();
         builder.setView(dialogView);

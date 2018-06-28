@@ -11,7 +11,7 @@
     tools:ignore="UseCompoundDrawables,UselessParent">
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/fees_transfer_support"
+        android:id="@+id/search_word_edittext_layout"
         app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -21,17 +21,18 @@
         tools:ignore="UnusedAttribute,NewApi">
 
         <android.support.design.widget.TextInputEditText
-            android:id="@+id/fees_transfer"
+            android:id="@+id/search_word_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
             android:drawableLeft="@drawable/search_black_24"
             android:drawableStart="@drawable/search_black_24"
-            android:drawablePadding="@dimen/spacing_double"
-            android:inputType="numberDecimal"
+            android:drawablePadding="@dimen/spacing_normal"
             android:textColorHint="@color/tz_placeholder"
-            android:maxLength="10"
-            android:digits="0123456789."
+            android:maxLength="5"
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            android:maxLines="1"
+            android:inputType="textPersonName|textCapWords|textNoSuggestions"
             android:textSize="@dimen/size_edit_text" />
     </android.support.design.widget.TextInputLayout>
 
