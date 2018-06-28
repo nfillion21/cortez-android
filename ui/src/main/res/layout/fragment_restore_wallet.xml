@@ -20,7 +20,6 @@
         android:scrollbars="vertical"
         app:layoutManager="android.support.v7.widget.GridLayoutManager"
         android:transitionGroup="false"
-        android:visibility="gone"
         app:spanCount="2" tools:ignore="UnusedAttribute" />
 
 </LinearLayout>

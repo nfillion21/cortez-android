@@ -39,8 +39,9 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
     {
         mLayoutInflater = LayoutInflater.from(activity.getApplicationContext());
         mActivity = activity;
+
         mWords = new ArrayList<>();
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 24; i++)
         {
             mWords.add("hello");
         }
@@ -50,14 +51,16 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
      * The {@link WordItemViewHolder} class.
      * Provides a reference to each view in the message item view.
      */
-    class WordItemViewHolder extends RecyclerView.ViewHolder
+    static class WordItemViewHolder extends RecyclerView.ViewHolder
     {
-        private final TextView messageItemName;
+        final TextView wordNumberItem;
+        final TextView wordItem;
 
         WordItemViewHolder(View view)
         {
             super(view);
-            messageItemName = view.findViewById(R.id.word_item_head);
+            wordNumberItem = view.findViewById(R.id.word_item_info);
+            wordItem = view.findViewById(R.id.word_item);
         }
     }
 
@@ -65,7 +68,7 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
     public int getItemCount()
     {
         // always 24 words.
-        return 24;
+        return mWords.size();
     }
 
     public String getItem(int position)
@@ -90,7 +93,7 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
     @Override
     public WordItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new WordItemViewHolder(mLayoutInflater
-                .inflate(R.layout.item_payment_account, parent, false));
+                .inflate(R.layout.item_word, parent, false));
     }
 
     /**
@@ -108,9 +111,14 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
                 WordItemViewHolder wordItemHolder = (WordItemViewHolder) holder;
 
                 String wordItem = getItem(position);
-                wordItemHolder.messageItemName.setText(wordItem);
+                //wordItemHolder.wordItem.setText(wordItem);
 
-                holder.itemView.setOnClickListener(v -> mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition())));
+                String wordNumber = String.format(mActivity.getString(R.string.word_info), ++position);
+                wordItemHolder.wordNumberItem.setText(wordNumber);
+
+                holder.itemView.setOnClickListener(v ->
+                        mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition()))
+                );
             }
             break;
 

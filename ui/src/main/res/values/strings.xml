@@ -16,5 +16,6 @@
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
     <string name="create_wallet">Create Wallet</string>
     <string name="mnemonics_backed_up">I wrote the 24 words on a piece of paper.</string>
+    <string name="word_info">#%1$d</string>
 
 </resources>
