@@ -16,6 +16,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Provides search suggestions for words and their definitions. -->
+        <provider android:name="com.tezos.core.database.EnglishWordsProvider"
+            android:authorities="com.tezos.core.database.EnglishWordsProvider" />
     </application>
 
 </manifest>

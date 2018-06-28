@@ -17,13 +17,13 @@ public class EnglishWordsProvider extends ContentProvider
     String TAG = "EnglishWordsProvider";
 
     public static String AUTHORITY = "com.tezos.core.database.EnglishWordProvider";
-    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/englishwords");
+    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/dictionary");
 
     // MIME types used for searching words or looking up a single definition
     public static final String WORDS_MIME_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
             "/vnd.com.tezos.core.database";
 
-    private EnglishWordsDatabaseTable mEnlishWords;
+    private EnglishWordsDatabase mEnlishWords;
 
     // UriMatcher stuff
     private static final int SEARCH_WORDS = 0;
@@ -58,8 +58,14 @@ public class EnglishWordsProvider extends ContentProvider
     @Override
     public boolean onCreate()
     {
-        mEnlishWords = new EnglishWordsDatabaseTable(getContext());
+        mEnlishWords = new EnglishWordsDatabase(getContext());
         return true;
+    }
+
+    public void simpleQuery()
+    {
+        Cursor cursor = mEnlishWords.getWord("5",  new String[]{EnglishWordsDatabase.COL_WORD});
+        Cursor cursor2 = mEnlishWords.getWord("5",  new String[]{EnglishWordsDatabase.COL_WORD});
     }
 
     /**
@@ -110,7 +116,7 @@ public class EnglishWordsProvider extends ContentProvider
         String[] columns = new String[]
                 {
                 BaseColumns._ID,
-                EnglishWordsDatabaseTable.COL_WORD,
+                EnglishWordsDatabase.COL_WORD,
                 /* SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
                                  (only if you want to refresh shortcuts) */
                 SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
@@ -124,7 +130,7 @@ public class EnglishWordsProvider extends ContentProvider
         String[] columns = new String[]
                 {
                         BaseColumns._ID,
-                        EnglishWordsDatabaseTable.COL_WORD};
+                        EnglishWordsDatabase.COL_WORD};
 
         return mEnlishWords.getWordMatches(query, columns);
     }
@@ -132,7 +138,7 @@ public class EnglishWordsProvider extends ContentProvider
     private Cursor getWord(Uri uri) {
         String rowId = uri.getLastPathSegment();
         String[] columns = new String[] {
-                EnglishWordsDatabaseTable.COL_WORD};
+                EnglishWordsDatabase.COL_WORD};
 
         return mEnlishWords.getWord(rowId, columns);
     }
@@ -148,7 +154,7 @@ public class EnglishWordsProvider extends ContentProvider
         String rowId = uri.getLastPathSegment();
         String[] columns = new String[] {
                 BaseColumns._ID,
-                EnglishWordsDatabaseTable.COL_WORD,
+                EnglishWordsDatabase.COL_WORD,
                 SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
                 SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
 

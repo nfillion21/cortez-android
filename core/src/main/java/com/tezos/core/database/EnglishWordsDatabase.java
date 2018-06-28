@@ -1,5 +1,6 @@
 package com.tezos.core.database;
 
+import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
@@ -7,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.tezos.core.R;
@@ -15,8 +17,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 
-public class EnglishWordsDatabaseTable
+public class EnglishWordsDatabase
 {
     private static final String TAG = "EnglishWordsDatabase";
 
@@ -28,16 +31,36 @@ public class EnglishWordsDatabaseTable
     private static final int DATABASE_VERSION = 1;
 
     private final DatabaseOpenHelper mDatabaseOpenHelper;
+    private static final HashMap<String,String> mColumnMap = buildColumnMap();
 
-    public EnglishWordsDatabaseTable(Context context)
+    public EnglishWordsDatabase(Context context)
     {
         mDatabaseOpenHelper = new DatabaseOpenHelper(context);
+    }
+
+    /**
+     * Builds a map for all columns that may be requested, which will be given to the
+     * SQLiteQueryBuilder. This is a good way to define aliases for column names, but must include
+     * all columns, even if the value is the key. This allows the ContentProvider to request
+     * columns w/o the need to know real column names and create the alias itself.
+     */
+    private static HashMap<String,String> buildColumnMap() {
+        HashMap<String,String> map = new HashMap<String,String>();
+        map.put(COL_WORD, COL_WORD);
+        map.put(BaseColumns._ID, "rowid AS " +
+                BaseColumns._ID);
+        map.put(SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID, "rowid AS " +
+                SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID);
+        map.put(SearchManager.SUGGEST_COLUMN_SHORTCUT_ID, "rowid AS " +
+                SearchManager.SUGGEST_COLUMN_SHORTCUT_ID);
+        return map;
     }
 
     private Cursor query(String selection, String[] selectionArgs, String[] columns)
     {
         SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
         builder.setTables(FTS_VIRTUAL_TABLE);
+        builder.setProjectionMap(mColumnMap);
 
         Cursor cursor = builder.query(mDatabaseOpenHelper.getReadableDatabase(),
                 columns, selection, selectionArgs, null, null, null);
@@ -108,6 +131,7 @@ public class EnglishWordsDatabaseTable
         {
             mDatabase = db;
             mDatabase.execSQL(FTS_TABLE_CREATE);
+            loadDictionary();
         }
 
         private void loadDictionary()
