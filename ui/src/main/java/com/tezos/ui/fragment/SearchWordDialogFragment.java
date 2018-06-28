@@ -1,25 +1,19 @@
 package com.tezos.ui.fragment;
 
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatRadioButton;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
 
 import com.tezos.ui.R;
+import com.tezos.ui.adapter.SearchWordsViewAdapter;
 
 /**
  * Created by nfillion on 3/9/18.
@@ -27,16 +21,9 @@ import com.tezos.ui.R;
 
 public class SearchWordDialogFragment extends DialogFragment
 {
-    private AppCompatRadioButton mRadioButton;
-    private AppCompatRadioButton mRadioButtonDiscreet;
 
-    private Button mSubmitButton;
-    private FrameLayout mSubmitButtonLayout;
-
-    private Button mCancelButton;
-    private FrameLayout mCancelButtonLayout;
-
-    private ChangeIconListener mCallback;
+    RecyclerView rv;
+    SearchWordsViewAdapter adapter;
 
     public interface ChangeIconListener
     {
@@ -46,6 +33,7 @@ public class SearchWordDialogFragment extends DialogFragment
     public static SearchWordDialogFragment newInstance()
     {
         return new SearchWordDialogFragment();
+        //Put the theme here
     }
 
     @Override
@@ -64,7 +52,7 @@ public class SearchWordDialogFragment extends DialogFragment
         // the callback interface. If not, it throws an exception
         try
         {
-            mCallback = (ChangeIconListener) context;
+            //mCallback = (ChangeIconListener) context;
         }
         catch (ClassCastException e)
         {
@@ -86,50 +74,17 @@ public class SearchWordDialogFragment extends DialogFragment
 
         View dialogView = inflater.inflate(R.layout.dialog_search_word, null);
 
+        rv= dialogView.findViewById(R.id.words_recyclerview);
+        rv.setLayoutManager(new LinearLayoutManager(this.getActivity()));
+
+        //ADAPTER
+        adapter=new SearchWordsViewAdapter(this.getActivity());
+        rv.setAdapter(adapter);
+
+        //this.getDialog().setTitle("TV Shows");
+
         builder.setView(dialogView);
 
         return builder.create();
-    }
-
-    private void validateSubmitButton(boolean validate)
-    {
-    }
-
-    private void validateCancelButton(boolean validate)
-    {
-    }
-
-    private StateListDrawable makeSelector(int primaryColor, int primaryColorDark)
-    {
-        StateListDrawable res = new StateListDrawable();
-        res.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(ContextCompat.getColor(getActivity(), primaryColorDark)));
-        res.addState(new int[]{}, new ColorDrawable(ContextCompat.getColor(getActivity(), primaryColor)));
-        return res;
-    }
-
-    private String getStandardName()
-    {
-
-        PackageManager packageManager = getActivity().getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(getActivity().getPackageName());
-        ComponentName componentName = intent.getComponent();
-
-        String className = componentName.getClassName();
-        return className;
-    }
-
-    private String getDiscreetName()
-    {
-        PackageManager packageManager = getActivity().getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(getActivity().getPackageName());
-        ComponentName componentName = intent.getComponent();
-
-        String className = componentName.getClassName();
-        return className;
-    }
-
-    private boolean changeIcon(boolean discreet)
-    {
-        return true;
     }
 }
