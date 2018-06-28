@@ -12,7 +12,7 @@ import com.tezos.ui.R;
 import com.tezos.ui.fragment.SearchWordDialogFragment;
 import com.tezos.ui.fragment.RestoreWalletFragment;
 
-public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener
+public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnSearchWordSelectedListener
 {
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -53,5 +53,13 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
     {
         SearchWordDialogFragment searchWordDialogFragment = SearchWordDialogFragment.newInstance();
         searchWordDialogFragment.show(getSupportFragmentManager(), "searchWordDialog");
+    }
+
+    @Override
+    public void onSearchWordClicked(String word)
+    {
+        //TODO
+        // go find the RestoreWalletFragment and update the list.
+        // need the position in the parameter.
     }
 }

@@ -21,8 +21,15 @@ import com.tezos.ui.widget.OffsetDecoration;
 
 public class SearchWordDialogFragment extends DialogFragment implements SearchWordsViewAdapter.OnItemClickListener
 {
-    RecyclerView mRecyclerView;
-    SearchWordsViewAdapter mAdapter;
+    private OnSearchWordSelectedListener mCallback;
+
+    private RecyclerView mRecyclerView;
+    private SearchWordsViewAdapter mAdapter;
+
+    public interface OnSearchWordSelectedListener
+    {
+        void onSearchWordClicked(String word);
+    }
 
     public static SearchWordDialogFragment newInstance()
     {
@@ -46,12 +53,12 @@ public class SearchWordDialogFragment extends DialogFragment implements SearchWo
         // the callback interface. If not, it throws an exception
         try
         {
-            //mCallback = (ChangeIconListener) context;
+            mCallback = (OnSearchWordSelectedListener) context;
         }
         catch (ClassCastException e)
         {
-            //throw new ClassCastException(context.toString()
-                    //+ " must implement WebviewListener");
+            throw new ClassCastException(context.toString()
+                    + " must implement OnSearchWordSelectedListener");
         }
     }
 
@@ -89,7 +96,12 @@ public class SearchWordDialogFragment extends DialogFragment implements SearchWo
 
 
     @Override
-    public void onClick(View view, String word) {
+    public void onClick(View view, String word)
+    {
         getDialog().dismiss();
+        if (mCallback != null)
+        {
+            mCallback.onSearchWordClicked(word);
+        }
     }
 }
