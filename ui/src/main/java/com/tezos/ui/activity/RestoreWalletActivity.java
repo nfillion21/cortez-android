@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.fragment.SearchWordDialogFragment;
 import com.tezos.ui.fragment.RestoreWalletFragment;
 
 public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener
@@ -51,6 +51,7 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
     @Override
     public void onWordClicked(String word)
     {
-        Log.i("word clicked", "word clicked");
+        SearchWordDialogFragment searchWordDialogFragment = SearchWordDialogFragment.newInstance();
+        searchWordDialogFragment.show(getSupportFragmentManager(), "searchWordDialog");
     }
 }
