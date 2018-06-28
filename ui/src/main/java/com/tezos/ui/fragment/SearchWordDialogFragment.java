@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,15 +19,10 @@ import com.tezos.ui.widget.OffsetDecoration;
  * Created by nfillion on 3/9/18.
  */
 
-public class SearchWordDialogFragment extends DialogFragment
+public class SearchWordDialogFragment extends DialogFragment implements SearchWordsViewAdapter.OnItemClickListener
 {
     RecyclerView mRecyclerView;
     SearchWordsViewAdapter mAdapter;
-
-    public interface ChangeIconListener
-    {
-        void iconChanged();
-    }
 
     public static SearchWordDialogFragment newInstance()
     {
@@ -78,17 +72,24 @@ public class SearchWordDialogFragment extends DialogFragment
                 .getDimensionPixelSize(R.dimen.spacing_nano);
         mRecyclerView.addItemDecoration(new OffsetDecoration(spacing));
 
-        setUpWordGrid();
+        setUpSearchWordGrid();
         builder.setView(dialogView);
 
         return builder.create();
     }
 
-    private void setUpWordGrid()
+    private void setUpSearchWordGrid()
     {
         //mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
 
         mAdapter = new SearchWordsViewAdapter(this.getActivity());
+        mAdapter.setOnItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+
+    @Override
+    public void onClick(View view, String word) {
+        getDialog().dismiss();
     }
 }
