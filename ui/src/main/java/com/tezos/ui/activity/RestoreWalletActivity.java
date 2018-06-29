@@ -49,7 +49,7 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
     }
 
     @Override
-    public void onWordClicked(String word)
+    public void onWordCardNumberClicked(int position)
     {
         SearchWordDialogFragment searchWordDialogFragment = SearchWordDialogFragment.newInstance();
         searchWordDialogFragment.show(getSupportFragmentManager(), "searchWordDialog");

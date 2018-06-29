@@ -25,7 +25,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
     public interface OnWordSelectedListener
     {
-        void onWordClicked(String word);
+        void onWordCardNumberClicked(int position);
     }
 
     public static RestoreWalletFragment newInstance(Bundle customTheme)
@@ -114,11 +114,11 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     }
 
     @Override
-    public void onClick(View view, String word)
+    public void onClick(View view, int position)
     {
         if (mCallback != null)
         {
-            mCallback.onWordClicked(word);
+            mCallback.onWordCardNumberClicked(position);
         }
     }
 

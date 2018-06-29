@@ -19,11 +19,13 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.tezos.core.database.EnglishWordsContentProvider;
 import com.tezos.core.database.EnglishWordsDatabaseConstants;
 import com.tezos.ui.R;
+import com.tezos.ui.adapter.SearchWordsViewAdapter;
 
 /**
  * Created by nfillion on 3/9/18.
@@ -31,6 +33,7 @@ import com.tezos.ui.R;
 
 public class SearchWordDialogFragment extends DialogFragment implements LoaderManager.LoaderCallbacks
 {
+    private OnSearchWordSelectedListener mCallback;
     private TextInputEditText mSearchWordEditText;
 
     private CursorAdapter mCursorAdapter;
@@ -48,6 +51,8 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
     {
         return new SearchWordDialogFragment();
         //Put the theme here
+
+        //TODO put here the number
     }
 
     @Override
@@ -62,11 +67,9 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
     {
         super.onAttach(context);
 
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception
         try
         {
-            //mCallback = (OnSearchWordSelectedListener) context;
+            mCallback = (OnSearchWordSelectedListener) context;
         }
         catch (ClassCastException e)
         {
@@ -92,16 +95,10 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
         mSearchWordEditText.addTextChangedListener(new TextWatcher()
         {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
-            {
-
-            }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
-            {
-
-            }
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
             public void afterTextChanged(Editable editable)
@@ -126,9 +123,14 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 
         mList = dialogView.findViewById(R.id.list);
         mList.setAdapter(mCursorAdapter);
+
         mList.setOnItemClickListener((adapterView, view, i, l) ->
         {
+            Cursor cursor = mCursorAdapter.getCursor();
+            cursor.moveToPosition(i);
+            String item = cursor.getString(cursor.getColumnIndex(EnglishWordsDatabaseConstants.COL_WORD));
 
+            mCallback.onSearchWordClicked(item);
         });
 
         getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
@@ -150,6 +152,7 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
                 query = bundle.getString("query");
             }
 
+            // it filters everything when I put null as a parameter
             return new CursorLoader(getActivity(),
                     EnglishWordsContentProvider.CONTENT_URI,
                     new String[] { EnglishWordsDatabaseConstants.COL_ID, EnglishWordsDatabaseConstants.COL_WORD }, null, new String[]{query},

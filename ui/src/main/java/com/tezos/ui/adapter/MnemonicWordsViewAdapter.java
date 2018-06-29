@@ -32,7 +32,7 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public interface OnItemClickListener
     {
-        void onClick(View view, String word);
+        void onClick(View view, int position);
     }
 
     public MnemonicWordsViewAdapter(Activity activity)
@@ -113,11 +113,12 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
                 String wordItem = getItem(position);
                 //wordItemHolder.wordItem.setText(wordItem);
 
-                String wordNumber = String.format(mActivity.getString(R.string.word_info), ++position);
+                int pos = ++position;
+                String wordNumber = String.format(mActivity.getString(R.string.word_info), pos);
                 wordItemHolder.wordNumberItem.setText(wordNumber);
 
                 holder.itemView.setOnClickListener(v ->
-                        mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition()))
+                        mOnItemClickListener.onClick(v, pos)
                 );
             }
             break;
