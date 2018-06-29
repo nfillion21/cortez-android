@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.tezos.core.R;
 
@@ -66,6 +67,7 @@ public class SQLiteHelper extends SQLiteOpenHelper implements EnglishWordsDataba
 		InputStream inputStream = resources.openRawResource(R.raw.english);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
+		int words = 0;
 		try
 		{
 			String line;
@@ -76,13 +78,18 @@ public class SQLiteHelper extends SQLiteOpenHelper implements EnglishWordsDataba
 				{
 					//Log.e(TAG, "unable to add word: " + line.trim());
 				}
+				else
+				{
+					words++;
+				}
 			}
 		}
 		finally
 		{
 			reader.close();
 		}
-		//Log.d(TAG, "DONE loading words.");
+
+		Log.d("DONE", "DONE loading words." + words);
 	}
 
 	public long addWord(SQLiteDatabase db, String word)

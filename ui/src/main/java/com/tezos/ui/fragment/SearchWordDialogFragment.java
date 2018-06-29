@@ -19,7 +19,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.tezos.core.database.EnglishWordsContentProvider;
@@ -109,6 +108,14 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
             {
                 // database change.
                 Log.i("database change", "database change");
+
+                //Cursor cursor = getActivity().managedQuery(EnglishWordsContentProvider.CONTENT_URI, null, null,
+                        //new String[] {editable.toString()}, null);
+
+                String query = editable.toString();
+                Bundle queryBundle = new Bundle();
+                queryBundle.putString("query", query);
+                getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, queryBundle, SearchWordDialogFragment.this);
             }
         });
 
@@ -119,11 +126,9 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 
         mList = dialogView.findViewById(R.id.list);
         mList.setAdapter(mCursorAdapter);
-        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        mList.setOnItemClickListener((adapterView, view, i, l) ->
+        {
 
-            }
         });
 
         getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
@@ -135,13 +140,22 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 
     @NonNull
     @Override
-    public Loader onCreateLoader(int id, @Nullable Bundle bundle) {
-        if (id != LOADER_ID) {
+    public Loader onCreateLoader(int id, @Nullable Bundle bundle)
+    {
+        if (id != LOADER_ID)
+        {
             return null;
         }
+
+        String query = null;
+        if (bundle != null)
+        {
+            query = bundle.getString("query");
+        }
+
         return new CursorLoader(getActivity(),
                 EnglishWordsContentProvider.CONTENT_URI,
-                new String[] { EnglishWordsDatabaseConstants.COL_ID, EnglishWordsDatabaseConstants.COL_WORD }, null, null,
+                new String[] { EnglishWordsDatabaseConstants.COL_ID, EnglishWordsDatabaseConstants.COL_WORD }, null, new String[]{query},
                 null);
     }
 
@@ -151,14 +165,6 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
         if (o != null && o instanceof Cursor)
         {
             Cursor cursor = (Cursor)o;
-            if (cursor.moveToFirst()) // data?
-            {
-
-                int count = cursor.getCount();
-                String word = cursor.getString(cursor.getColumnIndex("word"));
-                String word2 = cursor.getString(cursor.getColumnIndex("word"));
-                //System.out.println(cursor.getString(cursor.getColumnIndex("word")));
-            }
             mCursorAdapter.swapCursor(cursor);
         }
     }

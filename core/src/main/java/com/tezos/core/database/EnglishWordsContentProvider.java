@@ -11,7 +11,7 @@ import android.net.Uri;
  */
 public class EnglishWordsContentProvider extends ContentProvider
 {
-    public static String AUTHORITY = "com.tezos.android.database.EnglishWordsProvider";
+    public static String AUTHORITY = "com.tezos.core.database.EnglishWordsProvider";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + EnglishWordsDatabaseConstants.TABLE_WORD);
     private SQLiteHelper dbHelper;
@@ -29,11 +29,17 @@ public class EnglishWordsContentProvider extends ContentProvider
     {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(EnglishWordsDatabaseConstants.TABLE_WORD);
-        String orderBy = EnglishWordsDatabaseConstants.COL_WORD + " asc";
+
+        selection = EnglishWordsDatabaseConstants.COL_WORD + " LIKE ?";
+        if (selectionArgs != null && selectionArgs.length > 0)
+        {
+            selectionArgs = new String[] {"%" + selectionArgs[0] + "%"};
+        }
+
         Cursor cursor = qb.query(dbHelper.getReadableDatabase(),
                 new String[] { EnglishWordsDatabaseConstants.COL_ID,
-                        EnglishWordsDatabaseConstants.COL_WORD }, null,
-                null, null, null, orderBy);
+                        EnglishWordsDatabaseConstants.COL_WORD }, selection,
+                selectionArgs, null, null, null);
         return cursor;
     }
 

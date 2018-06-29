@@ -7,6 +7,7 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.SeedManager
 import com.tezos.core.utils.TezosUtils
 import com.tezos.ui.activity.CreateWalletActivity
+import com.tezos.ui.activity.PaymentScreenActivity
 import com.tezos.ui.activity.RestoreWalletActivity
 
 class MainActivity : AppCompatActivity()
@@ -38,8 +39,7 @@ class MainActivity : AppCompatActivity()
 
         val paymentScreenButton = findViewById<Button>(R.id.paymentScreenButton)
         paymentScreenButton.setOnClickListener {
-            //PaymentScreenActivity.start(this)
-            LanguageListActivity.start(this)
+            PaymentScreenActivity.start(this)
         }
     }
 }
