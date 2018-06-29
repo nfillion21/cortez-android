@@ -11,6 +11,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
@@ -18,6 +19,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.tezos.core.database.EnglishWordsContentProvider;
@@ -32,7 +34,7 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 {
     private TextInputEditText mSearchWordEditText;
 
-    private android.support.v4.widget.CursorAdapter mCursorAdapter;
+    private CursorAdapter mCursorAdapter;
 
     private ListView mList;
 
@@ -113,10 +115,17 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
         mCursorAdapter = new SimpleCursorAdapter(getActivity(),
                 R.layout.item_search_word, null,
                 new String[] {EnglishWordsDatabaseConstants.COL_WORD},
-                new int[] { R.id.list_item });
+                new int[] { R.id.word_item });
 
         mList = dialogView.findViewById(R.id.list);
         mList.setAdapter(mCursorAdapter);
+        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+            }
+        });
+
         getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 
         builder.setView(dialogView);
@@ -139,9 +148,17 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
     @Override
     public void onLoadFinished(@NonNull Loader loader, Object o)
     {
-        if (o instanceof Cursor)
+        if (o != null && o instanceof Cursor)
         {
             Cursor cursor = (Cursor)o;
+            if (cursor.moveToFirst()) // data?
+            {
+
+                int count = cursor.getCount();
+                String word = cursor.getString(cursor.getColumnIndex("word"));
+                String word2 = cursor.getString(cursor.getColumnIndex("word"));
+                //System.out.println(cursor.getString(cursor.getColumnIndex("word")));
+            }
             mCursorAdapter.swapCursor(cursor);
         }
     }
