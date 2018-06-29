@@ -8,30 +8,35 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ListView;
 
+import com.tezos.core.database.EnglishWordsContentProvider;
+import com.tezos.core.database.EnglishWordsDatabaseConstants;
 import com.tezos.ui.R;
-import com.tezos.ui.adapter.SearchWordsViewAdapter;
-import com.tezos.ui.widget.OffsetDecoration;
 
 /**
  * Created by nfillion on 3/9/18.
  */
 
-public class SearchWordDialogFragment extends DialogFragment implements SearchWordsViewAdapter.OnItemClickListener
+public class SearchWordDialogFragment extends DialogFragment implements LoaderManager.LoaderCallbacks
 {
-    private OnSearchWordSelectedListener mCallback;
-
-    private RecyclerView mRecyclerView;
-    private SearchWordsViewAdapter mAdapter;
-
     private TextInputEditText mSearchWordEditText;
+
+    private android.support.v4.widget.CursorAdapter mCursorAdapter;
+
+    private ListView mList;
+
+    private static final int LOADER_ID = 42;
 
     public interface OnSearchWordSelectedListener
     {
@@ -60,7 +65,7 @@ public class SearchWordDialogFragment extends DialogFragment implements SearchWo
         // the callback interface. If not, it throws an exception
         try
         {
-            mCallback = (OnSearchWordSelectedListener) context;
+            //mCallback = (OnSearchWordSelectedListener) context;
         }
         catch (ClassCastException e)
         {
@@ -81,10 +86,6 @@ public class SearchWordDialogFragment extends DialogFragment implements SearchWo
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
         View dialogView = inflater.inflate(R.layout.dialog_search_word, null);
-        mRecyclerView = dialogView.findViewById(R.id.words_recyclerview);
-        final int spacing = getContext().getResources()
-                .getDimensionPixelSize(R.dimen.spacing_nano);
-        mRecyclerView.addItemDecoration(new OffsetDecoration(spacing));
 
         mSearchWordEditText = dialogView.findViewById(R.id.search_word_edittext);
         mSearchWordEditText.addTextChangedListener(new TextWatcher()
@@ -109,76 +110,45 @@ public class SearchWordDialogFragment extends DialogFragment implements SearchWo
             }
         });
 
-        setUpSearchWordGrid();
+        mCursorAdapter = new SimpleCursorAdapter(getActivity(),
+                R.layout.item_search_word, null,
+                new String[] {EnglishWordsDatabaseConstants.COL_WORD},
+                new int[] { R.id.list_item });
+
+        mList = dialogView.findViewById(R.id.list);
+        mList.setAdapter(mCursorAdapter);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+
         builder.setView(dialogView);
 
         return builder.create();
     }
 
-    private void setUpSearchWordGrid()
-    {
-        //mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
-
-        mAdapter = new SearchWordsViewAdapter(this.getActivity());
-        mAdapter.setOnItemClickListener(this);
-        mRecyclerView.setAdapter(mAdapter);
+    @NonNull
+    @Override
+    public Loader onCreateLoader(int id, @Nullable Bundle bundle) {
+        if (id != LOADER_ID) {
+            return null;
+        }
+        return new CursorLoader(getActivity(),
+                EnglishWordsContentProvider.CONTENT_URI,
+                new String[] { EnglishWordsDatabaseConstants.COL_ID, EnglishWordsDatabaseConstants.COL_WORD }, null, null,
+                null);
     }
 
     @Override
-    public void onClick(View view, String word)
+    public void onLoadFinished(@NonNull Loader loader, Object o)
     {
-        showResults("b");
-        //getDialog().dismiss();
-        if (mCallback != null)
+        if (o instanceof Cursor)
         {
-            mCallback.onSearchWordClicked(word);
+            Cursor cursor = (Cursor)o;
+            mCursorAdapter.swapCursor(cursor);
         }
     }
 
-    private void showResults(String query) {
-
-        /*
-        Cursor cursor = getActivity().managedQuery(EnglishWordsContentProvider.CONTENT_URI, null, null,
-                new String[] {query}, null);
-
-        if (cursor == null) {
-            // There are no results
-            //mTextView.setText(getString(R.string.no_results, new Object[] {query}));
-        } else {
-            // Display the number of results
-            int count = cursor.getCount();
-            String countString = getResources().getQuantityString(R.plurals.search_results,
-                    count, new Object[] {count, query});
-            //mTextView.setText(countString);
-
-            // Specify the columns we want to display in the result
-            String[] from = new String[] {
-                    EnglishWordsDatabase.COL_WORD
-            };
-
-            // Specify the corresponding layout elements where we want the columns to go
-            int[] to = new int[] { R.id.word,
-                    R.id.definition };
-
-            // Create a simple cursor adapter for the definitions and apply them to the ListView
-            SimpleCursorAdapter words = new SimpleCursorAdapter(this,
-                    R.layout.result, cursor, from, to);
-            mListView.setAdapter(words);
-
-            // Define the on-click listener for the list items
-            mListView.setOnItemClickListener(new OnItemClickListener() {
-
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    // Build the Intent used to open WordActivity with a specific word Uri
-                    Intent wordIntent = new Intent(getApplicationContext(), WordActivity.class);
-                    Uri data = Uri.withAppendedPath(DictionaryProvider.CONTENT_URI,
-                            String.valueOf(id));
-                    wordIntent.setData(data);
-                    startActivity(wordIntent);
-                }
-            });
-        }
-        */
+    @Override
+    public void onLoaderReset(@NonNull Loader loader)
+    {
+        mCursorAdapter.swapCursor(null);
     }
 }
