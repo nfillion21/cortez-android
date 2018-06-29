@@ -106,15 +106,15 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
             @Override
             public void afterTextChanged(Editable editable)
             {
-                // database change.
-                Log.i("database change", "database change");
-
-                //Cursor cursor = getActivity().managedQuery(EnglishWordsContentProvider.CONTENT_URI, null, null,
-                        //new String[] {editable.toString()}, null);
 
                 String query = editable.toString();
-                Bundle queryBundle = new Bundle();
-                queryBundle.putString("query", query);
+
+                Bundle queryBundle = null;
+                if (!query.isEmpty())
+                {
+                    queryBundle = new Bundle();
+                    queryBundle.putString("query", query);
+                }
                 getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, queryBundle, SearchWordDialogFragment.this);
             }
         });
@@ -142,21 +142,21 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
     @Override
     public Loader onCreateLoader(int id, @Nullable Bundle bundle)
     {
-        if (id != LOADER_ID)
+        if (id == LOADER_ID)
         {
-            return null;
+            String query = null;
+            if (bundle != null)
+            {
+                query = bundle.getString("query");
+            }
+
+            return new CursorLoader(getActivity(),
+                    EnglishWordsContentProvider.CONTENT_URI,
+                    new String[] { EnglishWordsDatabaseConstants.COL_ID, EnglishWordsDatabaseConstants.COL_WORD }, null, new String[]{query},
+                    null);
         }
 
-        String query = null;
-        if (bundle != null)
-        {
-            query = bundle.getString("query");
-        }
-
-        return new CursorLoader(getActivity(),
-                EnglishWordsContentProvider.CONTENT_URI,
-                new String[] { EnglishWordsDatabaseConstants.COL_ID, EnglishWordsDatabaseConstants.COL_WORD }, null, new String[]{query},
-                null);
+        return null;
     }
 
     @Override
