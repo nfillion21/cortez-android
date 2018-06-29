@@ -106,6 +106,11 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
         wordsView.setAdapter(mAdapter);
     }
 
+    public void updateCard(String word, int position)
+    {
+        //TODO implement the card holder
+    }
+
     @Override
     public void onResume()
     {

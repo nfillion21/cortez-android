@@ -16,16 +16,13 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.tezos.core.database.EnglishWordsContentProvider;
 import com.tezos.core.database.EnglishWordsDatabaseConstants;
 import com.tezos.ui.R;
-import com.tezos.ui.adapter.SearchWordsViewAdapter;
 
 /**
  * Created by nfillion on 3/9/18.
@@ -33,6 +30,9 @@ import com.tezos.ui.adapter.SearchWordsViewAdapter;
 
 public class SearchWordDialogFragment extends DialogFragment implements LoaderManager.LoaderCallbacks
 {
+
+    public static final String CARD_POSITION_KEY = "card_position";
+
     private OnSearchWordSelectedListener mCallback;
     private TextInputEditText mSearchWordEditText;
 
@@ -44,12 +44,18 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 
     public interface OnSearchWordSelectedListener
     {
-        void onSearchWordClicked(String word);
+        void onSearchWordClicked(String word, int position);
     }
 
-    public static SearchWordDialogFragment newInstance()
+    public static SearchWordDialogFragment newInstance(int cardPosition)
     {
-        return new SearchWordDialogFragment();
+        SearchWordDialogFragment fragment = new SearchWordDialogFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(CARD_POSITION_KEY, cardPosition);
+
+        fragment.setArguments(bundle);
+        return fragment;
         //Put the theme here
 
         //TODO put here the number
@@ -130,7 +136,9 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
             cursor.moveToPosition(i);
             String item = cursor.getString(cursor.getColumnIndex(EnglishWordsDatabaseConstants.COL_WORD));
 
-            mCallback.onSearchWordClicked(item);
+            //TODO put here the item and position
+            int position = getArguments().getInt(CARD_POSITION_KEY);
+            mCallback.onSearchWordClicked(item, position);
         });
 
         getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);

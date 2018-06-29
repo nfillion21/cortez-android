@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 
 import com.tezos.core.models.CustomTheme;
@@ -51,15 +52,18 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
     @Override
     public void onWordCardNumberClicked(int position)
     {
-        SearchWordDialogFragment searchWordDialogFragment = SearchWordDialogFragment.newInstance();
+        SearchWordDialogFragment searchWordDialogFragment = SearchWordDialogFragment.newInstance(position);
         searchWordDialogFragment.show(getSupportFragmentManager(), "searchWordDialog");
     }
 
     @Override
-    public void onSearchWordClicked(String word)
+    public void onSearchWordClicked(String word, int position)
     {
-        //TODO
-        // go find the RestoreWalletFragment and update the list.
-        // need the position in the parameter.
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.restorewallet_container);
+        if (fragment != null && fragment instanceof RestoreWalletFragment)
+        {
+            RestoreWalletFragment restoreWalletFragment = (RestoreWalletFragment) fragment;
+            restoreWalletFragment.updateCard(word, position);
+        }
     }
 }
