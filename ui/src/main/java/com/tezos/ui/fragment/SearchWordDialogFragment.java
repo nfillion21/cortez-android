@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.tezos.core.database.EnglishWordsProvider;
 import com.tezos.ui.R;
 import com.tezos.ui.adapter.SearchWordsViewAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
@@ -138,14 +137,14 @@ public class SearchWordDialogFragment extends DialogFragment implements SearchWo
 
     private void showResults(String query) {
 
-        Cursor cursor = getActivity().managedQuery(EnglishWordsProvider.CONTENT_URI, null, null,
+        /*
+        Cursor cursor = getActivity().managedQuery(EnglishWordsContentProvider.CONTENT_URI, null, null,
                 new String[] {query}, null);
 
         if (cursor == null) {
             // There are no results
             //mTextView.setText(getString(R.string.no_results, new Object[] {query}));
         } else {
-            /*
             // Display the number of results
             int count = cursor.getCount();
             String countString = getResources().getQuantityString(R.plurals.search_results,
@@ -179,7 +178,7 @@ public class SearchWordDialogFragment extends DialogFragment implements SearchWo
                     startActivity(wordIntent);
                 }
             });
-        */
         }
+        */
     }
 }

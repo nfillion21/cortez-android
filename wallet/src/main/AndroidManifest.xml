@@ -17,9 +17,16 @@
             </intent-filter>
         </activity>
 
-        <!-- Provides search suggestions for words and their definitions. -->
-        <provider android:name="com.tezos.core.database.EnglishWordsProvider"
-            android:authorities="com.tezos.core.database.EnglishWordsProvider" />
+        <activity
+            android:name=".LanguageListActivity"
+            android:theme="@style/PaymentScreens.RestoreWalletActivity"
+            />
+
+        <provider
+            android:name="com.tezos.android.database.EnglishWordsContentProvider"
+            android:authorities="com.tezos.android.database.EnglishWordsProvider"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>
