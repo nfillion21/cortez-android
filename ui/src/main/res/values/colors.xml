@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#19335E</color>
+    <color name="colorPrimaryDark">#19335E</color>
     <!--
     <color name="colorPrimaryDark">#000000</color>
     -->
-    <color name="colorAccent">#424242</color>
+    <color name="colorAccent">#1D2733</color>
 
     <!-- theme colors -->
     <color name="theme_blue_primary">#03a9f4</color>
@@ -29,6 +29,9 @@
     <color name="theme_yellow_text">@color/tz_text</color>
     <color name="theme_yellow_primary_dark">#e6d335</color>
 
+    <color name="theme_tezos_primary">#ffeb3b</color>
+    <color name="theme_tezos_text">@color/tz_text</color>
+    <color name="theme_tezos_primary_dark">#e6d335</color>
 
     <color name="touch_effect">#9ccc</color>
 

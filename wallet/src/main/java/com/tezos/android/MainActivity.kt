@@ -40,7 +40,12 @@ class MainActivity : AppCompatActivity()
                 com.tezos.ui.R.color.theme_yellow_primary_dark,
                 com.tezos.ui.R.color.theme_yellow_text)
 
-        initActionBar(theme3)
+        val tezosTheme = CustomTheme(
+                com.tezos.ui.R.color.theme_tezos_primary,
+                com.tezos.ui.R.color.theme_tezos_primary_dark,
+                com.tezos.ui.R.color.theme_tezos_text)
+
+        initActionBar(tezosTheme)
 
         //Toolbar toolbar = (Toolbar) demoActivity.findViewById(R.id.toolbar);
         //toolbar.setBackgroundColor(ContextCompat.getColor(demoActivity, customTheme.getColorPrimaryId()));
@@ -60,7 +65,7 @@ class MainActivity : AppCompatActivity()
 
         val paymentScreenButton = findViewById<Button>(R.id.paymentScreenButton)
         paymentScreenButton.setOnClickListener {
-            PaymentScreenActivity.start(this, theme3)
+            PaymentScreenActivity.start(this, tezosTheme)
         }
     }
 
