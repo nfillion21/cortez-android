@@ -2,12 +2,11 @@
     package="com.tezos.ui">
 
     <application
-        android:name=".utils.ArchLifecycleApp"
-        >
+        android:name=".utils.ArchLifecycleApp">
 
         <activity
             android:name=".activity.PaymentFormActivity"
-            android:theme="@style/PaymentScreens.NoActionBar"
+            android:theme="@style/PaymentScreens.PaymentFormActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activity.PaymentAccountsActivity"

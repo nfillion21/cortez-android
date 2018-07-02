@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.ApiLevelHelper;
@@ -51,35 +52,24 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_form);
 
-        initToolbar();
-
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+        initToolbar(theme);
 
         if (savedInstanceState == null)
         {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(themeBundle)).commit();
         }
-
-        ImageButton mCloseButton = findViewById(R.id.close_button);
-        mCloseButton.setColorFilter((ContextCompat.getColor(this, theme.getTextColorPrimaryId())));
-        mCloseButton.setOnClickListener(v -> {
-            //requests stop in onDestroy.
-            finish();
-        });
     }
 
-    private void initToolbar()
+    private void initToolbar(CustomTheme theme)
     {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
-        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
-
         toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
-        toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+        //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
 
         Window window = getWindow();
@@ -94,6 +84,16 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
         {
             Log.getStackTraceString(e);
         }
+
+        ImageButton mCloseButton = findViewById(R.id.close_button);
+        mCloseButton.setColorFilter((ContextCompat.getColor(this, theme.getTextColorPrimaryId())));
+        mCloseButton.setOnClickListener(v -> {
+            //requests stop in onDestroy.
+            finish();
+        });
+
+        TextView mTitleBar = findViewById(R.id.barTitle);
+        mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
     }
 
     @Override

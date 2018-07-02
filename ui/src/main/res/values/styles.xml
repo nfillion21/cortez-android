@@ -57,4 +57,19 @@
     <style name="PaymentScreens.TextAppearance.WordItem" parent="TextAppearance.AppCompat.Medium">
         <item name="android:textSize">@dimen/size_word_item</item>
     </style>
+
+    <style name="PaymentScreens.PaymentAccountsActivity">
+    </style>
+
+    <style name="PaymentScreens.AddAccountActivity">
+    </style>
+
+    <style name="PaymentScreens.CreateWalletActivity">
+    </style>
+
+    <style name="PaymentScreens.RestoreWalletActivity">
+    </style>
+
+    <style name="PaymentScreens.PaymentFormActivity">
+    </style>
 </resources>

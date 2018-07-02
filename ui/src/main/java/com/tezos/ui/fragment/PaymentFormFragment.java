@@ -69,12 +69,17 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     {
         super.initContentViews(view);
 
+        Bundle args = getArguments();
+        Bundle themeBundle = args.getBundle(CustomTheme.TAG);
+        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
         mSrcButton = view.findViewById(R.id.transfer_src_button);
-        mSrcButton.setOnClickListener(v -> PaymentAccountsActivity.start(getActivity(), null, PaymentAccountsActivity.Selection.SelectionSource));
+        mSrcButton.setOnClickListener(v ->
+                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.Selection.SelectionSource));
 
         mDstButton = view.findViewById(R.id.transfer_dst_button);
         mDstButton.setOnClickListener(v ->
-                PaymentAccountsActivity.start(getActivity(), null, PaymentAccountsActivity.Selection.SelectionDestination)
+                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.Selection.SelectionDestination)
         );
 
         mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled);
@@ -88,7 +93,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         mCardInfoLayout.setVisibility(View.VISIBLE);
 
         //TODO handle the arguments
-        Bundle args = getArguments();
         //final PaymentPageRequest paymentPageRequest = PaymentPageRequest.fromBundle(args.getBundle(PaymentPageRequest.TAG));
 
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault());

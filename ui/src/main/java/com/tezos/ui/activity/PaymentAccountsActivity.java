@@ -8,7 +8,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Window;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
@@ -23,6 +29,8 @@ import com.tezos.ui.utils.ConfirmCredentialHelper;
 public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener, IConfirmCredentialHandler
 {
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
+
+    private TextView mBarTitle;
 
     public static void start(Activity activity, CustomTheme theme, Selection selection)
     {
@@ -47,11 +55,6 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     static Intent getStartIntent(Context context, CustomTheme theme, Selection selection)
     {
         Intent starter = new Intent(context, PaymentAccountsActivity.class);
-        if (theme == null)
-        {
-            theme = new CustomTheme(R.color.tz_primary,R.color.tz_primary_dark,R.color.tz_light);
-        }
-
         starter.putExtra(CustomTheme.TAG, theme.toBundle());
         starter.putExtra(SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
 
@@ -71,8 +74,7 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
 
         setContentView(R.layout.activity_payment_accounts);
 
-        Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
-        CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
+        initToolbar();
 
         if (savedInstanceState == null)
         {
@@ -81,6 +83,43 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
 
         //useful when this activity is gonna be called with makeTransition
         //supportPostponeEnterTransition();
+    }
+
+
+    private void initToolbar()
+    {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
+        //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+
+        Window window = getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(this,
+                theme.getColorPrimaryDarkId()));
+        try
+        {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+        catch (Exception e)
+        {
+            Log.getStackTraceString(e);
+        }
+
+        ImageButton mCloseButton = findViewById(R.id.close_button);
+        mCloseButton.setColorFilter((ContextCompat.getColor(this, theme.getTextColorPrimaryId())));
+        mCloseButton.setOnClickListener(v -> {
+            //requests stop in onDestroy.
+            finish();
+        });
+
+        TextView mTitleBar = findViewById(R.id.barTitle);
+        mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+        //mTitleBar.se
     }
 
     private void attachAccountGridFragment()

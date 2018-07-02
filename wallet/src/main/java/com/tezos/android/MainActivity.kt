@@ -6,6 +6,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.widget.Button
+import android.widget.TextView
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.core.utils.SeedManager
@@ -34,7 +35,12 @@ class MainActivity : AppCompatActivity()
                 com.tezos.ui.R.color.theme_blue_primary_dark,
                 com.tezos.ui.R.color.theme_blue_text)
 
-        initActionBar(theme2)
+        val theme3 = CustomTheme(
+                com.tezos.ui.R.color.theme_yellow_primary,
+                com.tezos.ui.R.color.theme_yellow_primary_dark,
+                com.tezos.ui.R.color.theme_yellow_text)
+
+        initActionBar(theme3)
 
         //Toolbar toolbar = (Toolbar) demoActivity.findViewById(R.id.toolbar);
         //toolbar.setBackgroundColor(ContextCompat.getColor(demoActivity, customTheme.getColorPrimaryId()));
@@ -54,11 +60,11 @@ class MainActivity : AppCompatActivity()
 
         val paymentScreenButton = findViewById<Button>(R.id.paymentScreenButton)
         paymentScreenButton.setOnClickListener {
-            PaymentScreenActivity.start(this, theme2)
+            PaymentScreenActivity.start(this, theme3)
         }
     }
 
-    fun initActionBar(theme:CustomTheme) {
+    private fun initActionBar(theme:CustomTheme) {
 
         if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP)) {
 
@@ -80,5 +86,8 @@ class MainActivity : AppCompatActivity()
         } catch (e:Exception) {
             }
         supportActionBar?.setDisplayShowTitleEnabled(false)
+
+        val titleBar = findViewById<TextView>(R.id.barTitle)
+        titleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
 }

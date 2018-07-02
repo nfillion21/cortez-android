@@ -1,9 +1,11 @@
 <resources>
+    <!--
     <style name="PaymentScreens" parent="PaymentScreens.Base">
         <item name="android:spinnerStyle">@style/Base.Widget.AppCompat.Spinner.Underlined</item>
     </style>
+    -->
 
-    <style name="PaymentScreens.PaymentAccountsActivity">
+    <style name="PaymentScreens.PaymentAccountsActivity" parent="PaymentScreens.NoActionBar">
         <item name="android:windowBackground">@color/tz_blank</item>
     </style>
 
@@ -19,7 +21,7 @@
         <item name="android:windowBackground">@color/tz_light</item>
     </style>
 
-    <style name="PaymentScreens.PaymentFormActivity">
+    <style name="PaymentScreens.PaymentFormActivity" parent="PaymentScreens.NoActionBar">
         <item name="android:windowBackground">@color/tz_light</item>
     </style>
 </resources>
