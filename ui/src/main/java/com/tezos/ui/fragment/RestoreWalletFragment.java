@@ -2,15 +2,22 @@ package com.tezos.ui.fragment;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.tezos.core.models.CustomTheme;
@@ -37,6 +44,9 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
     private MnemonicWordsViewAdapter mAdapter;
     private RecyclerView mRecyclerView;
+
+    private Button mValidateMnemonicsButton;
+    private FrameLayout mValidateMnemonicsButtonLayout;
 
     public interface OnWordSelectedListener
     {
@@ -87,7 +97,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
                              Bundle savedInstanceState)
     {
         return inflater.inflate(R.layout.fragment_restore_wallet, container, false);
-
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -95,6 +104,13 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
+
+        mValidateMnemonicsButton = view.findViewById(R.id.validate_mnemonics_button);
+        mValidateMnemonicsButtonLayout = view.findViewById(R.id.validate_mnemonics_button_layout);
+        mValidateMnemonicsButtonLayout.setOnClickListener(v ->
+        {
+            // handle click
+        });
 
         mRecyclerView = view.findViewById(R.id.words);
         setUpWordGrid(mRecyclerView);
@@ -106,6 +122,11 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             {
                 mAdapter.updateWords(words);
             }
+
+            if (isMnemonicsValid(words))
+            {
+                validateMnemonicsButton(true);
+            }
         }
         else
         {
@@ -115,7 +136,44 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
                 words.add(null);
             }
             mAdapter.updateWords(words);
+            validateMnemonicsButton(false);
         }
+    }
+
+    protected void validateMnemonicsButton(boolean validate) {
+
+        if (validate) {
+
+            final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
+            CustomTheme theme = CustomTheme.fromBundle(customThemeBundle);
+
+            mValidateMnemonicsButton.setTextColor(ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
+            mValidateMnemonicsButtonLayout.setEnabled(true);
+            mValidateMnemonicsButtonLayout.setBackground(makeSelector(theme));
+
+            Drawable[] drawables = mValidateMnemonicsButton.getCompoundDrawables();
+            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
+
+        } else {
+
+            mValidateMnemonicsButton.setTextColor(ContextCompat.getColor(getActivity(), android.R.color.white));
+            mValidateMnemonicsButtonLayout.setEnabled(false);
+            CustomTheme greyTheme = new CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey);
+            mValidateMnemonicsButtonLayout.setBackground(makeSelector(greyTheme));
+
+            Drawable[] drawables = mValidateMnemonicsButton.getCompoundDrawables();
+            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), android.R.color.white));
+        }
+    }
+
+    private StateListDrawable makeSelector(CustomTheme theme)
+    {
+        StateListDrawable res = new StateListDrawable();
+        res.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(ContextCompat.getColor(getActivity(), theme.getColorPrimaryDarkId())));
+        res.addState(new int[]{}, new ColorDrawable(ContextCompat.getColor(getActivity(), theme.getColorPrimaryId())));
+        return res;
     }
 
     private void setUpWordGrid(final RecyclerView wordsView)
@@ -137,17 +195,15 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
         if (mCallback != null)
         {
-           // mCallback.onWordCardNumberClicked(++position);
-            isMnemonicsValid(mAdapter.getWords());
+            validateMnemonicsButton(isMnemonicsValid(mAdapter.getWords()));
         }
-        // and then click on the next word
     }
 
     private boolean isMnemonicsValid(List<String> words)
     {
         boolean isValid;
 
-        if (words.contains(null))
+        if (words == null || words.contains(null))
         {
             isValid = false;
         }

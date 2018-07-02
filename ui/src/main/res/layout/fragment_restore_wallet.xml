@@ -13,6 +13,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/words"
         android:layout_width="match_parent"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:padding="@dimen/spacing_nano"
         android:clipToPadding="false"
@@ -21,5 +22,45 @@
         app:layoutManager="android.support.v7.widget.GridLayoutManager"
         android:transitionGroup="false"
         app:spanCount="2" tools:ignore="UnusedAttribute" />
+
+    <RelativeLayout
+        android:layout_weight="0"
+        android:layout_width="match_parent"
+        android:layout_margin="@dimen/spacing_double"
+        android:layout_height="?android:attr/actionBarSize">
+
+        <FrameLayout
+            android:id="@+id/validate_mnemonics_button_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            style="@style/PaymentScreens.Button"
+            android:enabled="false"
+            android:layout_centerInParent="true"
+            android:visibility="visible"
+            >
+
+            <Button
+                android:id="@+id/validate_mnemonics_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/restore_wallet"
+
+                android:drawableLeft="@drawable/ic_lock_black"
+                android:drawableStart="@drawable/ic_lock_black"
+                android:drawableTint="@color/tz_light"
+                android:drawablePadding="@dimen/spacing_normal"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                android:layout_gravity="center"
+                android:enabled="false"
+
+                android:background="@null"
+                android:clickable="false"
+                android:focusable="false"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                />
+
+        </FrameLayout>
+    </RelativeLayout>
 
 </LinearLayout>
