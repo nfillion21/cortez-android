@@ -67,39 +67,22 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
 
-        if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP))
-        {
-            Window window = getWindow();
-            window.setStatusBarColor(ContextCompat.getColor(this,
-                    theme.getColorPrimaryDarkId()));
-        }
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+
+
+        Window window = getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(this,
+                theme.getColorPrimaryDarkId()));
         try
         {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
         catch (Exception e)
         {
             Log.getStackTraceString(e);
         }
-
-        //Window window = getWindow();
-        //window.setStatusBarColor(ContextCompat.getColor(this,
-                //theme.getColorPrimaryDarkId()));
-
-
-        //mToolbarBack = (ImageButton) findViewById(R.id.back);
-        //mToolbarBack.setColorFilter((ContextCompat.getColor(this,
-                //getCustomTheme().getTextColorPrimaryId())));
-
-        //mToolbarBack.setOnClickListener(mOnClickListener);
-//        TextView titleView = (TextView) findViewById(R.id.payment_product_title);
-
-//        titleView.setText(paymentProduct.getPaymentProductDescription());
-//        titleView.setTextColor(ContextCompat.getColor(this,
-//                getCustomTheme().getTextColorPrimaryId()));
-//
-//        titleView.setBackgroundColor(ContextCompat.getColor(this,
-//                getCustomTheme().getColorPrimaryId()));
     }
 
     @Override

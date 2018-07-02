@@ -37,7 +37,7 @@
                 tools:targetApi="lollipop">
 
                 <TextView android:id="@+id/barTitle"
-                    android:text="@string/select_source"
+                    android:text="@string/transfer_title"
 
                     android:paddingStart="@dimen/spacing_normal"
                     android:paddingLeft="@dimen/spacing_normal"
