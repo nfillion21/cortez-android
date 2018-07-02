@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity()
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
 
 
-        toolbar.title = getString(R.string.app_name)
+        //toolbar.title = getString(R.string.app_name)
         toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
         toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
 
@@ -79,6 +79,6 @@ class MainActivity : AppCompatActivity()
             supportActionBar?.setDisplayHomeAsUpEnabled(false)
         } catch (e:Exception) {
             }
-        supportActionBar?.setDisplayShowTitleEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
     }
 }
