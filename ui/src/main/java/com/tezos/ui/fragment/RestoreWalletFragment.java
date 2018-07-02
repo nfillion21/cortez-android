@@ -65,8 +65,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        //setRetainInstance(true);
-
     }
 
     @Override
