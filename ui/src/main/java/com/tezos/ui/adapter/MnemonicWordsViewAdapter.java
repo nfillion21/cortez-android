@@ -39,12 +39,6 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
     {
         mLayoutInflater = LayoutInflater.from(activity.getApplicationContext());
         mActivity = activity;
-
-        mWords = new ArrayList<>();
-        for (int i = 0; i < 24; i++)
-        {
-            mWords.add("hello");
-        }
     }
 
     /**
@@ -69,6 +63,28 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
     {
         // always 24 words.
         return mWords.size();
+    }
+
+    public List<String> getWords()
+    {
+        return mWords;
+    }
+
+    public void updateWords(List<String> words)
+    {
+        if (mWords == null)
+        {
+            mWords = new ArrayList<>(24);
+        }
+        mWords.clear();
+        mWords.addAll(words);
+        notifyDataSetChanged();
+    }
+
+    public void updateWord(String word, int position)
+    {
+        mWords.set(position, word);
+        notifyDataSetChanged();
     }
 
     public String getItem(int position)
@@ -111,14 +127,14 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
                 WordItemViewHolder wordItemHolder = (WordItemViewHolder) holder;
 
                 String wordItem = getItem(position);
-                //wordItemHolder.wordItem.setText(wordItem);
+                wordItemHolder.wordItem.setText(wordItem);
 
-                int pos = ++position;
-                String wordNumber = String.format(mActivity.getString(R.string.word_info), pos);
+                int posCardView = position;
+                String wordNumber = String.format(mActivity.getString(R.string.word_info), ++posCardView);
                 wordItemHolder.wordNumberItem.setText(wordNumber);
 
                 holder.itemView.setOnClickListener(v ->
-                        mOnItemClickListener.onClick(v, pos)
+                        mOnItemClickListener.onClick(v, position)
                 );
             }
             break;

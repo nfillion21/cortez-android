@@ -17,8 +17,13 @@ import com.tezos.ui.R;
 import com.tezos.ui.adapter.MnemonicWordsViewAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RestoreWalletFragment extends Fragment implements MnemonicWordsViewAdapter.OnItemClickListener
 {
+    private static final String WORDS_KEY = "words_key";
+
     private OnWordSelectedListener mCallback;
 
     private MnemonicWordsViewAdapter mAdapter;
@@ -61,6 +66,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     {
         super.onCreate(savedInstanceState);
         //setRetainInstance(true);
+
     }
 
     @Override
@@ -74,6 +80,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
                              Bundle savedInstanceState)
     {
         return inflater.inflate(R.layout.fragment_restore_wallet, container, false);
+
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -85,12 +92,22 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
         mRecyclerView = view.findViewById(R.id.words);
         setUpWordGrid(mRecyclerView);
 
-        if (savedInstanceState == null)
+        if (savedInstanceState != null)
         {
-            //launchRequest();
+            ArrayList<String> words = savedInstanceState.getStringArrayList(WORDS_KEY);
+            if (words != null)
+            {
+                mAdapter.updateWords(words);
+            }
         }
         else
         {
+            List<String> words = new ArrayList<>(24);
+            for (int i = 0; i < 24; i++)
+            {
+                words.add(null);
+            }
+            mAdapter.updateWords(words);
         }
     }
 
@@ -109,8 +126,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
     public void updateCard(String word, int position)
     {
-        //TODO implement the card holder
-        Toast.makeText(getActivity(), word + " " + position, Toast.LENGTH_LONG).show();
+        mAdapter.updateWord(word, position);
 
         if (mCallback != null)
         {
@@ -139,5 +155,11 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     public void onSaveInstanceState(Bundle outState)
     {
         super.onSaveInstanceState(outState);
+
+        List<String> words = mAdapter.getWords();
+        if (words != null)
+        {
+            outState.putStringArrayList(WORDS_KEY, (ArrayList<String>) mAdapter.getWords());
+        }
     }
 }
