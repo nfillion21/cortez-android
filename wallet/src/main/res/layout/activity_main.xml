@@ -7,6 +7,33 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/TezosTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/TezosTheme.PopupOverlay">
+
+            <!--
+            <ProgressBar android:id="@+id/progress"
+                android:layout_width="@dimen/min_height_touch_target"
+                android:layout_height="@dimen/min_height_touch_target"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:layout_marginRight="@dimen/spacing_normal"
+                android:visibility="gone"
+                android:indeterminateOnly="true" />
+            -->
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
     <Button
         android:id="@+id/restoreWalletButton"
         android:layout_width="wrap_content"

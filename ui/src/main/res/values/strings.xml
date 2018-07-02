@@ -4,8 +4,6 @@
     <string name="pay">Pay %1$s</string>
     <string name="select_source">Select source transfer</string>
     <string name="select_destination">Select destination transfer</string>
-    <string name="card_owner">Card holder</string>
-    <string name="card_owner_placeholder" translatable="false">Martin Dupont</string>
     <string name="card_expiration">Expiry date</string>
     <string name="amount_default" translatable="false">0.1</string>
     <string name="amount">Transfer amount (min 0.1 ꜩ)</string>

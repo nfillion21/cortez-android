@@ -4,7 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.view.Window
+import android.support.v7.widget.Toolbar
 import android.widget.Button
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
@@ -34,11 +34,7 @@ class MainActivity : AppCompatActivity()
                 com.tezos.ui.R.color.theme_blue_primary_dark,
                 com.tezos.ui.R.color.theme_blue_text)
 
-        if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP)) {
-
-            val window = getWindow()
-            window.statusBarColor = ContextCompat.getColor(this, theme2.colorPrimaryDarkId)
-        }
+        initActionBar(theme2)
 
         //Toolbar toolbar = (Toolbar) demoActivity.findViewById(R.id.toolbar);
         //toolbar.setBackgroundColor(ContextCompat.getColor(demoActivity, customTheme.getColorPrimaryId()));
@@ -48,17 +44,41 @@ class MainActivity : AppCompatActivity()
 
         val restoreWalletButton = findViewById<Button>(R.id.restoreWalletButton)
         restoreWalletButton.setOnClickListener {
-            RestoreWalletActivity.start(this, theme)
+            RestoreWalletActivity.start(this, theme2)
         }
 
         val createWalletButton = findViewById<Button>(R.id.createWalletButton)
         createWalletButton.setOnClickListener {
-            CreateWalletActivity.start(this, theme)
+            CreateWalletActivity.start(this, theme2)
         }
 
         val paymentScreenButton = findViewById<Button>(R.id.paymentScreenButton)
         paymentScreenButton.setOnClickListener {
-            PaymentScreenActivity.start(this, theme)
+            PaymentScreenActivity.start(this, theme2)
         }
+    }
+
+    fun initActionBar(theme:CustomTheme) {
+
+        if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP)) {
+
+            val window = window
+            window.statusBarColor = ContextCompat.getColor(this, theme.colorPrimaryDarkId)
+        }
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+
+
+        toolbar.title = getString(R.string.app_name)
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+
+        setSupportActionBar(toolbar)
+
+        try {
+            supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        } catch (e:Exception) {
+            }
+        supportActionBar?.setDisplayShowTitleEnabled(true)
     }
 }

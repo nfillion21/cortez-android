@@ -7,6 +7,7 @@
 
         <activity
             android:name=".activity.PaymentFormActivity"
+            android:theme="@style/PaymentScreens.NoActionBar"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activity.PaymentAccountsActivity"

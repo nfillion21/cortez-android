@@ -18,20 +18,6 @@ public abstract class PaymentScreenActivity extends AppCompatActivity
 {
     public static void start(Activity activity, CustomTheme theme)
     {
-        //Intent paymentFormIntent = PaymentFormActivity.getStartIntent(activity, themeBundle);
-        //ActivityCompat.startActivity(activity, paymentFormIntent, null);
         PaymentFormActivity.start(activity, theme);
-    }
-
-    private static PaymentPageRequest buildPageRequest(String orderId)
-    {
-        PaymentPageRequest paymentPageRequest = new PaymentPageRequest();
-
-        paymentPageRequest.setOrderId(orderId);
-
-        String amount = "4.5";
-        paymentPageRequest.setAmount(Float.parseFloat(amount));
-
-        return paymentPageRequest;
     }
 }

@@ -3,6 +3,7 @@
 
     <style name="PaymentScreens" parent="PaymentScreens.Base" />
     <!-- Base application theme. -->
+
     <style name="PaymentScreens.Base" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/tz_primary</item>
@@ -13,6 +14,16 @@
         <item name="android:textColorPrimaryInverse">@color/tz_light</item>
         <item name="android:statusBarColor" tools:targetApi="lollipop">@color/tz_primary_dark</item>
     </style>
+
+    <style name="PaymentScreens.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="PaymentScreens.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="PaymentScreens.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
 
     <style name="PaymentScreens.Button" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/selector_button</item>

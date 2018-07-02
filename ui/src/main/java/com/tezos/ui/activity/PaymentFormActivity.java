@@ -8,9 +8,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Window;
 
 import com.tezos.core.models.CustomTheme;
+import com.tezos.core.utils.ApiLevelHelper;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.AbstractPaymentFormFragment;
 import com.tezos.ui.interfaces.IConfirmCredentialHandler;
@@ -44,13 +49,57 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_form);
 
+        initToolbar();
+
         if (savedInstanceState == null)
         {
-            Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
-
+            Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(customThemeBundle)).commit();
+                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(themeBundle)).commit();
         }
+    }
+
+    private void initToolbar()
+    {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
+        if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP))
+        {
+            Window window = getWindow();
+            window.setStatusBarColor(ContextCompat.getColor(this,
+                    theme.getColorPrimaryDarkId()));
+        }
+        try
+        {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        }
+        catch (Exception e)
+        {
+            Log.getStackTraceString(e);
+        }
+
+        //Window window = getWindow();
+        //window.setStatusBarColor(ContextCompat.getColor(this,
+                //theme.getColorPrimaryDarkId()));
+
+
+        //mToolbarBack = (ImageButton) findViewById(R.id.back);
+        //mToolbarBack.setColorFilter((ContextCompat.getColor(this,
+                //getCustomTheme().getTextColorPrimaryId())));
+
+        //mToolbarBack.setOnClickListener(mOnClickListener);
+//        TextView titleView = (TextView) findViewById(R.id.payment_product_title);
+
+//        titleView.setText(paymentProduct.getPaymentProductDescription());
+//        titleView.setTextColor(ContextCompat.getColor(this,
+//                getCustomTheme().getTextColorPrimaryId()));
+//
+//        titleView.setBackgroundColor(ContextCompat.getColor(this,
+//                getCustomTheme().getColorPrimaryId()));
     }
 
     @Override
