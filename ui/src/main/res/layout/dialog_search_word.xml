@@ -32,7 +32,7 @@
             android:maxLength="5"
             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             android:maxLines="1"
-            android:inputType="text|textEmailAddress|textVisiblePassword|textNoSuggestions"
+            android:inputType="text|textNoSuggestions"
             android:textSize="@dimen/size_edit_text" />
     </android.support.design.widget.TextInputLayout>
 

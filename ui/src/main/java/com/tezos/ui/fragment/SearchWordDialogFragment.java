@@ -138,7 +138,7 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
             int position = getArguments().getInt(CARD_POSITION_KEY);
             mCallback.onSearchWordClicked(item, position);
 
-            getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, SearchWordDialogFragment.this);
+            //getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, SearchWordDialogFragment.this);
             getDialog().dismiss();
         });
 
@@ -203,5 +203,13 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
     public void onLoaderReset(@NonNull Loader loader)
     {
         mCursorAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+
+        getActivity().getSupportLoaderManager().destroyLoader(LOADER_ID);
     }
 }

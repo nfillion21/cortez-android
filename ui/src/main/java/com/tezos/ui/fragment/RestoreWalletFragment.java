@@ -145,38 +145,49 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
     private boolean isMnemonicsValid(List<String> words)
     {
-        String separatedWords = TextUtils.join(" ", words);
+        boolean isValid;
 
-        boolean isValid = true;
+        if (words.contains(null))
+        {
+            isValid = false;
+        }
+        else
+        {
+            String separatedWords = TextUtils.join(" ", words);
 
-        try
-        {
-            MnemonicValidator.ofWordList(English.INSTANCE).validate(separatedWords);
+            boolean isCatched = false;
+
+            try
+            {
+                MnemonicValidator.ofWordList(English.INSTANCE).validate(separatedWords);
+            }
+            catch (InvalidChecksumException e)
+            {
+                e.printStackTrace();
+                isCatched = true;
+            }
+            catch (InvalidWordCountException e)
+            {
+                e.printStackTrace();
+                isCatched = true;
+            }
+            catch (WordNotFoundException e)
+            {
+                e.printStackTrace();
+                isCatched = true;
+            }
+            catch (UnexpectedWhiteSpaceException e)
+            {
+                e.printStackTrace();
+                isCatched = true;
+            }
+            finally
+            {
+                isValid = !isCatched;
+            }
         }
-        catch (InvalidChecksumException e)
-        {
-            e.printStackTrace();
-            isValid = false;
-        }
-        catch (InvalidWordCountException e)
-        {
-            e.printStackTrace();
-            isValid = false;
-        }
-        catch (WordNotFoundException e)
-        {
-            e.printStackTrace();
-            isValid = false;
-        }
-        catch (UnexpectedWhiteSpaceException e)
-        {
-            e.printStackTrace();
-            isValid = false;
-        }
-        finally
-        {
-            return isValid;
-        }
+
+        return isValid;
     }
 
     @Override
