@@ -7,18 +7,27 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.tezos.core.models.CustomTheme;
+import com.tezos.core.utils.TezosUtils;
 import com.tezos.ui.R;
 import com.tezos.ui.adapter.MnemonicWordsViewAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.github.novacrypto.bip39.MnemonicValidator;
+import io.github.novacrypto.bip39.Validation.InvalidChecksumException;
+import io.github.novacrypto.bip39.Validation.InvalidWordCountException;
+import io.github.novacrypto.bip39.Validation.UnexpectedWhiteSpaceException;
+import io.github.novacrypto.bip39.Validation.WordNotFoundException;
+import io.github.novacrypto.bip39.wordlists.English;
 
 public class RestoreWalletFragment extends Fragment implements MnemonicWordsViewAdapter.OnItemClickListener
 {
@@ -129,14 +138,50 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
         if (mCallback != null)
         {
            // mCallback.onWordCardNumberClicked(++position);
+            isMnemonicsValid(mAdapter.getWords());
         }
         // and then click on the next word
+    }
+
+    private boolean isMnemonicsValid(List<String> words)
+    {
+        String separatedWords = TextUtils.join(" ", words);
+
+        boolean isValid = true;
+
+        try
+        {
+            MnemonicValidator.ofWordList(English.INSTANCE).validate(separatedWords);
+        }
+        catch (InvalidChecksumException e)
+        {
+            e.printStackTrace();
+            isValid = false;
+        }
+        catch (InvalidWordCountException e)
+        {
+            e.printStackTrace();
+            isValid = false;
+        }
+        catch (WordNotFoundException e)
+        {
+            e.printStackTrace();
+            isValid = false;
+        }
+        catch (UnexpectedWhiteSpaceException e)
+        {
+            e.printStackTrace();
+            isValid = false;
+        }
+        finally
+        {
+            return isValid;
+        }
     }
 
     @Override
     public void onResume()
     {
-        //getActivity().supportStartPostponedEnterTransition();
         super.onResume();
     }
 
