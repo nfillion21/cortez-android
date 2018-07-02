@@ -1,16 +1,16 @@
 package com.tezos.ui.activity;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import com.tezos.core.models.CustomTheme;
-import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.AbstractPaymentFormFragment;
 import com.tezos.ui.interfaces.IConfirmCredentialHandler;
@@ -23,40 +23,29 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
 {
     public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
 
-    private AlertDialog mDialog;
-
-    public static Intent getStartIntent(Context context, Bundle paymentPageRequestBundle, Bundle themeBundle)
+    public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
         Intent starter = new Intent(context, PaymentFormActivity.class);
-
-        starter.putExtra(PaymentPageRequest.TAG, paymentPageRequestBundle);
-
         starter.putExtra(CustomTheme.TAG, themeBundle);
 
         return starter;
+    }
+
+    public static void start(Activity activity, CustomTheme theme)
+    {
+        Intent starter = getStartIntent(activity, theme.toBundle());
+        //TODO remove this request code
+        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_payment_form);
-
-        /*
-        CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
-        mProgressBar = (ProgressBar) findViewById(R.id.progress);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mProgressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(this, customTheme.getTextColorPrimaryId())));
-
-        } else {
-            mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, customTheme.getTextColorPrimaryId()), PorterDuff.Mode.SRC_IN);
-        }
-        */
 
         if (savedInstanceState == null)
         {
-            Bundle paymentPageRequestBundle = getIntent().getBundleExtra(PaymentPageRequest.TAG);
             Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
 
             getSupportFragmentManager().beginTransaction()
@@ -84,7 +73,8 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
         else
         {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.form_fragment_container);
-            if (fragment != null) {
+            if (fragment != null)
+            {
                 fragment.onActivityResult(requestCode, resultCode, data);
             }
         }
@@ -96,8 +86,8 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
         super.onPause();
     }
 
-    private void setLoadingMode(boolean loadingMode, boolean delay) {
-
+    private void setLoadingMode(boolean loadingMode, boolean delay)
+    {
         /*
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.form_fragment_container);
         if (fragment != null) {
@@ -107,16 +97,6 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
         }
         */
     }
-
-    /*
-    public CustomTheme getCustomTheme() {
-        return customTheme;
-    }
-
-    public void setCustomTheme(CustomTheme customTheme) {
-        this.customTheme = customTheme;
-    }
-    */
 
     @Override
     public void launchConfirmCredential()
