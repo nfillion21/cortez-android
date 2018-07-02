@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
@@ -109,6 +110,13 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     public void updateCard(String word, int position)
     {
         //TODO implement the card holder
+        Toast.makeText(getActivity(), word + " " + position, Toast.LENGTH_LONG).show();
+
+        if (mCallback != null)
+        {
+           // mCallback.onWordCardNumberClicked(++position);
+        }
+        // and then click on the next word
     }
 
     @Override

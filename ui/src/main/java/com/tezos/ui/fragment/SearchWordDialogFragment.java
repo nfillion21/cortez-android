@@ -18,6 +18,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ListView;
 
 import com.tezos.core.database.EnglishWordsContentProvider;
@@ -88,10 +90,6 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
-        if (savedInstanceState == null)
-        {
-        }
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
@@ -139,13 +137,34 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
             //TODO put here the item and position
             int position = getArguments().getInt(CARD_POSITION_KEY);
             mCallback.onSearchWordClicked(item, position);
+
+            getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, SearchWordDialogFragment.this);
+            getDialog().dismiss();
         });
 
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        if (savedInstanceState == null)
+        {
+            getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        }
 
         builder.setView(dialogView);
 
         return builder.create();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
+
+        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     @NonNull
