@@ -30,8 +30,6 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
 {
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
 
-    private TextView mBarTitle;
-
     public static void start(Activity activity, CustomTheme theme, Selection selection)
     {
         Intent starter = getStartIntent(activity, theme, selection);
@@ -80,9 +78,6 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
         {
             attachAccountGridFragment();
         }
-
-        //useful when this activity is gonna be called with makeTransition
-        //supportPostponeEnterTransition();
     }
 
 
@@ -119,7 +114,17 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
 
         TextView mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
-        //mTitleBar.se
+
+        String selectionString = getIntent().getStringExtra(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
+        Selection selection = Selection.fromStringValue(selectionString);
+        if (selection.equals(PaymentAccountsActivity.Selection.SelectionSource))
+        {
+            mTitleBar.setText(getString(R.string.select_source_title));
+        }
+        else
+        {
+            mTitleBar.setText(getString(R.string.select_destination_title));
+        }
     }
 
     private void attachAccountGridFragment()

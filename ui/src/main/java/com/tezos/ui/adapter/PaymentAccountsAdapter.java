@@ -31,17 +31,19 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     private List<Account> mAccounts;
 
     private OnItemClickListener mOnItemClickListener;
+    private CustomTheme mCustomTheme;
 
     public interface OnItemClickListener
     {
         void onClick(View view, Account paymentProduct);
     }
 
-    public PaymentAccountsAdapter(Activity activity, PaymentAccountsActivity.Selection selection)
+    public PaymentAccountsAdapter(Activity activity, PaymentAccountsActivity.Selection selection, CustomTheme customTheme)
     {
         mActivity = activity;
         mResources = mActivity.getResources();
         mLayoutInflater = LayoutInflater.from(activity.getApplicationContext());
+        mCustomTheme = customTheme;
 
         mAccounts = new ArrayList<>();
         for (int i = 0; i < 5; i++)
@@ -95,12 +97,6 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         // break this dependency
         //PaymentAccountsActivity activity = (PaymentAccountsActivity)mActivity;
 
-        CustomTheme theme = null;
-        if (theme == null)
-        {
-            theme = new CustomTheme(R.color.tz_primary,R.color.tz_primary_dark,R.color.tz_light);
-        }
-
         if (account.getPrivateKeyHash() != null)
         {
             holder.keyIcon.setImageResource(R.drawable.vpn_key_black);
@@ -113,8 +109,8 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         holder.pubKeyHash.setText(account.getPubKeyHash());
 
         holder.title.setText(account.getDescription());
-        holder.title.setTextColor(getColor(theme.getTextColorPrimaryId()));
-        holder.title.setBackgroundColor(getColor(theme.getColorPrimaryId()));
+        holder.title.setTextColor(getColor(mCustomTheme.getTextColorPrimaryId()));
+        holder.title.setBackgroundColor(getColor(mCustomTheme.getColorPrimaryId()));
 
         holder.itemView.setBackgroundColor(getColor(android.R.color.background_light));
         holder.itemView.setOnClickListener(v -> mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition())));

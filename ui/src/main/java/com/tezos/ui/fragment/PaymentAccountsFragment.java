@@ -63,12 +63,12 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         void onCardClicked(com.tezos.core.models.Account account);
     }
 
-    public static PaymentAccountsFragment newInstance(Bundle customTheme, PaymentAccountsActivity.Selection selection)
+    public static PaymentAccountsFragment newInstance(Bundle customThemeBundle, PaymentAccountsActivity.Selection selection)
     {
         PaymentAccountsFragment fragment = new PaymentAccountsFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putBundle(CustomTheme.TAG, customTheme);
+        bundle.putBundle(CustomTheme.TAG, customThemeBundle);
         bundle.putString(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
 
         fragment.setArguments(bundle);
@@ -205,8 +205,10 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
 
         Bundle args = getArguments();
         String selectionString = args.getString(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
+        Bundle customThemeBundle = args.getBundle(CustomTheme.TAG);
+        CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
 
-        mAdapter = new PaymentAccountsAdapter(getActivity(), PaymentAccountsActivity.Selection.fromStringValue(selectionString));
+        mAdapter = new PaymentAccountsAdapter(getActivity(), PaymentAccountsActivity.Selection.fromStringValue(selectionString), customTheme);
 
         mAdapter.setOnItemClickListener(this);
 
