@@ -12,7 +12,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
+import android.widget.ImageButton;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.ApiLevelHelper;
@@ -51,12 +53,21 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
 
         initToolbar();
 
+        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
         if (savedInstanceState == null)
         {
-            Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(themeBundle)).commit();
         }
+
+        ImageButton mCloseButton = findViewById(R.id.close_button);
+        mCloseButton.setColorFilter((ContextCompat.getColor(this, theme.getTextColorPrimaryId())));
+        mCloseButton.setOnClickListener(v -> {
+            //requests stop in onDestroy.
+            finish();
+        });
     }
 
     private void initToolbar()

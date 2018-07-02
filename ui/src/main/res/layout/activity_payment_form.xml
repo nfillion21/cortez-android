@@ -24,15 +24,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
 
-                android:contentInsetLeft="0dp"
-                android:contentInsetStart="0dp"
-                app:contentInsetLeft="0dp"
-                app:contentInsetStart="0dp"
-                android:contentInsetRight="0dp"
-                android:contentInsetEnd="0dp"
-                app:contentInsetRight="0dp"
-                app:contentInsetEnd="0dp"
-
                 app:popupTheme="@style/PaymentScreens.PopupOverlay"
                 tools:targetApi="lollipop">
 
@@ -51,6 +42,18 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical|center_horizontal"
                     tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
+
+                <ImageButton android:id="@+id/close_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+
+                    android:contentDescription="@string/content_description"
+                    android:padding="@dimen/spacing_double"
+                    android:gravity="end"
+                    android:src="@drawable/close_black_24"
+                    android:background="@drawable/selector_subtle"
+                    android:layout_gravity="end|end|center_vertical"
+                    />
 
             </android.support.v7.widget.Toolbar>
 
