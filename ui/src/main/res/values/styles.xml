@@ -34,7 +34,7 @@
         <item name="android:textSize">@dimen/amount_item_text_size</item>
     </style>
 
-    <style name="PaymentScreens.ScanButton" parent="Widget.AppCompat.Button.Borderless">
+    <style name="PaymentScreens.SourceButton" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/selector_scan_button</item>
     </style>
 
@@ -56,6 +56,10 @@
 
     <style name="PaymentScreens.TextAppearance.WordItem" parent="TextAppearance.AppCompat.Medium">
         <item name="android:textSize">@dimen/size_word_item</item>
+    </style>
+
+    <style name="PaymentScreens.RoundedButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/selector_rounded_button</item>
     </style>
 
     <style name="PaymentScreens.PaymentAccountsActivity">

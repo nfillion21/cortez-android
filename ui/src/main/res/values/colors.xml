@@ -47,10 +47,7 @@
     <color name="tz_text">#606060</color>
     <color name="tz_blank">@color/colorAccent</color>
     <color name="tz_background">#F5F5FF</color>
-    <!--
-    <color name="tz_background_dark">#D9DFED</color>
-    -->
-    <color name="tz_background_dark">@color/colorPrimary</color>
+    <color name="tz_background_dark">#8F9EC4</color>
 
     <color name="tz_error">#FFD50000</color>
     <color name="tz_placeholder">#ccc</color>

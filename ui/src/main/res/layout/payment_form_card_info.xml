@@ -62,7 +62,7 @@
         android:id="@+id/transfer_src_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/PaymentScreens.ScanButton"
+        style="@style/PaymentScreens.SourceButton"
         android:drawableLeft="@drawable/vpn_key_black"
         android:drawableStart="@drawable/vpn_key_black"
         android:paddingLeft="@dimen/spacing_double"
@@ -83,7 +83,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 
-        style="@style/PaymentScreens.ScanButton"
+        style="@style/PaymentScreens.SourceButton"
 
         android:drawableLeft="@drawable/redeem_black_24"
         android:drawableStart="@drawable/redeem_black_24"

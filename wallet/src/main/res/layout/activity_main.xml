@@ -50,41 +50,40 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <Button
-        android:id="@+id/restoreWalletButton"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Restore wallet"
-        />
+        android:orientation="vertical"
+        >
 
-    <Button
-        android:id="@+id/createWalletButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create wallet"
-        />
+        <Button
+            android:id="@+id/restoreWalletButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/PaymentScreens.SourceButton"
+            android:text="Restore wallet"
+            android:layout_gravity="center"
+            />
 
-    <Button
-        android:id="@+id/paymentScreenButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Payment screen"
-        />
+        <Button
+            android:id="@+id/createWalletButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/PaymentScreens.SourceButton"
+            android:text="Create wallet"
+            android:gravity="center"
+            />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="orchard roof outside sustain\n
-        depth robot inherit across\n
-        coil hospital gravity guilt\n
-        feel napkin hire tank\n
-        yard mandate theme learn\n
-        hollow gravity permit undo"
+        <Button
+            android:id="@+id/paymentScreenButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/PaymentScreens.RoundedButton"
+            android:text="Payment screen"
+            android:minHeight="200dp"
+            android:minWidth="200dp"
+            />
 
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
 
 </LinearLayout>
