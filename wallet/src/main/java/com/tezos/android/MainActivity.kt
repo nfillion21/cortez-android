@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity()
 
         val createWalletButton = findViewById<Button>(R.id.createWalletButton)
         createWalletButton.setOnClickListener {
-            CreateWalletActivity.start(this, theme2)
+            CreateWalletActivity.start(this, tezosTheme)
         }
 
         val paymentScreenButton = findViewById<Button>(R.id.paymentScreenButton)

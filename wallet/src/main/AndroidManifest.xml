@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/TezosTheme">
         <activity android:name=".MainActivity"
-            android:theme="@style/TezosTheme.NoActionBar">
+            android:theme="@style/TezosTheme.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

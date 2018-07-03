@@ -16,9 +16,9 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
-        <color android:color="@color/tz_blank" />
+        <color android:color="@color/colorAccent" />
     </item>
     <item>
-        <color android:color="@color/tz_primary" />
+        <color android:color="@color/colorPrimary" />
     </item>
 </selector>

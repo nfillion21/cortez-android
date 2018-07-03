@@ -1,0 +1,5 @@
+<resources>
+    <style name="TezosTheme.MainActivity" parent="TezosTheme.NoActionBar">
+        <item name="android:windowBackground">@color/tz_background</item>
+    </style>
+</resources>

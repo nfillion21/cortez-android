@@ -16,9 +16,13 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
@@ -62,7 +66,13 @@ public class CreateWalletActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_create_wallet);
 
+        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+        initToolbar(theme);
+
         mMnemonicsTextview = findViewById(R.id.mnemonics_textview);
+        //mMnemonicsTextview.setTextColor(ContextCompat.getColor(this, theme.getColorPrimaryDarkId()));
+        mMnemonicsTextview.setTextColor(ContextCompat.getColor(this, theme.getColorPrimaryDarkId()));
 
         mBackupCheckbox = findViewById(R.id.backup_checkbox);
 
@@ -73,11 +83,6 @@ public class CreateWalletActivity extends AppCompatActivity
         });
         */
 
-        mBackupCheckbox.setOnCheckedChangeListener((buttonView, isChecked) ->
-        {
-            mBackupChecked  = buttonView.isChecked();
-            validateCreateButton(isCreateButtonValid(), null);
-        });
 
         mCreateButton = findViewById(R.id.create_button);
         mCreateButtonLayout = findViewById(R.id.create_button_layout);
@@ -116,23 +121,9 @@ public class CreateWalletActivity extends AppCompatActivity
                                 .getResourceEntryName(v.getId()));
             }
         });
-        /*
-        CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
-        mProgressBar = (ProgressBar) findViewById(R.id.progress);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mProgressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(this, customTheme.getTextColorPrimaryId())));
-
-        } else {
-            mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, customTheme.getTextColorPrimaryId()), PorterDuff.Mode.SRC_IN);
-        }
-        */
 
         if (savedInstanceState == null)
         {
-            //Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
-
-            //getSupportFragmentManager().beginTransaction()
-            //.replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(paymentPageRequestBundle, customThemeBundle)).commit();
             mMnemonicsString = TezosUtils.generateNovaMnemonics();
             if (mMnemonicsString != null)
             {
@@ -153,8 +144,45 @@ public class CreateWalletActivity extends AppCompatActivity
             mBackupCheckbox.setChecked(mBackupChecked);
         }
 
-        //TODO handle the theme colors thing
         validateCreateButton(isCreateButtonValid(), null);
+
+        mBackupCheckbox.setOnCheckedChangeListener((buttonView, isChecked) ->
+        {
+            mBackupChecked  = buttonView.isChecked();
+            validateCreateButton(isCreateButtonValid(), theme);
+        });
+    }
+
+    private void initToolbar(CustomTheme theme)
+    {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
+        //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+
+        Window window = getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(this,
+                theme.getColorPrimaryDarkId()));
+        try
+        {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+        catch (Exception e)
+        {
+            Log.getStackTraceString(e);
+        }
+
+        ImageButton mCloseButton = findViewById(R.id.close_button);
+        mCloseButton.setColorFilter((ContextCompat.getColor(this, theme.getTextColorPrimaryId())));
+        mCloseButton.setOnClickListener(v -> {
+            //requests stop in onDestroy.
+            finish();
+        });
+
+        TextView mTitleBar = findViewById(R.id.barTitle);
+        mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
     }
 
     protected boolean isCreateButtonValid()
@@ -199,13 +227,6 @@ public class CreateWalletActivity extends AppCompatActivity
     {
         if (validate)
         {
-            if (theme == null)
-            {
-                theme = new CustomTheme(R.color.tz_primary,R.color.tz_primary_dark,R.color.tz_light);
-            }
-            //final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
-            //CustomTheme theme = CustomTheme.fromBundle(customThemeBundle);
-
             mCreateButton.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
             mCreateButtonLayout.setEnabled(true);
             mCreateButtonLayout.setBackground(makeSelector(theme));

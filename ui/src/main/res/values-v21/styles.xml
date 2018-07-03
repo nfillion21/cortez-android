@@ -1,19 +1,13 @@
 <resources>
-    <!--
-    <style name="PaymentScreens" parent="PaymentScreens.Base">
-        <item name="android:spinnerStyle">@style/Base.Widget.AppCompat.Spinner.Underlined</item>
-    </style>
-    -->
-
     <style name="PaymentScreens.PaymentAccountsActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_blank</item>
+        <item name="android:windowBackground">@color/colorAccent</item>
     </style>
 
     <style name="PaymentScreens.AddAccountActivity">
-        <item name="android:windowBackground">@color/tz_blank</item>
+        <item name="android:windowBackground">@color/colorAccent</item>
     </style>
 
-    <style name="PaymentScreens.CreateWalletActivity">
+    <style name="PaymentScreens.CreateWalletActivity" parent="PaymentScreens.NoActionBar">
         <item name="android:windowBackground">@color/tz_background</item>
     </style>
 

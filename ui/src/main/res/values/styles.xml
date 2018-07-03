@@ -6,9 +6,9 @@
 
     <style name="PaymentScreens.Base" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/tz_primary</item>
-        <item name="colorPrimaryDark">@color/tz_primary_dark</item>
-        <item name="colorAccent">@color/tz_accent</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
 
         <item name="android:textColorPrimary">@android:color/black</item>
         <item name="android:textColorPrimaryInverse">@color/tz_light</item>
@@ -51,7 +51,7 @@
     </style>
 
     <style name="PaymentScreens.TextAppearance.Title" parent="TextAppearance.AppCompat.Title">
-        <item name="android:textColor">@color/tz_primary</item>
+        <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
     <style name="PaymentScreens.TextAppearance.WordItem" parent="TextAppearance.AppCompat.Medium">
