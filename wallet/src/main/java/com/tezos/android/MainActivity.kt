@@ -1,8 +1,10 @@
 package com.tezos.android
 
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.widget.Button
@@ -14,6 +16,8 @@ import com.tezos.core.utils.TezosUtils
 import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.activity.PaymentScreenActivity
 import com.tezos.ui.activity.RestoreWalletActivity
+import com.tezos.ui.utils.Utils
+import com.tezos.ui.utils.Utils.makeSelector
 
 class MainActivity : AppCompatActivity()
 {
@@ -94,5 +98,16 @@ class MainActivity : AppCompatActivity()
 
         val titleBar = findViewById<TextView>(R.id.barTitle)
         titleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+    }
+
+    private fun validatePayButton(button:Button, theme:CustomTheme) {
+
+        button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+
+        button.background = Utils.makeSelector(this, theme)
+
+        val drawables = button.compoundDrawables
+        //val wrapDrawable = DrawableCompat.wrap(drawables[0])
+        //DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
 }

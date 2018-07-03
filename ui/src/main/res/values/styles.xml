@@ -60,6 +60,7 @@
 
     <style name="PaymentScreens.RoundedButton" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/selector_rounded_button</item>
+        <item name="android:textAllCaps">true</item>
     </style>
 
     <style name="PaymentScreens.PaymentAccountsActivity">
