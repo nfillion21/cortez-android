@@ -72,21 +72,9 @@
         >
 
         <Button
-            android:id="@+id/paymentScreenButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/spacing_double"
-            android:layout_marginLeft="@dimen/spacing_double"
-            style="@style/PaymentScreens.RoundedButton"
-            android:text="Payment screen"
-            android:minHeight="@dimen/min_height_touch_target"
-            />
-
-        <Button
             android:id="@+id/createWalletButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_normal"
             android:layout_marginRight="@dimen/spacing_double"
             android:layout_marginLeft="@dimen/spacing_double"
             style="@style/PaymentScreens.RoundedButton"

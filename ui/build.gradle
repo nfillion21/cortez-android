@@ -42,4 +42,6 @@ dependencies {
 
     api "com.android.support:recyclerview-v7:${supportLibVersion}"
     api project(':core')
+
+    implementation 'com.github.kenglxn.QRGen:android:2.5.0'
 }

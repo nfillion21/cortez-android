@@ -69,11 +69,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         createWalletButton.setOnClickListener {
             CreateWalletActivity.start(this, tezosTheme)
         }
-
-        val paymentScreenButton = findViewById<Button>(R.id.paymentScreenButton)
-        paymentScreenButton.setOnClickListener {
-            PaymentScreenActivity.start(this, tezosTheme)
-        }
     }
 
     private fun initActionBar(theme:CustomTheme) {
@@ -149,16 +144,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_camera -> {
-                // Handle the camera action
-            }
-            R.id.nav_gallery -> {
+            R.id.nav_transfer -> {
 
+                val tezosTheme = CustomTheme(
+                        com.tezos.ui.R.color.theme_tezos_primary,
+                        com.tezos.ui.R.color.theme_tezos_primary_dark,
+                        com.tezos.ui.R.color.theme_tezos_text)
+                PaymentScreenActivity.start(this, tezosTheme)
             }
-            R.id.nav_slideshow -> {
-
-            }
-            R.id.nav_manage -> {
+            R.id.nav_publickey -> {
 
             }
             R.id.nav_share -> {

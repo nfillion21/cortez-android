@@ -33,7 +33,7 @@ public class EnglishWordsContentProvider extends ContentProvider
         selection = EnglishWordsDatabaseConstants.COL_WORD + " LIKE ?";
         if (selectionArgs != null && selectionArgs.length > 0)
         {
-            selectionArgs = new String[] {"%" + selectionArgs[0] + "%"};
+            selectionArgs = new String[] { selectionArgs[0] + "%"};
         }
 
         Cursor cursor = qb.query(dbHelper.getReadableDatabase(),

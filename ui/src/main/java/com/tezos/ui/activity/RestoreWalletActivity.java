@@ -3,6 +3,7 @@ package com.tezos.ui.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -12,12 +13,15 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Window;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.SearchWordDialogFragment;
 import com.tezos.ui.fragment.RestoreWalletFragment;
+
+import net.glxn.qrgen.android.QRCode;
 
 public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnSearchWordSelectedListener
 {
@@ -87,6 +91,10 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
 
         TextView mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+
+        Bitmap myBitmap = QRCode.from("www.example.org").bitmap();
+        ImageView myImage = findViewById(R.id.qrcode);
+        myImage.setImageBitmap(myBitmap);
     }
 
     @Override
