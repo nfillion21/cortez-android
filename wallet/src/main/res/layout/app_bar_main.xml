@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/TezosTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/TezosTheme.PopupOverlay">
+
+            <TextView android:id="@+id/barTitle"
+                android:text="@string/app_name"
+
+                android:paddingStart="@dimen/spacing_normal"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingTop="@dimen/spacing_micro"
+                android:paddingBottom="@dimen/spacing_micro"
+                android:layout_width="wrap_content"
+                android:singleLine="true"
+
+                android:maxLines="1"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical|center_horizontal"
+                tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
+
+            <!--
+            <ProgressBar android:id="@+id/progress"
+                android:layout_width="@dimen/min_height_touch_target"
+                android:layout_height="@dimen/min_height_touch_target"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:layout_marginRight="@dimen/spacing_normal"
+                android:visibility="gone"
+                android:indeterminateOnly="true" />
+            -->
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0dp">
+
+        <ImageView android:id="@+id/ic_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="30dp"
+            app:srcCompat="@drawable/ic_logo_tezos" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_weight="0"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+
+        <Button
+            android:id="@+id/paymentScreenButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/spacing_double"
+            android:layout_marginLeft="@dimen/spacing_double"
+            style="@style/PaymentScreens.RoundedButton"
+            android:text="Payment screen"
+            android:minHeight="@dimen/min_height_touch_target"
+            />
+
+        <Button
+            android:id="@+id/createWalletButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginRight="@dimen/spacing_double"
+            android:layout_marginLeft="@dimen/spacing_double"
+            style="@style/PaymentScreens.RoundedButton"
+            android:text="Create wallet"
+            />
+
+        <Button
+            android:id="@+id/restoreWalletButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/PaymentScreens.RoundedButton"
+            android:text="Restore wallet"
+            android:visibility="visible"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginRight="@dimen/spacing_double"
+            android:layout_marginLeft="@dimen/spacing_double"
+            android:layout_marginBottom="@dimen/spacing_double"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>
+    <!--<?xml version="1.0" encoding="utf-8"?>
+    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <include layout="@layout/content_main" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            app:srcCompat="@android:drawable/ic_dialog_email" />
+
+    </android.support.design.widget.CoordinatorLayout>
+    -->
+
