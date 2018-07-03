@@ -77,4 +77,7 @@
 
     <style name="PaymentScreens.PaymentFormActivity">
     </style>
+
+    <style name="PaymentScreens.PublicKeyActivity">
+    </style>
 </resources>

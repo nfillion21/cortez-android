@@ -18,6 +18,7 @@ import com.tezos.core.utils.SeedManager
 import com.tezos.core.utils.TezosUtils
 import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.activity.PaymentScreenActivity
+import com.tezos.ui.activity.PublicKeyActivity
 import com.tezos.ui.activity.RestoreWalletActivity
 import com.tezos.ui.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
@@ -29,8 +30,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val mnemonics = "orchard roof outside sustain depth robot inherit across coil hospital gravity guilt feel napkin hire tank yard mandate theme learn hollow gravity permit undo"
-        SeedManager.getInstance().save(this, TezosUtils.generateNovaSeed(mnemonics))
+        //val mnemonics = "orchard roof outside sustain depth robot inherit across coil hospital gravity guilt feel napkin hire tank yard mandate theme learn hollow gravity permit undo"
+        //SeedManager.getInstance().save(this, TezosUtils.generateNovaSeed(mnemonics))
 
         val theme = CustomTheme(
                 com.tezos.ui.R.color.tz_primary,
@@ -154,6 +155,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_publickey -> {
 
+                val tezosTheme = CustomTheme(
+                        com.tezos.ui.R.color.theme_tezos_primary,
+                        com.tezos.ui.R.color.theme_tezos_primary_dark,
+                        com.tezos.ui.R.color.theme_tezos_text)
+                PublicKeyActivity.start(this, tezosTheme)
             }
             R.id.nav_share -> {
 

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,16 +17,14 @@ import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
-import com.tezos.ui.fragment.SearchWordDialogFragment;
-import com.tezos.ui.fragment.RestoreWalletFragment;
 
 import net.glxn.qrgen.android.QRCode;
 
-public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnSearchWordSelectedListener
+public class PublicKeyActivity extends AppCompatActivity
 {
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
-        Intent starter = new Intent(context, RestoreWalletActivity.class);
+        Intent starter = new Intent(context, PublicKeyActivity.class);
         starter.putExtra(CustomTheme.TAG, themeBundle);
 
         return starter;
@@ -46,19 +43,17 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_restore_wallet);
+        setContentView(R.layout.activity_public_key);
 
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
         initToolbar(theme);
 
-        if (savedInstanceState == null)
-        {
-            RestoreWalletFragment restoreWalletFragment = RestoreWalletFragment.newInstance(themeBundle);
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.restorewallet_container, restoreWalletFragment)
-                    .commit();
-        }
+        if (savedInstanceState == null) {}
+
+        Bitmap myBitmap = QRCode.from("www.example.org").bitmap();
+        ImageView myImage = findViewById(R.id.qrcode);
+        myImage.setImageBitmap(myBitmap);
     }
 
     private void initToolbar(CustomTheme theme)
@@ -91,23 +86,10 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
 
         TextView mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
-    }
 
-    @Override
-    public void onWordCardNumberClicked(int position)
-    {
-        SearchWordDialogFragment searchWordDialogFragment = SearchWordDialogFragment.newInstance(position);
-        searchWordDialogFragment.show(getSupportFragmentManager(), "searchWordDialog");
-    }
-
-    @Override
-    public void onSearchWordClicked(String word, int position)
-    {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.restorewallet_container);
-        if (fragment != null && fragment instanceof RestoreWalletFragment)
-        {
-            RestoreWalletFragment restoreWalletFragment = (RestoreWalletFragment) fragment;
-            restoreWalletFragment.updateCard(word, position);
-        }
+        Bitmap myBitmap = QRCode.from("www.example.org").bitmap();
+        ImageView myImage = findViewById(R.id.qrcode);
+        myImage.setImageBitmap(myBitmap);
     }
 }
+

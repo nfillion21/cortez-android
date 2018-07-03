@@ -17,6 +17,7 @@
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
     <string name="create_wallet">Create Wallet</string>
     <string name="restore_wallet">Restore Wallet</string>
+    <string name="receive_title">Receive</string>
     <string name="restore_wallet_info">Please fill your 24 english words in the right order to recover your accounts.</string>
     <string name="mnemonics_backed_up">I wrote the 24 words on a piece of paper.</string>
     <string name="word_info">Word #%1$d</string>

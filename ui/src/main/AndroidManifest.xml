@@ -27,6 +27,11 @@
             android:theme="@style/PaymentScreens.RestoreWalletActivity"
             />
 
+        <activity
+            android:name=".activity.PublicKeyActivity"
+            android:theme="@style/PaymentScreens.PublicKeyActivity"
+            />
+
     </application>
 
 </manifest>

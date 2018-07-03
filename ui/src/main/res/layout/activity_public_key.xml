@@ -20,7 +20,7 @@
             tools:targetApi="lollipop">
 
             <TextView android:id="@+id/barTitle"
-                android:text="@string/restore_wallet"
+                android:text="@string/receive_title"
 
                 android:paddingStart="@dimen/spacing_normal"
                 android:paddingLeft="@dimen/spacing_normal"
@@ -47,13 +47,14 @@
                 android:layout_gravity="end|end|center_vertical"
                 />
 
+
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
 
-    <FrameLayout
-        android:id="@+id/restorewallet_container"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/qrcode"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
 </LinearLayout>
