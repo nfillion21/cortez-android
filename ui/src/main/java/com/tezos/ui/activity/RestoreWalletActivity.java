@@ -6,7 +6,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Window;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
@@ -38,15 +44,49 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
 
         setContentView(R.layout.activity_restore_wallet);
 
+        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+        initToolbar(theme);
+
         if (savedInstanceState == null)
         {
-            Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
-
-            RestoreWalletFragment restoreWalletFragment = RestoreWalletFragment.newInstance(customThemeBundle);
+            RestoreWalletFragment restoreWalletFragment = RestoreWalletFragment.newInstance(themeBundle);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.restorewallet_container, restoreWalletFragment)
                     .commit();
         }
+    }
+
+    private void initToolbar(CustomTheme theme)
+    {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
+        //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+
+        Window window = getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(this,
+                theme.getColorPrimaryDarkId()));
+        try
+        {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+        catch (Exception e)
+        {
+            Log.getStackTraceString(e);
+        }
+
+        ImageButton mCloseButton = findViewById(R.id.close_button);
+        mCloseButton.setColorFilter((ContextCompat.getColor(this, theme.getTextColorPrimaryId())));
+        mCloseButton.setOnClickListener(v -> {
+            //requests stop in onDestroy.
+            finish();
+        });
+
+        TextView mTitleBar = findViewById(R.id.barTitle);
+        mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
     }
 
     @Override

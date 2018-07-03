@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity()
 
         val restoreWalletButton = findViewById<Button>(R.id.restoreWalletButton)
         restoreWalletButton.setOnClickListener {
-            RestoreWalletActivity.start(this, theme2)
+            RestoreWalletActivity.start(this, tezosTheme)
         }
 
         val createWalletButton = findViewById<Button>(R.id.createWalletButton)

@@ -179,7 +179,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     private void setUpWordGrid(final RecyclerView wordsView)
     {
         final int spacing = getContext().getResources()
-                .getDimensionPixelSize(R.dimen.spacing_nano);
+                .getDimensionPixelSize(R.dimen.spacing_micro);
         wordsView.addItemDecoration(new OffsetDecoration(spacing));
 
         mAdapter = new MnemonicWordsViewAdapter(getActivity());

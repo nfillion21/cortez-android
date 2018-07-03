@@ -96,6 +96,14 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
         View dialogView = inflater.inflate(R.layout.dialog_search_word, null);
 
         mSearchWordEditText = dialogView.findViewById(R.id.search_word_edittext);
+
+        int position = getArguments().getInt(CARD_POSITION_KEY);
+        int cardPos = position + 1;
+        if (position != -1)
+        {
+            mSearchWordEditText.setHint("Word #" + cardPos);
+        }
+
         mSearchWordEditText.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -134,8 +142,6 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
             cursor.moveToPosition(i);
             String item = cursor.getString(cursor.getColumnIndex(EnglishWordsDatabaseConstants.COL_WORD));
 
-            //TODO put here the item and position
-            int position = getArguments().getInt(CARD_POSITION_KEY);
             mCallback.onSearchWordClicked(item, position);
 
             //getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, SearchWordDialogFragment.this);

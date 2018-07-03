@@ -11,7 +11,7 @@
         <item name="android:windowBackground">@color/tz_background</item>
     </style>
 
-    <style name="PaymentScreens.RestoreWalletActivity">
+    <style name="PaymentScreens.RestoreWalletActivity" parent="PaymentScreens.NoActionBar">
         <item name="android:windowBackground">@color/tz_background</item>
     </style>
 
