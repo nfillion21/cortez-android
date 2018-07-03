@@ -122,11 +122,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             {
                 mAdapter.updateWords(words);
             }
-
-            if (isMnemonicsValid(words))
-            {
-                validateMnemonicsButton(true);
-            }
+            validateMnemonicsButton(isMnemonicsValid(words));
         }
         else
         {
