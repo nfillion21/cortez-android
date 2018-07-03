@@ -52,9 +52,35 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <ImageView
-        android:id="@+id/qrcode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_double"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/mnemonics_info_title_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:text="@string/public_key_info_title"/>
+
+        <TextView
+            android:id="@+id/mnemonics_info_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+            android:text="@string/mnemonic_info"
+            android:textColor="@color/colorAccent"
+            android:layout_marginBottom="@dimen/spacing_double"
+            android:ellipsize="end" />
+        <ImageView
+            android:id="@+id/qrcode"
+            android:layout_width="400px"
+            android:layout_gravity="center"
+            android:layout_height="400px" />
+
+    </LinearLayout>
 
 </LinearLayout>

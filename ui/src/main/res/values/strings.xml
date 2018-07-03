@@ -15,6 +15,7 @@
     <string name="public_key_hash">Public Key Hash</string>
     <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
+    <string name="public_key_info_title">Here is your Public key</string>
     <string name="create_wallet">Create Wallet</string>
     <string name="restore_wallet">Restore Wallet</string>
     <string name="receive_title">Receive</string>

@@ -87,7 +87,7 @@ public class PublicKeyActivity extends AppCompatActivity
         TextView mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
-        Bitmap myBitmap = QRCode.from("www.example.org").bitmap();
+        Bitmap myBitmap = QRCode.from("tz1SaAgFLKm5494CDctvy3eci2gcX7zf1xZg").withSize(400, 400).bitmap();
         ImageView myImage = findViewById(R.id.qrcode);
         myImage.setImageBitmap(myBitmap);
     }
