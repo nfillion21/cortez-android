@@ -14,14 +14,14 @@
     </style>
 
     <style name="PaymentScreens.CreateWalletActivity">
-        <item name="android:windowBackground">@color/tz_light</item>
+        <item name="android:windowBackground">@color/tz_background</item>
     </style>
 
     <style name="PaymentScreens.RestoreWalletActivity">
-        <item name="android:windowBackground">@color/tz_light</item>
+        <item name="android:windowBackground">@color/tz_background</item>
     </style>
 
     <style name="PaymentScreens.PaymentFormActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_light</item>
+        <item name="android:windowBackground">@color/tz_background</item>
     </style>
 </resources>
