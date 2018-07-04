@@ -11,12 +11,14 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,7 +34,9 @@ public class PublicKeyHashActivity extends AppCompatActivity
 {
     public static final String PKH_KEY = "pkh_key";
 
-    LinearLayout mLinearLayout;
+    private LinearLayout mLinearLayout;
+    private Button mShareButton;
+    private String mPublicKeyHash;
 
     public static Intent getStartIntent(Context context, String publicKeyHash, Bundle themeBundle)
     {
@@ -67,20 +71,29 @@ public class PublicKeyHashActivity extends AppCompatActivity
         DisplayMetrics dm = getResources().getDisplayMetrics();
         int width = dm.widthPixels / 2;
 
-        String publicKeyHash = getIntent().getStringExtra(PKH_KEY);
+        mPublicKeyHash = getIntent().getStringExtra(PKH_KEY);
 
-        Bitmap myBitmap = QRCode.from(publicKeyHash).withSize(width, width).bitmap();
+        Bitmap myBitmap = QRCode.from(mPublicKeyHash).withSize(width, width).bitmap();
         ImageView myImage = findViewById(R.id.qr_code);
         myImage.setImageBitmap(myBitmap);
 
         mLinearLayout = findViewById(R.id.pkh_info_layout);
         mLinearLayout.setOnTouchListener((view, motionEvent) -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText(getString(R.string.copied_pkh), publicKeyHash);
+            ClipData clip = ClipData.newPlainText(getString(R.string.copied_pkh), mPublicKeyHash);
             clipboard.setPrimaryClip(clip);
 
             Toast.makeText(PublicKeyHashActivity.this, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show();
             return false;
+        });
+
+        mShareButton = findViewById(R.id.shareButton);
+        mShareButton.setOnClickListener(view -> {
+
+            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, mPublicKeyHash);
+            startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)));
         });
     }
 

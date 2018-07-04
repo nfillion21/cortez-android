@@ -24,6 +24,8 @@
     <string name="word_info">Word #%1$d</string>
     <string name="copied_pkh">Copied public key hash</string>
     <string name="copied_your_pkh">Copied your public key hash</string>
-    <string name="tap_to_copy_info">Tap to copy your address and share it with the sender via email or text</string>
+    <string name="tap_to_copy_info">Tap to copy your address or share it with the sender via email or text</string>
+    <string name="share">Share</string>
+    <string name="share_via">Share via</string>
 
 </resources>
