@@ -14,11 +14,9 @@ import android.widget.Button
 import android.widget.TextView
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
-import com.tezos.core.utils.SeedManager
-import com.tezos.core.utils.TezosUtils
 import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.activity.PaymentScreenActivity
-import com.tezos.ui.activity.PublicKeyActivity
+import com.tezos.ui.activity.PublicKeyHashActivity
 import com.tezos.ui.activity.RestoreWalletActivity
 import com.tezos.ui.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
@@ -159,7 +157,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         com.tezos.ui.R.color.theme_tezos_primary,
                         com.tezos.ui.R.color.theme_tezos_primary_dark,
                         com.tezos.ui.R.color.theme_tezos_text)
-                PublicKeyActivity.start(this, tezosTheme)
+                PublicKeyHashActivity.start(this, "tz1SaAgFLKm5494CDctvy3eci2gcX7zf1xZg" ,tezosTheme)
             }
             R.id.nav_share -> {
 

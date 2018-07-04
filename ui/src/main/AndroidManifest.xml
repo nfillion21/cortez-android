@@ -28,7 +28,7 @@
             />
 
         <activity
-            android:name=".activity.PublicKeyActivity"
+            android:name=".activity.PublicKeyHashActivity"
             android:theme="@style/PaymentScreens.PublicKeyActivity"
             />
 

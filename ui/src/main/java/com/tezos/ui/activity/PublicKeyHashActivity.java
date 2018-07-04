@@ -1,6 +1,9 @@
 package com.tezos.ui.activity;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -9,30 +12,40 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 
 import net.glxn.qrgen.android.QRCode;
 
-public class PublicKeyActivity extends AppCompatActivity
+public class PublicKeyHashActivity extends AppCompatActivity
 {
-    public static Intent getStartIntent(Context context, Bundle themeBundle)
+    public static final String PKH_KEY = "pkh_key";
+
+    LinearLayout mLinearLayout;
+
+    public static Intent getStartIntent(Context context, String publicKeyHash, Bundle themeBundle)
     {
-        Intent starter = new Intent(context, PublicKeyActivity.class);
+        Intent starter = new Intent(context, PublicKeyHashActivity.class);
         starter.putExtra(CustomTheme.TAG, themeBundle);
+        starter.putExtra(PKH_KEY, publicKeyHash);
 
         return starter;
     }
 
-    public static void start(Activity activity, CustomTheme theme)
+    public static void start(Activity activity, String publicKeyHash, CustomTheme theme)
     {
-        Intent starter = getStartIntent(activity, theme.toBundle());
+        Intent starter = getStartIntent(activity, publicKeyHash, theme.toBundle());
 
         //TODO remove this request code
         ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
@@ -51,9 +64,24 @@ public class PublicKeyActivity extends AppCompatActivity
 
         if (savedInstanceState == null) {}
 
-        Bitmap myBitmap = QRCode.from("www.example.org").bitmap();
-        ImageView myImage = findViewById(R.id.qrcode);
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        int width = dm.widthPixels / 2;
+
+        String publicKeyHash = getIntent().getStringExtra(PKH_KEY);
+
+        Bitmap myBitmap = QRCode.from(publicKeyHash).withSize(width, width).bitmap();
+        ImageView myImage = findViewById(R.id.qr_code);
         myImage.setImageBitmap(myBitmap);
+
+        mLinearLayout = findViewById(R.id.pkh_info_layout);
+        mLinearLayout.setOnTouchListener((view, motionEvent) -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(getString(R.string.copied_pkh), publicKeyHash);
+            clipboard.setPrimaryClip(clip);
+
+            Toast.makeText(PublicKeyHashActivity.this, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show();
+            return false;
+        });
     }
 
     private void initToolbar(CustomTheme theme)
@@ -86,10 +114,6 @@ public class PublicKeyActivity extends AppCompatActivity
 
         TextView mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
-
-        Bitmap myBitmap = QRCode.from("tz1SaAgFLKm5494CDctvy3eci2gcX7zf1xZg").withSize(400, 400).bitmap();
-        ImageView myImage = findViewById(R.id.qrcode);
-        myImage.setImageBitmap(myBitmap);
     }
 }
 

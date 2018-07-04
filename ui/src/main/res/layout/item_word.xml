@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     android:minHeight="@dimen/min_height_touch_target"
 
-    card_view:cardCornerRadius="@dimen/cardview_default_radius"
-    card_view:cardElevation="@dimen/cardview_default_elevation" >
+    card_view:cardCornerRadius="@dimen/spacing_nano"
+    card_view:cardElevation="@dimen/spacing_micro" >
 
     <LinearLayout
         android:layout_width="match_parent"

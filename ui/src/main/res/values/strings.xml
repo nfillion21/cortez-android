@@ -15,12 +15,15 @@
     <string name="public_key_hash">Public Key Hash</string>
     <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
-    <string name="public_key_info_title">Here is your Public key</string>
+    <string name="public_key_info_title">Here is your Public key hash</string>
     <string name="create_wallet">Create Wallet</string>
     <string name="restore_wallet">Restore Wallet</string>
     <string name="receive_title">Receive</string>
     <string name="restore_wallet_info">Please fill your 24 english words in the right order to recover your accounts.</string>
     <string name="mnemonics_backed_up">I wrote the 24 words on a piece of paper.</string>
     <string name="word_info">Word #%1$d</string>
+    <string name="copied_pkh">Copied public key hash</string>
+    <string name="copied_your_pkh">Copied your public key hash</string>
+    <string name="tap_to_copy_info">Tap to copy your address and share it with the sender via email or text</string>
 
 </resources>

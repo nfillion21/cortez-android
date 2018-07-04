@@ -47,19 +47,19 @@
                 android:layout_gravity="end|end|center_vertical"
                 />
 
-
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
 
     <LinearLayout
+        android:id="@+id/pkh_info_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/spacing_double"
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/mnemonics_info_title_textview"
+            android:id="@+id/pkh_info_title_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
@@ -67,7 +67,7 @@
             android:text="@string/public_key_info_title"/>
 
         <TextView
-            android:id="@+id/mnemonics_info_textview"
+            android:id="@+id/pkh_info_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
@@ -75,12 +75,29 @@
             android:textColor="@color/colorAccent"
             android:layout_marginBottom="@dimen/spacing_double"
             android:ellipsize="end" />
+
         <ImageView
-            android:id="@+id/qrcode"
-            android:layout_width="400px"
-            android:layout_gravity="center"
-            android:layout_height="400px" />
+            android:id="@+id/qr_code"
+            android:padding="1dp"
+            android:background="@drawable/shadow_border"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/pkh_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+            android:text="tz1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1s"
+            android:textColor="@color/colorAccent"
+            android:layout_marginBottom="@dimen/spacing_double"
+            android:layout_marginTop="@dimen/spacing_double"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="14sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform" />
 
     </LinearLayout>
-
 </LinearLayout>
