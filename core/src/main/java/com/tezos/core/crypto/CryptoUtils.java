@@ -1,8 +1,8 @@
 package com.tezos.core.crypto;
 
+import android.os.Bundle;
 import android.text.TextUtils;
 
-import org.bitcoinj.core.Sha256Hash;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
@@ -21,6 +21,9 @@ import io.github.novacrypto.bip39.wordlists.English;
 
 public class CryptoUtils
 {
+    public static final String PUBLIC_KEY_HASH_KEY = "public_key_hash_key";
+    public static final String WALLET_BUNDLE_KEY = "wallet_bundle_key";
+
     public static String generateMnemonics()
     {
         StringBuilder sb = new StringBuilder();
@@ -33,7 +36,7 @@ public class CryptoUtils
         return sb.toString();
     }
 
-    private byte[] generateSeed(String mnemonics, String passphrase)
+    private static byte[] generateSeed(String mnemonics, String passphrase)
     {
         final byte[] seed = new SeedCalculator().calculateSeed(mnemonics, passphrase);
         return seed;
@@ -93,14 +96,17 @@ public class CryptoUtils
 
         return isValid;
     }
-
-    public JSONObject generateKeys(String mnemonics, String passphrase)
+    public static Bundle generateKeys(String mnemonics)
     {
-        JSONObject response = new JSONObject();
+        return generateKeys(mnemonics, "");
+    }
+
+    public static Bundle generateKeys(String mnemonics, String passphrase)
+    {
+        Bundle keyBundle;
 
         try
         {
-            passphrase = "";
 
             //MnemonicCode mc = new MnemonicCode();
             //String cleanMnemonic = mnemonic.replace("[", "");
@@ -132,13 +138,9 @@ public class CryptoUtils
             // Create Tezos PK.
             byte[] prefixedPubKey = new byte[36];
 
-            // on recupere les 4 premiers bytes dans le prefix (le prefix entier en fait)
             System.arraycopy(edpkPrefix, 0, prefixedPubKey, 0, 4);
 
-            // et dans les 32 bytes d'apres, on place les 32 premiers bytes de la sodium public key
             System.arraycopy(sodiumPublicKey, 0, prefixedPubKey, 4, 32);
-
-            // prefixedPubKey is 36 bytes full.
 
             byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
 
@@ -183,17 +185,23 @@ public class CryptoUtils
             String pkHash = Base58.encode(prefixedPKhashWithChecksum);
 
             // Builds JSON to return.
-            response.put("mnemonic", mnemonics);
-            response.put("passphrase", passphrase);
-            response.put("sk", TezosSkString);
-            response.put("pk", TezosPkString);
-            response.put("pkh", pkHash);
+            //response.put("mnemonic", mnemonics);
+            //response.put("passphrase", passphrase);
+            //response.put("sk", TezosSkString);
+            //response.put("pk", TezosPkString);
+            //response.put("pkh", pkHash);
+
+            keyBundle = new Bundle();
+            keyBundle.putString(PUBLIC_KEY_HASH_KEY, pkHash);
+
+            return keyBundle;
         }
         catch (Exception e)
         {
+            keyBundle = null;
             e.printStackTrace();
         }
 
-        return response;
+        return keyBundle;
     }
 }

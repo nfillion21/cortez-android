@@ -25,14 +25,16 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.tezos.core.crypto.CryptoUtils;
 import com.tezos.core.models.CustomTheme;
-import com.tezos.core.crypto.TezosUtils;
 import com.tezos.ui.R;
 
 public class CreateWalletActivity extends AppCompatActivity
 {
     private static final String MNEMONICS_KEY = "mnemonics_key";
     private static final String BACKUP_CHECKBOX_KEY = "backup_checkbox_key";
+
+    public static int CREATE_WALLET_REQUEST_CODE = 0x2300; // arbitrary int
 
     private FloatingActionButton mRenewFab;
     private TextView mMnemonicsTextview;
@@ -55,8 +57,7 @@ public class CreateWalletActivity extends AppCompatActivity
     public static void start(Activity activity, CustomTheme theme)
     {
         Intent starter = getStartIntent(activity, theme.toBundle());
-        //TODO remove this request code
-        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
+        ActivityCompat.startActivityForResult(activity, starter, CREATE_WALLET_REQUEST_CODE, null);
     }
 
     @Override
@@ -83,7 +84,6 @@ public class CreateWalletActivity extends AppCompatActivity
         });
         */
 
-
         mCreateButton = findViewById(R.id.create_button);
         mCreateButtonLayout = findViewById(R.id.create_button_layout);
 
@@ -95,6 +95,17 @@ public class CreateWalletActivity extends AppCompatActivity
         {
             //setLoadingMode(true,false);
             //launchRequest();
+
+            if (mMnemonicsString != null)
+            {
+                Intent intent = getIntent();
+
+                //TODO verify if it does always work
+                Bundle keyBundle = CryptoUtils.generateKeys(mMnemonicsString);
+                intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
+                setResult(R.id.create_wallet_succeed, intent);
+                finish();
+            }
         });
 
         mRenewFab = findViewById(R.id.renew);
@@ -108,7 +119,7 @@ public class CreateWalletActivity extends AppCompatActivity
                 mRenewFab.setEnabled(false);
                 removeDoneFab(() ->
                 {
-                    mMnemonicsString = TezosUtils.generateNovaMnemonics();
+                    mMnemonicsString = CryptoUtils.generateMnemonics();
                     mMnemonicsTextview.setText(mMnemonicsString);
                     // renew the mnemonic
                     showDoneFab();
@@ -124,7 +135,7 @@ public class CreateWalletActivity extends AppCompatActivity
 
         if (savedInstanceState == null)
         {
-            mMnemonicsString = TezosUtils.generateNovaMnemonics();
+            mMnemonicsString = CryptoUtils.generateMnemonics();
             if (mMnemonicsString != null)
             {
                 mMnemonicsTextview.setText(mMnemonicsString);

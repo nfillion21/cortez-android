@@ -38,6 +38,8 @@ public class PublicKeyHashActivity extends AppCompatActivity
     private Button mShareButton;
     private String mPublicKeyHash;
 
+    private TextView mPkhTextview;
+
     public static Intent getStartIntent(Context context, String publicKeyHash, Bundle themeBundle)
     {
         Intent starter = new Intent(context, PublicKeyHashActivity.class);
@@ -95,6 +97,10 @@ public class PublicKeyHashActivity extends AppCompatActivity
             sharingIntent.putExtra(Intent.EXTRA_TEXT, mPublicKeyHash);
             startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)));
         });
+
+        String pkhash = getIntent().getStringExtra(PKH_KEY);
+        mPkhTextview = findViewById(R.id.pkh_textview);
+        mPkhTextview.setText(pkhash);
     }
 
     private void initToolbar(CustomTheme theme)

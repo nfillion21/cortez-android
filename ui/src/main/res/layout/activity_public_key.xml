@@ -91,7 +91,6 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
-            android:text="tz1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1s"
             android:textColor="@color/colorAccent"
             android:layout_marginBottom="@dimen/spacing_double"
             android:layout_marginTop="@dimen/spacing_double"
