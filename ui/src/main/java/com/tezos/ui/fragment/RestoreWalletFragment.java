@@ -18,10 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.tezos.core.models.CustomTheme;
-import com.tezos.core.utils.TezosUtils;
 import com.tezos.ui.R;
 import com.tezos.ui.adapter.MnemonicWordsViewAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
