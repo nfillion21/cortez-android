@@ -5,5 +5,7 @@
     <item name="transfer_dst_selection_succeed" type="id" />
     <item name="transfer_dst_selection_failed" type="id" />
     <item name="create_wallet_succeed" type="id" />
+    <item name="restore_wallet_succeed" type="id" />
     <item name="create_wallet_failed" type="id" />
+    <item name="restore_wallet_failed" type="id" />
 </resources>

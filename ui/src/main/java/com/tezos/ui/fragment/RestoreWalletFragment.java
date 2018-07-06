@@ -2,6 +2,7 @@ package com.tezos.ui.fragment;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
@@ -19,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
+import com.tezos.core.crypto.CryptoUtils;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.adapter.MnemonicWordsViewAdapter;
@@ -37,6 +39,7 @@ import io.github.novacrypto.bip39.wordlists.English;
 public class RestoreWalletFragment extends Fragment implements MnemonicWordsViewAdapter.OnItemClickListener
 {
     private static final String WORDS_KEY = "words_key";
+    private static final int MNEMONICS_WORDS_NUMBER = 24;
 
     private OnWordSelectedListener mCallback;
 
@@ -107,7 +110,22 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
         mValidateMnemonicsButtonLayout = view.findViewById(R.id.validate_mnemonics_button_layout);
         mValidateMnemonicsButtonLayout.setOnClickListener(v ->
         {
-            // handle click
+            Intent intent = getActivity().getIntent();
+
+            //TODO verify if it does always work
+            String mnemonics = mnemonicsListToString(mAdapter.getWords());
+            if (mnemonics != null)
+            {
+                //TODO put this code in activity
+                Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
+                intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
+                getActivity().setResult(R.id.restore_wallet_succeed, intent);
+                getActivity().finish();
+            }
+            else
+            {
+                //TODO an error occurred
+            }
         });
 
         mRecyclerView = view.findViewById(R.id.words);
@@ -120,18 +138,30 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             {
                 mAdapter.updateWords(words);
             }
-            validateMnemonicsButton(isMnemonicsValid(words));
+            validateMnemonicsButton(CryptoUtils.validateMnemonics(words));
         }
         else
         {
-            List<String> words = new ArrayList<>(24);
-            for (int i = 0; i < 24; i++)
+            List<String> words = new ArrayList<>(MNEMONICS_WORDS_NUMBER);
+            for (int i = 0; i < MNEMONICS_WORDS_NUMBER; i++)
             {
                 words.add(null);
             }
             mAdapter.updateWords(words);
             validateMnemonicsButton(false);
         }
+    }
+
+    private String mnemonicsListToString(List<String> words)
+    {
+        String listString = null;
+
+        if (words != null && words.size() == MNEMONICS_WORDS_NUMBER && !words.contains(null))
+        {
+            listString = TextUtils.join(" ", words);
+        }
+
+        return listString;
     }
 
     protected void validateMnemonicsButton(boolean validate) {
@@ -189,55 +219,8 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
         if (mCallback != null)
         {
-            validateMnemonicsButton(isMnemonicsValid(mAdapter.getWords()));
+            validateMnemonicsButton(CryptoUtils.validateMnemonics(mAdapter.getWords()));
         }
-    }
-
-    private boolean isMnemonicsValid(List<String> words)
-    {
-        boolean isValid;
-
-        if (words == null || words.contains(null))
-        {
-            isValid = false;
-        }
-        else
-        {
-            String separatedWords = TextUtils.join(" ", words);
-
-            boolean isCatched = false;
-
-            try
-            {
-                MnemonicValidator.ofWordList(English.INSTANCE).validate(separatedWords);
-            }
-            catch (InvalidChecksumException e)
-            {
-                e.printStackTrace();
-                isCatched = true;
-            }
-            catch (InvalidWordCountException e)
-            {
-                e.printStackTrace();
-                isCatched = true;
-            }
-            catch (WordNotFoundException e)
-            {
-                e.printStackTrace();
-                isCatched = true;
-            }
-            catch (UnexpectedWhiteSpaceException e)
-            {
-                e.printStackTrace();
-                isCatched = true;
-            }
-            finally
-            {
-                isValid = !isCatched;
-            }
-        }
-
-        return isValid;
     }
 
     @Override

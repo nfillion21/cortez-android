@@ -25,6 +25,8 @@ import net.glxn.qrgen.android.QRCode;
 
 public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnSearchWordSelectedListener
 {
+    public static int RESTORE_WALLET_REQUEST_CODE = 0x2400; // arbitrary int
+
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
         Intent starter = new Intent(context, RestoreWalletActivity.class);
@@ -36,8 +38,7 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
     public static void start(Activity activity, CustomTheme theme)
     {
         Intent starter = getStartIntent(activity, theme.toBundle());
-        //TODO remove this request code
-        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
+        ActivityCompat.startActivityForResult(activity, starter, RESTORE_WALLET_REQUEST_CODE, null);
     }
 
     @Override

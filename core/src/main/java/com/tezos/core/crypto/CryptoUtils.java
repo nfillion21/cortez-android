@@ -98,6 +98,7 @@ public class CryptoUtils
     }
     public static Bundle generateKeys(String mnemonics)
     {
+        //TODO need to protect the private key
         return generateKeys(mnemonics, "");
     }
 

@@ -106,13 +106,36 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     }
                 }
             }
+
+            RestoreWalletActivity.RESTORE_WALLET_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.restore_wallet_succeed)
+                {
+                    if (data != null && data.hasExtra(CryptoUtils.WALLET_BUNDLE_KEY))
+                    {
+                        try
+                        {
+                            val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
+                            mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
+                        }
+                        catch (e: Exception)
+                        {
+                            //Toast.makeText(this, "Can't set background.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    else
+                    {
+                        //Log.v("ProjectDetails", "data is null")
+                    }
+                }
+            }
         }
     }
 
-    private fun initActionBar(theme:CustomTheme) {
-
-        if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP)) {
-
+    private fun initActionBar(theme:CustomTheme)
+    {
+        if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP))
+        {
             val window = window
             window.statusBarColor = ContextCompat.getColor(this, theme.colorPrimaryDarkId)
         }
