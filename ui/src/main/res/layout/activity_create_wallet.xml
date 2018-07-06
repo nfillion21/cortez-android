@@ -86,7 +86,7 @@
                     android:id="@+id/mnemonics_info_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                     android:text="@string/mnemonic_info"
                     android:textColor="@color/colorAccent"
                     android:layout_marginBottom="@dimen/spacing_double"

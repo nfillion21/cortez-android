@@ -18,6 +18,7 @@
     <string name="public_key_info_title">Here is your Public key hash</string>
     <string name="create_wallet">Create Wallet</string>
     <string name="restore_wallet">Restore Wallet</string>
+    <string name="add_address_title">Add an address</string>
     <string name="receive_title">Receive</string>
     <string name="restore_wallet_info">Please fill your 24 english words in the right order to recover your accounts.</string>
     <string name="mnemonics_backed_up">I wrote the 24 words on a piece of paper.</string>
@@ -29,11 +30,15 @@
     <string name="share_via">Share via</string>
     <string name="wallet_successfully_created">Wallet successfully created!</string>
     <string name="wallet_successfully_restored">Wallet successfully restored!</string>
-    <string name="account_title">Account title</string>
-    <string name="account_title_placeholder">John address</string>
+    <string name="address_owner">Address owner</string>
+    <string name="address_owner_placeholder">John Doe</string>
+    <string name="address_pkh">Address (Public key hash)</string>
+    <string name="address_pkh_placeholder">tz…</string>
     <string name="transfer">Transfer</string>
     <string name="receive">Receive</string>
     <string name="addresses">Addresses</string>
     <string name="settings">Settings</string>
+    <string name="add_an_address">Add</string>
+
 
 </resources>

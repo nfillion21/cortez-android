@@ -19,7 +19,7 @@
             android:id="@+id/mnemonics_info_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             android:text="@string/restore_wallet_info"
             android:textColor="@color/colorAccent"
             android:ellipsize="end" />

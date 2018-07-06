@@ -3,8 +3,8 @@
         <item name="android:windowBackground">@color/colorAccent</item>
     </style>
 
-    <style name="PaymentScreens.AddAccountActivity">
-        <item name="android:windowBackground">@color/colorAccent</item>
+    <style name="PaymentScreens.AddAddressActivity" parent="PaymentScreens.NoActionBar">
+        <item name="android:windowBackground">@color/tz_background</item>
     </style>
 
     <style name="PaymentScreens.CreateWalletActivity" parent="PaymentScreens.NoActionBar">

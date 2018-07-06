@@ -37,7 +37,7 @@
                 android:id="@+id/src_payment_account_pub_key_hash"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                 android:maxLines="2"
                 android:ellipsize="end"
                  />
@@ -47,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.PaymentProductItem"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             android:singleLine="true"
             android:padding="@dimen/spacing_double" />
 
