@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
@@ -91,16 +92,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 {
                     if (data != null && data.hasExtra(CryptoUtils.WALLET_BUNDLE_KEY))
                     {
-                        try
-                        {
-                            val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
-                            mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
+                        val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
+                        mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
 
-                        } catch (e: Exception)
-                        {
-                            //Toast.makeText(this, "Can't set background.", Toast.LENGTH_SHORT).show()
-                        }
-                    } else
+                        // TODO offset it
+                        val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.wallet_successfully_created, Snackbar.LENGTH_LONG)
+                        val snackBarView = snackbar.getView()
+                        snackBarView.setBackgroundColor((ContextCompat.getColor(this,
+                                android.R.color.holo_green_light)))
+                        snackbar.show()
+                    }
+                    else
                     {
                         //Log.v("ProjectDetails", "data is null")
                     }
@@ -113,15 +115,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 {
                     if (data != null && data.hasExtra(CryptoUtils.WALLET_BUNDLE_KEY))
                     {
-                        try
-                        {
-                            val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
-                            mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
-                        }
-                        catch (e: Exception)
-                        {
-                            //Toast.makeText(this, "Can't set background.", Toast.LENGTH_SHORT).show()
-                        }
+                        val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
+                        mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
+
+                        // TODO offset it
+                        val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.wallet_successfully_restored, Snackbar.LENGTH_LONG)
+                        val snackBarView = snackbar.getView()
+                        snackBarView.setBackgroundColor((ContextCompat.getColor(this,
+                                android.R.color.holo_green_light)))
+                        snackbar.show()
                     }
                     else
                     {

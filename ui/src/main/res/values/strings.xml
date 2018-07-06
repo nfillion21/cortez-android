@@ -27,5 +27,7 @@
     <string name="tap_to_copy_info">Tap to copy your address or share it with the sender via email or text</string>
     <string name="share">Share</string>
     <string name="share_via">Share via</string>
+    <string name="wallet_successfully_created">Wallet successfully created!</string>
+    <string name="wallet_successfully_restored">Wallet successfully restored!</string>
 
 </resources>
