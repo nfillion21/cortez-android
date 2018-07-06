@@ -17,10 +17,7 @@ import android.widget.TextView
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
-import com.tezos.ui.activity.CreateWalletActivity
-import com.tezos.ui.activity.PaymentScreenActivity
-import com.tezos.ui.activity.PublicKeyHashActivity
-import com.tezos.ui.activity.RestoreWalletActivity
+import com.tezos.ui.activity.*
 import com.tezos.ui.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -208,27 +205,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean
     {
         // Handle navigation view item clicks here.
+        val tezosTheme = CustomTheme(
+                com.tezos.ui.R.color.theme_tezos_primary,
+                com.tezos.ui.R.color.theme_tezos_primary_dark,
+                com.tezos.ui.R.color.theme_tezos_text)
+
         when (item.itemId)
         {
             R.id.nav_transfer ->
             {
-                val tezosTheme = CustomTheme(
-                        com.tezos.ui.R.color.theme_tezos_primary,
-                        com.tezos.ui.R.color.theme_tezos_primary_dark,
-                        com.tezos.ui.R.color.theme_tezos_text)
                 PaymentScreenActivity.start(this, tezosTheme)
             }
             R.id.nav_publickey ->
             {
-                val tezosTheme = CustomTheme(
-                        com.tezos.ui.R.color.theme_tezos_primary,
-                        com.tezos.ui.R.color.theme_tezos_primary_dark,
-                        com.tezos.ui.R.color.theme_tezos_text)
                 PublicKeyHashActivity.start(this, mPublicKeyHash, tezosTheme)
             }
-            R.id.nav_share ->
+            R.id.nav_addresses ->
             {
-
+                AddAddressActivity.start(this, tezosTheme)
             }
             R.id.nav_send ->
             {

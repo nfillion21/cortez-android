@@ -7,11 +7,15 @@
         <item
             android:id="@+id/nav_transfer"
             android:icon="@drawable/ic_arrow_upward_24"
-            android:title="Transfer" />
+            android:title="@string/transfer" />
         <item
             android:id="@+id/nav_publickey"
             android:icon="@drawable/ic_arrow_downward_24"
-            android:title="Receive" />
+            android:title="@string/receive" />
+        <item
+            android:id="@+id/nav_addresses"
+            android:icon="@drawable/ic_contacts_24"
+            android:title="@string/addresses" />
     </group>
 
     <item android:title="Communicate">
@@ -19,11 +23,11 @@
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:title="@string/share" />
             <item
                 android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:icon="@drawable/ic_settings_24"
+                android:title="@string/settings" />
         </menu>
     </item>
 

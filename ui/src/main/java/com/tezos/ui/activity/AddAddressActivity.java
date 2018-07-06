@@ -10,11 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 
-public class AddAccountActivity extends AppCompatActivity
+public class AddAddressActivity extends AppCompatActivity
 {
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
-        Intent starter = new Intent(context, AddAccountActivity.class);
+        Intent starter = new Intent(context, AddAddressActivity.class);
         starter.putExtra(CustomTheme.TAG, themeBundle);
 
         return starter;
@@ -23,6 +23,8 @@ public class AddAccountActivity extends AppCompatActivity
     public static void start(Activity activity, CustomTheme theme)
     {
         Intent starter = getStartIntent(activity, theme.toBundle());
+
+        //TODO remove the request code
         ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
@@ -31,7 +33,7 @@ public class AddAccountActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_add_account);
+        setContentView(R.layout.activity_add_address);
 
         /*
         CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);

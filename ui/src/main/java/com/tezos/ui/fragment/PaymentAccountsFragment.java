@@ -21,7 +21,7 @@ import com.tezos.core.client.GatewayClient;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.SeedManager;
 import com.tezos.ui.R;
-import com.tezos.ui.activity.AddAccountActivity;
+import com.tezos.ui.activity.AddAddressActivity;
 import com.tezos.ui.activity.PaymentAccountsActivity;
 import com.tezos.ui.adapter.PaymentAccountsAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
@@ -133,7 +133,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
             Bundle args = getArguments();
 
             CustomTheme theme = CustomTheme.fromBundle(args.getBundle(CustomTheme.TAG));
-            AddAccountActivity.start(getActivity(), theme);
+            AddAddressActivity.start(getActivity(), theme);
 
             //TODO add an account
 

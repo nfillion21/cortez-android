@@ -13,7 +13,7 @@
             android:theme="@style/PaymentScreens.PaymentAccountsActivity"
             />
         <activity
-            android:name=".activity.AddAccountActivity"
+            android:name=".activity.AddAddressActivity"
             android:theme="@style/PaymentScreens.AddAccountActivity"
             />
 

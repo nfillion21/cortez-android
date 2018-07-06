@@ -29,5 +29,11 @@
     <string name="share_via">Share via</string>
     <string name="wallet_successfully_created">Wallet successfully created!</string>
     <string name="wallet_successfully_restored">Wallet successfully restored!</string>
+    <string name="account_title">Account title</string>
+    <string name="account_title_placeholder">John address</string>
+    <string name="transfer">Transfer</string>
+    <string name="receive">Receive</string>
+    <string name="addresses">Addresses</string>
+    <string name="settings">Settings</string>
 
 </resources>
