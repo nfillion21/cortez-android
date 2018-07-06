@@ -55,15 +55,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/mnemonics_info_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-            android:text="@string/restore_wallet_info"
+            android:text="@string/add_address_info"
             android:textColor="@color/colorAccent"
             android:layout_margin="@dimen/spacing_double"
             android:ellipsize="end" />
@@ -91,9 +91,10 @@
                 android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 android:maxLength="30"
                 android:maxLines="1"
+                android:singleLine="true"
                 android:textColorHint="@color/tz_placeholder"
                 android:imeOptions="actionNext"
-                android:inputType="textPersonName|textCapWords|textNoSuggestions"
+                android:inputType="text|textPersonName|textCapWords|textNoSuggestions"
                 android:textSize="@dimen/size_edit_text" />
 
         </android.support.design.widget.TextInputLayout>
@@ -123,6 +124,7 @@
                 android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
                 android:maxLength="36"
                 android:maxLines="1"
+                android:singleLine="true"
                 android:textColorHint="@color/tz_placeholder"
                 android:imeOptions="actionDone"
                 android:inputType="textPersonName|textNoSuggestions"

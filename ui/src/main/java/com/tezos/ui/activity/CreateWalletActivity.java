@@ -80,7 +80,7 @@ public class CreateWalletActivity extends AppCompatActivity
         /*
         mBackupCheckbox.setOnClickListener(view ->
         {
-            validateCreateButton(mBackupChecked, null);
+            validateAddButton(mBackupChecked, null);
         });
         */
 

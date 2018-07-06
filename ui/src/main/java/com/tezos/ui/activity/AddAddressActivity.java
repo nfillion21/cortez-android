@@ -14,7 +14,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -26,11 +30,11 @@ import com.tezos.ui.R;
 
 public class AddAddressActivity extends AppCompatActivity
 {
-    private TextInputLayout mAddressOwnerLayout;
-    private TextInputEditText mAddressOwner;
+    private TextInputLayout mOwnerLayout;
+    private TextInputEditText mOwner;
 
-    private TextInputLayout mTezosAddressLayout;
-    private TextInputEditText mTezosAddress;
+    private TextInputLayout mTzAddressLayout;
+    private TextInputEditText mTzAddress;
 
     private Button mAddButton;
     private FrameLayout mAddButtonLayout;
@@ -58,15 +62,20 @@ public class AddAddressActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_add_address);
 
-        mAddressOwnerLayout = findViewById(R.id.address_owner_inputlayout);
-        mAddressOwner = findViewById(R.id.address_owner);
+        View.OnFocusChangeListener focusChangeListener = this.focusChangeListener();
 
-        mAddressOwnerLayout.setError(" ");
+        mOwnerLayout = findViewById(R.id.address_owner_inputlayout);
+        mOwner = findViewById(R.id.address_owner);
+        mOwner.addTextChangedListener(new GenericTextWatcher(mOwner));
+        mOwner.setOnFocusChangeListener(focusChangeListener);
+        mOwnerLayout.setError(" ");
 
-        mTezosAddressLayout = findViewById(R.id.tezos_address_inputlayout);
-        mTezosAddress = findViewById(R.id.tezos_address);
+        mTzAddressLayout = findViewById(R.id.tezos_address_inputlayout);
+        mTzAddress = findViewById(R.id.tezos_address);
+        mTzAddressLayout.setError(" ");
+        mTzAddress.addTextChangedListener(new GenericTextWatcher(mTzAddress));
+        mTzAddress.setOnFocusChangeListener(focusChangeListener);
 
-        mTezosAddressLayout.setError(" ");
 
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
@@ -74,7 +83,10 @@ public class AddAddressActivity extends AppCompatActivity
 
         mAddButton = findViewById(R.id.add_button);
         mAddButtonLayout = findViewById(R.id.add_button_layout);
-        validateCreateButton(true, theme);
+
+        validateAddButton(isInputDataValid());
+
+        putEverythingInRed();
 
         if (savedInstanceState == null)
         {
@@ -83,12 +95,157 @@ public class AddAddressActivity extends AppCompatActivity
             //getSupportFragmentManager().beginTransaction()
                     //.replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(paymentPageRequestBundle, customThemeBundle)).commit();
         }
+
     }
 
-    protected void validateCreateButton(boolean validate, CustomTheme theme)
+    protected boolean isInputDataValid()
+    {
+        if (
+                this.isOwnerFormValid() &&
+                        this.isTzAddressValid()
+                )
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isOwnerFormValid()
+    {
+        boolean isOwnerFormValid = false;
+
+        if (!TextUtils.isEmpty(mOwner.getText()))
+        {
+            isOwnerFormValid = true;
+        }
+
+        return isOwnerFormValid;
+    }
+
+    private boolean isTzAddressValid()
+    {
+        boolean isTzAddressValid = false;
+
+        if (!TextUtils.isEmpty(mTzAddress.getText()))
+        {
+            String addressText = mTzAddress.getText().toString();
+
+            if ((addressText.startsWith("tz1") ||  addressText.startsWith("tz2") || addressText.startsWith("tz3"))
+                &&
+                    addressText.length() == 36)
+            {
+                isTzAddressValid = true;
+            }
+        }
+
+        return isTzAddressValid;
+    }
+
+    protected void putEverythingInRed()
+    {
+        this.putOwnerFormInRed(true);
+        this.putTzAddressInRed(true);
+    }
+
+    // put everything in RED
+
+    private void putOwnerFormInRed(boolean red) {
+
+        int color;
+
+        boolean ownerFormValid = this.isOwnerFormValid();
+
+        if (red && !ownerFormValid) {
+            color = R.color.tz_error;
+
+        } else {
+            color = R.color.tz_accent;
+        }
+
+        this.mOwner.setTextColor(ContextCompat.getColor(this, color));
+    }
+
+    private void putTzAddressInRed(boolean red) {
+
+        int color;
+
+        boolean tzAddressValid = this.isTzAddressValid();
+
+        if (red && !tzAddressValid) {
+            color = R.color.tz_error;
+
+        } else {
+            color = R.color.tz_accent;
+        }
+
+        this.mTzAddress.setTextColor(ContextCompat.getColor(this, color));
+    }
+
+    private class GenericTextWatcher implements TextWatcher
+    {
+        private View v;
+        private GenericTextWatcher(View view)
+        {
+            this.v = view;
+        }
+
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+        public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+        public void afterTextChanged(Editable editable)
+        {
+            int i = v.getId();
+
+            if (i == R.id.address_owner)
+            {
+                putOwnerFormInRed(false);
+            }
+            else if (i == R.id.tezos_address)
+            {
+                putTzAddressInRed(false);
+            }
+            else
+            {
+                throw new UnsupportedOperationException(
+                        "OnClick has not been implemented for " + getResources().
+                                getResourceName(v.getId()));
+            }
+            validateAddButton(isInputDataValid());
+        }
+    }
+
+    private View.OnFocusChangeListener focusChangeListener()
+    {
+        return (v, hasFocus) ->
+        {
+            int i = v.getId();
+
+            if (i == R.id.address_owner)
+            {
+                putOwnerFormInRed(!hasFocus);
+            }
+            else if (i == R.id.tezos_address)
+            {
+                putTzAddressInRed(!hasFocus);
+            }
+            else
+            {
+                throw new UnsupportedOperationException(
+                        "onFocusChange has not been implemented for " + getResources().
+                                getResourceName(v.getId()));
+            }
+        };
+    }
+
+    protected void validateAddButton(boolean validate)
     {
         if (validate)
         {
+            Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+            CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
             mAddButton.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
             mAddButtonLayout.setEnabled(true);
             mAddButtonLayout.setBackground(makeSelector(theme));
