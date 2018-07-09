@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.tezos.core.models.Account;
+import com.tezos.core.models.Address;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,7 +39,7 @@ public class AddressesDatabase
         editor.apply();
     }
 
-    public void remove(Context context, Account address)
+    public void remove(Context context, Address address)
     {
         Set<String> addresses = this.getAddresses(context);
 

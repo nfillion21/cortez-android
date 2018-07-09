@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,11 +35,17 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     private List<Address> mAddresses;
 
     private OnItemClickListener mOnItemClickListener;
+    private OnItemLongClickListener mOnItemLongClickListener;
     private CustomTheme mCustomTheme;
 
     public interface OnItemClickListener
     {
         void onClick(View view, Address paymentProduct);
+    }
+
+    public interface OnItemLongClickListener
+    {
+        void onLongClick(View view, Address address);
     }
 
     public PaymentAccountsAdapter(Activity activity, PaymentAccountsActivity.Selection selection, CustomTheme customTheme)
@@ -96,7 +103,19 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         holder.title.setBackgroundColor(getColor(mCustomTheme.getColorPrimaryId()));
 
         holder.itemView.setBackgroundColor(getColor(android.R.color.background_light));
-        holder.itemView.setOnClickListener(v -> mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition())));
+
+        holder.itemView.setOnClickListener((View v) -> {
+            mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition()));
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view)
+            {
+                mOnItemLongClickListener.onLongClick(view, getItem(holder.getAdapterPosition()));
+                return false;
+            }
+        });
     }
 
     @Override
@@ -113,6 +132,11 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     public void setOnItemClickListener(OnItemClickListener onItemClickListener)
     {
         mOnItemClickListener = onItemClickListener;
+    }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener)
+    {
+        mOnItemLongClickListener = onItemLongClickListener;
     }
 
     public void updateAddresses(List<Address> addresses)

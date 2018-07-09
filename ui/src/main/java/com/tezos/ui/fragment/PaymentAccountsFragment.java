@@ -2,6 +2,7 @@ package com.tezos.ui.fragment;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
@@ -11,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +39,7 @@ import java.util.Set;
  * Created by nfillion on 26/02/16.
  */
 
-public class PaymentAccountsFragment extends Fragment implements PaymentAccountsAdapter.OnItemClickListener
+public class PaymentAccountsFragment extends Fragment implements PaymentAccountsAdapter.OnItemClickListener, PaymentAccountsAdapter.OnItemLongClickListener
 {
     private static final String ADDRESSES_ARRAYLIST = "addressList";
 
@@ -147,6 +149,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
 
         mAdapter = new PaymentAccountsAdapter(getActivity(), PaymentAccountsActivity.Selection.fromStringValue(selectionString), customTheme);
         mAdapter.setOnItemClickListener(this);
+        mAdapter.setOnItemLongClickListener(this);
 
         categoriesView.setAdapter(mAdapter);
 
@@ -155,25 +158,23 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
 
     private void reloadList()
     {
-        List<Address> databaseAddresses = null;
+        mAddressList.clear();
 
         Set<String> set = AddressesDatabase.getInstance().getAddresses(getActivity());
 
         if (set != null && !set.isEmpty()) {
-
-            databaseAddresses = new ArrayList<>(set.size());
 
             for (String addressString : set) {
 
                 Bundle addressBundle = Utils.fromJSONString(addressString);
                 if (addressBundle != null) {
                     Address address = Address.fromBundle(addressBundle);
-                    databaseAddresses.add(address);
+                    mAddressList.add(address);
                 }
             }
         }
 
-        mAdapter.updateAddresses(databaseAddresses);
+        mAdapter.updateAddresses(mAddressList);
     }
 
     @Override
@@ -240,5 +241,35 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         {
             mCallback.onCardClicked(address);
         }
+    }
+
+    @Override
+    public void onLongClick(View view, Address address)
+    {
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which)
+            {
+                case DialogInterface.BUTTON_POSITIVE:
+                {
+                    dialog.dismiss();
+
+                    AddressesDatabase.getInstance().remove(getActivity(), address);
+                    reloadList();
+                }
+                break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    dialog.dismiss();
+                    break;
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.alert_deleting_address)
+                .setMessage(R.string.alert_deleting_address_body)
+                .setNegativeButton(android.R.string.cancel, dialogClickListener)
+                .setPositiveButton(android.R.string.yes, dialogClickListener)
+                .setCancelable(false)
+                .show();
     }
 }
