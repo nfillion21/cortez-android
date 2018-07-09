@@ -20,9 +20,6 @@ public class AddressesDatabase
     final private String SHARED_PREFERENCES_NAME = "TezCore";
     final private String ADDRESSES_KEY = "addresses";
 
-    private AddressesDatabase() {
-    }
-
     public static AddressesDatabase getInstance()
     {
         if(mInstance == null)

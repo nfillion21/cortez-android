@@ -25,7 +25,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.ui.R;
 
 public class AddAddressActivity extends AppCompatActivity
@@ -83,6 +85,22 @@ public class AddAddressActivity extends AppCompatActivity
 
         mAddButton = findViewById(R.id.add_button);
         mAddButtonLayout = findViewById(R.id.add_button_layout);
+
+        mAddButtonLayout.setOnClickListener(v ->
+        {
+
+
+
+
+            String addressName = mOwner.getText().toString();
+            String publicKeyHash = mTzAddress.getText().toString();
+
+            if (addressName != null && publicKeyHash != null)
+            {
+                Account account = new Account();
+                AddressesDatabase.getInstance().add(this, account);
+            }
+        });
 
         validateAddButton(isInputDataValid());
 
