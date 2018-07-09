@@ -54,7 +54,6 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     private List<com.tezos.core.models.Account> accountList;
 
     protected boolean mLoadingMode;
-    protected int mCurrentLoading = -1;
 
     private FloatingActionButton mAddFab;
 
@@ -80,12 +79,6 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     {
         super.onAttach(context);
 
-        /*
-        if (mGatewayClient != null)
-        {
-            mGatewayClient.reLaunchOperations(mCurrentLoading);
-        }
-        */
         try
         {
             mCallback = (OnCardSelectedListener) context;
@@ -103,7 +96,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         super.onCreate(savedInstanceState);
 
         //necessary to handle the request
-        setRetainInstance(true);
+        //setRetainInstance(true);
     }
 
     @Override
@@ -134,26 +127,6 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
 
             CustomTheme theme = CustomTheme.fromBundle(args.getBundle(CustomTheme.TAG));
             AddAddressActivity.start(getActivity(), theme);
-
-            //TODO add an account
-
-            byte[] seed = SeedManager.getInstance().getSeed(getActivity());
-
-            ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(seed, Bitcoin.TEST_NET);
-
-            final io.github.novacrypto.bip44.Account account =
-                    m().purpose44()
-                            .coinType(1729)
-                            .account(0);
-            final ExtendedPublicKey accountKey = root.derive(account, io.github.novacrypto.bip44.Account.DERIVATION)
-                    .neuter();
-
-            for (int i = 0; i < 20; i++)
-            {
-                final AddressIndex derivationPath = account.external().address(i);
-                final ExtendedPublicKey publicKey = accountKey.derive(derivationPath, AddressIndex.DERIVATION_FROM_ACCOUNT);
-                System.out.println(derivationPath + " = " + publicKey.p2pkhAddress());
-            }
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)

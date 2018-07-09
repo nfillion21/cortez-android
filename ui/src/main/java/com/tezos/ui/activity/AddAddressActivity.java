@@ -28,7 +28,10 @@ import android.widget.TextView;
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
+import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
+
+import java.util.Set;
 
 public class AddAddressActivity extends AppCompatActivity
 {
@@ -88,8 +91,23 @@ public class AddAddressActivity extends AppCompatActivity
 
         mAddButtonLayout.setOnClickListener(v ->
         {
+            Set<String> addresses = AddressesDatabase.getInstance().getAddresses(this);
 
+            if (addresses != null && !addresses.isEmpty())
+            {
+                for (String addressString : addresses)
+                {
+                    Bundle paymentCardTokenBundle = Utils.fromJSONString(addressString);
+                    if (paymentCardTokenBundle != null)
+                    {
+                        Account account = Account.fromBundle(paymentCardTokenBundle);
+                        Account account2 = Account.fromBundle(paymentCardTokenBundle);
+                        //mPaymentCardTokens.add(paymentCardToken);
+                    }
+                }
+            }
 
+            //((ArrayAdapter)getListAdapter()).notifyDataSetChanged();
 
 
             String addressName = mOwner.getText().toString();
@@ -98,6 +116,9 @@ public class AddAddressActivity extends AppCompatActivity
             if (addressName != null && publicKeyHash != null)
             {
                 Account account = new Account();
+                account.setDescription(addressName);
+                account.setPubKeyHash(publicKeyHash);
+
                 AddressesDatabase.getInstance().add(this, account);
             }
         });

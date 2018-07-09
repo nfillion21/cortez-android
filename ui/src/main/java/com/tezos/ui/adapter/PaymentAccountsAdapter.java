@@ -58,29 +58,18 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
             mAccounts.add(account);
         }
 
-        if (selection.equals(PaymentAccountsActivity.Selection.SelectionSource))
+        if (selection.equals(PaymentAccountsActivity.Selection.SelectionAccounts))
         {
-            removeStandardAccounts(mAccounts);
+            removeAddresses(mAccounts);
         }
-
-        /*
-        // sort messages by date, oldest last.
-        Collections.sort(mAccounts, new Comparator<Account>()
+        else if (selection.equals(PaymentAccountsActivity.Selection.SelectionAddresses))
         {
-            @Override
-            public int compare(Account o1, Account o2)
-            {
-                if (o1.getPrivateKeyHash() == null) {
-                    return (o2.getPrivateKeyHash() == null) ? 0 : -1;
-                }
-                if (o2.getPrivateKeyHash() == null)
-                {
-                    return 1;
-                }
-                return o1.getPrivateKeyHash().compareTo(o2.getPrivateKeyHash());
-            }
-        });
-        */
+            removeAccounts(mAccounts);
+        }
+        else
+        {
+            //do not remove anything.
+        }
     }
 
     @Override
@@ -149,7 +138,23 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         return ContextCompat.getColor(mActivity, colorRes);
     }
 
-    private void removeStandardAccounts(List<Account> accountList)
+    private void removeAccounts(List<Account> accountList)
+    {
+        int size = accountList.size();
+        List<Account> itemsToRemove = new ArrayList<>(size);
+
+        for (Account a: accountList)
+        {
+            if (a.getPrivateKeyHash() != null)
+            {
+                itemsToRemove.add(a);
+            }
+        }
+
+        accountList.removeAll(itemsToRemove);
+    }
+
+    private void removeAddresses(List<Account> accountList)
     {
         int size = accountList.size();
         List<Account> itemsToRemove = new ArrayList<>(size);

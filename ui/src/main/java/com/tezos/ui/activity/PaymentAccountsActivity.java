@@ -80,7 +80,6 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
         }
     }
 
-
     private void initToolbar()
     {
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -117,13 +116,17 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
 
         String selectionString = getIntent().getStringExtra(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
         Selection selection = Selection.fromStringValue(selectionString);
-        if (selection.equals(PaymentAccountsActivity.Selection.SelectionSource))
+        if (selection.equals(Selection.SelectionAccounts))
         {
             mTitleBar.setText(getString(R.string.select_source_title));
         }
-        else
+        else if (selection.equals(Selection.SelectionAddresses))
         {
             mTitleBar.setText(getString(R.string.select_destination_title));
+        }
+        else
+        {
+            //TODO accounts AND addresses
         }
     }
 
@@ -156,13 +159,13 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
 
         switch (selection)
         {
-            case SelectionSource:
+            case SelectionAccounts:
             {
                 setResult(R.id.transfer_src_selection_succeed, intent);
             }
             break;
 
-            case SelectionDestination:
+            case SelectionAccountsAndAddresses:
             {
                 setResult(R.id.transfer_dst_selection_succeed, intent);
             }
@@ -183,8 +186,9 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
 
     public enum Selection
     {
-        SelectionSource ("SelectionSource"),
-        SelectionDestination ("SelectionDestination");
+        SelectionAccounts ("SelectionAccounts"),
+        SelectionAddresses ("SelectionAddresses"),
+        SelectionAccountsAndAddresses("SelectionAccountsAndAddresses");
 
         protected final String selection;
         Selection(String method)
@@ -201,14 +205,19 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
         {
             if (value == null) return null;
 
-            if (value.equalsIgnoreCase(SelectionSource.getStringValue()))
+            if (value.equalsIgnoreCase(SelectionAccounts.getStringValue()))
             {
-                return SelectionSource;
+                return SelectionAccounts;
             }
 
-            if (value.equalsIgnoreCase(SelectionDestination.getStringValue()))
+            if (value.equalsIgnoreCase(SelectionAddresses.getStringValue()))
             {
-                return SelectionDestination;
+                return SelectionAddresses;
+            }
+
+            if (value.equalsIgnoreCase(SelectionAccountsAndAddresses.getStringValue()))
+            {
+                return SelectionAccountsAndAddresses;
             }
             return null;
         }

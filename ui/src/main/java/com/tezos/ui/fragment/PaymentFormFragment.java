@@ -75,11 +75,11 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
         mSrcButton = view.findViewById(R.id.transfer_src_button);
         mSrcButton.setOnClickListener(v ->
-                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.Selection.SelectionSource));
+                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.Selection.SelectionAccounts));
 
         mDstButton = view.findViewById(R.id.transfer_dst_button);
         mDstButton.setOnClickListener(v ->
-                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.Selection.SelectionDestination)
+                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses)
         );
 
         mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled);
@@ -146,12 +146,12 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
                 if (resultCode == R.id.transfer_src_selection_succeed)
                 {
-                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionSource, account);
+                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, account);
                 }
                 else
                 if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
-                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionDestination, account);
+                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, account);
                 }
             }
         }
@@ -161,14 +161,14 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     {
         switch (selection)
         {
-            case SelectionSource:
+            case SelectionAccounts:
             {
                 mSrcButton.setVisibility(View.GONE);
                 mTransferSrcFilled.setVisibility(View.VISIBLE);
             }
             break;
 
-            case SelectionDestination:
+            case SelectionAccountsAndAddresses:
             {
                 mDstButton.setVisibility(View.GONE);
                 mTransferDstFilled.setVisibility(View.VISIBLE);

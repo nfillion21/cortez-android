@@ -203,7 +203,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_addresses ->
             {
-                AddAddressActivity.start(this, tezosTheme)
+                //AddAddressActivity.start(this, tezosTheme)
+                PaymentAccountsActivity.start(this, tezosTheme, PaymentAccountsActivity.Selection.SelectionAddresses)
             }
             R.id.nav_info ->
             {
