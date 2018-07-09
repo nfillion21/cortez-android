@@ -18,22 +18,19 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.tezos.core.client.GatewayClient;
+import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
-import com.tezos.core.utils.SeedManager;
+import com.tezos.core.utils.AddressesDatabase;
+import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
 import com.tezos.ui.activity.AddAddressActivity;
 import com.tezos.ui.activity.PaymentAccountsActivity;
 import com.tezos.ui.adapter.PaymentAccountsAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import io.github.novacrypto.bip32.ExtendedPrivateKey;
-import io.github.novacrypto.bip32.ExtendedPublicKey;
-import io.github.novacrypto.bip32.networks.Bitcoin;
-import io.github.novacrypto.bip44.AddressIndex;
-
-import static io.github.novacrypto.bip44.BIP44.m;
+import java.util.Set;
 
 
 /**
@@ -42,24 +39,20 @@ import static io.github.novacrypto.bip44.BIP44.m;
 
 public class PaymentAccountsFragment extends Fragment implements PaymentAccountsAdapter.OnItemClickListener
 {
+    private static final String ADDRESSES_ARRAYLIST = "addressList";
+
     private OnCardSelectedListener mCallback;
 
-    private static final String STATE_IS_LOADING = "isLoading";
-
     private PaymentAccountsAdapter mAdapter;
-    private GatewayClient mGatewayClient;
-    private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
 
-    private List<com.tezos.core.models.Account> accountList;
-
-    protected boolean mLoadingMode;
+    private List<Address> mAddressList;
 
     private FloatingActionButton mAddFab;
 
     public interface OnCardSelectedListener
     {
-        void onCardClicked(com.tezos.core.models.Account account);
+        void onCardClicked(Address address);
     }
 
     public static PaymentAccountsFragment newInstance(Bundle customThemeBundle, PaymentAccountsActivity.Selection selection)
@@ -118,8 +111,6 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     {
         super.onViewCreated(view, savedInstanceState);
 
-        mProgressBar = view.findViewById(R.id.progress);
-
         mAddFab = view.findViewById(R.id.add);
         mAddFab.setOnClickListener(v ->
         {
@@ -129,45 +120,18 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
             AddAddressActivity.start(getActivity(), theme);
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        if (savedInstanceState != null)
         {
-            mProgressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity(), R.color.tz_light)));
+            ArrayList<Bundle> messagesBundle = savedInstanceState.getParcelableArrayList(ADDRESSES_ARRAYLIST);
+            mAddressList = bundlesToItems(messagesBundle);
         }
         else
         {
-            mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.tz_light), PorterDuff.Mode.SRC_IN);
+            mAddressList = new ArrayList<>();
         }
 
         mRecyclerView = view.findViewById(R.id.products);
         setUpAccountGrid(mRecyclerView);
-
-        if (savedInstanceState == null)
-        {
-            //launchRequest();
-        }
-        else
-        {
-            if (accountList != null && !accountList.isEmpty())
-            {
-                mAdapter.updateAccounts(accountList);
-            }
-        }
-    }
-
-    private void setLoadingMode(boolean loadingMode)
-    {
-        if (loadingMode)
-        {
-            mProgressBar.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.GONE);
-        }
-        else
-        {
-            mProgressBar.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
-        }
-
-        mLoadingMode = loadingMode;
     }
 
     private void setUpAccountGrid(final RecyclerView categoriesView)
@@ -182,19 +146,40 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
 
         mAdapter = new PaymentAccountsAdapter(getActivity(), PaymentAccountsActivity.Selection.fromStringValue(selectionString), customTheme);
-
         mAdapter.setOnItemClickListener(this);
 
         categoriesView.setAdapter(mAdapter);
+
+        reloadList();
+    }
+
+    private void reloadList()
+    {
+        List<Address> databaseAddresses = null;
+
+        Set<String> set = AddressesDatabase.getInstance().getAddresses(getActivity());
+
+        if (set != null && !set.isEmpty()) {
+
+            databaseAddresses = new ArrayList<>(set.size());
+
+            for (String addressString : set) {
+
+                Bundle addressBundle = Utils.fromJSONString(addressString);
+                if (addressBundle != null) {
+                    Address address = Address.fromBundle(addressBundle);
+                    databaseAddresses.add(address);
+                }
+            }
+        }
+
+        mAdapter.updateAddresses(databaseAddresses);
     }
 
     @Override
     public void onResume()
     {
-        //getActivity().supportStartPostponedEnterTransition();
         super.onResume();
-
-        setLoadingMode(mLoadingMode);
     }
 
     @Override
@@ -207,36 +192,53 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     public void onSaveInstanceState(Bundle outState)
     {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(STATE_IS_LOADING, mLoadingMode);
+
+        ArrayList<Bundle> bundles = itemsToBundles(mAddressList);
+        outState.putParcelableArrayList(ADDRESSES_ARRAYLIST, bundles);
     }
 
-    public void cancelOperations()
+    private ArrayList<Bundle> itemsToBundles(List<Address> items)
     {
-        if (mGatewayClient != null)
+        if (items != null)
         {
-            mGatewayClient.cancelOperation(getActivity());
-            mGatewayClient = null;
+            ArrayList<Bundle> bundles = new ArrayList<>(items.size());
+            if (!items.isEmpty())
+            {
+                for (Address it : items)
+                {
+                    bundles.add(it.toBundle());
+                }
+            }
+            return bundles;
         }
 
-        setLoadingMode(false);
+        return null;
     }
 
-    public List<com.tezos.core.models.Account> getAccountList()
+    private ArrayList<Address> bundlesToItems(ArrayList<Bundle> bundles)
     {
-        return accountList;
-    }
+        if (bundles != null)
+        {
+            ArrayList<Address> items = new ArrayList<>(bundles.size());
+            if (!bundles.isEmpty())
+            {
+                for (Bundle bundle : bundles)
+                {
+                    items.add(Address.fromBundle(bundle));
+                }
+            }
+            return items;
+        }
 
-    public void setAccountList(List<com.tezos.core.models.Account> accountList)
-    {
-        this.accountList = accountList;
+        return null;
     }
 
     @Override
-    public void onClick(View view, com.tezos.core.models.Account account)
+    public void onClick(View view, Address address)
     {
         if (mCallback != null)
         {
-            mCallback.onCardClicked(account);
+            mCallback.onCardClicked(address);
         }
     }
 }

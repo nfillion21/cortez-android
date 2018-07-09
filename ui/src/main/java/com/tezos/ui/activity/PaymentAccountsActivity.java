@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.tezos.core.models.Account;
+import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.PaymentAccountsFragment;
@@ -149,13 +150,13 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     }
 
     @Override
-    public void onCardClicked(Account account)
+    public void onCardClicked(Address address)
     {
         Intent intent = getIntent();
         String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
 
         Selection selection = Selection.fromStringValue(selectionString);
-        intent.putExtra(Account.TAG, account.toBundle());
+        intent.putExtra(Account.TAG, address.toBundle());
 
         switch (selection)
         {

@@ -12,12 +12,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tezos.core.models.Account;
+import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.ui.R;
 import com.tezos.ui.activity.PaymentAccountsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by nfillion on 29/02/16.
@@ -28,14 +31,14 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     private final Resources mResources;
     private LayoutInflater mLayoutInflater;
     private Activity mActivity;
-    private List<Account> mAccounts;
+    private List<Address> mAddresses;
 
     private OnItemClickListener mOnItemClickListener;
     private CustomTheme mCustomTheme;
 
     public interface OnItemClickListener
     {
-        void onClick(View view, Account paymentProduct);
+        void onClick(View view, Address paymentProduct);
     }
 
     public PaymentAccountsAdapter(Activity activity, PaymentAccountsActivity.Selection selection, CustomTheme customTheme)
@@ -45,31 +48,23 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         mLayoutInflater = LayoutInflater.from(activity.getApplicationContext());
         mCustomTheme = customTheme;
 
-        mAccounts = new ArrayList<>();
-        for (int i = 0; i < 5; i++)
-        {
-            Account account = new Account();
-            account.setDescription("My account " + i );
-            account.setPubKeyHash("tz1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr");
-            if (i%3 == 0)
-            {
-                account.setPrivateKeyHash("TZ1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr");
-            }
-            mAccounts.add(account);
-        }
+        mAddresses = new ArrayList<>();
+
+        /*
 
         if (selection.equals(PaymentAccountsActivity.Selection.SelectionAccounts))
         {
-            removeAddresses(mAccounts);
+            removeAddresses(mAddresses);
         }
         else if (selection.equals(PaymentAccountsActivity.Selection.SelectionAddresses))
         {
-            removeAccounts(mAccounts);
+            removeAccounts(mAddresses);
         }
         else
         {
             //do not remove anything.
         }
+        */
     }
 
     @Override
@@ -81,12 +76,10 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position)
     {
-        Account account = mAccounts.get(holder.getAdapterPosition());
+        Address address = mAddresses.get(holder.getAdapterPosition());
 
-        // break this dependency
-        //PaymentAccountsActivity activity = (PaymentAccountsActivity)mActivity;
-
-        if (account.getPrivateKeyHash() != null)
+        /*
+        if (address.getPrivateKeyHash() != null)
         {
             holder.keyIcon.setImageResource(R.drawable.vpn_key_black);
         }
@@ -94,10 +87,11 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         {
             holder.keyIcon.setImageResource(R.drawable.redeem_black_24);
         }
+        */
 
-        holder.pubKeyHash.setText(account.getPubKeyHash());
+        holder.pubKeyHash.setText(address.getPubKeyHash());
 
-        holder.title.setText(account.getDescription());
+        holder.title.setText(address.getDescription());
         holder.title.setTextColor(getColor(mCustomTheme.getTextColorPrimaryId()));
         holder.title.setBackgroundColor(getColor(mCustomTheme.getColorPrimaryId()));
 
@@ -108,12 +102,12 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
     @Override
     public int getItemCount()
     {
-        return mAccounts.size();
+        return mAddresses.size();
     }
 
-    public Account getItem(int position)
+    public Address getItem(int position)
     {
-        return mAccounts.get(position);
+        return mAddresses.get(position);
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener)
@@ -121,10 +115,13 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         mOnItemClickListener = onItemClickListener;
     }
 
-    public void updateAccounts(List<Account> accounts)
+    public void updateAddresses(List<Address> addresses)
     {
-        mAccounts.clear();
-        mAccounts.addAll(accounts);
+        mAddresses.clear();
+        if (addresses != null && !addresses.isEmpty())
+        {
+            mAddresses.addAll(addresses);
+        }
         notifyDataSetChanged();
     }
 
@@ -134,37 +131,42 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
      * @param colorRes The resource id of the color to load.
      * @return The loaded color.
      */
-    private int getColor(@ColorRes int colorRes) {
+    private int getColor(@ColorRes int colorRes)
+    {
         return ContextCompat.getColor(mActivity, colorRes);
     }
 
-    private void removeAccounts(List<Account> accountList)
+    private void removeAccounts(List<Address> addressList)
     {
-        int size = accountList.size();
-        List<Account> itemsToRemove = new ArrayList<>(size);
+        int size = addressList.size();
+        List<Address> itemsToRemove = new ArrayList<>(size);
 
-        for (Account a: accountList)
+        for (Address a: addressList)
         {
+            /*
             if (a.getPrivateKeyHash() != null)
             {
                 itemsToRemove.add(a);
             }
+            */
         }
 
-        accountList.removeAll(itemsToRemove);
+        addressList.removeAll(itemsToRemove);
     }
 
-    private void removeAddresses(List<Account> accountList)
+    private void removeAddresses(List<Address> accountList)
     {
         int size = accountList.size();
-        List<Account> itemsToRemove = new ArrayList<>(size);
+        List<Address> itemsToRemove = new ArrayList<>(size);
 
-        for (Account a: accountList)
+        for (Address a: accountList)
         {
+            /*
             if (a.getPrivateKeyHash() == null)
             {
                 itemsToRemove.add(a);
             }
+            */
         }
 
         accountList.removeAll(itemsToRemove);
