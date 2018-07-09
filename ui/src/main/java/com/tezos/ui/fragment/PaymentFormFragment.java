@@ -75,11 +75,11 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
         mSrcButton = view.findViewById(R.id.transfer_src_button);
         mSrcButton.setOnClickListener(v ->
-                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.Selection.SelectionAccounts));
+                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.FromScreen.FromTransfer, PaymentAccountsActivity.Selection.SelectionAccounts));
 
         mDstButton = view.findViewById(R.id.transfer_dst_button);
         mDstButton.setOnClickListener(v ->
-                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses)
+                PaymentAccountsActivity.start(getActivity(), theme, PaymentAccountsActivity.FromScreen.FromTransfer, PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses)
         );
 
         mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled);

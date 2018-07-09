@@ -6,6 +6,7 @@
     <string name="select_destination">Select destination transfer</string>
     <string name="select_source_title">Select source</string>
     <string name="select_destination_title">Select destination</string>
+    <string name="addresses_title">Addresses</string>
     <string name="transfer_title">Transfer</string>
     <string name="card_expiration">Expiry date</string>
     <string name="amount_default" translatable="false">0.1</string>

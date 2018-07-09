@@ -89,9 +89,20 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+    }
 
-        //necessary to handle the request
-        //setRetainInstance(true);
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == AddAddressActivity.ADD_ADDRESS_REQUEST_CODE)
+        {
+            if (resultCode == R.id.add_address_succeed)
+            {
+                reloadList();
+            }
+        }
     }
 
     @Override
@@ -184,12 +195,6 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState)
     {
         super.onSaveInstanceState(outState);
@@ -237,6 +242,8 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     @Override
     public void onClick(View view, Address address)
     {
+
+        //TODO depending on the caller (transfer screen?)
         if (mCallback != null)
         {
             mCallback.onCardClicked(address);

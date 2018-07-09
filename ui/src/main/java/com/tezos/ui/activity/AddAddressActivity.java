@@ -26,6 +26,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.tezos.core.models.Account;
+import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.core.utils.Utils;
@@ -35,6 +36,8 @@ import java.util.Set;
 
 public class AddAddressActivity extends AppCompatActivity
 {
+    public static int ADD_ADDRESS_REQUEST_CODE = 0x2400; // arbitrary int
+
     private TextInputLayout mOwnerLayout;
     private TextInputEditText mOwner;
 
@@ -55,9 +58,7 @@ public class AddAddressActivity extends AppCompatActivity
     public static void start(Activity activity, CustomTheme theme)
     {
         Intent starter = getStartIntent(activity, theme.toBundle());
-
-        //TODO remove the request code
-        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
+        ActivityCompat.startActivityForResult(activity, starter, ADD_ADDRESS_REQUEST_CODE, null);
     }
 
     @Override
@@ -91,25 +92,6 @@ public class AddAddressActivity extends AppCompatActivity
 
         mAddButtonLayout.setOnClickListener(v ->
         {
-            Set<String> addresses = AddressesDatabase.getInstance().getAddresses(this);
-
-            if (addresses != null && !addresses.isEmpty())
-            {
-                for (String addressString : addresses)
-                {
-                    Bundle paymentCardTokenBundle = Utils.fromJSONString(addressString);
-                    if (paymentCardTokenBundle != null)
-                    {
-                        Account account = Account.fromBundle(paymentCardTokenBundle);
-                        Account account2 = Account.fromBundle(paymentCardTokenBundle);
-                        //mPaymentCardTokens.add(paymentCardToken);
-                    }
-                }
-            }
-
-            //((ArrayAdapter)getListAdapter()).notifyDataSetChanged();
-
-
             String addressName = mOwner.getText().toString();
             String publicKeyHash = mTzAddress.getText().toString();
 
@@ -120,6 +102,12 @@ public class AddAddressActivity extends AppCompatActivity
                 account.setPubKeyHash(publicKeyHash);
 
                 AddressesDatabase.getInstance().add(this, account);
+
+                //Intent intent = getIntent();
+                //intent.putExtra(Address.TAG, address.toBundle());
+
+                setResult(R.id.add_address_succeed, null);
+                finish();
             }
         });
 

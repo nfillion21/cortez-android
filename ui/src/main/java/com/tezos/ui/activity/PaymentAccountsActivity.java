@@ -30,10 +30,11 @@ import com.tezos.ui.utils.ConfirmCredentialHelper;
 public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener, IConfirmCredentialHandler
 {
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
+    public static String FROM_SCREEN_KEY = "FromScreenKey";
 
-    public static void start(Activity activity, CustomTheme theme, Selection selection)
+    public static void start(Activity activity, CustomTheme theme, FromScreen fromScreen, Selection selection)
     {
-        Intent starter = getStartIntent(activity, theme, selection);
+        Intent starter = getStartIntent(activity, theme, fromScreen, selection);
         ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
@@ -51,11 +52,12 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     }
 
     @NonNull
-    static Intent getStartIntent(Context context, CustomTheme theme, Selection selection)
+    static Intent getStartIntent(Context context, CustomTheme theme, FromScreen fromScreen, Selection selection)
     {
         Intent starter = new Intent(context, PaymentAccountsActivity.class);
         starter.putExtra(CustomTheme.TAG, theme.toBundle());
         starter.putExtra(SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
+        starter.putExtra(FROM_SCREEN_KEY, fromScreen.getStringValue());
 
         return starter;
     }
@@ -64,6 +66,18 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == AddAddressActivity.ADD_ADDRESS_REQUEST_CODE)
+        {
+            if (resultCode == R.id.add_address_succeed)
+            {
+                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.payment_products_container);
+                if (fragment != null)
+                {
+                    fragment.onActivityResult(requestCode, resultCode, data);
+                }
+            }
+        }
     }
 
     @Override
@@ -116,18 +130,29 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
         String selectionString = getIntent().getStringExtra(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
-        Selection selection = Selection.fromStringValue(selectionString);
-        if (selection.equals(Selection.SelectionAccounts))
+
+        String fromScreenString = getIntent().getStringExtra(FROM_SCREEN_KEY);
+        FromScreen fromScreen = FromScreen.fromStringValue(fromScreenString);
+
+        if (fromScreen.equals(FromScreen.FromHome))
         {
-            mTitleBar.setText(getString(R.string.select_source_title));
+            mTitleBar.setText(getString(R.string.addresses_title));
         }
-        else if (selection.equals(Selection.SelectionAddresses))
+        else if (fromScreen.equals(FromScreen.FromTransfer))
         {
-            mTitleBar.setText(getString(R.string.select_destination_title));
-        }
-        else
-        {
-            //TODO accounts AND addresses
+            Selection selection = Selection.fromStringValue(selectionString);
+            if (selection.equals(Selection.SelectionAccounts))
+            {
+                mTitleBar.setText(getString(R.string.select_source_title));
+            }
+            else if (selection.equals(Selection.SelectionAddresses))
+            {
+                mTitleBar.setText(getString(R.string.select_destination_title));
+            }
+            else
+            {
+                //TODO accounts AND addresses
+            }
         }
     }
 
@@ -153,30 +178,36 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     public void onCardClicked(Address address)
     {
         Intent intent = getIntent();
-        String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
 
-        Selection selection = Selection.fromStringValue(selectionString);
-        intent.putExtra(Account.TAG, address.toBundle());
-
-        switch (selection)
+        String fromScreenString = intent.getStringExtra(FROM_SCREEN_KEY);
+        FromScreen fromScreen = FromScreen.fromStringValue(fromScreenString);
+        if (!fromScreen.equals(FromScreen.FromHome))
         {
-            case SelectionAccounts:
-            {
-                setResult(R.id.transfer_src_selection_succeed, intent);
-            }
-            break;
+            String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
 
-            case SelectionAccountsAndAddresses:
-            {
-                setResult(R.id.transfer_dst_selection_succeed, intent);
-            }
-            break;
+            Selection selection = Selection.fromStringValue(selectionString);
+            intent.putExtra(Account.TAG, address.toBundle());
 
-            default: //no-op;
+            switch (selection)
+            {
+                case SelectionAccounts:
+                {
+                    setResult(R.id.transfer_src_selection_succeed, intent);
+                }
                 break;
-        }
 
-        finish();
+                case SelectionAccountsAndAddresses:
+                {
+                    setResult(R.id.transfer_dst_selection_succeed, intent);
+                }
+                break;
+
+                default: //no-op;
+                    break;
+            }
+
+            finish();
+        }
     }
 
     @Override
@@ -219,6 +250,39 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
             if (value.equalsIgnoreCase(SelectionAccountsAndAddresses.getStringValue()))
             {
                 return SelectionAccountsAndAddresses;
+            }
+            return null;
+        }
+    }
+
+    public enum FromScreen
+    {
+        FromHome ("FromHome"),
+        FromTransfer ("FromTransfer");
+
+        protected final String selection;
+        FromScreen(String method)
+        {
+            this.selection = method;
+        }
+
+        public String getStringValue()
+        {
+            return this.selection;
+        }
+
+        public static FromScreen fromStringValue(String value)
+        {
+            if (value == null) return null;
+
+            if (value.equalsIgnoreCase(FromHome.getStringValue()))
+            {
+                return FromHome;
+            }
+
+            if (value.equalsIgnoreCase(FromTransfer.getStringValue()))
+            {
+                return FromTransfer;
             }
             return null;
         }

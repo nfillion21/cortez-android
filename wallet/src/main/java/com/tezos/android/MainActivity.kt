@@ -163,18 +163,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
     }
 
-    private fun validatePayButton(button:Button, theme:CustomTheme) {
-
-        button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
-
-        button.background = Utils.makeSelector(this, theme)
-
-        val drawables = button.compoundDrawables
-        //val wrapDrawable = DrawableCompat.wrap(drawables[0])
-        //DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
-    }
-
-
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -204,7 +192,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_addresses ->
             {
                 //AddAddressActivity.start(this, tezosTheme)
-                PaymentAccountsActivity.start(this, tezosTheme, PaymentAccountsActivity.Selection.SelectionAddresses)
+                PaymentAccountsActivity.start(this, tezosTheme, PaymentAccountsActivity.FromScreen.FromHome, PaymentAccountsActivity.Selection.SelectionAddresses)
             }
             R.id.nav_info ->
             {
