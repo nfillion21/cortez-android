@@ -6,6 +6,7 @@ import com.tezos.core.errors.exceptions.ApiException;
 import com.tezos.core.errors.exceptions.HttpException;
 import com.tezos.core.models.AbstractModel;
 import com.tezos.core.models.Account;
+import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.AbstractRequest;
 import com.tezos.core.requests.order.PaymentPageRequest;
@@ -66,17 +67,22 @@ public abstract class AbstractSerializationMapper {
         }
     }
 
-    private void initSerializing(AbstractModel model) {
-
+    private void initSerializing(AbstractModel model)
+    {
         if (model instanceof CustomTheme)
         {
             CustomTheme customTheme = (CustomTheme) model;
             this.setSerialization(new CustomThemeSerialization(customTheme));
-
-        } else if (model instanceof Account) {
-
+        }
+        else if (model instanceof Account)
+        {
             Account account = (Account) model;
             this.setSerialization(new Account.AccountSerialization(account));
+        }
+        else if (model instanceof Address)
+        {
+            Address address = (Address) model;
+            this.setSerialization(new Address.AddressSerialization(address));
         }
     }
 

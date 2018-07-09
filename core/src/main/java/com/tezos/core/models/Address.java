@@ -9,39 +9,48 @@ import com.tezos.core.serialization.interfaces.AbstractSerialization;
 
 import java.util.Map;
 
-public class Account extends Address
+public class Address extends AbstractModel
 {
-    public static final String TAG = "Account";
+    public static final String TAG = "Address";
 
-    protected String privateKeyHash;
+    protected String description;
+    protected String pubKeyHash;
 
-    public Account() {}
+    public Address() {}
 
-    public String getPrivateKeyHash() {
-        return privateKeyHash;
+    public String getDescription() {
+        return description;
     }
 
-    public void setPrivateKeyHash(String privateKeyHash) {
-        this.privateKeyHash = privateKeyHash;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getPubKeyHash() {
+        return pubKeyHash;
+    }
+
+    public void setPubKeyHash(String pubKeyHash) {
+        this.pubKeyHash = pubKeyHash;
     }
 
     public Bundle toBundle()
     {
-        AccountSerializationMapper mapper = new AccountSerializationMapper(this);
+        AddressSerializationMapper mapper = new AddressSerializationMapper(this);
         return mapper.getSerializedBundle();
     }
 
-    public static Account fromBundle(Bundle bundle)
+    public static Address fromBundle(Bundle bundle)
     {
-        AccountMapper mapper = new AccountMapper(bundle);
+        AddressMapper mapper = new AddressMapper(bundle);
         return mapper.mappedObjectFromBundle();
     }
 
-    public static class AccountSerializationMapper extends AbstractSerializationMapper
+    public static class AddressSerializationMapper extends AbstractSerializationMapper
     {
-        protected AccountSerializationMapper(Account account)
+        protected AddressSerializationMapper(Address address)
         {
-            super(account);
+            super(address);
         }
 
         @Override
@@ -57,9 +66,9 @@ public class Account extends Address
         }
     }
 
-    protected static class AccountMapper extends AddressMapper
+    protected static class AddressMapper extends AbstractMapper
     {
-        public AccountMapper(Object rawData)
+        public AddressMapper(Object rawData)
         {
             super(rawData);
         }
@@ -85,29 +94,20 @@ public class Account extends Address
         @Override
         public Account mappedObjectFromBundle()
         {
-            Address address = super.mappedObjectFromBundle();
+            Account object = new Account();
 
-            Account account = this.accountFromAddress(address);
-            account.setPrivateKeyHash(this.getStringForKey("privateKeyHash"));
+            object.setDescription(this.getStringForKey("description"));
+            object.setPubKeyHash(this.getStringForKey("pubKeyHash"));
 
-            return account;
-        }
-
-        private Account accountFromAddress(Address address)
-        {
-            Account account = new Account();
-            account.setDescription(address.getDescription());
-            account.setPubKeyHash(address.getPubKeyHash());
-
-            return account;
+            return object;
         }
     }
 
-    public static class AccountSerialization extends AddressSerialization
+    public static class AddressSerialization extends AbstractSerialization
     {
-        public AccountSerialization(Account account)
+        public AddressSerialization(Address address)
         {
-            super(account);
+            super(address);
         }
 
         @Override
@@ -121,8 +121,9 @@ public class Account extends Address
         {
             super.getSerializedBundle();
 
-            Account account = (Account) this.getModel();
-            this.putStringForKey("privateKeyHash", account.getPrivateKeyHash());
+            Address address = (Address) this.getModel();
+            this.putStringForKey("description", address.getDescription());
+            this.putStringForKey("pubKeyHash", address.getPubKeyHash());
 
             return this.getBundle();
         }
