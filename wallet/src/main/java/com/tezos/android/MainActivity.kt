@@ -91,11 +91,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
                         mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
 
-                        // TODO offset it
-                        val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.wallet_successfully_created, Snackbar.LENGTH_LONG)
+                        val snackbar = Snackbar.make(findViewById<Button>(R.id.coordinator), R.string.wallet_successfully_created, Snackbar.LENGTH_LONG)
                         val snackBarView = snackbar.getView()
                         snackBarView.setBackgroundColor((ContextCompat.getColor(this,
-                                android.R.color.holo_green_light)))
+                                R.color.tz_green)))
                         snackbar.show()
                     }
                     else
@@ -115,7 +114,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
 
                         // TODO offset it
-                        val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.wallet_successfully_restored, Snackbar.LENGTH_LONG)
+                        val snackbar = Snackbar.make(findViewById(R.id.coordinator), R.string.wallet_successfully_restored, Snackbar.LENGTH_LONG)
                         val snackBarView = snackbar.getView()
                         snackBarView.setBackgroundColor((ContextCompat.getColor(this,
                                 android.R.color.holo_green_light)))
