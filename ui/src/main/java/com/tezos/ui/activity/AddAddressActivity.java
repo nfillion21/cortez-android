@@ -31,10 +31,11 @@ import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
+import com.tezos.ui.interfaces.IPasscodeHandler;
 
 import java.util.Set;
 
-public class AddAddressActivity extends AppCompatActivity
+public class AddAddressActivity extends AppCompatActivity implements IPasscodeHandler
 {
     public static int ADD_ADDRESS_REQUEST_CODE = 0x2400; // arbitrary int
 
@@ -207,6 +208,11 @@ public class AddAddressActivity extends AppCompatActivity
         }
 
         this.mTzAddress.setTextColor(ContextCompat.getColor(this, color));
+    }
+
+    @Override
+    public void launchPasscode() {
+
     }
 
     private class GenericTextWatcher implements TextWatcher

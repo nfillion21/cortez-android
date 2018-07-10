@@ -33,6 +33,11 @@
             android:theme="@style/PaymentScreens.PublicKeyActivity"
             />
 
+        <activity
+            android:name="com.tezos.ui.activity.PasscodeActivity"
+            android:theme="@style/PaymentScreens.PasscodeActivity"
+            android:windowSoftInputMode="stateVisible" />
+
     </application>
 
 </manifest>

@@ -7,9 +7,4 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="use_passcode">Use a passcode</string>
-    <string name="general_passcode">Please enter a general password for the application.</string>
-    <string name="incorrect_passcode">The passcode is incorrect, please try again.</string>
-    <string name="confirm_passcode">Please confirm the passcode.</string>
-    <string name="error_different_passcodes">The passcode and the confirmation are not the same, please enter the passcode again.</string>
-    <string name="title_passcode">Enter Passcode</string>
 </resources>

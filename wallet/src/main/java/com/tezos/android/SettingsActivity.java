@@ -16,9 +16,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
-import com.tezos.android.activities.PasscodeActivity;
+import com.tezos.ui.activity.PasscodeActivity;
 import com.tezos.android.fragments.SettingsFragment;
-import com.tezos.android.interfaces.IPasscodeHandler;
+import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.utils.ArchLifecycleApp;
 

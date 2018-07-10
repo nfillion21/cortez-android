@@ -1,4 +1,4 @@
-package com.tezos.android.interfaces;
+package com.tezos.ui.interfaces;
 
 /**
  * Created by nfillion on 3/7/18.

@@ -1,4 +1,4 @@
-package com.tezos.android.activities;
+package com.tezos.ui.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,7 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.tezos.android.R;
+import com.tezos.ui.R;
 
 /**
  * Created by nfillion on 3/7/18.

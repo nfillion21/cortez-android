@@ -24,11 +24,6 @@
         </activity>
 
         <activity
-            android:name=".activities.PasscodeActivity"
-            android:theme="@style/TezosTheme.PasscodeActivity"
-            android:windowSoftInputMode="stateVisible" />
-
-        <activity
             android:name=".AboutActivity"
             android:theme="@style/TezosTheme.AboutActivity" />
 

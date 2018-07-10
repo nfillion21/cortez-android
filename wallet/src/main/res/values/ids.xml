@@ -1,5 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="passcode_succeed" type="id" />
-    <item name="passcode_failed" type="id" />
 </resources>

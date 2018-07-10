@@ -48,5 +48,10 @@
     <string name="alert_deleting_address">Deleting address</string>
     <string name="alert_deleting_address_body">Are you sure that you want to delete this address?</string>
     <string name="address_successfuly_added">Address successfully added!</string>
+    <string name="general_passcode">Please enter a general password for the application.</string>
+    <string name="incorrect_passcode">The passcode is incorrect, please try again.</string>
+    <string name="confirm_passcode">Please confirm the passcode.</string>
+    <string name="error_different_passcodes">The passcode and the confirmation are not the same, please enter the passcode again.</string>
+    <string name="title_passcode">Enter Passcode</string>
 
 </resources>

@@ -23,7 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.tezos.android.R;
-import com.tezos.android.activities.PasscodeActivity;
+import com.tezos.ui.activity.PasscodeActivity;
 
 import java.util.Arrays;
 import java.util.List;
