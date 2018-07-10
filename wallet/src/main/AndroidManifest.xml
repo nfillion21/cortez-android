@@ -19,6 +19,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SettingsActivity"
+            android:theme="@style/TezosTheme.SettingsActivity">
+        </activity>
+
+        <activity
+            android:name=".activities.PasscodeActivity"
+            android:theme="@style/TezosTheme.PasscodeActivity"
+            android:windowSoftInputMode="stateVisible" />
 
         <provider
             android:name="com.tezos.core.database.EnglishWordsContentProvider"

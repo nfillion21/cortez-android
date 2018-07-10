@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
+import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
@@ -12,18 +13,23 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
+import com.tezos.android.R;
 import com.tezos.ui.activity.*
-import com.tezos.ui.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener
 {
-    private val PK_HASH_KEY = "pkhash_key"
-    var mPublicKeyHash: String? = null
+    private val pkHashKey = "pkhash_key"
+    private var mPublicKeyHash: String? = null
+
+    private var mRestoreWalletButton: Button? = null
+    private var mCreateWalletButton: Button? = null
+    private var mTezosLogo: ImageView? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -60,19 +66,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         //PaymentScreenActivity.start(this)
 
-        val restoreWalletButton = findViewById<Button>(R.id.restoreWalletButton)
-        restoreWalletButton.setOnClickListener {
+        mRestoreWalletButton = findViewById(R.id.restoreWalletButton)
+        mRestoreWalletButton!!.setOnClickListener {
             RestoreWalletActivity.start(this, tezosTheme)
         }
 
-        val createWalletButton = findViewById<Button>(R.id.createWalletButton)
-        createWalletButton.setOnClickListener {
+        mCreateWalletButton = findViewById(R.id.createWalletButton)
+        mCreateWalletButton!!.setOnClickListener {
             CreateWalletActivity.start(this, tezosTheme)
         }
 
+        mTezosLogo = findViewById(R.id.ic_logo)
+
         if (savedInstanceState != null)
         {
-            mPublicKeyHash = savedInstanceState.getString(PK_HASH_KEY, null)
+            mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
         }
     }
 
@@ -96,6 +104,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         snackBarView.setBackgroundColor((ContextCompat.getColor(this,
                                 R.color.tz_green)))
                         snackbar.show()
+
+                        //restoreWalletButton.visibility = View.INVISIBLE
+                        mRestoreWalletButton!!.animate().alpha(0.0f).duration = 1000
+                        mCreateWalletButton!!.animate().alpha(0.0f).duration = 1000
+                        mTezosLogo!!.animate().alpha(0.0f).duration = 1000
                     }
                     else
                     {
@@ -119,6 +132,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         snackBarView.setBackgroundColor((ContextCompat.getColor(this,
                                 android.R.color.holo_green_light)))
                         snackbar.show()
+
                     }
                     else
                     {
@@ -193,9 +207,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 //AddAddressActivity.start(this, tezosTheme)
                 PaymentAccountsActivity.start(this, tezosTheme, PaymentAccountsActivity.FromScreen.FromHome, PaymentAccountsActivity.Selection.SelectionAddresses)
             }
+            R.id.nav_settings ->
+            {
+                /*
+                val starter = Intent(this, AboutActivity::class.java)
+                starter.putExtra(CustomTheme.TAG, tezosTheme.toBundle())
+                ActivityCompat.startActivityForResult(this, starter, -1, null)
+                */
+                SettingsActivity.start(this, tezosTheme)
+            }
             R.id.nav_info ->
             {
-
+                val starter = Intent(this, AboutActivity::class.java)
+                starter.putExtra(CustomTheme.TAG, tezosTheme.toBundle())
+                ActivityCompat.startActivityForResult(this, starter, -1, null)
             }
         }
 
@@ -207,6 +232,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     {
         super.onSaveInstanceState(outState)
 
-        outState?.putString(PK_HASH_KEY, mPublicKeyHash)
+        outState?.putString(pkHashKey, mPublicKeyHash)
     }
 }
