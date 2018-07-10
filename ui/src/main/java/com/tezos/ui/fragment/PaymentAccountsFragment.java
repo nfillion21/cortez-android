@@ -9,7 +9,9 @@ import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -100,6 +102,13 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         {
             if (resultCode == R.id.add_address_succeed)
             {
+
+                Snackbar snackbar = Snackbar.make(mAddFab, R.string.address_successfuly_added,
+                        Snackbar.LENGTH_SHORT);
+                View snackBarView = snackbar.getView();
+                snackBarView.setBackgroundColor((ContextCompat.getColor(getActivity(),
+                        R.color.tz_green)));
+                snackbar.show();
                 reloadList();
             }
         }

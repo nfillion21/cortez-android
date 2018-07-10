@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:transitionGroup="false"
-    android:orientation="vertical"
-    tools:ignore="Overdraw,UnusedAttribute">
+    android:layout_height="match_parent">
 
     <android.support.v7.widget.RecyclerView
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -13,7 +11,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/products"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:padding="@dimen/spacing_nano"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
@@ -26,17 +24,12 @@
     <android.support.design.widget.FloatingActionButton
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:fabSize="normal"
         android:id="@+id/add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/spacing_double"
-        android:layout_marginEnd="@dimen/spacing_double"
-        android:layout_marginRight="@dimen/spacing_double"
-        android:layout_marginLeft="@dimen/spacing_double"
+        android:layout_gravity="bottom|right|end"
+        android:layout_margin="@dimen/spacing_double"
         android:src="@drawable/ic_add_black"
         app:backgroundTint="@android:color/background_light" />
-
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>
