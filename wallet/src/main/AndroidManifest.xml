@@ -28,6 +28,10 @@
             android:theme="@style/TezosTheme.PasscodeActivity"
             android:windowSoftInputMode="stateVisible" />
 
+        <activity
+            android:name=".AboutActivity"
+            android:theme="@style/TezosTheme.AboutActivity" />
+
         <provider
             android:name="com.tezos.core.database.EnglishWordsContentProvider"
             android:authorities="com.tezos.core.database.EnglishWordsProvider"

@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/spacing_double"
         android:layout_marginBottom="@dimen/spacing_micro"
-        style="@style/TextAppearance.AppCompat.Title"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
         android:elevation="@dimen/elevation_header"
         android:gravity="center_vertical"
         android:text="@string/privacy"
