@@ -20,9 +20,11 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.android.R;
 import com.tezos.ui.activity.*
+import com.tezos.ui.interfaces.IPasscodeHandler
+import com.tezos.ui.utils.ScreenUtils
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler
 {
     private val pkHashKey = "pkhash_key"
     private var mPublicKeyHash: String? = null
@@ -84,6 +86,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    override fun onResume()
+    {
+        super.onResume()
+        launchPasscode()
+    }
+
+    override fun launchPasscode()
+    {
+        ScreenUtils.launchPasscode(this)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
         super.onActivityResult(requestCode, resultCode, data)
@@ -132,7 +145,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         snackBarView.setBackgroundColor((ContextCompat.getColor(this,
                                 android.R.color.holo_green_light)))
                         snackbar.show()
-
                     }
                     else
                     {

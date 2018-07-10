@@ -22,12 +22,14 @@ import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.PaymentAccountsFragment;
 import com.tezos.ui.interfaces.IConfirmCredentialHandler;
+import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.ui.utils.ConfirmCredentialHelper;
+import com.tezos.ui.utils.ScreenUtils;
 
 /**
  * Created by nfillion on 25/02/16.
  */
-public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener, IConfirmCredentialHandler
+public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener, IConfirmCredentialHandler, IPasscodeHandler
 {
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
     public static String FROM_SCREEN_KEY = "FromScreenKey";
@@ -36,13 +38,6 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     {
         Intent starter = getStartIntent(activity, theme, fromScreen, selection);
         ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
-    }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        this.launchConfirmCredential();
     }
 
     @Override
@@ -93,6 +88,19 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
         {
             attachAccountGridFragment();
         }
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        launchPasscode();
+    }
+
+    @Override
+    public void launchPasscode() {
+        ScreenUtils.launchPasscode(this);
     }
 
     private void initToolbar()

@@ -28,8 +28,10 @@ import android.widget.TextView;
 import com.tezos.core.crypto.CryptoUtils;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.interfaces.IPasscodeHandler;
+import com.tezos.ui.utils.ScreenUtils;
 
-public class CreateWalletActivity extends AppCompatActivity
+public class CreateWalletActivity extends AppCompatActivity implements IPasscodeHandler
 {
     private static final String MNEMONICS_KEY = "mnemonics_key";
     private static final String BACKUP_CHECKBOX_KEY = "backup_checkbox_key";
@@ -162,6 +164,19 @@ public class CreateWalletActivity extends AppCompatActivity
             mBackupChecked  = buttonView.isChecked();
             validateCreateButton(isCreateButtonValid(), theme);
         });
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        launchPasscode();
+    }
+
+    @Override
+    public void launchPasscode() {
+        ScreenUtils.launchPasscode(this);
     }
 
     private void initToolbar(CustomTheme theme)

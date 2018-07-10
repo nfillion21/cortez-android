@@ -26,12 +26,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.tezos.core.models.Account;
-import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
 import com.tezos.ui.interfaces.IPasscodeHandler;
+import com.tezos.ui.utils.ScreenUtils;
 
 import java.util.Set;
 
@@ -126,6 +126,14 @@ public class AddAddressActivity extends AppCompatActivity implements IPasscodeHa
 
     }
 
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        launchPasscode();
+    }
+
     protected boolean isInputDataValid()
     {
         if (
@@ -212,7 +220,7 @@ public class AddAddressActivity extends AppCompatActivity implements IPasscodeHa
 
     @Override
     public void launchPasscode() {
-
+        ScreenUtils.launchPasscode(this);
     }
 
     private class GenericTextWatcher implements TextWatcher

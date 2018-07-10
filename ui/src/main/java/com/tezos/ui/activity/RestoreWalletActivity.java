@@ -20,10 +20,12 @@ import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.SearchWordDialogFragment;
 import com.tezos.ui.fragment.RestoreWalletFragment;
+import com.tezos.ui.interfaces.IPasscodeHandler;
+import com.tezos.ui.utils.ScreenUtils;
 
 import net.glxn.qrgen.android.QRCode;
 
-public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnSearchWordSelectedListener
+public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnSearchWordSelectedListener, IPasscodeHandler
 {
     public static int RESTORE_WALLET_REQUEST_CODE = 0x2400; // arbitrary int
 
@@ -59,6 +61,19 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
                     .add(R.id.restorewallet_container, restoreWalletFragment)
                     .commit();
         }
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        launchPasscode();
+    }
+
+    @Override
+    public void launchPasscode() {
+        ScreenUtils.launchPasscode(this);
     }
 
     private void initToolbar(CustomTheme theme)

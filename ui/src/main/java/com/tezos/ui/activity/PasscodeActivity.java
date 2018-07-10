@@ -16,12 +16,14 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.tezos.ui.R;
+import com.tezos.ui.interfaces.IPasscodeHandler;
+import com.tezos.ui.utils.ScreenUtils;
 
 /**
  * Created by nfillion on 3/7/18.
  */
 
-public class PasscodeActivity extends AppCompatActivity
+public class PasscodeActivity extends AppCompatActivity implements IPasscodeHandler
 {
     private TextInputEditText mCode1;
     private TextInputEditText mCode2;
@@ -113,6 +115,19 @@ public class PasscodeActivity extends AppCompatActivity
                 mInfoTextview.setVisibility(View.GONE);
             }
         }
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        launchPasscode();
+    }
+
+    @Override
+    public void launchPasscode() {
+        ScreenUtils.launchPasscode(this);
     }
 
     private void initActionBar()

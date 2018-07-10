@@ -21,6 +21,7 @@ import com.tezos.android.fragments.SettingsFragment;
 import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.utils.ArchLifecycleApp;
+import com.tezos.ui.utils.ScreenUtils;
 
 /**
  * Created by nfillion on 3/6/18.
@@ -128,20 +129,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
     @Override
     public void launchPasscode()
     {
-        ArchLifecycleApp archLifecycleApp = (ArchLifecycleApp) getApplication();
-        boolean isStarted = archLifecycleApp.isStarted();
-
-        if (isStarted)
-        {
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            String codeGuess = sharedPref.getString(PasscodeActivity.PASSCODE_KEY, null);
-
-            if (codeGuess != null)
-            {
-                Intent intent = new Intent(this, PasscodeActivity.class);
-                startActivity(intent);
-            }
-        }
+        ScreenUtils.launchPasscode(this);
     }
 
     @Override

@@ -12,9 +12,12 @@ import android.support.v7.widget.Toolbar
 import android.widget.TextView
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
+import com.tezos.ui.interfaces.IPasscodeHandler
+import com.tezos.ui.utils.ScreenUtils
 
-class AboutActivity : AppCompatActivity()
+class AboutActivity : AppCompatActivity(), IPasscodeHandler
 {
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -31,6 +34,17 @@ class AboutActivity : AppCompatActivity()
         {
             //mPublicKeyHash = savedInstanceState.getString(PK_HASH_KEY, null)
         }
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+        launchPasscode()
+    }
+
+    override fun launchPasscode()
+    {
+        ScreenUtils.launchPasscode(this)
     }
 
     fun start(activity: Activity, theme: CustomTheme)

@@ -27,10 +27,12 @@ import android.widget.Toast;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.interfaces.IPasscodeHandler;
+import com.tezos.ui.utils.ScreenUtils;
 
 import net.glxn.qrgen.android.QRCode;
 
-public class PublicKeyHashActivity extends AppCompatActivity
+public class PublicKeyHashActivity extends AppCompatActivity implements IPasscodeHandler
 {
     public static final String PKH_KEY = "pkh_key";
 
@@ -101,6 +103,19 @@ public class PublicKeyHashActivity extends AppCompatActivity
         String pkhash = getIntent().getStringExtra(PKH_KEY);
         mPkhTextview = findViewById(R.id.pkh_textview);
         mPkhTextview.setText(pkhash);
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        launchPasscode();
+    }
+
+    @Override
+    public void launchPasscode() {
+        ScreenUtils.launchPasscode(this);
     }
 
     private void initToolbar(CustomTheme theme)

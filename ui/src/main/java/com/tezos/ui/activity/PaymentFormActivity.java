@@ -22,12 +22,14 @@ import com.tezos.core.utils.ApiLevelHelper;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.AbstractPaymentFormFragment;
 import com.tezos.ui.interfaces.IConfirmCredentialHandler;
+import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.ui.utils.ConfirmCredentialHelper;
+import com.tezos.ui.utils.ScreenUtils;
 
 /**
  * Created by nfillion on 29/02/16.
  */
-public class PaymentFormActivity extends AppCompatActivity implements IConfirmCredentialHandler
+public class PaymentFormActivity extends AppCompatActivity implements IConfirmCredentialHandler, IPasscodeHandler
 {
     public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
 
@@ -63,6 +65,19 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
         }
     }
 
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        launchPasscode();
+    }
+
+    @Override
+    public void launchPasscode() {
+        ScreenUtils.launchPasscode(this);
+    }
+
     private void initToolbar(CustomTheme theme)
     {
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -94,13 +109,6 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
 
         TextView mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
-    }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        this.launchConfirmCredential();
     }
 
     @TargetApi(Build.VERSION_CODES.M)
