@@ -16,7 +16,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
@@ -48,6 +47,7 @@ import java.util.List;
 public class SettingsFragment extends Fragment implements AdapterView.OnItemClickListener
 {
     private OnRowSelectedListener mCallback;
+    private OnLogOutClickedListener mLogOutCallback;
 
     // The user view type.
     private static final int PASSCODE_ITEM_VIEW_TYPE = 0;
@@ -63,6 +63,11 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
     public interface OnRowSelectedListener
     {
         void onItemClicked();
+    }
+
+    public interface OnLogOutClickedListener
+    {
+        void onLogOutClicked();
     }
 
     public static SettingsFragment newInstance()
@@ -84,6 +89,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         try
         {
             mCallback = (OnRowSelectedListener) context;
+            mLogOutCallback = (OnLogOutClickedListener) context;
         }
         catch (ClassCastException e)
         {
@@ -140,7 +146,8 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
                         {
                             dialog.dismiss();
                             AddressesDatabase.getInstance().logOut(getActivity());
-                            validateExitButton(false);
+
+                            mLogOutCallback.onLogOutClicked();
                         }
                         break;
 
@@ -151,8 +158,8 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
                 };
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(R.string.alert_deleting_address)
-                        .setMessage(R.string.alert_deleting_address_body)
+                builder.setTitle(R.string.alert_exit_account)
+                        .setMessage(R.string.alert_exit_acccount_body)
                         .setNegativeButton(android.R.string.cancel, dialogClickListener)
                         .setPositiveButton(android.R.string.yes, dialogClickListener)
                         .setCancelable(false)

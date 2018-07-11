@@ -27,9 +27,11 @@ import com.tezos.ui.utils.ScreenUtils;
  * Created by nfillion on 3/6/18.
  */
 
-public class SettingsActivity extends AppCompatActivity implements SettingsFragment.OnRowSelectedListener, IPasscodeHandler
+public class SettingsActivity extends AppCompatActivity implements SettingsFragment.OnRowSelectedListener, IPasscodeHandler, SettingsFragment.OnLogOutClickedListener
 {
     private static final String TAG_SETTINGS = "SettingsTag";
+
+    public static int SETTINGS_REQUEST_CODE = 0x2500; // arbitrary int
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -42,7 +44,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
     public static void start(Activity activity, CustomTheme theme)
     {
         Intent starter = getStartIntent(activity, theme.toBundle());
-        ActivityCompat.startActivityForResult(activity, starter, -1, null);
+        ActivityCompat.startActivityForResult(activity, starter, SETTINGS_REQUEST_CODE, null);
     }
 
     @Override
@@ -135,5 +137,17 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
     @Override
     public void onItemClicked() {
 
+    }
+
+    @Override
+    public void onLogOutClicked()
+    {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.remove(PasscodeActivity.PASSCODE_KEY);
+        editor.apply();
+
+        setResult(R.id.logout_succeed, null);
+        finish();
     }
 }

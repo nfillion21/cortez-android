@@ -102,6 +102,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onResume()
         launchPasscode()
 
+        handleVisibility()
+    }
+
+    private fun handleVisibility()
+    {
         if (!animating)
         {
             val isPrivateKeyEnabled = AddressesDatabase.getInstance().isPrivateKeyOn(this)
@@ -115,8 +120,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             else
             {
+                mTezosLogo!!.alpha = 1.0f
                 mTezosLogo!!.visibility = View.VISIBLE
+                mCreateWalletButton!!.alpha = 1.0f
                 mCreateWalletButton!!.visibility = View.VISIBLE
+                mRestoreWalletButton!!.alpha = 1.0f
                 mRestoreWalletButton!!.visibility = View.VISIBLE
             }
         }
@@ -229,6 +237,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         //Log.v("ProjectDetails", "data is null")
                     }
                 }
+            }
+
+            SettingsActivity.SETTINGS_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.logout_succeed)
+                {
+                    //nothing special to do.
+                }
+            }
+
+            else ->
+            {
+                //handleVisibility()
             }
         }
     }

@@ -12,4 +12,6 @@
     <item name="add_address_failed" type="id" />
     <item name="passcode_succeed" type="id" />
     <item name="passcode_failed" type="id" />
+    <item name="logout_succeed" type="id" />
+    <item name="logout_failed" type="id" />
 </resources>
