@@ -5,12 +5,19 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,11 +25,14 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckedTextView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.tezos.android.R;
+import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.activity.PasscodeActivity;
 
 import java.util.Arrays;
@@ -32,7 +42,7 @@ import java.util.List;
  * Created by nfillion on 3/6/18.
  */
 
-public class SettingsFragment extends ListFragment implements AdapterView.OnItemClickListener
+public class SettingsFragment extends Fragment implements AdapterView.OnItemClickListener
 {
     private OnRowSelectedListener mCallback;
 
@@ -41,6 +51,11 @@ public class SettingsFragment extends ListFragment implements AdapterView.OnItem
 
     // The team support view type.
     private static final int ICON_ITEM_VIEW_TYPE = 1;
+
+    private Button mExitButton;
+    private FrameLayout mExitButtonLayout;
+
+    private ListView mList;
 
     public interface OnRowSelectedListener
     {
@@ -83,28 +98,77 @@ public class SettingsFragment extends ListFragment implements AdapterView.OnItem
         {
         }
 
-        ListView listView = getListView();
-        listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        listView.setItemsCanFocus(false);
-        listView.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
+    {
+        super.onViewCreated(view, savedInstanceState);
+
+        mList = view.findViewById(R.id.list);
+        mList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+        mList.setItemsCanFocus(false);
+        mList.setOnItemClickListener(this);
 
         List<String> list = Arrays.asList(
                 getString(R.string.use_passcode)
         );
 
         ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), list);
-        setListAdapter(adapter);
+        mList.setAdapter(adapter);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
         String codeGuess = sharedPref.getString(PasscodeActivity.PASSCODE_KEY, null);
 
-        listView.setItemChecked(0, codeGuess != null);
+        mList.setItemChecked(0, codeGuess != null);
+
+        mExitButton = view.findViewById(R.id.exit_button);
+        mExitButtonLayout = view.findViewById(R.id.exit_button_layout);
+
+        validateExitButton(true);
+    }
+
+    protected void validateExitButton(boolean validate) {
+
+        if (validate) {
+
+            CustomTheme theme = new CustomTheme(R.color.tz_error, R.color.tz_accent, R.color.tz_light);
+
+            mExitButton.setTextColor(ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
+            mExitButtonLayout.setEnabled(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                mExitButtonLayout.setBackground(makeSelector(theme));
+
+                Drawable[] drawables = mExitButton.getCompoundDrawables();
+                Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
+            }
+
+        } else {
+
+            mExitButton.setTextColor(ContextCompat.getColor(getActivity(), android.R.color.white));
+            mExitButtonLayout.setEnabled(false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                CustomTheme greyTheme = new CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey);
+                mExitButtonLayout.setBackground(makeSelector(greyTheme));
+
+                Drawable[] drawables = mExitButton.getCompoundDrawables();
+                Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), android.R.color.white));
+            }
+        }
+    }
+
+    private StateListDrawable makeSelector(CustomTheme theme) {
+        StateListDrawable res = new StateListDrawable();
+        res.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(ContextCompat.getColor(getActivity(), theme.getColorPrimaryDarkId())));
+        res.addState(new int[]{}, new ColorDrawable(ContextCompat.getColor(getActivity(), theme.getColorPrimaryId())));
+        return res;
     }
 
     public void notifyChanged()
     {
-        ListView listView = getListView();
-        listView.setItemChecked(0, false);
+        mList.setItemChecked(0, false);
     }
 
     private class SettingsArrayAdapter extends ArrayAdapter<String>
