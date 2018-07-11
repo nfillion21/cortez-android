@@ -3,6 +3,7 @@ package com.tezos.android.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
@@ -18,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +35,7 @@ import android.widget.TextView;
 
 import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.ui.activity.PasscodeActivity;
 
 import java.util.Arrays;
@@ -125,7 +128,40 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         mExitButton = view.findViewById(R.id.exit_button);
         mExitButtonLayout = view.findViewById(R.id.exit_button_layout);
 
-        validateExitButton(true);
+        mExitButtonLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                DialogInterface.OnClickListener dialogClickListener = (dialog, which) ->
+                {
+                    switch (which)
+                    {
+                        case DialogInterface.BUTTON_POSITIVE:
+                        {
+                            dialog.dismiss();
+                            AddressesDatabase.getInstance().logOut(getActivity());
+                            validateExitButton(false);
+                        }
+                        break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            dialog.dismiss();
+                            break;
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(R.string.alert_deleting_address)
+                        .setMessage(R.string.alert_deleting_address_body)
+                        .setNegativeButton(android.R.string.cancel, dialogClickListener)
+                        .setPositiveButton(android.R.string.yes, dialogClickListener)
+                        .setCancelable(false)
+                        .show();
+            }
+        });
+
+        boolean isPrivateKeyOn = AddressesDatabase.getInstance().isPrivateKeyOn(getActivity());
+        validateExitButton(isPrivateKeyOn);
     }
 
     protected void validateExitButton(boolean validate) {

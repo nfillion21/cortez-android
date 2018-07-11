@@ -1,13 +1,19 @@
 package com.tezos.android
 
+import android.animation.Animator
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Telephony
+import android.support.annotation.Nullable
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
+import android.support.v4.view.ViewCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -21,6 +27,7 @@ import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.android.activities.SettingsActivity
+import com.tezos.core.utils.AddressesDatabase
 import com.tezos.ui.activity.*
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
@@ -34,6 +41,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var mRestoreWalletButton: Button? = null
     private var mCreateWalletButton: Button? = null
     private var mTezosLogo: ImageView? = null
+
+    private var animating = false
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -92,6 +101,69 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     {
         super.onResume()
         launchPasscode()
+
+        if (!animating)
+        {
+            val isPrivateKeyEnabled = AddressesDatabase.getInstance().isPrivateKeyOn(this)
+            setMenuItemEnabled(isPrivateKeyEnabled)
+
+            if (isPrivateKeyEnabled)
+            {
+                mTezosLogo!!.visibility = View.GONE
+                mCreateWalletButton!!.visibility = View.GONE
+                mRestoreWalletButton!!.visibility = View.GONE
+            }
+            else
+            {
+                mTezosLogo!!.visibility = View.VISIBLE
+                mCreateWalletButton!!.visibility = View.VISIBLE
+                mRestoreWalletButton!!.visibility = View.VISIBLE
+            }
+        }
+
+        animating = false
+    }
+
+    private fun animateLogo()
+    {
+        animating = true
+
+        val animatorCreateButton = ObjectAnimator.ofFloat(mCreateWalletButton, View.ALPHA, 0.0f)
+        animatorCreateButton.duration = 1000
+        animatorCreateButton.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {}
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+            override fun onAnimationEnd(animation: Animator) {
+                mCreateWalletButton!!.visibility = View.GONE
+            }
+        })
+        animatorCreateButton.start()
+
+        val animatorRestoreButton = ObjectAnimator.ofFloat(mRestoreWalletButton, View.ALPHA, 0.0f)
+        animatorRestoreButton.duration = 1000
+        animatorRestoreButton.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {}
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+            override fun onAnimationEnd(animation: Animator) {
+                mTezosLogo!!.visibility = View.GONE
+            }
+        })
+        animatorRestoreButton.start()
+
+        val animator = ObjectAnimator.ofFloat(mTezosLogo, View.ALPHA, 0.0f)
+        animator.duration = 1000
+        animator.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {}
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+            override fun onAnimationEnd(animation: Animator) {
+                mTezosLogo!!.visibility = View.GONE
+                animating = false
+            }
+        })
+        animator.start()
     }
 
     override fun launchPasscode()
@@ -120,12 +192,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                                 R.color.tz_green)))
                         snackbar.show()
 
-                        //restoreWalletButton.visibility = View.INVISIBLE
-                        mRestoreWalletButton!!.animate().alpha(0.0f).duration = 1000
-                        mCreateWalletButton!!.animate().alpha(0.0f).duration = 1000
-                        mTezosLogo!!.animate().alpha(0.0f).duration = 1000
-
+                        AddressesDatabase.getInstance().setPrivateKeyOn(this, true)
                         setMenuItemEnabled(true)
+                        animateLogo()
                     }
                     else
                     {
@@ -150,7 +219,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                                 android.R.color.holo_green_light)))
                         snackbar.show()
 
+                        AddressesDatabase.getInstance().setPrivateKeyOn(this, true)
                         setMenuItemEnabled(true)
+
+                        animateLogo()
                     }
                     else
                     {
@@ -173,9 +245,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val publicKeyMenuItem = menu.findItem(R.id.nav_publickey)
         publicKeyMenuItem.isEnabled = enabled
-
-        val addressesMenuItem = menu.findItem(R.id.nav_addresses)
-        addressesMenuItem.isEnabled = enabled
     }
 
     private fun initActionBar(theme:CustomTheme)
