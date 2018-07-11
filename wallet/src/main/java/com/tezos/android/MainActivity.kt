@@ -12,13 +12,15 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import com.tezos.android.activities.AboutActivity
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
-import com.tezos.android.R;
+import com.tezos.android.activities.SettingsActivity
 import com.tezos.ui.activity.*
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
@@ -122,6 +124,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         mRestoreWalletButton!!.animate().alpha(0.0f).duration = 1000
                         mCreateWalletButton!!.animate().alpha(0.0f).duration = 1000
                         mTezosLogo!!.animate().alpha(0.0f).duration = 1000
+
+                        setMenuItemEnabled(true)
                     }
                     else
                     {
@@ -145,6 +149,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         snackBarView.setBackgroundColor((ContextCompat.getColor(this,
                                 android.R.color.holo_green_light)))
                         snackbar.show()
+
+                        setMenuItemEnabled(true)
                     }
                     else
                     {
@@ -153,6 +159,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
         }
+    }
+
+    private fun setMenuItemEnabled(enabled:Boolean)
+    {
+        val navigationView = findViewById<View>(R.id.nav_view) as NavigationView
+
+        // get menu from navigationView
+        val menu = navigationView.menu
+
+        val transferMenuItem = menu.findItem(R.id.nav_transfer)
+        transferMenuItem.isEnabled = enabled
+
+        val publicKeyMenuItem = menu.findItem(R.id.nav_publickey)
+        publicKeyMenuItem.isEnabled = enabled
+
+        val addressesMenuItem = menu.findItem(R.id.nav_addresses)
+        addressesMenuItem.isEnabled = enabled
     }
 
     private fun initActionBar(theme:CustomTheme)

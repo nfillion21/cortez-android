@@ -19,12 +19,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsActivity"
+        <activity android:name=".activities.SettingsActivity"
             android:theme="@style/TezosTheme.SettingsActivity">
         </activity>
 
         <activity
-            android:name=".AboutActivity"
+            android:name=".activities.AboutActivity"
             android:theme="@style/TezosTheme.AboutActivity" />
 
         <provider

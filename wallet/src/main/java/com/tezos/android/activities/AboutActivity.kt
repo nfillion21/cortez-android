@@ -1,4 +1,4 @@
-package com.tezos.android
+package com.tezos.android.activities
 
 import android.app.Activity
 import android.content.Context
@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.widget.TextView
+import com.tezos.android.R
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.interfaces.IPasscodeHandler
