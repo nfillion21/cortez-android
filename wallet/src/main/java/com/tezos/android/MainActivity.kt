@@ -40,6 +40,7 @@ import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.VolleySingleton
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler
 {
@@ -463,58 +464,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     val item = item0.getJSONObject(i)
                     val operation = Operation.fromJSONObject(item)
                     val item2 = item0.getJSONObject(i)
-
                     // Your code here
                 }
-                /*
-                var orderId: String? = null
-                try {
-                    orderId = response.getString("order_id")
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                }
-
-                var signature: String? = null
-                try {
-                    signature = response.getString("signature")
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                }
-                */
-
-                /*
-                if (getActivity() != null) {
-
-                    val activity = getActivity() as DemoActivity?
-                    if (!TextUtils.isEmpty(orderId) && !TextUtils.isEmpty(signature)) {
-
-                        val paymentPageRequest = buildPageRequest(activity, orderId)
-
-                        PaymentScreenActivity.start(activity, paymentPageRequest, signature, getCustomTheme())
-                        mDoneFab.setVisibility(View.INVISIBLE)
-
-                    } else {
-
-                        val dialogClickListener = DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() }
-
-                        val builder = AlertDialog.Builder(activity!!)
-                        builder.setTitle(R.string.error_title_default)
-                                .setMessage(R.string.unknown_error)
-                                .setNegativeButton(R.string.error_button_dismiss, dialogClickListener)
-                                .setCancelable(false)
-                                .show()
-                        showDoneFab()
-
-                        //DemoActivity demoActivity = (DemoActivity) getActivity();
-                        //ProgressBar progressBar = (ProgressBar) demoActivity.findViewById(R.id.progress);
-                        //progressBar.setVisibility(View.GONE);
-
-                    }
-                }
-                */
-
-                //setLoadingMode(false)
-
             }
 
         }, object : Response.ErrorListener {
@@ -536,7 +487,68 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         VolleySingleton.getInstance(this.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
-    fun bundlesToItems( bundles:ArrayList<Bundle>): ArrayList<Operation>?
+
+    private fun addOperationItemsFromJSON(response:JSONObject) {
+
+        //TODO parse it
+
+        /*
+    JSONArray messages = DataExtractor.getJSONArrayFromField(object, "messages");
+
+    if (messages != null && messages.length() > 0)
+    {
+        // clear before adding new elements
+        mRecyclerViewItems.clear();
+
+        for (int i = 0; i < messages.length(); i++)
+        {
+            JSONObject row = DataExtractor.getJSONObjectFromField(messages, i);
+            if (row != null)
+            {
+                String sender = DataExtractor.getStringFromField(row, "sender");
+                String body = DataExtractor.getStringFromField(row, "message");
+
+                Integer dateInteger = DataExtractor.getIntegerFromField(row, "date");
+                long date = -1;
+                if (dateInteger != null)
+                {
+                    date = dateInteger;
+                }
+
+                if (!TextUtils.isEmpty(sender) && !TextUtils.isEmpty(body))
+                {
+
+                    int type;
+                    if (sender.equalsIgnoreCase("user"))
+                    {
+                        type = 0;
+                    }
+                    else
+                    {
+                        type = 1;
+                    }
+
+                    SupportMessageItem messageItem = new SupportMessageItem(type, sender, body, date*1000);
+                    mRecyclerViewItems.add(messageItem);
+                }
+
+                // sort messages by date, oldest last.
+                Collections.sort(mRecyclerViewItems, new Comparator<SupportMessageItem>()
+                {
+                    @Override
+                    public int compare(SupportMessageItem o1, SupportMessageItem o2)
+                    {
+                        return (int) (o2.getDate() - o1.getDate());
+                    }
+                });
+                mRecyclerView.getAdapter().notifyDataSetChanged();
+            }
+        }
+    }
+        */
+}
+
+    private fun bundlesToItems( bundles:ArrayList<Bundle>): ArrayList<Operation>?
     {
         if (bundles != null)
         {
@@ -553,10 +565,31 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return null
     }
 
+    private fun itemsToBundles(items:ArrayList<Operation>?):ArrayList<Bundle>?
+    {
+        if (items != null)
+        {
+            val bundles = ArrayList<Bundle>(items.size)
+            if (!items.isEmpty())
+            {
+                items.forEach {
+                    bundles.add(it.toBundle())
+                }
+            }
+            return bundles
+        }
+        return null
+    }
+
     override fun onSaveInstanceState(outState: Bundle?)
     {
         super.onSaveInstanceState(outState)
 
         outState?.putString(pkHashKey, mPublicKeyHash)
+
+        val bundles = itemsToBundles(mRecyclerViewItems)
+        outState?.putParcelableArrayList(OPERATIONS_ARRAYLIST_KEY, bundles)
+
+        outState?.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
     }
 }
