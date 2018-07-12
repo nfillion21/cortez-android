@@ -90,16 +90,16 @@ public class Operation extends AbstractModel
         {
             Operation object = new Operation();
 
-            object.setHash(this.getStringForKey("hash"));
-            object.setOperationId(this.getIntegerForKey("operationId"));
-            object.setBlockHash(this.getStringForKey("blockHash"));
-            object.setTimestamp(this.getStringForKey("timestamp"));
-            object.setSource(this.getStringForKey("source"));
-            object.setSourceManager(this.getStringForKey("sourceManager"));
-            object.setDestination(this.getStringForKey("destination"));
-            object.setDestinationManager(this.getStringForKey("destinationManager"));
-            object.setAmount(this.getFloatForKey("amount"));
-            object.setFee(this.getFloatForKey("fee"));
+            object.setHash(this.getStringForKey(HASH_KEY));
+            object.setOperationId(this.getIntegerForKey(OPERATION_ID_KEY));
+            object.setBlockHash(this.getStringForKey(BLOCKHASH_KEY));
+            object.setTimestamp(this.getStringForKey(TIMESTAMP_KEY));
+            object.setSource(this.getStringForKey(SOURCE_KEY));
+            object.setSourceManager(this.getStringForKey(SOURCE_MANAGER_KEY));
+            object.setDestination(this.getStringForKey(DESTINATION_KEY));
+            object.setDestinationManager(this.getStringForKey(DESTINATION_MANAGER_KEY));
+            object.setAmount(this.getFloatForKey(AMOUNT_KEY));
+            object.setFee(this.getFloatForKey(FEE_KEY));
 
             return object;
         }
@@ -109,16 +109,16 @@ public class Operation extends AbstractModel
         {
             Operation object = new Operation();
 
-            object.setHash(this.getStringForKey("hash"));
-            object.setOperationId(this.getIntegerForKey("operationId"));
-            object.setBlockHash(this.getStringForKey("blockHash"));
-            object.setTimestamp(this.getStringForKey("timestamp"));
-            object.setSource(this.getStringForKey("source"));
-            object.setSourceManager(this.getStringForKey("sourceManager"));
-            object.setDestination(this.getStringForKey("destination"));
-            object.setDestinationManager(this.getStringForKey("destinationManager"));
-            object.setAmount(this.getFloatForKey("amount"));
-            object.setFee(this.getFloatForKey("fee"));
+            object.setHash(this.getStringForKey(HASH_KEY));
+            object.setOperationId(this.getIntegerForKey(OPERATION_ID_KEY));
+            object.setBlockHash(this.getStringForKey(BLOCKHASH_KEY));
+            object.setTimestamp(this.getStringForKey(TIMESTAMP_KEY));
+            object.setSource(this.getStringForKey(SOURCE_KEY));
+            object.setSourceManager(this.getStringForKey(SOURCE_MANAGER_KEY));
+            object.setDestination(this.getStringForKey(DESTINATION_KEY));
+            object.setDestinationManager(this.getStringForKey(DESTINATION_MANAGER_KEY));
+            object.setAmount(this.getFloatForKey(AMOUNT_KEY));
+            object.setFee(this.getFloatForKey(FEE_KEY));
 
             return object;
         }
@@ -143,16 +143,16 @@ public class Operation extends AbstractModel
             super.getSerializedBundle();
 
             Operation operation = (Operation) this.getModel();
-            this.putStringForKey("hash", operation.getHash());
-            this.putIntForKey("operationId", operation.getOperationId());
-            this.putStringForKey("blockHash", operation.getBlockHash());
-            this.putStringForKey("timestamp", operation.getTimestamp());
-            this.putStringForKey("source", operation.getSource());
-            this.putStringForKey("sourceManager", operation.getSourceManager());
-            this.putStringForKey("destination", operation.getDestination());
-            this.putStringForKey("destinationManager", operation.getDestinationManager());
-            this.putFloatForKey("amount", operation.getAmount());
-            this.putFloatForKey("fee", operation.getFee());
+            this.putStringForKey(HASH_KEY, operation.getHash());
+            this.putIntForKey(OPERATION_ID_KEY, operation.getOperationId());
+            this.putStringForKey(BLOCKHASH_KEY, operation.getBlockHash());
+            this.putStringForKey(TIMESTAMP_KEY, operation.getTimestamp());
+            this.putStringForKey(SOURCE_KEY, operation.getSource());
+            this.putStringForKey(SOURCE_MANAGER_KEY, operation.getSourceManager());
+            this.putStringForKey(DESTINATION_KEY, operation.getDestination());
+            this.putStringForKey(DESTINATION_MANAGER_KEY, operation.getDestinationManager());
+            this.putFloatForKey(AMOUNT_KEY, operation.getAmount());
+            this.putFloatForKey(FEE_KEY, operation.getFee());
 
             return this.getBundle();
         }
@@ -163,6 +163,17 @@ public class Operation extends AbstractModel
             return null;
         }
     }
+
+    public static final String HASH_KEY = "op_hash";
+    public static final String OPERATION_ID_KEY = "id";
+    public static final String BLOCKHASH_KEY = "blk_hash";
+    public static final String TIMESTAMP_KEY = "timestamp";
+    public static final String SOURCE_KEY = "src";
+    public static final String SOURCE_MANAGER_KEY = "src_mgr";
+    public static final String DESTINATION_KEY = "dst";
+    public static final String DESTINATION_MANAGER_KEY = "dst_mgr";
+    public static final String AMOUNT_KEY = "amount";
+    public static final String FEE_KEY = "fee";
 
 
     public String getHash() {

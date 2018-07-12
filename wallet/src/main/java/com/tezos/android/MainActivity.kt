@@ -2,24 +2,19 @@ package com.tezos.android
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.provider.Telephony
-import android.support.annotation.Nullable
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
-import android.support.v4.view.ViewCompat
 import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.text.TextUtils
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
@@ -30,13 +25,14 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
 import com.tezos.android.activities.AboutActivity
+import com.tezos.android.activities.SettingsActivity
+import com.tezos.android.adapters.OperationRecyclerViewAdapter
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.ApiLevelHelper
-import com.tezos.android.activities.SettingsActivity
+import com.tezos.core.models.Operation
 import com.tezos.core.utils.AddressesDatabase
+import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.activity.*
 import com.tezos.ui.interfaces.IPasscodeHandler
@@ -44,11 +40,13 @@ import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.VolleySingleton
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler
 {
+
+    private val OPERATIONS_ARRAYLIST_KEY = "operationsList"
+    private val GET_OPERATIONS_LOADING_KEY = "getOperationsLoading"
+
     private val pkHashKey = "pkhash_key"
     private var mPublicKeyHash: String? = null
 
@@ -58,10 +56,74 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var animating = false
 
+    private var mRecyclerView:RecyclerView? = null
+    private var mRecyclerViewItems:ArrayList<Operation>? = null
+
+    private var mGetHistoryLoading:Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (savedInstanceState != null)
+        {
+            mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
+
+            var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(OPERATIONS_ARRAYLIST_KEY)
+            mRecyclerViewItems = bundlesToItems(messagesBundle)
+
+            mGetHistoryLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
+        }
+        else
+        {
+            mRecyclerViewItems = ArrayList()
+        }
+
+        var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
+        val layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = layoutManager
+
+        val adapter = OperationRecyclerViewAdapter(mRecyclerViewItems)
+
+        recyclerView.adapter = adapter
+
+        mRecyclerView = recyclerView
+
+        if (savedInstanceState == null)
+        {
+            startInitialLoading()
+        }
+        else
+        {
+            // need to handle here the initialization (labels empty, loading, view visible, etc.)
+            // this method does it.
+
+            /*
+            if (mGetHistoryLoading)
+            {
+                // it does back to loading while we got elements on the list
+                // put the elements before loading.
+                // looks ok
+
+                refreshRecyclerViewAndText();
+                startInitialLoading();
+            }
+            else if (mSentMessageLoading)
+            {
+                submitButtonClicked();
+                refreshRecyclerViewAndText();
+
+                // we're going to cancel the send request, but only now.
+                // not on onDestroy.
+                startInitialLoading();
+            }
+            else
+            {
+                onMessagesLoadComplete();
+            }
+            */
+        }
 
         /*
         val theme = CustomTheme(
@@ -104,17 +166,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         mTezosLogo = findViewById(R.id.ic_logo)
+    }
 
-        if (savedInstanceState != null)
-        {
-            mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
-        }
+    private fun startInitialLoading()
+    {
+        //mSwipeRefreshLayout.setEnabled(false);
+
+        startGetRequestLoadOperations()
     }
 
     override fun onResume()
     {
         super.onResume()
         launchPasscode()
+
+        mRecyclerView!!.adapter!!.notifyDataSetChanged()
 
         handleVisibility()
     }
@@ -353,7 +419,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 starter.putExtra(CustomTheme.TAG, tezosTheme.toBundle())
                 ActivityCompat.startActivityForResult(this, starter, -1, null)
                 */
-                requestHistory()
+                startGetRequestLoadOperations()
                 //SettingsActivity.start(this, tezosTheme)
             }
             R.id.nav_info ->
@@ -372,9 +438,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private val TAG = "downloadHistory"
 
-    private fun requestHistory() {
-
+    private fun startGetRequestLoadOperations()
+    {
+        //TODO handle the loading later
         //setLoadingMode(true)
+        mGetHistoryLoading = true
+
+        //mEmptyLoadingTextview.setText(R.string.loading_list_support);
+        //mProgressBar.setVisibility(View.VISIBLE);
+
 
         val url = String.format(getString(R.string.history_url), "tz1dBEF7fUmrNZogkrGdTRFhHdx4PQz4ZuAA")
 
@@ -386,17 +458,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 val item0 = DataExtractor.getJSONArrayFromField(response,0)
 
-                for (i in 0..(item0.length() - 1)) {
+                for (i in 0..(item0.length() - 1))
+                {
                     val item = item0.getJSONObject(i)
+                    val operation = Operation.fromJSONObject(item)
                     val item2 = item0.getJSONObject(i)
 
                     // Your code here
                 }
-
-                val item1 = DataExtractor.getJSONArrayFromField(item0,1)
-
-                val count = item0.length()
-                val count2 = item1.length()
                 /*
                 var orderId: String? = null
                 try {
@@ -452,33 +521,36 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             override fun onErrorResponse(error: VolleyError)
             {
+                mGetHistoryLoading = false
 
-                val v = error
-                val v2 = error
-                v2.toString()
-                /*
-                if (getActivity() != null) {
+                //TODO handle the refresh element
+                //onMessagesLoadComplete()
 
-                    val activity = getActivity() as AppCompatActivity?
-                    val dialogClickListener = DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() }
-
-                    val builder = AlertDialog.Builder(activity!!)
-                    builder.setTitle(R.string.error_title_default)
-                            .setMessage(R.string.error_body_default)
-                            .setNegativeButton(R.string.error_button_dismiss, dialogClickListener)
-                            .setCancelable(false)
-                            .show()
-                    showDoneFab()
-                }
-
-                setLoadingMode(false)
-                */
+                //TODO handle network connection snackbar
+                //showSnackbarError(true);
             }
         })
 
         jsObjRequest.tag = TAG
 
         VolleySingleton.getInstance(this.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    fun bundlesToItems( bundles:ArrayList<Bundle>): ArrayList<Operation>?
+    {
+        if (bundles != null)
+        {
+            var items = ArrayList<Operation>(bundles.size)
+            if (!bundles.isEmpty())
+            {
+                bundles.forEach {
+                    val op = Operation.fromBundle(it)
+                    items.add(op)
+                }
+            }
+            return items
+        }
+        return null
     }
 
     override fun onSaveInstanceState(outState: Bundle?)

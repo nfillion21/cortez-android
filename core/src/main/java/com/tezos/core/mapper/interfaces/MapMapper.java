@@ -111,6 +111,9 @@ public class MapMapper implements IBehaviour {
                     return Integer.parseInt(digits);
                 }
             }
+            if (object instanceof Integer) {
+                return (Integer) object;
+            }
         }
 
         return null;
