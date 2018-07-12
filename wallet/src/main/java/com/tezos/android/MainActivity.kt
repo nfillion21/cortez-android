@@ -40,13 +40,14 @@ import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.VolleySingleton
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler
 {
 
     private val OPERATIONS_ARRAYLIST_KEY = "operationsList"
     private val GET_OPERATIONS_LOADING_KEY = "getOperationsLoading"
+
+    private val LOAD_OPERATIONS_TAG = "downloadHistory"
 
     private val pkHashKey = "pkhash_key"
     private var mPublicKeyHash: String? = null
@@ -437,7 +438,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     // volley
 
-    private val TAG = "downloadHistory"
 
     private fun startGetRequestLoadOperations()
     {
@@ -459,13 +459,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 val item0 = DataExtractor.getJSONArrayFromField(response,0)
 
-                for (i in 0..(item0.length() - 1))
-                {
-                    val item = item0.getJSONObject(i)
-                    val operation = Operation.fromJSONObject(item)
-                    val item2 = item0.getJSONObject(i)
-                    // Your code here
-                }
+                addOperationItemsFromJSON(item0)
             }
 
         }, object : Response.ErrorListener {
@@ -482,13 +476,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         })
 
-        jsObjRequest.tag = TAG
+        jsObjRequest.tag = LOAD_OPERATIONS_TAG
 
         VolleySingleton.getInstance(this.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
 
-    private fun addOperationItemsFromJSON(response:JSONObject) {
+    private fun addOperationItemsFromJSON(response:JSONArray) {
+
+        for (i in 0..(response.length() - 1))
+        {
+            val item = response.getJSONObject(i)
+            val operation = Operation.fromJSONObject(item)
+
+            mRecyclerViewItems!!.add(operation)
+        }
+
+        mRecyclerView!!.adapter!!.notifyDataSetChanged()
+        mRecyclerView!!.adapter!!.notifyDataSetChanged()
 
         //TODO parse it
 
@@ -591,5 +596,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         outState?.putParcelableArrayList(OPERATIONS_ARRAYLIST_KEY, bundles)
 
         outState?.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
+    }
+
+    private fun cancelRequest(getOperations: Boolean)
+    {
+        val requestQueue = VolleySingleton.getInstance(this.applicationContext).requestQueue
+        if (requestQueue != null)
+        {
+            if (getOperations)
+            {
+                requestQueue.cancelAll(LOAD_OPERATIONS_TAG)
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancelRequest(true)
     }
 }

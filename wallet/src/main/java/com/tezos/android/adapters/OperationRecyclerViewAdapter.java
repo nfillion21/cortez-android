@@ -110,7 +110,7 @@ public class OperationRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
         {
             case OPERATION_ITEM_VIEW_TYPE:
             {
-                OperationItemViewHolder messageItemHolder = (OperationItemViewHolder) holder;
+                OperationItemViewHolder operationItemHolder = (OperationItemViewHolder) holder;
                 Operation operationItem = mRecyclerViewItems.get(position);
 
                 //Date date = new Date(operationItem.getDate());
@@ -118,9 +118,9 @@ public class OperationRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
                 //String user = operationItem.getName().toLowerCase();
                 //user = user.substring(0, 1).toUpperCase() + user.substring(1).toLowerCase();
 
-                messageItemHolder.messageItemName.setText("hello");
-                messageItemHolder.messageItemPrice.setText("hello");
-                messageItemHolder.messageItemDate.setText(operationItem.getBlockHash());
+                operationItemHolder.messageItemName.setText("hello");
+                operationItemHolder.messageItemPrice.setText("hello");
+                operationItemHolder.messageItemDate.setText(operationItem.getBlockHash());
             }
             break;
 
