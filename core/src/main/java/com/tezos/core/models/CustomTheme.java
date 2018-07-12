@@ -99,7 +99,7 @@ public class CustomTheme extends AbstractModel
         }
 
         @Override
-        protected CustomTheme mappedObject() {
+        protected CustomTheme mappedObjectFromJSON() {
 
             return null;
         }

@@ -3,6 +3,7 @@ package com.tezos.android
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -15,23 +16,36 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.text.TextUtils
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
 import com.tezos.android.activities.AboutActivity
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.android.activities.SettingsActivity
 import com.tezos.core.utils.AddressesDatabase
+import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.activity.*
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
+import com.tezos.ui.utils.VolleySingleton
 import kotlinx.android.synthetic.main.activity_main.*
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler
 {
@@ -339,7 +353,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 starter.putExtra(CustomTheme.TAG, tezosTheme.toBundle())
                 ActivityCompat.startActivityForResult(this, starter, -1, null)
                 */
-                SettingsActivity.start(this, tezosTheme)
+                requestHistory()
+                //SettingsActivity.start(this, tezosTheme)
             }
             R.id.nav_info ->
             {
@@ -351,6 +366,119 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         //drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    // volley
+
+    private val TAG = "downloadHistory"
+
+    private fun requestHistory() {
+
+        //setLoadingMode(true)
+
+        val url = String.format(getString(R.string.history_url), "tz1dBEF7fUmrNZogkrGdTRFhHdx4PQz4ZuAA")
+
+        val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, object : Response.Listener<JSONArray>
+        {
+            override fun onResponse(response: JSONArray)
+            {
+                Log.i(response.toString(), response.toString())
+
+                val item0 = DataExtractor.getJSONArrayFromField(response,0)
+
+                for (i in 0..(item0.length() - 1)) {
+                    val item = item0.getJSONObject(i)
+                    val item2 = item0.getJSONObject(i)
+
+                    // Your code here
+                }
+
+                val item1 = DataExtractor.getJSONArrayFromField(item0,1)
+
+                val count = item0.length()
+                val count2 = item1.length()
+                /*
+                var orderId: String? = null
+                try {
+                    orderId = response.getString("order_id")
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+
+                var signature: String? = null
+                try {
+                    signature = response.getString("signature")
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+                */
+
+                /*
+                if (getActivity() != null) {
+
+                    val activity = getActivity() as DemoActivity?
+                    if (!TextUtils.isEmpty(orderId) && !TextUtils.isEmpty(signature)) {
+
+                        val paymentPageRequest = buildPageRequest(activity, orderId)
+
+                        PaymentScreenActivity.start(activity, paymentPageRequest, signature, getCustomTheme())
+                        mDoneFab.setVisibility(View.INVISIBLE)
+
+                    } else {
+
+                        val dialogClickListener = DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() }
+
+                        val builder = AlertDialog.Builder(activity!!)
+                        builder.setTitle(R.string.error_title_default)
+                                .setMessage(R.string.unknown_error)
+                                .setNegativeButton(R.string.error_button_dismiss, dialogClickListener)
+                                .setCancelable(false)
+                                .show()
+                        showDoneFab()
+
+                        //DemoActivity demoActivity = (DemoActivity) getActivity();
+                        //ProgressBar progressBar = (ProgressBar) demoActivity.findViewById(R.id.progress);
+                        //progressBar.setVisibility(View.GONE);
+
+                    }
+                }
+                */
+
+                //setLoadingMode(false)
+
+            }
+
+        }, object : Response.ErrorListener {
+
+            override fun onErrorResponse(error: VolleyError)
+            {
+
+                val v = error
+                val v2 = error
+                v2.toString()
+                /*
+                if (getActivity() != null) {
+
+                    val activity = getActivity() as AppCompatActivity?
+                    val dialogClickListener = DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() }
+
+                    val builder = AlertDialog.Builder(activity!!)
+                    builder.setTitle(R.string.error_title_default)
+                            .setMessage(R.string.error_body_default)
+                            .setNegativeButton(R.string.error_button_dismiss, dialogClickListener)
+                            .setCancelable(false)
+                            .show()
+                    showDoneFab()
+                }
+
+                setLoadingMode(false)
+                */
+            }
+        })
+
+        jsObjRequest.tag = TAG
+
+        VolleySingleton.getInstance(this.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
     override fun onSaveInstanceState(outState: Bundle?)

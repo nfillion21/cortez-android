@@ -75,7 +75,7 @@ public class HttpException extends AbstractException {
             return true;
         }
 
-        protected HttpException mappedObject() {
+        protected HttpException mappedObjectFromJSON() {
 
             return null;
         }

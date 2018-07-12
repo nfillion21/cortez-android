@@ -72,7 +72,7 @@ public class OrderRelatedRequest extends AbstractRequest
         }
 
         @Override
-        protected OrderRelatedRequest mappedObject() {
+        protected OrderRelatedRequest mappedObjectFromJSON() {
 
             return null;
             //actually this won't come from JSON

@@ -72,7 +72,7 @@ public class PaymentPageRequest extends OrderRelatedRequest {
         }
 
         @Override
-        protected PaymentPageRequest mappedObject() {
+        protected PaymentPageRequest mappedObjectFromJSON() {
 
             //we don't receive it from json
             return null;

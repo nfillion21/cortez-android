@@ -90,14 +90,14 @@ public class DataExtractor {
         return null;
     }
 
-    //public static JSONArray getJSONArrayFromField(JSONArray jsonArray, int i) {
+    public static JSONArray getJSONArrayFromField(JSONArray jsonArray, int i) {
 
-        //if (checkParams(jsonArray, i)) {
-            //return jsonArray.optJSONArray(i);
-        //}
+        if (checkParams(jsonArray, i)) {
+            return jsonArray.optJSONArray(i);
+        }
 
-        //return null;
-    //}
+        return null;
+    }
 
     public static Date getDateFromField(JSONObject jsonObject, String field) {
 

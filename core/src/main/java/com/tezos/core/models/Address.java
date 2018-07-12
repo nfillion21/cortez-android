@@ -86,7 +86,7 @@ public class Address extends AbstractModel
             return true;
         }
 
-        public Account mappedObject()
+        public Account mappedObjectFromJSON()
         {
             return null;
         }

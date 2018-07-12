@@ -73,7 +73,7 @@ public class ApiException extends AbstractException {
         }
 
         @Override
-        protected ApiException mappedObject() {
+        protected ApiException mappedObjectFromJSON() {
 
             return null;
         }

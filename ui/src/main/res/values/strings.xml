@@ -56,5 +56,6 @@
     <string name="confirm_passcode">Please confirm the passcode.</string>
     <string name="error_different_passcodes">The passcode and the confirmation are not the same, please enter the passcode again.</string>
     <string name="title_passcode">Enter Passcode</string>
+    <string name="history_url" translatable="false">http://lumi64.luminar.eu.org:8776/history?ks=%1$s</string>
 
 </resources>

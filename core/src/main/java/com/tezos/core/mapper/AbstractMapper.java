@@ -23,7 +23,7 @@ public abstract class AbstractMapper<T> {
 
     protected IBehaviour behaviour;
 
-    protected abstract Object mappedObject();
+    protected abstract Object mappedObjectFromJSON();
     protected abstract Object mappedObjectFromBundle();
     protected abstract boolean isValid();
 

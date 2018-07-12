@@ -77,7 +77,7 @@ public class Account extends Address
             return true;
         }
 
-        public Account mappedObject()
+        public Account mappedObjectFromJSON()
         {
             return null;
         }
