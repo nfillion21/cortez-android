@@ -3,6 +3,7 @@ package com.tezos.android
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -20,6 +21,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import com.android.volley.Request
 import com.android.volley.Response
@@ -55,6 +57,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var mRestoreWalletButton: Button? = null
     private var mCreateWalletButton: Button? = null
     private var mTezosLogo: ImageView? = null
+
+    private var mProgressBar: ProgressBar? = null
 
     private var animating = false
 
@@ -101,30 +105,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             // need to handle here the initialization (labels empty, loading, view visible, etc.)
             // this method does it.
 
-            /*
             if (mGetHistoryLoading)
             {
                 // it does back to loading while we got elements on the list
                 // put the elements before loading.
                 // looks ok
 
-                refreshRecyclerViewAndText();
-                startInitialLoading();
-            }
-            else if (mSentMessageLoading)
-            {
-                submitButtonClicked();
-                refreshRecyclerViewAndText();
-
-                // we're going to cancel the send request, but only now.
-                // not on onDestroy.
-                startInitialLoading();
+                refreshRecyclerViewAndText()
+                startInitialLoading()
             }
             else
             {
-                onMessagesLoadComplete();
+                onOperationsLoadComplete()
             }
-            */
         }
 
         /*
@@ -170,8 +163,45 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mTezosLogo = findViewById(R.id.ic_logo)
     }
 
+    private fun onOperationsLoadComplete()
+    {
+        mGetHistoryLoading = false
+
+        //TODO handle the progressBar
+        mProgressBar?.visibility = View.GONE
+
+        //TODO handle the swipe refresh layout
+        /*
+        mSwipeRefreshLayout.setEnabled(true);
+        mSwipeRefreshLayout.setRefreshing(false);
+        */
+
+        //validateEditText(true);
+
+        refreshRecyclerViewAndText()
+    }
+
+    private fun refreshRecyclerViewAndText()
+    {
+        if (mRecyclerViewItems?.isEmpty()!!)
+        {
+            mRecyclerView?.visibility = View.GONE
+
+            //TODO handle the empty loading textview
+            //mEmptyLoadingTextview.setVisibility(View.VISIBLE);
+            //mEmptyLoadingTextview.setText(R.string.empty_list_support);
+        }
+        else
+        {
+            mRecyclerView?.visibility = View.VISIBLE
+            //mEmptyLoadingTextview.setVisibility(View.GONE)
+            //mEmptyLoadingTextview.setText(null)
+        }
+    }
+
     private fun startInitialLoading()
     {
+        //TODO handle the swipe refresh layout
         //mSwipeRefreshLayout.setEnabled(false);
 
         startGetRequestLoadOperations()
@@ -366,14 +396,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         setSupportActionBar(toolbar)
 
-        try {
-            supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        } catch (e:Exception) {
-            }
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         val titleBar = findViewById<TextView>(R.id.barTitle)
         titleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+
+        mProgressBar = findViewById(R.id.nav_progress)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            mProgressBar?.indeterminateTintList = ColorStateList.valueOf(ContextCompat.getColor(this, theme.textColorPrimaryId))
+        }
+        else
+        {
+            //mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, R.color.colorTextToolbar), PorterDuff.Mode.SRC_IN);
+        }
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -441,12 +478,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun startGetRequestLoadOperations()
     {
+        cancelRequest(true)
+
         //TODO handle the loading later
         //setLoadingMode(true)
         mGetHistoryLoading = true
 
+        //TODO handle the "loading" text.
         //mEmptyLoadingTextview.setText(R.string.loading_list_support);
-        //mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBar?.visibility = View.VISIBLE
 
 
         val url = String.format(getString(R.string.history_url), "tz1dBEF7fUmrNZogkrGdTRFhHdx4PQz4ZuAA")
@@ -456,10 +496,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             override fun onResponse(response: JSONArray)
             {
                 Log.i(response.toString(), response.toString())
+                if (response != null)
+                {
+                    val item = DataExtractor.getJSONArrayFromField(response,0)
+                    addOperationItemsFromJSON(item)
+                }
+                else
+                {
+                    //TODO handle red snackbar
+                }
 
-                val item0 = DataExtractor.getJSONArrayFromField(response,0)
-
-                addOperationItemsFromJSON(item0)
+                onOperationsLoadComplete()
             }
 
         }, object : Response.ErrorListener {
@@ -468,8 +515,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             {
                 mGetHistoryLoading = false
 
-                //TODO handle the refresh element
-                //onMessagesLoadComplete()
+                onOperationsLoadComplete()
 
                 //TODO handle network connection snackbar
                 //showSnackbarError(true);
