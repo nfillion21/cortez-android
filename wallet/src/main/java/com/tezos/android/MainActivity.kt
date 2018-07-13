@@ -11,6 +11,7 @@ import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -62,6 +63,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var animating = false
 
+    private var mSwipeRefreshLayout:SwipeRefreshLayout? = null
+
     private var mRecyclerView:RecyclerView? = null
     private var mRecyclerViewItems:ArrayList<Operation>? = null
 
@@ -85,6 +88,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         {
             mRecyclerViewItems = ArrayList()
         }
+
+        mSwipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+        initSwipeRefresh()
 
         var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
         val layoutManager = LinearLayoutManager(this)
@@ -171,10 +177,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mProgressBar?.visibility = View.GONE
 
         //TODO handle the swipe refresh layout
-        /*
-        mSwipeRefreshLayout.setEnabled(true);
-        mSwipeRefreshLayout.setRefreshing(false);
-        */
+        mSwipeRefreshLayout?.isEnabled = true
+        mSwipeRefreshLayout?.isRefreshing = false
 
         //validateEditText(true);
 
@@ -201,10 +205,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun startInitialLoading()
     {
-        //TODO handle the swipe refresh layout
-        //mSwipeRefreshLayout.setEnabled(false);
+        //mSwipeRefreshLayout?.isEnabled = false
 
         startGetRequestLoadOperations()
+    }
+
+    private fun initSwipeRefresh()
+    {
+        mSwipeRefreshLayout?.setOnRefreshListener {
+
+            startGetRequestLoadOperations()
+        }
     }
 
     override fun onResume()
@@ -493,18 +504,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, object : Response.Listener<JSONArray>
         {
-            override fun onResponse(response: JSONArray)
+            override fun onResponse(answer: JSONArray)
             {
-                Log.i(response.toString(), response.toString())
-                if (response != null)
-                {
-                    val item = DataExtractor.getJSONArrayFromField(response,0)
-                    addOperationItemsFromJSON(item)
-                }
-                else
-                {
-                    //TODO handle red snackbar
-                }
+                addOperationItemsFromJSON(answer)
 
                 onOperationsLoadComplete()
             }
@@ -528,7 +530,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
 
-    private fun addOperationItemsFromJSON(response:JSONArray) {
+    private fun addOperationItemsFromJSON(answer:JSONArray) {
+
+        val response = DataExtractor.getJSONArrayFromField(answer,0)
+
+        mRecyclerViewItems?.clear()
 
         for (i in 0..(response.length() - 1))
         {
@@ -538,7 +544,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             mRecyclerViewItems!!.add(operation)
         }
 
-        mRecyclerView!!.adapter!!.notifyDataSetChanged()
         mRecyclerView!!.adapter!!.notifyDataSetChanged()
 
         //TODO parse it

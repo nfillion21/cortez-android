@@ -1,5 +1,6 @@
 package com.tezos.core.serialization;
 
+import android.graphics.Path;
 import android.os.Bundle;
 
 import com.tezos.core.errors.exceptions.ApiException;
@@ -8,6 +9,7 @@ import com.tezos.core.models.AbstractModel;
 import com.tezos.core.models.Account;
 import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.core.models.Operation;
 import com.tezos.core.requests.AbstractRequest;
 import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.core.serialization.interfaces.CustomThemeSerialization;
@@ -83,6 +85,11 @@ public abstract class AbstractSerializationMapper {
         {
             Address address = (Address) model;
             this.setSerialization(new Address.AddressSerialization(address));
+        }
+        else if (model instanceof Operation)
+        {
+            Operation operation = (Operation) model;
+            this.setSerialization(new Operation.OperationSerialization(operation));
         }
     }
 

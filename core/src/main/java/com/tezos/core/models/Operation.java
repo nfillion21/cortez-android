@@ -126,9 +126,9 @@ public class Operation extends AbstractModel
 
     public static class OperationSerialization extends AbstractSerialization
     {
-        public OperationSerialization(Address address)
+        public OperationSerialization(Operation operation)
         {
-            super(address);
+            super(operation);
         }
 
         @Override
