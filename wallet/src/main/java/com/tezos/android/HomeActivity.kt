@@ -2,7 +2,6 @@ package com.tezos.android
 
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -34,16 +33,13 @@ import kotlinx.android.synthetic.main.activity_home.*
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler, HomeFragment.OnFragmentInteractionListener
 {
     override fun onFragmentInteraction() {
-        replaceFragment()
+        switchToOperations()
     }
 
     private val pkHashKey = "pkhash_key"
     private var mPublicKeyHash: String? = null
 
     private var mProgressBar: ProgressBar? = null
-
-    //private var animating = false
-
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -59,19 +55,13 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         initActionBar(tezosTheme)
 
-
         if (savedInstanceState != null)
         {
             mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
         }
         else
         {
-            /*
-            val operationsFragment = OperationsFragment.newInstance(tezosTheme)
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.main_fragments_container, operationsFragment, "tag")
-                    .commit()
-            */
+            //TODO begin with home unless you got your keys already
 
             val homeFragment = HomeFragment.newInstance(tezosTheme)
             supportFragmentManager.beginTransaction()
@@ -80,7 +70,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun replaceFragment()
+    private fun switchToOperations()
     {
         val tezosTheme = CustomTheme(
                 com.tezos.ui.R.color.theme_tezos_primary,
@@ -90,90 +80,27 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val operationsFragment = OperationsFragment.newInstance(tezosTheme)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, operationsFragment)
-                .addToBackStack(null).commit()
+                .commit()
+    }
+
+    private fun switchToHome()
+    {
+        val tezosTheme = CustomTheme(
+                com.tezos.ui.R.color.theme_tezos_primary,
+                com.tezos.ui.R.color.theme_tezos_primary_dark,
+                com.tezos.ui.R.color.theme_tezos_text)
+
+        val homeFragment = HomeFragment.newInstance(tezosTheme)
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.main_fragments_container, homeFragment)
+                .commit()
     }
 
     override fun onResume()
     {
         super.onResume()
         launchPasscode()
-
-
-        //handleVisibility()
     }
-
-    /*
-    private fun handleVisibility()
-    {
-        if (!animating)
-        {
-            val isPrivateKeyEnabled = AddressesDatabase.getInstance().isPrivateKeyOn(this)
-            setMenuItemEnabled(isPrivateKeyEnabled)
-
-            if (isPrivateKeyEnabled)
-            {
-                mTezosLogo!!.visibility = View.GONE
-                mCreateWalletButton!!.visibility = View.GONE
-                mRestoreWalletButton!!.visibility = View.GONE
-            }
-            else
-            {
-                mTezosLogo!!.alpha = 1.0f
-                mTezosLogo!!.visibility = View.VISIBLE
-                mCreateWalletButton!!.alpha = 1.0f
-                mCreateWalletButton!!.visibility = View.VISIBLE
-                mRestoreWalletButton!!.alpha = 1.0f
-                mRestoreWalletButton!!.visibility = View.VISIBLE
-            }
-        }
-
-        animating = false
-    }
-    */
-
-    /*
-    private fun animateLogo()
-    {
-        animating = true
-
-        val animatorCreateButton = ObjectAnimator.ofFloat(mCreateWalletButton, View.ALPHA, 0.0f)
-        animatorCreateButton.duration = 1000
-        animatorCreateButton.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator) {}
-            override fun onAnimationCancel(animation: Animator) {}
-            override fun onAnimationRepeat(animation: Animator) {}
-            override fun onAnimationEnd(animation: Animator) {
-                mCreateWalletButton!!.visibility = View.GONE
-            }
-        })
-        animatorCreateButton.start()
-
-        val animatorRestoreButton = ObjectAnimator.ofFloat(mRestoreWalletButton, View.ALPHA, 0.0f)
-        animatorRestoreButton.duration = 1000
-        animatorRestoreButton.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator) {}
-            override fun onAnimationCancel(animation: Animator) {}
-            override fun onAnimationRepeat(animation: Animator) {}
-            override fun onAnimationEnd(animation: Animator) {
-                mTezosLogo!!.visibility = View.GONE
-            }
-        })
-        animatorRestoreButton.start()
-
-        val animator = ObjectAnimator.ofFloat(mTezosLogo, View.ALPHA, 0.0f)
-        animator.duration = 1000
-        animator.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator) {}
-            override fun onAnimationCancel(animation: Animator) {}
-            override fun onAnimationRepeat(animation: Animator) {}
-            override fun onAnimationEnd(animation: Animator) {
-                mTezosLogo!!.visibility = View.GONE
-                animating = false
-            }
-        })
-        animator.start()
-    }
-    */
 
     override fun launchPasscode()
     {
@@ -203,7 +130,8 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                         AddressesDatabase.getInstance().setPrivateKeyOn(this, true)
                         setMenuItemEnabled(true)
-                        //animateLogo()
+
+                        switchToOperations()
                     }
                     else
                     {
@@ -231,7 +159,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         AddressesDatabase.getInstance().setPrivateKeyOn(this, true)
                         setMenuItemEnabled(true)
 
-                        //animateLogo()
+                        switchToOperations()
                     }
                     else
                     {
@@ -244,7 +172,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             {
                 if (resultCode == R.id.logout_succeed)
                 {
-                    //nothing special to do.
+                    switchToHome()
                 }
             }
 
@@ -342,8 +270,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_settings ->
             {
-                //SettingsActivity.start(this, tezosTheme)
-                replaceFragment()
+                SettingsActivity.start(this, tezosTheme)
             }
             R.id.nav_info ->
             {
