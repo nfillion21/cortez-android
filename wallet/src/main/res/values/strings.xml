@@ -7,4 +7,6 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="use_passcode">Use a passcode</string>
+    <string name="empty_list_operations">No operations</string>
+    <string name="loading_list_operations">Loading operations…</string>
 </resources>

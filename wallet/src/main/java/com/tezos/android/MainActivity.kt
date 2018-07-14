@@ -17,7 +17,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -70,11 +69,41 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var mGetHistoryLoading:Boolean = false
 
+    private var mEmptyLoadingTextView:TextView? = null
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // first get the theme
+        val tezosTheme = CustomTheme(
+                com.tezos.ui.R.color.theme_tezos_primary,
+                com.tezos.ui.R.color.theme_tezos_primary_dark,
+                com.tezos.ui.R.color.theme_tezos_text)
+
+        // initialize the buttons
+
+        mRestoreWalletButton = findViewById(R.id.restoreWalletButton)
+        mRestoreWalletButton!!.setOnClickListener {
+            RestoreWalletActivity.start(this, tezosTheme)
+        }
+
+        mCreateWalletButton = findViewById(R.id.createWalletButton)
+        mCreateWalletButton!!.setOnClickListener {
+            CreateWalletActivity.start(this, tezosTheme)
+        }
+
+        mTezosLogo = findViewById(R.id.ic_logo)
+
+        initActionBar(tezosTheme)
+
+        mEmptyLoadingTextView = findViewById(R.id.empty_loading_textview)
+
+        mSwipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+        mSwipeRefreshLayout?.setOnRefreshListener {
+            startGetRequestLoadOperations()
+        }
 
         if (savedInstanceState != null)
         {
@@ -84,40 +113,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             mRecyclerViewItems = bundlesToItems(messagesBundle)
 
             mGetHistoryLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
-        }
-        else
-        {
-            mRecyclerViewItems = ArrayList()
-        }
 
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
-
-        initActionBar(tezosTheme)
-
-        mSwipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
-        initSwipeRefresh()
-
-        var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
-        val layoutManager = LinearLayoutManager(this)
-        recyclerView.layoutManager = layoutManager
-
-        val adapter = OperationRecyclerViewAdapter(mRecyclerViewItems)
-
-        recyclerView.adapter = adapter
-
-        mRecyclerView = recyclerView
-
-        if (savedInstanceState == null)
-        {
-            startInitialLoading()
-        }
-        else
-        {
-            // need to handle here the initialization (labels empty, loading, view visible, etc.)
-            // this method does it.
 
             if (mGetHistoryLoading)
             {
@@ -133,43 +129,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 onOperationsLoadComplete()
             }
         }
+        else
+        {
+            mRecyclerViewItems = ArrayList()
 
-        /*
-        val theme = CustomTheme(
-                com.tezos.ui.R.color.tz_primary,
-                com.tezos.ui.R.color.tz_primary_dark,
-                com.tezos.ui.R.color.theme_blue_text)
-
-        val theme2 = CustomTheme(
-                com.tezos.ui.R.color.theme_blue_primary,
-                com.tezos.ui.R.color.theme_blue_primary_dark,
-                com.tezos.ui.R.color.theme_blue_text)
-
-        val theme3 = CustomTheme(
-                com.tezos.ui.R.color.theme_yellow_primary,
-                com.tezos.ui.R.color.theme_yellow_primary_dark,
-                com.tezos.ui.R.color.theme_yellow_text)
-        */
-
-
-
-        //Toolbar toolbar = (Toolbar) demoActivity.findViewById(R.id.toolbar);
-        //toolbar.setBackgroundColor(ContextCompat.getColor(demoActivity, customTheme.getColorPrimaryId()));
-        //toolbar.setTitleTextColor(ContextCompat.getColor(demoActivity, customTheme.getTextColorPrimaryId()));
-
-        //PaymentScreenActivity.start(this)
-
-        mRestoreWalletButton = findViewById(R.id.restoreWalletButton)
-        mRestoreWalletButton!!.setOnClickListener {
-            RestoreWalletActivity.start(this, tezosTheme)
+            startInitialLoading()
         }
 
-        mCreateWalletButton = findViewById(R.id.createWalletButton)
-        mCreateWalletButton!!.setOnClickListener {
-            CreateWalletActivity.start(this, tezosTheme)
-        }
+        var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
+        val layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = layoutManager
 
-        mTezosLogo = findViewById(R.id.ic_logo)
+        val adapter = OperationRecyclerViewAdapter(mRecyclerViewItems)
+
+        recyclerView.adapter = adapter
+
+        mRecyclerView = recyclerView
     }
 
     private fun onOperationsLoadComplete()
@@ -183,8 +158,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mSwipeRefreshLayout?.isEnabled = true
         mSwipeRefreshLayout?.isRefreshing = false
 
-        //validateEditText(true);
-
         refreshRecyclerViewAndText()
     }
 
@@ -194,15 +167,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         {
             mRecyclerView?.visibility = View.GONE
 
-            //TODO handle the empty loading textview
-            //mEmptyLoadingTextview.setVisibility(View.VISIBLE);
-            //mEmptyLoadingTextview.setText(R.string.empty_list_support);
+            mEmptyLoadingTextView?.visibility = View.VISIBLE;
+            mEmptyLoadingTextView?.setText(R.string.empty_list_operations)
         }
         else
         {
             mRecyclerView?.visibility = View.VISIBLE
-            //mEmptyLoadingTextview.setVisibility(View.GONE)
-            //mEmptyLoadingTextview.setText(null)
+            mEmptyLoadingTextView?.visibility = View.GONE
+            mEmptyLoadingTextView?.text = null
         }
     }
 
@@ -211,14 +183,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mSwipeRefreshLayout?.isEnabled = false
 
         startGetRequestLoadOperations()
-    }
-
-    private fun initSwipeRefresh()
-    {
-        mSwipeRefreshLayout?.setOnRefreshListener {
-
-            startGetRequestLoadOperations()
-        }
     }
 
     override fun onResume()
@@ -494,12 +458,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     {
         cancelRequest(true)
 
-        //TODO handle the loading later
-        //setLoadingMode(true)
         mGetHistoryLoading = true
 
-        //TODO handle the "loading" text.
-        //mEmptyLoadingTextview.setText(R.string.loading_list_support);
+        mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
         mProgressBar?.visibility = View.VISIBLE
 
 
