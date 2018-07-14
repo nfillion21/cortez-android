@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
         if (savedInstanceState != null)
         {
             mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
@@ -88,6 +89,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         {
             mRecyclerViewItems = ArrayList()
         }
+
+        val tezosTheme = CustomTheme(
+                com.tezos.ui.R.color.theme_tezos_primary,
+                com.tezos.ui.R.color.theme_tezos_primary_dark,
+                com.tezos.ui.R.color.theme_tezos_text)
+
+        initActionBar(tezosTheme)
 
         mSwipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         initSwipeRefresh()
@@ -143,12 +151,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 com.tezos.ui.R.color.theme_yellow_text)
         */
 
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
 
-        initActionBar(tezosTheme)
 
         //Toolbar toolbar = (Toolbar) demoActivity.findViewById(R.id.toolbar);
         //toolbar.setBackgroundColor(ContextCompat.getColor(demoActivity, customTheme.getColorPrimaryId()));
@@ -205,7 +208,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun startInitialLoading()
     {
-        //mSwipeRefreshLayout?.isEnabled = false
+        mSwipeRefreshLayout?.isEnabled = false
 
         startGetRequestLoadOperations()
     }
