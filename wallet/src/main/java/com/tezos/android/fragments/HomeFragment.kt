@@ -7,27 +7,31 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
 
 import com.tezos.android.R
 import com.tezos.core.models.CustomTheme
+import com.tezos.ui.activity.CreateWalletActivity
+import com.tezos.ui.activity.RestoreWalletActivity
 
 private const val ARG_THEME = "theme"
 class HomeFragment : Fragment()
 {
     private var listener: OnFragmentInteractionListener? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private var mRestoreWalletButton: Button? = null
+    private var mCreateWalletButton: Button? = null
+    private var mTezosLogo: ImageView? = null
+
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
 
-        arguments?.let {
-            val themeBundle = it.getBundle(ARG_THEME)
-            val customTheme = CustomTheme.fromBundle(themeBundle)
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
@@ -35,22 +39,25 @@ class HomeFragment : Fragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        mRestoreWalletButton = findViewById(R.id.restoreWalletButton)
+        var tezosTheme:CustomTheme? = null
+        arguments?.let {
+            val themeBundle = it.getBundle(ARG_THEME)
+            tezosTheme = CustomTheme.fromBundle(themeBundle)
+        }
+
+        mRestoreWalletButton = view.findViewById(R.id.restoreWalletButton)
         mRestoreWalletButton!!.setOnClickListener {
-            RestoreWalletActivity.start(this, tezosTheme)
+            RestoreWalletActivity.start(activity, tezosTheme)
+
+            listener?.onFragmentInteraction()
         }
 
-        mCreateWalletButton = findViewById(R.id.createWalletButton)
+        mCreateWalletButton = view.findViewById(R.id.createWalletButton)
         mCreateWalletButton!!.setOnClickListener {
-            CreateWalletActivity.start(this, tezosTheme)
+            CreateWalletActivity.start(activity, tezosTheme)
         }
 
-        mTezosLogo = findViewById(R.id.ic_logo)
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    fun onButtonPressed(uri: Uri) {
-        listener?.onFragmentInteraction(uri)
+        mTezosLogo = view.findViewById(R.id.ic_logo)
     }
 
     override fun onAttach(context: Context) {
@@ -70,7 +77,7 @@ class HomeFragment : Fragment()
    interface OnFragmentInteractionListener
    {
         // TODO: Update argument type and name
-        fun onFragmentInteraction(uri: Uri)
+        fun onFragmentInteraction()
     }
 
     companion object

@@ -1,5 +1,9 @@
 package com.tezos.ui.activity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -119,13 +123,28 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
                 mBackupCheckbox.setEnabled(false);
 
                 mRenewFab.setEnabled(false);
-                removeDoneFab(() ->
+
+                ObjectAnimator textViewAnimator = ObjectAnimator.ofFloat(mRenewFab, View.SCALE_X,0f);
+                ObjectAnimator textViewAnimator2 = ObjectAnimator.ofFloat(mRenewFab, View.SCALE_Y,0f);
+                ObjectAnimator textViewAnimator3 = ObjectAnimator.ofFloat(mRenewFab, View.ALPHA,0f);
+
+                AnimatorSet animatorSet = new AnimatorSet();
+                animatorSet.setInterpolator(new FastOutSlowInInterpolator());
+                animatorSet.play(textViewAnimator).with(textViewAnimator2).with(textViewAnimator3);
+                animatorSet.addListener(new AnimatorListenerAdapter()
                 {
-                    mMnemonicsString = CryptoUtils.generateMnemonics();
-                    mMnemonicsTextview.setText(mMnemonicsString);
-                    // renew the mnemonic
-                    showDoneFab();
+                    @Override
+                    public void onAnimationEnd(Animator animation)
+                    {
+                        super.onAnimationEnd(animation);
+
+                        mMnemonicsString = CryptoUtils.generateMnemonics();
+                        mMnemonicsTextview.setText(mMnemonicsString);
+                        // renew the mnemonic
+                        showDoneFab();
+                    }
                 });
+                animatorSet.start();
             }
             else
             {
@@ -221,32 +240,34 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
         return false;
     }
 
-    private void removeDoneFab(@Nullable Runnable endAction) {
-        ViewCompat.animate(mRenewFab)
-                .scaleX(0)
-                .scaleY(0)
-                .alpha(0)
-                .setInterpolator(new FastOutSlowInInterpolator())
-                .withEndAction(endAction)
-                .start();
-    }
-
     private void showDoneFab()
     {
         mRenewFab.show();
+
         mRenewFab.setScaleX(0f);
         mRenewFab.setScaleY(0f);
-        ViewCompat.animate(mRenewFab)
-                .scaleX(1)
-                .scaleY(1)
-                .alpha(1)
-                .setStartDelay(200)
-                .setInterpolator(new FastOutSlowInInterpolator())
-                .start();
 
-        mRenewFab.setEnabled(true);
+        ObjectAnimator textViewAnimator = ObjectAnimator.ofFloat(mRenewFab, View.SCALE_X,1f);
+        ObjectAnimator textViewAnimator2 = ObjectAnimator.ofFloat(mRenewFab, View.SCALE_Y,1f);
+        ObjectAnimator textViewAnimator3 = ObjectAnimator.ofFloat(mRenewFab, View.ALPHA,1f);
 
-        mBackupCheckbox.setEnabled(true);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.setStartDelay(200);
+
+        animatorSet.setInterpolator(new FastOutSlowInInterpolator());
+        animatorSet.play(textViewAnimator).with(textViewAnimator2).with(textViewAnimator3);
+        animatorSet.addListener(new AnimatorListenerAdapter()
+        {
+            @Override
+            public void onAnimationEnd(Animator animation)
+            {
+                super.onAnimationEnd(animation);
+                mRenewFab.setEnabled(true);
+
+                mBackupCheckbox.setEnabled(true);
+            }
+        });
+        animatorSet.start();
     }
 
     protected void validateCreateButton(boolean validate, CustomTheme theme)

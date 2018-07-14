@@ -33,8 +33,8 @@ import kotlinx.android.synthetic.main.activity_home.*
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler, HomeFragment.OnFragmentInteractionListener
 {
-    override fun onFragmentInteraction(uri: Uri) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onFragmentInteraction() {
+        replaceFragment()
     }
 
     private val pkHashKey = "pkhash_key"
