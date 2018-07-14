@@ -46,11 +46,6 @@ import org.json.JSONArray
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler
 {
 
-    private val OPERATIONS_ARRAYLIST_KEY = "operationsList"
-    private val GET_OPERATIONS_LOADING_KEY = "getOperationsLoading"
-
-    private val LOAD_OPERATIONS_TAG = "downloadHistory"
-
     private val pkHashKey = "pkhash_key"
     private var mPublicKeyHash: String? = null
 
@@ -62,14 +57,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var animating = false
 
-    private var mSwipeRefreshLayout:SwipeRefreshLayout? = null
-
-    private var mRecyclerView:RecyclerView? = null
-    private var mRecyclerViewItems:ArrayList<Operation>? = null
-
-    private var mGetHistoryLoading:Boolean = false
-
-    private var mEmptyLoadingTextView:TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -98,89 +85,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         initActionBar(tezosTheme)
 
-        mEmptyLoadingTextView = findViewById(R.id.empty_loading_textview)
-
-        mSwipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
-        mSwipeRefreshLayout?.setOnRefreshListener {
-            startGetRequestLoadOperations()
-        }
 
         if (savedInstanceState != null)
         {
             mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
-
-            var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(OPERATIONS_ARRAYLIST_KEY)
-            mRecyclerViewItems = bundlesToItems(messagesBundle)
-
-            mGetHistoryLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
-
-
-            if (mGetHistoryLoading)
-            {
-                // it does back to loading while we got elements on the list
-                // put the elements before loading.
-                // looks ok
-
-                refreshRecyclerViewAndText()
-                startInitialLoading()
-            }
-            else
-            {
-                onOperationsLoadComplete()
-            }
-        }
-        else
-        {
-            mRecyclerViewItems = ArrayList()
-
-            startInitialLoading()
         }
 
-        var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
-        val layoutManager = LinearLayoutManager(this)
-        recyclerView.layoutManager = layoutManager as RecyclerView.LayoutManager?
-
-        val adapter = OperationRecyclerViewAdapter(mRecyclerViewItems)
-
-        recyclerView.adapter = adapter
-
-        mRecyclerView = recyclerView
-    }
-
-    private fun onOperationsLoadComplete()
-    {
-        mGetHistoryLoading = false
-
-        mProgressBar?.visibility = View.GONE
-
-        mSwipeRefreshLayout?.isEnabled = true
-        mSwipeRefreshLayout?.isRefreshing = false
-
-        refreshRecyclerViewAndText()
-    }
-
-    private fun refreshRecyclerViewAndText()
-    {
-        if (mRecyclerViewItems?.isEmpty()!!)
-        {
-            mRecyclerView?.visibility = View.GONE
-
-            mEmptyLoadingTextView?.visibility = View.VISIBLE
-            mEmptyLoadingTextView?.setText(R.string.empty_list_operations)
-        }
-        else
-        {
-            mRecyclerView?.visibility = View.VISIBLE
-            mEmptyLoadingTextView?.visibility = View.GONE
-            mEmptyLoadingTextView?.text = null
-        }
-    }
-
-    private fun startInitialLoading()
-    {
-        mSwipeRefreshLayout?.isEnabled = false
-
-        startGetRequestLoadOperations()
     }
 
     override fun onResume()
@@ -188,7 +98,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onResume()
         launchPasscode()
 
-        mRecyclerView?.adapter?.notifyDataSetChanged()
 
         //handleVisibility()
     }
@@ -443,201 +352,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-    // volley
-
-
-    private fun startGetRequestLoadOperations()
-    {
-        cancelRequest(true)
-
-        mGetHistoryLoading = true
-
-        mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
-        mProgressBar?.visibility = View.VISIBLE
-
-
-        val url = String.format(getString(R.string.history_url), "tz1dBEF7fUmrNZogkrGdTRFhHdx4PQz4ZuAA")
-
-        val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, object : Response.Listener<JSONArray>
-        {
-            override fun onResponse(answer: JSONArray)
-            {
-                addOperationItemsFromJSON(answer)
-
-                onOperationsLoadComplete()
-            }
-
-        }, object : Response.ErrorListener {
-
-            override fun onErrorResponse(error: VolleyError)
-            {
-                mGetHistoryLoading = false
-
-                onOperationsLoadComplete()
-
-                showSnackbarError(true)
-            }
-        })
-
-        jsObjRequest.tag = LOAD_OPERATIONS_TAG
-
-        VolleySingleton.getInstance(this.applicationContext).addToRequestQueue(jsObjRequest)
-    }
-
-    private fun showSnackbarError(network :Boolean)
-    {
-        mEmptyLoadingTextView?.setText(R.string.network_error)
-
-        var error:Int = if (network)
-        {
-            R.string.network_error
-        }
-        else
-        {
-            R.string.generic_error
-        }
-
-        val snackbar = Snackbar.make(findViewById<Button>(R.id.coordinator), error, Snackbar.LENGTH_LONG)
-        val snackBarView = snackbar.view
-        snackBarView.setBackgroundColor((ContextCompat.getColor(this,
-                android.R.color.holo_red_light)))
-        snackbar.show()
-    }
-
-
-    private fun addOperationItemsFromJSON(answer:JSONArray) {
-
-        val response = DataExtractor.getJSONArrayFromField(answer,0)
-
-        mRecyclerViewItems?.clear()
-
-        for (i in 0..(response.length() - 1))
-        {
-            val item = response.getJSONObject(i)
-            val operation = Operation.fromJSONObject(item)
-
-            mRecyclerViewItems!!.add(operation)
-        }
-
-        mRecyclerView!!.adapter!!.notifyDataSetChanged()
-
-        //TODO parse it
-
-        /*
-    JSONArray messages = DataExtractor.getJSONArrayFromField(object, "messages");
-
-    if (messages != null && messages.length() > 0)
-    {
-        // clear before adding new elements
-        mRecyclerViewItems.clear();
-
-        for (int i = 0; i < messages.length(); i++)
-        {
-            JSONObject row = DataExtractor.getJSONObjectFromField(messages, i);
-            if (row != null)
-            {
-                String sender = DataExtractor.getStringFromField(row, "sender");
-                String body = DataExtractor.getStringFromField(row, "message");
-
-                Integer dateInteger = DataExtractor.getIntegerFromField(row, "date");
-                long date = -1;
-                if (dateInteger != null)
-                {
-                    date = dateInteger;
-                }
-
-                if (!TextUtils.isEmpty(sender) && !TextUtils.isEmpty(body))
-                {
-
-                    int type;
-                    if (sender.equalsIgnoreCase("user"))
-                    {
-                        type = 0;
-                    }
-                    else
-                    {
-                        type = 1;
-                    }
-
-                    SupportMessageItem messageItem = new SupportMessageItem(type, sender, body, date*1000);
-                    mRecyclerViewItems.add(messageItem);
-                }
-
-                // sort messages by date, oldest last.
-                Collections.sort(mRecyclerViewItems, new Comparator<SupportMessageItem>()
-                {
-                    @Override
-                    public int compare(SupportMessageItem o1, SupportMessageItem o2)
-                    {
-                        return (int) (o2.getDate() - o1.getDate());
-                    }
-                });
-                mRecyclerView.getAdapter().notifyDataSetChanged();
-            }
-        }
-    }
-        */
-}
-
-    private fun bundlesToItems( bundles:ArrayList<Bundle>): ArrayList<Operation>?
-    {
-        if (bundles != null)
-        {
-            var items = ArrayList<Operation>(bundles.size)
-            if (!bundles.isEmpty())
-            {
-                bundles.forEach {
-                    val op = Operation.fromBundle(it)
-                    items.add(op)
-                }
-            }
-            return items
-        }
-        return null
-    }
-
-    private fun itemsToBundles(items:ArrayList<Operation>?):ArrayList<Bundle>?
-    {
-        if (items != null)
-        {
-            val bundles = ArrayList<Bundle>(items.size)
-            if (!items.isEmpty())
-            {
-                items.forEach {
-                    bundles.add(it.toBundle())
-                }
-            }
-            return bundles
-        }
-        return null
-    }
-
     override fun onSaveInstanceState(outState: Bundle?)
     {
         super.onSaveInstanceState(outState)
 
         outState?.putString(pkHashKey, mPublicKeyHash)
-
-        val bundles = itemsToBundles(mRecyclerViewItems)
-        outState?.putParcelableArrayList(OPERATIONS_ARRAYLIST_KEY, bundles)
-
-        outState?.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
-    }
-
-    private fun cancelRequest(getOperations: Boolean)
-    {
-        val requestQueue = VolleySingleton.getInstance(this.applicationContext).requestQueue
-        if (requestQueue != null)
-        {
-            if (getOperations)
-            {
-                requestQueue.cancelAll(LOAD_OPERATIONS_TAG)
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cancelRequest(true)
     }
 }
