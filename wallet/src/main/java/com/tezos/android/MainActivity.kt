@@ -11,11 +11,8 @@ import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
@@ -23,25 +20,18 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.JsonArrayRequest
 import com.tezos.android.activities.AboutActivity
 import com.tezos.android.activities.SettingsActivity
-import com.tezos.android.adapters.OperationRecyclerViewAdapter
+import com.tezos.android.fragments.OperationsFragment
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.models.Operation
 import com.tezos.core.utils.AddressesDatabase
 import com.tezos.core.utils.ApiLevelHelper
-import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.activity.*
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
-import com.tezos.ui.utils.VolleySingleton
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONArray
+import kotlinx.android.synthetic.main.app_bar_main.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler
 {
@@ -49,13 +39,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val pkHashKey = "pkhash_key"
     private var mPublicKeyHash: String? = null
 
-    private var mRestoreWalletButton: Button? = null
-    private var mCreateWalletButton: Button? = null
-    private var mTezosLogo: ImageView? = null
+    //private var mRestoreWalletButton: Button? = null
+    //private var mCreateWalletButton: Button? = null
+    //private var mTezosLogo: ImageView? = null
 
     private var mProgressBar: ProgressBar? = null
 
-    private var animating = false
+    //private var animating = false
 
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -71,6 +61,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // initialize the buttons
 
+        /*
         mRestoreWalletButton = findViewById(R.id.restoreWalletButton)
         mRestoreWalletButton!!.setOnClickListener {
             RestoreWalletActivity.start(this, tezosTheme)
@@ -82,6 +73,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         mTezosLogo = findViewById(R.id.ic_logo)
+        */
 
         initActionBar(tezosTheme)
 
@@ -90,7 +82,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         {
             mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
         }
-
+        else
+        {
+            val operationsFragment = OperationsFragment.newInstance(tezosTheme)
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.main_fragments_container, operationsFragment, "tag")
+                    .commit()
+        }
     }
 
     override fun onResume()
@@ -102,6 +100,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         //handleVisibility()
     }
 
+    /*
     private fun handleVisibility()
     {
         if (!animating)
@@ -128,7 +127,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         animating = false
     }
+    */
 
+    /*
     private fun animateLogo()
     {
         animating = true
@@ -170,6 +171,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         })
         animator.start()
     }
+    */
 
     override fun launchPasscode()
     {
@@ -199,7 +201,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                         AddressesDatabase.getInstance().setPrivateKeyOn(this, true)
                         setMenuItemEnabled(true)
-                        animateLogo()
+                        //animateLogo()
                     }
                     else
                     {
@@ -227,7 +229,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         AddressesDatabase.getInstance().setPrivateKeyOn(this, true)
                         setMenuItemEnabled(true)
 
-                        animateLogo()
+                        //animateLogo()
                     }
                     else
                     {

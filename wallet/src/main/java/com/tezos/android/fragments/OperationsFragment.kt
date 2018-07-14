@@ -9,7 +9,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import com.android.volley.Request
 import com.android.volley.Response
@@ -17,6 +19,7 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.tezos.android.R
 import com.tezos.android.adapters.OperationRecyclerViewAdapter
+import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.utils.VolleySingleton
@@ -40,12 +43,20 @@ class OperationsFragment : Fragment()
 
     private var mCoordinatorLayout: CoordinatorLayout? = null
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-    }
+    companion object
+    {
+        private val ARG_CAUGHT = "myFragment_caught"
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
+        fun newInstance(theme: CustomTheme):OperationsFragment
+        {
+            //do not use them for now
+            //val args: Bundle = Bundle()
+            //args.putSerializable(ARG_CAUGHT, theme)
+            //fragment.arguments = args
+
+            val fragment = OperationsFragment()
+            return fragment
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,15 +70,12 @@ class OperationsFragment : Fragment()
             startGetRequestLoadOperations()
         }
 
-
-
         if (savedInstanceState != null)
         {
             var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(OPERATIONS_ARRAYLIST_KEY)
             mRecyclerViewItems = bundlesToItems(messagesBundle)
 
             mGetHistoryLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
-
 
             if (mGetHistoryLoading)
             {
@@ -90,7 +98,6 @@ class OperationsFragment : Fragment()
             startInitialLoading()
         }
 
-
         var recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         val layoutManager = LinearLayoutManager(activity)
         recyclerView.layoutManager = layoutManager as RecyclerView.LayoutManager?
@@ -100,6 +107,16 @@ class OperationsFragment : Fragment()
         recyclerView.adapter = adapter
 
         mRecyclerView = recyclerView
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?)
+    {
+        super.onActivityCreated(savedInstanceState)
+    }
+
+    override fun onAttach(context: Context?)
+    {
+        super.onAttach(context)
     }
 
     override fun onResume()
@@ -185,6 +202,11 @@ class OperationsFragment : Fragment()
         jsObjRequest.tag = LOAD_OPERATIONS_TAG
 
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        //return super.onCreateView(inflater, container, savedInstanceState)
+        return inflater.inflate(R.layout.fragment_operations, container, false);
     }
 
     private fun showSnackbarError(network :Boolean)
