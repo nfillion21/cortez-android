@@ -9,4 +9,7 @@
     <string name="use_passcode">Use a passcode</string>
     <string name="empty_list_operations">No operations</string>
     <string name="loading_list_operations">Loading operations…</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

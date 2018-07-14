@@ -1,9 +1,8 @@
 package com.tezos.android
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -17,11 +16,11 @@ import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.tezos.android.activities.AboutActivity
 import com.tezos.android.activities.SettingsActivity
+import com.tezos.android.fragments.HomeFragment
 import com.tezos.android.fragments.OperationsFragment
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
@@ -30,18 +29,16 @@ import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.activity_home.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler
+class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler, HomeFragment.OnFragmentInteractionListener
 {
+    override fun onFragmentInteraction(uri: Uri) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     private val pkHashKey = "pkhash_key"
     private var mPublicKeyHash: String? = null
-
-    //private var mRestoreWalletButton: Button? = null
-    //private var mCreateWalletButton: Button? = null
-    //private var mTezosLogo: ImageView? = null
 
     private var mProgressBar: ProgressBar? = null
 
@@ -51,7 +48,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_home)
 
         // first get the theme
         val tezosTheme = CustomTheme(
@@ -59,21 +56,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 com.tezos.ui.R.color.theme_tezos_primary_dark,
                 com.tezos.ui.R.color.theme_tezos_text)
 
-        // initialize the buttons
-
-        /*
-        mRestoreWalletButton = findViewById(R.id.restoreWalletButton)
-        mRestoreWalletButton!!.setOnClickListener {
-            RestoreWalletActivity.start(this, tezosTheme)
-        }
-
-        mCreateWalletButton = findViewById(R.id.createWalletButton)
-        mCreateWalletButton!!.setOnClickListener {
-            CreateWalletActivity.start(this, tezosTheme)
-        }
-
-        mTezosLogo = findViewById(R.id.ic_logo)
-        */
 
         initActionBar(tezosTheme)
 
@@ -84,11 +66,31 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         else
         {
+            /*
             val operationsFragment = OperationsFragment.newInstance(tezosTheme)
             supportFragmentManager.beginTransaction()
                     .add(R.id.main_fragments_container, operationsFragment, "tag")
                     .commit()
+            */
+
+            val homeFragment = HomeFragment.newInstance(tezosTheme)
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.main_fragments_container, homeFragment, "tag")
+                    .commit()
         }
+    }
+
+    private fun replaceFragment()
+    {
+        val tezosTheme = CustomTheme(
+                com.tezos.ui.R.color.theme_tezos_primary,
+                com.tezos.ui.R.color.theme_tezos_primary_dark,
+                com.tezos.ui.R.color.theme_tezos_text)
+
+        val operationsFragment = OperationsFragment.newInstance(tezosTheme)
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.main_fragments_container, operationsFragment)
+                .addToBackStack(null).commit()
     }
 
     override fun onResume()
@@ -340,7 +342,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_settings ->
             {
-                SettingsActivity.start(this, tezosTheme)
+                //SettingsActivity.start(this, tezosTheme)
+                replaceFragment()
             }
             R.id.nav_info ->
             {
