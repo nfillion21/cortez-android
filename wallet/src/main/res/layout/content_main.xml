@@ -19,58 +19,58 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/recycler_view"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                android:scrollbars="vertical" />
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/empty_loading_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="Hello world"
+                    android:textColor="@color/colorAccent"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:clickable="false" />
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="vertical" />
 
-            <TextView
-                android:id="@+id/empty_loading_textview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:focusable="false"
-                android:textColor="@color/colorAccent"
-                android:focusableInTouchMode="false"
-                android:clickable="false"
-                android:visibility="visible" />
+                <ImageView android:id="@+id/ic_logo"
+                    android:layout_width="wrap_content"
+                    android:visibility="gone"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="@dimen/spacing_double"
+                    app:srcCompat="@drawable/ic_logo_tezos" />
 
-            <ImageView android:id="@+id/ic_logo"
-                android:layout_width="wrap_content"
-                android:layout_weight="0"
-                android:visibility="gone"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_margin="@dimen/spacing_double"
-                app:srcCompat="@drawable/ic_logo_tezos" />
+                <Button
+                    android:id="@+id/createWalletButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginRight="@dimen/spacing_double"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    style="@style/PaymentScreens.RoundedButton"
+                    android:text="Create wallet"
+                    />
 
-            <Button
-                android:id="@+id/createWalletButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:visibility="gone"
-                android:layout_marginRight="@dimen/spacing_double"
-                android:layout_marginLeft="@dimen/spacing_double"
-                style="@style/PaymentScreens.RoundedButton"
-                android:text="Create wallet"
-                />
-
-            <Button
-                android:id="@+id/restoreWalletButton"
-                android:layout_width="match_parent"
-                android:layout_weight="0"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                style="@style/PaymentScreens.RoundedButton"
-                android:text="Restore wallet"
-                android:layout_marginTop="@dimen/spacing_normal"
-                android:layout_marginRight="@dimen/spacing_double"
-                android:layout_marginLeft="@dimen/spacing_double"
-                android:layout_marginBottom="@dimen/spacing_double"
-                />
+                <Button
+                    android:id="@+id/restoreWalletButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    style="@style/PaymentScreens.RoundedButton"
+                    android:text="Restore wallet"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:layout_marginRight="@dimen/spacing_double"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    />
+            </LinearLayout>
         </android.support.v4.widget.SwipeRefreshLayout>
 
     </LinearLayout>

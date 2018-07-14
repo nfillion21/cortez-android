@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
         val layoutManager = LinearLayoutManager(this)
-        recyclerView.layoutManager = layoutManager
+        recyclerView.layoutManager = layoutManager as RecyclerView.LayoutManager?
 
         val adapter = OperationRecyclerViewAdapter(mRecyclerViewItems)
 
@@ -151,10 +151,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     {
         mGetHistoryLoading = false
 
-        //TODO handle the progressBar
         mProgressBar?.visibility = View.GONE
 
-        //TODO handle the swipe refresh layout
         mSwipeRefreshLayout?.isEnabled = true
         mSwipeRefreshLayout?.isRefreshing = false
 
@@ -167,7 +165,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         {
             mRecyclerView?.visibility = View.GONE
 
-            mEmptyLoadingTextView?.visibility = View.VISIBLE;
+            mEmptyLoadingTextView?.visibility = View.VISIBLE
             mEmptyLoadingTextView?.setText(R.string.empty_list_operations)
         }
         else
@@ -190,9 +188,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onResume()
         launchPasscode()
 
-        mRecyclerView!!.adapter!!.notifyDataSetChanged()
+        mRecyclerView?.adapter?.notifyDataSetChanged()
 
-        handleVisibility()
+        //handleVisibility()
     }
 
     private fun handleVisibility()
@@ -431,13 +429,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_settings ->
             {
-                /*
-                val starter = Intent(this, AboutActivity::class.java)
-                starter.putExtra(CustomTheme.TAG, tezosTheme.toBundle())
-                ActivityCompat.startActivityForResult(this, starter, -1, null)
-                */
-                startGetRequestLoadOperations()
-                //SettingsActivity.start(this, tezosTheme)
+                SettingsActivity.start(this, tezosTheme)
             }
             R.id.nav_info ->
             {
