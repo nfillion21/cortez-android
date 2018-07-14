@@ -56,7 +56,7 @@ class AboutActivity : AppCompatActivity(), IPasscodeHandler
 
     private fun getStartIntent(context: Context, theme:CustomTheme): Intent
     {
-        val starter = Intent(this, AboutActivity::class.java)
+        val starter = Intent(context, AboutActivity::class.java)
         starter.putExtra(CustomTheme.TAG, theme.toBundle())
 
         return starter

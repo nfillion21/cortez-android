@@ -475,14 +475,33 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 onOperationsLoadComplete()
 
-                //TODO handle network connection snackbar
-                //showSnackbarError(true);
+                showSnackbarError(true)
             }
         })
 
         jsObjRequest.tag = LOAD_OPERATIONS_TAG
 
         VolleySingleton.getInstance(this.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    private fun showSnackbarError(network :Boolean)
+    {
+        mEmptyLoadingTextView?.setText(R.string.network_error)
+
+        var error:Int = if (network)
+        {
+            R.string.network_error
+        }
+        else
+        {
+            R.string.generic_error
+        }
+
+        val snackbar = Snackbar.make(findViewById<Button>(R.id.coordinator), error, Snackbar.LENGTH_LONG)
+        val snackBarView = snackbar.view
+        snackBarView.setBackgroundColor((ContextCompat.getColor(this,
+                android.R.color.holo_red_light)))
+        snackbar.show()
     }
 
 
