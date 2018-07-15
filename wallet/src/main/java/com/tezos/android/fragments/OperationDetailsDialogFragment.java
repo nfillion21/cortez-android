@@ -150,7 +150,7 @@ public class OperationDetailsDialogFragment extends DialogFragment
 
         @Override
         public boolean areAllItemsEnabled() {
-            return true;
+            return false;
         }
 
         @Override

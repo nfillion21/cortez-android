@@ -15,6 +15,10 @@ import com.tezos.android.R;
 import com.tezos.core.models.Operation;
 
 import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -59,17 +63,17 @@ public class OperationRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
      */
     class OperationItemViewHolder extends RecyclerView.ViewHolder
     {
-        private final TextView messageItemName;
-        private final TextView messageItemPrice;
-        private final TextView messageItemDate;
+        private final TextView itemAmount;
+        private final TextView itemFee;
+        private final TextView itemDate;
 
         OperationItemViewHolder(View view)
         {
             super(view);
 
-            messageItemName = view.findViewById(R.id.operation_item_hash);
-            messageItemPrice = view.findViewById(R.id.operation_item_id);
-            messageItemDate = view.findViewById(R.id.operation_item_blockhash);
+            itemAmount = view.findViewById(R.id.operation_item_amount);
+            itemFee = view.findViewById(R.id.operation_item_fee);
+            itemDate = view.findViewById(R.id.operation_item_date);
         }
     }
 
@@ -125,14 +129,12 @@ public class OperationRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
                 OperationItemViewHolder operationItemHolder = (OperationItemViewHolder) holder;
                 Operation operationItem = mRecyclerViewItems.get(position);
 
-                //Date date = new Date(operationItem.getDate());
-                //String s = mDateFormat.format(date);
-                //String user = operationItem.getName().toLowerCase();
-                //user = user.substring(0, 1).toUpperCase() + user.substring(1).toLowerCase();
+                operationItemHolder.itemAmount.setText(operationItem.getAmount()/1000000 + "ꜩ");
 
-                operationItemHolder.messageItemName.setText(operationItem.getAmount() + "");
-                operationItemHolder.messageItemPrice.setText(operationItem.getFee() + "");
-                operationItemHolder.messageItemDate.setText(operationItem.getBlockHash());
+                operationItemHolder.itemFee.setText(operationItem.getFee()/1000000 + "ꜩ");
+
+                Date date = Date.from(Instant.parse(operationItem.getTimestamp()));
+                operationItemHolder.itemDate.setText(mDateFormat.format(date));
 
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override

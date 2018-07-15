@@ -20,4 +20,7 @@
     <string name="operation_details_src_mgr">Source Manager</string>
     <string name="operation_details_dst">Destination</string>
     <string name="operation_details_dst_mgr">Destination Manager</string>
+
+    <string name="amount_info">Amount:</string>
+    <string name="fee_info">Fee:</string>
 </resources>
