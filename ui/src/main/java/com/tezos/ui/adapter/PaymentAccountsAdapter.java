@@ -8,20 +8,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.tezos.core.models.Account;
 import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
-import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.ui.R;
 import com.tezos.ui.activity.PaymentAccountsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by nfillion on 29/02/16.

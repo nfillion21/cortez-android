@@ -25,8 +25,9 @@ import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.utils.VolleySingleton
 import org.json.JSONArray
 
-class OperationsFragment : Fragment()
+class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickListener
 {
+
     private val OPERATIONS_ARRAYLIST_KEY = "operationsList"
     private val GET_OPERATIONS_LOADING_KEY = "getOperationsLoading"
 
@@ -45,24 +46,19 @@ class OperationsFragment : Fragment()
 
     companion object
     {
-        private val ARG_CAUGHT = "myFragment_caught"
-
-        fun newInstance(theme: CustomTheme):OperationsFragment
-        {
-            //do not use them for now
-            //val args: Bundle = Bundle()
-            //args.putSerializable(ARG_CAUGHT, theme)
-            //fragment.arguments = args
-
-            val fragment = OperationsFragment()
-            return fragment
-        }
+        @JvmStatic
+        fun newInstance(theme: CustomTheme) =
+                OperationsFragment().apply {
+                    arguments = Bundle().apply {
+                        putBundle(CustomTheme.TAG, theme.toBundle())
+                    }
+                }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mCoordinatorLayout = view.findViewById(R.id.coordinator)
+        mCoordinatorLayout = view.findViewById<CoordinatorLayout>(R.id.coordinator)
         mEmptyLoadingTextView = view.findViewById(R.id.empty_loading_textview)
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
@@ -104,6 +100,7 @@ class OperationsFragment : Fragment()
 
         val adapter = OperationRecyclerViewAdapter(mRecyclerViewItems)
 
+        adapter.setOnItemClickListener(this)
         recyclerView.adapter = adapter
 
         mRecyclerView = recyclerView
@@ -304,5 +301,11 @@ class OperationsFragment : Fragment()
     override fun onDestroy() {
         super.onDestroy()
         cancelRequest(true)
+    }
+
+    override fun onOperationSelected(view: View?, operation: Operation?)
+    {
+        //call the new fragment
+        showSnackbarError(true)
     }
 }

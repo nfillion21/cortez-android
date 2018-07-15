@@ -31,6 +31,18 @@ public class OperationRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
 
     private final DateFormat mDateFormat;
 
+    private OnItemClickListener mOnItemClickListener;
+
+    public interface OnItemClickListener
+    {
+        void onOperationSelected(View view, Operation operation);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener)
+    {
+        mOnItemClickListener = onItemClickListener;
+    }
+
     /**
      * For this example app, the recyclerViewItems list contains only
      * {@link Operation} type.
@@ -118,9 +130,17 @@ public class OperationRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
                 //String user = operationItem.getName().toLowerCase();
                 //user = user.substring(0, 1).toUpperCase() + user.substring(1).toLowerCase();
 
-                operationItemHolder.messageItemName.setText("hello");
-                operationItemHolder.messageItemPrice.setText("hello");
+                operationItemHolder.messageItemName.setText(operationItem.getAmount() + "");
+                operationItemHolder.messageItemPrice.setText(operationItem.getFee() + "");
                 operationItemHolder.messageItemDate.setText(operationItem.getBlockHash());
+
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        mOnItemClickListener.onOperationSelected(view, operationItem);
+                    }
+                });
             }
             break;
 
