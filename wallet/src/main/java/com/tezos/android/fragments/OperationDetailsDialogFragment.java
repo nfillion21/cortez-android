@@ -3,7 +3,6 @@ package com.tezos.android.fragments;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Path;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,7 +26,7 @@ public class OperationDetailsDialogFragment extends DialogFragment
 {
     private ListView mList;
 
-    private static final int LOADER_ID = 42;
+    public static final String TAG = "OperationDetailsDialogFragment";
 
     public static OperationDetailsDialogFragment newInstance(Operation operation)
     {
@@ -116,20 +115,20 @@ public class OperationDetailsDialogFragment extends DialogFragment
 
         private final Context context;
         private final List<String> mList;
-        private final Operation operation;
+        private final Operation mOperation;
 
         OperationDetailsArrayAdapter(Context context, List<String> list, Operation operation)
         {
-            super(context, android.R.layout.simple_list_item_2, list);
+            super(context, R.layout.item_operation_details, list);
             this.context = context;
             this.mList = list;
-            this.operation = operation;
+            this.mOperation = operation;
         }
 
         private class ViewHolder
         {
             TextView titleTextView;
-            TextView textView;
+            TextView valueTextView;
         }
 
         @Override
@@ -166,8 +165,9 @@ public class OperationDetailsDialogFragment extends DialogFragment
                 switch (type) {
                     case ITEM_VIEW_TYPE:
                     {
-                        rowView = inflater.inflate(R.layout.item_passcode_settings, parent, false);
+                        rowView = inflater.inflate(R.layout.item_operation_details, parent, false);
                         viewHolder.titleTextView = rowView.findViewById(R.id.text1);
+                        viewHolder.valueTextView = rowView.findViewById(R.id.text2);
                     }
                     break;
                 }
@@ -179,7 +179,39 @@ public class OperationDetailsDialogFragment extends DialogFragment
             }
 
             ViewHolder holder = (ViewHolder) rowView.getTag();
-            holder.textView.setText(mList.get(position));
+            holder.titleTextView.setText(mList.get(position));
+            switch (position)
+            {
+                case 0:
+                {
+                    holder.valueTextView.setText(mOperation.getAmount().toString());
+                }
+                break;
+
+                case 1:
+                {
+                    holder.valueTextView.setText(mOperation.getFee().toString());
+                }
+                break;
+
+                case 2:
+                {
+                    holder.valueTextView.setText(mOperation.getBlockHash());
+                }
+                break;
+
+                case 3:
+                {
+                    holder.valueTextView.setText(mOperation.getDestination());
+                }
+                break;
+
+                default:
+                {
+                    //no-op
+                }
+                break;
+            }
 
             return rowView;
         }

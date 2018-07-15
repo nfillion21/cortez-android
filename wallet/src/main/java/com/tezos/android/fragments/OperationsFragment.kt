@@ -305,7 +305,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     override fun onOperationSelected(view: View?, operation: Operation?)
     {
-        //call the new fragment
-        showSnackbarError(true)
+        val operationDetailsFragment = OperationDetailsDialogFragment.newInstance(operation)
+        operationDetailsFragment.show(activity?.supportFragmentManager, OperationDetailsDialogFragment.TAG)
     }
 }

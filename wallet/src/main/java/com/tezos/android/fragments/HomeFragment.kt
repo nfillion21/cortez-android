@@ -27,7 +27,6 @@ class HomeFragment : Fragment()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -48,8 +47,6 @@ class HomeFragment : Fragment()
         mRestoreWalletButton = view.findViewById(R.id.restoreWalletButton)
         mRestoreWalletButton!!.setOnClickListener {
             RestoreWalletActivity.start(activity, tezosTheme)
-
-            listener?.onFragmentInteraction()
         }
 
         mCreateWalletButton = view.findViewById(R.id.createWalletButton)
