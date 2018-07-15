@@ -63,10 +63,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         {
             //TODO begin with home unless you got your keys already
 
-            val homeFragment = HomeFragment.newInstance(tezosTheme)
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.main_fragments_container, homeFragment, "tag")
-                    .commit()
+            switchToHome()
         }
     }
 
@@ -100,6 +97,8 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     {
         super.onResume()
         launchPasscode()
+
+        drawer_layout.closeDrawer(GravityCompat.START)
     }
 
     override fun launchPasscode()
@@ -282,6 +281,10 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         //drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onPause() {
+        super.onPause()
     }
 
     override fun onSaveInstanceState(outState: Bundle?)
