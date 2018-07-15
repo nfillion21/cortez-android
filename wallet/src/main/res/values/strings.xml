@@ -10,6 +10,8 @@
     <string name="empty_list_operations">No operations</string>
     <string name="loading_list_operations">Loading operations…</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="operation_details_amount">Amount</string>
+    <string name="operation_details_fee">Fee</string>
+    <string name="operation_details_hash">Hash</string>
+    <string name="operation_details_dst">Destination</string>
 </resources>
