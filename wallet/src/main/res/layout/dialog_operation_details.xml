@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/category_item"
+    android:id="@+id/operation_details_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:foreground="@drawable/selector_subtle"
     android:orientation="vertical"
-    android:padding="@dimen/spacing_double"
+    android:padding="@dimen/spacing_micro"
     tools:ignore="UseCompoundDrawables,UselessParent">
 
     <!--

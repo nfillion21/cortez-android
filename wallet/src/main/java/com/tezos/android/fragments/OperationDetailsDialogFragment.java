@@ -10,9 +10,12 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -73,13 +76,27 @@ public class OperationDetailsDialogFragment extends DialogFragment
 
         View dialogView = inflater.inflate(R.layout.dialog_operation_details, null);
 
+
         mList = dialogView.findViewById(R.id.list);
+        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+            {
+                getDialog().dismiss();
+            }
+        });
 
         List<String> list = Arrays.asList(
-                getString(R.string.operation_details_amount),
-                getString(R.string.operation_details_fee),
                 getString(R.string.operation_details_hash),
-                getString(R.string.operation_details_dst)
+                getString(R.string.operation_details_operation_id),
+                getString(R.string.operation_details_block_hash),
+                getString(R.string.operation_details_timestamp),
+                getString(R.string.operation_details_src),
+                getString(R.string.operation_details_src_mgr),
+                getString(R.string.operation_details_dst),
+                getString(R.string.operation_details_dst_mgr),
+                getString(R.string.operation_details_amount),
+                getString(R.string.operation_details_fee)
         );
 
         Bundle args = getArguments();
@@ -129,6 +146,16 @@ public class OperationDetailsDialogFragment extends DialogFragment
         {
             TextView titleTextView;
             TextView valueTextView;
+        }
+
+        @Override
+        public boolean areAllItemsEnabled() {
+            return true;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return true;
         }
 
         @Override
@@ -183,34 +210,36 @@ public class OperationDetailsDialogFragment extends DialogFragment
             switch (position)
             {
                 case 0:
-                {
-                    holder.valueTextView.setText(mOperation.getAmount().toString());
-                }
-                break;
+                    holder.valueTextView.setText(mOperation.getHash().toString()); break;
 
                 case 1:
-                {
-                    holder.valueTextView.setText(mOperation.getFee().toString());
-                }
-                break;
+                    holder.valueTextView.setText(mOperation.getOperationId().toString()); break;
 
                 case 2:
-                {
-                    holder.valueTextView.setText(mOperation.getBlockHash());
-                }
-                break;
+                    holder.valueTextView.setText(mOperation.getBlockHash()); break;
 
                 case 3:
-                {
-                    holder.valueTextView.setText(mOperation.getDestination());
-                }
-                break;
+                    holder.valueTextView.setText(mOperation.getTimestamp()); break;
 
-                default:
-                {
-                    //no-op
-                }
-                break;
+                case 4:
+                    holder.valueTextView.setText(mOperation.getSource()); break;
+
+                case 5:
+                    holder.valueTextView.setText(mOperation.getSourceManager()); break;
+
+                case 6:
+                    holder.valueTextView.setText(mOperation.getDestination()); break;
+
+                case 7:
+                    holder.valueTextView.setText(mOperation.getDestinationManager()); break;
+
+                case 8:
+                    holder.valueTextView.setText(mOperation.getAmount().toString()); break;
+
+                case 9:
+                    holder.valueTextView.setText(mOperation.getFee().toString()); break;
+
+                default: break;
             }
 
             return rowView;

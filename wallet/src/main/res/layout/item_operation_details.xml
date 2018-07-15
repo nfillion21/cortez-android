@@ -10,8 +10,11 @@
     <TextView android:id="@id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_normal"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        android:textColor="@color/colorPrimary"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+        android:layout_marginBottom="@dimen/spacing_micro"
+        android:textStyle="bold"
+        android:layout_marginTop="@dimen/spacing_normal" />
 
     <TextView android:id="@id/text2"
         android:layout_width="match_parent"
