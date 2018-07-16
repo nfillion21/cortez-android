@@ -44,10 +44,6 @@ public abstract class AbstractPaymentFormFragment extends Fragment
     }
 
     protected TextInputEditText mAmount;
-
-    protected TextInputEditText mFees;
-
-    protected TextInputLayout mFeesLayout;
     protected TextInputLayout mAmountLayout;
 
     protected abstract boolean isInputDataValid();

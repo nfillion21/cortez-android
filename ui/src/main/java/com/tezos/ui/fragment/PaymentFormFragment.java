@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.widget.AppCompatSpinner;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -45,6 +47,8 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     private LinearLayout mTransferSrcFilled;
     private LinearLayout mTransferDstFilled;
 
+    private AppCompatSpinner mCurrencySpinner;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
@@ -72,6 +76,12 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         Bundle args = getArguments();
         Bundle themeBundle = args.getBundle(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
+        mCurrencySpinner = view.findViewById(R.id.fee_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.array_fee, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mCurrencySpinner.setAdapter(adapter);
 
         mSrcButton = view.findViewById(R.id.transfer_src_button);
         mSrcButton.setOnClickListener(v ->
@@ -117,14 +127,7 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         mAmount.addTextChangedListener(new GenericTextWatcher(mAmount));
         mAmount.setOnFocusChangeListener(focusChangeListener);
 
-        mFees = view.findViewById(R.id.fees_transfer);
-        mFees.addTextChangedListener(new GenericTextWatcher(mFees));
-        mFees.setOnFocusChangeListener(focusChangeListener);
-
-        mFeesLayout = view.findViewById(R.id.fees_transfer_support);
         mAmountLayout = view.findViewById(R.id.amount_transfer_support);
-
-        mFeesLayout.setError(" ");
         mAmountLayout.setError(" ");
 
         validatePayButton(isInputDataValid());
@@ -191,14 +194,10 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
                 mPayButtonLayout.setVisibility(View.GONE);
                 mProgressBar.setVisibility(View.VISIBLE);
 
-                mFees.setEnabled(false);
-
             } else {
 
                 mPayButtonLayout.setVisibility(View.VISIBLE);
                 mProgressBar.setVisibility(View.GONE);
-
-                mFees.setEnabled(true);
             }
         }
 
@@ -213,10 +212,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
             if (i == R.id.amount_transfer)
             {
                 putAmountInRed(!hasFocus);
-            }
-            else if (i == R.id.fees_transfer)
-            {
-                putFeesInRed(!hasFocus);
             }
             else
             {
@@ -305,10 +300,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
             if (i == R.id.amount_transfer)
             {
                 putAmountInRed(false);
-            }
-            else if (i == R.id.fees_transfer)
-            {
-                putFeesInRed(false);
             }
             else
             {
@@ -431,8 +422,7 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     protected boolean isInputDataValid()
     {
         if (
-                this.isTransferAmountValid() &&
-                this.isFeesAmountValid()
+                this.isTransferAmountValid()
                 )
         {
             return true;
@@ -444,7 +434,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     protected void putEverythingInRed()
     {
         this.putAmountInRed(true);
-        this.putFeesInRed(true);
     }
 
     // put everything in RED
@@ -463,22 +452,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         }
 
         this.mAmount.setTextColor(ContextCompat.getColor(getActivity(), color));
-    }
-
-    private void putFeesInRed(boolean red) {
-
-        int color;
-
-        boolean feesAmountValid = this.isFeesAmountValid();
-
-        if (red && !feesAmountValid) {
-            color = R.color.tz_error;
-
-        } else {
-            color = R.color.tz_accent;
-        }
-
-        this.mFees.setTextColor(ContextCompat.getColor(getActivity(), color));
     }
 
     private boolean isTransferAmountValid()
@@ -502,28 +475,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         }
 
         return isAmountValid;
-    }
-
-    private boolean isFeesAmountValid()
-    {
-        boolean isFeesValid = false;
-
-        if (!TextUtils.isEmpty(mFees.getText()))
-        {
-            try
-            {
-                float fees = Float.parseFloat(mFees.getText().toString());
-                if (fees >= 0.001f)
-                {
-                    return true;
-                }
-            }
-            catch (NumberFormatException e)
-            {
-                return false;
-            }
-        }
-        return isFeesValid;
     }
 }
 

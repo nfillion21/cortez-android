@@ -141,59 +141,64 @@
         </LinearLayout>
 
     </LinearLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/amount_transfer_support"
-        app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?android:attr/actionBarSize"
-        android:hint="@string/amount"
-        android:clipToPadding="false"
-        android:transitionGroup="true"
-        tools:ignore="UnusedAttribute,NewApi">
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_double"
+        android:background="@drawable/selector_rect_layout">
 
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/amount_transfer"
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/amount_transfer_support"
+            app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
-            android:drawableRight="@drawable/ic_credit_card_black"
-            android:drawableEnd="@drawable/ic_credit_card_black"
-            android:drawablePadding="@dimen/spacing_double"
-            android:hint="@string/amount_default"
-            android:inputType="numberDecimal"
-            android:textColorHint="@color/tz_placeholder"
-            android:maxLength="10"
-            android:digits="0123456789."
-            android:textSize="@dimen/size_edit_text" />
-    </android.support.design.widget.TextInputLayout>
+            android:minHeight="?android:attr/actionBarSize"
+            android:hint="@string/amount"
+            android:clipToPadding="false"
+            android:transitionGroup="true"
+            tools:ignore="UnusedAttribute,NewApi">
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/fees_transfer_support"
-        app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="?android:attr/actionBarSize"
-        android:hint="@string/fees"
-        android:clipToPadding="false"
-        android:transitionGroup="true"
-        tools:ignore="UnusedAttribute,NewApi">
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/amount_transfer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:drawableRight="@drawable/ic_credit_card_black"
+                android:drawableEnd="@drawable/ic_credit_card_black"
+                android:drawablePadding="@dimen/spacing_double"
+                android:hint="@string/amount_default"
+                android:inputType="numberDecimal"
+                android:textColorHint="@color/tz_placeholder"
+                android:maxLength="10"
+                android:digits="0123456789."
+                android:textSize="@dimen/size_edit_text" />
+        </android.support.design.widget.TextInputLayout>
 
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/fees_transfer"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:drawableRight="@drawable/ic_credit_card_black"
-            android:drawableEnd="@drawable/ic_credit_card_black"
-            android:drawablePadding="@dimen/spacing_double"
-            android:hint="@string/fees_default"
-            android:inputType="numberDecimal"
-            android:textColorHint="@color/tz_placeholder"
-            android:maxLength="10"
-            android:digits="0123456789."
-            android:textSize="@dimen/size_edit_text" />
-    </android.support.design.widget.TextInputLayout>
+            android:minHeight="?android:attr/actionBarSize"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/fee_textview"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:textColor="@color/colorPrimaryDark"
+                android:elevation="@dimen/elevation_header"
+                android:gravity="center_vertical"
+                android:text="@string/fee_default"
+                android:clipToPadding="false"
+                tools:ignore="UnusedAttribute,NewApi" />
 
+            <android.support.v7.widget.AppCompatSpinner
+                android:id="@+id/fee_spinner"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
