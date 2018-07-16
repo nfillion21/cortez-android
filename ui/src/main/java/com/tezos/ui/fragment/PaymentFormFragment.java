@@ -30,9 +30,6 @@ import com.tezos.ui.R;
 import com.tezos.ui.activity.PaymentAccountsActivity;
 import com.tezos.ui.activity.PaymentFormActivity;
 
-import java.text.NumberFormat;
-import java.util.Locale;
-
 /**
  * Created by nfillion on 20/04/16.
  */
@@ -443,7 +440,7 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         if (red && !amountValid)
         {
             color = R.color.tz_error;
-            mPayButton.setText("Pay");
+            mPayButton.setText(getString(R.string.pay, ""));
         }
         else
         {
@@ -451,13 +448,42 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
             if (amountValid)
             {
-                NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault());
-                String moneyFormatted = currencyFormatter.format(Float.parseFloat(mAmount.getText().toString()));
+                String amount = mAmount.getText().toString();
 
-                String moneyFormatted2 = moneyFormatted + "ꜩ";
+                //check the correct amount
+                if (amount.contains("."))
+                {
+                    String elements = amount.substring(amount.indexOf("."));
+                    if (elements.length() > 7)
+                    {
+                        amount = String.format("%.6f", Float.parseFloat(amount));
+                    }
+                    else if (elements.length() > 3)
+                    {
+//                        int length = elements.length() - 1;
+//                        String format = "%." + length + "f";
+//                        Float f = Float.parseFloat(amount);
+//                        amount = String.format(format, f);
+                    }
+
+                    else
+                    {
+                        amount = String.format("%.2f", Float.parseFloat(amount));
+                    }
+                }
+                else
+                {
+                    amount = String.format("%.2f", Float.parseFloat(amount));
+                }
+
+                String moneyFormatted2 = amount + " ꜩ";
 
                 String moneyString = getString(R.string.pay, moneyFormatted2);
                 mPayButton.setText(moneyString);
+            }
+            else
+            {
+                mPayButton.setText(getString(R.string.pay, ""));
             }
         }
 
@@ -473,27 +499,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
             try
             {
                 Float amount = Float.parseFloat(mAmount.getText().toString());
-
-                //check the correct amount
-                String amountString = mAmount.getText().toString();
-                if (amountString.contains("."))
-                {
-                    String elements = amountString.substring(amountString.indexOf("."));
-                    if (elements.length() > 1)
-                    {
-                        String decimals = elements.substring(1, elements.length());
-                        if (decimals.length() > 2 && decimals.length() >= 6)
-                        {
-                            // passage au microTez.
-                        }
-                        else if (decimals.length() > 6)
-                        {
-                            // verification format, deleting zeros
-
-                            //
-                        }
-                    }
-                }
 
                 if (amount >= 0.1f)
                 {

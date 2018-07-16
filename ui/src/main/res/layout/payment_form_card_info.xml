@@ -186,7 +186,7 @@
                 android:hint="@string/amount_default"
                 android:inputType="numberDecimal"
                 android:textColorHint="@color/tz_placeholder"
-                android:maxLength="10"
+                android:maxLength="15"
                 android:digits="0123456789."
                 android:textSize="@dimen/size_edit_text" />
 
