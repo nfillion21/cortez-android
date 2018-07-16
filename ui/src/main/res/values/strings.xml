@@ -9,9 +9,9 @@
     <string name="addresses_title">Addresses</string>
     <string name="transfer_title">Transfer</string>
     <string name="card_expiration">Expiry date</string>
-    <string name="amount_default" translatable="false">0.1</string>
+    <string name="amount_default" translatable="false">60.05</string>
     <string name="amount">Amount</string>
-    <string name="fees">Fees amount (min 0.01 ꜩ)</string>
+    <string name="fee">Fee</string>
     <string name="fees_default">0.001</string>
     <string name="public_key_hash">Public Key Hash</string>
     <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>
@@ -59,9 +59,9 @@
     <string name="history_url" translatable="false">http://lumi64.luminar.eu.org:8776/history?ks=%1$s</string>
     <string name="fee_default">Default</string>
     <string-array name="array_fee">
-        <item>Low</item>
-        <item>Default</item>
-        <item>High</item>
+        <item>Standard (0.05ꜩ)</item>
+        <item>Low (0.01ꜩ)</item>
+        <item>High (0.1ꜩ)</item>
     </string-array>
 
 </resources>

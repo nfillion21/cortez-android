@@ -148,57 +148,71 @@
         android:padding="@dimen/spacing_double"
         android:background="@drawable/selector_rect_layout">
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/amount_transfer_support"
-            app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/amount_textview"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minHeight="?android:attr/actionBarSize"
-            android:hint="@string/amount"
-            android:clipToPadding="false"
-            android:transitionGroup="true"
-            tools:ignore="UnusedAttribute,NewApi">
+            android:text="@string/amount"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+            tools:ignore="UnusedAttribute,NewApi" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/amount_transfer"
+                android:elevation="@dimen/elevation_header"
+                android:text="ꜩ"
+                android:layout_marginRight="@dimen/spacing_normal"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                android:clipToPadding="false"
+                tools:ignore="UnusedAttribute,NewApi" />
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/amount_transfer"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionNext"
-                android:drawableRight="@drawable/ic_credit_card_black"
-                android:drawableEnd="@drawable/ic_credit_card_black"
-                android:drawablePadding="@dimen/spacing_double"
+                android:imeOptions="actionDone"
                 android:hint="@string/amount_default"
                 android:inputType="numberDecimal"
                 android:textColorHint="@color/tz_placeholder"
                 android:maxLength="10"
                 android:digits="0123456789."
                 android:textSize="@dimen/size_edit_text" />
-        </android.support.design.widget.TextInputLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="?android:attr/actionBarSize"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/fee_textview"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                style="@style/TextAppearance.AppCompat.Subhead"
-                android:textColor="@color/colorPrimaryDark"
-                android:elevation="@dimen/elevation_header"
-                android:gravity="center_vertical"
-                android:text="@string/fee_default"
-                android:clipToPadding="false"
-                tools:ignore="UnusedAttribute,NewApi" />
-
-            <android.support.v7.widget.AppCompatSpinner
-                android:id="@+id/fee_spinner"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/fee_textview"
+            android:layout_width="wrap_content"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            android:layout_marginTop="@dimen/spacing_double"
+            android:text="@string/fee"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:clipToPadding="false"
+            tools:ignore="UnusedAttribute,NewApi" />
+        <!--
+        style="@style/PaymentScreens.TextAppearance.InfoItem"
+        -->
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/fee_spinner"
+            android:prompt="@string/fee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+            />
     </LinearLayout>
 </LinearLayout>

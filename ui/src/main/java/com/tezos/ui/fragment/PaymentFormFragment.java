@@ -127,8 +127,8 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         mAmount.addTextChangedListener(new GenericTextWatcher(mAmount));
         mAmount.setOnFocusChangeListener(focusChangeListener);
 
-        mAmountLayout = view.findViewById(R.id.amount_transfer_support);
-        mAmountLayout.setError(" ");
+        //mAmountLayout = view.findViewById(R.id.amount_transfer_support);
+        //mAmountLayout.setError(" ");
 
         validatePayButton(isInputDataValid());
 
