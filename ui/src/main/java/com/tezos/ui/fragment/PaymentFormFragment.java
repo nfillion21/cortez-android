@@ -105,10 +105,6 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         //TODO handle the arguments
         //final PaymentPageRequest paymentPageRequest = PaymentPageRequest.fromBundle(args.getBundle(PaymentPageRequest.TAG));
 
-        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault());
-        //Currency c = Currency.getInstance(paymentPageRequest.getCurrency());
-        //currencyFormatter.setCurrency(c);
-        //String moneyFormatted = currencyFormatter.format(paymentPageRequest.getAmount());
         String moneyFormatted = "ꜩ";
 
         String moneyString = getString(R.string.pay, moneyFormatted);
@@ -444,11 +440,25 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
         boolean amountValid = this.isTransferAmountValid();
 
-        if (red && !amountValid) {
+        if (red && !amountValid)
+        {
             color = R.color.tz_error;
-
-        } else {
+            mPayButton.setText("Pay");
+        }
+        else
+        {
             color = R.color.tz_accent;
+
+            if (amountValid)
+            {
+                NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault());
+                String moneyFormatted = currencyFormatter.format(Float.parseFloat(mAmount.getText().toString()));
+
+                String moneyFormatted2 = moneyFormatted + "ꜩ";
+
+                String moneyString = getString(R.string.pay, moneyFormatted2);
+                mPayButton.setText(moneyString);
+            }
         }
 
         this.mAmount.setTextColor(ContextCompat.getColor(getActivity(), color));
@@ -462,7 +472,29 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         {
             try
             {
-                float amount = Float.parseFloat(mAmount.getText().toString());
+                Float amount = Float.parseFloat(mAmount.getText().toString());
+
+                //check the correct amount
+                String amountString = mAmount.getText().toString();
+                if (amountString.contains("."))
+                {
+                    String elements = amountString.substring(amountString.indexOf("."));
+                    if (elements.length() > 1)
+                    {
+                        String decimals = elements.substring(1, elements.length());
+                        if (decimals.length() > 2 && decimals.length() >= 6)
+                        {
+                            // passage au microTez.
+                        }
+                        else if (decimals.length() > 6)
+                        {
+                            // verification format, deleting zeros
+
+                            //
+                        }
+                    }
+                }
+
                 if (amount >= 0.1f)
                 {
                     return true;
