@@ -44,6 +44,8 @@
     <string name="settings_title">Settings</string>
     <string name="exit_button">Log Out</string>
     <string name="privacy">Privacy</string>
+    <string name="balance_title">Balance</string>
+    <string name="operations_title">Operations</string>
     <string name="add_an_address">Add</string>
     <string name="about">About</string>
     <string name="alert_deleting_address">Deleting address</string>
