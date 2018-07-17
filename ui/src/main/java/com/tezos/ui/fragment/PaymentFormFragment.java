@@ -431,8 +431,8 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
     // put everything in RED
 
-    private void putAmountInRed(boolean red) {
-
+    private void putAmountInRed(boolean red)
+    {
         int color;
 
         boolean amountValid = this.isTransferAmountValid();
@@ -449,37 +449,7 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
             if (amountValid)
             {
                 String amount = mAmount.getText().toString();
-
-                //check the correct amount
-                if (amount.contains("."))
-                {
-                    String elements = amount.substring(amount.indexOf("."));
-                    if (elements.length() > 7)
-                    {
-                        amount = String.format("%.6f", Float.parseFloat(amount));
-                    }
-                    else if (elements.length() > 3)
-                    {
-//                        int length = elements.length() - 1;
-//                        String format = "%." + length + "f";
-//                        Float f = Float.parseFloat(amount);
-//                        amount = String.format(format, f);
-                    }
-
-                    else
-                    {
-                        amount = String.format("%.2f", Float.parseFloat(amount));
-                    }
-                }
-                else
-                {
-                    amount = String.format("%.2f", Float.parseFloat(amount));
-                }
-
-                String moneyFormatted2 = amount + " ꜩ";
-
-                String moneyString = getString(R.string.pay, moneyFormatted2);
-                mPayButton.setText(moneyString);
+                this.setTextPayButton(amount);
             }
             else
             {
@@ -488,6 +458,72 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         }
 
         this.mAmount.setTextColor(ContextCompat.getColor(getActivity(), color));
+    }
+
+    private void setTextPayButton(String amount)
+    {
+        Float amountFloat = Float.parseFloat(amount);
+
+        long selectedItemThreeDS = mCurrencySpinner.getSelectedItemId();
+
+        switch ((int) selectedItemThreeDS)
+        {
+            case 0:
+            {
+                amountFloat = amountFloat + 0.05f;
+            }
+            break;
+
+            case 1:
+            {
+                amountFloat = amountFloat + 0.01f;
+            }
+            break;
+
+            case 2:
+            {
+                amountFloat = amountFloat + 0.1f;
+            }
+            break;
+
+            default:
+                //no-op
+                break;
+        }
+
+        amount = Float.toString(amountFloat);
+
+        //check the correct amount
+        if (amount.contains("."))
+        {
+            String elements = amount.substring(amount.indexOf("."));
+            if (elements.length() > 7)
+            {
+                amount = String.format("%.6f", Float.parseFloat(amount));
+            }
+            else if (elements.length() > 3)
+            {
+//                        int length = elements.length() - 1;
+//                        String format = "%." + length + "f";
+//                        Float f = Float.parseFloat(amount);
+//                        amount = String.format(format, f);
+            }
+
+            else
+            {
+                amount = String.format("%.2f", Float.parseFloat(amount));
+            }
+        }
+        else
+        {
+            amount = String.format("%.2f", Float.parseFloat(amount));
+        }
+
+        String moneyFormatted2 = amount + " ꜩ";
+
+        String moneyString = getString(R.string.pay, moneyFormatted2);
+
+        mPayButton.setText(getString(R.string.pay, moneyString));
     }
 
     private boolean isTransferAmountValid()
