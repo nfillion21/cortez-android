@@ -57,15 +57,26 @@
                             >
 
                             <TextView
+                                android:id="@+id/tz_currency"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignBaseline="@+id/amount_transfer"
-                                android:elevation="@dimen/elevation_header"
                                 android:text="ꜩ"
-                                android:layout_marginRight="@dimen/spacing_normal"
                                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                                 android:textStyle="bold"
                                 android:textColor="@color/colorPrimary"
+                                tools:ignore="UnusedAttribute,NewApi" />
+                            <View
+                                android:layout_height="0dp"
+                                android:layout_width="@dimen/spacing_double" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignBaseline="@+id/tz_currency"
+                                android:elevation="@dimen/elevation_header"
+                                android:text="607.789"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textColor="@color/colorAccent"
                                 android:clipToPadding="false"
                                 tools:ignore="UnusedAttribute,NewApi" />
 
@@ -90,8 +101,9 @@
                 <TextView
                     android:id="@+id/empty_loading_textview"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:layout_margin="@dimen/spacing_double"
                     android:textColor="@color/colorAccent"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
