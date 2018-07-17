@@ -1,6 +1,5 @@
 package com.tezos.android.fragments
 
-import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
@@ -15,8 +14,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.StringRequest
 import com.tezos.android.R
 import com.tezos.android.adapters.OperationRecyclerViewAdapter
 import com.tezos.core.models.CustomTheme
@@ -27,22 +26,29 @@ import org.json.JSONArray
 
 class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickListener
 {
+    private val OPERATIONS_ARRAYLIST_KEY = "operations_list"
+    private val BALANCE_FLOAT_KEY = "balance_float_item"
 
-    private val OPERATIONS_ARRAYLIST_KEY = "operationsList"
-    private val GET_OPERATIONS_LOADING_KEY = "getOperationsLoading"
+    private val GET_OPERATIONS_LOADING_KEY = "get_operations_loading"
+    private val GET_BALANCE_LOADING_KEY = "get_balance_loading"
 
-    private val LOAD_OPERATIONS_TAG = "downloadHistory"
+    private val LOAD_OPERATIONS_TAG = "load_operations"
+    private val LOAD_BALANCE_TAG = "load_balance"
 
     private var mSwipeRefreshLayout: SwipeRefreshLayout? = null
 
     private var mRecyclerView: RecyclerView? = null
     private var mRecyclerViewItems:ArrayList<Operation>? = null
+    private var mBalanceItem:Double? = null
 
     private var mGetHistoryLoading:Boolean = false
+    private var mGetBalanceLoading:Boolean = false
 
     private var mEmptyLoadingTextView: TextView? = null
 
     private var mCoordinatorLayout: CoordinatorLayout? = null
+
+    private var mBalanceTextView: TextView? = null
 
     companion object
     {
@@ -58,12 +64,15 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mCoordinatorLayout = view.findViewById<CoordinatorLayout>(R.id.coordinator)
+        mBalanceTextView = view.findViewById(R.id.balance_textview)
+
+        mCoordinatorLayout = view.findViewById(R.id.coordinator)
         mEmptyLoadingTextView = view.findViewById(R.id.empty_loading_textview)
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
         mSwipeRefreshLayout?.setOnRefreshListener {
-            startGetRequestLoadOperations()
+            //startGetRequestLoadOperations()
+            startGetRequestLoadBalance()
         }
 
         if (savedInstanceState != null)
@@ -71,7 +80,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(OPERATIONS_ARRAYLIST_KEY)
             mRecyclerViewItems = bundlesToItems(messagesBundle)
 
-            mGetHistoryLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
+            mGetBalanceLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
+            mGetHistoryLoading = savedInstanceState.getBoolean(GET_BALANCE_LOADING_KEY)
+
+            mBalanceItem = savedInstanceState.getDouble(BALANCE_FLOAT_KEY)
+
+            //TODO this needs to be well handled
 
             if (mGetHistoryLoading)
             {
@@ -79,24 +93,36 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                 // put the elements before loading.
                 // looks ok
 
-                refreshRecyclerViewAndText()
-                startInitialLoading()
+                refreshRecyclerViewAndTextHistory()
+                startInitialLoadingHistory()
             }
             else
             {
-                onOperationsLoadComplete()
+                onOperationsLoadHistoryComplete()
+            }
+
+            if (mGetBalanceLoading)
+            {
+                refreshRecyclerViewAndTextHistory()
+                startInitialLoadingHistory()
+            }
+            else
+            {
+                onOperationsLoadHistoryComplete()
             }
         }
         else
         {
             mRecyclerViewItems = ArrayList()
+            //there's no need to initialize mBalanceItem
 
-            startInitialLoading()
+            //TODO we will start loading
+            startInitialLoadingHistory()
         }
 
         var recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         val layoutManager = LinearLayoutManager(activity)
-        recyclerView.layoutManager = layoutManager as RecyclerView.LayoutManager?
+        recyclerView.layoutManager = layoutManager
 
         val adapter = OperationRecyclerViewAdapter(mRecyclerViewItems)
 
@@ -106,44 +132,36 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         mRecyclerView = recyclerView
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?)
-    {
-        super.onActivityCreated(savedInstanceState)
-    }
-
-    override fun onAttach(context: Context?)
-    {
-        super.onAttach(context)
-    }
-
     override fun onResume()
     {
         super.onResume()
 
         mRecyclerView?.adapter?.notifyDataSetChanged()
+        mBalanceTextView?.text = mBalanceItem.toString()
     }
 
-    private fun onOperationsLoadComplete()
+    private fun onOperationsLoadHistoryComplete()
     {
         mGetHistoryLoading = false
 
         //TODO progressBar from activity
         //mProgressBar?.visibility = View.GONE
 
+        //TODO see how we handle this swipe
         mSwipeRefreshLayout?.isEnabled = true
         mSwipeRefreshLayout?.isRefreshing = false
 
-        refreshRecyclerViewAndText()
+        refreshRecyclerViewAndTextHistory()
     }
 
-    private fun startInitialLoading()
+    private fun startInitialLoadingHistory()
     {
         mSwipeRefreshLayout?.isEnabled = false
 
         startGetRequestLoadOperations()
     }
 
-    private fun refreshRecyclerViewAndText()
+    private fun refreshRecyclerViewAndTextHistory()
     {
         if (mRecyclerViewItems?.isEmpty()!!)
         {
@@ -161,6 +179,43 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     }
 
     // volley
+    private fun startGetRequestLoadBalance()
+    {
+        cancelRequest(true)
+
+        mGetHistoryLoading = true
+
+        mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
+
+        //TODO progressBar from activity
+        //mProgressBar?.visibility = View.VISIBLE
+
+        val url = String.format(getString(R.string.balance_url), "tz1VyfL1U3x8GwKwrwBy3odwQfZX5CdXwcvK")
+
+        // Request a string response from the provided URL.
+        val stringRequest = StringRequest(Request.Method.GET, url,
+                Response.Listener<String> { response ->
+                    // Display the first 500 characters of the response string.
+                    val balance = response.replace("[^0-9]".toRegex(), "")
+                    mBalanceItem = balance.toDouble()/1000000
+                    mBalanceTextView?.text = mBalanceItem.toString()
+
+                    //TODO handle that for the loadBalanceComplete
+                    onOperationsLoadHistoryComplete()
+                },
+                Response.ErrorListener {
+                    mGetBalanceLoading = false
+
+                    //TODO handle that for the loadBalanceComplete
+                    onOperationsLoadHistoryComplete()
+                    showSnackbarError(true)
+                })
+
+        stringRequest.tag = LOAD_BALANCE_TAG
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+    }
+
+    // volley
     private fun startGetRequestLoadOperations()
     {
         cancelRequest(true)
@@ -175,25 +230,16 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         val url = String.format(getString(R.string.history_url), "tz1dBEF7fUmrNZogkrGdTRFhHdx4PQz4ZuAA")
 
-        val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, object : Response.Listener<JSONArray>
-        {
-            override fun onResponse(answer: JSONArray)
-            {
-                addOperationItemsFromJSON(answer)
+        val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray> { answer ->
+            addOperationItemsFromJSON(answer)
 
-                onOperationsLoadComplete()
-            }
+            onOperationsLoadHistoryComplete()
+        }, Response.ErrorListener {
+            mGetHistoryLoading = false
 
-        }, object : Response.ErrorListener {
+            onOperationsLoadHistoryComplete()
 
-            override fun onErrorResponse(error: VolleyError)
-            {
-                mGetHistoryLoading = false
-
-                onOperationsLoadComplete()
-
-                showSnackbarError(true)
-            }
+            showSnackbarError(true)
         })
 
         jsObjRequest.tag = LOAD_OPERATIONS_TAG
@@ -244,7 +290,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         mRecyclerView!!.adapter!!.notifyDataSetChanged()
     }
 
-    private fun bundlesToItems( bundles:ArrayList<Bundle>): ArrayList<Operation>?
+    private fun bundlesToItems( bundles:ArrayList<Bundle>?): ArrayList<Operation>?
     {
         if (bundles != null)
         {
@@ -283,7 +329,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         val bundles = itemsToBundles(mRecyclerViewItems)
         outState.putParcelableArrayList(OPERATIONS_ARRAYLIST_KEY, bundles)
 
+        mBalanceItem?.let {
+            outState.putDouble(BALANCE_FLOAT_KEY, it)
+        }
+
         outState.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
+        outState.putBoolean(GET_BALANCE_LOADING_KEY, mGetBalanceLoading)
     }
 
     private fun cancelRequest(getOperations: Boolean)
@@ -294,6 +345,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             if (getOperations)
             {
                 requestQueue.cancelAll(LOAD_OPERATIONS_TAG)
+                requestQueue.cancelAll(LOAD_BALANCE_TAG)
             }
         }
     }

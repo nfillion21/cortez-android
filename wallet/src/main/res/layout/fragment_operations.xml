@@ -70,6 +70,7 @@
                                 android:layout_width="@dimen/spacing_double" />
 
                             <TextView
+                                android:id="@+id/balance_textview"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignBaseline="@+id/tz_currency"
