@@ -462,7 +462,7 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
     private void setTextPayButton(String amount)
     {
-        Float amountFloat = Float.parseFloat(amount);
+        Double amountDouble = Double.parseDouble(amount);
 
         long selectedItemThreeDS = mCurrencySpinner.getSelectedItemId();
 
@@ -470,19 +470,19 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         {
             case 0:
             {
-                amountFloat = amountFloat + 0.05f;
+                amountDouble += 0.05f;
             }
             break;
 
             case 1:
             {
-                amountFloat = amountFloat + 0.01f;
+                amountDouble += 0.01f;
             }
             break;
 
             case 2:
             {
-                amountFloat = amountFloat + 0.1f;
+                amountDouble += 0.1f;
             }
             break;
 
@@ -491,7 +491,7 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
                 break;
         }
 
-        amount = Float.toString(amountFloat);
+        amount = Double.toString(amountDouble);
 
         //check the correct amount
         if (amount.contains("."))
@@ -499,7 +499,7 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
             String elements = amount.substring(amount.indexOf("."));
             if (elements.length() > 7)
             {
-                amount = String.format("%.6f", Float.parseFloat(amount));
+                amount = String.format("%.6f", Double.parseDouble(amount));
             }
             else if (elements.length() > 3)
             {
@@ -511,12 +511,12 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
 
             else
             {
-                amount = String.format("%.2f", Float.parseFloat(amount));
+                amount = String.format("%.2f", Double.parseDouble(amount));
             }
         }
         else
         {
-            amount = String.format("%.2f", Float.parseFloat(amount));
+            amount = String.format("%.2f", Double.parseDouble(amount));
         }
 
         String moneyFormatted2 = amount + " ꜩ";
@@ -534,7 +534,7 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         {
             try
             {
-                Float amount = Float.parseFloat(mAmount.getText().toString());
+                Double amount = Double.parseDouble(mAmount.getText().toString());
 
                 if (amount >= 0.1f)
                 {

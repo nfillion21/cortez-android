@@ -22,12 +22,20 @@
         android:clipToPadding="false"
         tools:ignore="UnusedAttribute,NewApi" />
 
-    <ListView
-        android:id="@+id/list"
+    <LinearLayout
         android:layout_below="@+id/payment_products_textview"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent" >
-    </ListView>
+        android:minHeight="?attr/actionBarSize"
+        android:orientation="horizontal"
+        android:layout_margin="@dimen/spacing_double"
+        android:background="@drawable/selector_rect_layout">
+        <ListView
+            android:id="@+id/list"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent" >
+        </ListView>
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/exit_button_layout"

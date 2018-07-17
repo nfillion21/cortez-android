@@ -56,6 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_margin="@dimen/spacing_double"
         android:orientation="vertical">
 
         <TextView
@@ -65,72 +66,77 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             android:text="@string/add_address_info"
             android:textColor="@color/colorAccent"
-            android:layout_margin="@dimen/spacing_double"
             android:ellipsize="end" />
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/address_owner_inputlayout"
-            app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="?android:attr/actionBarSize"
-            android:hint="@string/address_owner"
-            android:clipToPadding="false"
-            android:transitionGroup="true"
-            android:layout_margin="@dimen/spacing_double"
-            tools:ignore="UnusedAttribute,NewApi">
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_double"
+            android:layout_marginTop="@dimen/spacing_double"
+            android:background="@drawable/selector_rect_layout">
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/address_owner"
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/address_owner_inputlayout"
+                app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/address_owner_placeholder"
-                android:drawableRight="@drawable/ic_person_black"
-                android:drawableEnd="@drawable/ic_person_black"
-                android:drawablePadding="@dimen/spacing_double"
-                android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                android:maxLength="30"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:textColorHint="@color/tz_placeholder"
-                android:imeOptions="actionNext"
-                android:inputType="text|textPersonName|textCapWords|textNoSuggestions"
-                android:textSize="@dimen/size_edit_text" />
+                android:minHeight="?android:attr/actionBarSize"
+                android:hint="@string/address_owner"
+                android:clipToPadding="false"
+                android:transitionGroup="true"
+                android:layout_marginBottom="@dimen/spacing_double"
+                tools:ignore="UnusedAttribute,NewApi">
 
-        </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/address_owner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/address_owner_placeholder"
+                    android:drawableRight="@drawable/ic_person_black"
+                    android:drawableEnd="@drawable/ic_person_black"
+                    android:drawablePadding="@dimen/spacing_double"
+                    android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    android:maxLength="30"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColorHint="@color/tz_placeholder"
+                    android:imeOptions="actionNext"
+                    android:inputType="text|textPersonName|textCapWords|textNoSuggestions"
+                    android:textSize="@dimen/size_edit_text" />
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/tezos_address_inputlayout"
-            app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="?android:attr/actionBarSize"
-            android:hint="@string/address_pkh"
-            android:clipToPadding="false"
-            android:transitionGroup="true"
-            android:layout_marginBottom="@dimen/spacing_double"
-            android:layout_marginLeft="@dimen/spacing_double"
-            android:layout_marginRight="@dimen/spacing_double"
-            tools:ignore="UnusedAttribute,NewApi">
+            </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/tezos_address"
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/tezos_address_inputlayout"
+                app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/address_pkh_placeholder"
-                android:drawableRight="@drawable/account_wallet_24"
-                android:drawableEnd="@drawable/account_wallet_24"
-                android:drawablePadding="@dimen/spacing_double"
-                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-                android:maxLength="36"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:textColorHint="@color/tz_placeholder"
-                android:imeOptions="actionDone"
-                android:inputType="textPersonName|textNoSuggestions"
-                android:textSize="@dimen/size_edit_text" />
-        </android.support.design.widget.TextInputLayout>
+                android:minHeight="?android:attr/actionBarSize"
+                android:hint="@string/address_pkh"
+                android:clipToPadding="false"
+                android:transitionGroup="true"
+                tools:ignore="UnusedAttribute,NewApi">
 
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/tezos_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/address_pkh_placeholder"
+                    android:drawableRight="@drawable/account_wallet_24"
+                    android:drawableEnd="@drawable/account_wallet_24"
+                    android:drawablePadding="@dimen/spacing_double"
+                    android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+                    android:maxLength="36"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColorHint="@color/tz_placeholder"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPersonName|textNoSuggestions"
+                    android:textSize="@dimen/size_edit_text" />
+            </android.support.design.widget.TextInputLayout>
+
+        </LinearLayout>
     </LinearLayout>
 
     <RelativeLayout
