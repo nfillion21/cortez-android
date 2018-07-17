@@ -72,7 +72,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
         mSwipeRefreshLayout?.setOnRefreshListener {
             //startGetRequestLoadOperations()
-            startGetRequestLoadBalance()
+            startInitialLoadingBalance()
         }
 
         if (savedInstanceState != null)
@@ -86,29 +86,32 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             mBalanceItem = savedInstanceState.getDouble(BALANCE_FLOAT_KEY)
 
             //TODO this needs to be well handled
-
-            if (mGetHistoryLoading)
-            {
-                // it does back to loading while we got elements on the list
-                // put the elements before loading.
-                // looks ok
-
-                refreshRecyclerViewAndTextHistory()
-                startInitialLoadingHistory()
-            }
-            else
-            {
-                onOperationsLoadHistoryComplete()
-            }
+            //TODO there can't be two requests in the same time.
+            //TODO first check about getbalance
 
             if (mGetBalanceLoading)
             {
-                refreshRecyclerViewAndTextHistory()
-                startInitialLoadingHistory()
+                refreshTextBalance()
+                startInitialLoadingBalance()
             }
             else
             {
-                onOperationsLoadHistoryComplete()
+                onBalanceLoadComplete()
+                //TODO mGetBalanceLoading and mGetHistoryLoading can't be true in the same time
+
+                if (mGetHistoryLoading)
+                {
+                    // it does back to loading while we got elements on the list
+                    // put the elements before loading.
+                    // looks ok
+
+                    refreshRecyclerViewAndTextHistory()
+                    startInitialLoadingHistory()
+                }
+                else
+                {
+                    onOperationsLoadHistoryComplete()
+                }
             }
         }
         else
@@ -117,7 +120,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             //there's no need to initialize mBalanceItem
 
             //TODO we will start loading
-            startInitialLoadingHistory()
+            startInitialLoadingBalance()
         }
 
         var recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
@@ -154,6 +157,30 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         refreshRecyclerViewAndTextHistory()
     }
 
+    private fun onBalanceLoadComplete()
+    {
+        mGetBalanceLoading = false
+
+        //TODO progressBar from activity
+        //TODO it won't stop because after balance Load complete, there's operations history
+        //mProgressBar?.visibility = View.GONE
+
+        //TODO see how we handle this swipe
+        //TODO when onBalanceLoad is complete, usually launch the second request
+
+        //mSwipeRefreshLayout?.isEnabled = true
+        //mSwipeRefreshLayout?.isRefreshing = false
+
+        refreshTextBalance()
+    }
+
+    private fun startInitialLoadingBalance()
+    {
+        mSwipeRefreshLayout?.isEnabled = false
+
+        startGetRequestLoadBalance()
+    }
+
     private fun startInitialLoadingHistory()
     {
         mSwipeRefreshLayout?.isEnabled = false
@@ -178,10 +205,23 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         }
     }
 
+    private fun refreshTextBalance()
+    {
+        if (mBalanceItem != null)
+        {
+            mBalanceTextView?.text = mBalanceItem.toString()
+        }
+        else
+        {
+            //TODO handle the empty(?) balance. should be 0.
+            mBalanceTextView?.text = "empty"
+        }
+    }
+
     // volley
     private fun startGetRequestLoadBalance()
     {
-        cancelRequest(true)
+        cancelRequest(true, true)
 
         mGetHistoryLoading = true
 
@@ -201,13 +241,16 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                     mBalanceTextView?.text = mBalanceItem.toString()
 
                     //TODO handle that for the loadBalanceComplete
-                    onOperationsLoadHistoryComplete()
+                    onBalanceLoadComplete()
+                    startInitialLoadingHistory()
+
+                    //TODO start for the operationsLoading
                 },
                 Response.ErrorListener {
                     mGetBalanceLoading = false
 
                     //TODO handle that for the loadBalanceComplete
-                    onOperationsLoadHistoryComplete()
+                    onBalanceLoadComplete()
                     showSnackbarError(true)
                 })
 
@@ -218,7 +261,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     // volley
     private fun startGetRequestLoadOperations()
     {
-        cancelRequest(true)
+        cancelRequest(true, true)
 
         mGetHistoryLoading = true
 
@@ -227,14 +270,17 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         //TODO progressBar from activity
         //mProgressBar?.visibility = View.VISIBLE
 
+        val url = String.format(getString(R.string.history_url), "tz1VyfL1U3x8GwKwrwBy3odwQfZX5CdXwcvK")
 
-        val url = String.format(getString(R.string.history_url), "tz1dBEF7fUmrNZogkrGdTRFhHdx4PQz4ZuAA")
+        val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+        { answer ->
 
-        val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray> { answer ->
             addOperationItemsFromJSON(answer)
 
             onOperationsLoadHistoryComplete()
-        }, Response.ErrorListener {
+
+        }, Response.ErrorListener
+        {
             mGetHistoryLoading = false
 
             onOperationsLoadHistoryComplete()
@@ -247,9 +293,10 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
+    {
         //return super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.fragment_operations, container, false);
+        return inflater.inflate(R.layout.fragment_operations, container, false)
     }
 
     private fun showSnackbarError(network :Boolean)
@@ -272,9 +319,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         snackbar.show()
     }
 
-
-    private fun addOperationItemsFromJSON(answer:JSONArray) {
-
+    private fun addOperationItemsFromJSON(answer:JSONArray)
+    {
         val response = DataExtractor.getJSONArrayFromField(answer,0)
 
         mRecyclerViewItems?.clear()
@@ -323,7 +369,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         return null
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
+    override fun onSaveInstanceState(outState: Bundle)
+    {
         super.onSaveInstanceState(outState)
 
         val bundles = itemsToBundles(mRecyclerViewItems)
@@ -337,22 +384,26 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         outState.putBoolean(GET_BALANCE_LOADING_KEY, mGetBalanceLoading)
     }
 
-    private fun cancelRequest(getOperations: Boolean)
+    private fun cancelRequest(operations: Boolean, balance:Boolean)
     {
         val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
         if (requestQueue != null)
         {
-            if (getOperations)
+            if (operations)
             {
                 requestQueue.cancelAll(LOAD_OPERATIONS_TAG)
+            }
+            if (balance)
+            {
                 requestQueue.cancelAll(LOAD_BALANCE_TAG)
             }
         }
     }
 
-    override fun onDestroy() {
+    override fun onDestroy()
+    {
         super.onDestroy()
-        cancelRequest(true)
+        cancelRequest(true, true)
     }
 
     override fun onOperationSelected(view: View?, operation: Operation?)
