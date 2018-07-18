@@ -20,7 +20,7 @@ import android.widget.TextView
 import com.tezos.android.activities.AboutActivity
 import com.tezos.android.activities.SettingsActivity
 import com.tezos.android.fragments.HomeFragment
-import com.tezos.android.fragments.OperationsFragment
+import com.tezos.ui.fragment.OperationsFragment
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.AddressesDatabase

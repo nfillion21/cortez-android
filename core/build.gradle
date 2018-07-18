@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
@@ -37,4 +38,8 @@ dependencies {
     api 'io.github.novacrypto:BIP39:0.1.9'
     api 'io.github.novacrypto:BIP32:0.0.9'
     api 'io.github.novacrypto:BIP44:0.0.3'
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

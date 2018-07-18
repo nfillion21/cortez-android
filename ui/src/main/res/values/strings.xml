@@ -61,6 +61,20 @@
     <string name="history_url" translatable="false">http://lumi64.luminar.eu.org:8776/history?ks=%1$s</string>
     <string name="balance_url" translatable="false">http://lumi64.luminar.eu.org:18732/chains/main/blocks/head/context/contracts/%1$s/balance</string>
     <string name="fee_default">Default</string>
+    <string name="loading_list_operations">Loading operations…</string>
+    <string name="loading_balance">Loading balance…</string>
+    <string name="empty_list_operations">No operations</string>
+
+    <string name="operation_details_amount">Amount</string>
+    <string name="operation_details_fee">Fee</string>
+    <string name="operation_details_operation_id">Operation id</string>
+    <string name="operation_details_hash">Hash</string>
+    <string name="operation_details_block_hash">Block Hash</string>
+    <string name="operation_details_timestamp">Timestamp</string>
+    <string name="operation_details_src">Source</string>
+    <string name="operation_details_src_mgr">Source Manager</string>
+    <string name="operation_details_dst">Destination</string>
+    <string name="operation_details_dst_mgr">Destination Manager</string>
     <string-array name="array_fee">
         <item>Standard (0.05 ꜩ)</item>
         <item>Low (0.01 ꜩ)</item>

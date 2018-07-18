@@ -1,4 +1,4 @@
-package com.tezos.android.fragments
+package com.tezos.ui.fragment
 
 import android.animation.Animator
 import android.animation.AnimatorSet
@@ -20,11 +20,11 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.StringRequest
-import com.tezos.android.R
-import com.tezos.android.adapters.OperationRecyclerViewAdapter
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
+import com.tezos.ui.R
+import com.tezos.ui.adapter.OperationRecyclerViewAdapter
 import com.tezos.ui.utils.VolleySingleton
 import org.json.JSONArray
 import java.time.Instant

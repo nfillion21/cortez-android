@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
@@ -45,4 +46,7 @@ dependencies {
 
     implementation 'com.github.kenglxn.QRGen:android:2.5.0'
     api 'com.android.volley:volley:1.1.0'
+}
+repositories {
+    mavenCentral()
 }

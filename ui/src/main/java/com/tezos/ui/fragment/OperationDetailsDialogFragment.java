@@ -1,4 +1,4 @@
-package com.tezos.android.fragments;
+package com.tezos.ui.fragment;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -10,17 +10,15 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.tezos.android.R;
 import com.tezos.core.models.Operation;
+import com.tezos.ui.R;
 
 import java.util.Arrays;
 import java.util.List;
@@ -193,7 +191,7 @@ public class OperationDetailsDialogFragment extends DialogFragment
                     case ITEM_VIEW_TYPE:
                     {
                         rowView = inflater.inflate(R.layout.item_operation_details, parent, false);
-                        viewHolder.titleTextView = rowView.findViewById(R.id.text1);
+                        viewHolder.titleTextView = rowView.findViewById(R.id.text);
                         viewHolder.valueTextView = rowView.findViewById(R.id.text2);
                     }
                     break;

@@ -1,4 +1,4 @@
-package com.tezos.android.adapters;
+package com.tezos.ui.adapter;
 
 /*
  * Created by nfillion on 7/12/18.
@@ -11,12 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.tezos.android.R;
 import com.tezos.core.models.Operation;
+import com.tezos.ui.R;
 
 import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;

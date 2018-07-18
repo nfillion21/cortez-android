@@ -7,20 +7,6 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="use_passcode">Use a passcode</string>
-    <string name="empty_list_operations">No operations</string>
-    <string name="loading_list_operations">Loading operations…</string>
-    <string name="loading_balance">Loading balance…</string>
-
-    <string name="operation_details_amount">Amount</string>
-    <string name="operation_details_fee">Fee</string>
-    <string name="operation_details_operation_id">Operation id</string>
-    <string name="operation_details_hash">Hash</string>
-    <string name="operation_details_block_hash">Block Hash</string>
-    <string name="operation_details_timestamp">Timestamp</string>
-    <string name="operation_details_src">Source</string>
-    <string name="operation_details_src_mgr">Source Manager</string>
-    <string name="operation_details_dst">Destination</string>
-    <string name="operation_details_dst_mgr">Destination Manager</string>
 
     <string name="amount_info">Amount:</string>
     <string name="fee_info">Fee:</string>
