@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -79,6 +80,17 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
                 R.array.array_fee, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCurrencySpinner.setAdapter(adapter);
+        mCurrencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                putAmountInRed(false);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         mSrcButton = view.findViewById(R.id.transfer_src_button);
         mSrcButton.setOnClickListener(v ->
@@ -470,21 +482,21 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         {
             case 0:
             {
-                amountDouble += 0.05f;
+                amountDouble += 0.05;
+                break;
             }
-            break;
 
             case 1:
             {
-                amountDouble += 0.01f;
+                amountDouble += 0.01;
+                break;
             }
-            break;
 
             case 2:
             {
-                amountDouble += 0.1f;
+                amountDouble += 0.1;
+                break;
             }
-            break;
 
             default:
                 //no-op
@@ -500,6 +512,8 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
             if (elements.length() > 7)
             {
                 amount = String.format("%.6f", Double.parseDouble(amount));
+                Double d = Double.parseDouble(amount);
+                amount = d.toString();
             }
             else if (elements.length() > 3)
             {
@@ -517,13 +531,12 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
         else
         {
             amount = String.format("%.2f", Double.parseDouble(amount));
+            //amount = Double.parseDouble(amount).toString();
         }
 
         String moneyFormatted2 = amount + " ꜩ";
-
-        String moneyString = getString(R.string.pay, moneyFormatted2);
-
-        mPayButton.setText(getString(R.string.pay, moneyString));
+        //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
+        mPayButton.setText(getString(R.string.pay, moneyFormatted2));
     }
 
     private boolean isTransferAmountValid()
