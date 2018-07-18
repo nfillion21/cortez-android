@@ -1,5 +1,8 @@
 package com.tezos.android.fragments
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
@@ -96,20 +99,15 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
             if (mGetBalanceLoading)
             {
-                refreshTextBalance()
+                refreshTextBalance(false)
                 startInitialLoadingBalance()
             }
             else
             {
-                onBalanceLoadComplete()
-                //TODO mGetBalanceLoading and mGetHistoryLoading can't be true in the same time
+                onBalanceLoadComplete(false)
 
                 if (mGetHistoryLoading)
                 {
-                    // it does back to loading while we got elements on the list
-                    // put the elements before loading.
-                    // looks ok
-
                     refreshRecyclerViewAndTextHistory()
                     startInitialLoadingHistory()
                 }
@@ -147,7 +145,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         //mRecyclerView?.adapter?.notifyDataSetChanged()
         //mBalanceTextView?.text = mBalanceItem.toString()
         refreshRecyclerViewAndTextHistory()
-        refreshTextBalance()
+        refreshTextBalance(false)
     }
 
     private fun onOperationsLoadHistoryComplete()
@@ -162,12 +160,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         refreshRecyclerViewAndTextHistory()
     }
 
-    private fun onBalanceLoadComplete()
+    private fun onBalanceLoadComplete(animating:Boolean)
     {
         mGetBalanceLoading = false
         mNavProgressBalance?.visibility = View.GONE
 
-        refreshTextBalance()
+        refreshTextBalance(animating)
     }
 
     private fun startInitialLoadingBalance()
@@ -201,12 +199,15 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         }
     }
 
-    private fun refreshTextBalance()
+    private fun refreshTextBalance(animating:Boolean)
     {
         if (mBalanceItem != -1.0 && mBalanceItem != null)
         {
             mBalanceTextView?.visibility = View.VISIBLE
-            mBalanceTextView?.text = mBalanceItem.toString()
+            if (!animating)
+            {
+                mBalanceTextView?.text = mBalanceItem.toString()
+            }
 
             mEmptyLoadingBalanceTextview?.visibility = View.GONE
             mEmptyLoadingBalanceTextview?.text = null
@@ -238,22 +239,40 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                 Response.Listener<String> { response ->
                     val balance = response.replace("[^0-9]".toRegex(), "")
                     mBalanceItem = balance.toDouble()/1000000
-                    mBalanceTextView?.text = mBalanceItem.toString()
+                    animateBalance(mBalanceItem)
 
-                    onBalanceLoadComplete()
-                    //startInitialLoadingHistory()
+                    onBalanceLoadComplete(true)
                     startGetRequestLoadOperations()
                 },
                 Response.ErrorListener {
-                    mGetBalanceLoading = false
-
-                    onBalanceLoadComplete()
+                    onBalanceLoadComplete(false)
                     onOperationsLoadHistoryComplete()
                     showSnackbarError(true)
                 })
 
         stringRequest.tag = LOAD_BALANCE_TAG
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+    }
+
+    private fun animateBalance(balance: Double?)
+    {
+        val objectAnimator = ObjectAnimator.ofFloat(mBalanceTextView, View.ALPHA, 0f)
+        objectAnimator.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {}
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+            override fun onAnimationEnd(animation: Animator) {
+                mBalanceTextView?.text = balance.toString()
+            }
+        })
+
+        val objectAnimator2 = ObjectAnimator.ofFloat(mBalanceTextView, View.ALPHA, 1f)
+
+        //mBalanceTextView?.text = balance.toString()
+
+        val animatorSet = AnimatorSet()
+        animatorSet.play(objectAnimator).before(objectAnimator2)
+        animatorSet.start()
     }
 
     // volley
@@ -278,8 +297,6 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         }, Response.ErrorListener
         {
-            mGetHistoryLoading = false
-
             onOperationsLoadHistoryComplete()
 
             showSnackbarError(true)
