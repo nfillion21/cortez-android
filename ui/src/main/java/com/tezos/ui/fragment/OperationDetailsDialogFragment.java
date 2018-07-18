@@ -2,7 +2,10 @@ package com.tezos.ui.fragment;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.Path;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tezos.core.models.Operation;
 import com.tezos.ui.R;
@@ -74,16 +78,6 @@ public class OperationDetailsDialogFragment extends DialogFragment
 
         View dialogView = inflater.inflate(R.layout.dialog_operation_details, null);
 
-
-        mList = dialogView.findViewById(R.id.list);
-        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
-            {
-                getDialog().dismiss();
-            }
-        });
-
         List<String> list = Arrays.asList(
                 getString(R.string.operation_details_hash),
                 getString(R.string.operation_details_operation_id),
@@ -96,6 +90,42 @@ public class OperationDetailsDialogFragment extends DialogFragment
                 getString(R.string.operation_details_amount),
                 getString(R.string.operation_details_fee)
         );
+
+        mList = dialogView.findViewById(R.id.list);
+        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+            {
+                String copied = null;
+
+                Bundle operationBundle = getArguments().getBundle(Operation.TAG);
+                Operation operation = Operation.fromBundle(operationBundle);
+
+                switch (i)
+                {
+                    case 0: { copied = operation.getHash(); } break;
+                    case 1: { copied = operation.getOperationId().toString(); } break;
+                    case 2: { copied = operation.getBlockHash(); } break;
+                    case 3: { copied = operation.getTimestamp(); } break;
+                    case 4: { copied = operation.getSource(); } break;
+                    case 5: { copied = operation.getSourceManager(); } break;
+                    case 6: { copied = operation.getDestination(); } break;
+                    case 7: { copied = operation.getDestinationManager(); } break;
+                    case 8: { copied = operation.getAmount().toString(); } break;
+                    case 9: { copied = operation.getFee().toString(); } break;
+                    default:
+                        //no-op
+                    break;
+                }
+
+                ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText(copied, copied);
+                clipboard.setPrimaryClip(clip);
+
+                Toast.makeText(getActivity(), String.format(getString(R.string.copied), copied), Toast.LENGTH_SHORT).show();
+                getDialog().dismiss();
+            }
+        });
 
         Bundle args = getArguments();
         Bundle operationBundle = args.getBundle(Operation.TAG);
