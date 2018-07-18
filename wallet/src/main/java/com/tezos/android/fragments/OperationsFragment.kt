@@ -71,8 +71,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
         mSwipeRefreshLayout?.setOnRefreshListener {
-            //startGetRequestLoadOperations()
-            startInitialLoadingBalance()
+            startGetRequestLoadBalance()
         }
 
         if (savedInstanceState != null)
@@ -235,7 +234,6 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         // Request a string response from the provided URL.
         val stringRequest = StringRequest(Request.Method.GET, url,
                 Response.Listener<String> { response ->
-                    // Display the first 500 characters of the response string.
                     val balance = response.replace("[^0-9]".toRegex(), "")
                     mBalanceItem = balance.toDouble()/1000000
                     mBalanceTextView?.text = mBalanceItem.toString()
