@@ -46,6 +46,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     private var mGetBalanceLoading:Boolean = false
 
     private var mEmptyLoadingTextView: TextView? = null
+    private var mEmptyLoadingBalanceTextview: TextView? = null
 
     private var mCoordinatorLayout: CoordinatorLayout? = null
 
@@ -76,6 +77,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mCoordinatorLayout = view.findViewById(R.id.coordinator)
         mEmptyLoadingTextView = view.findViewById(R.id.empty_loading_textview)
+        mEmptyLoadingBalanceTextview = view.findViewById(R.id.empty_loading_balance_textview)
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
         mSwipeRefreshLayout?.setOnRefreshListener {
@@ -90,11 +92,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             mGetBalanceLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
             mGetHistoryLoading = savedInstanceState.getBoolean(GET_BALANCE_LOADING_KEY)
 
-            mBalanceItem = savedInstanceState.getDouble(BALANCE_FLOAT_KEY)
-
-            //TODO this needs to be well handled
-            //TODO there can't be two requests in the same time.
-            //TODO first check about getbalance
+            mBalanceItem = savedInstanceState.getDouble(BALANCE_FLOAT_KEY, -1.0)
 
             if (mGetBalanceLoading)
             {
@@ -146,8 +144,10 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     {
         super.onResume()
 
-        mRecyclerView?.adapter?.notifyDataSetChanged()
-        mBalanceTextView?.text = mBalanceItem.toString()
+        //mRecyclerView?.adapter?.notifyDataSetChanged()
+        //mBalanceTextView?.text = mBalanceItem.toString()
+        refreshRecyclerViewAndTextHistory()
+        refreshTextBalance()
     }
 
     private fun onOperationsLoadHistoryComplete()
@@ -203,14 +203,19 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private fun refreshTextBalance()
     {
-        if (mBalanceItem != null)
+        if (mBalanceItem != -1.0 && mBalanceItem != null)
         {
+            mBalanceTextView?.visibility = View.VISIBLE
             mBalanceTextView?.text = mBalanceItem.toString()
+
+            mEmptyLoadingBalanceTextview?.visibility = View.GONE
+            mEmptyLoadingBalanceTextview?.text = null
         }
         else
         {
-            //TODO handle the empty(?) balance. should be 0.
-            mBalanceTextView?.text = "empty"
+            mBalanceTextView?.visibility = View.GONE
+            mEmptyLoadingBalanceTextview?.visibility = View.VISIBLE
+            mEmptyLoadingBalanceTextview?.text = "-"
         }
     }
 
@@ -222,6 +227,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         mGetHistoryLoading = true
 
         mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
+        mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
 
         mNavProgressBalance?.visibility = View.VISIBLE
 
@@ -242,6 +248,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                     mGetBalanceLoading = false
 
                     onBalanceLoadComplete()
+                    onOperationsLoadHistoryComplete()
                     showSnackbarError(true)
                 })
 
@@ -291,8 +298,6 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private fun showSnackbarError(network :Boolean)
     {
-        mEmptyLoadingTextView?.setText(R.string.network_error)
-
         var error:Int = if (network)
         {
             R.string.network_error
@@ -301,6 +306,9 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         {
             R.string.generic_error
         }
+
+        mEmptyLoadingTextView?.setText(error)
+        mEmptyLoadingBalanceTextview?.setText(error)
 
         val snackbar = Snackbar.make(mCoordinatorLayout!!, error, Snackbar.LENGTH_LONG)
         val snackBarView = snackbar.view
@@ -369,7 +377,6 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         mBalanceItem?.let {
             outState.putDouble(BALANCE_FLOAT_KEY, it)
         }
-
         outState.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
         outState.putBoolean(GET_BALANCE_LOADING_KEY, mGetBalanceLoading)
     }

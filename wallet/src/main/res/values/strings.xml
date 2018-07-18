@@ -9,6 +9,7 @@
     <string name="use_passcode">Use a passcode</string>
     <string name="empty_list_operations">No operations</string>
     <string name="loading_list_operations">Loading operations…</string>
+    <string name="loading_balance">Loading balance…</string>
 
     <string name="operation_details_amount">Amount</string>
     <string name="operation_details_fee">Fee</string>

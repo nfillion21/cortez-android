@@ -88,15 +88,24 @@
                                 android:layout_width="@dimen/spacing_double" />
 
                             <TextView
+                                android:id="@+id/empty_loading_balance_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/colorAccent"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+                                android:focusable="false"
+                                android:focusableInTouchMode="false"
+                                android:clickable="false" />
+                            <TextView
                                 android:id="@+id/balance_textview"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignBaseline="@+id/tz_currency"
                                 android:elevation="@dimen/elevation_header"
-                                android:text="607.789"
                                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                                 android:textColor="@color/colorAccent"
                                 android:clipToPadding="false"
+                                android:visibility="gone"
                                 tools:ignore="UnusedAttribute,NewApi" />
 
                         </LinearLayout>
