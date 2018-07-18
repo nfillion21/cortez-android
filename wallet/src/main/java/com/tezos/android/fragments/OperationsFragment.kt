@@ -27,6 +27,9 @@ import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.utils.VolleySingleton
 import org.json.JSONArray
+import java.time.Instant
+import java.util.*
+import kotlin.collections.ArrayList
 
 class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickListener
 {
@@ -340,15 +343,27 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mRecyclerViewItems?.clear()
 
+        var sortedList = arrayListOf<Operation>()
         for (i in 0..(response.length() - 1))
         {
             val item = response.getJSONObject(i)
             val operation = Operation.fromJSONObject(item)
 
-            mRecyclerViewItems!!.add(operation)
+            sortedList.add(operation)
         }
 
-        mRecyclerView!!.adapter!!.notifyDataSetChanged()
+        sortedList.sortWith(object: Comparator<Operation>
+        {
+            override fun compare(o1: Operation, o2: Operation): Int = when {
+
+                Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
+                Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
+                else -> 1
+            }
+        })
+
+        mRecyclerViewItems?.addAll(sortedList)
+        mRecyclerView?.adapter?.notifyDataSetChanged()
     }
 
     private fun bundlesToItems( bundles:ArrayList<Bundle>?): ArrayList<Operation>?
