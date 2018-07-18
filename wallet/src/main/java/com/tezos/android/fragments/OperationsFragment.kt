@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextView
 import com.android.volley.Request
 import com.android.volley.Response
@@ -50,6 +51,9 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private var mBalanceTextView: TextView? = null
 
+    private var mNavProgressBalance: ProgressBar? = null
+    private var mNavProgressOperations: ProgressBar? = null
+
     companion object
     {
         @JvmStatic
@@ -61,8 +65,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                 }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?)
+    {
         super.onViewCreated(view, savedInstanceState)
+
+        mNavProgressBalance = view.findViewById(R.id.nav_progress_balance)
+        mNavProgressOperations = view.findViewById(R.id.nav_progress_operations)
 
         mBalanceTextView = view.findViewById(R.id.balance_textview)
 
@@ -146,10 +154,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     {
         mGetHistoryLoading = false
 
-        //TODO progressBar from activity
-        //mProgressBar?.visibility = View.GONE
+        mNavProgressOperations?.visibility = View.GONE
 
-        //TODO see how we handle this swipe
         mSwipeRefreshLayout?.isEnabled = true
         mSwipeRefreshLayout?.isRefreshing = false
 
@@ -159,16 +165,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     private fun onBalanceLoadComplete()
     {
         mGetBalanceLoading = false
-
-        //TODO progressBar from activity
-        //TODO it won't stop because after balance Load complete, there's operations history
-        //mProgressBar?.visibility = View.GONE
-
-        //TODO see how we handle this swipe
-        //TODO when onBalanceLoad is complete, usually launch the second request
-
-        //mSwipeRefreshLayout?.isEnabled = true
-        //mSwipeRefreshLayout?.isRefreshing = false
+        mNavProgressBalance?.visibility = View.GONE
 
         refreshTextBalance()
     }
@@ -226,8 +223,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
 
-        //TODO progressBar from activity
-        //mProgressBar?.visibility = View.VISIBLE
+        mNavProgressBalance?.visibility = View.VISIBLE
 
         val url = String.format(getString(R.string.balance_url), "tz1VyfL1U3x8GwKwrwBy3odwQfZX5CdXwcvK")
 
@@ -238,16 +234,13 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                     mBalanceItem = balance.toDouble()/1000000
                     mBalanceTextView?.text = mBalanceItem.toString()
 
-                    //TODO handle that for the loadBalanceComplete
                     onBalanceLoadComplete()
-                    startInitialLoadingHistory()
-
-                    //TODO start for the operationsLoading
+                    //startInitialLoadingHistory()
+                    startGetRequestLoadOperations()
                 },
                 Response.ErrorListener {
                     mGetBalanceLoading = false
 
-                    //TODO handle that for the loadBalanceComplete
                     onBalanceLoadComplete()
                     showSnackbarError(true)
                 })
@@ -265,8 +258,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
 
-        //TODO progressBar from activity
-        //mProgressBar?.visibility = View.VISIBLE
+        mNavProgressOperations?.visibility = View.VISIBLE
 
         val url = String.format(getString(R.string.history_url), "tz1VyfL1U3x8GwKwrwBy3odwQfZX5CdXwcvK")
 

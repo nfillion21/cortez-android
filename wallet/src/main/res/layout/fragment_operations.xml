@@ -50,7 +50,7 @@
                             tools:ignore="UnusedAttribute,NewApi" />
 
                         <ProgressBar
-                            android:id="@+id/nav_progress"
+                            android:id="@+id/nav_progress_balance"
                             style="?android:attr/progressBarStyleSmall"
                             android:layout_gravity="bottom"
                             android:layout_width="wrap_content"
