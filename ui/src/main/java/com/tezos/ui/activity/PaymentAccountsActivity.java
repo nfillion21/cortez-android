@@ -189,7 +189,7 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
 
         String fromScreenString = intent.getStringExtra(FROM_SCREEN_KEY);
         FromScreen fromScreen = FromScreen.fromStringValue(fromScreenString);
-        if (!fromScreen.equals(FromScreen.FromHome))
+        if (fromScreen.equals(FromScreen.FromTransfer))
         {
             String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
 
@@ -215,6 +215,15 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
             }
 
             finish();
+        }
+        else
+        {
+            Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+
+            Intent starter = new Intent(this, AddressDetailsActivity.class);
+            starter.putExtra(CustomTheme.TAG, themeBundle);
+            starter.putExtra(Address.TAG, address.toBundle());
+            ActivityCompat.startActivityForResult(this, starter, -1, null);
         }
     }
 

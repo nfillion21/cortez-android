@@ -26,4 +26,8 @@
     <style name="PaymentScreens.PasscodeActivity" parent="PaymentScreens.NoActionBar">
         <item name="android:windowBackground">@color/tz_background</item>
     </style>
+
+    <style name="PaymentScreens.AddressDetailsActivity" parent="PaymentScreens.NoActionBar">
+        <item name="android:windowBackground">@color/tz_background</item>
+    </style>
 </resources>

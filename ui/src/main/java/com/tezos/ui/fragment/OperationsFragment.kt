@@ -20,6 +20,7 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.StringRequest
+import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
@@ -64,10 +65,11 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     companion object
     {
         @JvmStatic
-        fun newInstance(theme: CustomTheme) =
+        fun newInstance(theme: CustomTheme, address: Address) =
                 OperationsFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
+                        putBundle(Address.TAG, address.toBundle())
                     }
                 }
     }
@@ -139,16 +141,6 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         recyclerView.adapter = adapter
 
         mRecyclerView = recyclerView
-    }
-
-    override fun onResume()
-    {
-        super.onResume()
-
-        //mRecyclerView?.adapter?.notifyDataSetChanged()
-        //mBalanceTextView?.text = mBalanceItem.toString()
-        refreshRecyclerViewAndTextHistory()
-        refreshTextBalance(false)
     }
 
     private fun onOperationsLoadHistoryComplete()
@@ -235,7 +227,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mNavProgressBalance?.visibility = View.VISIBLE
 
-        val url = String.format(getString(R.string.balance_url), "tz1VyfL1U3x8GwKwrwBy3odwQfZX5CdXwcvK")
+        var pkh:Address? = null
+        arguments?.let {
+            val addressBundle = it.getBundle(Address.TAG)
+            pkh = Address.fromBundle(addressBundle)
+        }
+        val url = String.format(getString(R.string.balance_url), pkh?.pubKeyHash)
 
         // Request a string response from the provided URL.
         val stringRequest = StringRequest(Request.Method.GET, url,
@@ -289,7 +286,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mNavProgressOperations?.visibility = View.VISIBLE
 
-        val url = String.format(getString(R.string.history_url), "tz1VyfL1U3x8GwKwrwBy3odwQfZX5CdXwcvK")
+        var pkh:Address? = null
+        arguments?.let {
+            val addressBundle = it.getBundle(Address.TAG)
+            pkh = Address.fromBundle(addressBundle)
+        }
+        val url = String.format(getString(R.string.history_url), pkh?.pubKeyHash)
 
         val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
         { answer ->

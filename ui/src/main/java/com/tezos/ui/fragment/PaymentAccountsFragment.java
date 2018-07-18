@@ -251,8 +251,6 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     @Override
     public void onClick(View view, Address address)
     {
-
-        //TODO depending on the caller (transfer screen?)
         if (mCallback != null)
         {
             mCallback.onCardClicked(address);

@@ -22,6 +22,7 @@ import com.tezos.android.activities.SettingsActivity
 import com.tezos.android.fragments.HomeFragment
 import com.tezos.ui.fragment.OperationsFragment
 import com.tezos.core.crypto.CryptoUtils
+import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.AddressesDatabase
 import com.tezos.core.utils.ApiLevelHelper
@@ -74,7 +75,11 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 com.tezos.ui.R.color.theme_tezos_primary_dark,
                 com.tezos.ui.R.color.theme_tezos_text)
 
-        val operationsFragment = OperationsFragment.newInstance(tezosTheme)
+        var address = Address()
+        address.description = "template"
+        address.pubKeyHash = "tz1Ym38VjqqSv7hJy2ZSGarqPYLQfmuaUEb4"
+
+        val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, operationsFragment)
                 .commit()
