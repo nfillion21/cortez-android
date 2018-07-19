@@ -3,7 +3,6 @@ package com.tezos.ui.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -13,7 +12,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Window;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
@@ -23,9 +21,7 @@ import com.tezos.ui.fragment.RestoreWalletFragment;
 import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.ui.utils.ScreenUtils;
 
-import net.glxn.qrgen.android.QRCode;
-
-public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnSearchWordSelectedListener, IPasscodeHandler
+public class RestoreWalletActivity extends AppCompatActivity implements RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener, IPasscodeHandler
 {
     public static int RESTORE_WALLET_REQUEST_CODE = 0x2400; // arbitrary int
 
@@ -116,7 +112,7 @@ public class RestoreWalletActivity extends AppCompatActivity implements RestoreW
     }
 
     @Override
-    public void onSearchWordClicked(String word, int position)
+    public void onWordClicked(String word, int position)
     {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.restorewallet_container);
         if (fragment != null && fragment instanceof RestoreWalletFragment)

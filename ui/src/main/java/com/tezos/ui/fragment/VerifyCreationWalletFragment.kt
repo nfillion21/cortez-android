@@ -24,9 +24,6 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItemClickListener {
-    override fun onClick(view: View?, position: Int) {
-
-    }
 
     private val SIX_WORDS_KEY = "words_key"
     private val MNEMONICS_WORDS_NUMBER = 6
@@ -106,7 +103,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
             }
 
             //TODO need to valid mnemonics differently
-            //validateMnemonicsButton(CryptoUtils.validateMnemonics(words))
+            validateMnemonicsButton(CryptoUtils.validateMnemonics(words))
         }
         else
         {
@@ -189,6 +186,11 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         wordsView?.adapter = mAdapter
     }
 
+    override fun onClick(view: View?, position: Int)
+    {
+        listener?.onVerifyWalletCardNumberClicked(position)
+    }
+
     fun updateCard(word: String, position: Int)
     {
         mAdapter?.updateWord(word, position)
@@ -205,7 +207,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
     interface OnVerifyWalletCreationListener
     {
-        fun onVerifyWalletCreationValidated()
+        fun onVerifyWalletCardNumberClicked(position: Int)
     }
 
     override fun onSaveInstanceState(outState: Bundle)
@@ -216,5 +218,10 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         if (words != null) {
             outState.putStringArrayList(SIX_WORDS_KEY, mAdapter?.words as ArrayList<String>)
         }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
     }
 }

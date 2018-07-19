@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -16,11 +17,13 @@ import android.widget.TextView;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.CreateWalletFragment;
+import com.tezos.ui.fragment.RestoreWalletFragment;
+import com.tezos.ui.fragment.SearchWordDialogFragment;
 import com.tezos.ui.fragment.VerifyCreationWalletFragment;
 import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.ui.utils.ScreenUtils;
 
-public class CreateWalletActivity extends AppCompatActivity implements IPasscodeHandler, CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener
+public class CreateWalletActivity extends AppCompatActivity implements IPasscodeHandler, CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener
 {
     public static int CREATE_WALLET_REQUEST_CODE = 0x2300; // arbitrary int
 
@@ -125,7 +128,20 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
     }
 
     @Override
-    public void onVerifyWalletCreationValidated() {
+    public void onVerifyWalletCardNumberClicked(int position)
+    {
+        SearchWordDialogFragment searchWordDialogFragment = SearchWordDialogFragment.newInstance(position);
+        searchWordDialogFragment.show(getSupportFragmentManager(), SearchWordDialogFragment.TAG);
+    }
 
+    @Override
+    public void onWordClicked(String word, int position)
+    {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.create_wallet_container);
+        if (fragment != null && fragment instanceof VerifyCreationWalletFragment)
+        {
+            VerifyCreationWalletFragment verifyCreationWalletFragment = (VerifyCreationWalletFragment) fragment;
+            verifyCreationWalletFragment.updateCard(word, position);
+        }
     }
 }

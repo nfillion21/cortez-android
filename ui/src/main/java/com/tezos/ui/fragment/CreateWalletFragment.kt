@@ -87,15 +87,6 @@ class CreateWalletFragment : Fragment()
 
             if (mMnemonicsString != null)
             {
-                /*
-                val intent = getIntent()
-
-                //TODO verify if it does always work
-                val keyBundle = CryptoUtils.generateKeys(mMnemonicsString)
-                intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle)
-                setResult(R.id.create_wallet_succeed, intent)
-                finish()
-                */
                 listener?.onCreateWalletValidated(mMnemonicsString!!)
             }
         }
@@ -263,6 +254,11 @@ class CreateWalletFragment : Fragment()
     interface OnCreateWalletListener
     {
         fun onCreateWalletValidated(mnemonics:String)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
     }
 
     override fun onSaveInstanceState(outState: Bundle)

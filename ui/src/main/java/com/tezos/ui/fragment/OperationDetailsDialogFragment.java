@@ -59,12 +59,12 @@ public class OperationDetailsDialogFragment extends DialogFragment
         /*
         try
         {
-            mCallback = (OnSearchWordSelectedListener) context;
+            mCallback = (OnWordSelectedListener) context;
         }
         catch (ClassCastException e)
         {
             throw new ClassCastException(context.toString()
-                    + " must implement OnSearchWordSelectedListener");
+                    + " must implement OnWordSelectedListener");
         }
         */
     }

@@ -74,7 +74,7 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
     {
         if (mWords == null)
         {
-            mWords = new ArrayList<>(24);
+            mWords = new ArrayList<>(words.size());
         }
         mWords.clear();
         mWords.addAll(words);

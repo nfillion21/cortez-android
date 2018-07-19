@@ -21,6 +21,7 @@
         <activity
             android:name=".activity.CreateWalletActivity"
             android:theme="@style/PaymentScreens.CreateWalletActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize"
             />
 
         <activity

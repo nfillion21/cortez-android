@@ -34,8 +34,9 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 {
 
     public static final String CARD_POSITION_KEY = "card_position";
+    public static final String TAG = "search_word_dialog_fragment";
 
-    private OnSearchWordSelectedListener mCallback;
+    private OnWordSelectedListener mCallback;
     private TextInputEditText mSearchWordEditText;
 
     private CursorAdapter mCursorAdapter;
@@ -44,9 +45,9 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 
     private static final int LOADER_ID = 42;
 
-    public interface OnSearchWordSelectedListener
+    public interface OnWordSelectedListener
     {
-        void onSearchWordClicked(String word, int position);
+        void onWordClicked(String word, int position);
     }
 
     public static SearchWordDialogFragment newInstance(int cardPosition)
@@ -77,12 +78,12 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 
         try
         {
-            mCallback = (OnSearchWordSelectedListener) context;
+            mCallback = (OnWordSelectedListener) context;
         }
         catch (ClassCastException e)
         {
             throw new ClassCastException(context.toString()
-                    + " must implement OnSearchWordSelectedListener");
+                    + " must implement OnWordSelectedListener");
         }
     }
 
@@ -142,7 +143,7 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
             cursor.moveToPosition(i);
             String item = cursor.getString(cursor.getColumnIndex(EnglishWordsDatabaseConstants.COL_WORD));
 
-            mCallback.onSearchWordClicked(item, position);
+            mCallback.onWordClicked(item, position);
 
             //getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, SearchWordDialogFragment.this);
             getDialog().dismiss();
