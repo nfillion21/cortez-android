@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
@@ -38,6 +39,8 @@ class CreateWalletFragment : Fragment()
 
     private var mBackupChecked: Boolean = false
 
+    private var listener: OnCreateWalletListener? = null
+
     companion object
     {
         @JvmStatic
@@ -47,6 +50,15 @@ class CreateWalletFragment : Fragment()
                         putBundle(CustomTheme.TAG, theme.toBundle())
                     }
                 }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnCreateWalletListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context.toString() + " must implement OnCreateWalletListener")
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
@@ -84,6 +96,7 @@ class CreateWalletFragment : Fragment()
                 setResult(R.id.create_wallet_succeed, intent)
                 finish()
                 */
+                listener?.onCreateWalletValidated(mMnemonicsString!!)
             }
         }
 
@@ -223,6 +236,7 @@ class CreateWalletFragment : Fragment()
 
             mRenewFab?.isEnabled = false
             mRenewFab?.hide()
+
         } else {
             mCreateButton?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
             mCreateButtonLayout?.isEnabled = false
@@ -244,6 +258,11 @@ class CreateWalletFragment : Fragment()
         res.addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(ContextCompat.getColor(activity!!, theme!!.colorPrimaryDarkId)))
         res.addState(intArrayOf(), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryId)))
         return res
+    }
+
+    interface OnCreateWalletListener
+    {
+        fun onCreateWalletValidated(mnemonics:String)
     }
 
     override fun onSaveInstanceState(outState: Bundle)

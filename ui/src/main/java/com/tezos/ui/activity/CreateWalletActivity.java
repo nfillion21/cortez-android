@@ -16,12 +16,15 @@ import android.widget.TextView;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.CreateWalletFragment;
+import com.tezos.ui.fragment.VerifyCreationWalletFragment;
 import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.ui.utils.ScreenUtils;
 
-public class CreateWalletActivity extends AppCompatActivity implements IPasscodeHandler
+public class CreateWalletActivity extends AppCompatActivity implements IPasscodeHandler, CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener
 {
     public static int CREATE_WALLET_REQUEST_CODE = 0x2300; // arbitrary int
+
+    public static String MNEMONICS_STR = "mnemonics_str";
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -107,5 +110,22 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
     protected void onSaveInstanceState(Bundle outState)
     {
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onCreateWalletValidated(String mnemonics)
+    {
+        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
+        VerifyCreationWalletFragment verifyCreationWalletFragment = VerifyCreationWalletFragment.newInstance(theme, mnemonics);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.create_wallet_container, verifyCreationWalletFragment).addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void onVerifyWalletCreationValidated() {
+
     }
 }
