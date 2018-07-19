@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.fragment.CreateWalletFragment;
 import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.ui.utils.ScreenUtils;
 
@@ -46,6 +47,14 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
         initToolbar(theme);
+
+        if (savedInstanceState == null)
+        {
+            CreateWalletFragment createWalletFragment = CreateWalletFragment.newInstance(theme);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.create_wallet_container, createWalletFragment)
+                    .commit();
+        }
     }
 
     @Override

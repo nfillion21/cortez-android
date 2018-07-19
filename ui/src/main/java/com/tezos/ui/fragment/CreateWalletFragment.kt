@@ -8,7 +8,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -21,7 +20,6 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import com.tezos.core.crypto.CryptoUtils
-import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 
@@ -43,11 +41,10 @@ class CreateWalletFragment : Fragment()
     companion object
     {
         @JvmStatic
-        fun newInstance(theme: CustomTheme, address: Address) =
-                OperationsFragment().apply {
+        fun newInstance(theme: CustomTheme) =
+                CreateWalletFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
-                        putBundle(Address.TAG, address.toBundle())
                     }
                 }
     }
@@ -62,6 +59,7 @@ class CreateWalletFragment : Fragment()
             theme = CustomTheme.fromBundle(themeBundle)
         }
 
+        mMnemonicsTextview = view.findViewById(R.id.mnemonics_textview)
         mMnemonicsTextview?.setTextColor(ContextCompat.getColor(activity!!, theme!!.colorPrimaryDarkId))
 
         mBackupCheckbox = view.findViewById(R.id.backup_checkbox)
@@ -73,10 +71,11 @@ class CreateWalletFragment : Fragment()
 
         mCreateButton?.setText(R.string.create_wallet)
 
-        mCreateButtonLayout?.setOnClickListener { v ->
+        mCreateButtonLayout?.setOnClickListener { _ ->
 
             if (mMnemonicsString != null)
             {
+                /*
                 val intent = getIntent()
 
                 //TODO verify if it does always work
@@ -84,6 +83,7 @@ class CreateWalletFragment : Fragment()
                 intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle)
                 setResult(R.id.create_wallet_succeed, intent)
                 finish()
+                */
             }
         }
 
@@ -141,7 +141,7 @@ class CreateWalletFragment : Fragment()
             mBackupCheckbox?.isChecked = mBackupChecked
         }
 
-        validateCreateButton(isCreateButtonValid(), null)
+        validateCreateButton(isCreateButtonValid(), theme)
 
         mBackupCheckbox?.setOnCheckedChangeListener { buttonView, isChecked ->
             mBackupChecked = buttonView.isChecked
@@ -155,6 +155,7 @@ class CreateWalletFragment : Fragment()
         return inflater.inflate(R.layout.fragment_create_wallet, container, false)
     }
 
+    /*
     private fun showSnackbarError(network :Boolean)
     {
         var error:Int = if (network)
@@ -172,6 +173,7 @@ class CreateWalletFragment : Fragment()
                 android.R.color.holo_red_light)))
         snackbar.show()
     }
+    */
 
     protected fun isCreateButtonValid(): Boolean
     {
