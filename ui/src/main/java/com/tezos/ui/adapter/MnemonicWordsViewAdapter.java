@@ -29,6 +29,7 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
     private Activity mActivity;
 
     private List<String> mWords;
+    private List<Integer> mOrder;
 
     public interface OnItemClickListener
     {
@@ -70,8 +71,13 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
         return mWords;
     }
 
-    public void updateWords(List<String> words)
+    public void updateWords(List<String> words, List<Integer> order)
     {
+        if (order != null)
+        {
+            mOrder = order;
+        }
+
         if (mWords == null)
         {
             mWords = new ArrayList<>(words.size());
@@ -129,8 +135,17 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
                 String wordItem = getItem(position);
                 wordItemHolder.wordItem.setText(wordItem);
 
-                int posCardView = position;
-                String wordNumber = String.format(mActivity.getString(R.string.word_info), ++posCardView);
+
+                int wordNumberInt;
+                if (mOrder != null)
+                {
+                    wordNumberInt = mOrder.get(position);
+                }
+                else
+                {
+                    wordNumberInt = position;
+                }
+                String wordNumber = String.format(mActivity.getString(R.string.word_info), ++wordNumberInt);
                 wordItemHolder.wordNumberItem.setText(wordNumber);
 
                 holder.itemView.setOnClickListener(v ->

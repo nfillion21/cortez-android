@@ -20,13 +20,17 @@ import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.adapter.MnemonicWordsViewAdapter
 import com.tezos.ui.widget.OffsetDecoration
 import java.util.*
-import kotlin.collections.HashMap
+import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
 class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItemClickListener {
 
     private val SIX_WORDS_KEY = "words_key"
+    private val SIX_WORDS_NUMBER_KEY = "words_number_key"
     private val MNEMONICS_WORDS_NUMBER = 6
+
+    private val WORD_INTEGER_KEY = "word_integer_key"
+    private val WORD_STRING_KEY = "word_string_key"
 
     private var mAdapter: MnemonicWordsViewAdapter? = null
     private var mRecyclerView: RecyclerView? = null
@@ -35,6 +39,8 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
     private var mValidateWalletButton: Button? = null
     private var mValidateWalletButtonLayout: FrameLayout? = null
+
+    private var mVerifyWords: ArrayList<Bundle> = ArrayList(MNEMONICS_WORDS_NUMBER)
 
     companion object
     {
@@ -63,26 +69,6 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
         var theme:CustomTheme? = null
 
-        arguments?.let {
-            val themeBundle = it.getBundle(CustomTheme.TAG)
-            theme = CustomTheme.fromBundle(themeBundle)
-
-            val words = it.getString(CreateWalletActivity.MNEMONICS_STR).split(" ")
-
-            var sixNumbers = HashSet<Int>(6)
-            while (sixNumbers.size < 6)
-            {
-                val randomInt = (0 until words.size).random()
-                sixNumbers.add(randomInt)
-            }
-
-            var sixWords:HashMap<Int, String> = HashMap()
-            for (item:Int in sixNumbers)
-            {
-                sixWords[item+1] = words[item]
-            }
-        }
-
         mValidateWalletButton = view.findViewById(R.id.validate_mnemonics_button)
         mValidateWalletButtonLayout = view.findViewById(R.id.validate_mnemonics_button_layout)
         mValidateWalletButtonLayout?.setOnClickListener(
@@ -94,28 +80,72 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         mRecyclerView = view.findViewById(R.id.words)
         setUpWordGrid(mRecyclerView)
 
+
         if (savedInstanceState != null)
         {
             val words = savedInstanceState.getStringArrayList(SIX_WORDS_KEY)
             if (words != null)
             {
-                mAdapter?.updateWords(words)
+                mAdapter?.updateWords(words, intFromVerifyWords(mVerifyWords))
             }
 
+            mVerifyWords = savedInstanceState.getParcelableArrayList(SIX_WORDS_NUMBER_KEY)
+
             //TODO need to valid mnemonics differently
-            validateMnemonicsButton(CryptoUtils.validateMnemonics(words))
+            validateMnemonicsButton(isInputValid())
         }
         else
         {
+            //TODO put that in onSavedInstance
+            arguments?.let {
+                val themeBundle = it.getBundle(CustomTheme.TAG)
+                theme = CustomTheme.fromBundle(themeBundle)
+
+                val words = it.getString(CreateWalletActivity.MNEMONICS_STR).split(" ")
+
+                var sixNumbers = HashSet<Int>(6)
+                while (sixNumbers.size < 6)
+                {
+                    val randomInt = (0 until words.size).random()
+                    sixNumbers.add(randomInt)
+                }
+
+                mVerifyWords = ArrayList(MNEMONICS_WORDS_NUMBER)
+                for (item:Int in sixNumbers)
+                {
+                    val bundleWord = Bundle()
+                    bundleWord.putInt(WORD_INTEGER_KEY, item)
+                    bundleWord.putString(WORD_STRING_KEY, words[item])
+                    mVerifyWords.add(bundleWord)
+                }
+            }
+
             val words = ArrayList<String?>(MNEMONICS_WORDS_NUMBER)
             for (i in 0 until MNEMONICS_WORDS_NUMBER) {
                 words.add(null)
             }
-            mAdapter?.updateWords(words)
+            mAdapter?.updateWords(words, intFromVerifyWords(mVerifyWords))
 
             //TODO need to valid mnemonics differently
             validateMnemonicsButton(false)
         }
+    }
+
+    private fun isInputValid():Boolean
+    {
+
+        return false
+    }
+
+    private fun intFromVerifyWords(verifyWords:ArrayList<Bundle>):List<Int>
+    {
+        var list = ArrayList<Int>(MNEMONICS_WORDS_NUMBER)
+
+        for (item:Bundle in verifyWords)
+        {
+            list.add(item.getInt(WORD_INTEGER_KEY))
+        }
+        return list
     }
 
     private fun ClosedRange<Int>.random() =
@@ -194,7 +224,13 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
     fun updateCard(word: String, position: Int)
     {
         mAdapter?.updateWord(word, position)
-        validateMnemonicsButton(CryptoUtils.validateMnemonics(mAdapter?.words))
+
+        val wordToVerifyBundle = mVerifyWords[position]
+        val wordToVerify = wordToVerifyBundle.getString(WORD_STRING_KEY)
+
+        val bool = word == wordToVerify
+
+        validateMnemonicsButton(isInputValid())
     }
 
     private fun makeSelector(theme: CustomTheme?): StateListDrawable
@@ -218,6 +254,8 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         if (words != null) {
             outState.putStringArrayList(SIX_WORDS_KEY, mAdapter?.words as ArrayList<String>)
         }
+
+        outState.putParcelableArrayList(SIX_WORDS_NUMBER_KEY, mVerifyWords)
     }
 
     override fun onDetach() {

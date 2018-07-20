@@ -136,7 +136,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             ArrayList<String> words = savedInstanceState.getStringArrayList(WORDS_KEY);
             if (words != null)
             {
-                mAdapter.updateWords(words);
+                mAdapter.updateWords(words, null);
             }
             validateMnemonicsButton(CryptoUtils.validateMnemonics(words));
         }
@@ -147,7 +147,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             {
                 words.add(null);
             }
-            mAdapter.updateWords(words);
+            mAdapter.updateWords(words, null);
             validateMnemonicsButton(false);
         }
     }
