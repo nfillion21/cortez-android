@@ -159,27 +159,7 @@ class CreateWalletFragment : Fragment()
         return inflater.inflate(R.layout.fragment_create_wallet, container, false)
     }
 
-    /*
-    private fun showSnackbarError(network :Boolean)
-    {
-        var error:Int = if (network)
-        {
-            R.string.network_error
-        }
-        else
-        {
-            R.string.generic_error
-        }
-
-        val snackbar = Snackbar.make(mCoordinatorLayout!!, error, Snackbar.LENGTH_LONG)
-        val snackBarView = snackbar.view
-        snackBarView.setBackgroundColor((ContextCompat.getColor(activity!!,
-                android.R.color.holo_red_light)))
-        snackbar.show()
-    }
-    */
-
-    protected fun isCreateButtonValid(): Boolean
+    private fun isCreateButtonValid(): Boolean
     {
         return mBackupChecked
     }

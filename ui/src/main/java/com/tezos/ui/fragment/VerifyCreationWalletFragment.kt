@@ -83,13 +83,13 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
         if (savedInstanceState != null)
         {
+            mVerifyWords = savedInstanceState.getParcelableArrayList(SIX_WORDS_NUMBER_KEY)
+
             val words = savedInstanceState.getStringArrayList(SIX_WORDS_KEY)
             if (words != null)
             {
                 mAdapter?.updateWords(words, intFromVerifyWords(mVerifyWords))
             }
-
-            mVerifyWords = savedInstanceState.getParcelableArrayList(SIX_WORDS_NUMBER_KEY)
 
             //TODO need to valid mnemonics differently
             validateMnemonicsButton(isInputValid())
@@ -133,8 +133,10 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
     private fun isInputValid():Boolean
     {
+        val wordsFromVerifyWords = wordsFromVerifyWords(mVerifyWords)
+        val wordsFromAdapter = mAdapter?.words
 
-        return false
+        return wordsFromAdapter == wordsFromVerifyWords
     }
 
     private fun intFromVerifyWords(verifyWords:ArrayList<Bundle>):List<Int>
@@ -144,6 +146,17 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         for (item:Bundle in verifyWords)
         {
             list.add(item.getInt(WORD_INTEGER_KEY))
+        }
+        return list
+    }
+
+    private fun wordsFromVerifyWords(verifyWords:ArrayList<Bundle>):List<String>
+    {
+        var list = ArrayList<String>(MNEMONICS_WORDS_NUMBER)
+
+        for (item:Bundle in verifyWords)
+        {
+            list.add(item.getString(WORD_STRING_KEY))
         }
         return list
     }
@@ -224,11 +237,6 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
     fun updateCard(word: String, position: Int)
     {
         mAdapter?.updateWord(word, position)
-
-        val wordToVerifyBundle = mVerifyWords[position]
-        val wordToVerify = wordToVerifyBundle.getString(WORD_STRING_KEY)
-
-        val bool = word == wordToVerify
 
         validateMnemonicsButton(isInputValid())
     }
