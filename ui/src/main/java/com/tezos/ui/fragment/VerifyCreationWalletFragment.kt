@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -170,7 +171,6 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         return inflater.inflate(R.layout.fragment_verify_creation_wallet, container, false)
     }
 
-    /*
     private fun showSnackbarError(network :Boolean)
     {
         var error:Int = if (network)
@@ -182,13 +182,12 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
             R.string.generic_error
         }
 
-        val snackbar = Snackbar.make(mCoordinatorLayout!!, error, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(mValidateWalletButton!!, error, Snackbar.LENGTH_LONG)
         val snackBarView = snackbar.view
         snackBarView.setBackgroundColor((ContextCompat.getColor(activity!!,
                 android.R.color.holo_red_light)))
         snackbar.show()
     }
-    */
 
     private fun validateMnemonicsButton(validate: Boolean) {
 
@@ -216,6 +215,8 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
+
+        showSnackbarError(true)
     }
 
     private fun setUpWordGrid(wordsView: RecyclerView?)

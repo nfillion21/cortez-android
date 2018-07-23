@@ -23,6 +23,7 @@ import org.libsodium.jni.keys.PublicKey;
 import static org.libsodium.jni.NaCl.sodium;
 import static org.libsodium.jni.SodiumConstants.PUBLICKEY_BYTES;
 import static org.libsodium.jni.SodiumConstants.SECRETKEY_BYTES;
+import static org.libsodium.jni.SodiumConstants.SIGNATURE_BYTES;
 import static org.libsodium.jni.crypto.Util.zeros;
 
 public class KeyPair {
@@ -66,4 +67,10 @@ public class KeyPair {
         return new PrivateKey(secretKey);
     }
 
+    private byte[] sign(KeyPair keyPair, byte[] data)
+    {
+        byte[] signature = new byte[SIGNATURE_BYTES];
+        sodium().crypto_sign_detached(signature, null, data, data.length, this.secretKey);
+        return signature;
+    }
 }
