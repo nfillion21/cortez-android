@@ -103,8 +103,8 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
                 val words = it.getString(CreateWalletActivity.MNEMONICS_STR).split(" ")
 
-                var sixNumbers = HashSet<Int>(6)
-                while (sixNumbers.size < 6)
+                var sixNumbers = HashSet<Int>(MNEMONICS_WORDS_NUMBER)
+                while (sixNumbers.size < MNEMONICS_WORDS_NUMBER)
                 {
                     val randomInt = (0 until words.size).random()
                     sixNumbers.add(randomInt)
@@ -190,7 +190,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
     }
     */
 
-    fun validateMnemonicsButton(validate: Boolean) {
+    private fun validateMnemonicsButton(validate: Boolean) {
 
         if (validate) {
 

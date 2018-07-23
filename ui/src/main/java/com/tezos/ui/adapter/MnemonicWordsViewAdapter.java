@@ -89,7 +89,16 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public void updateWord(String word, int position)
     {
-        mWords.set(position, word);
+        //if we got a mOrder position,
+        // we need a tool to find the real position after that.
+        int cardPosition = position;
+
+        if (mOrder != null)
+        {
+            cardPosition = mOrder.indexOf(position);
+        }
+
+        mWords.set(cardPosition, word);
         notifyDataSetChanged();
     }
 
@@ -145,12 +154,15 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
                 {
                     wordNumberInt = position;
                 }
+
+                int finalWordNumberInt = wordNumberInt;
+                holder.itemView.setOnClickListener(v ->
+                        mOnItemClickListener.onClick(v, finalWordNumberInt)
+                );
+
                 String wordNumber = String.format(mActivity.getString(R.string.word_info), ++wordNumberInt);
                 wordItemHolder.wordNumberItem.setText(wordNumber);
 
-                holder.itemView.setOnClickListener(v ->
-                        mOnItemClickListener.onClick(v, position)
-                );
             }
             break;
 

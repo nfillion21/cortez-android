@@ -81,7 +81,7 @@ class CreateWalletFragment : Fragment()
 
         mCreateButtonLayout?.visibility = View.VISIBLE
 
-        mCreateButton?.setText(R.string.create_wallet)
+        mCreateButton?.setText(R.string.next_step_button)
 
         mCreateButtonLayout?.setOnClickListener { _ ->
 
@@ -176,7 +176,7 @@ class CreateWalletFragment : Fragment()
         val textViewAnimator3 = ObjectAnimator.ofFloat(mRenewFab, View.ALPHA, 1f)
 
         val animatorSet = AnimatorSet()
-        animatorSet.startDelay = 200
+        //animatorSet.startDelay = 200
 
         animatorSet.interpolator = FastOutSlowInInterpolator()
         animatorSet.play(textViewAnimator).with(textViewAnimator2).with(textViewAnimator3)

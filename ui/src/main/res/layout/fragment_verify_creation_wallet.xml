@@ -61,7 +61,7 @@
                 android:id="@+id/validate_mnemonics_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/restore_wallet"
+                android:text="@string/create_wallet"
 
                 android:drawableLeft="@drawable/ic_lock_black"
                 android:drawableStart="@drawable/ic_lock_black"

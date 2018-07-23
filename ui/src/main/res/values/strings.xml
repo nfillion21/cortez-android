@@ -18,11 +18,12 @@
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
     <string name="public_key_info_title">Here is your Public key hash</string>
     <string name="create_wallet">Create Wallet</string>
+    <string name="next_step_button">Next step</string>
     <string name="restore_wallet">Restore Wallet</string>
     <string name="add_address_title">Add an address</string>
     <string name="receive_title">Receive</string>
     <string name="restore_wallet_info">Please fill your 24 english words in the right order to recover your accounts.</string>
-    <string name="verify_creation_wallet_info">Please fill these 6 random words from the mnemonics you have previously noted.</string>
+    <string name="verify_creation_wallet_info">Please fill these 6 random words from the mnemonics to make sure you have previously noted it.</string>
     <string name="add_address_info">Please complete this form to add an address.</string>
     <string name="mnemonics_backed_up">I wrote the 24 words on a piece of paper.</string>
     <string name="word_info">Word #%1$d</string>
