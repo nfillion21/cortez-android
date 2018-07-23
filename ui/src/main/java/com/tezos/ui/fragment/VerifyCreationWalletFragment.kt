@@ -84,6 +84,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         mRecyclerView = view.findViewById(R.id.words)
         setUpWordGrid(mRecyclerView)
 
+        listener?.updateTitle()
 
         if (savedInstanceState != null)
         {
@@ -256,6 +257,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
     interface OnVerifyWalletCreationListener
     {
         fun onVerifyWalletCardNumberClicked(position: Int)
+        fun updateTitle()
     }
 
     override fun onSaveInstanceState(outState: Bundle)

@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -28,6 +30,8 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
     public static int CREATE_WALLET_REQUEST_CODE = 0x2300; // arbitrary int
 
     public static String MNEMONICS_STR = "mnemonics_str";
+
+    private TextView mTitleBar;
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -60,6 +64,9 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.create_wallet_container, createWalletFragment)
                     .commit();
+
+            //TextView mTitleBar = findViewById(R.id.barTitle);
+            //TitleBar.setText(R.string.create_wallet_title_1);
         }
     }
 
@@ -69,6 +76,31 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
         super.onResume();
 
         launchPasscode();
+    }
+
+    @Override
+    public void updateTitle()
+    {
+        // Update your UI here.
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.create_wallet_container);
+        if (fragment != null)
+        {
+            String titleScreen = null;
+
+            if (fragment instanceof VerifyCreationWalletFragment)
+            {
+                titleScreen = getString(R.string.create_wallet_title_2);
+            }
+            else
+            if (fragment instanceof CreateWalletFragment)
+            {
+                titleScreen = getString(R.string.create_wallet_title_1);
+            }
+            if (mTitleBar != null)
+            {
+                mTitleBar.setText(titleScreen);
+            }
+        }
     }
 
     @Override
@@ -105,7 +137,7 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
             finish();
         });
 
-        TextView mTitleBar = findViewById(R.id.barTitle);
+        mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
     }
 
@@ -123,8 +155,19 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
 
         VerifyCreationWalletFragment verifyCreationWalletFragment = VerifyCreationWalletFragment.newInstance(theme, mnemonics);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.create_wallet_container, verifyCreationWalletFragment).addToBackStack(null)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .replace(R.id.create_wallet_container, verifyCreationWalletFragment)
+                .addToBackStack(null)
                 .commit();
+
+        getSupportFragmentManager().addOnBackStackChangedListener(
+                new FragmentManager.OnBackStackChangedListener()
+                {
+                    public void onBackStackChanged()
+                    {
+                        updateTitle();
+                    }
+                });
     }
 
     @Override

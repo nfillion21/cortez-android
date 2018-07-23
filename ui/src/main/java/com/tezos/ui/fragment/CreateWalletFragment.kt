@@ -90,6 +90,7 @@ class CreateWalletFragment : Fragment()
                 listener?.onCreateWalletValidated(mMnemonicsString!!)
             }
         }
+        listener?.updateTitle()
 
         mRenewFab = view.findViewById(R.id.renew)
         mRenewFab?.setOnClickListener { v ->
@@ -151,6 +152,7 @@ class CreateWalletFragment : Fragment()
             mBackupChecked = buttonView.isChecked
             validateCreateButton(isCreateButtonValid(), theme)
         }
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -234,6 +236,7 @@ class CreateWalletFragment : Fragment()
     interface OnCreateWalletListener
     {
         fun onCreateWalletValidated(mnemonics:String)
+        fun updateTitle()
     }
 
     override fun onDetach() {

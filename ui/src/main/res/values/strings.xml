@@ -18,6 +18,8 @@
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
     <string name="public_key_info_title">Here is your Public key hash</string>
     <string name="create_wallet">Create Wallet</string>
+    <string name="create_wallet_title_1">Create Wallet 1/2</string>
+    <string name="create_wallet_title_2">Create Wallet 2/2</string>
     <string name="next_step_button">Next step</string>
     <string name="restore_wallet">Restore Wallet</string>
     <string name="add_address_title">Add an address</string>
