@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
+import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -14,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
-import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.activity.CreateWalletActivity
@@ -43,6 +43,8 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
     private var mVerifyWords: ArrayList<Bundle> = ArrayList(MNEMONICS_WORDS_NUMBER)
 
+    private var mCoordinatorLayout: CoordinatorLayout? = null
+
     companion object
     {
         @JvmStatic
@@ -69,6 +71,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         super.onViewCreated(view, savedInstanceState)
 
         var theme:CustomTheme? = null
+        mCoordinatorLayout = view.findViewById(R.id.coordinator)
 
         mValidateWalletButton = view.findViewById(R.id.validate_mnemonics_button)
         mValidateWalletButtonLayout = view.findViewById(R.id.validate_mnemonics_button_layout)
@@ -171,21 +174,17 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         return inflater.inflate(R.layout.fragment_verify_creation_wallet, container, false)
     }
 
-    private fun showSnackbarError(network :Boolean)
+    private fun showSnackbar(valid :Boolean)
     {
-        var error:Int = if (network)
-        {
-            R.string.network_error
-        }
-        else
-        {
-            R.string.generic_error
-        }
+        val text:Int = if (valid) { R.string.six_words_match }
+        else { R.string.six_words_do_not_match }
 
-        val snackbar = Snackbar.make(mValidateWalletButton!!, error, Snackbar.LENGTH_LONG)
+        val color:Int = if (valid) { ContextCompat.getColor(activity!!, R.color.tz_green) }
+        else { ContextCompat.getColor(activity!!, R.color.tz_red) }
+
+        val snackbar = Snackbar.make(mCoordinatorLayout!!, text, Snackbar.LENGTH_LONG)
         val snackBarView = snackbar.view
-        snackBarView.setBackgroundColor((ContextCompat.getColor(activity!!,
-                android.R.color.holo_red_light)))
+        snackBarView.setBackgroundColor((color))
         snackbar.show()
     }
 
@@ -215,8 +214,6 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
-
-        showSnackbarError(true)
     }
 
     private fun setUpWordGrid(wordsView: RecyclerView?)
@@ -239,7 +236,13 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
     {
         mAdapter?.updateWord(word, position)
 
-        validateMnemonicsButton(isInputValid())
+        val isInputValid = isInputValid()
+
+        if (mAdapter?.isFull!!)
+        {
+            validateMnemonicsButton(isInputValid)
+            showSnackbar(isInputValid)
+        }
     }
 
     private fun makeSelector(theme: CustomTheme?): StateListDrawable

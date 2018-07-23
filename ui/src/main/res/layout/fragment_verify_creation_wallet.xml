@@ -1,84 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:transitionGroup="false"
-    android:orientation="vertical"
-    tools:ignore="Overdraw,UnusedAttribute">
-
+    android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/spacing_double"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:layout_gravity="center"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/mnemonics_info_textview"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.tezos.ui.utils.FloatingActionButtonBehavior"
+        android:transitionGroup="false"
+        android:orientation="vertical"
+        tools:ignore="Overdraw,UnusedAttribute">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-            android:text="@string/verify_creation_wallet_info"
-            android:textColor="@color/colorAccent"
-            android:ellipsize="end" />
-    </LinearLayout>
-
-    <android.support.v7.widget.RecyclerView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/words"
-        android:layout_width="match_parent"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/spacing_nano"
-        android:clipToPadding="false"
-        android:scrollbarStyle="outsideOverlay"
-        android:scrollbars="vertical"
-        app:layoutManager="android.support.v7.widget.GridLayoutManager"
-        android:transitionGroup="false"
-        app:spanCount="2" tools:ignore="UnusedAttribute" />
-
-    <RelativeLayout
-        android:layout_weight="0"
-        android:layout_width="match_parent"
-        android:layout_margin="@dimen/spacing_double"
-        android:layout_height="?android:attr/actionBarSize">
-
-        <FrameLayout
-            android:id="@+id/validate_mnemonics_button_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            style="@style/PaymentScreens.Button"
-            android:enabled="false"
-            android:layout_centerInParent="true"
-            android:visibility="visible"
-            >
-
-            <Button
-                android:id="@+id/validate_mnemonics_button"
-                android:layout_width="wrap_content"
+            android:layout_margin="@dimen/spacing_double"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/mnemonics_info_textview"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/create_wallet"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                android:text="@string/verify_creation_wallet_info"
+                android:textColor="@color/colorAccent"
+                android:ellipsize="end" />
+        </LinearLayout>
 
-                android:drawableLeft="@drawable/ic_lock_black"
-                android:drawableStart="@drawable/ic_lock_black"
-                android:drawableTint="@color/tz_light"
-                android:drawablePadding="@dimen/spacing_normal"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
-                android:layout_gravity="center"
+        <android.support.v7.widget.RecyclerView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/words"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_nano"
+            android:clipToPadding="false"
+            android:scrollbarStyle="outsideOverlay"
+            android:scrollbars="vertical"
+            app:layoutManager="android.support.v7.widget.GridLayoutManager"
+            android:transitionGroup="false"
+            app:spanCount="2" tools:ignore="UnusedAttribute" />
+
+        <RelativeLayout
+            android:layout_weight="0"
+            android:layout_width="match_parent"
+            android:layout_margin="@dimen/spacing_double"
+            android:layout_height="?android:attr/actionBarSize">
+
+            <FrameLayout
+                android:id="@+id/validate_mnemonics_button_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                style="@style/PaymentScreens.Button"
                 android:enabled="false"
+                android:layout_centerInParent="true"
+                android:visibility="visible"
+                >
 
-                android:background="@null"
-                android:clickable="false"
-                android:focusable="false"
-                android:minHeight="0dp"
-                android:minWidth="0dp"
-                />
+                <Button
+                    android:id="@+id/validate_mnemonics_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_wallet"
 
-        </FrameLayout>
-    </RelativeLayout>
+                    android:drawableLeft="@drawable/ic_lock_black"
+                    android:drawableStart="@drawable/ic_lock_black"
+                    android:drawableTint="@color/tz_light"
+                    android:drawablePadding="@dimen/spacing_normal"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                    android:layout_gravity="center"
+                    android:enabled="false"
 
-</LinearLayout>
+                    android:background="@null"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    />
+
+            </FrameLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

@@ -53,6 +53,7 @@
     <color name="tz_placeholder">#ccc</color>
 
     <color name="tz_green">@android:color/holo_green_light</color>
+    <color name="tz_red">@android:color/holo_red_light</color>
     <color name="red">#ff5252</color>
     <color name="dark_grey">#aaa</color>
     <color name="light_grey">#ddd</color>

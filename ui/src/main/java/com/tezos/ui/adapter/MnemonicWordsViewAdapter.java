@@ -71,6 +71,19 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
         return mWords;
     }
 
+    public boolean isFull()
+    {
+        boolean isFull = false;
+
+        List<String> words = getWords();
+        if (words != null && !words.isEmpty())
+        {
+            isFull = !words.contains(null);
+        }
+
+        return isFull;
+    }
+
     public void updateWords(List<String> words, List<Integer> order)
     {
         if (order != null)
