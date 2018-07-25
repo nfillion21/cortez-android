@@ -23,6 +23,9 @@ import com.tezos.ui.widget.OffsetDecoration
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
+import com.tezos.core.crypto.CryptoUtils
+
+
 
 class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItemClickListener {
 
@@ -70,7 +73,6 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
     {
         super.onViewCreated(view, savedInstanceState)
 
-        var theme:CustomTheme? = null
         mCoordinatorLayout = view.findViewById(R.id.coordinator)
 
         mValidateWalletButton = view.findViewById(R.id.validate_mnemonics_button)
@@ -78,7 +80,20 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         mValidateWalletButtonLayout?.setOnClickListener(
                 { v ->
 
+                    arguments?.let {
 
+                        val words = it.getString(CreateWalletActivity.MNEMONICS_STR)
+                        val keyBundle = CryptoUtils.generateKeys(words)
+
+                        //TODO we should enter the secret things here.
+
+                        listener?.mnemonicsVerified()
+                        /*
+                        intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle)
+                        setResult(R.id.create_wallet_succeed, intent)
+                        finish()
+                        */
+                    }
                 })
 
         mRecyclerView = view.findViewById(R.id.words)
@@ -104,7 +119,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
             //TODO put that in onSavedInstance
             arguments?.let {
                 val themeBundle = it.getBundle(CustomTheme.TAG)
-                theme = CustomTheme.fromBundle(themeBundle)
+                val theme = CustomTheme.fromBundle(themeBundle)
 
                 val words = it.getString(CreateWalletActivity.MNEMONICS_STR).split(" ")
 
@@ -258,6 +273,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
     {
         fun onVerifyWalletCardNumberClicked(position: Int)
         fun updateTitle()
+        fun mnemonicsVerified()
     }
 
     override fun onSaveInstanceState(outState: Bundle)

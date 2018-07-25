@@ -187,4 +187,9 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
             verifyCreationWalletFragment.updateCard(word, position);
         }
     }
+
+    @Override
+    public void mnemonicsVerified() {
+
+    }
 }
