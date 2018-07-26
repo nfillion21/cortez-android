@@ -5,7 +5,6 @@ import android.hardware.fingerprint.FingerprintManager
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
-import co.temy.securitysample.authentication.SystemServices
 import com.tezos.ui.R
 
 class AuthenticationFingerprint(

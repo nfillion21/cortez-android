@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import co.temy.securitysample.authentication.SystemServices
 import com.tezos.ui.R
 import com.tezos.ui.extentions.showKeyboard
 import kotlinx.android.synthetic.main.dialog_fingerprint_backup.*

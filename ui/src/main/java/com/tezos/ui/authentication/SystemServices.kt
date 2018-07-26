@@ -1,4 +1,4 @@
-package co.temy.securitysample.authentication
+package com.tezos.ui.authentication
 
 import android.annotation.TargetApi
 import android.app.Activity
@@ -10,9 +10,9 @@ import android.os.CancellationSignal
 import android.os.Handler
 import android.support.v4.hardware.fingerprint.FingerprintManagerCompat
 import android.support.v7.app.AlertDialog
+import com.tezos.ui.BuildConfig
 import com.tezos.ui.extentions.openLockScreenSettings
-import com.tezos.core.BuildConfig
-import com.tezos.core.R
+import com.tezos.ui.R
 
 @TargetApi(Build.VERSION_CODES.M)
 class SystemServices(private val context: Context) {

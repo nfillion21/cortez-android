@@ -2,7 +2,7 @@ package com.tezos.ui.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.google.gson.Gson
+//import com.google.gson.Gson
 import java.io.Serializable
 import java.util.*
 
@@ -14,7 +14,7 @@ class Storage constructor(context: Context) {
     private val settings: SharedPreferences
     private val secrets: SharedPreferences
 
-    private val gson: Gson by lazy(LazyThreadSafetyMode.NONE) { Gson() }
+    //private val gson: Gson by lazy(LazyThreadSafetyMode.NONE) { Gson() }
 
     data class SecretData(
             val alias: String,
@@ -64,7 +64,7 @@ class Storage constructor(context: Context) {
     }
 
     fun saveSecret(secret: SecretData) {
-        secrets.edit().putString(secret.alias, gson.toJson(secret)).apply()
+        //secrets.edit().putString(secret.alias, gson.toJson(secret)).apply()
     }
 
     fun removeSecret(alias: String) {
@@ -74,9 +74,9 @@ class Storage constructor(context: Context) {
     fun getSecrets(): List<SecretData> {
         val secretsList = ArrayList<SecretData>()
         val secretsAliases = secrets.all
-        secretsAliases
-                .map { gson.fromJson(it.value as String, SecretData::class.java) }
-                .forEach { secretsList.add(it) }
+        //secretsAliases
+                //.map { gson.fromJson(it.value as String, SecretData::class.java) }
+                //.forEach { secretsList.add(it) }
 
         secretsList.sortByDescending { it.createDate }
         return secretsList

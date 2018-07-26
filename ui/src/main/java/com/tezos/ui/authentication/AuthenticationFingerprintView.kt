@@ -3,8 +3,8 @@ package com.tezos.ui.authentication
 import android.content.res.Resources
 import android.widget.ImageView
 import android.widget.TextView
-import co.temy.securitysample.extentions.getColorCompat
-import com.tezos.core.R
+import com.tezos.ui.extentions.getColorCompat
+import com.tezos.ui.R
 
 class AuthenticationFingerprintView(private val icon: ImageView, private val errorTextView: TextView) {
 
