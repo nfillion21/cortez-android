@@ -80,4 +80,9 @@
 
     <style name="PaymentScreens.PublicKeyActivity">
     </style>
+
+    <style name="AuthenticationDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowFixedWidthMinor">90%</item>
+    </style>
 </resources>

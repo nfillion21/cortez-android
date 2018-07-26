@@ -89,4 +89,23 @@
         <item>High (0.1 ꜩ)</item>
     </string-array>
 
+    <!--Fingerprint Sample Dialog strings-->
+    <string name="authentication_ok">OK</string>
+    <string name="authentication_cancel">Cancel</string>
+    <string name="authentication_title">Authenticate</string>
+    <string name="authentication_use_password">Use password</string>
+    <string name="authentication_password">Password</string>
+    <string name="authentication_password_description">Enter your password to continue</string>
+    <string name="authentication_error_incorrect_password">Password is incorrect</string>
+    <string name="authentication_fingerprint_description">Confirm fingerprint to continue</string>
+    <string name="authentication_fingerprint_hint">Touch sensor</string>
+    <string name="authentication_fingerprint_not_recognized">Fingerprint not recognized. Try again</string>
+    <string name="authentication_fingerprint_success">Fingerprint recognized</string>
+    <string name="authentication_fingerprint_new_enrollment_description">
+        A new fingerprint was added to this device, so your password is required.
+    </string>
+    <string name="authentication_fingerprint_use_in_future">Use fingerprint in the future</string>
+    <string name="authentication_fingerprint_icon_description">Fingerprint icon</string>
+    <string name="authentication_fingerprint_use_to_authenticate_key">use_fingerprint_to_authenticate_key</string>
+
 </resources>
