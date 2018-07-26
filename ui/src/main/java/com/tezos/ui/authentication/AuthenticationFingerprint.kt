@@ -1,11 +1,12 @@
-package co.temy.securitysample.authentication
+package com.tezos.ui.authentication
 
 import android.annotation.TargetApi
 import android.hardware.fingerprint.FingerprintManager
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
-import co.temy.securitysample.R
+import co.temy.securitysample.authentication.SystemServices
+import com.tezos.ui.R
 
 class AuthenticationFingerprint(
         private val systemServices: SystemServices,

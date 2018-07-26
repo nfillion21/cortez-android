@@ -1,4 +1,4 @@
-package co.temy.securitysample.authentication
+package com.tezos.ui.authentication
 
 import android.content.Context
 import android.hardware.fingerprint.FingerprintManager
@@ -10,8 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import co.temy.securitysample.extentions.showKeyboard
+import co.temy.securitysample.authentication.SystemServices
 import com.tezos.ui.R
+import com.tezos.ui.extentions.showKeyboard
 import kotlinx.android.synthetic.main.dialog_fingerprint_backup.*
 import kotlinx.android.synthetic.main.dialog_fingerprint_container.*
 import kotlinx.android.synthetic.main.dialog_fingerprint_content.*
@@ -62,11 +63,11 @@ class AuthenticationDialog : AppCompatDialogFragment(), AuthenticationFingerprin
         super.onAttach(context)
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater!!.inflate(R.layout.dialog_fingerprint_container, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dialog.setTitle(getString(R.string.authentication_title))
         cancelButtonView.setOnClickListener { dismiss() }
@@ -75,7 +76,7 @@ class AuthenticationDialog : AppCompatDialogFragment(), AuthenticationFingerprin
 
         if (SystemServices.hasMarshmallow()) {
             authenticationFingerprint = AuthenticationFingerprint(
-                    SystemServices(context.applicationContext),
+                    SystemServices(context?.applicationContext!!),
                     AuthenticationFingerprintView(fingerprintIconView, fingerprintStatusView), this)
         }
 

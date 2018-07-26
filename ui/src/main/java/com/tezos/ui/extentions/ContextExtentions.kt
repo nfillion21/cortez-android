@@ -1,4 +1,4 @@
-package co.temy.securitysample.extentions
+package com.tezos.ui.extentions
 
 import android.app.admin.DevicePolicyManager
 import android.content.Context

@@ -1,4 +1,4 @@
-package co.temy.securitysample.extentions
+package com.tezos.ui.extentions
 
 import android.support.annotation.LayoutRes
 import android.view.LayoutInflater

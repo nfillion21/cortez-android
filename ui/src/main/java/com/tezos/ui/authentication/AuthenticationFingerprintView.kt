@@ -1,4 +1,4 @@
-package co.temy.securitysample.authentication
+package com.tezos.ui.authentication
 
 import android.content.res.Resources
 import android.widget.ImageView

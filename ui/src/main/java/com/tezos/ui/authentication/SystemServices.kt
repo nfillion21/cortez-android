@@ -10,7 +10,7 @@ import android.os.CancellationSignal
 import android.os.Handler
 import android.support.v4.hardware.fingerprint.FingerprintManagerCompat
 import android.support.v7.app.AlertDialog
-import co.temy.securitysample.extentions.openLockScreenSettings
+import com.tezos.ui.extentions.openLockScreenSettings
 import com.tezos.core.BuildConfig
 import com.tezos.core.R
 

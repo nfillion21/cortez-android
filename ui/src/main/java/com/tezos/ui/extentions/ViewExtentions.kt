@@ -1,4 +1,4 @@
-package co.temy.securitysample.extentions
+package com.tezos.ui.extentions
 
 import android.content.Context
 import android.view.View
