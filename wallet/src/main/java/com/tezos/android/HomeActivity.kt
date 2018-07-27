@@ -29,8 +29,10 @@ import com.tezos.core.utils.AddressesDatabase
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
+import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
 class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler, HomeFragment.OnFragmentInteractionListener
@@ -69,7 +71,16 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         }
         else
         {
-            EncryptionServices(applicationContext).createConfirmCredentialsKey()
+            //EncryptionServices(applicationContext).createConfirmCredentialsKey()
+            createKeys("123", true)
+            with(Storage(this)) {
+                val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "123")
+                //logi("Original password is: $passwordString")
+                //logi("Saved password is: $encryptedPassword")
+
+                savePassword(encryptedPassword)
+                saveFingerprintAllowed(true)
+            }
             switchToHome()
         }
     }
@@ -98,6 +109,18 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, operationsFragment)
                 .commit()
+    }
+
+    private fun createKeys(password: String, isFingerprintAllowed: Boolean) {
+        val encryptionService = EncryptionServices(applicationContext)
+        encryptionService.createMasterKey(password)
+
+        if (SystemServices.hasMarshmallow()) {
+            if (isFingerprintAllowed && systemServices.hasEnrolledFingerprints()) {
+                encryptionService.createFingerprintKey()
+            }
+            encryptionService.createConfirmCredentialsKey()
+        }
     }
 
     private fun switchToHome()
