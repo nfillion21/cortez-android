@@ -1,5 +1,6 @@
 package com.tezos.android
 
+import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Build
@@ -27,20 +28,27 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.AddressesDatabase
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
+import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
 import kotlinx.android.synthetic.main.activity_home.*
 
-class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler, HomeFragment.OnFragmentInteractionListener
+class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler, HomeFragment.OnFragmentInteractionListener
 {
     override fun onFragmentInteraction() {
         switchToOperations()
+    }
+
+    companion object {
+        const val AUTHENTICATION_SCREEN_CODE = 301
     }
 
     private val pkHashKey = "pkhash_key"
     private var mPublicKeyHash: String? = null
 
     private var mProgressBar: ProgressBar? = null
+
+    private var isAuthenticating = false
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -53,7 +61,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 com.tezos.ui.R.color.theme_tezos_primary_dark,
                 com.tezos.ui.R.color.theme_tezos_text)
 
-
         initActionBar(tezosTheme)
 
         if (savedInstanceState != null)
@@ -62,9 +69,17 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         else
         {
-            //TODO begin with home unless you got your keys already
-
+            EncryptionServices(applicationContext).createConfirmCredentialsKey()
             switchToHome()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (!isAuthenticating && !EncryptionServices(applicationContext).validateConfirmCredentialsAuthentication()) {
+            isAuthenticating = true
+            systemServices.showAuthenticationScreen(this, AUTHENTICATION_SCREEN_CODE)
         }
     }
 
@@ -177,6 +192,14 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (resultCode == R.id.logout_succeed)
                 {
                     switchToHome()
+                }
+            }
+
+            AUTHENTICATION_SCREEN_CODE ->
+            {
+                isAuthenticating = false
+                if (resultCode != Activity.RESULT_OK) {
+                    finish()
                 }
             }
 
