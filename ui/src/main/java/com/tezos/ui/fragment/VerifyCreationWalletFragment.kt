@@ -77,24 +77,15 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
         mValidateWalletButton = view.findViewById(R.id.validate_mnemonics_button)
         mValidateWalletButtonLayout = view.findViewById(R.id.validate_mnemonics_button_layout)
-        mValidateWalletButtonLayout?.setOnClickListener(
-                { v ->
+        mValidateWalletButtonLayout?.setOnClickListener { _ ->
 
-                    arguments?.let {
+            arguments?.let {
 
-                        val words = it.getString(CreateWalletActivity.MNEMONICS_STR)
-                        val keyBundle = CryptoUtils.generateKeys(words)
-
-                        //TODO we should enter the secret things here.
-
-                        listener?.mnemonicsVerified()
-                        /*
-                        intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle)
-                        setResult(R.id.create_wallet_succeed, intent)
-                        finish()
-                        */
-                    }
-                })
+                //val words = it.getString(CreateWalletActivity.MNEMONICS_STR)
+                val words = "link warm visual pony bike person truck pupil moral gift shoulder eye kit human jacket rich sand cupboard position friend fox calm bring kick"
+                listener?.mnemonicsVerified(words)
+            }
+        }
 
         mRecyclerView = view.findViewById(R.id.words)
         setUpWordGrid(mRecyclerView)
@@ -118,9 +109,6 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         {
             //TODO put that in onSavedInstance
             arguments?.let {
-                val themeBundle = it.getBundle(CustomTheme.TAG)
-                val theme = CustomTheme.fromBundle(themeBundle)
-
                 val words = it.getString(CreateWalletActivity.MNEMONICS_STR).split(" ")
 
                 var sixNumbers = HashSet<Int>(MNEMONICS_WORDS_NUMBER)
@@ -147,7 +135,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
             mAdapter?.updateWords(words, intFromVerifyWords(mVerifyWords))
 
             //TODO need to valid mnemonics differently
-            validateMnemonicsButton(false)
+            validateMnemonicsButton(true)
         }
     }
 
@@ -273,7 +261,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
     {
         fun onVerifyWalletCardNumberClicked(position: Int)
         fun updateTitle()
-        fun mnemonicsVerified()
+        fun mnemonicsVerified(mnemonics: String)
     }
 
     override fun onSaveInstanceState(outState: Bundle)

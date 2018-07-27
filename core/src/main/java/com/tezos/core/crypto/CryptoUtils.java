@@ -36,7 +36,7 @@ public class CryptoUtils
         return sb.toString();
     }
 
-    private static byte[] generateSeed(String mnemonics, String passphrase)
+    public static byte[] generateSeed(String mnemonics, String passphrase)
     {
         final byte[] seed = new SeedCalculator().calculateSeed(mnemonics, passphrase);
         return seed;

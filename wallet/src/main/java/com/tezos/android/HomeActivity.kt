@@ -75,8 +75,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             createKeys("123", true)
             with(Storage(this)) {
                 val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "123")
-                //logi("Original password is: $passwordString")
-                //logi("Saved password is: $encryptedPassword")
 
                 savePassword(encryptedPassword)
                 saveFingerprintAllowed(true)

@@ -16,8 +16,10 @@ import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.tezos.core.crypto.CryptoUtils;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.authentication.AuthenticationDialog;
 import com.tezos.ui.fragment.CreateWalletFragment;
 import com.tezos.ui.fragment.RestoreWalletFragment;
 import com.tezos.ui.fragment.SearchWordDialogFragment;
@@ -189,7 +191,39 @@ public class CreateWalletActivity extends AppCompatActivity implements IPasscode
     }
 
     @Override
-    public void mnemonicsVerified() {
+    public void mnemonicsVerified(String mnemonics)
+    {
+        //TODO put the seed in secrets
+
+        String k = mnemonics.toString();
+        byte[] seed = CryptoUtils.generateSeed(k, "");
+        String k2 = mnemonics.toString();
+
+        //val keyBundle = CryptoUtils.generateKeys(words)
+
+        //TODO we should enter the secret things here.
+
+                /*
+                        intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle)
+                        setResult(R.id.create_wallet_succeed, intent)
+                        finish()
+
+
+        AuthenticationDialog dialog =  new AuthenticationDialog();
+        dialog.setStage(AuthenticationDialog.Stage.PASSWORD);
+        dialog.setAuthenticationSuccessListener();
+
+        dialog.authenticationSuccessListener = { startSecretActivity(ADD_SECRET_REQUEST_CODE, password = it) }
+        dialog.passwordVerificationListener = { validatePassword(it) }
+        dialog.show(supportFragmentManager, "Authentication")
+
+        Intent intent = new Intent(this, SecretAc);
+        intent.putExtra("mode", mode)
+        password?.let { intent.putExtra("password", password) }
+        secretData?.let { intent.putExtra("secret", secretData) }
+        startActivityForResult(intent, requestCode)
+                */
 
     }
+
 }
