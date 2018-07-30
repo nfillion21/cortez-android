@@ -21,9 +21,6 @@ import io.github.novacrypto.bip39.wordlists.English;
 
 public class CryptoUtils
 {
-    public static final String PUBLIC_KEY_HASH_KEY = "public_key_hash_key";
-    public static final String WALLET_BUNDLE_KEY = "wallet_bundle_key";
-
     public static String generateMnemonics()
     {
         StringBuilder sb = new StringBuilder();
@@ -193,7 +190,7 @@ public class CryptoUtils
             //response.put("pkh", pkHash);
 
             keyBundle = new Bundle();
-            keyBundle.putString(PUBLIC_KEY_HASH_KEY, pkHash);
+            //keyBundle.putString(PUBLIC_KEY_HASH_KEY, pkHash);
 
             return keyBundle;
         }

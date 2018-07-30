@@ -114,14 +114,18 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
             savePassword(encryptedPassword)
             saveFingerprintAllowed(true)
 
-            saveSeed(createSeedData("seed", mnemonics, password))
+            val seedData = createSeedData("seed", mnemonics, password)
+            saveSeed(seedData)
+
+
+            //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
+            //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
+
+            intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
+            setResult(R.id.restore_wallet_succeed, intent)
+            finish()
         }
 
-        //TODO put the seed in Secrets
-        //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
-        //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
-        setResult(R.id.restore_wallet_succeed, null)
-        finish()
     }
 
     private fun createSeedData(alias: String, secret: String, password: String): Storage.SeedData {
@@ -154,6 +158,7 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
 
     companion object {
         var RESTORE_WALLET_REQUEST_CODE = 0x2400 // arbitrary int
+        const val SEED_DATA_KEY = "seed_data_key"
 
         fun getStartIntent(context: Context, themeBundle: Bundle): Intent {
             val starter = Intent(context, RestoreWalletActivity::class.java)

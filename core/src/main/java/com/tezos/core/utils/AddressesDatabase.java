@@ -20,7 +20,6 @@ public class AddressesDatabase
 
     final private String SHARED_PREFERENCES_NAME = "TezCore";
     final private String ADDRESSES_KEY = "addresses";
-    final private String PRIVATE_KEY = "privateKey";
 
     public static AddressesDatabase getInstance()
     {
@@ -36,34 +35,6 @@ public class AddressesDatabase
         SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.remove(ADDRESSES_KEY);
-        //editor.commit();
-        editor.apply();
-    }
-
-    public void logOut(Context context)
-    {
-        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.remove(ADDRESSES_KEY);
-        editor.remove(PRIVATE_KEY);
-        //editor.commit();
-        editor.apply();
-    }
-
-    public boolean isPrivateKeyOn(Context context)
-    {
-        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-
-        boolean isPrivateKeyOn = preferences.getBoolean(PRIVATE_KEY, false);
-        return isPrivateKeyOn;
-    }
-
-    public void setPrivateKeyOn(Context context, boolean on)
-    {
-        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean(PRIVATE_KEY, on);
         //editor.commit();
         editor.apply();
     }
@@ -119,6 +90,15 @@ public class AddressesDatabase
             //editor.commit();
             editor.apply();
         }
+    }
+
+    public void logOut(Context context)
+    {
+        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove(ADDRESSES_KEY);
+        //editor.commit();
+        editor.apply();
     }
 
     public Set<String> getAddresses(Context context)

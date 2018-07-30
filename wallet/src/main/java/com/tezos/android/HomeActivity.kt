@@ -11,7 +11,6 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
@@ -21,15 +20,12 @@ import android.widget.TextView
 import com.tezos.android.activities.AboutActivity
 import com.tezos.android.activities.SettingsActivity
 import com.tezos.android.fragments.HomeFragment
-import com.tezos.ui.fragment.OperationsFragment
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.AddressesDatabase
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
-import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.authentication.SystemServices
+import com.tezos.ui.fragment.OperationsFragment
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.Storage
@@ -38,7 +34,7 @@ import kotlinx.android.synthetic.main.activity_home.*
 class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler, HomeFragment.OnFragmentInteractionListener
 {
     override fun onFragmentInteraction() {
-        switchToOperations()
+        //switchToOperations(realSeed)
     }
 
     companion object {
@@ -69,7 +65,9 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         val isPasswordSaved = Storage(this).isPasswordSaved()
         if (isPasswordSaved)
         {
-            switchToOperations()
+            val seeds = Storage(baseContext).getSeeds()
+            val seedOne = seeds[0]
+            switchToOperations(seedOne)
         }
         else
         {
@@ -80,6 +78,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         if (savedInstanceState != null)
         {
+            //TODO not useful anymore, remote it.
             mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
         }
         else
@@ -99,7 +98,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         */
     }
 
-    private fun switchToOperations()
+    private fun switchToOperations(realSeed: Storage.SeedData)
     {
         val tezosTheme = CustomTheme(
                 com.tezos.ui.R.color.theme_tezos_primary,
@@ -109,6 +108,8 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         var address = Address()
         address.description = "template"
         address.pubKeyHash = "tz1Ym38VjqqSv7hJy2ZSGarqPYLQfmuaUEb4"
+
+        //TODO no way, we need to get clear tz1.
 
         val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
         supportFragmentManager.beginTransaction()
@@ -152,6 +153,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.create_wallet_succeed)
                 {
+                    /*
                     if (data != null && data.hasExtra(CryptoUtils.WALLET_BUNDLE_KEY))
                     {
                         val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
@@ -163,15 +165,15 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                                 R.color.tz_green)))
                         snackbar.show()
 
-                        AddressesDatabase.getInstance().setPrivateKeyOn(this, true)
                         setMenuItemEnabled(true)
 
-                        switchToOperations()
+                        switchToOperations(realSeed)
                     }
                     else
                     {
                         //Log.v("ProjectDetails", "data is null")
                     }
+                        */
                 }
             }
 
@@ -179,32 +181,33 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.restore_wallet_succeed)
                 {
-                    val seeds = Storage(baseContext).getSeeds()
-                    val seedOne = seeds[0]
+                    //val seeds = Storage(baseContext).getSeeds()
+                    //val seedOne = seeds[0]
 
                     // in marshmallow, you don't need any password
-                    val seed = EncryptionServices(applicationContext).decrypt(seedOne.seed, "1234")
+                    //val seed = EncryptionServices(applicationContext).decrypt(seedOne.seed, "not useful for marshmallow")
+                    //val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
+                    //mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
 
-                    if (data != null && data.hasExtra(CryptoUtils.WALLET_BUNDLE_KEY))
+                    //TODO check data later
+                    if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
-                        val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
-                        mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
+                        val seedDataKey = data.getBundleExtra(RestoreWalletActivity.SEED_DATA_KEY)
+                        val realSeed = Storage.fromBundle(seedDataKey)
 
                         // TODO offset it
                         val snackbar = Snackbar.make(findViewById(R.id.coordinator), R.string.wallet_successfully_restored, Snackbar.LENGTH_LONG)
-                        val snackBarView = snackbar.getView()
-                        snackBarView.setBackgroundColor((ContextCompat.getColor(this,
+                        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                                 android.R.color.holo_green_light)))
                         snackbar.show()
 
-                        AddressesDatabase.getInstance().setPrivateKeyOn(this, true)
                         setMenuItemEnabled(true)
 
-                        switchToOperations()
+                        switchToOperations(realSeed)
                     }
                     else
                     {
-                        //Log.v("ProjectDetails", "data is null")
+
                     }
                 }
             }
@@ -214,6 +217,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 if (resultCode == R.id.logout_succeed)
                 {
                     switchToHome()
+                    setMenuItemEnabled(false)
                 }
             }
 

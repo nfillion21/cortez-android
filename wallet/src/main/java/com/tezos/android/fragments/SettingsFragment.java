@@ -36,6 +36,7 @@ import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.ui.activity.PasscodeActivity;
+import com.tezos.ui.utils.Storage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -167,8 +168,9 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
             }
         });
 
-        boolean isPrivateKeyOn = AddressesDatabase.getInstance().isPrivateKeyOn(getActivity());
-        validateExitButton(isPrivateKeyOn);
+        //boolean isPrivateKeyOn = AddressesDatabase.getInstance().isPrivateKeyOn(getActivity());
+        boolean isPasswordSaved = new Storage(getActivity()).isPasswordSaved();
+        validateExitButton(isPasswordSaved);
     }
 
     protected void validateExitButton(boolean validate) {

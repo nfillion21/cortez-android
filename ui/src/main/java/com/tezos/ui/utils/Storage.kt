@@ -2,6 +2,7 @@ package com.tezos.ui.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Bundle
 import com.google.gson.Gson
 //import com.google.gson.Gson
 import java.io.Serializable
@@ -27,6 +28,16 @@ class Storage constructor(context: Context) {
         private val STORAGE_PASSWORD: String = "password"
         private val STORAGE_SEEDS: String = "seeds"
         private val STORAGE_FINGERPRINT: String = "fingerprint_allowed"
+
+        public fun toBundle(seedData: SeedData): Bundle {
+            val serializer = SeedDataSerialization(seedData)
+            return serializer.getSerializedBundle()
+        }
+
+        public fun fromBundle(bundle: Bundle): SeedData {
+            val mapper = SeedDataMapper(bundle)
+            return mapper.mappedObjectFromBundle()
+        }
     }
 
     init {
@@ -86,17 +97,6 @@ class Storage constructor(context: Context) {
         seeds.edit().clear().apply()
     }
 
-    /*
-    fun fromBundle(bundle: Bundle): SeedData {
-        val mapper = SeedDataMapper(bundle)
-        return mapper.mappedObjectFromBundle()
-    }
-
-    fun toBundle(seedData: SeedData): Bundle {
-        val serializer = SeedDataSerialization(seedData)
-        return serializer.getSerializedBundle()
-    }
-
     internal class SeedDataSerialization internal constructor(private val seedData: SeedData)
     {
         internal fun getSerializedBundle():Bundle
@@ -120,5 +120,4 @@ class Storage constructor(context: Context) {
             return SeedData(alias, seed)
         }
     }
-    */
 }
