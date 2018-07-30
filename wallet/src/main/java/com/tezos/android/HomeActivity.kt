@@ -66,7 +66,8 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         initActionBar(tezosTheme)
 
-        if (Storage(this).isPasswordSaved())
+        val isPasswordSaved = Storage(this).isPasswordSaved()
+        if (isPasswordSaved)
         {
             switchToOperations()
         }
@@ -74,6 +75,8 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         {
             switchToHome()
         }
+
+        setMenuItemEnabled(isPasswordSaved)
 
         if (savedInstanceState != null)
         {
@@ -176,6 +179,12 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.restore_wallet_succeed)
                 {
+                    val seeds = Storage(baseContext).getSeeds()
+                    val seedOne = seeds[0]
+
+                    // in marshmallow, you don't need any password
+                    val seed = EncryptionServices(applicationContext).decrypt(seedOne.seed, "1234")
+
                     if (data != null && data.hasExtra(CryptoUtils.WALLET_BUNDLE_KEY))
                     {
                         val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)

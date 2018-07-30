@@ -19,9 +19,11 @@ import android.widget.ImageButton;
 import com.tezos.android.R;
 import com.tezos.ui.activity.PasscodeActivity;
 import com.tezos.android.fragments.SettingsFragment;
+import com.tezos.ui.authentication.EncryptionServices;
 import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.utils.ScreenUtils;
+import com.tezos.ui.utils.Storage;
 
 /**
  * Created by nfillion on 3/6/18.
@@ -142,10 +144,18 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
     @Override
     public void onLogOutClicked()
     {
+        //TODO not useful anymore soon
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.remove(PasscodeActivity.PASSCODE_KEY);
         editor.apply();
+
+        EncryptionServices encryptionServices = new EncryptionServices(getApplicationContext());
+        encryptionServices.removeMasterKey();
+        encryptionServices.removeFingerprintKey();
+        encryptionServices.removeConfirmCredentialsKey();
+
+        new Storage(getBaseContext()).clear();
 
         setResult(R.id.logout_succeed, null);
         finish();

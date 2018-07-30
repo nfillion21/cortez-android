@@ -179,26 +179,22 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
 
             mExitButton.setTextColor(ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
             mExitButtonLayout.setEnabled(true);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                mExitButtonLayout.setBackground(makeSelector(theme));
+            mExitButtonLayout.setBackground(makeSelector(theme));
 
-                Drawable[] drawables = mExitButton.getCompoundDrawables();
-                Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
-                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
-            }
+            Drawable[] drawables = mExitButton.getCompoundDrawables();
+            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
 
         } else {
 
             mExitButton.setTextColor(ContextCompat.getColor(getActivity(), android.R.color.white));
             mExitButtonLayout.setEnabled(false);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                CustomTheme greyTheme = new CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey);
-                mExitButtonLayout.setBackground(makeSelector(greyTheme));
+            CustomTheme greyTheme = new CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey);
+            mExitButtonLayout.setBackground(makeSelector(greyTheme));
 
-                Drawable[] drawables = mExitButton.getCompoundDrawables();
-                Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
-                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), android.R.color.white));
-            }
+            Drawable[] drawables = mExitButton.getCompoundDrawables();
+            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), android.R.color.white));
         }
     }
 

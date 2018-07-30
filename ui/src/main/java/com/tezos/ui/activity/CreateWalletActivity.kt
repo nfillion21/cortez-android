@@ -149,25 +149,22 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
             saveFingerprintAllowed(true)
 
             // TODO put the seed later
-            saveSeed(createSecretData("seed", mnemonics, password))
-            setResult(Activity.RESULT_OK)
+            saveSeed(createSeedData("seed", mnemonics, password))
+            setResult(R.id.restore_wallet_succeed, null)
             finish()
         }
 
         //TODO put the seed in Secrets
         //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
         //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
-
-        setResult(R.id.restore_wallet_succeed, null)
-        finish()
     }
 
-    private fun createSecretData(alias: String, secret: String, password: String): Storage.SeedData {
+    private fun createSeedData(alias: String, secret: String, password: String): Storage.SeedData {
         val encryptedSecret = EncryptionServices(applicationContext).encrypt(secret, password)
 
         //logi("Original seed is: $seed")
         //logi("Saved seed is: $encryptedSecret")
-        return Storage.SeedData(alias.capitalize(), encryptedSecret)
+        return Storage.SeedData(alias, encryptedSecret)
     }
 
     private fun createKeys(password: String, isFingerprintAllowed: Boolean) {

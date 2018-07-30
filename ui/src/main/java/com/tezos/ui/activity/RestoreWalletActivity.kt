@@ -103,6 +103,7 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
         finish();
         */
         val seed = CryptoUtils.generateSeed(mnemonics, "")
+        val password = "123"
 
         //TODO asks the user to put his password.
         // the password hello is not used in Marshmallow
@@ -112,6 +113,8 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
 
             savePassword(encryptedPassword)
             saveFingerprintAllowed(true)
+
+            saveSeed(createSeedData("seed", mnemonics, password))
         }
 
         //TODO put the seed in Secrets
@@ -119,6 +122,14 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
         //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
         setResult(R.id.restore_wallet_succeed, null)
         finish()
+    }
+
+    private fun createSeedData(alias: String, secret: String, password: String): Storage.SeedData {
+        val encryptedSecret = EncryptionServices(applicationContext).encrypt(secret, password)
+
+        //logi("Original seed is: $seed")
+        //logi("Saved seed is: $encryptedSecret")
+        return Storage.SeedData(alias, encryptedSecret)
     }
 
     private fun createKeys(password: String, isFingerprintAllowed: Boolean) {
