@@ -99,6 +99,65 @@ public class CryptoUtils
         return generateKeys(mnemonics, "");
     }
 
+    public static String generatePkh(String mnemonics, String passphrase)
+    {
+
+        byte[] src_seed = generateSeed(mnemonics, passphrase);
+
+        byte[] seed = Arrays.copyOfRange(src_seed, 0, 32);
+
+        KeyPair key = new KeyPair(seed);
+        byte[] sodiumPublicKey = key.getPublicKey().toBytes();
+
+        // then we got the KeyPair from the seed, thanks to sodium.
+
+        // These are our prefixes
+        byte[] edpkPrefix = {(byte) 13, (byte) 15, (byte) 37, (byte) 217};
+        byte[] tz1Prefix = {(byte) 6, (byte) 161, (byte) 159};
+
+        // begins eztz b58encode
+
+        // Create Tezos PK.
+        byte[] prefixedPubKey = new byte[36];
+
+        System.arraycopy(edpkPrefix, 0, prefixedPubKey, 0, 4);
+
+        System.arraycopy(sodiumPublicKey, 0, prefixedPubKey, 4, 32);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
+
+
+        byte[] prefixedPubKeyWithChecksum = new byte[40];
+
+        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
+
+
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
+
+        // ends eztz b58encode
+
+        //create tezos PKHash
+        byte[] genericHash = new byte[20];
+        try {
+            genericHash = CryptoGenericHash.cryptoGenericHash(sodiumPublicKey, genericHash.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        byte[] prefixedGenericHash = new byte[23];
+        System.arraycopy(tz1Prefix, 0, prefixedGenericHash, 0, 3);
+        System.arraycopy(genericHash, 0, prefixedGenericHash, 3, 20);
+
+        firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedGenericHash);
+        byte[] prefixedPKhashWithChecksum = new byte[27];
+        System.arraycopy(prefixedGenericHash, 0, prefixedPKhashWithChecksum, 0, 23);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPKhashWithChecksum, 23, 4);
+
+        String pkHash = Base58.encode(prefixedPKhashWithChecksum);
+
+        return pkHash;
+    }
+
     public static Bundle generateKeys(String mnemonics, String passphrase)
     {
         Bundle keyBundle;

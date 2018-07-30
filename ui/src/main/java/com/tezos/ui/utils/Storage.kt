@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import com.google.gson.Gson
-//import com.google.gson.Gson
 import java.io.Serializable
 import java.util.*
 
@@ -19,7 +18,7 @@ class Storage constructor(context: Context) {
     private val gson: Gson by lazy(LazyThreadSafetyMode.NONE) { Gson() }
 
     data class SeedData(
-            val alias: String,
+            val pkh: String,
             val seed: String) : Serializable
 
     companion object {
@@ -29,12 +28,12 @@ class Storage constructor(context: Context) {
         private val STORAGE_SEEDS: String = "seeds"
         private val STORAGE_FINGERPRINT: String = "fingerprint_allowed"
 
-        public fun toBundle(seedData: SeedData): Bundle {
+        fun toBundle(seedData: SeedData): Bundle {
             val serializer = SeedDataSerialization(seedData)
             return serializer.getSerializedBundle()
         }
 
-        public fun fromBundle(bundle: Bundle): SeedData {
+        fun fromBundle(bundle: Bundle): SeedData {
             val mapper = SeedDataMapper(bundle)
             return mapper.mappedObjectFromBundle()
         }
@@ -74,7 +73,7 @@ class Storage constructor(context: Context) {
     }
 
     fun saveSeed(seed: SeedData) {
-        seeds.edit().putString(seed.alias, gson.toJson(seed)).apply()
+        seeds.edit().putString(seed.pkh, gson.toJson(seed)).apply()
     }
 
     fun removeSeed(alias: String) {
@@ -103,7 +102,7 @@ class Storage constructor(context: Context) {
         {
             val secretDataBundle = Bundle()
 
-            secretDataBundle.putString("alias", seedData.alias)
+            secretDataBundle.putString("pkh", seedData.pkh)
             secretDataBundle.putString("seed", seedData.seed)
 
             return secretDataBundle
@@ -114,7 +113,7 @@ class Storage constructor(context: Context) {
     {
         internal fun mappedObjectFromBundle(): SeedData
         {
-            val alias = this.bundle.getString("alias", null)
+            val alias = this.bundle.getString("pkh", null)
             val seed = this.bundle.getString("seed", null)
 
             return SeedData(alias, seed)

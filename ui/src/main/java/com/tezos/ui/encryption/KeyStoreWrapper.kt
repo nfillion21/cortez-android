@@ -28,12 +28,12 @@ class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String)
     private val defaultKeyStore = createDefaultKeyStore()
 
     /**
-     * @return symmetric key from Android Key Store or null if any key with given alias exists
+     * @return symmetric key from Android Key Store or null if any key with given pkh exists
      */
     fun getAndroidKeyStoreSymmetricKey(alias: String): SecretKey? = keyStore.getKey(alias, null) as SecretKey?
 
     /**
-     * @return symmetric key from Default Key Store or null if any key with given alias exists
+     * @return symmetric key from Default Key Store or null if any key with given pkh exists
      */
     fun getDefaultKeyStoreSymmetricKey(alias: String, keyPassword: String): SecretKey? {
         return try {
@@ -44,7 +44,7 @@ class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String)
     }
 
     /**
-     * @return asymmetric keypair from Android Key Store or null if any key with given alias exists
+     * @return asymmetric keypair from Android Key Store or null if any key with given pkh exists
      */
     fun getAndroidKeyStoreAsymmetricKeyPair(alias: String): KeyPair? {
         val privateKey = keyStore.getKey(alias, null) as PrivateKey?
@@ -58,7 +58,7 @@ class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String)
     }
 
     /**
-     * Remove key with given alias from Android Key Store
+     * Remove key with given pkh from Android Key Store
      */
     fun removeAndroidKeyStoreKey(alias: String) = keyStore.deleteEntry(alias)
 

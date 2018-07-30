@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.widget.ImageButton
 import android.widget.TextView
+import com.tezos.core.crypto.CryptoUtils
 
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
@@ -149,7 +150,7 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
             saveFingerprintAllowed(true)
 
             // TODO put the seed later
-            saveSeed(createSeedData("seed", mnemonics, password))
+            saveSeed(createSeedData(mnemonics, password))
             setResult(R.id.restore_wallet_succeed, null)
             finish()
         }
@@ -159,12 +160,12 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
         //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
     }
 
-    private fun createSeedData(alias: String, secret: String, password: String): Storage.SeedData {
-        val encryptedSecret = EncryptionServices(applicationContext).encrypt(secret, password)
-
+    private fun createSeedData(mnemonics: String, password: String): Storage.SeedData {
+        val encryptedSecret = EncryptionServices(applicationContext).encrypt(mnemonics, password)
         //logi("Original seed is: $seed")
         //logi("Saved seed is: $encryptedSecret")
-        return Storage.SeedData(alias, encryptedSecret)
+        val pkh = CryptoUtils.generatePkh(mnemonics, "")
+        return Storage.SeedData(pkh, encryptedSecret)
     }
 
     private fun createKeys(password: String, isFingerprintAllowed: Boolean) {

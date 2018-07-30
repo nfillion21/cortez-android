@@ -122,7 +122,7 @@ public class ConfirmCredentialHelper
             KeyGenerator keyGenerator = KeyGenerator.getInstance(
                     KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
 
-            // Set the alias of the entry in Android KeyStore where the key will appear
+            // Set the pkh of the entry in Android KeyStore where the key will appear
             // and the constrains (purposes) in the constructor of the Builder
             keyGenerator.init(new KeyGenParameterSpec.Builder(KEY_NAME,
                     KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)

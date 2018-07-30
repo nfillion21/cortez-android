@@ -42,9 +42,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         const val AUTHENTICATION_SCREEN_CODE = 301
     }
 
-    private val pkHashKey = "pkhash_key"
-    private var mPublicKeyHash: String? = null
-
     private var mProgressBar: ProgressBar? = null
 
     private var isAuthenticating = false
@@ -79,7 +76,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         if (savedInstanceState != null)
         {
             //TODO not useful anymore, remote it.
-            mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
+            //mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
         }
         else
         {
@@ -106,10 +103,9 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 com.tezos.ui.R.color.theme_tezos_text)
 
         var address = Address()
-        address.description = "template"
-        address.pubKeyHash = "tz1Ym38VjqqSv7hJy2ZSGarqPYLQfmuaUEb4"
-
-        //TODO no way, we need to get clear tz1.
+        address.description = "main address"
+        //address.pubKeyHash = "tz1Ym38VjqqSv7hJy2ZSGarqPYLQfmuaUEb4"
+        address.pubKeyHash = realSeed.pkh
 
         val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
         supportFragmentManager.beginTransaction()
@@ -314,7 +310,13 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             }
             R.id.nav_publickey ->
             {
-                PublicKeyHashActivity.start(this, mPublicKeyHash, tezosTheme)
+                val isPasswordSaved = Storage(this).isPasswordSaved()
+                if (isPasswordSaved)
+                {
+                    val seeds = Storage(baseContext).getSeeds()
+                    val seedOne = seeds[0]
+                    PublicKeyHashActivity.start(this, seedOne.pkh, tezosTheme)
+                }
             }
             R.id.nav_addresses ->
             {
@@ -344,7 +346,5 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
     override fun onSaveInstanceState(outState: Bundle?)
     {
         super.onSaveInstanceState(outState)
-
-        outState?.putString(pkHashKey, mPublicKeyHash)
     }
 }
