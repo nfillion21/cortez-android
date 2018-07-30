@@ -18,6 +18,7 @@ import com.tezos.ui.R
 class SystemServices(private val context: Context) {
 
     companion object {
+        //@JvmStatic
         fun hasMarshmallow() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
     }
 

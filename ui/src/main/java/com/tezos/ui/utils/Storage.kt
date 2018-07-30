@@ -2,6 +2,7 @@ package com.tezos.ui.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.gson.Gson
 //import com.google.gson.Gson
 import java.io.Serializable
 import java.util.*
@@ -12,27 +13,25 @@ import java.util.*
 class Storage constructor(context: Context) {
 
     private val settings: SharedPreferences
-    private val secrets: SharedPreferences
+    private val seeds: SharedPreferences
 
-    //private val gson: Gson by lazy(LazyThreadSafetyMode.NONE) { Gson() }
+    private val gson: Gson by lazy(LazyThreadSafetyMode.NONE) { Gson() }
 
-    data class SecretData(
+    data class SeedData(
             val alias: String,
-            val secret: String,
-            val createDate: Date,
-            val updateDate: Date) : Serializable
+            val seed: String) : Serializable
 
     companion object {
         private val STORAGE_SETTINGS: String = "settings"
         private val STORAGE_ENCRYPTION_KEY: String = "encryption_key"
         private val STORAGE_PASSWORD: String = "password"
-        private val STORAGE_SECRETS: String = "secrets"
+        private val STORAGE_SEEDS: String = "seeds"
         private val STORAGE_FINGERPRINT: String = "fingerprint_allowed"
     }
 
     init {
         settings = context.getSharedPreferences(STORAGE_SETTINGS, android.content.Context.MODE_PRIVATE)
-        secrets = context.getSharedPreferences(STORAGE_SECRETS, android.content.Context.MODE_PRIVATE)
+        seeds = context.getSharedPreferences(STORAGE_SEEDS, android.content.Context.MODE_PRIVATE)
     }
 
     fun saveEncryptionKey(key: String) {
@@ -59,31 +58,67 @@ class Storage constructor(context: Context) {
         return settings.getBoolean(STORAGE_FINGERPRINT, false)
     }
 
-    fun hasSecret(alias: String): Boolean {
-        return secrets.contains(alias)
+    fun hasSeed(alias: String): Boolean {
+        return seeds.contains(alias)
     }
 
-    fun saveSecret(secret: SecretData) {
-        //secrets.edit().putString(secret.alias, gson.toJson(secret)).apply()
+    fun saveSeed(seed: SeedData) {
+        seeds.edit().putString(seed.alias, gson.toJson(seed)).apply()
     }
 
-    fun removeSecret(alias: String) {
-        secrets.edit().remove(alias).apply()
+    fun removeSeed(alias: String) {
+        seeds.edit().remove(alias).apply()
     }
 
-    fun getSecrets(): List<SecretData> {
-        val secretsList = ArrayList<SecretData>()
-        val secretsAliases = secrets.all
-        //secretsAliases
-                //.map { gson.fromJson(it.value as String, SecretData::class.java) }
-                //.forEach { secretsList.add(it) }
+    fun getSeeds(): List<SeedData> {
+        val secretsList = ArrayList<SeedData>()
+        val seedAliases = seeds.all
 
-        secretsList.sortByDescending { it.createDate }
+        seedAliases
+                .map { gson.fromJson(it.value as String, SeedData::class.java) }
+                .forEach { secretsList.add(it) }
         return secretsList
     }
 
-    fun clear(){
+    fun clear()
+    {
         settings.edit().clear().apply()
-        secrets.edit().clear().apply()
+        seeds.edit().clear().apply()
     }
+
+    /*
+    fun fromBundle(bundle: Bundle): SeedData {
+        val mapper = SeedDataMapper(bundle)
+        return mapper.mappedObjectFromBundle()
+    }
+
+    fun toBundle(seedData: SeedData): Bundle {
+        val serializer = SeedDataSerialization(seedData)
+        return serializer.getSerializedBundle()
+    }
+
+    internal class SeedDataSerialization internal constructor(private val seedData: SeedData)
+    {
+        internal fun getSerializedBundle():Bundle
+        {
+            val secretDataBundle = Bundle()
+
+            secretDataBundle.putString("alias", seedData.alias)
+            secretDataBundle.putString("seed", seedData.seed)
+
+            return secretDataBundle
+        }
+    }
+
+    internal class SeedDataMapper internal constructor(private val bundle: Bundle)
+    {
+        internal fun mappedObjectFromBundle(): SeedData
+        {
+            val alias = this.bundle.getString("alias", null)
+            val seed = this.bundle.getString("seed", null)
+
+            return SeedData(alias, seed)
+        }
+    }
+    */
 }

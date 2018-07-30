@@ -13,10 +13,8 @@ import android.util.Log
 import android.widget.ImageButton
 import android.widget.TextView
 
-import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
-import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.CreateWalletFragment
@@ -137,44 +135,39 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
     override fun mnemonicsVerified(mnemonics: String) {
         //TODO put the seed in secrets
 
-        val seed = CryptoUtils.generateSeed(mnemonics, "")
+        //val seed = CryptoUtils.generateSeed(mnemonics, "")
+
+        val password = "123"
 
         //TODO asks the user to put his password.
         // the password hello is not used in Marshmallow
         createKeys("hello", true)
         with(Storage(this)) {
-            val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "123")
+            val encryptedPassword = EncryptionServices(applicationContext).encrypt(password, password)
 
             savePassword(encryptedPassword)
             saveFingerprintAllowed(true)
+
+            // TODO put the seed later
+            saveSeed(createSecretData("seed", mnemonics, password))
+            setResult(Activity.RESULT_OK)
+            finish()
         }
 
         //TODO put the seed in Secrets
         //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
         //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
+
         setResult(R.id.restore_wallet_succeed, null)
         finish()
+    }
 
-        // then, ask for password:
+    private fun createSecretData(alias: String, secret: String, password: String): Storage.SeedData {
+        val encryptedSecret = EncryptionServices(applicationContext).encrypt(secret, password)
 
-        //val keyBundle = CryptoUtils.generateKeys(words)
-
-        /*
-        val dialog = AuthenticationDialog()
-        dialog.stage = AuthenticationDialog.Stage.PASSWORD
-        dialog.authenticationSuccessListener = {
-            //startSecretActivity(ADD_SECRET_REQUEST_CODE, password = it)
-            //
-            val seed2 = CryptoUtils.generateSeed(mnemonics, "")
-            val seed3 = CryptoUtils.generateSeed(mnemonics, "")
-
-            //EncryptionServices(applicationContext).createConfirmCredentialsKey()
-
-        }
-        dialog.passwordVerificationListener = { validatePassword(it) }
-        dialog.show(supportFragmentManager, "Authentication")
-        */
-
+        //logi("Original seed is: $seed")
+        //logi("Saved seed is: $encryptedSecret")
+        return Storage.SeedData(alias.capitalize(), encryptedSecret)
     }
 
     private fun createKeys(password: String, isFingerprintAllowed: Boolean) {
