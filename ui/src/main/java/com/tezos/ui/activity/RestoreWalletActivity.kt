@@ -5,50 +5,41 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
-import android.support.v4.app.FragmentTransaction
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.widget.ImageButton
 import android.widget.TextView
-
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
-import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.authentication.SystemServices
-import com.tezos.ui.fragment.CreateWalletFragment
+import com.tezos.ui.fragment.RestoreWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
-import com.tezos.ui.fragment.VerifyCreationWalletFragment
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.Storage
 
-class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener {
-
-    private var mTitleBar: TextView? = null
+class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener, IPasscodeHandler {
 
     val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_create_wallet)
+        setContentView(R.layout.activity_restore_wallet)
 
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
         val theme = CustomTheme.fromBundle(themeBundle)
         initToolbar(theme)
 
         if (savedInstanceState == null) {
-            val createWalletFragment = CreateWalletFragment.newInstance(theme)
+            val restoreWalletFragment = RestoreWalletFragment.newInstance(themeBundle)
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.create_wallet_container, createWalletFragment)
+                    .add(R.id.restorewallet_container, restoreWalletFragment)
                     .commit()
-
-            //TextView mTitleBar = findViewById(R.id.barTitle);
-            //TitleBar.setText(R.string.create_wallet_title_1);
         }
     }
 
@@ -56,23 +47,6 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
         super.onResume()
 
         launchPasscode()
-    }
-
-    override fun updateTitle() {
-        // Update your UI here.
-        val fragment = supportFragmentManager.findFragmentById(R.id.create_wallet_container)
-        if (fragment != null) {
-            var titleScreen: String? = null
-
-            if (fragment is VerifyCreationWalletFragment) {
-                titleScreen = getString(R.string.create_wallet_title_2)
-            } else if (fragment is CreateWalletFragment) {
-                titleScreen = getString(R.string.create_wallet_title_1)
-            }
-            if (mTitleBar != null) {
-                mTitleBar!!.text = titleScreen
-            }
-        }
     }
 
     override fun launchPasscode() {
@@ -103,40 +77,31 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
             finish()
         }
 
-        mTitleBar = findViewById(R.id.barTitle)
-        mTitleBar!!.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+        val mTitleBar = findViewById<TextView>(R.id.barTitle)
+        mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
 
-    override fun onCreateWalletValidated(mnemonics: String) {
-        val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(themeBundle)
-
-        val verifyCreationWalletFragment = VerifyCreationWalletFragment.newInstance(theme, mnemonics)
-        supportFragmentManager.beginTransaction()
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.create_wallet_container, verifyCreationWalletFragment)
-                .addToBackStack(null)
-                .commit()
-
-        supportFragmentManager.addOnBackStackChangedListener { updateTitle() }
-    }
-
-    override fun onVerifyWalletCardNumberClicked(position: Int) {
+    override fun onWordCardNumberClicked(position: Int) {
         val searchWordDialogFragment = SearchWordDialogFragment.newInstance(position)
-        searchWordDialogFragment.show(supportFragmentManager, SearchWordDialogFragment.TAG)
-    }
-
-    override fun onWordClicked(word: String, position: Int) {
-        val fragment = supportFragmentManager.findFragmentById(R.id.create_wallet_container)
-        if (fragment != null && fragment is VerifyCreationWalletFragment) {
-            val verifyCreationWalletFragment = fragment as VerifyCreationWalletFragment?
-            verifyCreationWalletFragment!!.updateCard(word, position)
-        }
+        searchWordDialogFragment.show(supportFragmentManager, "searchWordDialog")
     }
 
     override fun mnemonicsVerified(mnemonics: String) {
-        //TODO put the seed in secrets
+        /*
+        //TODO put the seed in Secrets
+        createKeys("hello", true)
+        with(Storage(this)) {
+        val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "123")
 
+        savePassword(encryptedPassword)
+        saveFingerprintAllowed(true)
+    }
+        byte[] seed = CryptoUtils.generateSeed(mnemonics, "");
+        //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
+        //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
+        setResult(R.id.restore_wallet_succeed, null);
+        finish();
+        */
         val seed = CryptoUtils.generateSeed(mnemonics, "")
 
         //TODO asks the user to put his password.
@@ -154,27 +119,6 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
         //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
         setResult(R.id.restore_wallet_succeed, null)
         finish()
-
-        // then, ask for password:
-
-        //val keyBundle = CryptoUtils.generateKeys(words)
-
-        /*
-        val dialog = AuthenticationDialog()
-        dialog.stage = AuthenticationDialog.Stage.PASSWORD
-        dialog.authenticationSuccessListener = {
-            //startSecretActivity(ADD_SECRET_REQUEST_CODE, password = it)
-            //
-            val seed2 = CryptoUtils.generateSeed(mnemonics, "")
-            val seed3 = CryptoUtils.generateSeed(mnemonics, "")
-
-            //EncryptionServices(applicationContext).createConfirmCredentialsKey()
-
-        }
-        dialog.passwordVerificationListener = { validatePassword(it) }
-        dialog.show(supportFragmentManager, "Authentication")
-        */
-
     }
 
     private fun createKeys(password: String, isFingerprintAllowed: Boolean) {
@@ -189,18 +133,19 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
         }
     }
 
-    private fun validatePassword(inputtedPassword: String): Boolean {
-        val storage = Storage(this)
-        return EncryptionServices(applicationContext).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
+    override fun onWordClicked(word: String, position: Int) {
+        val fragment = supportFragmentManager.findFragmentById(R.id.restorewallet_container)
+        if (fragment != null && fragment is RestoreWalletFragment) {
+            val restoreWalletFragment = fragment as RestoreWalletFragment?
+            restoreWalletFragment!!.updateCard(word, position)
+        }
     }
 
     companion object {
-        var CREATE_WALLET_REQUEST_CODE = 0x2300 // arbitrary int
-
-        var MNEMONICS_STR = "mnemonics_str"
+        var RESTORE_WALLET_REQUEST_CODE = 0x2400 // arbitrary int
 
         fun getStartIntent(context: Context, themeBundle: Bundle): Intent {
-            val starter = Intent(context, CreateWalletActivity::class.java)
+            val starter = Intent(context, RestoreWalletActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
 
             return starter
@@ -208,8 +153,7 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
 
         fun start(activity: Activity, theme: CustomTheme) {
             val starter = getStartIntent(activity, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, CREATE_WALLET_REQUEST_CODE, null)
+            ActivityCompat.startActivityForResult(activity, starter, RESTORE_WALLET_REQUEST_CODE, null)
         }
     }
-
 }

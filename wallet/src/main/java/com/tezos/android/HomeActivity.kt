@@ -88,10 +88,12 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
     override fun onStart() {
         super.onStart()
 
+        /*
         if (!isAuthenticating && !EncryptionServices(applicationContext).validateConfirmCredentialsAuthentication()) {
             isAuthenticating = true
             systemServices.showAuthenticationScreen(this, AUTHENTICATION_SCREEN_CODE)
         }
+        */
     }
 
     private fun switchToOperations()

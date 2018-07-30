@@ -53,6 +53,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     public interface OnWordSelectedListener
     {
         void onWordCardNumberClicked(int position);
+        void mnemonicsVerified(String mnemonics);
     }
 
     public static RestoreWalletFragment newInstance(Bundle customTheme)
@@ -117,11 +118,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             String mnemonics = mnemonicsListToString(mAdapter.getWords());
             if (mnemonics != null)
             {
-                //TODO put this code in activity
-                Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
-                intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
-                getActivity().setResult(R.id.restore_wallet_succeed, intent);
-                getActivity().finish();
+                mCallback.mnemonicsVerified(mnemonics);
             }
             else
             {

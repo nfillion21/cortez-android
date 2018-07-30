@@ -46,7 +46,7 @@ class HomeFragment : Fragment()
 
         mRestoreWalletButton = view.findViewById(R.id.restoreWalletButton)
         mRestoreWalletButton!!.setOnClickListener {
-            RestoreWalletActivity.start(activity, tezosTheme)
+            RestoreWalletActivity.start(activity!!, tezosTheme!!)
         }
 
         mCreateWalletButton = view.findViewById(R.id.createWalletButton)
