@@ -42,6 +42,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
     }
 
     companion object {
+        const val ADD_SECRET_REQUEST_CODE = 300
         const val AUTHENTICATION_SCREEN_CODE = 301
     }
 
@@ -65,21 +66,22 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         initActionBar(tezosTheme)
 
+        if (Storage(this).isPasswordSaved())
+        {
+            switchToOperations()
+        }
+        else
+        {
+            switchToHome()
+        }
+
         if (savedInstanceState != null)
         {
             mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
         }
         else
         {
-            //EncryptionServices(applicationContext).createConfirmCredentialsKey()
-            createKeys("123", true)
-            with(Storage(this)) {
-                val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "123")
-
-                savePassword(encryptedPassword)
-                saveFingerprintAllowed(true)
-            }
-            switchToHome()
+            //switchToHome()
         }
     }
 
@@ -107,18 +109,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, operationsFragment)
                 .commit()
-    }
-
-    private fun createKeys(password: String, isFingerprintAllowed: Boolean) {
-        val encryptionService = EncryptionServices(applicationContext)
-        encryptionService.createMasterKey(password)
-
-        if (SystemServices.hasMarshmallow()) {
-            if (isFingerprintAllowed && systemServices.hasEnrolledFingerprints()) {
-                encryptionService.createFingerprintKey()
-            }
-            encryptionService.createConfirmCredentialsKey()
-        }
     }
 
     private fun switchToHome()

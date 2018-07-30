@@ -27,6 +27,7 @@ import com.tezos.ui.adapter.MnemonicWordsViewAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.github.novacrypto.bip39.MnemonicValidator;
@@ -217,10 +218,41 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     {
         mAdapter.updateWord(word, position);
 
-        if (mCallback != null)
-        {
-            validateMnemonicsButton(CryptoUtils.validateMnemonics(mAdapter.getWords()));
+        //konami code
+
+        if (position == 23 && word.equalsIgnoreCase("zebra")){
+
+            List<String> zebras = Arrays.asList(
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra" );
+
+            mAdapter.updateWords(zebras, null);
+
         }
+
+        validateMnemonicsButton(CryptoUtils.validateMnemonics(mAdapter.getWords()));
     }
 
     @Override

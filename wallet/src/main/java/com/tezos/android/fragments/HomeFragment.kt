@@ -51,7 +51,7 @@ class HomeFragment : Fragment()
 
         mCreateWalletButton = view.findViewById(R.id.createWalletButton)
         mCreateWalletButton!!.setOnClickListener {
-            CreateWalletActivity.start(activity, tezosTheme)
+            CreateWalletActivity.start(activity!!, tezosTheme!!)
         }
 
         mTezosLogo = view.findViewById(R.id.ic_logo)

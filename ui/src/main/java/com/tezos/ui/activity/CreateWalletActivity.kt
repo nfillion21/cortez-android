@@ -16,15 +16,21 @@ import android.widget.TextView
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
+import com.tezos.ui.authentication.AuthenticationDialog
+import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.CreateWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.fragment.VerifyCreationWalletFragment
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
+import com.tezos.ui.utils.Storage
 
 class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener {
 
     private var mTitleBar: TextView? = null
+
+    val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,10 +107,6 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
         mTitleBar!!.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-    }
-
     override fun onCreateWalletValidated(mnemonics: String) {
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
         val theme = CustomTheme.fromBundle(themeBundle)
@@ -136,31 +138,54 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
         //TODO put the seed in secrets
 
         val seed = CryptoUtils.generateSeed(mnemonics, "")
-        val k2 = mnemonics
+
+        //TODO asks the user to put his password.
+        // the password hello is not used in Marshmallow
+        createKeys("hello", true)
+        with(Storage(this)) {
+            val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "123")
+
+            savePassword(encryptedPassword)
+            saveFingerprintAllowed(true)
+        }
+
+        // then, ask for password:
 
         //val keyBundle = CryptoUtils.generateKeys(words)
 
-        //TODO we should enter the secret things here.
+        /*
+        val dialog = AuthenticationDialog()
+        dialog.stage = AuthenticationDialog.Stage.PASSWORD
+        dialog.authenticationSuccessListener = {
+            //startSecretActivity(ADD_SECRET_REQUEST_CODE, password = it)
+            //
+            val seed2 = CryptoUtils.generateSeed(mnemonics, "")
+            val seed3 = CryptoUtils.generateSeed(mnemonics, "")
 
-                        intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle)
-                        setResult(R.id.create_wallet_succeed, intent)
-                        finish()
+            //EncryptionServices(applicationContext).createConfirmCredentialsKey()
 
-
-        AuthenticationDialog dialog =  new AuthenticationDialog();
-        dialog.setStage(AuthenticationDialog.Stage.PASSWORD);
-        dialog.setAuthenticationSuccessListener();
-
-        dialog.authenticationSuccessListener = { startSecretActivity(ADD_SECRET_REQUEST_CODE, password = it) }
+        }
         dialog.passwordVerificationListener = { validatePassword(it) }
         dialog.show(supportFragmentManager, "Authentication")
+        */
 
-        Intent intent = new Intent(this, SecretAc);
-        intent.putExtra("mode", mode)
-        password?.let { intent.putExtra("password", password) }
-        secretData?.let { intent.putExtra("secret", secretData) }
-        startActivityForResult(intent, requestCode)
+    }
 
+    private fun createKeys(password: String, isFingerprintAllowed: Boolean) {
+        val encryptionService = EncryptionServices(applicationContext)
+        encryptionService.createMasterKey(password)
+
+        if (SystemServices.hasMarshmallow()) {
+            if (isFingerprintAllowed && systemServices.hasEnrolledFingerprints()) {
+                encryptionService.createFingerprintKey()
+            }
+            encryptionService.createConfirmCredentialsKey()
+        }
+    }
+
+    private fun validatePassword(inputtedPassword: String): Boolean {
+        val storage = Storage(this)
+        return EncryptionServices(applicationContext).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
     }
 
     companion object {
