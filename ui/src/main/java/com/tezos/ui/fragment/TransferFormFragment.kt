@@ -19,6 +19,7 @@ import com.tezos.core.requests.order.PaymentPageRequest
 import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
 import com.tezos.ui.activity.TransferFormActivity
+import com.tezos.ui.utils.Storage
 
 /**
  * Created by nfillion on 20/04/16.
@@ -33,6 +34,8 @@ class TransferFormFragment : AbstractPaymentFormFragment()
 
     private var mTransferSrcFilled: LinearLayout? = null
     private var mTransferDstFilled: LinearLayout? = null
+
+    private var mTransferSrcPkh: TextView? = null
 
     private var mCurrencySpinner: AppCompatSpinner? = null
 
@@ -93,6 +96,8 @@ class TransferFormFragment : AbstractPaymentFormFragment()
         mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled)
         mTransferDstFilled = view.findViewById(R.id.transfer_destination_filled)
 
+        mTransferSrcPkh = view.findViewById(R.id.src_payment_account_pub_key_hash)
+
         mPayButton = view.findViewById(R.id.pay_button)
         mPayButtonLayout = view.findViewById(R.id.pay_button_layout)
 
@@ -120,9 +125,13 @@ class TransferFormFragment : AbstractPaymentFormFragment()
         //mAmountLayout = view.findViewById(R.id.amount_transfer_support);
         //mAmountLayout.setError(" ");
 
-        validatePayButton(isInputDataValid)
+        arguments?.let {
+            val seedDataBundle = it.getBundle(Storage.TAG)
+            val seedData = Storage.fromBundle(seedDataBundle)
 
-        switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, Account())
+            switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, seedData)
+        }
+        validatePayButton(isInputDataValid)
 
         putEverythingInRed()
     }
@@ -140,17 +149,17 @@ class TransferFormFragment : AbstractPaymentFormFragment()
 
                 if (resultCode == R.id.transfer_src_selection_succeed)
                 {
-                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, account)
+                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, null)
                 }
                 else if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
-                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, account)
+                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, null)
                 }
             }
         }
     }
 
-    private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, account: Account)
+    private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, seed: Storage.SeedData?)
     {
         when (selection)
         {
@@ -158,6 +167,8 @@ class TransferFormFragment : AbstractPaymentFormFragment()
             {
                 mSrcButton?.visibility = View.GONE
                 mTransferSrcFilled?.visibility = View.VISIBLE
+
+                mTransferSrcPkh?.text = seed?.pkh
             }
 
             PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses ->
@@ -413,7 +424,7 @@ class TransferFormFragment : AbstractPaymentFormFragment()
             }
 
             1 -> {
-                amountDouble += 0.01
+                amountDouble += 0.00
             }
 
             2 -> {
@@ -425,7 +436,7 @@ class TransferFormFragment : AbstractPaymentFormFragment()
             }
         }
 
-        amount = java.lang.Double.toString(amountDouble!!)
+        amount = java.lang.Double.toString(amountDouble)
 
         //check the correct amount
         if (amount.contains("."))

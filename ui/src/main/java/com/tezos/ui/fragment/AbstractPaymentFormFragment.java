@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
+import com.tezos.ui.utils.Storage;
 
 /**
  * Created by nfillion on 29/02/16.
@@ -48,7 +49,7 @@ public abstract class AbstractPaymentFormFragment extends Fragment
 
     protected abstract boolean isInputDataValid();
 
-    public static AbstractPaymentFormFragment newInstance(Bundle customTheme)
+    public static AbstractPaymentFormFragment newInstance(Bundle seedDataBundle, Bundle customTheme)
     {
         AbstractPaymentFormFragment fragment;
 
@@ -56,6 +57,7 @@ public abstract class AbstractPaymentFormFragment extends Fragment
 
         Bundle args = new Bundle();
         args.putBundle(CustomTheme.TAG, customTheme);
+        args.putBundle(Storage.TAG, seedDataBundle);
 
         fragment.setArguments(args);
 

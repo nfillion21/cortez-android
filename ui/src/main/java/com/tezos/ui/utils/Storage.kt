@@ -22,11 +22,13 @@ class Storage constructor(context: Context) {
             val seed: String) : Serializable
 
     companion object {
-        private val STORAGE_SETTINGS: String = "settings"
-        private val STORAGE_ENCRYPTION_KEY: String = "encryption_key"
-        private val STORAGE_PASSWORD: String = "password"
-        private val STORAGE_SEEDS: String = "seeds"
-        private val STORAGE_FINGERPRINT: String = "fingerprint_allowed"
+        private const val STORAGE_SETTINGS: String = "settings"
+        private const val STORAGE_ENCRYPTION_KEY: String = "encryption_key"
+        private const val STORAGE_PASSWORD: String = "password"
+        private const val STORAGE_SEEDS: String = "seeds"
+        private const val STORAGE_FINGERPRINT: String = "fingerprint_allowed"
+
+        const val TAG: String = "storage_tag"
 
         fun toBundle(seedData: SeedData): Bundle {
             val serializer = SeedDataSerialization(seedData)

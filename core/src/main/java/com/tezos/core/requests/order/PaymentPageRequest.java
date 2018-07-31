@@ -11,7 +11,7 @@ import com.tezos.core.serialization.AbstractSerializationMapper;
 public class PaymentPageRequest extends OrderRelatedRequest {
 
     public static final String TAG = "Payment_page_request";
-    public static final int REQUEST_ORDER = 0x2300;
+    public static final int REQUEST_ORDER = 0x2200;
 
     public PaymentPageRequest() {}
 

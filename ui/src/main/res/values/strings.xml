@@ -85,7 +85,7 @@
     <string name="six_words_do_not_match">These 6 words do not match with the mnemonics previously displayed.</string>
     <string-array name="array_fee">
         <item>Standard (0.05 ꜩ)</item>
-        <item>Low (0.01 ꜩ)</item>
+        <item>Low (0.00 ꜩ)</item>
         <item>High (0.1 ꜩ)</item>
     </string-array>
 

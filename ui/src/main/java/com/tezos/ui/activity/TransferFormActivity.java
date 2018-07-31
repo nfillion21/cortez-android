@@ -23,6 +23,7 @@ import com.tezos.ui.interfaces.IConfirmCredentialHandler;
 import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.ui.utils.ConfirmCredentialHelper;
 import com.tezos.ui.utils.ScreenUtils;
+import com.tezos.ui.utils.Storage;
 
 /**
  * Created by nfillion on 29/02/16.
@@ -31,17 +32,18 @@ public class TransferFormActivity extends AppCompatActivity implements IConfirmC
 {
     public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
 
-    public static Intent getStartIntent(Context context, Bundle themeBundle)
+    public static Intent getStartIntent(Context context, Bundle seedBundle, Bundle themeBundle)
     {
         Intent starter = new Intent(context, TransferFormActivity.class);
         starter.putExtra(CustomTheme.TAG, themeBundle);
+        starter.putExtra(Storage.TAG, seedBundle);
 
         return starter;
     }
 
-    public static void start(Activity activity, CustomTheme theme)
+    public static void start(Activity activity, Bundle seedBundle, CustomTheme theme)
     {
-        Intent starter = getStartIntent(activity, theme.toBundle());
+        Intent starter = getStartIntent(activity, seedBundle, theme.toBundle());
         //TODO remove this request code
         ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
     }
@@ -54,12 +56,16 @@ public class TransferFormActivity extends AppCompatActivity implements IConfirmC
 
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
+        Bundle seedDataBundle = getIntent().getBundleExtra(Storage.TAG);
+        //Storage.SeedData seedData = Storage.Companion.fromBundle(seedDataBundle);
+
         initToolbar(theme);
 
         if (savedInstanceState == null)
         {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(themeBundle)).commit();
+                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(seedDataBundle, themeBundle)).commit();
         }
     }
 
@@ -83,7 +89,6 @@ public class TransferFormActivity extends AppCompatActivity implements IConfirmC
 
         toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
-
 
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this,

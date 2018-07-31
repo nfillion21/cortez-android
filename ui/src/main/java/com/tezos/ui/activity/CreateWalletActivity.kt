@@ -186,7 +186,7 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
     }
 
     companion object {
-        var CREATE_WALLET_REQUEST_CODE = 0x2300 // arbitrary int
+        var CREATE_WALLET_REQUEST_CODE = 0x2600 // arbitrary int
 
         var MNEMONICS_STR = "mnemonics_str"
 

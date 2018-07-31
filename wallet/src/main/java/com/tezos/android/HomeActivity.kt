@@ -306,16 +306,21 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         {
             R.id.nav_transfer ->
             {
-                PaymentScreenActivity.start(this, tezosTheme)
+                val isPasswordSaved = Storage(this).isPasswordSaved()
+                if (isPasswordSaved)
+                {
+                    val seed = Storage(baseContext).getSeed()
+                    val seedBundle = Storage.toBundle(seed)
+                    TransferFormActivity.start(this, seedBundle, tezosTheme)
+                }
             }
             R.id.nav_publickey ->
             {
                 val isPasswordSaved = Storage(this).isPasswordSaved()
                 if (isPasswordSaved)
                 {
-                    val seeds = Storage(baseContext).getSeeds()
-                    val seedOne = seeds[0]
-                    PublicKeyHashActivity.start(this, seedOne.pkh, tezosTheme)
+                    val seed = Storage(baseContext).getSeed()
+                    PublicKeyHashActivity.start(this, seed.pkh, tezosTheme)
                 }
             }
             R.id.nav_addresses ->
@@ -337,14 +342,5 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         //drawer_layout.closeDrawer(GravityCompat.START)
         return true
-    }
-
-    override fun onPause() {
-        super.onPause()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle?)
-    {
-        super.onSaveInstanceState(outState)
     }
 }

@@ -146,7 +146,8 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
                         case DialogInterface.BUTTON_POSITIVE:
                         {
                             dialog.dismiss();
-                            AddressesDatabase.getInstance().logOut(getActivity());
+                            //TODO don't remove addresses
+                            //AddressesDatabase.getInstance().logOut(getActivity());
 
                             mLogOutCallback.onLogOutClicked();
                         }
