@@ -140,18 +140,6 @@ public class TransferFormActivity extends AppCompatActivity implements IConfirmC
         super.onPause();
     }
 
-    private void setLoadingMode(boolean loadingMode, boolean delay)
-    {
-        /*
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.form_fragment_container);
-        if (fragment != null) {
-
-            AbstractPaymentFormFragment abstractPaymentFormFragment = (AbstractPaymentFormFragment)fragment;
-            abstractPaymentFormFragment.setLoadingMode(loadingMode, delay);
-        }
-        */
-    }
-
     @Override
     public void launchConfirmCredential()
     {

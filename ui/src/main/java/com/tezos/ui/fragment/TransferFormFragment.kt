@@ -80,22 +80,23 @@ class TransferFormFragment : Fragment()
         mAmount?.addTextChangedListener(GenericTextWatcher(mAmount!!))
         mAmount?.onFocusChangeListener = focusChangeListener
 
+        mPayButton = view.findViewById(R.id.pay_button)
+        mPayButtonLayout = view.findViewById(R.id.pay_button_layout)
+
         mCurrencySpinner = view.findViewById(R.id.fee_spinner)
         val adapter = ArrayAdapter.createFromResource(activity!!,
                 R.array.array_fee, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         mCurrencySpinner!!.adapter = adapter
-        /*
         mCurrencySpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener
         {
-            override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long)
+            override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
             {
                 putAmountInRed(false)
             }
 
             override fun onNothingSelected(adapterView: AdapterView<*>) {}
         }
-        */
 
         mSrcButton = view.findViewById(R.id.transfer_src_button)
         mSrcButton!!.setOnClickListener { v -> PaymentAccountsActivity.start(activity, theme, PaymentAccountsActivity.FromScreen.FromTransfer, PaymentAccountsActivity.Selection.SelectionAccounts) }
@@ -107,9 +108,6 @@ class TransferFormFragment : Fragment()
         mTransferDstFilled = view.findViewById(R.id.transfer_destination_filled)
 
         mTransferSrcPkh = view.findViewById(R.id.src_payment_account_pub_key_hash)
-
-        mPayButton = view.findViewById(R.id.pay_button)
-        mPayButtonLayout = view.findViewById(R.id.pay_button_layout)
 
         mPayButtonLayout!!.visibility = View.VISIBLE
 
