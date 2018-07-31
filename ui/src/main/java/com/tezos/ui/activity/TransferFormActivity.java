@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
-import com.tezos.ui.fragment.AbstractPaymentFormFragment;
+import com.tezos.ui.fragment.TransferFormFragment;
 import com.tezos.ui.interfaces.IConfirmCredentialHandler;
 import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.ui.utils.ConfirmCredentialHelper;
@@ -65,7 +65,7 @@ public class TransferFormActivity extends AppCompatActivity implements IConfirmC
         if (savedInstanceState == null)
         {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(seedDataBundle, themeBundle)).commit();
+                    .replace(R.id.form_fragment_container, TransferFormFragment.newInstance(seedDataBundle, themeBundle)).commit();
         }
     }
 

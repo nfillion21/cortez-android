@@ -104,7 +104,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         var address = Address()
         address.description = "main address"
-        //address.pubKeyHash = "tz1Ym38VjqqSv7hJy2ZSGarqPYLQfmuaUEb4"
         address.pubKeyHash = realSeed.pkh
 
         val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)

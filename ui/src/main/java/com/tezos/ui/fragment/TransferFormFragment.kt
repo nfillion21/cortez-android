@@ -3,19 +3,22 @@ package com.tezos.ui.fragment
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
-import android.os.Build
+import android.os.Bundle
+import android.support.design.widget.TextInputEditText
+import android.support.design.widget.TextInputLayout
+import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.widget.AppCompatSpinner
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
-import com.tezos.core.client.AbstractClient
 import com.tezos.core.models.Account
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.requests.order.PaymentPageRequest
 import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
 import com.tezos.ui.activity.TransferFormActivity
@@ -24,7 +27,7 @@ import com.tezos.ui.utils.Storage
 /**
  * Created by nfillion on 20/04/16.
  */
-class TransferFormFragment : AbstractPaymentFormFragment()
+class TransferFormFragment : Fragment()
 {
     private var mPayButton: Button? = null
     private var mPayButtonLayout: FrameLayout? = null
@@ -39,44 +42,50 @@ class TransferFormFragment : AbstractPaymentFormFragment()
 
     private var mCurrencySpinner: AppCompatSpinner? = null
 
-    private val isTransferAmountValid: Boolean
-        get()
-        {
-            val isAmountValid = false
+    private var mAmount:TextInputEditText? = null
+    //private var mAmountLayout: TextInputLayout? = null
 
-            if (!TextUtils.isEmpty(mAmount.text))
-            {
-                try
-                {
-                    val amount = java.lang.Double.parseDouble(mAmount.text!!.toString())
-
-                    if (amount >= 0.000001f)
-                    {
-                        return true
+    companion object
+    {
+        @JvmStatic
+        fun newInstance(seedDataBundle:Bundle, customTheme:Bundle) =
+                TransferFormFragment().apply {
+                    arguments = Bundle().apply {
+                        putBundle(CustomTheme.TAG, customTheme)
+                        putBundle(Storage.TAG, seedDataBundle)
                     }
                 }
-                catch (e: NumberFormatException)
-                {
-                    return false
-                }
-            }
+    }
 
-            return isAmountValid
-        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initContentViews(view)
+    }
 
-    override fun initContentViews(view: View)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View?
     {
-        super.initContentViews(view)
+        return inflater.inflate(R.layout.fragment_payment_form, container, false)
+    }
 
+    private fun initContentViews(view: View)
+    {
         val args = arguments
         val themeBundle = args!!.getBundle(CustomTheme.TAG)
         val theme = CustomTheme.fromBundle(themeBundle)
+
+        val focusChangeListener = this.focusChangeListener()
+
+        mAmount = view.findViewById(R.id.amount_transfer)
+        mAmount?.addTextChangedListener(GenericTextWatcher(mAmount!!))
+        mAmount?.onFocusChangeListener = focusChangeListener
 
         mCurrencySpinner = view.findViewById(R.id.fee_spinner)
         val adapter = ArrayAdapter.createFromResource(activity!!,
                 R.array.array_fee, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         mCurrencySpinner!!.adapter = adapter
+        /*
         mCurrencySpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener
         {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long)
@@ -86,6 +95,7 @@ class TransferFormFragment : AbstractPaymentFormFragment()
 
             override fun onNothingSelected(adapterView: AdapterView<*>) {}
         }
+        */
 
         mSrcButton = view.findViewById(R.id.transfer_src_button)
         mSrcButton!!.setOnClickListener { v -> PaymentAccountsActivity.start(activity, theme, PaymentAccountsActivity.FromScreen.FromTransfer, PaymentAccountsActivity.Selection.SelectionAccounts) }
@@ -103,8 +113,6 @@ class TransferFormFragment : AbstractPaymentFormFragment()
 
         mPayButtonLayout!!.visibility = View.VISIBLE
 
-        mCardInfoLayout.visibility = View.VISIBLE
-
         val moneyFormatted = "ꜩ"
 
         val moneyString = getString(R.string.pay, moneyFormatted)
@@ -116,12 +124,6 @@ class TransferFormFragment : AbstractPaymentFormFragment()
             //launchRequest();
         }
 
-        val focusChangeListener = this.focusChangeListener()
-
-        mAmount = view.findViewById(R.id.amount_transfer)
-        mAmount.addTextChangedListener(GenericTextWatcher(mAmount))
-        mAmount.onFocusChangeListener = focusChangeListener
-
         //mAmountLayout = view.findViewById(R.id.amount_transfer_support);
         //mAmountLayout.setError(" ");
 
@@ -131,7 +133,7 @@ class TransferFormFragment : AbstractPaymentFormFragment()
 
             switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, seedData)
         }
-        validatePayButton(isInputDataValid)
+        validatePayButton(isInputDataValid())
 
         putEverythingInRed()
     }
@@ -159,6 +161,31 @@ class TransferFormFragment : AbstractPaymentFormFragment()
         }
     }
 
+    private fun isTransferAmountValid():Boolean
+    {
+        val isAmountValid = false
+
+        if (mAmount != null && !TextUtils.isEmpty(mAmount?.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val amount = mAmount?.text!!.toString().toDouble()
+
+                if (amount >= 0.000001f)
+                {
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                return false
+            }
+        }
+
+        return isAmountValid
+    }
+
     private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, seed: Storage.SeedData?)
     {
         when (selection)
@@ -182,25 +209,6 @@ class TransferFormFragment : AbstractPaymentFormFragment()
                 //no-op
             }
         }
-    }
-
-    override fun setLoadingMode(loadingMode: Boolean, delay: Boolean)
-    {
-        if (!delay)
-        {
-            if (loadingMode)
-            {
-                mPayButtonLayout!!.visibility = View.GONE
-                mProgressBar.visibility = View.VISIBLE
-            }
-            else
-            {
-                mPayButtonLayout!!.visibility = View.VISIBLE
-                mProgressBar.visibility = View.GONE
-            }
-        }
-
-        mLoadingMode = loadingMode
     }
 
     private fun focusChangeListener(): View.OnFocusChangeListener
@@ -275,103 +283,13 @@ class TransferFormFragment : AbstractPaymentFormFragment()
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
             }
-            validatePayButton(isInputDataValid)
+            validatePayButton(isInputDataValid())
         }
     }
 
-    override fun launchRequest()
+    fun isInputDataValid(): Boolean
     {
-        val args = arguments
-
-        val paymentPageRequest = PaymentPageRequest.fromBundle(args!!.getBundle(PaymentPageRequest.TAG))
-        //final PaymentProduct paymentProduct = PaymentProduct.fromBundle(args.getBundle(PaymentProduct.TAG));
-
-        //mSecureVaultClient = new SecureVaultClient(getActivity());
-        mCurrentLoading = AbstractClient.RequestLoaderId.GenerateTokenReqLoaderId.integerValue!!
-
-        /*
-        mSecureVaultClient.generateToken(
-
-                mCardNumberCache,
-                mMonthExpiryCache,
-                mYearExpiryCache,
-                mCardOwnerCache,
-                mCardCVVCache,
-                paymentPageRequest.getMultiUse(),
-
-                new SecureVaultRequestCallback() {
-                    @Override
-                    public void onSuccess(PaymentCardToken paymentCardToken) {
-
-                        mPaymentCardToken = paymentCardToken;
-
-                        //secure vault
-                        cancelLoaderId(AbstractClient.RequestLoaderId.GenerateTokenReqLoaderId.getIntegerValue());
-
-                        OrderRequest orderRequest = new OrderRequest(paymentPageRequest);
-
-                        String productCode = paymentProduct.getCode();
-                        if (productCode.equals(PaymentProduct.PaymentProductCategoryCodeCard) || !productCode.equals(inferedPaymentProduct)) {
-                            productCode = mCardBehaviour.getProductCode();
-                        }
-
-                        orderRequest.setPaymentProductCode(productCode);
-
-                        CardTokenPaymentMethodRequest cardTokenPaymentMethodRequest =
-                                new CardTokenPaymentMethodRequest(
-                                        mPaymentCardToken.getToken(),
-                                        paymentPageRequest.getEci(),
-                                        paymentPageRequest.getAuthenticationIndicator());
-
-                        orderRequest.setPaymentMethod(cardTokenPaymentMethodRequest);
-
-                        //check if activity is still available
-                        if (getActivity() != null) {
-
-                            mGatewayClient = new GatewayClient(getActivity());
-                            mCurrentLoading = AbstractClient.RequestLoaderId.OrderReqLoaderId.getIntegerValue();
-
-                            mGatewayClient.requestNewOrder(orderRequest, signature, new OrderRequestCallback() {
-
-                                @Override
-                                public void onSuccess(final Transaction transaction) {
-                                    //Log.i("transaction success", transaction.toString());
-
-                                    if (mCallback != null) {
-                                        cancelLoaderId(AbstractClient.RequestLoaderId.OrderReqLoaderId.getIntegerValue());
-                                        mCallback.onCallbackOrderReceived(transaction, null);
-                                    }
-
-                                }
-
-                                @Override
-                                public void onError(Exception error) {
-                                    //Log.i("transaction failed", error.getLocalizedMessage());
-                                    if (mCallback != null) {
-                                        cancelLoaderId(AbstractClient.RequestLoaderId.OrderReqLoaderId.getIntegerValue());
-                                        mCallback.onCallbackOrderReceived(null, error);
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onError(Exception error) {
-
-                        if (mCallback != null) {
-                            cancelLoaderId(AbstractClient.RequestLoaderId.GenerateTokenReqLoaderId.getIntegerValue());
-                            mCallback.onCallbackOrderReceived(null, error);
-                        }
-                    }
-                }
-        );
-        */
-    }
-
-    override fun isInputDataValid(): Boolean
-    {
-        return this.isTransferAmountValid
+        return isTransferAmountValid()
     }
 
     private fun putEverythingInRed()
@@ -385,7 +303,7 @@ class TransferFormFragment : AbstractPaymentFormFragment()
     {
         val color: Int
 
-        val amountValid = this.isTransferAmountValid
+        val amountValid = isTransferAmountValid()
 
         if (red && !amountValid)
         {
@@ -398,7 +316,7 @@ class TransferFormFragment : AbstractPaymentFormFragment()
 
             if (amountValid)
             {
-                val amount = mAmount.text!!.toString()
+                val amount = mAmount!!.text.toString()
                 this.setTextPayButton(amount)
             }
             else
@@ -407,7 +325,7 @@ class TransferFormFragment : AbstractPaymentFormFragment()
             }
         }
 
-        this.mAmount.setTextColor(ContextCompat.getColor(activity!!, color))
+        mAmount?.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
     private fun setTextPayButton(amount: String)
