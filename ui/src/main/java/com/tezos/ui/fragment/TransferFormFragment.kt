@@ -5,7 +5,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
 import android.support.design.widget.TextInputEditText
-import android.support.design.widget.TextInputLayout
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -18,11 +17,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.tezos.core.models.Account
+import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
 import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.utils.Storage
+import java.util.ArrayList
 
 /**
  * Created by nfillion on 20/04/16.
@@ -39,11 +40,15 @@ class TransferFormFragment : Fragment()
     private var mTransferDstFilled: LinearLayout? = null
 
     private var mTransferSrcPkh: TextView? = null
+    private var mTransferDstPkh: TextView? = null
 
     private var mCurrencySpinner: AppCompatSpinner? = null
 
     private var mAmount:TextInputEditText? = null
     //private var mAmountLayout: TextInputLayout? = null
+
+    private var mSrcAccount:Account? = null
+    private var mDstAccount:Account? = null
 
     companion object
     {
@@ -55,10 +60,30 @@ class TransferFormFragment : Fragment()
                         putBundle(Storage.TAG, seedDataBundle)
                     }
                 }
+
+        private const val SRC_ACCOUNT_KEY = "src_account_key"
+        private const val DST_ACCOUNT_KEY = "dst_account_key"
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (savedInstanceState != null)
+        {
+            val srcBundle = savedInstanceState.getParcelable<Bundle>(SRC_ACCOUNT_KEY)
+
+            if (srcBundle != null)
+            {
+                mSrcAccount = Account.fromBundle(srcBundle)
+            }
+
+            val dstBundle = savedInstanceState.getParcelable<Bundle>(DST_ACCOUNT_KEY)
+            if (dstBundle != null)
+            {
+                mDstAccount = Account.fromBundle(dstBundle)
+            }
+        }
+
         initContentViews(view)
     }
 
@@ -108,6 +133,7 @@ class TransferFormFragment : Fragment()
         mTransferDstFilled = view.findViewById(R.id.transfer_destination_filled)
 
         mTransferSrcPkh = view.findViewById(R.id.src_payment_account_pub_key_hash)
+        mTransferDstPkh = view.findViewById(R.id.dst_payment_account_pub_key_hash)
 
         mPayButtonLayout!!.visibility = View.VISIBLE
 
@@ -118,8 +144,15 @@ class TransferFormFragment : Fragment()
         mPayButton!!.text = moneyString
 
         mPayButtonLayout!!.setOnClickListener { v ->
-            //setLoadingMode(true,false);
-            //launchRequest();
+
+            val seedDataBundle = arguments?.getBundle(Storage.TAG)
+            val seedData = Storage.fromBundle(seedDataBundle!!)
+            val pkhSrc = seedData.pkh
+
+            val pkhDst = mDstAccount?.pubKeyHash
+            val pkhDst2 = mDstAccount?.pubKeyHash
+            val pkhDst3 = mDstAccount?.pubKeyHash
+
         }
 
         //mAmountLayout = view.findViewById(R.id.amount_transfer_support);
@@ -129,7 +162,9 @@ class TransferFormFragment : Fragment()
             val seedDataBundle = it.getBundle(Storage.TAG)
             val seedData = Storage.fromBundle(seedDataBundle)
 
-            switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, seedData)
+            var account = Account()
+            account.pubKeyHash = seedData.pkh
+            switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, account)
         }
         validatePayButton(isInputDataValid())
 
@@ -149,11 +184,13 @@ class TransferFormFragment : Fragment()
 
                 if (resultCode == R.id.transfer_src_selection_succeed)
                 {
-                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, null)
+                    mSrcAccount = account
+                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, mSrcAccount!!)
                 }
                 else if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
-                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, null)
+                    mDstAccount = account
+                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
                 }
             }
         }
@@ -184,7 +221,7 @@ class TransferFormFragment : Fragment()
         return isAmountValid
     }
 
-    private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, seed: Storage.SeedData?)
+    private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, account: Account)
     {
         when (selection)
         {
@@ -193,13 +230,14 @@ class TransferFormFragment : Fragment()
                 mSrcButton?.visibility = View.GONE
                 mTransferSrcFilled?.visibility = View.VISIBLE
 
-                mTransferSrcPkh?.text = seed?.pkh
+                mTransferSrcPkh?.text = account.pubKeyHash
             }
 
             PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses ->
             {
                 mDstButton?.visibility = View.GONE
                 mTransferDstFilled?.visibility = View.VISIBLE
+                mTransferDstPkh?.text = account.pubKeyHash
             }
 
             else ->
@@ -388,5 +426,13 @@ class TransferFormFragment : Fragment()
         val moneyFormatted2 = "$amount ꜩ"
         //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
         mPayButton!!.text = getString(R.string.pay, moneyFormatted2)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        super.onSaveInstanceState(outState)
+
+        outState.putParcelable(SRC_ACCOUNT_KEY, mSrcAccount?.toBundle())
+        outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
     }
 }

@@ -37,7 +37,7 @@ public class Account extends Address
         return mapper.mappedObjectFromBundle();
     }
 
-    public static class AccountSerializationMapper extends AbstractSerializationMapper
+    public static class AccountSerializationMapper extends AddressSerializationMapper
     {
         protected AccountSerializationMapper(Account account)
         {
