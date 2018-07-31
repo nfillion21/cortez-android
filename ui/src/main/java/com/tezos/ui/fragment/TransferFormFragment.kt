@@ -4,24 +4,14 @@ import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Build
-import android.os.Bundle
-import android.support.design.widget.TextInputEditText
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.widget.AppCompatSpinner
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-
+import android.widget.*
 import com.tezos.core.client.AbstractClient
 import com.tezos.core.models.Account
 import com.tezos.core.models.CustomTheme
@@ -33,7 +23,8 @@ import com.tezos.ui.activity.TransferFormActivity
 /**
  * Created by nfillion on 20/04/16.
  */
-class PaymentFormFragment : AbstractPaymentFormFragment() {
+class TransferFormFragment : AbstractPaymentFormFragment()
+{
     private var mPayButton: Button? = null
     private var mPayButtonLayout: FrameLayout? = null
 
@@ -46,38 +37,32 @@ class PaymentFormFragment : AbstractPaymentFormFragment() {
     private var mCurrencySpinner: AppCompatSpinner? = null
 
     private val isTransferAmountValid: Boolean
-        get() {
+        get()
+        {
             val isAmountValid = false
 
-            if (!TextUtils.isEmpty(mAmount.text)) {
-                try {
+            if (!TextUtils.isEmpty(mAmount.text))
+            {
+                try
+                {
                     val amount = java.lang.Double.parseDouble(mAmount.text!!.toString())
 
-                    if (amount >= 0.1f) {
+                    if (amount >= 0.000001f)
+                    {
                         return true
                     }
-                } catch (e: NumberFormatException) {
+                }
+                catch (e: NumberFormatException)
+                {
                     return false
                 }
-
             }
 
             return isAmountValid
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
-
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-    }
-
-    override fun initContentViews(view: View) {
+    override fun initContentViews(view: View)
+    {
         super.initContentViews(view)
 
         val args = arguments
@@ -89,14 +74,14 @@ class PaymentFormFragment : AbstractPaymentFormFragment() {
                 R.array.array_fee, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         mCurrencySpinner!!.adapter = adapter
-        mCurrencySpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
+        mCurrencySpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener
+        {
+            override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long)
+            {
                 putAmountInRed(false)
             }
 
-            override fun onNothingSelected(adapterView: AdapterView<*>) {
-
-            }
+            override fun onNothingSelected(adapterView: AdapterView<*>) {}
         }
 
         mSrcButton = view.findViewById(R.id.transfer_src_button)
@@ -115,9 +100,6 @@ class PaymentFormFragment : AbstractPaymentFormFragment() {
 
         mCardInfoLayout.visibility = View.VISIBLE
 
-        //TODO handle the arguments
-        //final PaymentPageRequest paymentPageRequest = PaymentPageRequest.fromBundle(args.getBundle(PaymentPageRequest.TAG));
-
         val moneyFormatted = "ꜩ"
 
         val moneyString = getString(R.string.pay, moneyFormatted)
@@ -131,7 +113,7 @@ class PaymentFormFragment : AbstractPaymentFormFragment() {
 
         val focusChangeListener = this.focusChangeListener()
 
-        mAmount = view.findViewById<TextInputEditText>(R.id.amount_transfer)
+        mAmount = view.findViewById(R.id.amount_transfer)
         mAmount.addTextChangedListener(GenericTextWatcher(mAmount))
         mAmount.onFocusChangeListener = focusChangeListener
 
@@ -140,53 +122,68 @@ class PaymentFormFragment : AbstractPaymentFormFragment() {
 
         validatePayButton(isInputDataValid)
 
+        switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, Account())
+
         putEverythingInRed()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE) {
-            if (data != null && data.hasExtra(Account.TAG)) {
+        if (requestCode == TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE)
+        {
+            if (data != null && data.hasExtra(Account.TAG))
+            {
                 val accountBundle = data.getBundleExtra(Account.TAG)
                 val account = Account.fromBundle(accountBundle)
 
-                if (resultCode == R.id.transfer_src_selection_succeed) {
+                if (resultCode == R.id.transfer_src_selection_succeed)
+                {
                     switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, account)
-                } else if (resultCode == R.id.transfer_dst_selection_succeed) {
+                }
+                else if (resultCode == R.id.transfer_dst_selection_succeed)
+                {
                     switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, account)
                 }
             }
         }
     }
 
-    private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, account: Account) {
-        when (selection) {
-            PaymentAccountsActivity.Selection.SelectionAccounts -> {
-                mSrcButton!!.visibility = View.GONE
-                mTransferSrcFilled!!.visibility = View.VISIBLE
+    private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, account: Account)
+    {
+        when (selection)
+        {
+            PaymentAccountsActivity.Selection.SelectionAccounts ->
+            {
+                mSrcButton?.visibility = View.GONE
+                mTransferSrcFilled?.visibility = View.VISIBLE
             }
 
-            PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses -> {
-                mDstButton!!.visibility = View.GONE
-                mTransferDstFilled!!.visibility = View.VISIBLE
+            PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses ->
+            {
+                mDstButton?.visibility = View.GONE
+                mTransferDstFilled?.visibility = View.VISIBLE
             }
 
-            else -> {
+            else ->
+            {
+                //no-op
             }
-        }//no-op
+        }
     }
 
-    override fun setLoadingMode(loadingMode: Boolean, delay: Boolean) {
-        if (!delay) {
-
-            if (loadingMode) {
-
+    override fun setLoadingMode(loadingMode: Boolean, delay: Boolean)
+    {
+        if (!delay)
+        {
+            if (loadingMode)
+            {
                 mPayButtonLayout!!.visibility = View.GONE
                 mProgressBar.visibility = View.VISIBLE
-
-            } else {
-
+            }
+            else
+            {
                 mPayButtonLayout!!.visibility = View.VISIBLE
                 mProgressBar.visibility = View.GONE
             }
@@ -195,16 +192,19 @@ class PaymentFormFragment : AbstractPaymentFormFragment() {
         mLoadingMode = loadingMode
     }
 
-
-    private fun focusChangeListener(): View.OnFocusChangeListener {
+    private fun focusChangeListener(): View.OnFocusChangeListener
+    {
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_transfer) {
-                this@PaymentFormFragment.putAmountInRed(!hasFocus)
-            } else {
+            if (i == R.id.amount_transfer)
+            {
+                putAmountInRed(!hasFocus)
+            }
+            else
+            {
                 throw UnsupportedOperationException(
-                        "onFocusChange has not been implemented for " + this@PaymentFormFragment.resources.getResourceName(v.id))
+                        "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
             }
         }
     }
@@ -218,27 +218,22 @@ class PaymentFormFragment : AbstractPaymentFormFragment() {
 
             mPayButton!!.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
             mPayButtonLayout!!.isEnabled = true
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-            {
-                mPayButtonLayout!!.background = makeSelector(theme)
+            mPayButtonLayout!!.background = makeSelector(theme)
 
-                val drawables = mPayButton!!.compoundDrawables
-                val wrapDrawable = DrawableCompat.wrap(drawables[0])
-                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            }
+            val drawables = mPayButton!!.compoundDrawables
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
         }
         else
         {
             mPayButton!!.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
             mPayButtonLayout!!.isEnabled = false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-                mPayButtonLayout!!.background = makeSelector(greyTheme)
+            val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+            mPayButtonLayout!!.background = makeSelector(greyTheme)
 
-                val drawables = mPayButton!!.compoundDrawables
-                val wrapDrawable = DrawableCompat.wrap(drawables[0])
-                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
-            }
+            val drawables = mPayButton!!.compoundDrawables
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
     }
 
@@ -273,7 +268,8 @@ class PaymentFormFragment : AbstractPaymentFormFragment() {
         }
     }
 
-    override fun launchRequest() {
+    override fun launchRequest()
+    {
         val args = arguments
 
         val paymentPageRequest = PaymentPageRequest.fromBundle(args!!.getBundle(PaymentPageRequest.TAG))

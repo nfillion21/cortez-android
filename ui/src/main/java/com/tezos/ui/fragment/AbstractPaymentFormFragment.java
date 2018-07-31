@@ -52,7 +52,7 @@ public abstract class AbstractPaymentFormFragment extends Fragment
     {
         AbstractPaymentFormFragment fragment;
 
-        fragment = new PaymentFormFragment();
+        fragment = new TransferFormFragment();
 
         Bundle args = new Bundle();
         args.putBundle(CustomTheme.TAG, customTheme);
