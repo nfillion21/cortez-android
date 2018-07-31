@@ -460,22 +460,29 @@ class TransferFormFragment : Fragment()
         outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
     }
 
-
-    private fun pay()
+    private fun pay(src:String, srcPk:String, dst:String, amount: String, fee:String)
     {
         val url = getString(R.string.transfer_url)
 
         var postparams = JSONObject()
+        /*
         postparams.put("src","tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk")
         postparams.put("src_pk","edpkuw2nHYNcksmy2GK6xtG8R2iyHCC35jc8K1684Mc7SFjqZzch2a")
         postparams.put("dst","tz1YEZRQrof1htK6iQoLzrz8KTz2sguhhtQg")
         postparams.put("amount","15")
         postparams.put("fee","12")
+        */
+
+        postparams.put("src", src)
+        postparams.put("src_pk", srcPk)
+        postparams.put("dst", dst)
+        postparams.put("amount", amount)
+        postparams.put("fee", fee)
 
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
         { answer ->
 
-            signIt(answer.getInt("id"), answer.getString("payload"), "sk", "pk")
+            signIt(answer.getInt("id"), answer.getString("payload"), srcPk, src)
 
             //onOperationsLoadHistoryComplete()
 
