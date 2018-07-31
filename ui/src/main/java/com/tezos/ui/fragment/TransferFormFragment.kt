@@ -67,6 +67,7 @@ class TransferFormFragment : Fragment()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initContentViews(view)
 
         if (savedInstanceState != null)
         {
@@ -81,10 +82,10 @@ class TransferFormFragment : Fragment()
             if (dstBundle != null)
             {
                 mDstAccount = Account.fromBundle(dstBundle)
+                switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
         }
 
-        initContentViews(view)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -151,7 +152,21 @@ class TransferFormFragment : Fragment()
 
             val pkhDst = mDstAccount?.pubKeyHash
             val pkhDst2 = mDstAccount?.pubKeyHash
+
+            val amount = mAmount?.text.toString().toDouble()
+            var fee = 0.0
+            val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
+
+            when (selectedItemThreeDS.toInt())
+            {
+                0 -> { fee = 0.05 }
+                1 -> { fee = 0.00 }
+                2 -> { fee = 0.01 }
+                else -> {}
+            }
+
             val pkhDst3 = mDstAccount?.pubKeyHash
+
 
         }
 
@@ -191,6 +206,7 @@ class TransferFormFragment : Fragment()
                 {
                     mDstAccount = account
                     switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+                    validatePayButton(isInputDataValid())
                 }
             }
         }
@@ -326,6 +342,7 @@ class TransferFormFragment : Fragment()
     fun isInputDataValid(): Boolean
     {
         return isTransferAmountValid()
+                && mDstAccount != null
     }
 
     private fun putEverythingInRed()

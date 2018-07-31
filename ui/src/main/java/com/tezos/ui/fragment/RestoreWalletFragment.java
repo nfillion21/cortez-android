@@ -249,7 +249,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
         }
         else
-        if (position == 23 && word.equalsIgnoreCase("kick"))
+        if (position == 0 && word.equalsIgnoreCase("link"))
         {
 
             List<String> kick = Arrays.asList(
