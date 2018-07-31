@@ -413,7 +413,8 @@ class TransferFormFragment : AbstractPaymentFormFragment()
     private fun setTextPayButton(amount: String)
     {
         var amount = amount
-        var amountDouble: Double = java.lang.Double.parseDouble(amount)
+        //var amountDouble: Double = java.lang.Double.parseDouble(amount)
+        var amountDouble: Double = amount.toDouble()
 
         val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
 
@@ -436,7 +437,8 @@ class TransferFormFragment : AbstractPaymentFormFragment()
             }
         }
 
-        amount = java.lang.Double.toString(amountDouble)
+        //amount = java.lang.Double.toString(amountDouble)
+        amount = amountDouble.toString()
 
         //check the correct amount
         if (amount.contains("."))
@@ -445,8 +447,8 @@ class TransferFormFragment : AbstractPaymentFormFragment()
 
             if (elements.length > 7)
             {
-                amount = String.format("%.6f", java.lang.Double.parseDouble(amount))
-                val d = java.lang.Double.parseDouble(amount)
+                amount = String.format("%.6f", amount.toDouble())
+                val d = amount.toDouble()
                 amount = d.toString()
             }
             else if (elements.length > 3)
@@ -458,12 +460,12 @@ class TransferFormFragment : AbstractPaymentFormFragment()
             }
             else
             {
-                amount = String.format("%.2f", java.lang.Double.parseDouble(amount))
+                amount = String.format("%.2f", amount.toDouble())
             }
         }
         else
         {
-            amount = String.format("%.2f", java.lang.Double.parseDouble(amount))
+            amount = String.format("%.2f", amount.toDouble())
             //amount = Double.parseDouble(amount).toString();
         }
 
