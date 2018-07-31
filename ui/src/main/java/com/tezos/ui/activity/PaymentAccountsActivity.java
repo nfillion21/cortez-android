@@ -37,7 +37,7 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     public static void start(Activity activity, CustomTheme theme, FromScreen fromScreen, Selection selection)
     {
         Intent starter = getStartIntent(activity, theme, fromScreen, selection);
-        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
+        ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
     @Override

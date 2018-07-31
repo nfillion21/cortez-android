@@ -29,7 +29,7 @@ import com.tezos.core.models.CustomTheme;
 import com.tezos.core.requests.order.PaymentPageRequest;
 import com.tezos.ui.R;
 import com.tezos.ui.activity.PaymentAccountsActivity;
-import com.tezos.ui.activity.PaymentFormActivity;
+import com.tezos.ui.activity.TransferFormActivity;
 
 /**
  * Created by nfillion on 20/04/16.
@@ -145,7 +145,7 @@ public class PaymentFormFragment extends AbstractPaymentFormFragment
     {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE)
+        if (requestCode == TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE)
         {
             if (data != null && data.hasExtra(Account.TAG))
             {

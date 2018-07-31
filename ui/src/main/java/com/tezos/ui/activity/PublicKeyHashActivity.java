@@ -52,7 +52,7 @@ public class PublicKeyHashActivity extends AppCompatActivity implements IPasscod
         Intent starter = getStartIntent(activity, publicKeyHash, theme.toBundle());
 
         //TODO remove this request code
-        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
+        ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
     @Override

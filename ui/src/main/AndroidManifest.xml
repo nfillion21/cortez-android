@@ -6,7 +6,7 @@
         android:name=".utils.ArchLifecycleApp">
 
         <activity
-            android:name=".activity.PaymentFormActivity"
+            android:name=".activity.TransferFormActivity"
             android:theme="@style/PaymentScreens.PaymentFormActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity

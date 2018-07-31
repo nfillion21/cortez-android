@@ -90,6 +90,16 @@ class Storage constructor(context: Context) {
         return secretsList
     }
 
+    fun getSeed(): SeedData {
+        val secretsList = ArrayList<SeedData>()
+        val seedAliases = seeds.all
+
+        seedAliases
+                .map { gson.fromJson(it.value as String, SeedData::class.java) }
+                .forEach { secretsList.add(it) }
+        return secretsList[0]
+    }
+
     fun clear()
     {
         settings.edit().clear().apply()

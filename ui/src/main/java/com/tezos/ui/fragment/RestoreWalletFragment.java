@@ -248,6 +248,38 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             mAdapter.updateWords(zebras, null);
 
         }
+        else
+        if (position == 23 && word.equalsIgnoreCase("kick"))
+        {
+
+            List<String> kick = Arrays.asList(
+                    "link",
+                    "warm",
+                    "visual",
+                    "pony",
+                    "bike",
+                    "person",
+                    "truck",
+                    "pupil",
+                    "moral",
+                    "gift",
+                    "shoulder",
+                    "eye",
+                    "kit",
+                    "human",
+                    "jacket",
+                    "rich",
+                    "sand",
+                    "cupboard",
+                    "position",
+                    "friend",
+                    "fox",
+                    "calm",
+                    "bring",
+                    "kick" );
+
+            mAdapter.updateWords(kick, null);
+        }
 
         validateMnemonicsButton(CryptoUtils.validateMnemonics(mAdapter.getWords()));
     }

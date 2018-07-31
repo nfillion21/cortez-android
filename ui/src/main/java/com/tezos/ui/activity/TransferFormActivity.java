@@ -12,13 +12,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.tezos.core.models.CustomTheme;
-import com.tezos.core.utils.ApiLevelHelper;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.AbstractPaymentFormFragment;
 import com.tezos.ui.interfaces.IConfirmCredentialHandler;
@@ -29,13 +27,13 @@ import com.tezos.ui.utils.ScreenUtils;
 /**
  * Created by nfillion on 29/02/16.
  */
-public class PaymentFormActivity extends AppCompatActivity implements IConfirmCredentialHandler, IPasscodeHandler
+public class TransferFormActivity extends AppCompatActivity implements IConfirmCredentialHandler, IPasscodeHandler
 {
     public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
-        Intent starter = new Intent(context, PaymentFormActivity.class);
+        Intent starter = new Intent(context, TransferFormActivity.class);
         starter.putExtra(CustomTheme.TAG, themeBundle);
 
         return starter;
@@ -45,7 +43,7 @@ public class PaymentFormActivity extends AppCompatActivity implements IConfirmCr
     {
         Intent starter = getStartIntent(activity, theme.toBundle());
         //TODO remove this request code
-        ActivityCompat.startActivityForResult(activity, starter, PaymentFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
+        ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
     @Override
