@@ -65,6 +65,8 @@
     <string name="title_passcode">Enter Passcode</string>
     <string name="history_url" translatable="false">http://aleph.luminar.eu.org:8776/history?ks=%1$s</string>
     <string name="balance_url" translatable="false">http://aleph.luminar.eu.org:18732/chains/main/blocks/head/context/contracts/%1$s/balance</string>
+    <string name="transfer_url" translatable="false">http://aleph.luminar.eu.org:8776/transfer/init</string>
+    <string name="transfer_finalize" translatable="false">http://aleph.luminar.eu.org:8776/transfer/finalize</string>
     <string name="fee_default">Default</string>
     <string name="loading_list_operations">Loading operations…</string>
     <string name="loading_balance">Loading balance…</string>

@@ -12,10 +12,16 @@ import android.support.v7.widget.AppCompatSpinner
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.android.volley.AuthFailureError
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
+import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
@@ -23,6 +29,8 @@ import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
 import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.utils.Storage
+import com.tezos.ui.utils.VolleySingleton
+import org.json.JSONObject
 import java.util.ArrayList
 
 /**
@@ -451,5 +459,109 @@ class TransferFormFragment : Fragment()
 
         outState.putParcelable(SRC_ACCOUNT_KEY, mSrcAccount?.toBundle())
         outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
+    }
+
+
+    private fun pay()
+    {
+        val url = getString(R.string.transfer_url)
+
+        var postparams = JSONObject()
+        postparams.put("src","tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk")
+        postparams.put("src_pk","edpkuw2nHYNcksmy2GK6xtG8R2iyHCC35jc8K1684Mc7SFjqZzch2a")
+        postparams.put("dst","tz1YEZRQrof1htK6iQoLzrz8KTz2sguhhtQg")
+        postparams.put("amount","15")
+        postparams.put("fee","12")
+
+        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
+        { answer ->
+
+            signIt(answer.getInt("id"), answer.getString("payload"), sk, pk)
+
+            //onOperationsLoadHistoryComplete()
+
+        }, Response.ErrorListener
+        {
+            Log.i(it.toString(), it.toString())
+            Log.i(it.toString(), it.toString())
+        }){
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Content-Type", "application/json")
+                return headers
+            }
+        }
+        /*
+        val jsonObjReq = object : JsonObjectRequest(Method.POST, url, postparams,
+                Response.Listener<JSONObject> { answer ->
+                    //Log.d(TAG, "/post request OK! Response: $response")
+                    Log.i(answer.toString(), answer.toString())
+                    Log.i(answer.toString(), answer.toString())
+                },
+                Response.ErrorListener { error ->
+                    //VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
+                    //completionHandler(null)
+                    Log.i(error.toString(), error.toString())
+                    Log.i(error.toString(), error.toString())
+                }) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Content-Type", "application/json")
+                return headers
+            }
+        }
+        */
+
+        //jsObjRequest.tag = LOAD_OPERATIONS_TAG
+
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+
+    }
+
+    private fun signIt(id: Int, payload:String, sk: String, pk: String)
+    {
+        val url = getString(R.string.transfer_finalize)
+
+        //val skBytes = sk.hexStringToByteArray()
+
+        val byteArrayThree = payload.hexToByteArray()
+        val signature = KeyPair.sign(sk, byteArrayThree)
+
+        val signVerified = KeyPair.verifySign(signature, byteArrayThree, pk)
+
+        var hexSign = signature.toNoPrefixHexString()
+
+        var postparams = JSONObject()
+        postparams.put("id",id)
+        postparams.put("payload", hexSign)
+        //le payload c'est la signature en hex, en 64 bytes donc 128 chars hex
+
+        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
+        { answer ->
+
+            //addOperationItemsFromJSON(answer)
+            Log.i(answer.toString(), answer.toString())
+            Log.i(answer.toString(), answer.toString())
+
+            //startGetRequestLoadOperations()
+
+            //onOperationsLoadHistoryComplete()
+
+        }, Response.ErrorListener
+        {
+            Log.i(it.toString(), it.toString())
+            Log.i(it.toString(), it.toString())
+        }){
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
 }

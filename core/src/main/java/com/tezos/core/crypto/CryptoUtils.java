@@ -3,8 +3,10 @@ package com.tezos.core.crypto;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
@@ -93,7 +95,7 @@ public class CryptoUtils
 
         return isValid;
     }
-    public static Bundle generateKeys(String mnemonics)
+    public static JSONObject generateKeys(String mnemonics)
     {
         //TODO need to protect the private key
         return generateKeys(mnemonics, "");
@@ -160,7 +162,27 @@ public class CryptoUtils
 
     public static Bundle generateKeys(String mnemonics, String passphrase)
     {
-        Bundle keyBundle;
+        try
+        {
+
+            byte[] src_seed = generateSeed(mnemonics, "");
+            byte[] seed = Arrays.copyOfRange(src_seed, 0, 32);
+            KeyPair key = new KeyPair(seed);
+
+            return key;
+        }
+        catch (Exception e)
+        {
+            //keyBundle = null;
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static JSONObject generateKeys(String mnemonics, String passphrase)
+    {
+        //Bundle keyBundle;
 
         try
         {
@@ -224,6 +246,8 @@ public class CryptoUtils
             System.arraycopy(prefixedSecKey, 0, prefixedSecKeyWithChecksum, 0, 68);
             System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedSecKeyWithChecksum, 68, 4);
 
+            //ici il faut virer le prefix, pour atteindre 32 bytes de data.
+
             String TezosSkString = Base58.encode(prefixedSecKeyWithChecksum);
 
             //create tezos PKHash
@@ -242,23 +266,61 @@ public class CryptoUtils
             String pkHash = Base58.encode(prefixedPKhashWithChecksum);
 
             // Builds JSON to return.
-            //response.put("mnemonic", mnemonics);
-            //response.put("passphrase", passphrase);
-            //response.put("sk", TezosSkString);
-            //response.put("pk", TezosPkString);
-            //response.put("pkh", pkHash);
+            JSONObject payload = new JSONObject();
+            payload.put("mnemonic", mnemonics);
+            payload.put("passphrase", passphrase);
+            payload.put("sk", TezosSkString);
+            payload.put("pk", TezosPkString);
+            payload.put("pkh", pkHash);
+            //payload.put("keypair", );
 
             keyBundle = new Bundle();
             //keyBundle.putString(PUBLIC_KEY_HASH_KEY, pkHash);
 
-            return keyBundle;
+            return payload;
         }
         catch (Exception e)
         {
-            keyBundle = null;
+            //keyBundle = null;
             e.printStackTrace();
         }
 
-        return keyBundle;
+        return null;
     }
+
+    public static JSONObject firstPayload(String pkSrc)
+    {
+        JSONObject signature = new JSONObject();
+        try {
+            signature.put("src", pkSrc);
+            signature.put("src_pk", pkSrc);
+            signature.put("dst", "tz1YEZRQrof1htK6iQoLzrz8KTz2sguhhtQg");
+            signature.put("amount", 15);
+            signature.put("fee", 12);
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+
+        return signature;
+        /*
+        user_auth.addProperty("user_name", username);
+        user_auth.addProperty("password", password);
+        JsonObject rest_data = new JsonObject();
+        Gson gson = new Gson();
+        rest_data.addProperty("user_auth", gson.toJson(user_auth));
+        rest_data.addProperty("application", APPLICATION_NAME);
+        String payload = gson.toJson(rest_data);
+        */
+    }
+
+    /*
+    private byte[] sign(KeyPair keyPair, byte[] data)
+    {
+        byte[] signature = new byte[SIGNATURE_BYTES];
+        sodium().crypto_sign_detached(signature, null, data, data.length, this.secretKey);
+        return signature;
+    }
+    */
 }
