@@ -21,12 +21,14 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
+import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
 import com.tezos.ui.activity.TransferFormActivity
+import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
@@ -159,9 +161,8 @@ class TransferFormFragment : Fragment()
             val pkhSrc = seedData.pkh
 
             val pkhDst = mDstAccount?.pubKeyHash
-            val pkhDst2 = mDstAccount?.pubKeyHash
 
-            val amount = mAmount?.text.toString().toDouble()
+            var amount = mAmount?.text.toString().toDouble()
             var fee = 0.0
             val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
 
@@ -173,8 +174,16 @@ class TransferFormFragment : Fragment()
                 else -> {}
             }
 
+            amount *= 1000000
+            fee *= 1000000
+
+            val mnemonics = EncryptionServices(activity!!).decrypt(seedData.seed, "not useful for marshmallow")
+            val sk = CryptoUtils.generateSk(mnemonics, "")
+
+            val pk = CryptoUtils.generatePk(mnemonics, "")
+
             //TODO just pay
-            pay()
+            pay(pkhSrc, pk, pkhDst!!, amount.toInt().toString(), fee.toInt().toString(), sk)
         }
 
         //mAmountLayout = view.findViewById(R.id.amount_transfer_support);
@@ -460,7 +469,7 @@ class TransferFormFragment : Fragment()
         outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
     }
 
-    private fun pay(src:String, srcPk:String, dst:String, amount: String, fee:String)
+    private fun pay(src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
     {
         val url = getString(R.string.transfer_url)
 
@@ -482,7 +491,7 @@ class TransferFormFragment : Fragment()
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
         { answer ->
 
-            signIt(answer.getInt("id"), answer.getString("payload"), srcPk, src)
+            signIt(answer.getInt("id"), answer.getString("payload"), sk, src)
 
             //onOperationsLoadHistoryComplete()
 

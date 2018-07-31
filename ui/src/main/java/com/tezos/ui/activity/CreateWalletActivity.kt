@@ -29,7 +29,7 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
 
     private var mTitleBar: TextView? = null
 
-    val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
+    private val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -190,7 +190,7 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
 
         var MNEMONICS_STR = "mnemonics_str"
 
-        fun getStartIntent(context: Context, themeBundle: Bundle): Intent {
+        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent {
             val starter = Intent(context, CreateWalletActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
 

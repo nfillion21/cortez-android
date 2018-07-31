@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.spongycastle.crypto.engines.TEAEngine;
 
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -161,6 +162,183 @@ public class CryptoUtils
 
         return pkHash;
     }
+
+    public static String generateSk(String mnemonics, String passphrase)
+    {
+
+        /*
+        byte[] src_seed = generateSeed(mnemonics, passphrase);
+
+        byte[] seed = Arrays.copyOfRange(src_seed, 0, 32);
+
+        KeyPair key = new KeyPair(seed);
+        byte[] sodiumPrivateKey = key.getPrivateKey().toBytes();
+        byte[] sodiumPublicKey = key.getPublicKey().toBytes();
+
+        // then we got the KeyPair from the seed, thanks to sodium.
+
+        // These are our prefixes
+        byte[] edpkPrefix = {(byte) 13, (byte) 15, (byte) 37, (byte) 217};
+        byte[] edskPrefix = {(byte) 43, (byte) 246, (byte) 78, (byte) 7};
+
+        // begins eztz b58encode
+
+        // Create Tezos PK.
+        byte[] prefixedPubKey = new byte[36];
+
+        System.arraycopy(edpkPrefix, 0, prefixedPubKey, 0, 4);
+
+        System.arraycopy(sodiumPublicKey, 0, prefixedPubKey, 4, 32);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
+
+
+        byte[] prefixedPubKeyWithChecksum = new byte[40];
+
+        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
+
+
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
+
+
+        // Create Tezos SK.
+        byte[] prefixedSecKey = new byte[68];
+        System.arraycopy(edskPrefix, 0, prefixedSecKey, 0, 4);
+        System.arraycopy(sodiumPrivateKey, 0, prefixedSecKey, 4, 64);
+
+        firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedSecKey);
+        byte[] prefixedSecKeyWithChecksum = new byte[72];
+        System.arraycopy(prefixedSecKey, 0, prefixedSecKeyWithChecksum, 0, 68);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedSecKeyWithChecksum, 68, 4);
+
+        //ici il faut virer le prefix, pour atteindre 32 bytes de data.
+
+        String tezosSkString = Base58.encode(prefixedSecKeyWithChecksum);
+        return tezosSkString;
+        */
+
+
+
+
+
+
+
+
+
+
+        //MnemonicCode mc = new MnemonicCode();
+        //String cleanMnemonic = mnemonic.replace("[", "");
+        //cleanMnemonic = cleanMnemonic.replace("]", "");
+
+        //List<String> items = Arrays.asList(mnemonic.split("\\s*,\\s*"));
+        //byte[] src_seed = mnemonics.toSeed(items, passphrase);
+
+
+        byte[] src_seed = generateSeed(mnemonics, passphrase);
+
+        byte[] seed = Arrays.copyOfRange(src_seed, 0, 32);
+
+        // ok we got the seed.
+
+        KeyPair key = new KeyPair(seed);
+        byte[] sodiumPublicKey = key.getPublicKey().toBytes();
+        byte[] sodiumPrivateKey = key.getPrivateKey().toBytes();
+
+        // then we got the KeyPair from the seed, thanks to sodium.
+
+        // These are our prefixes
+        byte[] edpkPrefix = {(byte) 13, (byte) 15, (byte) 37, (byte) 217};
+        byte[] edskPrefix = {(byte) 43, (byte) 246, (byte) 78, (byte) 7};
+        byte[] tz1Prefix = {(byte) 6, (byte) 161, (byte) 159};
+
+        // begins eztz b58encode
+
+        // Create Tezos PK.
+        byte[] prefixedPubKey = new byte[36];
+
+        System.arraycopy(edpkPrefix, 0, prefixedPubKey, 0, 4);
+
+        System.arraycopy(sodiumPublicKey, 0, prefixedPubKey, 4, 32);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
+
+
+        byte[] prefixedPubKeyWithChecksum = new byte[40];
+
+        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
+
+
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
+
+
+        String TezosPkString = Base58.encode(prefixedPubKeyWithChecksum);
+
+        // ends eztz b58encode
+
+        // Create Tezos SK.
+        byte[] prefixedSecKey = new byte[68];
+        System.arraycopy(edskPrefix, 0, prefixedSecKey, 0, 4);
+        System.arraycopy(sodiumPrivateKey, 0, prefixedSecKey, 4, 64);
+
+        firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedSecKey);
+        byte[] prefixedSecKeyWithChecksum = new byte[72];
+        System.arraycopy(prefixedSecKey, 0, prefixedSecKeyWithChecksum, 0, 68);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedSecKeyWithChecksum, 68, 4);
+
+        //ici il faut virer le prefix, pour atteindre 32 bytes de data.
+
+        String TezosSkString = Base58.encode(prefixedSecKeyWithChecksum);
+        return TezosSkString;
+
+
+
+
+    }
+
+    public static String generatePk(String mnemonics, String passphrase)
+    {
+        byte[] src_seed = generateSeed(mnemonics, passphrase);
+
+        byte[] seed = Arrays.copyOfRange(src_seed, 0, 32);
+
+        // ok we got the seed.
+
+        KeyPair key = new KeyPair(seed);
+        byte[] sodiumPublicKey = key.getPublicKey().toBytes();
+        byte[] sodiumPrivateKey = key.getPrivateKey().toBytes();
+
+        // then we got the KeyPair from the seed, thanks to sodium.
+
+        // These are our prefixes
+        byte[] edpkPrefix = {(byte) 13, (byte) 15, (byte) 37, (byte) 217};
+        byte[] edskPrefix = {(byte) 43, (byte) 246, (byte) 78, (byte) 7};
+        byte[] tz1Prefix = {(byte) 6, (byte) 161, (byte) 159};
+
+        // begins eztz b58encode
+
+        // Create Tezos PK.
+        byte[] prefixedPubKey = new byte[36];
+
+        System.arraycopy(edpkPrefix, 0, prefixedPubKey, 0, 4);
+
+        System.arraycopy(sodiumPublicKey, 0, prefixedPubKey, 4, 32);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
+
+
+        byte[] prefixedPubKeyWithChecksum = new byte[40];
+
+        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
+
+
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
+
+
+        String tezosPkString = Base58.encode(prefixedPubKeyWithChecksum);
+        return tezosPkString;
+
+    }
+
 
     /*
     public static Bundle generateKeys(String mnemonics, String passphrase)
