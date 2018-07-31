@@ -95,11 +95,13 @@ public class CryptoUtils
 
         return isValid;
     }
+    /*
     public static JSONObject generateKeys(String mnemonics)
     {
         //TODO need to protect the private key
         return generateKeys(mnemonics, "");
     }
+    */
 
     public static String generatePkh(String mnemonics, String passphrase)
     {
@@ -160,6 +162,7 @@ public class CryptoUtils
         return pkHash;
     }
 
+    /*
     public static Bundle generateKeys(String mnemonics, String passphrase)
     {
         try
@@ -179,7 +182,9 @@ public class CryptoUtils
 
         return null;
     }
+    */
 
+    /*
     public static JSONObject generateKeys(String mnemonics, String passphrase)
     {
         //Bundle keyBundle;
@@ -286,41 +291,6 @@ public class CryptoUtils
         }
 
         return null;
-    }
-
-    public static JSONObject firstPayload(String pkSrc)
-    {
-        JSONObject signature = new JSONObject();
-        try {
-            signature.put("src", pkSrc);
-            signature.put("src_pk", pkSrc);
-            signature.put("dst", "tz1YEZRQrof1htK6iQoLzrz8KTz2sguhhtQg");
-            signature.put("amount", 15);
-            signature.put("fee", 12);
-        }
-        catch (JSONException e)
-        {
-            e.printStackTrace();
-        }
-
-        return signature;
-        /*
-        user_auth.addProperty("user_name", username);
-        user_auth.addProperty("password", password);
-        JsonObject rest_data = new JsonObject();
-        Gson gson = new Gson();
-        rest_data.addProperty("user_auth", gson.toJson(user_auth));
-        rest_data.addProperty("application", APPLICATION_NAME);
-        String payload = gson.toJson(rest_data);
-        */
-    }
-
-    /*
-    private byte[] sign(KeyPair keyPair, byte[] data)
-    {
-        byte[] signature = new byte[SIGNATURE_BYTES];
-        sodium().crypto_sign_detached(signature, null, data, data.length, this.secretKey);
-        return signature;
     }
     */
 }

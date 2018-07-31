@@ -23,15 +23,15 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
-import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
 import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
+import com.tezos.ui.utils.hexToByteArray
+import com.tezos.ui.utils.toNoPrefixHexString
 import org.json.JSONObject
-import java.util.ArrayList
 
 /**
  * Created by nfillion on 20/04/16.
@@ -173,9 +173,8 @@ class TransferFormFragment : Fragment()
                 else -> {}
             }
 
-            val pkhDst3 = mDstAccount?.pubKeyHash
-
-
+            //TODO just pay
+            pay()
         }
 
         //mAmountLayout = view.findViewById(R.id.amount_transfer_support);
@@ -476,7 +475,7 @@ class TransferFormFragment : Fragment()
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
         { answer ->
 
-            signIt(answer.getInt("id"), answer.getString("payload"), sk, pk)
+            signIt(answer.getInt("id"), answer.getString("payload"), "sk", "pk")
 
             //onOperationsLoadHistoryComplete()
 
