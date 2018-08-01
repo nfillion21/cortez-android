@@ -180,11 +180,6 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
         }
     }
 
-    private fun validatePassword(inputtedPassword: String): Boolean {
-        val storage = Storage(this)
-        return EncryptionServices(applicationContext).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
-    }
-
     companion object {
         var CREATE_WALLET_REQUEST_CODE = 0x2600 // arbitrary int
 

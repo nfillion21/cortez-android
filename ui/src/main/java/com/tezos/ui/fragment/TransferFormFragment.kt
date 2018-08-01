@@ -28,7 +28,9 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
 import com.tezos.ui.activity.TransferFormActivity
+import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
@@ -40,6 +42,9 @@ import org.json.JSONObject
  */
 class TransferFormFragment : Fragment()
 {
+    private val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(activity?.baseContext!!) }
+    private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(activity?.applicationContext!!) }
+
     private var mPayButton: Button? = null
     private var mPayButtonLayout: FrameLayout? = null
 
@@ -135,7 +140,10 @@ class TransferFormFragment : Fragment()
         }
 
         mSrcButton = view.findViewById(R.id.transfer_src_button)
-        mSrcButton!!.setOnClickListener { v -> PaymentAccountsActivity.start(activity, theme, PaymentAccountsActivity.FromScreen.FromTransfer, PaymentAccountsActivity.Selection.SelectionAccounts) }
+        mSrcButton!!.setOnClickListener { v -> PaymentAccountsActivity.start(activity,
+                theme,
+                PaymentAccountsActivity.FromScreen.FromTransfer,
+                PaymentAccountsActivity.Selection.SelectionAccounts) }
 
         mDstButton = view.findViewById(R.id.transfer_dst_button)
         mDstButton!!.setOnClickListener { v -> PaymentAccountsActivity.start(activity, theme, PaymentAccountsActivity.FromScreen.FromTransfer, PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses) }
@@ -155,6 +163,40 @@ class TransferFormFragment : Fragment()
         mPayButton!!.text = moneyString
 
         mPayButtonLayout!!.setOnClickListener { v ->
+
+            val dialog = AuthenticationDialog()
+            if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints()) {
+                dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
+                dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
+                dialog.fingerprintAuthenticationSuccessListener = {
+                    //validateKeyAuthentication(secret, it)
+
+
+
+                }
+                if (dialog.cryptoObjectToAuthenticateWith == null)
+                {
+                    dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
+                }
+                else
+                {
+                    dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
+                }
+            }
+            else
+            {
+                dialog.stage = AuthenticationDialog.Stage.PASSWORD
+            }
+            dialog.authenticationSuccessListener = {
+                //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
+            }
+            dialog.passwordVerificationListener =
+                    {
+                validatePassword(it)
+            }
+            dialog.show(activity?.supportFragmentManager, "Authentication")
+
+            /*
 
             val seedDataBundle = arguments?.getBundle(Storage.TAG)
             val seedData = Storage.fromBundle(seedDataBundle!!)
@@ -184,10 +226,9 @@ class TransferFormFragment : Fragment()
 
             //TODO just pay
             pay(pkhSrc, pk, pkhDst!!, amount.toInt().toString(), fee.toInt().toString(), sk)
-        }
 
-        //mAmountLayout = view.findViewById(R.id.amount_transfer_support);
-        //mAmountLayout.setError(" ");
+            */
+        }
 
         arguments?.let {
             val seedDataBundle = it.getBundle(Storage.TAG)
@@ -578,5 +619,24 @@ class TransferFormFragment : Fragment()
         }
 
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    /**
+     * Fingerprint was invalidated, decide what to do in this case.
+     */
+    private fun onFingerprintInvalidation(useInFuture: Boolean) {
+        storage.saveFingerprintAllowed(useInFuture)
+        if (useInFuture) {
+            EncryptionServices(activity?.applicationContext!!).createFingerprintKey()
+        }
+    }
+
+    /**
+     * Validate password inputted from Authentication Dialog.
+     */
+    private fun validatePassword(inputtedPassword: String): Boolean
+    {
+        val storage = Storage(activity!!)
+        return EncryptionServices(activity?.applicationContext!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
     }
 }
