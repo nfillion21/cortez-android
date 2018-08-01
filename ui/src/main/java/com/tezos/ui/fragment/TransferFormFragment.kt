@@ -3,6 +3,7 @@ package com.tezos.ui.fragment
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
+import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
 import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
@@ -21,6 +22,7 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
@@ -164,37 +166,7 @@ class TransferFormFragment : Fragment()
 
         mPayButtonLayout!!.setOnClickListener { v ->
 
-            val dialog = AuthenticationDialog()
-            if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints()) {
-                dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
-                dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
-                dialog.fingerprintAuthenticationSuccessListener = {
-                    //validateKeyAuthentication(secret, it)
-
-
-
-                }
-                if (dialog.cryptoObjectToAuthenticateWith == null)
-                {
-                    dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
-                }
-                else
-                {
-                    dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
-                }
-            }
-            else
-            {
-                dialog.stage = AuthenticationDialog.Stage.PASSWORD
-            }
-            dialog.authenticationSuccessListener = {
-                //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
-            }
-            dialog.passwordVerificationListener =
-                    {
-                validatePassword(it)
-            }
-            dialog.show(activity?.supportFragmentManager, "Authentication")
+            onPayClick()
 
             /*
 
@@ -241,6 +213,38 @@ class TransferFormFragment : Fragment()
         validatePayButton(isInputDataValid())
 
         putEverythingInRed()
+    }
+
+    private fun onPayClick()
+    {
+        val dialog = AuthenticationDialog()
+        if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints()) {
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
+            dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
+            dialog.fingerprintAuthenticationSuccessListener = {
+                validateKeyAuthentication(it)
+            }
+            if (dialog.cryptoObjectToAuthenticateWith == null)
+            {
+                dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
+            }
+            else
+            {
+                dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
+            }
+        }
+        else
+        {
+            dialog.stage = AuthenticationDialog.Stage.PASSWORD
+        }
+        dialog.authenticationSuccessListener = {
+            //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
+        }
+        dialog.passwordVerificationListener =
+                {
+                    validatePassword(it)
+                }
+        dialog.show(activity?.supportFragmentManager, "Authentication")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -597,15 +601,42 @@ class TransferFormFragment : Fragment()
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
         { answer ->
 
-            //addOperationItemsFromJSON(answer)
             Log.i(answer.toString(), answer.toString())
             Log.i(answer.toString(), answer.toString())
 
             //startGetRequestLoadOperations()
 
+            activity?.finish()
             //onOperationsLoadHistoryComplete()
 
         }, Response.ErrorListener
+        {
+            Log.i(it.toString(), it.toString())
+            Log.i(it.toString(), it.toString())
+
+            activity?.finish()
+        }){
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        /*
+        // Request a string response from the provided URL.
+        val stringRequest = object : StringRequest(Request.Method.POST, url,
+                Response.Listener<String> { response ->
+                    //val response = response.replace("[^0-9]".toRegex(), "")
+                    //mBalanceItem = balance.toDouble()/1000000
+                    //animateBalance(mBalanceItem)
+                    Log.i(response.toString(), response.toString())
+                    Log.i(response.toString(), response.toString())
+
+                    //onBalanceLoadComplete(true)
+                    //startGetRequestLoadOperations()
+                }, Response.ErrorListener
         {
             Log.i(it.toString(), it.toString())
             Log.i(it.toString(), it.toString())
@@ -616,7 +647,19 @@ class TransferFormFragment : Fragment()
                 headers["Content-Type"] = "application/json"
                 return headers
             }
+
+            override fun getBody(): HashMap<String, String> {
+                var params = HashMap<String, String>()
+                params.put("id", postparams.getString("id"))
+                params.put("payload", postparams.getString("payload"))
+                return params
+            }
+
+            override fun getPostBody(): ByteArray {
+                return super.getPostBody()
+            }
         }
+        */
 
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
@@ -638,5 +681,21 @@ class TransferFormFragment : Fragment()
     {
         val storage = Storage(activity!!)
         return EncryptionServices(activity?.applicationContext!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
+    }
+
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
+    {
+        if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
+        {
+            //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, secretData = secret)
+            Log.i("hello", "hello")
+            Log.i("hello", "hello")
+        }
+        else
+        {
+            Log.i("hello", "hello")
+            Log.i("hello", "hello")
+            onPayClick()
+        }
     }
 }
