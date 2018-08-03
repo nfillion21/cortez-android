@@ -121,7 +121,8 @@ class CreateWalletFragment : Fragment()
                     }
                 })
                 animatorSet.start()
-            } else
+            }
+            else
             {
                 throw UnsupportedOperationException(
                         "The onClick method has not been implemented for " + resources
@@ -129,16 +130,21 @@ class CreateWalletFragment : Fragment()
             }
         }
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null)
+        {
             mMnemonicsString = CryptoUtils.generateMnemonics()
-            if (mMnemonicsString != null) {
+            if (mMnemonicsString != null)
+            {
                 mMnemonicsTextview?.text = mMnemonicsString
             }
 
             mBackupChecked = false
-        } else {
+        }
+        else
+        {
             mMnemonicsString = savedInstanceState.getString(MNEMONICS_KEY, null)
-            if (mMnemonicsString != null) {
+            if (mMnemonicsString != null)
+            {
                 mMnemonicsTextview?.text = mMnemonicsString
             }
 
@@ -152,7 +158,6 @@ class CreateWalletFragment : Fragment()
             mBackupChecked = buttonView.isChecked
             validateCreateButton(isCreateButtonValid(), theme)
         }
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -195,7 +200,7 @@ class CreateWalletFragment : Fragment()
         animatorSet.start()
     }
 
-    fun validateCreateButton(validate: Boolean, theme: CustomTheme?)
+    private fun validateCreateButton(validate: Boolean, theme: CustomTheme?)
     {
         if (validate)
         {
@@ -203,14 +208,16 @@ class CreateWalletFragment : Fragment()
             mCreateButtonLayout?.isEnabled = true
             mCreateButtonLayout?.background = makeSelector(theme)
 
-            val drawables = mCreateButton?.getCompoundDrawables()
+            val drawables = mCreateButton?.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme!!.textColorPrimaryId))
 
             mRenewFab?.isEnabled = false
             mRenewFab?.hide()
 
-        } else {
+        }
+        else
+        {
             mCreateButton?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
             mCreateButtonLayout?.isEnabled = false
 
@@ -226,7 +233,8 @@ class CreateWalletFragment : Fragment()
         }
     }
 
-    private fun makeSelector(theme: CustomTheme?): StateListDrawable {
+    private fun makeSelector(theme: CustomTheme?): StateListDrawable
+    {
         val res = StateListDrawable()
         res.addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(ContextCompat.getColor(activity!!, theme!!.colorPrimaryDarkId)))
         res.addState(intArrayOf(), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryId)))
@@ -239,7 +247,8 @@ class CreateWalletFragment : Fragment()
         fun updateTitle()
     }
 
-    override fun onDetach() {
+    override fun onDetach()
+    {
         super.onDetach()
         listener = null
     }

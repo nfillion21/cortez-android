@@ -81,8 +81,8 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
             arguments?.let {
 
-                //val words = it.getString(CreateWalletActivity.MNEMONICS_STR)
-                val words = "link warm visual pony bike person truck pupil moral gift shoulder eye kit human jacket rich sand cupboard position friend fox calm bring kick"
+                val words = it.getString(CreateWalletActivity.MNEMONICS_STR)
+                //val words = "link warm visual pony bike person truck pupil moral gift shoulder eye kit human jacket rich sand cupboard position friend fox calm bring kick"
                 listener?.mnemonicsVerified(words)
             }
         }
@@ -134,8 +134,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
             }
             mAdapter?.updateWords(words, intFromVerifyWords(mVerifyWords))
 
-            //TODO need to valid mnemonics differently
-            validateMnemonicsButton(true)
+            validateMnemonicsButton(false)
         }
     }
 

@@ -150,8 +150,10 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
             saveFingerprintAllowed(true)
 
             // TODO put the seed later
-            saveSeed(createSeedData(mnemonics, password))
-            setResult(R.id.restore_wallet_succeed, null)
+            val seedData = createSeedData(mnemonics, password)
+            saveSeed(seedData)
+            intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
+            setResult(R.id.create_wallet_succeed, intent)
             finish()
         }
 
@@ -182,6 +184,7 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
 
     companion object {
         var CREATE_WALLET_REQUEST_CODE = 0x2600 // arbitrary int
+        const val SEED_DATA_KEY = "seed_data_key"
 
         var MNEMONICS_STR = "mnemonics_str"
 

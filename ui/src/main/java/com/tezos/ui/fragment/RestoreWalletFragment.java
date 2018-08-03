@@ -112,8 +112,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
         mValidateMnemonicsButtonLayout = view.findViewById(R.id.validate_mnemonics_button_layout);
         mValidateMnemonicsButtonLayout.setOnClickListener(v ->
         {
-            Intent intent = getActivity().getIntent();
-
             //TODO verify if it does always work
             String mnemonics = mnemonicsListToString(mAdapter.getWords());
             if (mnemonics != null)

@@ -169,6 +169,27 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                         //Log.v("ProjectDetails", "data is null")
                     }
                         */
+
+                    //TODO check data later
+                    if (data != null && data.hasExtra(CreateWalletActivity.SEED_DATA_KEY))
+                    {
+                        val seedDataKey = data.getBundleExtra(CreateWalletActivity.SEED_DATA_KEY)
+                        val realSeed = Storage.fromBundle(seedDataKey)
+
+                        // TODO offset it
+                        val snackbar = Snackbar.make(findViewById(R.id.coordinator), R.string.wallet_successfully_restored, Snackbar.LENGTH_LONG)
+                        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
+                                android.R.color.holo_green_light)))
+                        snackbar.show()
+
+                        setMenuItemEnabled(true)
+
+                        switchToOperations(realSeed)
+                    }
+                    else
+                    {
+
+                    }
                 }
             }
 
