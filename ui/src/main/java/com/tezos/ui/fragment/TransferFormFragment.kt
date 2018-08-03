@@ -166,9 +166,7 @@ class TransferFormFragment : Fragment()
 
         mPayButtonLayout!!.setOnClickListener { v ->
 
-            onPayClick()
 
-            /*
 
             val seedDataBundle = arguments?.getBundle(Storage.TAG)
             val seedData = Storage.fromBundle(seedDataBundle!!)
@@ -197,9 +195,8 @@ class TransferFormFragment : Fragment()
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             //TODO just pay
-            pay(pkhSrc, pk, pkhDst!!, amount.toInt().toString(), fee.toInt().toString(), sk)
+            onPayClick(pkhSrc, pk, pkhDst!!, amount.toInt().toString(), fee.toInt().toString(), sk)
 
-            */
         }
 
         arguments?.let {
@@ -215,14 +212,14 @@ class TransferFormFragment : Fragment()
         putEverythingInRed()
     }
 
-    private fun onPayClick()
+    private fun onPayClick(src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
     {
         val dialog = AuthenticationDialog()
         if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints()) {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthentication(it)
+                validateKeyAuthentication(it, src, srcPk, dst, amount, fee, sk)
             }
             if (dialog.cryptoObjectToAuthenticateWith == null)
             {
@@ -239,6 +236,7 @@ class TransferFormFragment : Fragment()
         }
         dialog.authenticationSuccessListener = {
             //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
+            pay(src, srcPk, dst, amount, fee, sk)
         }
         dialog.passwordVerificationListener =
                 {
@@ -683,19 +681,15 @@ class TransferFormFragment : Fragment()
         return EncryptionServices(activity?.applicationContext!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
     }
 
-    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject, src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
     {
         if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
         {
-            //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, secretData = secret)
-            Log.i("hello", "hello")
-            Log.i("hello", "hello")
+            pay(src, srcPk, dst, amount, fee, sk)
         }
         else
         {
-            Log.i("hello", "hello")
-            Log.i("hello", "hello")
-            onPayClick()
+            onPayClick(src, srcPk, dst, amount, fee, sk)
         }
     }
 }
