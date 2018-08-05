@@ -1,4 +1,4 @@
-package com.tezos.android
+package com.tezcore.cortez
 
 import android.app.Activity
 import android.content.Intent
@@ -14,13 +14,12 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.tezos.android.activities.AboutActivity
-import com.tezos.android.activities.SettingsActivity
-import com.tezos.android.fragments.HomeFragment
-import com.tezos.core.crypto.CryptoUtils
+import com.tezos.android.R
+import com.tezcore.cortez.activities.AboutActivity
+import com.tezcore.cortez.activities.SettingsActivity
+import com.tezcore.cortez.fragments.HomeFragment
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
@@ -228,7 +227,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
 
-            SettingsActivity.SETTINGS_REQUEST_CODE ->
+            com.tezcore.cortez.activities.SettingsActivity.SETTINGS_REQUEST_CODE ->
             {
                 if (resultCode == R.id.logout_succeed)
                 {
@@ -350,7 +349,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             }
             R.id.nav_settings ->
             {
-                SettingsActivity.start(this, tezosTheme)
+                com.tezcore.cortez.activities.SettingsActivity.start(this, tezosTheme)
             }
             R.id.nav_info ->
             {

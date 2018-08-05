@@ -11,7 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/TezosTheme">
-        <activity android:name=".HomeActivity"
+        <activity android:name="com.tezcore.cortez.HomeActivity"
             android:theme="@style/TezosTheme.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,12 +19,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.SettingsActivity"
+        <activity android:name="com.tezcore.cortez.activities.SettingsActivity"
             android:theme="@style/TezosTheme.SettingsActivity">
         </activity>
 
         <activity
-            android:name=".activities.AboutActivity"
+            android:name="com.tezcore.cortez.activities.AboutActivity"
             android:theme="@style/TezosTheme.AboutActivity" />
 
         <provider

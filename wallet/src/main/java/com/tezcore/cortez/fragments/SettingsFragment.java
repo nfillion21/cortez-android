@@ -1,5 +1,5 @@
 
-package com.tezos.android.fragments;
+package com.tezcore.cortez.fragments;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -34,7 +33,6 @@ import android.widget.TextView;
 
 import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
-import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.ui.activity.PasscodeActivity;
 import com.tezos.ui.utils.Storage;
 

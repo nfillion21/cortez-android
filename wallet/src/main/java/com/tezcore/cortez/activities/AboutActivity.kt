@@ -1,4 +1,4 @@
-package com.tezos.android.activities
+package com.tezcore.cortez.activities
 
 import android.app.Activity
 import android.content.Context

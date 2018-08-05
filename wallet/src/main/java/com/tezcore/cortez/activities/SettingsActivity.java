@@ -1,4 +1,4 @@
-package com.tezos.android.activities;
+package com.tezcore.cortez.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,9 +16,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
+import com.tezcore.cortez.zeronet.fragments.SettingsFragment;
 import com.tezos.android.R;
 import com.tezos.ui.activity.PasscodeActivity;
-import com.tezos.android.fragments.SettingsFragment;
 import com.tezos.ui.authentication.EncryptionServices;
 import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.core.models.CustomTheme;
