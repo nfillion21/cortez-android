@@ -4,12 +4,47 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+def alphanetPropertiesFile = rootProject.file("wallet/deployment/alphanet.properties")
+def zeronetPropertiesFile = rootProject.file("wallet/deployment/zeronet.properties")
+def betanetPropertiesFile = rootProject.file("wallet/deployment/betanet.properties")
+
+def keystoreAlphanetProperties = new Properties()
+keystoreAlphanetProperties.load(new FileInputStream(alphanetPropertiesFile))
+
+def keystoreBetanetProperties = new Properties()
+keystoreBetanetProperties.load(new FileInputStream(betanetPropertiesFile))
+
+def keystoreZeronetProperties = new Properties()
+keystoreZeronetProperties.load(new FileInputStream(zeronetPropertiesFile))
+
 android {
+    signingConfigs {
+        betanetConfig {
+            keyAlias betanetPropertiesFile['keyAlias']
+            keyPassword betanetPropertiesFile['keyPassword']
+            storeFile file(betanetPropertiesFile['storeFile'])
+            storePassword betanetPropertiesFile['storePassword']
+        }
+        alphanetConfig {
+            keyAlias alphanetPropertiesFile['keyAlias']
+            keyPassword alphanetPropertiesFile['keyPassword']
+            storeFile file(alphanetPropertiesFile['storeFile'])
+            storePassword alphanetPropertiesFile['storePassword']
+        }
+        zeronetConfig {
+            keyAlias zeronetPropertiesFile['keyAlias']
+            keyPassword zeronetPropertiesFile['keyPassword']
+            storeFile file(zeronetPropertiesFile['storeFile'])
+            storePassword zeronetPropertiesFile['storePassword']
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId 'com.tezcore.cortez'
         minSdkVersion 26
         targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -18,31 +53,39 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        alphanetBuild {
+            signingConfig signingConfigs.alphanetConfig
+        }
+        betanetBuild {
+            signingConfig signingConfigs.betanetConfig
+        }
+        zeronetBuild {
+            signingConfig signingConfigs.zeronetConfig
+        }
     }
     compileOptions {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
-
-    flavorDimensions "tier", "minApi"
+    flavorDimensions "version"
     productFlavors {
         zeronet {
             applicationIdSuffix ".zeronet"
-            versionCode 1
-            versionName "1.0"
-            dimension "tier"
+            versionNameSuffix "-zeronet"
+            dimension "version"
+            signingConfig signingConfigs.zeronetConfig
         }
         betanet {
             applicationIdSuffix ".betanet"
-            versionCode 1
-            versionName "1.0"
-            dimension "minApi"
+            dimension "version"
+            versionNameSuffix "-betanet"
+            signingConfig signingConfigs.betanetConfig
         }
         alphanet {
             applicationIdSuffix ".alphanet"
-            versionCode 1
-            versionName "1.0"
-            dimension "minApi"
+            versionNameSuffix "-alphanet"
+            dimension "version"
+            signingConfig signingConfigs.alphanetConfig
         }
     }
 }
