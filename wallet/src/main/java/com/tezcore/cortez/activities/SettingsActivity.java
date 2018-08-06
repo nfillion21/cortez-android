@@ -16,12 +16,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
-import com.tezcore.cortez.zeronet.fragments.SettingsFragment;
+import com.tezcore.cortez.fragments.SettingsFragment;
 import com.tezos.android.R;
+import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.activity.PasscodeActivity;
 import com.tezos.ui.authentication.EncryptionServices;
 import com.tezos.ui.interfaces.IPasscodeHandler;
-import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.utils.ScreenUtils;
 import com.tezos.ui.utils.Storage;
 

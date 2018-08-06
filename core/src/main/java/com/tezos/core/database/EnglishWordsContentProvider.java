@@ -6,14 +6,21 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
+import com.tezos.core.BuildConfig;
+import com.tezos.core.database.EnglishWordsDatabaseConstants;
+import com.tezos.core.database.SQLiteHelper;
+
 /**
  * Provides access to the dictionary database.
  */
 public class EnglishWordsContentProvider extends ContentProvider
 {
+    /*
     public static String AUTHORITY = "com.tezos.core.database.EnglishWordsProvider";
+    //public static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".EnglishWordsProvider";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + EnglishWordsDatabaseConstants.TABLE_WORD);
+    */
     private SQLiteHelper dbHelper;
 
     @Override

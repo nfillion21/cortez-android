@@ -9,33 +9,32 @@ def zeronetPropertiesFile = rootProject.file("wallet/deployment/zeronet.properti
 def betanetPropertiesFile = rootProject.file("wallet/deployment/betanet.properties")
 
 def keystoreAlphanetProperties = new Properties()
-keystoreAlphanetProperties.load(new FileInputStream(alphanetPropertiesFile))
-
 def keystoreBetanetProperties = new Properties()
-keystoreBetanetProperties.load(new FileInputStream(betanetPropertiesFile))
-
 def keystoreZeronetProperties = new Properties()
+
+keystoreAlphanetProperties.load(new FileInputStream(alphanetPropertiesFile))
+keystoreBetanetProperties.load(new FileInputStream(betanetPropertiesFile))
 keystoreZeronetProperties.load(new FileInputStream(zeronetPropertiesFile))
 
 android {
     signingConfigs {
         betanetConfig {
-            keyAlias betanetPropertiesFile['keyAlias']
-            keyPassword betanetPropertiesFile['keyPassword']
-            storeFile file(betanetPropertiesFile['storeFile'])
-            storePassword betanetPropertiesFile['storePassword']
+            keyAlias keystoreBetanetProperties['keyAlias']
+            keyPassword keystoreBetanetProperties['keyPassword']
+            storeFile file(keystoreBetanetProperties['storeFile'])
+            storePassword keystoreBetanetProperties['storePassword']
         }
         alphanetConfig {
-            keyAlias alphanetPropertiesFile['keyAlias']
-            keyPassword alphanetPropertiesFile['keyPassword']
-            storeFile file(alphanetPropertiesFile['storeFile'])
-            storePassword alphanetPropertiesFile['storePassword']
+            keyAlias keystoreAlphanetProperties['keyAlias']
+            keyPassword keystoreAlphanetProperties['keyPassword']
+            storeFile file(keystoreAlphanetProperties['storeFile'])
+            storePassword keystoreAlphanetProperties['storePassword']
         }
         zeronetConfig {
-            keyAlias zeronetPropertiesFile['keyAlias']
-            keyPassword zeronetPropertiesFile['keyPassword']
-            storeFile file(zeronetPropertiesFile['storeFile'])
-            storePassword zeronetPropertiesFile['storePassword']
+            keyAlias keystoreZeronetProperties['keyAlias']
+            keyPassword keystoreZeronetProperties['keyPassword']
+            storeFile file(keystoreZeronetProperties['storeFile'])
+            storePassword keystoreZeronetProperties['storePassword']
         }
     }
     compileSdkVersion 28
@@ -52,15 +51,6 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-        alphanetBuild {
-            signingConfig signingConfigs.alphanetConfig
-        }
-        betanetBuild {
-            signingConfig signingConfigs.betanetConfig
-        }
-        zeronetBuild {
-            signingConfig signingConfigs.zeronetConfig
         }
     }
     compileOptions {

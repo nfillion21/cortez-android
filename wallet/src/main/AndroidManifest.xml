@@ -29,7 +29,7 @@
 
         <provider
             android:name="com.tezos.core.database.EnglishWordsContentProvider"
-            android:authorities="com.tezos.core.database.EnglishWordsProvider"
+            android:authorities="${applicationId}.provider"
             android:enabled="true"
             android:exported="false" />
     </application>
