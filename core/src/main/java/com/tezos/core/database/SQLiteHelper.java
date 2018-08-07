@@ -16,103 +16,103 @@ import java.io.InputStreamReader;
 
 public class SQLiteHelper extends SQLiteOpenHelper implements EnglishWordsDatabaseConstants
 {
-	public static final int DB_VERSION = 1;
-	private final Context mHelperContext;
+    public static final int DB_VERSION = 1;
+    private final Context mHelperContext;
 
-	public SQLiteHelper(Context context)
-	{
-		super(context, DB_NAME, null, DB_VERSION);
+    public SQLiteHelper(Context context)
+    {
+        super(context, DB_NAME, null, DB_VERSION);
 
-		mHelperContext = context;
-		getWritableDatabase();
-	}
+        mHelperContext = context;
+        getWritableDatabase();
+    }
 
-	private static final String FTS_TABLE_CREATE =
-			"CREATE VIRTUAL TABLE " + FTS_VIRTUAL_TABLE +
-					" USING fts3 (" +
-					COL_WORD + ")";
+    private static final String FTS_TABLE_CREATE =
+            "CREATE VIRTUAL TABLE " + FTS_VIRTUAL_TABLE +
+                    " USING fts3 (" +
+                    COL_WORD + ")";
 
-	private static final String STANDARD_TABLE_CREATE =
-			"CREATE TABLE " + TABLE_WORD + "(" + COL_ID
-					+ " INTEGER PRIMARY KEY NOT NULL, " + " " + COL_WORD
-					+ " VARCHAR(50) NOT NULL);";
+    private static final String STANDARD_TABLE_CREATE =
+            "CREATE TABLE " + TABLE_WORD + "(" + COL_ID
+                    + " INTEGER PRIMARY KEY NOT NULL, " + " " + COL_WORD
+                    + " VARCHAR(50) NOT NULL);";
 
-	@Override
-	public void onCreate(SQLiteDatabase db)
-	{
-		db.execSQL("CREATE TABLE " + TABLE_WORD + "(" + COL_ID
-				+ " INTEGER PRIMARY KEY NOT NULL, " + " " + COL_WORD
-				+ " VARCHAR(50) NOT NULL);");
-		loadDictionary(db);
-	}
+    @Override
+    public void onCreate(SQLiteDatabase db)
+    {
+        db.execSQL("CREATE TABLE " + TABLE_WORD + "(" + COL_ID
+                + " INTEGER PRIMARY KEY NOT NULL, " + " " + COL_WORD
+                + " VARCHAR(50) NOT NULL);");
+        loadDictionary(db);
+    }
 
-	private void loadDictionary(SQLiteDatabase db)
-	{
-		new Thread(() ->
-		{
-			try
-			{
-				loadWords(db);
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}).start();
-	}
+    private void loadDictionary(SQLiteDatabase db)
+    {
+        //new Thread(() ->
+        //{
+        try
+        {
+            loadWords(db);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        //}).start();
+    }
 
-	private void loadWords(SQLiteDatabase db) throws IOException
-	{
-		final Resources resources = mHelperContext.getResources();
-		InputStream inputStream = resources.openRawResource(R.raw.english);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    private void loadWords(SQLiteDatabase db) throws IOException
+    {
+        final Resources resources = mHelperContext.getResources();
+        InputStream inputStream = resources.openRawResource(R.raw.english);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-		int words = 0;
-		try
-		{
-			String line;
-			while ((line = reader.readLine()) != null)
-			{
-				long id = addWord(db, line.trim());
-				if (id < 0)
-				{
-					//Log.e(TAG, "unable to add word: " + line.trim());
-				}
-				else
-				{
-					words++;
-				}
-			}
-		}
-		finally
-		{
-			reader.close();
-		}
+        int words = 0;
+        try
+        {
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                long id = addWord(db, line.trim());
+                if (id < 0)
+                {
+                    //Log.e(TAG, "unable to add word: " + line.trim());
+                }
+                else
+                {
+                    words++;
+                }
+            }
+        }
+        finally
+        {
+            reader.close();
+        }
 
-		Log.d("DONE", "DONE loading words." + words);
-	}
+        Log.d("DONE", "DONE loading words." + words);
+    }
 
-	public long addWord(SQLiteDatabase db, String word)
-	{
-		ContentValues initialValues = new ContentValues();
-		initialValues.put(COL_WORD, word);
+    public long addWord(SQLiteDatabase db, String word)
+    {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(COL_WORD, word);
 
-		//db.execSQL("INSERT INTO " + TABLE_WORD + " (" + COL_WORD
-				//+ ") VALUES ('" + word + "');");
+        //db.execSQL("INSERT INTO " + TABLE_WORD + " (" + COL_WORD
+        //+ ") VALUES ('" + word + "');");
 
-				//TODO handle FTS virtual table
-		//return db.insert(FTS_VIRTUAL_TABLE, null, initialValues);
-		return db.insert(TABLE_WORD, null, initialValues);
-	}
+        //TODO handle FTS virtual table
+        //return db.insert(FTS_VIRTUAL_TABLE, null, initialValues);
+        return db.insert(TABLE_WORD, null, initialValues);
+    }
 
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
-	{
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
+    {
 	    /*
 		Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
 				+ newVersion + ", which will destroy all old data");
 		db.execSQL("DROP TABLE IF EXISTS " + FTS_VIRTUAL_TABLE);
 		onCreate(db);
 		*/
-	}
+    }
 }
