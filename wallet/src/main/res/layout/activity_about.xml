@@ -39,36 +39,51 @@
     </android.support.design.widget.AppBarLayout>
 
     <LinearLayout
+        android:id="@+id/mnemonics_scroll_layout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical" >
+        android:layout_gravity="center"
+        android:orientation="vertical">
 
-        <TextView
+        <ScrollView
+            android:layout_gravity="top"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_double"
-            android:layout_marginLeft="@dimen/spacing_double"
-            android:layout_marginRight="@dimen/spacing_double"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
-            android:elevation="@dimen/elevation_header"
-            android:gravity="center_vertical"
-            android:text="@string/cortez_for_android"
-            android:clipToPadding="false"
-            tools:ignore="UnusedAttribute,NewApi" />
+            android:layout_height="wrap_content">
 
-        <TextView android:id="@id/text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/selector_rect_layout"
-            android:textColor="@color/colorAccent"
-            android:layout_margin="@dimen/spacing_double"
-            android:padding="@dimen/spacing_double"
-            android:autoLink="all"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-            android:layout_marginBottom="@dimen/spacing_micro"
-            android:text="@string/about_info" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_double"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    android:layout_marginRight="@dimen/spacing_double"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+                    android:elevation="@dimen/elevation_header"
+                    android:gravity="center_vertical"
+                    android:text="@string/cortez_for_android"
+                    android:clipToPadding="false"
+                    tools:ignore="UnusedAttribute,NewApi" />
+
+                <TextView android:id="@id/text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/selector_rect_layout"
+                    android:textColor="@color/colorAccent"
+                    android:layout_margin="@dimen/spacing_double"
+                    android:padding="@dimen/spacing_double"
+                    android:autoLink="all"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:layout_marginBottom="@dimen/spacing_micro"
+                    android:text="@string/about_info" />
+
+            </LinearLayout>
+
+        </ScrollView>
     </LinearLayout>
 
     <LinearLayout
