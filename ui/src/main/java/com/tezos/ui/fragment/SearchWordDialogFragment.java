@@ -186,6 +186,7 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
                 query = bundle.getString("query");
             }
 
+            // the
             String packageName = getActivity().getApplicationContext().getPackageName();
             String packageProvider = packageName + ".provider";
             Uri contentUri = Uri.parse("content://" + packageProvider

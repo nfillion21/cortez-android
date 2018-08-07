@@ -17,14 +17,14 @@ class EncryptionServices(context: Context) {
      * The place to keep all constants.
      */
     companion object {
-        val DEFAULT_KEY_STORE_NAME = "default_keystore"
+        const val DEFAULT_KEY_STORE_NAME = "default_keystore"
 
-        val MASTER_KEY = "MASTER_KEY"
-        val FINGERPRINT_KEY = "FINGERPRINT_KEY"
-        val CONFIRM_CREDENTIALS_KEY = "CONFIRM_CREDENTIALS_KEY"
+        const val MASTER_KEY = "MASTER_KEY"
+        const val FINGERPRINT_KEY = "FINGERPRINT_KEY"
+        const val CONFIRM_CREDENTIALS_KEY = "CONFIRM_CREDENTIALS_KEY"
 
         val KEY_VALIDATION_DATA = byteArrayOf(0, 1, 0, 1)
-        val CONFIRM_CREDENTIALS_VALIDATION_DELAY = 120 // Seconds
+        const val CONFIRM_CREDENTIALS_VALIDATION_DELAY = 120 // Seconds
     }
 
     private val keyStoreWrapper = KeyStoreWrapper(context, DEFAULT_KEY_STORE_NAME)

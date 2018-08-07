@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.tezcore.cortez.HomeActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -19,7 +20,7 @@
             app:popupTheme="@style/TezosTheme.PopupOverlay">
 
             <TextView android:id="@+id/barTitle"
-                android:text="@string/settings_title"
+                android:text="@string/about_title"
 
                 android:paddingStart="@dimen/spacing_normal"
                 android:paddingLeft="@dimen/spacing_normal"
@@ -34,22 +35,61 @@
                 android:gravity="center_vertical|center_horizontal"
                 tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
 
-            <!--
-            <ProgressBar android:id="@+id/progress"
-                android:layout_width="@dimen/min_height_touch_target"
-                android:layout_height="@dimen/min_height_touch_target"
-                android:layout_gravity="center_vertical|end"
-                android:layout_marginEnd="@dimen/spacing_normal"
-                android:layout_marginRight="@dimen/spacing_normal"
-                android:visibility="gone"
-                android:indeterminateOnly="true" />
-            -->
-
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
-    <!--
-    <include layout="@layout/content_main" />
-    -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_double"
+            android:layout_marginLeft="@dimen/spacing_double"
+            android:layout_marginRight="@dimen/spacing_double"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+            android:elevation="@dimen/elevation_header"
+            android:gravity="center_vertical"
+            android:text="@string/cortez_for_android"
+            android:clipToPadding="false"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <TextView android:id="@id/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_rect_layout"
+            android:textColor="@color/colorAccent"
+            android:layout_margin="@dimen/spacing_double"
+            android:padding="@dimen/spacing_double"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            android:layout_marginBottom="@dimen/spacing_micro"
+            android:text="@string/about_info" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_weight="0"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+
+        <Button
+            android:id="@+id/mailButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/PaymentScreens.RoundedButton"
+            android:text="@string/contact_us"
+            android:visibility="visible"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginRight="@dimen/spacing_double"
+            android:layout_marginLeft="@dimen/spacing_double"
+            android:layout_marginBottom="@dimen/spacing_double"
+            />
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -3,21 +3,27 @@ package com.tezcore.cortez.activities
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.widget.Button
 import android.widget.TextView
 import com.tezos.android.R
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
+import android.content.ActivityNotFoundException
+
+
 
 class AboutActivity : AppCompatActivity(), IPasscodeHandler
 {
+    private var mMailButton: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -31,9 +37,10 @@ class AboutActivity : AppCompatActivity(), IPasscodeHandler
 
         initActionBar(tezosTheme)
 
-        if (savedInstanceState != null)
-        {
-            //mPublicKeyHash = savedInstanceState.getString(PK_HASH_KEY, null)
+        mMailButton = findViewById(R.id.mailButton)
+        mMailButton?.setOnClickListener { _ ->
+
+            sendMail()
         }
     }
 
@@ -86,5 +93,17 @@ class AboutActivity : AppCompatActivity(), IPasscodeHandler
 
         val titleBar = findViewById<TextView>(R.id.barTitle)
         titleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+    }
+
+    private fun sendMail()
+    {
+        val emailIntent = Intent(Intent.ACTION_SENDTO)
+        emailIntent.data = Uri.parse("mailto:cortez@tezcore.com")
+
+        try {
+            startActivity(emailIntent)
+        } catch (e: ActivityNotFoundException) {
+            //TODO: Handle case where no email app is available
+        }
     }
 }

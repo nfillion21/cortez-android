@@ -227,7 +227,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
 
-            com.tezcore.cortez.activities.SettingsActivity.SETTINGS_REQUEST_CODE ->
+            SettingsActivity.SETTINGS_REQUEST_CODE ->
             {
                 if (resultCode == R.id.logout_succeed)
                 {
