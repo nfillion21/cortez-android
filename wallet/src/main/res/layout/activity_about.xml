@@ -64,6 +64,7 @@
             android:textColor="@color/colorAccent"
             android:layout_margin="@dimen/spacing_double"
             android:padding="@dimen/spacing_double"
+            android:autoLink="all"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             android:layout_marginBottom="@dimen/spacing_micro"
             android:text="@string/about_info" />
