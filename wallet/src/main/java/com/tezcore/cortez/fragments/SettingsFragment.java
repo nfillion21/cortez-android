@@ -4,16 +4,12 @@ package com.tezcore.cortez.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -33,6 +29,7 @@ import android.widget.TextView;
 
 import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.ui.authentication.EncryptionServices;
 import com.tezos.ui.utils.Storage;
 
 import java.util.Arrays;
@@ -118,18 +115,13 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         mList.setOnItemClickListener(this);
 
         List<String> list = Arrays.asList(
-                getString(R.string.use_passcode)
+                getString(R.string.ask_for_credentials)
         );
 
         ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), list);
         mList.setAdapter(adapter);
 
-        /*
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
-        String codeGuess = sharedPref.getString(PasscodeActivity.PASSCODE_KEY, null);
-
-        mList.setItemChecked(0, codeGuess != null);
-        */
+        mList.setItemChecked(0, new EncryptionServices(getActivity()).containsConfirmCredentialsKey());
 
         mExitButton = view.findViewById(R.id.exit_button);
         mExitButtonLayout = view.findViewById(R.id.exit_button_layout);
@@ -168,7 +160,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
             }
         });
 
-        //boolean isPrivateKeyOn = AddressesDatabase.getInstance().isPrivateKeyOn(getActivity());
         boolean isPasswordSaved = new Storage(getActivity()).isPasswordSaved();
         validateExitButton(isPasswordSaved);
     }
@@ -296,8 +287,21 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         {
             case 0:
             {
-                /*
+                //mList.setItemChecked(0, new EncryptionServices(getActivity()).containsConfirmCredentialsKey());
+
                 CheckedTextView checkedTextView = (CheckedTextView)view;
+
+                EncryptionServices encryptionServices = new EncryptionServices(getActivity());
+                if (checkedTextView.isChecked())
+                {
+                    encryptionServices.createConfirmCredentialsKey();
+                }
+                else
+                {
+                    encryptionServices.removeConfirmCredentialsKey();
+                }
+
+                /*
 
                 SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
                 SharedPreferences.Editor editor = sharedPref.edit();

@@ -25,7 +25,7 @@ import com.tezos.ui.fragment.PaymentAccountsFragment;
 /**
  * Created by nfillion on 25/02/16.
  */
-public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener
+public class PaymentAccountsActivity extends BaseSecureActivity implements PaymentAccountsFragment.OnCardSelectedListener
 {
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
     public static String FROM_SCREEN_KEY = "FromScreenKey";

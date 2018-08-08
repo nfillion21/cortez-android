@@ -193,6 +193,10 @@ class EncryptionServices(context: Context) {
         keyStoreWrapper.removeAndroidKeyStoreKey(CONFIRM_CREDENTIALS_KEY)
     }
 
+    fun containsConfirmCredentialsKey(): Boolean {
+        return keyStoreWrapper.containsAlias(CONFIRM_CREDENTIALS_KEY)
+    }
+
     /**
      * @return true if confirm credential authentication is not required.
      */

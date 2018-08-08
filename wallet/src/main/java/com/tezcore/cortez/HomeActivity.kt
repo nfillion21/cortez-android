@@ -79,8 +79,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         else
         {
             //switchToHome()
-
-            EncryptionServices(this).createConfirmCredentialsKey()
         }
     }
 

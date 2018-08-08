@@ -133,7 +133,6 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
             if (isFingerprintAllowed && systemServices.hasEnrolledFingerprints()) {
                 encryptionService.createFingerprintKey()
             }
-            encryptionService.createConfirmCredentialsKey()
         }
     }
 
