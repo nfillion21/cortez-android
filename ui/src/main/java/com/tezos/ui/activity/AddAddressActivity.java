@@ -160,7 +160,7 @@ public class AddAddressActivity extends BaseSecureActivity
         {
             String addressText = mTzAddress.getText().toString();
 
-            if ((addressText.startsWith("tz1") ||  addressText.startsWith("tz2") || addressText.startsWith("tz3"))
+            if ((addressText.toLowerCase().startsWith("tz1") ||  addressText.toLowerCase().startsWith("tz2") || addressText.toLowerCase().startsWith("tz3"))
                 &&
                     addressText.length() == 36)
             {

@@ -1,6 +1,7 @@
 package com.tezcore.cortez
 
 import android.app.Activity
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Build
@@ -11,6 +12,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
@@ -24,7 +26,6 @@ import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
-import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.fragment.OperationsFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
@@ -302,7 +303,19 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
-            super.onBackPressed()
+
+            AlertDialog.Builder(this)
+                    .setTitle(R.string.exit)
+                    .setMessage(R.string.exit_info)
+                    .setPositiveButton(android.R.string.yes, DialogInterface.OnClickListener
+                    {
+                        dialog,
+                        which ->
+
+                        super.onBackPressed()
+
+                    })
+                    .setNegativeButton(android.R.string.no, null).show()
         }
     }
 

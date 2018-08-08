@@ -45,7 +45,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
     private OnLogOutClickedListener mLogOutCallback;
 
     // The user view type.
-    private static final int PASSCODE_ITEM_VIEW_TYPE = 0;
+    private static final int CONFIRM_CREDENTIALS_ITEM_VIEW_TYPE = 0;
 
     // The team support view type.
     private static final int ICON_ITEM_VIEW_TYPE = 1;
@@ -210,7 +210,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
 
         SettingsArrayAdapter(Context context, List<String> list)
         {
-            super(context, android.R.layout.simple_list_item_multiple_choice, list);
+            super(context, R.layout.item_confirm_credentials_settings, list);
             this.context = context;
             this.mList = list;
         }
@@ -238,7 +238,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         {
             if (position == 0)
             {
-                return PASSCODE_ITEM_VIEW_TYPE;
+                return CONFIRM_CREDENTIALS_ITEM_VIEW_TYPE;
             }
             else
             {
@@ -258,10 +258,11 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
                 LayoutInflater inflater = ((Activity)context).getLayoutInflater();
 
                 ViewHolder viewHolder = new ViewHolder();
-                switch (type) {
-                    case PASSCODE_ITEM_VIEW_TYPE:
+                switch (type)
+                {
+                    case CONFIRM_CREDENTIALS_ITEM_VIEW_TYPE:
                     {
-                        rowView = inflater.inflate(R.layout.item_passcode_settings, parent, false);
+                        rowView = inflater.inflate(R.layout.item_confirm_credentials_settings, parent, false);
                         viewHolder.textView = rowView.findViewById(R.id.text1);
                     }
                     break;
@@ -287,8 +288,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         {
             case 0:
             {
-                //mList.setItemChecked(0, new EncryptionServices(getActivity()).containsConfirmCredentialsKey());
-
                 CheckedTextView checkedTextView = (CheckedTextView)view;
 
                 EncryptionServices encryptionServices = new EncryptionServices(getActivity());
@@ -300,29 +299,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
                 {
                     encryptionServices.removeConfirmCredentialsKey();
                 }
-
-                /*
-
-                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
-                SharedPreferences.Editor editor = sharedPref.edit();
-                if (checkedTextView.isChecked())
-                {
-                    String passcode = sharedPref.getString(PasscodeActivity.PASSCODE_KEY, null);
-
-                    if (passcode == null)
-                    {
-                        Intent intent = new Intent(getActivity(), PasscodeActivity.class);
-                        intent.putExtra(PasscodeActivity.ASK_NEW_CODE_PARAMETER, true);
-
-                        ActivityCompat.startActivityForResult(getActivity(), intent, PasscodeActivity.ASK_NEW_CODE_RESULT, null);
-                    }
-                }
-                else
-                {
-                    editor.remove(PasscodeActivity.PASSCODE_KEY);
-                }
-                editor.apply();
-                */
             }
             break;
 
