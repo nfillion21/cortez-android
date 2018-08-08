@@ -12,7 +12,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -28,14 +27,10 @@ import android.widget.TextView;
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
-import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
-import com.tezos.ui.interfaces.IPasscodeHandler;
-import com.tezos.ui.utils.ScreenUtils;
 
-import java.util.Set;
 
-public class AddAddressActivity extends AppCompatActivity implements IPasscodeHandler
+public class AddAddressActivity extends BaseSecureActivity
 {
     public static int ADD_ADDRESS_REQUEST_CODE = 0x2400; // arbitrary int
 
@@ -130,8 +125,6 @@ public class AddAddressActivity extends AppCompatActivity implements IPasscodeHa
     protected void onResume()
     {
         super.onResume();
-
-        launchPasscode();
     }
 
     protected boolean isInputDataValid()
@@ -216,11 +209,6 @@ public class AddAddressActivity extends AppCompatActivity implements IPasscodeHa
         }
 
         this.mTzAddress.setTextColor(ContextCompat.getColor(this, color));
-    }
-
-    @Override
-    public void launchPasscode() {
-        ScreenUtils.launchPasscode(this);
     }
 
     private class GenericTextWatcher implements TextWatcher

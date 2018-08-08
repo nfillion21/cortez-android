@@ -21,15 +21,11 @@ import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.PaymentAccountsFragment;
-import com.tezos.ui.interfaces.IConfirmCredentialHandler;
-import com.tezos.ui.interfaces.IPasscodeHandler;
-import com.tezos.ui.utils.ConfirmCredentialHelper;
-import com.tezos.ui.utils.ScreenUtils;
 
 /**
  * Created by nfillion on 25/02/16.
  */
-public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener, IConfirmCredentialHandler, IPasscodeHandler
+public class PaymentAccountsActivity extends AppCompatActivity implements PaymentAccountsFragment.OnCardSelectedListener
 {
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
     public static String FROM_SCREEN_KEY = "FromScreenKey";
@@ -94,13 +90,6 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
     protected void onResume()
     {
         super.onResume();
-
-        launchPasscode();
-    }
-
-    @Override
-    public void launchPasscode() {
-        ScreenUtils.launchPasscode(this);
     }
 
     private void initToolbar()
@@ -225,12 +214,6 @@ public class PaymentAccountsActivity extends AppCompatActivity implements Paymen
             starter.putExtra(Address.TAG, address.toBundle());
             ActivityCompat.startActivityForResult(this, starter, -1, null);
         }
-    }
-
-    @Override
-    public void launchConfirmCredential()
-    {
-        ConfirmCredentialHelper.launchConfirmCredential(this);
     }
 
     public enum Selection

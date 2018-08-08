@@ -16,22 +16,20 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.tezos.android.R
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezcore.cortez.fragments.HomeFragment
+import com.tezos.android.R
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.fragment.OperationsFragment
-import com.tezos.ui.interfaces.IPasscodeHandler
-import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
-class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelectedListener, IPasscodeHandler, HomeFragment.OnFragmentInteractionListener
+class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelectedListener, HomeFragment.OnFragmentInteractionListener
 {
     override fun onFragmentInteraction() {
         //switchToOperations(realSeed)
@@ -130,14 +128,8 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
     override fun onResume()
     {
         super.onResume()
-        launchPasscode()
 
         //drawer_layout.closeDrawer(GravityCompat.START)
-    }
-
-    override fun launchPasscode()
-    {
-        ScreenUtils.launchPasscode(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)

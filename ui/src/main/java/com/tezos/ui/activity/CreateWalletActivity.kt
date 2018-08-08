@@ -21,11 +21,10 @@ import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.CreateWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.fragment.VerifyCreationWalletFragment
-import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.Storage
 
-class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener {
+class CreateWalletActivity : AppCompatActivity(), CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener {
 
     private var mTitleBar: TextView? = null
 
@@ -53,8 +52,6 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
 
     override fun onResume() {
         super.onResume()
-
-        launchPasscode()
     }
 
     override fun updateTitle() {
@@ -72,10 +69,6 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
                 mTitleBar!!.text = titleScreen
             }
         }
-    }
-
-    override fun launchPasscode() {
-        ScreenUtils.launchPasscode(this)
     }
 
     private fun initToolbar(theme: CustomTheme) {

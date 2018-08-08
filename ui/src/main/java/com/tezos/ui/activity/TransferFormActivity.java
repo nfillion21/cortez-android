@@ -19,16 +19,13 @@ import android.widget.TextView;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.TransferFormFragment;
-import com.tezos.ui.interfaces.IConfirmCredentialHandler;
-import com.tezos.ui.interfaces.IPasscodeHandler;
 import com.tezos.ui.utils.ConfirmCredentialHelper;
-import com.tezos.ui.utils.ScreenUtils;
 import com.tezos.ui.utils.Storage;
 
 /**
  * Created by nfillion on 29/02/16.
  */
-public class TransferFormActivity extends AppCompatActivity implements IConfirmCredentialHandler, IPasscodeHandler
+public class TransferFormActivity extends BaseSecureActivity
 {
     public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
 
@@ -73,13 +70,6 @@ public class TransferFormActivity extends AppCompatActivity implements IConfirmC
     protected void onResume()
     {
         super.onResume();
-
-        launchPasscode();
-    }
-
-    @Override
-    public void launchPasscode() {
-        ScreenUtils.launchPasscode(this);
     }
 
     private void initToolbar(CustomTheme theme)
@@ -138,11 +128,5 @@ public class TransferFormActivity extends AppCompatActivity implements IConfirmC
     protected void onPause()
     {
         super.onPause();
-    }
-
-    @Override
-    public void launchConfirmCredential()
-    {
-        ConfirmCredentialHelper.launchConfirmCredential(this);
     }
 }

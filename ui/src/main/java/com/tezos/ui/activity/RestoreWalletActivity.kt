@@ -18,11 +18,10 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.RestoreWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
-import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.Storage
 
-class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener, IPasscodeHandler {
+class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener {
 
     val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
 
@@ -45,12 +44,6 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
 
     override fun onResume() {
         super.onResume()
-
-        launchPasscode()
-    }
-
-    override fun launchPasscode() {
-        ScreenUtils.launchPasscode(this)
     }
 
     private fun initToolbar(theme: CustomTheme) {
@@ -72,7 +65,7 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
 
         val mCloseButton = findViewById<ImageButton>(R.id.close_button)
         mCloseButton.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        mCloseButton.setOnClickListener { v ->
+        mCloseButton.setOnClickListener { _ ->
             //requests stop in onDestroy.
             finish()
         }

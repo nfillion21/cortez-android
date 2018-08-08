@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -23,12 +22,10 @@ import android.widget.Toast;
 
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
-import com.tezos.ui.interfaces.IPasscodeHandler;
-import com.tezos.ui.utils.ScreenUtils;
 
 import net.glxn.qrgen.android.QRCode;
 
-public class PublicKeyHashActivity extends AppCompatActivity implements IPasscodeHandler
+public class PublicKeyHashActivity extends BaseSecureActivity
 {
     public static final String PKH_KEY = "pkh_key";
 
@@ -105,13 +102,6 @@ public class PublicKeyHashActivity extends AppCompatActivity implements IPasscod
     protected void onResume()
     {
         super.onResume();
-
-        launchPasscode();
-    }
-
-    @Override
-    public void launchPasscode() {
-        ScreenUtils.launchPasscode(this);
     }
 
     private void initToolbar(CustomTheme theme)

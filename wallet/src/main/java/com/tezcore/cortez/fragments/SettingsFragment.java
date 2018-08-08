@@ -33,7 +33,6 @@ import android.widget.TextView;
 
 import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
-import com.tezos.ui.activity.PasscodeActivity;
 import com.tezos.ui.utils.Storage;
 
 import java.util.Arrays;
@@ -125,10 +124,12 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), list);
         mList.setAdapter(adapter);
 
+        /*
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
         String codeGuess = sharedPref.getString(PasscodeActivity.PASSCODE_KEY, null);
 
         mList.setItemChecked(0, codeGuess != null);
+        */
 
         mExitButton = view.findViewById(R.id.exit_button);
         mExitButtonLayout = view.findViewById(R.id.exit_button_layout);
@@ -295,6 +296,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         {
             case 0:
             {
+                /*
                 CheckedTextView checkedTextView = (CheckedTextView)view;
 
                 SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
@@ -316,6 +318,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
                     editor.remove(PasscodeActivity.PASSCODE_KEY);
                 }
                 editor.apply();
+                */
             }
             break;
 

@@ -3,14 +3,10 @@ package com.tezcore.cortez.activities;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -20,17 +16,14 @@ import com.tezcore.cortez.fragments.SettingsFragment;
 import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.activity.BaseSecureActivity;
-import com.tezos.ui.activity.PasscodeActivity;
 import com.tezos.ui.authentication.EncryptionServices;
-import com.tezos.ui.interfaces.IPasscodeHandler;
-import com.tezos.ui.utils.ScreenUtils;
 import com.tezos.ui.utils.Storage;
 
 /**
  * Created by nfillion on 3/6/18.
  */
 
-public class SettingsActivity extends BaseSecureActivity implements SettingsFragment.OnRowSelectedListener, IPasscodeHandler, SettingsFragment.OnLogOutClickedListener
+public class SettingsActivity extends BaseSecureActivity implements SettingsFragment.OnRowSelectedListener, SettingsFragment.OnLogOutClickedListener
 {
     private static final String TAG_SETTINGS = "SettingsTag";
 
@@ -73,6 +66,7 @@ public class SettingsActivity extends BaseSecureActivity implements SettingsFrag
     {
         super.onActivityResult(requestCode, resultCode, data);
 
+        /*
         if (requestCode == PasscodeActivity.ASK_NEW_CODE_RESULT)
         {
             if (resultCode == R.id.passcode_succeed)
@@ -98,14 +92,13 @@ public class SettingsActivity extends BaseSecureActivity implements SettingsFrag
                 // uncheck the password.
             }
         }
+        */
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
-
-        launchPasscode();
     }
 
     private void initActionBar()
@@ -132,12 +125,6 @@ public class SettingsActivity extends BaseSecureActivity implements SettingsFrag
     }
 
     @Override
-    public void launchPasscode()
-    {
-        ScreenUtils.launchPasscode(this);
-    }
-
-    @Override
     public void onItemClicked() {
 
     }
@@ -145,12 +132,6 @@ public class SettingsActivity extends BaseSecureActivity implements SettingsFrag
     @Override
     public void onLogOutClicked()
     {
-        //TODO not useful anymore soon
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.remove(PasscodeActivity.PASSCODE_KEY);
-        editor.apply();
-
         EncryptionServices encryptionServices = new EncryptionServices(getApplicationContext());
         encryptionServices.removeMasterKey();
         encryptionServices.removeFingerprintKey();

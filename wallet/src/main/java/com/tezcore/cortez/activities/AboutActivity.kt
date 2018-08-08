@@ -17,11 +17,9 @@ import com.tezos.android.R
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.BaseSecureActivity
-import com.tezos.ui.interfaces.IPasscodeHandler
-import com.tezos.ui.utils.ScreenUtils
 
 
-class AboutActivity : BaseSecureActivity(), IPasscodeHandler
+class AboutActivity : BaseSecureActivity()
 {
     private var mMailButton: Button? = null
 
@@ -42,17 +40,6 @@ class AboutActivity : BaseSecureActivity(), IPasscodeHandler
 
             sendMail()
         }
-    }
-
-    override fun onResume()
-    {
-        super.onResume()
-        launchPasscode()
-    }
-
-    override fun launchPasscode()
-    {
-        ScreenUtils.launchPasscode(this)
     }
 
     fun start(activity: Activity, theme: CustomTheme)
