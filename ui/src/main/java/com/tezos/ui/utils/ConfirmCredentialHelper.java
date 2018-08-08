@@ -52,7 +52,6 @@ public class ConfirmCredentialHelper
 
         if (isStarted)
         {
-            createKey();
             tryEncrypt();
         }
     }
@@ -110,7 +109,7 @@ public class ConfirmCredentialHelper
      * authenticated with device credentials within the last X seconds.
      */
     @RequiresApi(api = Build.VERSION_CODES.M)
-    private static void createKey()
+    public static void createKey()
     {
         // Generate a key to decrypt payment credentials, tokens, etc.
         // This will most likely be a registration step for the user when they are setting up your app.

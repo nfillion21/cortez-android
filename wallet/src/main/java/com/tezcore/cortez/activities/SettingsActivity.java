@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import com.tezcore.cortez.fragments.SettingsFragment;
 import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.ui.activity.BaseSecureActivity;
 import com.tezos.ui.activity.PasscodeActivity;
 import com.tezos.ui.authentication.EncryptionServices;
 import com.tezos.ui.interfaces.IPasscodeHandler;
@@ -29,7 +30,7 @@ import com.tezos.ui.utils.Storage;
  * Created by nfillion on 3/6/18.
  */
 
-public class SettingsActivity extends AppCompatActivity implements SettingsFragment.OnRowSelectedListener, IPasscodeHandler, SettingsFragment.OnLogOutClickedListener
+public class SettingsActivity extends BaseSecureActivity implements SettingsFragment.OnRowSelectedListener, IPasscodeHandler, SettingsFragment.OnLogOutClickedListener
 {
     private static final String TAG_SETTINGS = "SettingsTag";
 

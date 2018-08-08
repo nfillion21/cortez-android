@@ -1,6 +1,7 @@
 package com.tezcore.cortez.activities
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -8,21 +9,19 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import com.tezos.android.R
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
+import com.tezos.ui.activity.BaseSecureActivity
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
-import android.content.ActivityNotFoundException
-import android.view.View
-import android.widget.ImageButton
 
 
-class AboutActivity : AppCompatActivity(), IPasscodeHandler
+class AboutActivity : BaseSecureActivity(), IPasscodeHandler
 {
     private var mMailButton: Button? = null
 

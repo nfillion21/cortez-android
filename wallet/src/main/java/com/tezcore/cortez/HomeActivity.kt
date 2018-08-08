@@ -24,6 +24,7 @@ import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
+import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.fragment.OperationsFragment
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
@@ -80,6 +81,8 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         else
         {
             //switchToHome()
+
+            EncryptionServices(this).createConfirmCredentialsKey()
         }
     }
 

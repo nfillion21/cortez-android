@@ -97,7 +97,7 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
 
         val mCloseButton = findViewById<ImageButton>(R.id.close_button)
         mCloseButton.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        mCloseButton.setOnClickListener { v ->
+        mCloseButton.setOnClickListener { _ ->
             //requests stop in onDestroy.
             finish()
         }
@@ -178,7 +178,6 @@ class CreateWalletActivity : AppCompatActivity(), IPasscodeHandler, CreateWallet
             if (isFingerprintAllowed && systemServices.hasEnrolledFingerprints()) {
                 encryptionService.createFingerprintKey()
             }
-            encryptionService.createConfirmCredentialsKey()
         }
     }
 

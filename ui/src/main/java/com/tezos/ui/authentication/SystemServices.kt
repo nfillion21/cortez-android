@@ -20,6 +20,7 @@ class SystemServices(private val context: Context) {
     companion object {
         //@JvmStatic
         fun hasMarshmallow() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+        const val AUTHENTICATION_SCREEN_CODE = 301
     }
 
     private val keyguardManager: KeyguardManager
