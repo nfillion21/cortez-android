@@ -35,6 +35,18 @@
                 android:gravity="center_vertical|center_horizontal"
                 tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
 
+            <ImageButton android:id="@+id/close_button"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+
+                android:contentDescription="@string/content_description"
+                android:padding="@dimen/spacing_double"
+                android:gravity="end"
+                android:src="@drawable/close_black_24"
+                android:background="@drawable/selector_subtle"
+                android:layout_gravity="end|center_vertical"
+                />
+
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
@@ -76,7 +88,7 @@
                     android:textColor="@color/colorAccent"
                     android:layout_margin="@dimen/spacing_double"
                     android:padding="@dimen/spacing_double"
-                    android:autoLink="all"
+                    android:autoLink="web"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                     android:layout_marginBottom="@dimen/spacing_micro"
                     android:text="@string/about_info" />

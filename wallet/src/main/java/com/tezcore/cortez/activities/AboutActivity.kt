@@ -18,7 +18,8 @@ import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.interfaces.IPasscodeHandler
 import com.tezos.ui.utils.ScreenUtils
 import android.content.ActivityNotFoundException
-
+import android.view.View
+import android.widget.ImageButton
 
 
 class AboutActivity : AppCompatActivity(), IPasscodeHandler
@@ -93,6 +94,12 @@ class AboutActivity : AppCompatActivity(), IPasscodeHandler
 
         val titleBar = findViewById<TextView>(R.id.barTitle)
         titleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+
+        val mCloseButton = findViewById<ImageButton>(R.id.close_button)
+        mCloseButton.setColorFilter(ContextCompat.getColor(this, R.color.theme_tezos_text))
+        mCloseButton.setOnClickListener {
+            finish()
+        }
     }
 
     private fun sendMail()
