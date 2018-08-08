@@ -61,7 +61,7 @@
     <string name="alert_deleting_address">Deleting address</string>
     <string name="alert_deleting_address_body">Are you sure that you want to delete this address?</string>
     <string name="alert_exit_account">Log Out</string>
-    <string name="alert_exit_acccount_body">Please make sure you have your 24 mnemonics or your data will be lost forever.</string>
+    <string name="alert_exit_acccount_body">Please make sure you still have your 24 mnemonics words on a piece of paper or your data will be lost forever.</string>
     <string name="address_successfuly_added">Address successfully added!</string>
     <string name="general_passcode">Please enter a general password for the application.</string>
     <string name="incorrect_passcode">The passcode is incorrect, please try again.</string>

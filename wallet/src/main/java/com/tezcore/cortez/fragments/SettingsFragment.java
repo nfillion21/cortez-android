@@ -47,9 +47,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
     // The user view type.
     private static final int CONFIRM_CREDENTIALS_ITEM_VIEW_TYPE = 0;
 
-    // The team support view type.
-    private static final int ICON_ITEM_VIEW_TYPE = 1;
-
     private Button mExitButton;
     private FrameLayout mExitButtonLayout;
 
@@ -115,7 +112,8 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         mList.setOnItemClickListener(this);
 
         List<String> list = Arrays.asList(
-                getString(R.string.ask_for_credentials)
+                getString(R.string.ask_for_credentials),
+                getString(R.string.use_fingerprint)
         );
 
         ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), list);
@@ -198,11 +196,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         return res;
     }
 
-    public void notifyChanged()
-    {
-        mList.setItemChecked(0, false);
-    }
-
     private class SettingsArrayAdapter extends ArrayAdapter<String>
     {
         private final Context context;
@@ -236,14 +229,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         @Override
         public int getItemViewType(int position)
         {
-            if (position == 0)
-            {
-                return CONFIRM_CREDENTIALS_ITEM_VIEW_TYPE;
-            }
-            else
-            {
-                return ICON_ITEM_VIEW_TYPE;
-            }
+            return CONFIRM_CREDENTIALS_ITEM_VIEW_TYPE;
         }
 
         @NonNull
@@ -304,6 +290,24 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
 
             case 1:
             {
+                /*
+                if (!systemServices.hasEnrolledFingerprints()) {
+                    item.isChecked = false
+                    Snackbar.make(rootView, R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.sign_up_snack_action, { openSecuritySettings() })
+                            .show()
+                } else {
+                    // Set new checkbox state
+                    item.isChecked = !item.isChecked
+
+                    new Storage(baseContext).saveFingerprintAllowed(item.isChecked)
+                    if (!item.isChecked) {
+                        EncryptionServices(this).removeFingerprintKey()
+                    }
+                }
+                */
+
+
                 if (mCallback != null)
                 {
                     mCallback.onItemClicked();
