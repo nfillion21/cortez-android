@@ -96,6 +96,9 @@
         <item>High (0.1 ꜩ)</item>
     </string-array>
 
+    <string name="sign_up_snack_message">Register at least one fingerprint.</string>
+    <string name="sign_up_snack_action">SETTINGS</string>
+
     <!--Fingerprint Sample Dialog strings-->
     <string name="authentication_ok">OK</string>
     <string name="authentication_cancel">Cancel</string>

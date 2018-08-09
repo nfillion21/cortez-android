@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.Toolbar
@@ -14,13 +15,14 @@ import com.tezos.android.R
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.activity.BaseSecureActivity
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.extentions.openSecuritySettings
 import com.tezos.ui.utils.Storage
 
 /**
  * Created by nfillion on 3/6/18.
  */
 
-class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOptionSelectedListener, SettingsFragment.OnLogOutClickedListener
+class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOptionSelectedListener, SettingsFragment.OnLogOutClickedListener, SettingsFragment.OnSystemInformationsCallback
 {
     companion object
     {
@@ -115,26 +117,23 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
 
     override fun onFingerprintOptionClicked(isOptionChecked:Boolean)
     {
-        /*
         if (!systemServices.hasEnrolledFingerprints())
         {
-            item.isChecked = false
-            Snackbar.make(rootView, R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
+            //item.isChecked = false
+            // TODO put the checkbox to false
+
+            Snackbar.make(findViewById(android.R.id.content), R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
                     .setAction(R.string.sign_up_snack_action, { openSecuritySettings() })
                     .show()
         }
         else
         {
-            // Set new checkbox state
-            item.isChecked = !item.isChecked
+            Storage(baseContext).saveFingerprintAllowed(isOptionChecked)
+            if (!isOptionChecked)
+            {
+                EncryptionServices(this).removeFingerprintKey()
+            }
         }
-
-        Storage(baseContext).saveFingerprintAllowed(item.isChecked)
-        if (!item.isChecked)
-        {
-            EncryptionServices(this).removeFingerprintKey()
-        }
-        */
     }
 
     override fun onLogOutClicked()
@@ -148,5 +147,15 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
 
         setResult(R.id.logout_succeed, null)
         finish()
+    }
+
+    override fun isFingerprintHardwareAvailable(): Boolean
+    {
+        return (systemServices.isFingerprintHardwareAvailable())
+    }
+
+    override fun isFingerprintAllowed(): Boolean
+    {
+        return (Storage(applicationContext).isFingerprintAllowed())
     }
 }

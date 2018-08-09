@@ -43,6 +43,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
 {
     private OnFingerprintOptionSelectedListener mFingerprintOptionCallback;
     private OnLogOutClickedListener mLogOutCallback;
+    private OnSystemInformationsCallback mSystemInformationsCallback;
 
     // The user view type.
     private static final int CONFIRM_CREDENTIALS_ITEM_VIEW_TYPE = 0;
@@ -60,6 +61,12 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
     public interface OnLogOutClickedListener
     {
         void onLogOutClicked();
+    }
+
+    public interface OnSystemInformationsCallback
+    {
+        boolean isFingerprintHardwareAvailable();
+        boolean isFingerprintAllowed();
     }
 
     public static SettingsFragment newInstance()
@@ -82,6 +89,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         {
             mFingerprintOptionCallback = (OnFingerprintOptionSelectedListener) context;
             mLogOutCallback = (OnLogOutClickedListener) context;
+            mSystemInformationsCallback = (OnSystemInformationsCallback) context;
         }
         catch (ClassCastException e)
         {
@@ -104,16 +112,20 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
                 getString(R.string.ask_for_credentials)
         );
 
-        Storage storage = new Storage(getActivity().getApplicationContext());
-        if (storage.isFingerprintAllowed())
+        if (mSystemInformationsCallback.isFingerprintHardwareAvailable())
         {
-            list.add(getString(R.string.use_fingerprint));
+            list = Arrays.asList(
+                    getString(R.string.ask_for_credentials),
+                    getString(R.string.use_fingerprint)
+            );
         }
 
         ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), list);
         mList.setAdapter(adapter);
 
         mList.setItemChecked(0, new EncryptionServices(getActivity()).containsConfirmCredentialsKey());
+
+        mList.setItemChecked(1, mSystemInformationsCallback.isFingerprintAllowed());
 
         mExitButton = view.findViewById(R.id.exit_button);
         mExitButtonLayout = view.findViewById(R.id.exit_button_layout);
@@ -291,5 +303,15 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
             }
             break;
         }
+    }
+
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+
+        mSystemInformationsCallback = null;
+        mFingerprintOptionCallback = null;
+        mLogOutCallback = null;
     }
 }
