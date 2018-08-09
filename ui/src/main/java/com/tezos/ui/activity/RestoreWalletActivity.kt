@@ -18,7 +18,6 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.RestoreWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
-import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.Storage
 
 class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener {
@@ -81,7 +80,7 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
 
     override fun mnemonicsVerified(mnemonics: String) {
         /*
-        //TODO put the seed in Secrets
+        //TODO put the mnemonics in Secrets
         createKeys("hello", true)
         with(Storage(this)) {
         val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "123")
@@ -89,7 +88,7 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
         savePassword(encryptedPassword)
         saveFingerprintAllowed(true)
     }
-        byte[] seed = CryptoUtils.generateSeed(mnemonics, "");
+        byte[] mnemonics = CryptoUtils.generateSeed(mnemonics, "");
         //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
         //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
         setResult(R.id.restore_wallet_succeed, null);
@@ -101,7 +100,7 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
         // the password hello is not used in Marshmallow
         createKeys("hello", true)
         with(Storage(this)) {
-            val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "123")
+            val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "hello")
 
             savePassword(encryptedPassword)
             saveFingerprintAllowed(true)
@@ -118,11 +117,11 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
         }
     }
 
-    private fun createSeedData(mnemonics: String, password: String): Storage.SeedData {
+    private fun createSeedData(mnemonics: String, password: String): Storage.MnemonicsData {
         val encryptedSecret = EncryptionServices(applicationContext).encrypt(mnemonics, password)
 
         val pkh = CryptoUtils.generatePkh(mnemonics, "")
-        return Storage.SeedData(pkh, encryptedSecret)
+        return Storage.MnemonicsData(pkh, encryptedSecret)
     }
 
     private fun createKeys(password: String, isFingerprintAllowed: Boolean) {

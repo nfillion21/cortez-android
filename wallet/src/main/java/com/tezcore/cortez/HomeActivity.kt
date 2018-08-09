@@ -81,7 +81,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         }
     }
 
-    private fun switchToOperations(realSeed: Storage.SeedData)
+    private fun switchToOperations(realMnemonics: Storage.MnemonicsData)
     {
         val tezosTheme = CustomTheme(
                 com.tezos.ui.R.color.theme_tezos_primary,
@@ -90,7 +90,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         var address = Address()
         address.description = "main address"
-        address.pubKeyHash = realSeed.pkh
+        address.pubKeyHash = realMnemonics.pkh
 
         val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
         supportFragmentManager.beginTransaction()
@@ -174,7 +174,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                     //val seedOne = seeds[0]
 
                     // in marshmallow, you don't need any password
-                    //val seed = EncryptionServices(applicationContext).decrypt(seedOne.seed, "not useful for marshmallow")
+                    //val mnemonics = EncryptionServices(applicationContext).decrypt(seedOne.mnemonics, "not useful for marshmallow")
                     //val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
                     //mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
 

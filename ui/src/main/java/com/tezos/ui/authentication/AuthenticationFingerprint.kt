@@ -13,8 +13,8 @@ class AuthenticationFingerprint(
         private val callback: Callback) {
 
     companion object {
-        private val ERROR_TIMEOUT_MILLIS: Long = 1600
-        private val SUCCESS_DELAY_MILLIS: Long = 1300
+        private const val ERROR_TIMEOUT_MILLIS: Long = 1600
+        private const val SUCCESS_DELAY_MILLIS: Long = 1300
     }
 
     private var mCancellationSignal: CancellationSignal? = null

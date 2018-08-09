@@ -17,9 +17,9 @@ class Storage constructor(context: Context) {
 
     private val gson: Gson by lazy(LazyThreadSafetyMode.NONE) { Gson() }
 
-    data class SeedData(
+    data class MnemonicsData(
             val pkh: String,
-            val seed: String) : Serializable
+            val mnemonics: String) : Serializable
 
     companion object {
         private const val STORAGE_SETTINGS: String = "settings"
@@ -30,12 +30,12 @@ class Storage constructor(context: Context) {
 
         const val TAG: String = "storage_tag"
 
-        fun toBundle(seedData: SeedData): Bundle {
-            val serializer = SeedDataSerialization(seedData)
+        fun toBundle(mnemonicsData: MnemonicsData): Bundle {
+            val serializer = SeedDataSerialization(mnemonicsData)
             return serializer.getSerializedBundle()
         }
 
-        fun fromBundle(bundle: Bundle): SeedData {
+        fun fromBundle(bundle: Bundle): MnemonicsData {
             val mapper = SeedDataMapper(bundle)
             return mapper.mappedObjectFromBundle()
         }
@@ -74,30 +74,30 @@ class Storage constructor(context: Context) {
         return mnemonics.contains(alias)
     }
 
-    fun saveSeed(seed: SeedData) {
-        mnemonics.edit().putString(seed.pkh, gson.toJson(seed)).apply()
+    fun saveSeed(mnemonics: MnemonicsData) {
+        this.mnemonics.edit().putString(mnemonics.pkh, gson.toJson(mnemonics)).apply()
     }
 
     fun removeSeed(alias: String) {
         mnemonics.edit().remove(alias).apply()
     }
 
-    fun getMnemonicsList(): List<SeedData> {
-        val secretsList = ArrayList<SeedData>()
+    fun getMnemonicsList(): List<MnemonicsData> {
+        val secretsList = ArrayList<MnemonicsData>()
         val seedAliases = mnemonics.all
 
         seedAliases
-                .map { gson.fromJson(it.value as String, SeedData::class.java) }
+                .map { gson.fromJson(it.value as String, MnemonicsData::class.java) }
                 .forEach { secretsList.add(it) }
         return secretsList
     }
 
-    fun getMnemonics(): SeedData {
-        val secretsList = ArrayList<SeedData>()
+    fun getMnemonics(): MnemonicsData {
+        val secretsList = ArrayList<MnemonicsData>()
         val seedAliases = mnemonics.all
 
         seedAliases
-                .map { gson.fromJson(it.value as String, SeedData::class.java) }
+                .map { gson.fromJson(it.value as String, MnemonicsData::class.java) }
                 .forEach { secretsList.add(it) }
         return secretsList[0]
     }
@@ -108,14 +108,14 @@ class Storage constructor(context: Context) {
         mnemonics.edit().clear().apply()
     }
 
-    internal class SeedDataSerialization internal constructor(private val seedData: SeedData)
+    internal class SeedDataSerialization internal constructor(private val mnemonicsData: MnemonicsData)
     {
         internal fun getSerializedBundle():Bundle
         {
             val secretDataBundle = Bundle()
 
-            secretDataBundle.putString("pkh", seedData.pkh)
-            secretDataBundle.putString("seed", seedData.seed)
+            secretDataBundle.putString("pkh", mnemonicsData.pkh)
+            secretDataBundle.putString("mnemonics", mnemonicsData.mnemonics)
 
             return secretDataBundle
         }
@@ -123,12 +123,12 @@ class Storage constructor(context: Context) {
 
     internal class SeedDataMapper internal constructor(private val bundle: Bundle)
     {
-        internal fun mappedObjectFromBundle(): SeedData
+        internal fun mappedObjectFromBundle(): MnemonicsData
         {
             val alias = this.bundle.getString("pkh", null)
-            val seed = this.bundle.getString("seed", null)
+            val seed = this.bundle.getString("mnemonics", null)
 
-            return SeedData(alias, seed)
+            return MnemonicsData(alias, seed)
         }
     }
 }

@@ -7,7 +7,7 @@ fun Activity.startSecretActivity(requestCode: Int, mode: Int = SecretActivity.MO
     val intent = Intent(this, SecretActivity::class.java)
     intent.putExtra("mode", mode)
     password?.let { intent.putExtra("password", password) }
-    secretData?.let { intent.putExtra("seed", secretData) }
+    secretData?.let { intent.putExtra("mnemonics", secretData) }
     startActivityForResult(intent, requestCode)
 }
 */

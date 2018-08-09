@@ -21,7 +21,6 @@ import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.CreateWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.fragment.VerifyCreationWalletFragment
-import com.tezos.ui.utils.ScreenUtils
 import com.tezos.ui.utils.Storage
 
 class CreateWalletActivity : AppCompatActivity(), CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener {
@@ -127,9 +126,9 @@ class CreateWalletActivity : AppCompatActivity(), CreateWalletFragment.OnCreateW
     }
 
     override fun mnemonicsVerified(mnemonics: String) {
-        //TODO put the seed in secrets
+        //TODO put the mnemonics in secrets
 
-        //val seed = CryptoUtils.generateSeed(mnemonics, "")
+        //val mnemonics = CryptoUtils.generateSeed(mnemonics, "")
 
         val password = "123"
 
@@ -142,7 +141,7 @@ class CreateWalletActivity : AppCompatActivity(), CreateWalletFragment.OnCreateW
             savePassword(encryptedPassword)
             saveFingerprintAllowed(true)
 
-            // TODO put the seed later
+            // TODO put the mnemonics later
             val seedData = createSeedData(mnemonics, password)
             saveSeed(seedData)
             intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
@@ -150,17 +149,17 @@ class CreateWalletActivity : AppCompatActivity(), CreateWalletFragment.OnCreateW
             finish()
         }
 
-        //TODO put the seed in Secrets
+        //TODO put the mnemonics in Secrets
         //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
         //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
     }
 
-    private fun createSeedData(mnemonics: String, password: String): Storage.SeedData {
+    private fun createSeedData(mnemonics: String, password: String): Storage.MnemonicsData {
         val encryptedSecret = EncryptionServices(applicationContext).encrypt(mnemonics, password)
-        //logi("Original seed is: $seed")
-        //logi("Saved seed is: $encryptedSecret")
+        //logi("Original mnemonics is: $mnemonics")
+        //logi("Saved mnemonics is: $encryptedSecret")
         val pkh = CryptoUtils.generatePkh(mnemonics, "")
-        return Storage.SeedData(pkh, encryptedSecret)
+        return Storage.MnemonicsData(pkh, encryptedSecret)
     }
 
     private fun createKeys(password: String, isFingerprintAllowed: Boolean) {

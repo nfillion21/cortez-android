@@ -22,7 +22,6 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
@@ -189,7 +188,8 @@ class TransferFormFragment : Fragment()
             amount *= 1000000
             fee *= 1000000
 
-            val mnemonics = EncryptionServices(activity!!).decrypt(seedData.seed, "not useful for marshmallow")
+            //TODO would be better to decrypt after the user succeed in password
+            val mnemonics = EncryptionServices(activity!!).decrypt(seedData.mnemonics, "not useful for marshmallow")
             val sk = CryptoUtils.generateSk(mnemonics, "")
 
             val pk = CryptoUtils.generatePk(mnemonics, "")

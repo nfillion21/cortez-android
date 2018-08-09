@@ -55,7 +55,7 @@ public class TransferFormActivity extends BaseSecureActivity
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
 
         Bundle seedDataBundle = getIntent().getBundleExtra(Storage.TAG);
-        //Storage.SeedData seedData = Storage.Companion.fromBundle(seedDataBundle);
+        //Storage.MnemonicsData seedData = Storage.Companion.fromBundle(seedDataBundle);
 
         initToolbar(theme);
 
