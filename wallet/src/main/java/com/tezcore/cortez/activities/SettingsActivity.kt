@@ -24,6 +24,7 @@ import com.tezos.ui.utils.Storage
 
 class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOptionSelectedListener, SettingsFragment.OnLogOutClickedListener, SettingsFragment.OnSystemInformationsCallback
 {
+
     companion object
     {
         private val TAG_SETTINGS = "SettingsTag"
@@ -60,6 +61,18 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
         }
 
         initActionBar()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (!systemServices.isDeviceSecure()) {
+            deviceSecurityAlert = systemServices.showDeviceSecurityAlert()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        deviceSecurityAlert?.dismiss()
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -157,5 +170,10 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
     override fun isFingerprintAllowed(): Boolean
     {
         return (Storage(applicationContext).isFingerprintAllowed())
+    }
+
+    override fun isDeviceSecure(): Boolean
+    {
+        return systemServices.isDeviceSecure()
     }
 }

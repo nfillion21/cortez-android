@@ -32,7 +32,7 @@ import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.authentication.EncryptionServices;
 import com.tezos.ui.utils.Storage;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,6 +66,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
     public interface OnSystemInformationsCallback
     {
         boolean isFingerprintHardwareAvailable();
+        boolean isDeviceSecure();
         boolean isFingerprintAllowed();
     }
 
@@ -108,19 +109,19 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         mList.setItemsCanFocus(false);
         mList.setOnItemClickListener(this);
 
-        List<String> list = Arrays.asList(
-                getString(R.string.ask_for_credentials)
-        );
+        ArrayList settingsList = new ArrayList();
+
+        if (mSystemInformationsCallback.isDeviceSecure())
+        {
+            settingsList.add(getString(R.string.ask_for_credentials));
+        }
 
         if (mSystemInformationsCallback.isFingerprintHardwareAvailable())
         {
-            list = Arrays.asList(
-                    getString(R.string.ask_for_credentials),
-                    getString(R.string.use_fingerprint)
-            );
+            settingsList.add(getString(R.string.use_fingerprint));
         }
 
-        ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), list);
+        ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), settingsList);
         mList.setAdapter(adapter);
 
         mList.setItemChecked(0, new EncryptionServices(getActivity()).containsConfirmCredentialsKey());

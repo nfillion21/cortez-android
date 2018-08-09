@@ -14,19 +14,7 @@ open class BaseSecureActivity : AppCompatActivity() {
     protected val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
     private var isAuthenticating = false
 
-    private var deviceSecurityAlert: AlertDialog? = null
-
-    override fun onStart() {
-        super.onStart()
-        if (!systemServices.isDeviceSecure()) {
-            deviceSecurityAlert = systemServices.showDeviceSecurityAlert()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        deviceSecurityAlert?.dismiss()
-    }
+    protected var deviceSecurityAlert: AlertDialog? = null
 
     override fun onResume() {
         super.onResume()

@@ -239,6 +239,9 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         val publicKeyMenuItem = menu.findItem(R.id.nav_publickey)
         publicKeyMenuItem.isEnabled = enabled
+
+        val settingsMenuItem = menu.findItem(R.id.nav_settings)
+        settingsMenuItem.isEnabled = enabled
     }
 
     private fun initActionBar(theme:CustomTheme)
