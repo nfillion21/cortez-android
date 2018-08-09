@@ -9,7 +9,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Window;
@@ -133,7 +132,7 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
 
         if (fromScreen.equals(FromScreen.FromHome))
         {
-            mTitleBar.setText(getString(R.string.addresses_title));
+            mTitleBar.setText(getString(R.string.address_book_title));
         }
         else if (fromScreen.equals(FromScreen.FromTransfer))
         {
