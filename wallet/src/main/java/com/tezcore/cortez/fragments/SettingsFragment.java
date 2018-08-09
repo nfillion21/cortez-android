@@ -41,7 +41,7 @@ import java.util.List;
 
 public class SettingsFragment extends Fragment implements AdapterView.OnItemClickListener
 {
-    private OnRowSelectedListener mCallback;
+    private OnFingerprintOptionSelectedListener mFingerprintOptionCallback;
     private OnLogOutClickedListener mLogOutCallback;
 
     // The user view type.
@@ -52,9 +52,9 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
 
     private ListView mList;
 
-    public interface OnRowSelectedListener
+    public interface OnFingerprintOptionSelectedListener
     {
-        void onItemClicked();
+        void onFingerprintOptionClicked(boolean isOptionChecked);
     }
 
     public interface OnLogOutClickedListener
@@ -80,25 +80,14 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
 
         try
         {
-            mCallback = (OnRowSelectedListener) context;
+            mFingerprintOptionCallback = (OnFingerprintOptionSelectedListener) context;
             mLogOutCallback = (OnLogOutClickedListener) context;
         }
         catch (ClassCastException e)
         {
             throw new ClassCastException(context.toString()
-                    + " must implement OnRowSelectedListener");
+                    + " must implement OnFingerprintOptionSelectedListener");
         }
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState)
-    {
-        super.onActivityCreated(savedInstanceState);
-
-        if (savedInstanceState == null)
-        {
-        }
-
     }
 
     @Override
@@ -112,9 +101,14 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         mList.setOnItemClickListener(this);
 
         List<String> list = Arrays.asList(
-                getString(R.string.ask_for_credentials),
-                getString(R.string.use_fingerprint)
+                getString(R.string.ask_for_credentials)
         );
+
+        Storage storage = new Storage(getActivity().getApplicationContext());
+        if (storage.isFingerprintAllowed())
+        {
+            list.add(getString(R.string.use_fingerprint));
+        }
 
         ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), list);
         mList.setAdapter(adapter);
@@ -270,12 +264,12 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
+        CheckedTextView checkedTextView = (CheckedTextView)view;
+
         switch (position)
         {
             case 0:
             {
-                CheckedTextView checkedTextView = (CheckedTextView)view;
-
                 EncryptionServices encryptionServices = new EncryptionServices(getActivity());
                 if (checkedTextView.isChecked())
                 {
@@ -290,27 +284,9 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
 
             case 1:
             {
-                /*
-                if (!systemServices.hasEnrolledFingerprints()) {
-                    item.isChecked = false
-                    Snackbar.make(rootView, R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
-                            .setAction(R.string.sign_up_snack_action, { openSecuritySettings() })
-                            .show()
-                } else {
-                    // Set new checkbox state
-                    item.isChecked = !item.isChecked
-
-                    new Storage(baseContext).saveFingerprintAllowed(item.isChecked)
-                    if (!item.isChecked) {
-                        EncryptionServices(this).removeFingerprintKey()
-                    }
-                }
-                */
-
-
-                if (mCallback != null)
+                if (mFingerprintOptionCallback != null)
                 {
-                    mCallback.onItemClicked();
+                    mFingerprintOptionCallback.onFingerprintOptionClicked(checkedTextView.isChecked());
                 }
             }
             break;

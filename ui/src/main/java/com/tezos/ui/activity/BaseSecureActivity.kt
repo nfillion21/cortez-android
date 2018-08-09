@@ -11,7 +11,7 @@ import com.tezos.ui.utils.ArchLifecycleApp
 
 open class BaseSecureActivity : AppCompatActivity() {
 
-    private val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
+    protected val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
     private var isAuthenticating = false
 
     private var deviceSecurityAlert: AlertDialog? = null
