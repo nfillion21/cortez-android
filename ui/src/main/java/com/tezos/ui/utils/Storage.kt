@@ -13,7 +13,7 @@ import java.util.*
 class Storage constructor(context: Context) {
 
     private val settings: SharedPreferences
-    private val seeds: SharedPreferences
+    private val mnemonics: SharedPreferences
 
     private val gson: Gson by lazy(LazyThreadSafetyMode.NONE) { Gson() }
 
@@ -25,7 +25,7 @@ class Storage constructor(context: Context) {
         private const val STORAGE_SETTINGS: String = "settings"
         private const val STORAGE_ENCRYPTION_KEY: String = "encryption_key"
         private const val STORAGE_PASSWORD: String = "password"
-        private const val STORAGE_SEEDS: String = "seeds"
+        private const val STORAGE_MNEMONICS: String = "mnemonics"
         private const val STORAGE_FINGERPRINT: String = "fingerprint_allowed"
 
         const val TAG: String = "storage_tag"
@@ -43,7 +43,7 @@ class Storage constructor(context: Context) {
 
     init {
         settings = context.getSharedPreferences(STORAGE_SETTINGS, android.content.Context.MODE_PRIVATE)
-        seeds = context.getSharedPreferences(STORAGE_SEEDS, android.content.Context.MODE_PRIVATE)
+        mnemonics = context.getSharedPreferences(STORAGE_MNEMONICS, android.content.Context.MODE_PRIVATE)
     }
 
     fun saveEncryptionKey(key: String) {
@@ -71,20 +71,20 @@ class Storage constructor(context: Context) {
     }
 
     fun hasSeed(alias: String): Boolean {
-        return seeds.contains(alias)
+        return mnemonics.contains(alias)
     }
 
     fun saveSeed(seed: SeedData) {
-        seeds.edit().putString(seed.pkh, gson.toJson(seed)).apply()
+        mnemonics.edit().putString(seed.pkh, gson.toJson(seed)).apply()
     }
 
     fun removeSeed(alias: String) {
-        seeds.edit().remove(alias).apply()
+        mnemonics.edit().remove(alias).apply()
     }
 
-    fun getSeeds(): List<SeedData> {
+    fun getMnemonicsList(): List<SeedData> {
         val secretsList = ArrayList<SeedData>()
-        val seedAliases = seeds.all
+        val seedAliases = mnemonics.all
 
         seedAliases
                 .map { gson.fromJson(it.value as String, SeedData::class.java) }
@@ -92,9 +92,9 @@ class Storage constructor(context: Context) {
         return secretsList
     }
 
-    fun getSeed(): SeedData {
+    fun getMnemonics(): SeedData {
         val secretsList = ArrayList<SeedData>()
-        val seedAliases = seeds.all
+        val seedAliases = mnemonics.all
 
         seedAliases
                 .map { gson.fromJson(it.value as String, SeedData::class.java) }
@@ -105,7 +105,7 @@ class Storage constructor(context: Context) {
     fun clear()
     {
         settings.edit().clear().apply()
-        seeds.edit().clear().apply()
+        mnemonics.edit().clear().apply()
     }
 
     internal class SeedDataSerialization internal constructor(private val seedData: SeedData)

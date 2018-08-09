@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
-import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
@@ -61,9 +60,8 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         val isPasswordSaved = Storage(this).isPasswordSaved()
         if (isPasswordSaved)
         {
-            val seeds = Storage(baseContext).getSeeds()
-            val seedOne = seeds[0]
-            switchToOperations(seedOne)
+            val seed = Storage(baseContext).getMnemonics()
+            switchToOperations(seed)
         }
         else
         {
@@ -172,7 +170,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.restore_wallet_succeed)
                 {
-                    //val seeds = Storage(baseContext).getSeeds()
+                    //val seeds = Storage(baseContext).getMnemonicsList()
                     //val seedOne = seeds[0]
 
                     // in marshmallow, you don't need any password
@@ -319,7 +317,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 val isPasswordSaved = Storage(this).isPasswordSaved()
                 if (isPasswordSaved)
                 {
-                    val seed = Storage(baseContext).getSeed()
+                    val seed = Storage(baseContext).getMnemonics()
                     val seedBundle = Storage.toBundle(seed)
                     TransferFormActivity.start(this, seedBundle, tezosTheme)
                 }
@@ -329,7 +327,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 val isPasswordSaved = Storage(this).isPasswordSaved()
                 if (isPasswordSaved)
                 {
-                    val seed = Storage(baseContext).getSeed()
+                    val seed = Storage(baseContext).getMnemonics()
                     PublicKeyHashActivity.start(this, seed.pkh, tezosTheme)
                 }
             }
