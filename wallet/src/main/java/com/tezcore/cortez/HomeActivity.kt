@@ -83,17 +83,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        /*
-        if (!isAuthenticating && !EncryptionServices(applicationContext).validateConfirmCredentialsAuthentication()) {
-            isAuthenticating = true
-            systemServices.showAuthenticationScreen(this, AUTHENTICATION_SCREEN_CODE)
-        }
-        */
-    }
-
     private fun switchToOperations(realSeed: Storage.SeedData)
     {
         val tezosTheme = CustomTheme(
@@ -122,13 +111,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, homeFragment)
                 .commit()
-    }
-
-    override fun onResume()
-    {
-        super.onResume()
-
-        //drawer_layout.closeDrawer(GravityCompat.START)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -355,13 +337,11 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             }
             R.id.nav_settings ->
             {
-                com.tezcore.cortez.activities.SettingsActivity.start(this, tezosTheme)
+                SettingsActivity.start(this, tezosTheme)
             }
             R.id.nav_info ->
             {
-                val starter = Intent(this, AboutActivity::class.java)
-                starter.putExtra(CustomTheme.TAG, tezosTheme.toBundle())
-                ActivityCompat.startActivityForResult(this, starter, -1, null)
+                AboutActivity.start(this, tezosTheme)
             }
         }
 

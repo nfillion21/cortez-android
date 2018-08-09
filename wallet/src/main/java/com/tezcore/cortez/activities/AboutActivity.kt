@@ -23,6 +23,27 @@ class AboutActivity : BaseSecureActivity()
 {
     private var mMailButton: Button? = null
 
+    companion object
+    {
+        private val ABOUT_TAG = "AboutTag"
+
+        var SETTINGS_REQUEST_CODE = 0x2500 // arbitrary int
+
+        fun start(activity: Activity, theme: CustomTheme)
+        {
+            var starter = getStartIntent(activity, theme)
+            ActivityCompat.startActivityForResult(activity, starter, -1, null)
+        }
+
+        private fun getStartIntent(context: Context, theme:CustomTheme): Intent
+        {
+            val starter = Intent(context, AboutActivity::class.java)
+            starter.putExtra(CustomTheme.TAG, theme.toBundle())
+
+            return starter
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -40,20 +61,6 @@ class AboutActivity : BaseSecureActivity()
 
             sendMail()
         }
-    }
-
-    fun start(activity: Activity, theme: CustomTheme)
-    {
-        var starter = getStartIntent(activity, theme)
-        ActivityCompat.startActivityForResult(activity, starter, -1, null)
-    }
-
-    private fun getStartIntent(context: Context, theme:CustomTheme): Intent
-    {
-        val starter = Intent(context, AboutActivity::class.java)
-        starter.putExtra(CustomTheme.TAG, theme.toBundle())
-
-        return starter
     }
 
     private fun initActionBar(theme:CustomTheme)
