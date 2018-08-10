@@ -96,18 +96,19 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
         finish();
         */
 
+        /*
         val dialog = PasswordDialog()
-        dialog.stage = PasswordDialog.Stage.PASSWORD
         dialog.authenticationSuccessListener = {
             //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
             //pay(src, srcPk, dst, amount, fee, sk)
         }
         dialog.show(supportFragmentManager, "Password")
+        */
+
+        //*
 
 
 
-
-        /*
         val password = "123"
 
         //TODO asks the user to put his password.
@@ -129,7 +130,9 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
             setResult(R.id.restore_wallet_succeed, intent)
             finish()
         }
-        */
+
+
+
     }
 
     private fun createSeedData(mnemonics: String, password: String): Storage.MnemonicsData {

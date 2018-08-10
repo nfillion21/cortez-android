@@ -10,18 +10,12 @@ import android.view.inputmethod.EditorInfo
 import com.tezos.ui.R
 import kotlinx.android.synthetic.main.dialog_fingerprint_backup.*
 import kotlinx.android.synthetic.main.dialog_fingerprint_container.*
-import kotlinx.android.synthetic.main.dialog_fingerprint_content.*
+import kotlinx.android.synthetic.main.dialog_pwd_content.*
 
 class PasswordDialog : AppCompatDialogFragment() {
 
     var passwordVerificationListener: ((password: String) -> Boolean)? = null
     var authenticationSuccessListener: ((password: String) -> Unit)? = null
-
-    var stage = Stage.FINGERPRINT
-
-    /**
-     * The crypto object to be passed in when authenticating with fingerprint.
-     */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +39,10 @@ class PasswordDialog : AppCompatDialogFragment() {
 
         showBackupStage()
 
-        passwordView.setOnEditorActionListener { _, actionId, _ -> onEditorAction(actionId) }
+        enterPassword.setOnEditorActionListener {
+            _, actionId,
+            _ -> onEditorAction(actionId)
+        }
     }
 
     private fun onEditorAction(actionId: Int): Boolean {
@@ -58,7 +55,6 @@ class PasswordDialog : AppCompatDialogFragment() {
     private fun showBackupStage() {
         cancelButtonView.setText(R.string.authentication_cancel)
         secondButtonView.setText(R.string.authentication_ok)
-        backupContainerView.visibility = View.VISIBLE
     }
 
     /**
