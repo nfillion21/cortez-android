@@ -4,9 +4,9 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-def alphanetPropertiesFile = rootProject.file("wallet/deployment/alphanet.properties")
-def zeronetPropertiesFile = rootProject.file("wallet/deployment/zeronet.properties")
-def betanetPropertiesFile = rootProject.file("wallet/deployment/betanet.properties")
+def alphanetPropertiesFile = rootProject.file("cortez/deployment/alphanet.properties")
+def zeronetPropertiesFile = rootProject.file("cortez/deployment/zeronet.properties")
+def betanetPropertiesFile = rootProject.file("cortez/deployment/betanet.properties")
 
 def keystoreAlphanetProperties = new Properties()
 def keystoreBetanetProperties = new Properties()
