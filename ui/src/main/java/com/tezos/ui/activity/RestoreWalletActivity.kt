@@ -15,6 +15,7 @@ import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.authentication.PasswordDialog
 import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.RestoreWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
@@ -94,6 +95,19 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
         setResult(R.id.restore_wallet_succeed, null);
         finish();
         */
+
+        val dialog = PasswordDialog()
+        dialog.stage = PasswordDialog.Stage.PASSWORD
+        dialog.authenticationSuccessListener = {
+            //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
+            //pay(src, srcPk, dst, amount, fee, sk)
+        }
+        dialog.show(supportFragmentManager, "Password")
+
+
+
+
+        /*
         val password = "123"
 
         //TODO asks the user to put his password.
@@ -115,6 +129,7 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
             setResult(R.id.restore_wallet_succeed, intent)
             finish()
         }
+        */
     }
 
     private fun createSeedData(mnemonics: String, password: String): Storage.MnemonicsData {

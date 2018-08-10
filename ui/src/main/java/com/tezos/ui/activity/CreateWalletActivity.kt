@@ -17,6 +17,7 @@ import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.authentication.PasswordDialog
 import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.CreateWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
@@ -130,6 +131,8 @@ class CreateWalletActivity : AppCompatActivity(), CreateWalletFragment.OnCreateW
 
         //val mnemonics = CryptoUtils.generateSeed(mnemonics, "")
 
+
+        /*
         val password = "123"
 
         //TODO asks the user to put his password.
@@ -148,6 +151,7 @@ class CreateWalletActivity : AppCompatActivity(), CreateWalletFragment.OnCreateW
             setResult(R.id.create_wallet_succeed, intent)
             finish()
         }
+        */
 
         //TODO put the mnemonics in Secrets
         //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
