@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/rootView"
     android:orientation="vertical">
 
     <FrameLayout
@@ -32,13 +33,13 @@
             android:layout_weight="1"
             android:visibility="invisible" />
         <Button
-            android:id="@+id/cancelButtonView"
+            android:id="@+id/cancelButtonPasswordView"
             style="?attr/buttonBarNegativeButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <Button
-            android:id="@+id/secondButtonView"
+            android:id="@+id/secondButtonPasswordView"
             style="?attr/buttonBarPositiveButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

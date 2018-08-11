@@ -1,7 +1,9 @@
 package com.tezos.ui.authentication
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AppCompatDialogFragment
 import android.view.LayoutInflater
@@ -9,8 +11,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import com.tezos.ui.R
+import com.tezos.ui.extentions.openSecuritySettings
 import kotlinx.android.synthetic.main.dialog_fingerprint_backup.*
 import kotlinx.android.synthetic.main.dialog_fingerprint_container.*
+import kotlinx.android.synthetic.main.dialog_pwd_container.*
 import kotlinx.android.synthetic.main.dialog_pwd_content.*
 
 class PasswordDialog : AppCompatDialogFragment()
@@ -23,6 +27,7 @@ class PasswordDialog : AppCompatDialogFragment()
     interface OnPasswordDialogListener
     {
         fun isFingerprintHardwareAvailable():Boolean
+        fun hasEnrolledFingerprints():Boolean
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,18 +60,22 @@ class PasswordDialog : AppCompatDialogFragment()
         super.onViewCreated(view, savedInstanceState)
         dialog.setTitle(getString(R.string.sign_up_create_master_password))
 
-        cancelButtonView.setText(R.string.authentication_cancel)
-        secondButtonView.setText(R.string.authentication_ok)
+        cancelButtonPasswordView.setText(R.string.authentication_cancel)
+        secondButtonPasswordView.setText(R.string.authentication_ok)
 
-        cancelButtonView.setOnClickListener { dismiss() }
-        secondButtonView.setOnClickListener {
+        cancelButtonPasswordView.setOnClickListener { dismiss() }
+        secondButtonPasswordView.setOnClickListener {
             verifyPassword()
         }
 
-        if (!listener!!.isFingerprintHardwareAvailable())
+        if (listener!!.isFingerprintHardwareAvailable())
         {
             useFingerprintInFutureCheck.visibility = View.VISIBLE
         }
+
+        useFingerprintInFutureCheck.isChecked = listener!!.hasEnrolledFingerprints()
+
+        useFingerprintInFutureCheck.setOnCheckedChangeListener { _, checked -> onAllowFingerprint(checked) }
 
         enterPassword.setOnEditorActionListener {
             _, actionId,
@@ -101,5 +110,17 @@ class PasswordDialog : AppCompatDialogFragment()
      */
     private fun checkPassword(password: String): Boolean {
         return passwordVerificationListener?.invoke(password) ?: false
+    }
+
+    private fun onAllowFingerprint(checked: Boolean)
+    {
+        if (checked && !listener!!.hasEnrolledFingerprints())
+        {
+            useFingerprintInFutureCheck.isChecked = false
+            Snackbar.make(rootView, R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.sign_up_snack_action, { activity?.openSecuritySettings() })
+                    .setActionTextColor(Color.YELLOW)
+                    .show()
+        }
     }
 }
