@@ -91,15 +91,16 @@
     <string name="six_words_match">These 6 words match with the mnemonics previously displayed.</string>
     <string name="six_words_do_not_match">These 6 words do not match with the mnemonics previously displayed.</string>
     <string-array name="array_fee">
-        <item>Standard (0.05 ꜩ)</item>
-        <item>Low (0.00 ꜩ)</item>
-        <item>High (0.1 ꜩ)</item>
+        <item>Low (0.01 ꜩ)</item>
+        <item>None (0.00 ꜩ)</item>
+        <item>High (0.05 ꜩ)</item>
     </string-array>
 
     <string name="sign_up_snack_message">Register at least one fingerprint.</string>
     <string name="sign_up_snack_action">SETTINGS</string>
     <string name="sign_up_allow_fingerprint">Allow Fingerprint for later use</string>
     <string name="sign_up_create_master_password">Master Password</string>
+    <string name="sign_up_set_secure_password">Set a secure password. It must be at least six characters long. This password will be asked for transfers.</string>
 
     <!--Fingerprint Sample Dialog strings-->
     <string name="authentication_ok">OK</string>

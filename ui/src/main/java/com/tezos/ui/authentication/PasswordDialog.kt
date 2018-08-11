@@ -61,9 +61,6 @@ class PasswordDialog : AppCompatDialogFragment()
         super.onViewCreated(view, savedInstanceState)
         dialog.setTitle(getString(R.string.sign_up_create_master_password))
 
-        cancelButtonPasswordView.setText(R.string.authentication_cancel)
-        secondButtonPasswordView.setText(R.string.authentication_ok)
-
         cancelButtonPasswordView.setOnClickListener { dismiss() }
         secondButtonPasswordView.setOnClickListener {
             verifyPassword()

@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:text="@string/authentication_fingerprint_new_enrollment_description"
+            android:text="@string/sign_up_set_secure_password"
             android:textColor="?android:attr/textColorSecondary" />
     </FrameLayout>
 

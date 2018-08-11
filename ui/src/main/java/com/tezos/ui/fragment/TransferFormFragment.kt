@@ -451,7 +451,7 @@ class TransferFormFragment : Fragment()
         when (selectedItemThreeDS.toInt())
         {
             0 -> {
-                amountDouble += 0.05
+                amountDouble += 0.01
             }
 
             1 -> {
@@ -459,7 +459,7 @@ class TransferFormFragment : Fragment()
             }
 
             2 -> {
-                amountDouble += 0.1
+                amountDouble += 0.05
             }
 
             else -> {
