@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/backupContainerView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="16dp"
-    android:paddingBottom="8dp">
+    android:paddingTop="@dimen/spacing_double"
+    android:paddingBottom="@dimen/spacing_double"
+    android:orientation="vertical">
 
     <FrameLayout
         android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
+        android:layout_marginBottom="@dimen/spacing_double"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         >
@@ -19,17 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:text="@string/authentication_password_description"
-            android:id="@+id/passwordDescriptionView"
-            android:textColor="?android:attr/textColorSecondary" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:text="@string/authentication_fingerprint_new_enrollment_description"
-            android:id="@+id/fingerprintEnrolledView"
-            android:visibility="gone"
             android:textColor="?android:attr/textColorSecondary" />
     </FrameLayout>
 
@@ -38,40 +28,32 @@
         android:layout_height="wrap_content"
         android:inputType="textPassword"
         android:ems="10"
-        android:hint="@string/authentication_password"
-        android:imeOptions="actionGo"
-        android:id="@+id/enterPassword"
-        android:layout_below="@+id/description"
-        android:layout_marginTop="16dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_alignParentStart="true" />
+        android:hint="@string/sign_up_prompt_password"
+        android:imeOptions="actionNext"
+        android:id="@+id/enterPassword" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
-        android:ems="10"
-        android:hint="@string/authentication_password"
-        android:imeOptions="actionGo"
-        android:id="@+id/confirmPassword"
-        android:layout_below="@+id/description"
-        android:layout_marginTop="16dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_alignParentStart="true" />
+        android:ems="10"
+        android:hint="@string/sign_up_prompt_confirm_password"
+        android:imeOptions="actionDone"
+        android:id="@+id/confirmPassword" />
 
     <CheckBox
         android:id="@+id/useFingerprintInFutureView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/confirmPassword"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/spacing_double"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:checked="true"
-        android:text="@string/authentication_fingerprint_use_in_future" />
+        android:text="@string/sign_up_allow_fingerprint" />
 
-</RelativeLayout>
+</LinearLayout>
 

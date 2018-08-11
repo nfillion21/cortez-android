@@ -80,35 +80,15 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
     }
 
     override fun mnemonicsVerified(mnemonics: String) {
-        /*
-        //TODO put the mnemonics in Secrets
-        createKeys("hello", true)
-        with(Storage(this)) {
-        val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "123")
 
-        savePassword(encryptedPassword)
-        saveFingerprintAllowed(true)
-    }
-        byte[] mnemonics = CryptoUtils.generateSeed(mnemonics, "");
-        //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
-        //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
-        setResult(R.id.restore_wallet_succeed, null);
-        finish();
-        */
-
-        /*
         val dialog = PasswordDialog()
         dialog.authenticationSuccessListener = {
             //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
             //pay(src, srcPk, dst, amount, fee, sk)
         }
         dialog.show(supportFragmentManager, "Password")
-        */
 
-        //*
-
-
-
+        /*
         val password = "123"
 
         //TODO asks the user to put his password.
@@ -131,6 +111,8 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
             finish()
         }
 
+
+        */
 
 
     }

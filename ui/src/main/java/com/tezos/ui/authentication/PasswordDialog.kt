@@ -31,7 +31,7 @@ class PasswordDialog : AppCompatDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dialog.setTitle(getString(R.string.authentication_title))
+        dialog.setTitle(getString(R.string.sign_up_create_master_password))
         cancelButtonView.setOnClickListener { dismiss() }
         secondButtonView.setOnClickListener {
             verifyPassword()

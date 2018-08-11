@@ -98,6 +98,8 @@
 
     <string name="sign_up_snack_message">Register at least one fingerprint.</string>
     <string name="sign_up_snack_action">SETTINGS</string>
+    <string name="sign_up_allow_fingerprint">Allow Fingerprint for later use</string>
+    <string name="sign_up_create_master_password">Master Password</string>
 
     <!--Fingerprint Sample Dialog strings-->
     <string name="authentication_ok">OK</string>
@@ -118,6 +120,8 @@
     <string name="authentication_fingerprint_icon_description">Fingerprint icon</string>
     <string name="authentication_fingerprint_use_to_authenticate_key">use_fingerprint_to_authenticate_key</string>
 
+    <string name="sign_up_prompt_password">Enter password</string>
+    <string name="sign_up_prompt_confirm_password">Confirm password</string>
 
     <!--Lock Check strings -->
     <string name="lock_exit">Exit</string>
