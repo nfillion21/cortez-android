@@ -32,9 +32,10 @@ class PasswordDialog : AppCompatDialogFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        isCancelable = true
 
         // Do not create a new Fragment when the Activity is re-created such as orientation changes.
-        retainInstance = true
+        //retainInstance = true
         setStyle(DialogFragment.STYLE_NORMAL, R.style.AuthenticationDialog)
     }
 

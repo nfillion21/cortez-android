@@ -159,6 +159,6 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
     }
 
     override fun hasEnrolledFingerprints(): Boolean {
-        return !systemServices.hasEnrolledFingerprints()
+        return systemServices.hasEnrolledFingerprints()
     }
 }
