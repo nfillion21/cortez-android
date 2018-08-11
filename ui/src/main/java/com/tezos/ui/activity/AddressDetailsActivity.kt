@@ -17,7 +17,7 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.fragment.OperationsFragment
 
-class AddressDetailsActivity : AppCompatActivity()
+class AddressDetailsActivity : BaseSecureActivity()
 {
     private var mToolbarBackButton: ImageButton? = null
 

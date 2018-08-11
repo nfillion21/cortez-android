@@ -24,11 +24,9 @@ import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.fragment.VerifyCreationWalletFragment
 import com.tezos.ui.utils.Storage
 
-class CreateWalletActivity : AppCompatActivity(), CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener {
+class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener {
 
     private var mTitleBar: TextView? = null
-
-    private val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

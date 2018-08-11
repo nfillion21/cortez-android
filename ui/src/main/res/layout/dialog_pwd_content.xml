@@ -46,13 +46,14 @@
         android:id="@+id/confirmPassword" />
 
     <CheckBox
-        android:id="@+id/useFingerprintInFutureView"
+        android:id="@+id/useFingerprintInFutureCheck"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_double"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:checked="true"
+        android:visibility="gone"
         android:text="@string/sign_up_allow_fingerprint" />
 
 </LinearLayout>

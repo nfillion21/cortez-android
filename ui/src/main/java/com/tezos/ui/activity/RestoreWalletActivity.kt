@@ -21,9 +21,24 @@ import com.tezos.ui.fragment.RestoreWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.utils.Storage
 
-class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener {
+class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener, PasswordDialog.OnPasswordDialogListener {
 
-    val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
+    companion object {
+        var RESTORE_WALLET_REQUEST_CODE = 0x2400 // arbitrary int
+        const val SEED_DATA_KEY = "seed_data_key"
+
+        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent {
+            val starter = Intent(context, RestoreWalletActivity::class.java)
+            starter.putExtra(CustomTheme.TAG, themeBundle)
+
+            return starter
+        }
+
+        fun start(activity: Activity, theme: CustomTheme) {
+            val starter = getStartIntent(activity, theme.toBundle())
+            ActivityCompat.startActivityForResult(activity, starter, RESTORE_WALLET_REQUEST_CODE, null)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,10 +55,6 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
                     .add(R.id.restorewallet_container, restoreWalletFragment)
                     .commit()
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     private fun initToolbar(theme: CustomTheme) {
@@ -143,20 +154,7 @@ class RestoreWalletActivity : AppCompatActivity(), RestoreWalletFragment.OnWordS
         }
     }
 
-    companion object {
-        var RESTORE_WALLET_REQUEST_CODE = 0x2400 // arbitrary int
-        const val SEED_DATA_KEY = "seed_data_key"
-
-        fun getStartIntent(context: Context, themeBundle: Bundle): Intent {
-            val starter = Intent(context, RestoreWalletActivity::class.java)
-            starter.putExtra(CustomTheme.TAG, themeBundle)
-
-            return starter
-        }
-
-        fun start(activity: Activity, theme: CustomTheme) {
-            val starter = getStartIntent(activity, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, RESTORE_WALLET_REQUEST_CODE, null)
-        }
+    override fun isFingerprintHardwareAvailable(): Boolean {
+        return systemServices.isFingerprintHardwareAvailable()
     }
 }

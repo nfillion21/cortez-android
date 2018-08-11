@@ -14,8 +14,6 @@ open class BaseSecureActivity : AppCompatActivity() {
     protected val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(this) }
     private var isAuthenticating = false
 
-    protected var deviceSecurityAlert: AlertDialog? = null
-
     override fun onResume() {
         super.onResume()
 

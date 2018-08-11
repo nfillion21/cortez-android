@@ -1,5 +1,6 @@
 package com.tezos.ui.authentication
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AppCompatDialogFragment
@@ -12,10 +13,17 @@ import kotlinx.android.synthetic.main.dialog_fingerprint_backup.*
 import kotlinx.android.synthetic.main.dialog_fingerprint_container.*
 import kotlinx.android.synthetic.main.dialog_pwd_content.*
 
-class PasswordDialog : AppCompatDialogFragment() {
-
+class PasswordDialog : AppCompatDialogFragment()
+{
     var passwordVerificationListener: ((password: String) -> Boolean)? = null
     var authenticationSuccessListener: ((password: String) -> Unit)? = null
+
+    private var listener: OnPasswordDialogListener? = null
+
+    interface OnPasswordDialogListener
+    {
+        fun isFingerprintHardwareAvailable():Boolean
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,15 +37,36 @@ class PasswordDialog : AppCompatDialogFragment() {
         return inflater!!.inflate(R.layout.dialog_pwd_container, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onAttach(context: Context)
+    {
+        super.onAttach(context)
+        if (context is OnPasswordDialogListener)
+        {
+            listener = context
+        }
+        else
+        {
+            throw RuntimeException(context.toString() + " must implement OnPasswordDialogListener")
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?)
+    {
         super.onViewCreated(view, savedInstanceState)
         dialog.setTitle(getString(R.string.sign_up_create_master_password))
+
+        cancelButtonView.setText(R.string.authentication_cancel)
+        secondButtonView.setText(R.string.authentication_ok)
+
         cancelButtonView.setOnClickListener { dismiss() }
         secondButtonView.setOnClickListener {
             verifyPassword()
         }
 
-        showBackupStage()
+        if (!listener!!.isFingerprintHardwareAvailable())
+        {
+            useFingerprintInFutureCheck.visibility = View.VISIBLE
+        }
 
         enterPassword.setOnEditorActionListener {
             _, actionId,
@@ -50,11 +79,6 @@ class PasswordDialog : AppCompatDialogFragment() {
             verifyPassword()
             true
         } else false
-    }
-
-    private fun showBackupStage() {
-        cancelButtonView.setText(R.string.authentication_cancel)
-        secondButtonView.setText(R.string.authentication_ok)
     }
 
     /**
@@ -77,14 +101,5 @@ class PasswordDialog : AppCompatDialogFragment() {
      */
     private fun checkPassword(password: String): Boolean {
         return passwordVerificationListener?.invoke(password) ?: false
-    }
-
-    /**
-     * Enumeration to indicate which authentication method the user is trying to authenticate with.
-     */
-    enum class Stage {
-        FINGERPRINT,
-        NEW_FINGERPRINT_ENROLLED,
-        PASSWORD
     }
 }
