@@ -23,11 +23,6 @@ class HomeFragment : Fragment()
     private var mCreateWalletButton: Button? = null
     private var mTezosLogo: ImageView? = null
 
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)

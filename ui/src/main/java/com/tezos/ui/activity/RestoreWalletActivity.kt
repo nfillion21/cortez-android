@@ -92,26 +92,7 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
 
     override fun mnemonicsVerified(mnemonics: String)
     {
-        val dialog = PasswordDialog()
-        dialog.passwordVerificationListener = {
-
-            //TODO asks the user to put his password.
-            // the password hello is not used in Marshmallow
-            createKeys(it, true)
-            with(Storage(this)) {
-                val encryptedPassword = EncryptionServices(applicationContext).encrypt(it, "hello")
-
-                savePassword(encryptedPassword)
-                saveFingerprintAllowed(true)
-
-                val seedData = createSeedData(mnemonics, it)
-                saveSeed(seedData)
-
-                intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
-                setResult(R.id.restore_wallet_succeed, intent)
-                finish()
-            }
-        }
+        val dialog = PasswordDialog.newInstance(mnemonics)
         dialog.show(supportFragmentManager, "Password")
     }
 
@@ -147,5 +128,24 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
 
     override fun hasEnrolledFingerprints(): Boolean {
         return systemServices.hasEnrolledFingerprints()
+    }
+
+    override fun passwordVerified(mnemonics: String, password: String, fingerprint: Boolean)
+    {
+        // the password hello is not used in Marshmallow
+        createKeys(password, fingerprint)
+        with(Storage(this)) {
+            val encryptedPassword = EncryptionServices(applicationContext).encrypt(password, "hello")
+
+            savePassword(encryptedPassword)
+            saveFingerprintAllowed(fingerprint)
+
+            val seedData = createSeedData(mnemonics, password)
+            saveSeed(seedData)
+
+            intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
+            setResult(R.id.restore_wallet_succeed, intent)
+            finish()
+        }
     }
 }

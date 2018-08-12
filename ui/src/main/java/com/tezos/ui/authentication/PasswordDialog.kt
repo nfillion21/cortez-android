@@ -21,14 +21,26 @@ import kotlinx.android.synthetic.main.dialog_pwd_content.*
 
 class PasswordDialog : AppCompatDialogFragment()
 {
-    var passwordVerificationListener: ((password: String) -> Unit)? = null
-
     private var listener: OnPasswordDialogListener? = null
 
     interface OnPasswordDialogListener
     {
         fun isFingerprintHardwareAvailable():Boolean
         fun hasEnrolledFingerprints():Boolean
+        fun passwordVerified(mnemonics: String, password: String, fingerprint: Boolean)
+    }
+
+    companion object
+    {
+        @JvmStatic
+        fun newInstance(mnemonics: String) =
+                PasswordDialog().apply {
+                    arguments = Bundle().apply {
+                        putString(MNEMONICS_KEY, mnemonics)
+                    }
+                }
+
+        private const val MNEMONICS_KEY = "mnemonics_key"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,8 +100,15 @@ class PasswordDialog : AppCompatDialogFragment()
      */
     private fun verifyPassword() {
         val password = enterPassword.text.toString()
+        val fingerprint = useFingerprintInFutureCheck.isChecked
         dismiss()
-        passwordVerificationListener?.invoke(password)
+
+        val listener = listener
+
+        arguments?.let {
+            val mnemonics = it.getString(MNEMONICS_KEY)
+            listener?.passwordVerified(mnemonics, password, fingerprint)
+        }
     }
 
     private fun onAllowFingerprint(checked: Boolean)
