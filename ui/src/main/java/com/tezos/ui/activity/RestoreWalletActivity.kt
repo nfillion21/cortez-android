@@ -90,42 +90,29 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         searchWordDialogFragment.show(supportFragmentManager, "searchWordDialog")
     }
 
-    override fun mnemonicsVerified(mnemonics: String) {
-
+    override fun mnemonicsVerified(mnemonics: String)
+    {
         val dialog = PasswordDialog()
-        dialog.authenticationSuccessListener = {
-            //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
-            //pay(src, srcPk, dst, amount, fee, sk)
+        dialog.passwordVerificationListener = {
+
+            //TODO asks the user to put his password.
+            // the password hello is not used in Marshmallow
+            createKeys(it, true)
+            with(Storage(this)) {
+                val encryptedPassword = EncryptionServices(applicationContext).encrypt(it, "hello")
+
+                savePassword(encryptedPassword)
+                saveFingerprintAllowed(true)
+
+                val seedData = createSeedData(mnemonics, it)
+                saveSeed(seedData)
+
+                intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
+                setResult(R.id.restore_wallet_succeed, intent)
+                finish()
+            }
         }
         dialog.show(supportFragmentManager, "Password")
-
-        /*
-        val password = "123"
-
-        //TODO asks the user to put his password.
-        // the password hello is not used in Marshmallow
-        createKeys("hello", true)
-        with(Storage(this)) {
-            val encryptedPassword = EncryptionServices(applicationContext).encrypt("123", "hello")
-
-            savePassword(encryptedPassword)
-            saveFingerprintAllowed(true)
-
-            val seedData = createSeedData(mnemonics, password)
-            saveSeed(seedData)
-
-            //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
-            //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
-
-            intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
-            setResult(R.id.restore_wallet_succeed, intent)
-            finish()
-        }
-
-
-        */
-
-
     }
 
     private fun createSeedData(mnemonics: String, password: String): Storage.MnemonicsData {

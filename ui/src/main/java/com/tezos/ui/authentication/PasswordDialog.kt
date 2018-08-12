@@ -21,8 +21,7 @@ import kotlinx.android.synthetic.main.dialog_pwd_content.*
 
 class PasswordDialog : AppCompatDialogFragment()
 {
-    var passwordVerificationListener: ((password: String) -> Boolean)? = null
-    var authenticationSuccessListener: ((password: String) -> Unit)? = null
+    var passwordVerificationListener: ((password: String) -> Unit)? = null
 
     private var listener: OnPasswordDialogListener? = null
 
@@ -42,7 +41,7 @@ class PasswordDialog : AppCompatDialogFragment()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater!!.inflate(R.layout.dialog_pwd_container, container, false)
+        return inflater.inflate(R.layout.dialog_pwd_container, container, false)
     }
 
     override fun onAttach(context: Context)
@@ -81,18 +80,6 @@ class PasswordDialog : AppCompatDialogFragment()
         confirmPassword.addTextChangedListener(GenericTextWatcher(confirmPassword))
 
         validateOkButton(isInputDataValid())
-
-        enterPassword.setOnEditorActionListener {
-            _, actionId,
-            _ -> onEditorAction(actionId)
-        }
-    }
-
-    private fun onEditorAction(actionId: Int): Boolean {
-        return if (actionId == EditorInfo.IME_ACTION_GO) {
-            verifyPassword()
-            true
-        } else false
     }
 
     /**
@@ -100,21 +87,9 @@ class PasswordDialog : AppCompatDialogFragment()
      * let's the activity know about the result.
      */
     private fun verifyPassword() {
-        val password = passwordView.text.toString()
-        if (!checkPassword(password)) {
-            passwordView.error = getString(R.string.authentication_error_incorrect_password)
-            return
-        }
-        passwordView.setText("")
-        authenticationSuccessListener?.invoke(password)
+        val password = enterPassword.text.toString()
         dismiss()
-    }
-
-    /**
-     * @return true if `password` is correct, false otherwise
-     */
-    private fun checkPassword(password: String): Boolean {
-        return passwordVerificationListener?.invoke(password) ?: false
+        passwordVerificationListener?.invoke(password)
     }
 
     private fun onAllowFingerprint(checked: Boolean)
@@ -123,7 +98,9 @@ class PasswordDialog : AppCompatDialogFragment()
         {
             useFingerprintInFutureCheck.isChecked = false
             Snackbar.make(rootView, R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.sign_up_snack_action, { activity?.openSecuritySettings() })
+                    .setAction(R.string.sign_up_snack_action) {
+                        activity?.openSecuritySettings()
+                    }
                     .setActionTextColor(Color.YELLOW)
                     .show()
         }
@@ -138,7 +115,6 @@ class PasswordDialog : AppCompatDialogFragment()
         override fun afterTextChanged(editable: Editable)
         {
             val i = v.id
-
             if (i != R.id.enterPassword && i != R.id.confirmPassword)
             {
                 throw UnsupportedOperationException(
@@ -165,5 +141,10 @@ class PasswordDialog : AppCompatDialogFragment()
     private fun validateOkButton(validate: Boolean)
     {
         secondButtonPasswordView.isEnabled = validate
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
     }
 }
