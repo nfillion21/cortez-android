@@ -24,6 +24,7 @@
     </FrameLayout>
 
     <EditText
+        android:id="@+id/enterPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
@@ -31,10 +32,10 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:hint="@string/sign_up_prompt_password"
-        android:imeOptions="actionNext"
-        android:id="@+id/enterPassword" />
+        android:imeOptions="actionNext" />
 
     <EditText
+        android:id="@+id/confirmPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
@@ -42,8 +43,7 @@
         android:layout_marginEnd="20dp"
         android:ems="10"
         android:hint="@string/sign_up_prompt_confirm_password"
-        android:imeOptions="actionDone"
-        android:id="@+id/confirmPassword" />
+        android:imeOptions="actionDone" />
 
     <CheckBox
         android:id="@+id/useFingerprintInFutureCheck"

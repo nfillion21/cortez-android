@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AppCompatDialogFragment
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +16,6 @@ import android.view.inputmethod.EditorInfo
 import com.tezos.ui.R
 import com.tezos.ui.extentions.openSecuritySettings
 import kotlinx.android.synthetic.main.dialog_fingerprint_backup.*
-import kotlinx.android.synthetic.main.dialog_fingerprint_container.*
 import kotlinx.android.synthetic.main.dialog_pwd_container.*
 import kotlinx.android.synthetic.main.dialog_pwd_content.*
 
@@ -75,6 +77,11 @@ class PasswordDialog : AppCompatDialogFragment()
 
         useFingerprintInFutureCheck.setOnCheckedChangeListener { _, checked -> onAllowFingerprint(checked) }
 
+        enterPassword.addTextChangedListener(GenericTextWatcher(enterPassword))
+        confirmPassword.addTextChangedListener(GenericTextWatcher(confirmPassword))
+
+        validateOkButton(isInputDataValid())
+
         enterPassword.setOnEditorActionListener {
             _, actionId,
             _ -> onEditorAction(actionId)
@@ -120,5 +127,43 @@ class PasswordDialog : AppCompatDialogFragment()
                     .setActionTextColor(Color.YELLOW)
                     .show()
         }
+    }
+
+    private inner class GenericTextWatcher internal constructor(private val v: View) : TextWatcher
+    {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+
+        override fun afterTextChanged(editable: Editable)
+        {
+            val i = v.id
+
+            if (i != R.id.enterPassword && i != R.id.confirmPassword)
+            {
+                throw UnsupportedOperationException(
+                        "OnClick has not been implemented for " + resources.getResourceName(v.id))
+            }
+
+            validateOkButton(isInputDataValid())
+        }
+    }
+
+    fun isInputDataValid(): Boolean
+    {
+        if (!TextUtils.isEmpty(enterPassword.text) && !TextUtils.isEmpty(confirmPassword.text))
+        {
+            if (enterPassword.text.toString() == confirmPassword.text.toString()
+                    && enterPassword.text.length >= 6 )
+            {
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun validateOkButton(validate: Boolean)
+    {
+        secondButtonPasswordView.isEnabled = validate
     }
 }
