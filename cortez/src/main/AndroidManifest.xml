@@ -6,9 +6,9 @@
     <application
         android:allowBackup="false"
         tools:replace="android:allowBackup"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_ctz"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_cortez_round"
+        android:roundIcon="@mipmap/ic_launcher_ctz_round"
         android:supportsRtl="true"
         android:theme="@style/TezosTheme">
         <activity android:name="com.tezcore.cortez.HomeActivity"
