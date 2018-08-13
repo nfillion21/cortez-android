@@ -24,9 +24,30 @@ import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.fragment.VerifyCreationWalletFragment
 import com.tezos.ui.utils.Storage
 
-class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener {
+class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreateWalletListener, VerifyCreationWalletFragment.OnVerifyWalletCreationListener, SearchWordDialogFragment.OnWordSelectedListener, PasswordDialog.OnPasswordDialogListener {
 
     private var mTitleBar: TextView? = null
+
+    companion object {
+        var CREATE_WALLET_REQUEST_CODE = 0x2600 // arbitrary int
+        const val SEED_DATA_KEY = "seed_data_key"
+
+        var MNEMONICS_STR = "mnemonics_str"
+
+        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
+        {
+            val starter = Intent(context, CreateWalletActivity::class.java)
+            starter.putExtra(CustomTheme.TAG, themeBundle)
+
+            return starter
+        }
+
+        fun start(activity: Activity, theme: CustomTheme)
+        {
+            val starter = getStartIntent(activity, theme.toBundle())
+            ActivityCompat.startActivityForResult(activity, starter, CREATE_WALLET_REQUEST_CODE, null)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,35 +146,9 @@ class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreate
     }
 
     override fun mnemonicsVerified(mnemonics: String) {
-        //TODO put the mnemonics in secrets
 
-        //val mnemonics = CryptoUtils.generateSeed(mnemonics, "")
-
-
-        /*
-        val password = "123"
-
-        //TODO asks the user to put his password.
-        // the password hello is not used in Marshmallow
-        createKeys("hello", true)
-        with(Storage(this)) {
-            val encryptedPassword = EncryptionServices(applicationContext).encrypt(password, password)
-
-            savePassword(encryptedPassword)
-            saveFingerprintAllowed(true)
-
-            // TODO put the mnemonics later
-            val seedData = createSeedData(mnemonics, password)
-            saveSeed(seedData)
-            intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
-            setResult(R.id.create_wallet_succeed, intent)
-            finish()
-        }
-        */
-
-        //TODO put the mnemonics in Secrets
-        //Bundle keyBundle = CryptoUtils.generateKeys(mnemonics);
-        //intent.putExtra(CryptoUtils.WALLET_BUNDLE_KEY, keyBundle);
+        val dialog = PasswordDialog.newInstance(mnemonics)
+        dialog.show(supportFragmentManager, "Password")
     }
 
     private fun createSeedData(mnemonics: String, password: String): Storage.MnemonicsData {
@@ -175,23 +170,30 @@ class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreate
         }
     }
 
-    companion object {
-        var CREATE_WALLET_REQUEST_CODE = 0x2600 // arbitrary int
-        const val SEED_DATA_KEY = "seed_data_key"
-
-        var MNEMONICS_STR = "mnemonics_str"
-
-        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent {
-            val starter = Intent(context, CreateWalletActivity::class.java)
-            starter.putExtra(CustomTheme.TAG, themeBundle)
-
-            return starter
-        }
-
-        fun start(activity: Activity, theme: CustomTheme) {
-            val starter = getStartIntent(activity, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, CREATE_WALLET_REQUEST_CODE, null)
-        }
+    override fun isFingerprintHardwareAvailable(): Boolean {
+        return systemServices.isFingerprintHardwareAvailable()
     }
 
+    override fun hasEnrolledFingerprints(): Boolean {
+        return systemServices.hasEnrolledFingerprints()
+    }
+
+    override fun passwordVerified(mnemonics: String, password: String, fingerprint: Boolean)
+    {
+        // the password hello is not used in Marshmallow
+        createKeys(password, fingerprint)
+        with(Storage(this)) {
+            val encryptedPassword = EncryptionServices(applicationContext).encrypt(password, "hello")
+
+            savePassword(encryptedPassword)
+            saveFingerprintAllowed(fingerprint)
+
+            val seedData = createSeedData(mnemonics, password)
+            saveSeed(seedData)
+
+            intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
+            setResult(R.id.restore_wallet_succeed, intent)
+            finish()
+        }
+    }
 }
