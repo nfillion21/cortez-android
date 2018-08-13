@@ -192,7 +192,7 @@ class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreate
             saveSeed(seedData)
 
             intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
-            setResult(R.id.restore_wallet_succeed, intent)
+            setResult(R.id.create_wallet_succeed, intent)
             finish()
         }
     }
