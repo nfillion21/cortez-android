@@ -40,7 +40,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId 'com.tezcore.cortez'
-        minSdkVersion 26
+        minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
         versionName "0.1"
