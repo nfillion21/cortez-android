@@ -150,7 +150,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                         val realSeed = Storage.fromBundle(seedDataKey)
 
                         // TODO offset it
-                        val snackbar = Snackbar.make(findViewById(R.id.coordinator), R.string.wallet_successfully_restored, Snackbar.LENGTH_LONG)
+                        val snackbar = Snackbar.make(findViewById(R.id.coordinator), R.string.wallet_successfully_created, Snackbar.LENGTH_LONG)
                         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                                 android.R.color.holo_green_light)))
                         snackbar.show()
