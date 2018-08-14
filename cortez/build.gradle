@@ -1,0 +1,98 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+def alphanetPropertiesFile = rootProject.file("cortez/deployment/alphanet.properties")
+def zeronetPropertiesFile = rootProject.file("cortez/deployment/zeronet.properties")
+def betanetPropertiesFile = rootProject.file("cortez/deployment/betanet.properties")
+
+def keystoreAlphanetProperties = new Properties()
+def keystoreBetanetProperties = new Properties()
+def keystoreZeronetProperties = new Properties()
+
+keystoreAlphanetProperties.load(new FileInputStream(alphanetPropertiesFile))
+keystoreBetanetProperties.load(new FileInputStream(betanetPropertiesFile))
+keystoreZeronetProperties.load(new FileInputStream(zeronetPropertiesFile))
+
+android {
+    signingConfigs {
+        betanetConfig {
+            keyAlias keystoreBetanetProperties['keyAlias']
+            keyPassword keystoreBetanetProperties['keyPassword']
+            storeFile file(keystoreBetanetProperties['storeFile'])
+            storePassword keystoreBetanetProperties['storePassword']
+        }
+        alphanetConfig {
+            keyAlias keystoreAlphanetProperties['keyAlias']
+            keyPassword keystoreAlphanetProperties['keyPassword']
+            storeFile file(keystoreAlphanetProperties['storeFile'])
+            storePassword keystoreAlphanetProperties['storePassword']
+        }
+        zeronetConfig {
+            keyAlias keystoreZeronetProperties['keyAlias']
+            keyPassword keystoreZeronetProperties['keyPassword']
+            storeFile file(keystoreZeronetProperties['storeFile'])
+            storePassword keystoreZeronetProperties['storePassword']
+        }
+    }
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId 'com.tezcore.cortez'
+        minSdkVersion 26
+        targetSdkVersion 28
+        versionCode 1
+        versionName "0.1"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+    flavorDimensions "version"
+    productFlavors {
+        zeronet {
+            applicationIdSuffix ".zeronet"
+            versionNameSuffix "-zeronet"
+            dimension "version"
+            signingConfig signingConfigs.zeronetConfig
+        }
+        betanet {
+            applicationIdSuffix ".betanet"
+            dimension "version"
+            versionNameSuffix "-betanet"
+            signingConfig signingConfigs.betanetConfig
+        }
+        alphanet {
+            applicationIdSuffix ".alphanet"
+            versionNameSuffix "-alphanet"
+            dimension "version"
+            signingConfig signingConfigs.alphanetConfig
+        }
+    }
+}
+
+
+ext {
+    supportLibVersion = "28.0.0-alpha3"
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation 'com.android.support:support-v4:28.0.0-alpha3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.android.support:design:28.0.0-alpha3'
+    implementation project(':ui')
+}

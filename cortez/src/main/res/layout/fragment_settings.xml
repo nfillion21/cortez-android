@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:paddingBottom="@dimen/spacing_double"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/payment_products_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="@dimen/spacing_double"
+        android:layout_marginLeft="@dimen/spacing_double"
+        android:layout_marginRight="@dimen/spacing_double"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+        android:elevation="@dimen/elevation_header"
+        android:gravity="center_vertical"
+        android:text="@string/privacy"
+        android:clipToPadding="false"
+        tools:ignore="UnusedAttribute,NewApi" />
+
+    <LinearLayout
+        android:layout_below="@+id/payment_products_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:orientation="horizontal"
+        android:layout_margin="@dimen/spacing_double"
+        android:background="@drawable/selector_rect_layout">
+        <ListView
+            android:id="@+id/list"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent" >
+        </ListView>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/exit_button_layout"
+        android:layout_width="match_parent"
+        style="@style/PaymentScreens.Button"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/spacing_double"
+        android:visibility="visible"
+        android:layout_height="?android:attr/actionBarSize">
+
+        <Button
+            android:id="@+id/exit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/exit_button"
+            android:drawableLeft="@drawable/exit_to_app_24"
+            android:drawableStart="@drawable/exit_to_app_24"
+            android:drawableTint="@color/tz_light"
+            android:drawablePadding="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+            android:layout_gravity="center"
+            android:enabled="false"
+
+            android:background="@null"
+            android:clickable="false"
+            android:focusable="false"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            />
+
+    </FrameLayout>
+</RelativeLayout>

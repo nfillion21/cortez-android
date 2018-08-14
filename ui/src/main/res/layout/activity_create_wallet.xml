@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_weight="0"
+        android:theme="@style/PaymentScreens.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+
+            app:popupTheme="@style/PaymentScreens.PopupOverlay"
+            tools:targetApi="lollipop">
+
+            <TextView android:id="@+id/barTitle"
+                android:text="@string/create_wallet"
+
+                android:paddingStart="@dimen/spacing_normal"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingTop="@dimen/spacing_micro"
+                android:paddingBottom="@dimen/spacing_micro"
+                android:layout_width="wrap_content"
+                android:singleLine="true"
+
+                android:maxLines="1"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical|center_horizontal"
+                tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
+
+            <ImageButton android:id="@+id/close_button"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+
+                android:contentDescription="@string/content_description"
+                android:padding="@dimen/spacing_double"
+                android:gravity="end"
+                android:src="@drawable/close_black_24"
+                android:background="@drawable/selector_subtle"
+                android:layout_gravity="end|end|center_vertical"
+                />
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <FrameLayout
+        android:id="@+id/create_wallet_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

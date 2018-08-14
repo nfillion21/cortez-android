@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Tezos wallet</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Cortez for Zeronet (test)</string>
+    <string name="nav_header_subtitle">cortez@tezcore.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="ask_for_credentials">Ask for confirm credentials when the app goes to background</string>
+    <string name="use_fingerprint">Use fingerprint option to confirm transfers</string>
+
+    <string name="amount_info">Amount:</string>
+    <string name="fee_info">Fee:</string>
+
+    <string name="about_info">
+        Cortez for Android is a native mobile wallet for the Tezos blockchain.\n\nDeveloped in Paris by a core mobile team, this native Android app aims to bring maximum security and best user experience the Android operating system can bring to its users.\n\nYou can find some more informations about the security implementation and roadmap at http://tezos.gitlab.io/cortez\n\nCortez is 100% open source. Check it out at https://gitlab.com/tezos/cortez-android\n\nFeel free to mail us by clicking on the button below.
+        </string>
+
+</resources>

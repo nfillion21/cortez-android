@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="PaymentScreens" parent="PaymentScreens.Base" />
+    <!-- Base application theme. -->
+
+    <style name="PaymentScreens.Base" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="android:textColorPrimary">@android:color/black</item>
+        <item name="android:textColorPrimaryInverse">@color/tz_light</item>
+        <item name="android:statusBarColor" tools:targetApi="lollipop">@color/tz_primary_dark</item>
+    </style>
+
+    <style name="PaymentScreens.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="PaymentScreens.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="PaymentScreens.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+
+    <style name="PaymentScreens.Button" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/selector_button</item>
+        <item name="android:button">@null</item>
+    </style>
+
+    <style name="PaymentScreens.TextAppearance.AmountItem" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">@dimen/amount_item_text_size</item>
+    </style>
+
+    <style name="PaymentScreens.SourceButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/selector_scan_button</item>
+    </style>
+
+    <style name="PaymentScreens.TextAppearance.ErrorSmallItem" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textSize">@dimen/error_item_very_small_size</item>
+    </style>
+
+    <style name="PaymentScreens.TextAppearance.InfoItem" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textSize">@dimen/info_item_text_size</item>
+    </style>
+
+    <style name="PaymentScreens.TextAppearance.StandardItem" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textSize">@dimen/standard_item_text_size</item>
+    </style>
+
+    <style name="PaymentScreens.TextAppearance.Title" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="PaymentScreens.TextAppearance.WordItem" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">@dimen/size_word_item</item>
+    </style>
+
+    <style name="PaymentScreens.RoundedButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/selector_rounded_button</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="PaymentScreens.PaymentAccountsActivity">
+    </style>
+
+    <style name="PaymentScreens.AddAccountActivity">
+    </style>
+
+    <style name="PaymentScreens.CreateWalletActivity">
+    </style>
+
+    <style name="PaymentScreens.RestoreWalletActivity">
+    </style>
+
+    <style name="PaymentScreens.PaymentFormActivity">
+    </style>
+
+    <style name="PaymentScreens.PublicKeyActivity">
+    </style>
+
+    <style name="AuthenticationDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowFixedWidthMinor">90%</item>
+    </style>
+</resources>

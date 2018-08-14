@@ -1,0 +1,14 @@
+<resources>
+    <style name="TezosTheme.MainActivity" parent="TezosTheme.NoActionBar">
+        <item name="android:windowBackground">@color/tz_background</item>
+    </style>
+    <style name="TezosTheme.SettingsActivity" parent="TezosTheme.NoActionBar">
+        <item name="android:windowBackground">@color/tz_background</item>
+    </style>
+    <style name="TezosTheme.PasscodeActivity" parent="TezosTheme.NoActionBar">
+        <item name="android:windowBackground">@color/tz_background</item>
+    </style>
+    <style name="TezosTheme.AboutActivity" parent="TezosTheme.NoActionBar">
+        <item name="android:windowBackground">@color/tz_background</item>
+    </style>
+</resources>

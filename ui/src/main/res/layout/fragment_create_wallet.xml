@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/mnemonics_scroll_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_gravity="top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/spacing_double"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/mnemonics_info_title_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+                    android:layout_marginBottom="@dimen/spacing_normal"
+                    android:text="@string/mnemonic_info_title"/>
+
+                <TextView
+                    android:id="@+id/mnemonics_info_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:text="@string/mnemonic_info"
+                    android:textColor="@color/colorAccent"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    android:ellipsize="end" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <LinearLayout
+                        android:id="@+id/mnemonics_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="?attr/actionBarSize"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/spacing_double"
+                        android:background="@drawable/selector_rect_layout">
+
+                        <TextView
+                            android:id="@+id/mnemonics_textview"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                            />
+                    </LinearLayout>
+
+                    <android.support.design.widget.FloatingActionButton
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/renew"
+                        android:layout_below="@id/mnemonics_layout"
+                        android:layout_alignParentRight="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/autorenew_white_24"
+                        android:layout_marginTop="@dimen/spacing_normal"
+                        android:layout_marginBottom="@dimen/spacing_double"
+                        app:backgroundTint="@color/colorAccent" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_weight="0"
+        android:layout_width="match_parent"
+        android:layout_margin="@dimen/spacing_double"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/backup_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?android:attr/actionBarSize"
+            android:text="@string/mnemonics_backed_up"
+            android:textColor="@color/tz_accent"
+            android:textStyle="bold"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+            />
+
+        <FrameLayout
+            android:id="@+id/create_button_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?android:attr/actionBarSize"
+            style="@style/PaymentScreens.Button"
+            android:enabled="false"
+            android:visibility="gone"
+            >
+
+            <Button
+                android:id="@+id/create_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:drawableLeft="@drawable/ic_lock_black"
+                android:drawableStart="@drawable/ic_lock_black"
+                android:drawableTint="@color/tz_light"
+                android:drawablePadding="@dimen/spacing_normal"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                android:layout_gravity="center"
+                android:enabled="false"
+
+                android:background="@null"
+                android:clickable="false"
+                android:focusable="false"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                />
+
+        </FrameLayout>
+
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,47 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.tezos.ui">
+
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <application
+        android:name=".utils.ArchLifecycleApp">
+
+        <activity
+            android:name=".activity.TransferFormActivity"
+            android:theme="@style/PaymentScreens.PaymentFormActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".activity.PaymentAccountsActivity"
+            android:theme="@style/PaymentScreens.PaymentAccountsActivity"
+            />
+        <activity
+            android:name=".activity.AddAddressActivity"
+            android:theme="@style/PaymentScreens.AddAddressActivity"
+            android:windowSoftInputMode="adjustPan|stateVisible"
+            />
+
+        <activity
+            android:name=".activity.CreateWalletActivity"
+            android:theme="@style/PaymentScreens.CreateWalletActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize"
+            />
+
+        <activity
+            android:name=".activity.RestoreWalletActivity"
+            android:theme="@style/PaymentScreens.RestoreWalletActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize"
+            />
+
+        <activity
+            android:name=".activity.PublicKeyHashActivity"
+            android:theme="@style/PaymentScreens.PublicKeyActivity"
+            />
+
+        <activity
+            android:name="com.tezos.ui.activity.AddressDetailsActivity"
+            android:theme="@style/PaymentScreens.AddressDetailsActivity" />
+
+    </application>
+
+</manifest>
+
+

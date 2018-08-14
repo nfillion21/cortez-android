@@ -1,0 +1,311 @@
+package com.tezos.ui.fragment;
+
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
+
+import com.tezos.core.crypto.CryptoUtils;
+import com.tezos.core.models.CustomTheme;
+import com.tezos.ui.R;
+import com.tezos.ui.adapter.MnemonicWordsViewAdapter;
+import com.tezos.ui.widget.OffsetDecoration;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import io.github.novacrypto.bip39.MnemonicValidator;
+import io.github.novacrypto.bip39.Validation.InvalidChecksumException;
+import io.github.novacrypto.bip39.Validation.InvalidWordCountException;
+import io.github.novacrypto.bip39.Validation.UnexpectedWhiteSpaceException;
+import io.github.novacrypto.bip39.Validation.WordNotFoundException;
+import io.github.novacrypto.bip39.wordlists.English;
+
+public class RestoreWalletFragment extends Fragment implements MnemonicWordsViewAdapter.OnItemClickListener
+{
+    private static final String WORDS_KEY = "words_key";
+    private static final int MNEMONICS_WORDS_NUMBER = 24;
+
+    private OnWordSelectedListener mCallback;
+
+    private MnemonicWordsViewAdapter mAdapter;
+    private RecyclerView mRecyclerView;
+
+    private Button mValidateMnemonicsButton;
+    private FrameLayout mValidateMnemonicsButtonLayout;
+
+    public interface OnWordSelectedListener
+    {
+        void onWordCardNumberClicked(int position);
+        void mnemonicsVerified(String mnemonics);
+    }
+
+    public static RestoreWalletFragment newInstance(Bundle customTheme)
+    {
+        RestoreWalletFragment fragment = new RestoreWalletFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putBundle(CustomTheme.TAG, customTheme);
+
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+
+        try
+        {
+            mCallback = (OnWordSelectedListener) context;
+        }
+        catch (ClassCastException e)
+        {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnWordSelectedListener");
+        }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState)
+    {
+        return inflater.inflate(R.layout.fragment_restore_wallet, container, false);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState)
+    {
+        super.onViewCreated(view, savedInstanceState);
+
+        mValidateMnemonicsButton = view.findViewById(R.id.validate_mnemonics_button);
+        mValidateMnemonicsButtonLayout = view.findViewById(R.id.validate_mnemonics_button_layout);
+        mValidateMnemonicsButtonLayout.setOnClickListener(v ->
+        {
+            //TODO verify if it does always work
+            String mnemonics = mnemonicsListToString(mAdapter.getWords());
+            if (mnemonics != null)
+            {
+                mCallback.mnemonicsVerified(mnemonics);
+            }
+            else
+            {
+                //TODO an error occurred
+            }
+        });
+
+        mRecyclerView = view.findViewById(R.id.words);
+        setUpWordGrid(mRecyclerView);
+
+        if (savedInstanceState != null)
+        {
+            ArrayList<String> words = savedInstanceState.getStringArrayList(WORDS_KEY);
+            if (words != null)
+            {
+                mAdapter.updateWords(words, null);
+            }
+            validateMnemonicsButton(CryptoUtils.validateMnemonics(words));
+        }
+        else
+        {
+            List<String> words = new ArrayList<>(MNEMONICS_WORDS_NUMBER);
+            for (int i = 0; i < MNEMONICS_WORDS_NUMBER; i++)
+            {
+                words.add(null);
+            }
+            mAdapter.updateWords(words, null);
+            validateMnemonicsButton(false);
+        }
+    }
+
+    private String mnemonicsListToString(List<String> words)
+    {
+        String listString = null;
+
+        if (words != null && words.size() == MNEMONICS_WORDS_NUMBER && !words.contains(null))
+        {
+            listString = TextUtils.join(" ", words);
+        }
+
+        return listString;
+    }
+
+    protected void validateMnemonicsButton(boolean validate) {
+
+        if (validate) {
+
+            final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
+            CustomTheme theme = CustomTheme.fromBundle(customThemeBundle);
+
+            mValidateMnemonicsButton.setTextColor(ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
+            mValidateMnemonicsButtonLayout.setEnabled(true);
+            mValidateMnemonicsButtonLayout.setBackground(makeSelector(theme));
+
+            Drawable[] drawables = mValidateMnemonicsButton.getCompoundDrawables();
+            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
+
+        } else {
+
+            mValidateMnemonicsButton.setTextColor(ContextCompat.getColor(getActivity(), android.R.color.white));
+            mValidateMnemonicsButtonLayout.setEnabled(false);
+            CustomTheme greyTheme = new CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey);
+            mValidateMnemonicsButtonLayout.setBackground(makeSelector(greyTheme));
+
+            Drawable[] drawables = mValidateMnemonicsButton.getCompoundDrawables();
+            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), android.R.color.white));
+        }
+    }
+
+    private StateListDrawable makeSelector(CustomTheme theme)
+    {
+        StateListDrawable res = new StateListDrawable();
+        res.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(ContextCompat.getColor(getActivity(), theme.getColorPrimaryDarkId())));
+        res.addState(new int[]{}, new ColorDrawable(ContextCompat.getColor(getActivity(), theme.getColorPrimaryId())));
+        return res;
+    }
+
+    private void setUpWordGrid(final RecyclerView wordsView)
+    {
+        final int spacing = getContext().getResources()
+                .getDimensionPixelSize(R.dimen.spacing_micro);
+        wordsView.addItemDecoration(new OffsetDecoration(spacing));
+
+        mAdapter = new MnemonicWordsViewAdapter(getActivity());
+
+        mAdapter.setOnItemClickListener(this);
+
+        wordsView.setAdapter(mAdapter);
+    }
+
+    public void updateCard(String word, int position)
+    {
+        mAdapter.updateWord(word, position);
+
+        //konami code
+
+        if (position == 23 && word.equalsIgnoreCase("zebra")){
+
+            List<String> zebras = Arrays.asList(
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra",
+                    "zebra" );
+
+            mAdapter.updateWords(zebras, null);
+
+        }
+        else
+        if (position == 0 && word.equalsIgnoreCase("link"))
+        {
+
+            List<String> kick = Arrays.asList(
+                    "link",
+                    "warm",
+                    "visual",
+                    "pony",
+                    "bike",
+                    "person",
+                    "truck",
+                    "pupil",
+                    "moral",
+                    "gift",
+                    "shoulder",
+                    "eye",
+                    "kit",
+                    "human",
+                    "jacket",
+                    "rich",
+                    "sand",
+                    "cupboard",
+                    "position",
+                    "friend",
+                    "fox",
+                    "calm",
+                    "bring",
+                    "kick" );
+
+            mAdapter.updateWords(kick, null);
+        }
+
+        validateMnemonicsButton(CryptoUtils.validateMnemonics(mAdapter.getWords()));
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+    }
+
+    @Override
+    public void onClick(View view, int position)
+    {
+        if (mCallback != null)
+        {
+            mCallback.onWordCardNumberClicked(position);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+
+        List<String> words = mAdapter.getWords();
+        if (words != null)
+        {
+            outState.putStringArrayList(WORDS_KEY, (ArrayList<String>) mAdapter.getWords());
+        }
+    }
+}

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.tezos.ui.utils.FloatingActionButtonBehavior"
+        android:orientation="vertical"
+        >
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:orientation="vertical"
+                    >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_double"
+                        android:layout_marginLeft="@dimen/spacing_double"
+                        android:layout_marginRight="@dimen/spacing_double"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/balance_title_textview"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+                            android:gravity="center_vertical"
+                            android:text="@string/balance_title"
+                            android:clipToPadding="false"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <ProgressBar
+                            android:id="@+id/nav_progress_balance"
+                            style="?android:attr/progressBarStyleSmall"
+                            android:layout_gravity="bottom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0"
+                            android:visibility="visible" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_double"
+                        android:layout_margin="@dimen/spacing_double"
+                        android:background="@drawable/selector_rect_layout">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            >
+
+                            <TextView
+                                android:id="@+id/tz_currency"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ꜩ"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorPrimary"
+                                tools:ignore="UnusedAttribute,NewApi" />
+                            <View
+                                android:layout_height="0dp"
+                                android:layout_width="@dimen/spacing_double" />
+
+                            <TextView
+                                android:id="@+id/empty_loading_balance_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/colorAccent"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+                                android:focusable="false"
+                                android:focusableInTouchMode="false"
+                                android:clickable="false" />
+                            <TextView
+                                android:id="@+id/balance_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignBaseline="@+id/tz_currency"
+                                android:elevation="@dimen/elevation_header"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textColor="@color/colorAccent"
+                                android:clipToPadding="false"
+                                android:visibility="gone"
+                                tools:ignore="UnusedAttribute,NewApi" />
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_double"
+                        android:layout_marginLeft="@dimen/spacing_double"
+                        android:layout_marginRight="@dimen/spacing_double"
+                        android:layout_marginBottom="@dimen/spacing_normal"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+                            android:text="@string/operations_title"
+                            android:clipToPadding="false"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <ProgressBar
+                            android:id="@+id/nav_progress_operations"
+                            style="?android:attr/progressBarStyleSmall"
+                            android:layout_gravity="bottom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0"
+                            android:visibility="visible" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/empty_loading_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_margin="@dimen/spacing_double"
+                    android:textColor="@color/colorAccent"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:clickable="false" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="vertical" />
+
+            </LinearLayout>
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+    </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>
