@@ -13,7 +13,7 @@ This native Android app aims to bring maximum security and best user experience 
 
 ## Security
 
-Cortez for Android allows to work with the Tezos blockchain and keeps your private keys protected using **Encryption**, **Fingerprint** and **Confirm Credentials** API’s. 
+Cortez for Android allows you to work with the Tezos blockchain and keeps your private keys protected using **Encryption**, **Fingerprint** and **Confirm Credentials** API’s. 
 
 The wallet generates your **mnemonics 24 words** in the same way as Ledger Nano does. You need to keep these 24 words (in the same order) to recover your account.
 
