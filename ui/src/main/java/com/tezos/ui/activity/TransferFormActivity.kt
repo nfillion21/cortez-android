@@ -130,7 +130,8 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
 
     override fun onTransferSucceed()
     {
-
+        //TODO transfer data to display?
+        setResult(R.id.transfer_succeed, null)
+        finish()
     }
-
 }

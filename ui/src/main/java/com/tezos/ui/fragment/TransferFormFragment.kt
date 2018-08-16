@@ -30,7 +30,6 @@ package com.tezos.ui.fragment
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
@@ -57,7 +56,6 @@ import com.tezos.core.models.Account
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
-import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.authentication.SystemServices
@@ -236,6 +234,7 @@ class TransferFormFragment : Fragment()
                 else -> {}
             }
 
+            // convert in µꜩ
             amount *= 1000000
             fee *= 1000000
 
@@ -247,10 +246,10 @@ class TransferFormFragment : Fragment()
 
             //TODO just pay
             onPayClick(pkhSrc, pk, pkhDst!!, amount.toInt().toString(), fee.toInt().toString(), sk)
-
         }
 
         arguments?.let {
+
             val seedDataBundle = it.getBundle(Storage.TAG)
             val seedData = Storage.fromBundle(seedDataBundle)
 
@@ -258,6 +257,7 @@ class TransferFormFragment : Fragment()
             account.pubKeyHash = seedData.pkh
             switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, account)
         }
+
         validatePayButton(isInputDataValid())
 
         putEverythingInRed()
@@ -572,15 +572,15 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_url)
 
-        var postparams = JSONObject()
+        var postParams = JSONObject()
 
-        postparams.put("src", src)
-        postparams.put("src_pk", srcPk)
-        postparams.put("dst", dst)
-        postparams.put("amount", amount)
-        postparams.put("fee", fee)
+        postParams.put("src", src)
+        postParams.put("src_pk", srcPk)
+        postParams.put("dst", dst)
+        postParams.put("amount", amount)
+        postParams.put("fee", fee)
 
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
+        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             signIt(answer.getInt("id"), answer.getString("payload"), sk, src)
@@ -627,21 +627,17 @@ class TransferFormFragment : Fragment()
             answer ->
 
             Log.i(answer.toString(), answer.toString())
-            Log.i(answer.toString(), answer.toString())
 
             //startGetRequestLoadOperations()
 
             listener?.onTransferSucceed()
 
-            activity?.finish()
             //onOperationsLoadHistoryComplete()
 
         }, Response.ErrorListener
         {
             Log.i(it.toString(), it.toString())
-            Log.i(it.toString(), it.toString())
 
-            activity?.finish()
             listener?.onTransferSucceed()
         })
         {
@@ -690,7 +686,8 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    override fun onDetach() {
+    override fun onDetach()
+    {
         super.onDetach()
         listener = null
     }

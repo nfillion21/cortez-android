@@ -69,8 +69,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
     private var mProgressBar: ProgressBar? = null
 
-    private var isAuthenticating = false
-
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -180,22 +178,12 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
 
-
             TransferFormActivity.TRANSFER_REQUEST_CODE ->
             {
-                if (resultCode == R.id.restore_wallet_succeed)
+                if (resultCode == R.id.transfer_succeed)
                 {
-                    if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
-                    {
-                        val seedDataKey = data.getBundleExtra(RestoreWalletActivity.SEED_DATA_KEY)
-                        val realSeed = Storage.fromBundle(seedDataKey)
-
-                        showSnackBar(R.string.wallet_successfully_restored)
-
-                        setMenuItemEnabled(true)
-
-                        switchToOperations(realSeed)
-                    }
+                    showSnackBar(R.string.transfer_succeed)
+                    //TODO I need to refresh balance.
                 }
             }
 
@@ -208,17 +196,8 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
 
-            AUTHENTICATION_SCREEN_CODE ->
-            {
-                isAuthenticating = false
-                if (resultCode != Activity.RESULT_OK) {
-                    finish()
-                }
-            }
-
             else ->
             {
-                //handleVisibility()
             }
         }
     }

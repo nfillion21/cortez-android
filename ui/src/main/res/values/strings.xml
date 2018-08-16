@@ -39,6 +39,7 @@
     <string name="share_via">Share via</string>
     <string name="wallet_successfully_created">Wallet successfully created!</string>
     <string name="wallet_successfully_restored">Wallet successfully restored!</string>
+    <string name="transfer_succeed">Transfer succeed!</string>
     <string name="address_owner">Address owner</string>
     <string name="address_owner_placeholder">John Doe</string>
     <string name="address_pkh">Address (Public key hash)</string>
