@@ -180,6 +180,25 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
 
+
+            TransferFormActivity.TRANSFER_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.restore_wallet_succeed)
+                {
+                    if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
+                    {
+                        val seedDataKey = data.getBundleExtra(RestoreWalletActivity.SEED_DATA_KEY)
+                        val realSeed = Storage.fromBundle(seedDataKey)
+
+                        showSnackBar(R.string.wallet_successfully_restored)
+
+                        setMenuItemEnabled(true)
+
+                        switchToOperations(realSeed)
+                    }
+                }
+            }
+
             SettingsActivity.SETTINGS_REQUEST_CODE ->
             {
                 if (resultCode == R.id.logout_succeed)

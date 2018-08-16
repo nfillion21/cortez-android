@@ -27,6 +27,7 @@
 
 package com.tezos.ui.fragment
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
@@ -93,6 +94,8 @@ class TransferFormFragment : Fragment()
     private var mSrcAccount:Account? = null
     private var mDstAccount:Account? = null
 
+    private var listener: OnTransferListener? = null
+
     companion object
     {
         @JvmStatic
@@ -106,6 +109,24 @@ class TransferFormFragment : Fragment()
 
         private const val SRC_ACCOUNT_KEY = "src_account_key"
         private const val DST_ACCOUNT_KEY = "dst_account_key"
+    }
+
+    interface OnTransferListener
+    {
+        fun onTransferSucceed()
+    }
+
+    override fun onAttach(context: Context)
+    {
+        super.onAttach(context)
+        if (context is OnTransferListener)
+        {
+            listener = context
+        }
+        else
+        {
+            throw RuntimeException(context.toString() + " must implement OnTransferListener")
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -167,7 +188,7 @@ class TransferFormFragment : Fragment()
         }
 
         mSrcButton = view.findViewById(R.id.transfer_src_button)
-        mSrcButton!!.setOnClickListener { v ->
+        mSrcButton!!.setOnClickListener { _ ->
             PaymentAccountsActivity.start(activity,
                 theme,
                 PaymentAccountsActivity.FromScreen.FromTransfer,
@@ -245,7 +266,8 @@ class TransferFormFragment : Fragment()
     private fun onPayClick(src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
     {
         val dialog = AuthenticationDialog()
-        if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints()) {
+        if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints())
+        {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
@@ -601,12 +623,15 @@ class TransferFormFragment : Fragment()
         //le payload c'est la signature en hex, en 64 bytes donc 128 chars hex
 
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
-        { answer ->
+        {
+            answer ->
 
             Log.i(answer.toString(), answer.toString())
             Log.i(answer.toString(), answer.toString())
 
             //startGetRequestLoadOperations()
+
+            listener?.onTransferSucceed()
 
             activity?.finish()
             //onOperationsLoadHistoryComplete()
@@ -617,9 +642,12 @@ class TransferFormFragment : Fragment()
             Log.i(it.toString(), it.toString())
 
             activity?.finish()
-        }){
+            listener?.onTransferSucceed()
+        })
+        {
             @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
+            override fun getHeaders(): Map<String, String>
+            {
                 val headers = HashMap<String, String>()
                 headers["Content-Type"] = "application/json"
                 return headers
@@ -632,9 +660,11 @@ class TransferFormFragment : Fragment()
     /**
      * Fingerprint was invalidated, decide what to do in this case.
      */
-    private fun onFingerprintInvalidation(useInFuture: Boolean) {
+    private fun onFingerprintInvalidation(useInFuture: Boolean)
+    {
         storage.saveFingerprintAllowed(useInFuture)
-        if (useInFuture) {
+        if (useInFuture)
+        {
             EncryptionServices(activity?.applicationContext!!).createFingerprintKey()
         }
     }
@@ -658,5 +688,10 @@ class TransferFormFragment : Fragment()
         {
             onPayClick(src, srcPk, dst, amount, fee, sk)
         }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
     }
 }

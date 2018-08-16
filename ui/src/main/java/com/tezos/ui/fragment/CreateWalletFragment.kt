@@ -79,11 +79,15 @@ class CreateWalletFragment : Fragment()
                 }
     }
 
-    override fun onAttach(context: Context) {
+    override fun onAttach(context: Context)
+    {
         super.onAttach(context)
-        if (context is OnCreateWalletListener) {
+        if (context is OnCreateWalletListener)
+        {
             listener = context
-        } else {
+        }
+        else
+        {
             throw RuntimeException(context.toString() + " must implement OnCreateWalletListener")
         }
     }
