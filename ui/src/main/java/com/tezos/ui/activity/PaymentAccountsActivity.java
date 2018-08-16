@@ -53,13 +53,15 @@ import com.tezos.ui.fragment.PaymentAccountsFragment;
  */
 public class PaymentAccountsActivity extends BaseSecureActivity implements PaymentAccountsFragment.OnCardSelectedListener
 {
+    public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
+
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
     public static String FROM_SCREEN_KEY = "FromScreenKey";
 
     public static void start(Activity activity, CustomTheme theme, FromScreen fromScreen, Selection selection)
     {
         Intent starter = getStartIntent(activity, theme, fromScreen, selection);
-        ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
+        ActivityCompat.startActivityForResult(activity, starter, TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
     @Override

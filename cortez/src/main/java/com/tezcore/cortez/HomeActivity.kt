@@ -148,47 +148,16 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.create_wallet_succeed)
                 {
-                    /*
-                    if (data != null && data.hasExtra(CryptoUtils.WALLET_BUNDLE_KEY))
-                    {
-                        val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
-                        mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
-
-                        val snackbar = Snackbar.make(findViewById<Button>(R.id.coordinator), R.string.wallet_successfully_created, Snackbar.LENGTH_LONG)
-                        val snackBarView = snackbar.getView()
-                        snackBarView.setBackgroundColor((ContextCompat.getColor(this,
-                                R.color.tz_green)))
-                        snackbar.show()
-
-                        setMenuItemEnabled(true)
-
-                        switchToOperations(realSeed)
-                    }
-                    else
-                    {
-                        //Log.v("ProjectDetails", "data is null")
-                    }
-                        */
-
-                    //TODO check data later
                     if (data != null && data.hasExtra(CreateWalletActivity.SEED_DATA_KEY))
                     {
                         val seedDataKey = data.getBundleExtra(CreateWalletActivity.SEED_DATA_KEY)
                         val realSeed = Storage.fromBundle(seedDataKey)
 
-                        // TODO offset it
-                        val snackbar = Snackbar.make(findViewById(R.id.coordinator), R.string.wallet_successfully_created, Snackbar.LENGTH_LONG)
-                        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
-                                android.R.color.holo_green_light)))
-                        snackbar.show()
+                        showSnackBar(R.string.wallet_successfully_created)
 
                         setMenuItemEnabled(true)
 
                         switchToOperations(realSeed)
-                    }
-                    else
-                    {
-
                     }
                 }
             }
@@ -197,33 +166,16 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.restore_wallet_succeed)
                 {
-                    //val seeds = Storage(baseContext).getMnemonicsList()
-                    //val seedOne = seeds[0]
-
-                    // in marshmallow, you don't need any password
-                    //val mnemonics = EncryptionServices(applicationContext).decrypt(seedOne.mnemonics, "not useful for marshmallow")
-                    //val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
-                    //mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
-
-                    //TODO check data later
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
                         val seedDataKey = data.getBundleExtra(RestoreWalletActivity.SEED_DATA_KEY)
                         val realSeed = Storage.fromBundle(seedDataKey)
 
-                        // TODO offset it
-                        val snackbar = Snackbar.make(findViewById(R.id.coordinator), R.string.wallet_successfully_restored, Snackbar.LENGTH_LONG)
-                        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
-                                android.R.color.holo_green_light)))
-                        snackbar.show()
+                        showSnackBar(R.string.wallet_successfully_restored)
 
                         setMenuItemEnabled(true)
 
                         switchToOperations(realSeed)
-                    }
-                    else
-                    {
-
                     }
                 }
             }
@@ -250,6 +202,16 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 //handleVisibility()
             }
         }
+    }
+
+    private fun showSnackBar(resText:Int)
+    {
+
+        // TODO offset it
+        val snackbar = Snackbar.make(findViewById(R.id.coordinator), resText, Snackbar.LENGTH_LONG)
+        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
+                android.R.color.holo_green_light)))
+        snackbar.show()
     }
 
     private fun setMenuItemEnabled(enabled:Boolean)

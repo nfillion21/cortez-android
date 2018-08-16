@@ -54,7 +54,7 @@ import com.tezos.ui.utils.Storage;
  */
 public class TransferFormActivity extends BaseSecureActivity
 {
-    public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
+    public static int TRANSFER_REQUEST_CODE = 0x2100; // arbitrary int
 
     public static Intent getStartIntent(Context context, Bundle seedBundle, Bundle themeBundle)
     {
@@ -69,7 +69,7 @@ public class TransferFormActivity extends BaseSecureActivity
     {
         Intent starter = getStartIntent(activity, seedBundle, theme.toBundle());
         //TODO remove this request code
-        ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
+        ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_REQUEST_CODE, null);
     }
 
     @Override

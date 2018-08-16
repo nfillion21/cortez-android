@@ -74,9 +74,7 @@ public class PublicKeyHashActivity extends BaseSecureActivity
     public static void start(Activity activity, String publicKeyHash, CustomTheme theme)
     {
         Intent starter = getStartIntent(activity, publicKeyHash, theme.toBundle());
-
-        //TODO remove this request code
-        ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE, null);
+        ActivityCompat.startActivityForResult(activity, starter, -1, null);
     }
 
     @Override

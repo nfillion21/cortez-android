@@ -51,7 +51,7 @@ import com.tezos.ui.utils.Storage
 class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener, PasswordDialog.OnPasswordDialogListener {
 
     companion object {
-        var RESTORE_WALLET_REQUEST_CODE = 0x2400 // arbitrary int
+        var RESTORE_WALLET_REQUEST_CODE = 0x2700 // arbitrary int
         const val SEED_DATA_KEY = "seed_data_key"
 
         private fun getStartIntent(context: Context, themeBundle: Bundle): Intent {

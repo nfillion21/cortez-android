@@ -279,7 +279,7 @@ class TransferFormFragment : Fragment()
     {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE)
+        if (requestCode == PaymentAccountsActivity.TRANSFER_SELECT_REQUEST_CODE)
         {
             if (data != null && data.hasExtra(Account.TAG))
             {
@@ -514,14 +514,17 @@ class TransferFormFragment : Fragment()
                     amount = d.toString()
                 }
 
-                elements.length > 3 ->
+                elements.length <= 3 ->
+                {
+                    amount = String.format("%.2f", amount.toDouble())
+                }
+                else ->
                 {
                     //                        int length = elements.length() - 1;
                     //                        String format = "%." + length + "f";
                     //                        Float f = Float.parseFloat(amount);
                     //                        amount = String.format(format, f);
                 }
-                else -> amount = String.format("%.2f", amount.toDouble())
             }
         }
         else
