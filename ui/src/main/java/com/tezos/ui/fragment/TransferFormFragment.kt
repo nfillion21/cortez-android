@@ -29,6 +29,7 @@ package com.tezos.ui.fragment
 
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
@@ -88,7 +89,6 @@ class TransferFormFragment : Fragment()
     private var mCurrencySpinner: AppCompatSpinner? = null
 
     private var mAmount:TextInputEditText? = null
-    //private var mAmountLayout: TextInputLayout? = null
 
     private var mSrcAccount:Account? = null
     private var mDstAccount:Account? = null
@@ -128,7 +128,6 @@ class TransferFormFragment : Fragment()
                 switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
         }
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -168,13 +167,21 @@ class TransferFormFragment : Fragment()
         }
 
         mSrcButton = view.findViewById(R.id.transfer_src_button)
-        mSrcButton!!.setOnClickListener { v -> PaymentAccountsActivity.start(activity,
+        mSrcButton!!.setOnClickListener { v ->
+            PaymentAccountsActivity.start(activity,
                 theme,
                 PaymentAccountsActivity.FromScreen.FromTransfer,
-                PaymentAccountsActivity.Selection.SelectionAccounts) }
+                PaymentAccountsActivity.Selection.SelectionAccounts)
+        }
 
         mDstButton = view.findViewById(R.id.transfer_dst_button)
-        mDstButton!!.setOnClickListener { v -> PaymentAccountsActivity.start(activity, theme, PaymentAccountsActivity.FromScreen.FromTransfer, PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses) }
+        mDstButton!!.setOnClickListener { _ ->
+            PaymentAccountsActivity.start(
+                    activity,
+                    theme,
+                    PaymentAccountsActivity.FromScreen.FromTransfer,
+                    PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses)
+        }
 
         mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled)
         mTransferDstFilled = view.findViewById(R.id.transfer_destination_filled)
@@ -184,15 +191,11 @@ class TransferFormFragment : Fragment()
 
         mPayButtonLayout!!.visibility = View.VISIBLE
 
-        val moneyFormatted = "ꜩ"
-
-        val moneyString = getString(R.string.pay, moneyFormatted)
+        val moneyString = getString(R.string.pay, "ꜩ")
 
         mPayButton!!.text = moneyString
 
-        mPayButtonLayout!!.setOnClickListener { v ->
-
-
+        mPayButtonLayout!!.setOnClickListener { _ ->
 
             val seedDataBundle = arguments?.getBundle(Storage.TAG)
             val seedData = Storage.fromBundle(seedDataBundle!!)
@@ -502,22 +505,23 @@ class TransferFormFragment : Fragment()
         {
             val elements = amount.substring(amount.indexOf("."))
 
-            if (elements.length > 7)
+            when
             {
-                amount = String.format("%.6f", amount.toDouble())
-                val d = amount.toDouble()
-                amount = d.toString()
-            }
-            else if (elements.length > 3)
-            {
-                //                        int length = elements.length() - 1;
-                //                        String format = "%." + length + "f";
-                //                        Float f = Float.parseFloat(amount);
-                //                        amount = String.format(format, f);
-            }
-            else
-            {
-                amount = String.format("%.2f", amount.toDouble())
+                elements.length > 7 ->
+                {
+                    amount = String.format("%.6f", amount.toDouble())
+                    val d = amount.toDouble()
+                    amount = d.toString()
+                }
+
+                elements.length > 3 ->
+                {
+                    //                        int length = elements.length() - 1;
+                    //                        String format = "%." + length + "f";
+                    //                        Float f = Float.parseFloat(amount);
+                    //                        amount = String.format(format, f);
+                }
+                else -> amount = String.format("%.2f", amount.toDouble())
             }
         }
         else
@@ -544,13 +548,6 @@ class TransferFormFragment : Fragment()
         val url = getString(R.string.transfer_url)
 
         var postparams = JSONObject()
-        /*
-        postparams.put("src","tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk")
-        postparams.put("src_pk","edpkuw2nHYNcksmy2GK6xtG8R2iyHCC35jc8K1684Mc7SFjqZzch2a")
-        postparams.put("dst","tz1YEZRQrof1htK6iQoLzrz8KTz2sguhhtQg")
-        postparams.put("amount","15")
-        postparams.put("fee","12")
-        */
 
         postparams.put("src", src)
         postparams.put("src_pk", srcPk)
@@ -571,38 +568,15 @@ class TransferFormFragment : Fragment()
             Log.i(it.toString(), it.toString())
         }){
             @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
+            override fun getHeaders(): Map<String, String>
+            {
                 val headers = HashMap<String, String>()
-                headers.put("Content-Type", "application/json")
+                headers["Content-Type"] = "application/json"
                 return headers
             }
         }
-        /*
-        val jsonObjReq = object : JsonObjectRequest(Method.POST, url, postparams,
-                Response.Listener<JSONObject> { answer ->
-                    //Log.d(TAG, "/post request OK! Response: $response")
-                    Log.i(answer.toString(), answer.toString())
-                    Log.i(answer.toString(), answer.toString())
-                },
-                Response.ErrorListener { error ->
-                    //VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
-                    //completionHandler(null)
-                    Log.i(error.toString(), error.toString())
-                    Log.i(error.toString(), error.toString())
-                }) {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers.put("Content-Type", "application/json")
-                return headers
-            }
-        }
-        */
-
-        //jsObjRequest.tag = LOAD_OPERATIONS_TAG
 
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-
     }
 
     private fun signIt(id: Int, payload:String, sk: String, pk: String)
@@ -648,43 +622,6 @@ class TransferFormFragment : Fragment()
                 return headers
             }
         }
-
-        /*
-        // Request a string response from the provided URL.
-        val stringRequest = object : StringRequest(Request.Method.POST, url,
-                Response.Listener<String> { response ->
-                    //val response = response.replace("[^0-9]".toRegex(), "")
-                    //mBalanceItem = balance.toDouble()/1000000
-                    //animateBalance(mBalanceItem)
-                    Log.i(response.toString(), response.toString())
-                    Log.i(response.toString(), response.toString())
-
-                    //onBalanceLoadComplete(true)
-                    //startGetRequestLoadOperations()
-                }, Response.ErrorListener
-        {
-            Log.i(it.toString(), it.toString())
-            Log.i(it.toString(), it.toString())
-        }){
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
-            }
-
-            override fun getBody(): HashMap<String, String> {
-                var params = HashMap<String, String>()
-                params.put("id", postparams.getString("id"))
-                params.put("payload", postparams.getString("payload"))
-                return params
-            }
-
-            override fun getPostBody(): ByteArray {
-                return super.getPostBody()
-            }
-        }
-        */
 
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
