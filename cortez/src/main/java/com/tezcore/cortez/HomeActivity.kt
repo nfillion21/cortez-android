@@ -269,23 +269,26 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         nav_view.setNavigationItemSelectedListener(this)
     }
 
-    override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+    override fun onBackPressed()
+    {
+        if (drawer_layout.isDrawerOpen(GravityCompat.START))
+        {
             drawer_layout.closeDrawer(GravityCompat.START)
-        } else {
-
+        }
+        else
+        {
             AlertDialog.Builder(this)
                     .setTitle(R.string.exit)
                     .setMessage(R.string.exit_info)
-                    .setPositiveButton(android.R.string.yes, DialogInterface.OnClickListener
-                    {
-                        dialog,
-                        which ->
+                    .setNegativeButton(android.R.string.no, null)
+                    .setPositiveButton(android.R.string.yes) {
+                        _,
+                        _ ->
 
                         super.onBackPressed()
 
-                    })
-                    .setNegativeButton(android.R.string.no, null).show()
+                    }
+                    .show()
         }
     }
 

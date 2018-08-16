@@ -63,7 +63,6 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
         fun start(activity: Activity, seedBundle: Bundle, theme: CustomTheme)
         {
             val starter = getStartIntent(activity, seedBundle, theme.toBundle())
-            //TODO remove this request code
             ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_REQUEST_CODE, null)
         }
     }

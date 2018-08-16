@@ -70,6 +70,9 @@ import org.json.JSONObject
  */
 class TransferFormFragment : Fragment()
 {
+    private val TRANSFER_INIT_TAG = "transfer_init"
+    private val TRANSFER_FINALIZE_TAG = "transfer_finalize"
+
     private val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(activity?.baseContext!!) }
     private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(activity?.applicationContext!!) }
 
@@ -127,7 +130,8 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?)
+    {
         super.onViewCreated(view, savedInstanceState)
         initContentViews(view)
 
@@ -591,7 +595,8 @@ class TransferFormFragment : Fragment()
         {
             Log.i(it.toString(), it.toString())
             Log.i(it.toString(), it.toString())
-        }){
+        })
+        {
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String>
             {
@@ -600,6 +605,8 @@ class TransferFormFragment : Fragment()
                 return headers
             }
         }
+
+        jsObjRequest.tag = TRANSFER_INIT_TAG
 
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
@@ -627,17 +634,11 @@ class TransferFormFragment : Fragment()
             answer ->
 
             Log.i(answer.toString(), answer.toString())
-
-            //startGetRequestLoadOperations()
-
             listener?.onTransferSucceed()
-
-            //onOperationsLoadHistoryComplete()
 
         }, Response.ErrorListener
         {
             Log.i(it.toString(), it.toString())
-
             listener?.onTransferSucceed()
         })
         {
@@ -649,6 +650,8 @@ class TransferFormFragment : Fragment()
                 return headers
             }
         }
+
+        jsObjRequest.tag = TRANSFER_FINALIZE_TAG
 
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
@@ -684,6 +687,19 @@ class TransferFormFragment : Fragment()
         {
             onPayClick(src, srcPk, dst, amount, fee, sk)
         }
+    }
+
+    private fun cancelRequests()
+    {
+        val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
+        requestQueue?.cancelAll(TRANSFER_INIT_TAG)
+        requestQueue?.cancelAll(TRANSFER_FINALIZE_TAG)
+    }
+
+    override fun onDestroy()
+    {
+        super.onDestroy()
+        cancelRequests()
     }
 
     override fun onDetach()
