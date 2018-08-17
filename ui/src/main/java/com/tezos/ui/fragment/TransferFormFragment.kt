@@ -97,6 +97,9 @@ class TransferFormFragment : Fragment()
 
     private var listener: OnTransferListener? = null
 
+    private var mInitTransferLoading:Boolean = false
+    private var mFinalizeTransferLoading:Boolean = false
+
     companion object
     {
         @JvmStatic
@@ -149,8 +152,142 @@ class TransferFormFragment : Fragment()
                 mDstAccount = Account.fromBundle(dstBundle)
                 switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
+
+            mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
+            mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
+
+            //TODO we got to keep in mind there's an id already.
+            if (mInitTransferLoading)
+            {
+                //TODO make it load
+                //refreshTextBalance(false)
+
+                startInitTransferLoading()
+            }
+            else
+            {
+                onInitTransferLoadComplete()
+
+                if (mFinalizeTransferLoading)
+                {
+                    //TODO ui stuff.
+                    //refreshRecyclerViewAndTextHistory()
+
+                    startFinalizeTransferLoading()
+                }
+                else
+                {
+                    onFinalizeTransferLoadComplete()
+                }
+            }
         }
     }
+
+    private fun onInitTransferLoadComplete()
+    {
+        mInitTransferLoading = false
+
+        //mNavProgressBalance?.visibility = View.GONE
+        //refreshTextBalance(animating)
+    }
+
+    private fun onFinalizeTransferLoadComplete()
+    {
+        mFinalizeTransferLoading = false
+
+        //mNavProgressBalance?.visibility = View.GONE
+        //refreshTextBalance(animating)
+    }
+
+    private fun startInitTransferLoading()
+    {
+        startPostRequestLoadInitTransfer()
+    }
+
+    private fun startFinalizeTransferLoading()
+    {
+        startPostRequestLoadFinalizeTransfer()
+    }
+
+    // volley
+    private fun startPostRequestLoadInitTransfer()
+    {
+        cancelRequests()
+
+        mInitTransferLoading = true
+
+        //mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
+        //mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
+
+        //mNavProgressBalance?.visibility = View.VISIBLE
+
+
+        var pkh:Address? = null
+        arguments?.let {
+            val addressBundle = it.getBundle(Address.TAG)
+            pkh = Address.fromBundle(addressBundle)
+        }
+        val url = String.format(getString(R.string.balance_url), pkh?.pubKeyHash)
+
+        // Request a string response from the provided URL.
+        val stringRequest = StringRequest(Request.Method.GET, url,
+                Response.Listener<String> { response ->
+                    val balance = response.replace("[^0-9]".toRegex(), "")
+                    mBalanceItem = balance.toDouble()/1000000
+                    animateBalance(mBalanceItem)
+
+                    onBalanceLoadComplete(true)
+                    startGetRequestLoadOperations()
+                },
+                Response.ErrorListener {
+                    onBalanceLoadComplete(false)
+                    onOperationsLoadHistoryComplete()
+                    showSnackbarError(true)
+                })
+
+        stringRequest.tag = LOAD_BALANCE_TAG
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+    }
+
+    // volley
+    private fun startPostRequestLoadFinalizeTransfer()
+    {
+        cancelRequest(true, true)
+
+        mGetHistoryLoading = true
+
+        mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
+
+        mNavProgressOperations?.visibility = View.VISIBLE
+
+        var pkh:Address? = null
+        arguments?.let {
+            val addressBundle = it.getBundle(Address.TAG)
+            pkh = Address.fromBundle(addressBundle)
+        }
+        val url = String.format(getString(R.string.history_url), pkh?.pubKeyHash)
+
+        val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+        { answer ->
+
+            addOperationItemsFromJSON(answer)
+
+            onOperationsLoadHistoryComplete()
+
+        }, Response.ErrorListener
+        {
+            onOperationsLoadHistoryComplete()
+
+            showSnackbarError(true)
+        })
+
+        jsObjRequest.tag = LOAD_OPERATIONS_TAG
+
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
@@ -563,14 +700,6 @@ class TransferFormFragment : Fragment()
         mPayButton!!.text = getString(R.string.pay, moneyFormatted2)
     }
 
-    override fun onSaveInstanceState(outState: Bundle)
-    {
-        super.onSaveInstanceState(outState)
-
-        outState.putParcelable(SRC_ACCOUNT_KEY, mSrcAccount?.toBundle())
-        outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
-    }
-
     private fun pay(src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
     {
         val url = getString(R.string.transfer_url)
@@ -699,6 +828,17 @@ class TransferFormFragment : Fragment()
     {
         super.onDestroy()
         cancelRequests()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        super.onSaveInstanceState(outState)
+
+        outState.putParcelable(SRC_ACCOUNT_KEY, mSrcAccount?.toBundle())
+        outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
+
+        outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
+        outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
     }
 
     override fun onDetach()

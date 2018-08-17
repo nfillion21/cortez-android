@@ -27,8 +27,6 @@
 
 package com.tezcore.cortez
 
-import android.app.Activity
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Build
@@ -60,11 +58,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 {
     override fun onFragmentInteraction() {
         //switchToOperations(realSeed)
-    }
-
-    companion object {
-        const val ADD_SECRET_REQUEST_CODE = 300
-        const val AUTHENTICATION_SCREEN_CODE = 301
     }
 
     private var mProgressBar: ProgressBar? = null
