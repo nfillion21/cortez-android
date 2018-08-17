@@ -37,6 +37,7 @@ import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
+import android.support.v4.hardware.fingerprint.FingerprintManagerCompat
 import android.support.v7.widget.AppCompatSpinner
 import android.text.Editable
 import android.text.TextUtils
@@ -199,6 +200,7 @@ class TransferFormFragment : Fragment()
         //refreshTextBalance(animating)
     }
 
+    //TODO check if we should pass crypted mnemonics data as parameter
     private fun startInitTransferLoading()
     {
         startPostRequestLoadInitTransfer()
@@ -220,6 +222,56 @@ class TransferFormFragment : Fragment()
         //mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
 
         //mNavProgressBalance?.visibility = View.VISIBLE
+
+
+        //TODO we will build the request here, assuming the user unlocked the pass
+
+
+        val url = getString(R.string.transfer_url)
+
+        var postParams = JSONObject()
+
+        postParams.put("src", src)
+        postParams.put("src_pk", srcPk)
+        postParams.put("dst", dst)
+        postParams.put("amount", amount)
+        postParams.put("fee", fee)
+
+        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        { answer ->
+
+            signIt(answer.getInt("id"), answer.getString("payload"), sk, src)
+
+            //onOperationsLoadHistoryComplete()
+
+        }, Response.ErrorListener
+        {
+            Log.i(it.toString(), it.toString())
+            Log.i(it.toString(), it.toString())
+        })
+        {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String>
+            {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        jsObjRequest.tag = TRANSFER_INIT_TAG
+
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+
+
+
+
+
+
+
+
+
+
 
 
         var pkh:Address? = null
@@ -285,9 +337,6 @@ class TransferFormFragment : Fragment()
 
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
-
-
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
@@ -381,11 +430,16 @@ class TransferFormFragment : Fragment()
             //TODO would be better to decrypt after the user succeed in password
             val mnemonics = EncryptionServices(activity!!).decrypt(seedData.mnemonics, "not useful for marshmallow")
             val sk = CryptoUtils.generateSk(mnemonics, "")
-
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             //TODO just pay
-            onPayClick(pkhSrc, pk, pkhDst!!, amount.toInt().toString(), fee.toInt().toString(), sk)
+
+            //TODO block the interface then put in cache amount + fee
+
+            onPayClick(seedData)
+
+            // I need parameters amount, fee unless I keep them in cache.
+            //onPayClick(pkhSrc, pk, pkhDst!!, amount.toInt().toString(), fee.toInt().toString(), sk)
         }
 
         arguments?.let {
@@ -403,6 +457,42 @@ class TransferFormFragment : Fragment()
         putEverythingInRed()
     }
 
+    private fun onPayClick(mnemonics:Storage.MnemonicsData)
+    {
+        val dialog = AuthenticationDialog()
+        if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints())
+        {
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
+            dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
+            dialog.fingerprintAuthenticationSuccessListener = {
+                validateKeyAuthentication(it, mnemonics)
+            }
+            if (dialog.cryptoObjectToAuthenticateWith == null)
+            {
+                dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
+            }
+            else
+            {
+                dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
+            }
+        }
+        else
+        {
+            dialog.stage = AuthenticationDialog.Stage.PASSWORD
+        }
+        dialog.authenticationSuccessListener = {
+            //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
+            //pay(src, srcPk, dst, amount, fee, sk)
+            startInitTransferLoading()
+        }
+        dialog.passwordVerificationListener =
+                {
+                    validatePassword(it)
+                }
+        dialog.show(activity?.supportFragmentManager, "Authentication")
+    }
+
+    /*
     private fun onPayClick(src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
     {
         val dialog = AuthenticationDialog()
@@ -436,6 +526,7 @@ class TransferFormFragment : Fragment()
                 }
         dialog.show(activity?.supportFragmentManager, "Authentication")
     }
+    */
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
@@ -805,15 +896,16 @@ class TransferFormFragment : Fragment()
         return EncryptionServices(activity?.applicationContext!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
     }
 
-    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject, src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManagerCompat.CryptoObject, mnemonics: Storage.MnemonicsData)
     {
         if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
         {
-            pay(src, srcPk, dst, amount, fee, sk)
+            startInitTransferLoading()
+            //pay(src, srcPk, dst, amount, fee, sk)
         }
         else
         {
-            onPayClick(src, srcPk, dst, amount, fee, sk)
+            onPayClick(mnemonics)
         }
     }
 

@@ -32,6 +32,7 @@ import android.content.Context
 import android.hardware.fingerprint.FingerprintManager
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.UserNotAuthenticatedException
+import android.support.v4.hardware.fingerprint.FingerprintManagerCompat
 import com.tezos.ui.encryption.CipherWrapper
 import com.tezos.ui.encryption.KeyStoreWrapper
 import java.security.InvalidKeyException
@@ -182,7 +183,7 @@ class EncryptionServices(context: Context) {
      * @return true if cryptoObject was initialized successfully and key was not invalidated during authentication.
      */
     @TargetApi(23)
-    fun validateFingerprintAuthentication(cryptoObject: FingerprintManager.CryptoObject): Boolean {
+    fun validateFingerprintAuthentication(cryptoObject: FingerprintManagerCompat.CryptoObject): Boolean {
         try {
             cryptoObject.cipher.doFinal(KEY_VALIDATION_DATA)
             return true
