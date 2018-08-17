@@ -30,6 +30,7 @@ package com.tezos.ui.fragment
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
@@ -383,11 +384,15 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         sortedList.sortWith(object: Comparator<Operation>
         {
-            override fun compare(o1: Operation, o2: Operation): Int = when {
+            override fun compare(o1: Operation, o2: Operation): Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                when {
 
-                Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
-                Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
-                else -> 1
+                    Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
+                    Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
+                    else -> 1
+                }
+            } else {
+                TODO("VERSION.SDK_INT < O")
             }
         })
 

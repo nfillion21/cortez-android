@@ -81,28 +81,20 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 com.tezos.ui.R.color.theme_tezos_text)
 
         initActionBar(tezosTheme)
-
         val isPasswordSaved = Storage(this).isPasswordSaved()
-        if (isPasswordSaved)
-        {
-            val seed = Storage(baseContext).getMnemonics()
-            switchToOperations(seed)
-        }
-        else
-        {
-            switchToHome()
-        }
-
         setMenuItemEnabled(isPasswordSaved)
 
-        if (savedInstanceState != null)
+        if (savedInstanceState == null)
         {
-            //TODO not useful anymore, remote it.
-            //mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
-        }
-        else
-        {
-            //switchToHome()
+            if (isPasswordSaved)
+            {
+                val seed = Storage(baseContext).getMnemonics()
+                switchToOperations(seed)
+            }
+            else
+            {
+                switchToHome()
+            }
         }
     }
 

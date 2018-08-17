@@ -138,7 +138,6 @@ class TransferFormFragment : Fragment()
         if (savedInstanceState != null)
         {
             val srcBundle = savedInstanceState.getParcelable<Bundle>(SRC_ACCOUNT_KEY)
-
             if (srcBundle != null)
             {
                 mSrcAccount = Account.fromBundle(srcBundle)
