@@ -41,7 +41,6 @@ import android.support.v7.widget.AppCompatSpinner
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -159,7 +158,7 @@ class TransferFormFragment : Fragment()
                 switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
 
-            mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY)
+            mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY, -1)
             mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
 
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
@@ -303,34 +302,6 @@ class TransferFormFragment : Fragment()
         jsObjRequest.tag = TRANSFER_INIT_TAG
         mInitTransferLoading = true
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-
-        /*
-        var pkh:Address? = null
-        arguments?.let {
-            val addressBundle = it.getBundle(Address.TAG)
-            pkh = Address.fromBundle(addressBundle)
-        }
-        val url = String.format(getString(R.string.balance_url), pkh?.pubKeyHash)
-
-        // Request a string response from the provided URL.
-        val stringRequest = StringRequest(Request.Method.GET, url,
-                Response.Listener<String> { response ->
-                    val balance = response.replace("[^0-9]".toRegex(), "")
-                    mBalanceItem = balance.toDouble()/1000000
-                    animateBalance(mBalanceItem)
-
-                    onBalanceLoadComplete(true)
-                    startGetRequestLoadOperations()
-                },
-                Response.ErrorListener {
-                    onBalanceLoadComplete(false)
-                    onOperationsLoadHistoryComplete()
-                    showSnackbarError(true)
-                })
-
-        stringRequest.tag = LOAD_BALANCE_TAG
-        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
-        */
     }
 
     // volley
@@ -344,9 +315,6 @@ class TransferFormFragment : Fragment()
         //mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
         //mNavProgressOperations?.visibility = View.VISIBLE
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
-        val sk = CryptoUtils.generateSk(mnemonics, "")
-
         val url = getString(R.string.transfer_finalize)
 
         //val skBytes = sk.hexStringToByteArray()
@@ -354,6 +322,9 @@ class TransferFormFragment : Fragment()
         if (mTransferId != null && mTransferId != -1 && mTransferPayload != null)
         {
             val byteArrayThree = mTransferPayload!!.hexToByteArray()
+
+            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val sk = CryptoUtils.generateSk(mnemonics, "")
             val signature = KeyPair.sign(sk, byteArrayThree)
 
             //TODO verify signature
@@ -371,7 +342,8 @@ class TransferFormFragment : Fragment()
                 answer ->
 
                 //TODO check the JSON object before calling success
-                Log.i(answer.toString(), answer.toString())
+
+                onFinalizeTransferLoadComplete()
 
                 listener?.onTransferSucceed()
 
@@ -381,7 +353,8 @@ class TransferFormFragment : Fragment()
                 //TODO check the volley error
                 //TODO add snackbar error here
 
-                Log.i(it.toString(), it.toString())
+                onFinalizeTransferLoadComplete()
+
                 listener?.onTransferSucceed()
             })
             {
@@ -399,34 +372,6 @@ class TransferFormFragment : Fragment()
             mFinalizeTransferLoading = true
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
         }
-
-
-        /*
-        var pkh:Address? = null
-        arguments?.let {
-            val addressBundle = it.getBundle(Address.TAG)
-            pkh = Address.fromBundle(addressBundle)
-        }
-        val url = String.format(getString(R.string.history_url), pkh?.pubKeyHash)
-
-        val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
-        { answer ->
-
-            addOperationItemsFromJSON(answer)
-
-            onOperationsLoadHistoryComplete()
-
-        }, Response.ErrorListener
-        {
-            onOperationsLoadHistoryComplete()
-
-            showSnackbarError(true)
-        })
-
-        jsObjRequest.tag = LOAD_OPERATIONS_TAG
-
-        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-        */
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -495,42 +440,7 @@ class TransferFormFragment : Fragment()
         mPayButton!!.text = moneyString
 
         mPayButtonLayout!!.setOnClickListener { _ ->
-
-            val seedDataBundle = arguments?.getBundle(Storage.TAG)
-            val seedData = Storage.fromBundle(seedDataBundle!!)
-            val pkhSrc = seedData.pkh
-
-            val pkhDst = mDstAccount?.pubKeyHash
-
-            var amount = mAmount?.text.toString().toDouble()
-            var fee = 0.0
-            val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
-
-            when (selectedItemThreeDS.toInt())
-            {
-                0 -> { fee = 0.05 }
-                1 -> { fee = 0.00 }
-                2 -> { fee = 0.01 }
-                else -> {}
-            }
-
-            // convert in µꜩ
-            amount *= 1000000
-            fee *= 1000000
-
-            //TODO would be better to decrypt after the user succeed in password
-            val mnemonics = EncryptionServices(activity!!).decrypt(seedData.mnemonics, "not useful for marshmallow")
-            val sk = CryptoUtils.generateSk(mnemonics, "")
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
-            //TODO just pay
-
-            //TODO block the interface then put in cache amount + fee
-
-            onPayClick(seedData)
-
-            // I need parameters amount, fee unless I keep them in cache.
-            //onPayClick(pkhSrc, pk, pkhDst!!, amount.toInt().toString(), fee.toInt().toString(), sk)
+            onPayClick()
         }
 
         arguments?.let {
@@ -548,7 +458,7 @@ class TransferFormFragment : Fragment()
         putEverythingInRed()
     }
 
-    private fun onPayClick(mnemonics:Storage.MnemonicsData)
+    private fun onPayClick()
     {
         val dialog = AuthenticationDialog()
         if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints())
@@ -556,7 +466,7 @@ class TransferFormFragment : Fragment()
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthentication(it, mnemonics)
+                validateKeyAuthentication(it)
             }
             if (dialog.cryptoObjectToAuthenticateWith == null)
             {
@@ -607,31 +517,6 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    private fun isTransferAmountValid():Boolean
-    {
-        val isAmountValid = false
-
-        if (mAmount != null && !TextUtils.isEmpty(mAmount?.text))
-        {
-            try
-            {
-                //val amount = java.lang.Double.parseDouble()
-                val amount = mAmount?.text!!.toString().toDouble()
-
-                if (amount >= 0.000001f)
-                {
-                    return true
-                }
-            }
-            catch (e: NumberFormatException)
-            {
-                return false
-            }
-        }
-
-        return isAmountValid
-    }
-
     private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, account: Account)
     {
         when (selection)
@@ -658,6 +543,31 @@ class TransferFormFragment : Fragment()
         }
     }
 
+
+    private fun isTransferAmountValid():Boolean
+    {
+        val isAmountValid = false
+
+        if (mAmount != null && !TextUtils.isEmpty(mAmount?.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val amount = mAmount?.text!!.toString().toDouble()
+
+                if (amount >= 0.000001f)
+                {
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                return false
+            }
+        }
+
+        return isAmountValid
+    }
     private fun focusChangeListener(): View.OnFocusChangeListener
     {
         return View.OnFocusChangeListener { v, hasFocus ->
@@ -953,7 +863,7 @@ class TransferFormFragment : Fragment()
         return EncryptionServices(activity?.applicationContext!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
     }
 
-    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject, mnemonics: Storage.MnemonicsData)
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
     {
         if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
         {
@@ -961,7 +871,7 @@ class TransferFormFragment : Fragment()
         }
         else
         {
-            onPayClick(mnemonics)
+            onPayClick()
         }
     }
 
