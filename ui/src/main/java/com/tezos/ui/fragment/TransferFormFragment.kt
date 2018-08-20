@@ -211,34 +211,35 @@ class TransferFormFragment : Fragment()
     //TODO check if we should pass crypted mnemonics data as parameter
     private fun startInitTransferLoading()
     {
-        val seedDataBundle = arguments?.getBundle(Storage.TAG)
-        val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
+        arguments?.let {
+            val seedDataBundle = it.getBundle(Storage.TAG)
+            val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
 
-        startPostRequestLoadInitTransfer(mnemonicsData)
+            startPostRequestLoadInitTransfer(mnemonicsData)
+        }
     }
 
     private fun startFinalizeTransferLoading()
     {
-        startPostRequestLoadFinalizeTransfer()
+        arguments?.let {
+            val seedDataBundle = it.getBundle(Storage.TAG)
+            val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
+
+            startPostRequestLoadFinalizeTransfer(mnemonicsData)
+        }
     }
 
     // volley
-    private fun startPostRequestLoadInitTransfer(mnemonics: Storage.MnemonicsData)
+    private fun startPostRequestLoadInitTransfer(mnemonicsData: Storage.MnemonicsData)
     {
         //mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
         //mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
 
         //mNavProgressBalance?.visibility = View.VISIBLE
 
-
-        //TODO we will build the request here, assuming the user unlocked the pass
-
         val url = getString(R.string.transfer_url)
 
         //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
-
-        val pkhSrc = mnemonics.pkh
-        val pkhDst = mDstAccount?.pubKeyHash
 
         var amount = mAmount?.text.toString().toDouble()
         var fee = 0.0
@@ -256,16 +257,20 @@ class TransferFormFragment : Fragment()
         amount *= 1000000
         fee *= 1000000
 
-        //TODO would be better to decrypt after the user succeed in password
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonics.mnemonics, "not useful for marshmallow")
+        //TODO need to check if activity is not null
+
+        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
+        val pkhSrc = mnemonicsData.pkh
+        val pkhDst = mDstAccount?.pubKeyHash
+
         var postParams = JSONObject()
-        postParams.put("src", pk)
-        postParams.put("src_pk", pkhSrc)
+        postParams.put("src", pkhSrc)
+        postParams.put("src_pk", pk)
         postParams.put("dst", pkhDst)
-        postParams.put("amount", amount)
-        postParams.put("fee", fee)
+        postParams.put("amount", amount.toInt().toString())
+        postParams.put("fee", fee.toInt().toString())
 
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
@@ -278,8 +283,6 @@ class TransferFormFragment : Fragment()
             mTransferPayload = answer.getString("payload")
 
             startFinalizeTransferLoading()
-
-            //signIt(answer.getInt("id"), answer.getString("payload"), sk, src)
 
         }, Response.ErrorListener
         {
@@ -295,9 +298,9 @@ class TransferFormFragment : Fragment()
             }
         }
 
-        jsObjRequest.tag = TRANSFER_INIT_TAG
+        //cancelRequests()
 
-        cancelRequests()
+        jsObjRequest.tag = TRANSFER_INIT_TAG
         mInitTransferLoading = true
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
 
@@ -331,17 +334,17 @@ class TransferFormFragment : Fragment()
     }
 
     // volley
-    private fun startPostRequestLoadFinalizeTransfer()
+    private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
     {
         cancelRequests()
 
         //TODO first we need to verify we go id + payload
 
-
         //TODO handle UI
         //mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
         //mNavProgressOperations?.visibility = View.VISIBLE
 
+        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
         val url = getString(R.string.transfer_finalize)
@@ -569,8 +572,6 @@ class TransferFormFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
-            //pay(src, srcPk, dst, amount, fee, sk)
             startInitTransferLoading()
         }
         dialog.passwordVerificationListener =
@@ -957,7 +958,6 @@ class TransferFormFragment : Fragment()
         if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
         {
             startInitTransferLoading()
-            //pay(src, srcPk, dst, amount, fee, sk)
         }
         else
         {

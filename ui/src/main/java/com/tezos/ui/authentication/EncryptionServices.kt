@@ -183,7 +183,7 @@ class EncryptionServices(context: Context) {
      * @return true if cryptoObject was initialized successfully and key was not invalidated during authentication.
      */
     @TargetApi(23)
-    fun validateFingerprintAuthentication(cryptoObject: FingerprintManagerCompat.CryptoObject): Boolean {
+    fun validateFingerprintAuthentication(cryptoObject: FingerprintManager.CryptoObject): Boolean {
         try {
             cryptoObject.cipher.doFinal(KEY_VALIDATION_DATA)
             return true
