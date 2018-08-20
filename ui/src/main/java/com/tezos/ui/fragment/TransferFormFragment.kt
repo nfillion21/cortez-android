@@ -279,8 +279,7 @@ class TransferFormFragment : Fragment()
 
             startFinalizeTransferLoading()
 
-            val sk = CryptoUtils.generateSk(mnemonics, "")
-            signIt(answer.getInt("id"), answer.getString("payload"), sk, src)
+            //signIt(answer.getInt("id"), answer.getString("payload"), sk, src)
 
         }, Response.ErrorListener
         {
@@ -338,57 +337,65 @@ class TransferFormFragment : Fragment()
 
         //TODO first we need to verify we go id + payload
 
-        mFinalizeTransferLoading = true
 
         //TODO handle UI
         //mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
         //mNavProgressOperations?.visibility = View.VISIBLE
 
+        val sk = CryptoUtils.generateSk(mnemonics, "")
+
         val url = getString(R.string.transfer_finalize)
 
         //val skBytes = sk.hexStringToByteArray()
 
-        val byteArrayThree = payload.hexToByteArray()
-        val signature = KeyPair.sign(sk, byteArrayThree)
-
-        val signVerified = KeyPair.verifySign(signature, byteArrayThree, pk)
-
-        var hexSign = signature.toNoPrefixHexString()
-
-        var postparams = JSONObject()
-        postparams.put("id",id)
-        postparams.put("payload", hexSign)
-        //le payload c'est la signature en hex, en 64 bytes donc 128 chars hex
-
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
+        if (mTransferId != null && mTransferId != -1 && mTransferPayload != null)
         {
-            answer ->
+            val byteArrayThree = mTransferPayload!!.hexToByteArray()
+            val signature = KeyPair.sign(sk, byteArrayThree)
 
-            //TODO check the JSON object
-            Log.i(answer.toString(), answer.toString())
+            //TODO verify signature
+            //val signVerified = KeyPair.verifySign(signature, byteArrayThree, pk)
 
-            listener?.onTransferSucceed()
+            var hexSign = signature.toNoPrefixHexString()
 
-        }, Response.ErrorListener
-        {
+            var postparams = JSONObject()
+            postparams.put("id", mTransferId!!)
+            postparams.put("payload", hexSign)
+            //payload is hex signature, 64 bytes then 128 hex chars
 
-            //TODO check the volley error
-            Log.i(it.toString(), it.toString())
-            listener?.onTransferSucceed()
-        })
-        {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String>
+            val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
             {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
+                answer ->
+
+                //TODO check the JSON object before calling success
+                Log.i(answer.toString(), answer.toString())
+
+                listener?.onTransferSucceed()
+
+            }, Response.ErrorListener
+            {
+
+                //TODO check the volley error
+                //TODO add snackbar error here
+
+                Log.i(it.toString(), it.toString())
+                listener?.onTransferSucceed()
+            })
+            {
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String>
+                {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    return headers
+                }
             }
+
+            jsObjRequest.tag = TRANSFER_FINALIZE_TAG
+
+            mFinalizeTransferLoading = true
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
         }
-
-        jsObjRequest.tag = TRANSFER_FINALIZE_TAG
-
-        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
 
 
         /*
@@ -572,42 +579,6 @@ class TransferFormFragment : Fragment()
                 }
         dialog.show(activity?.supportFragmentManager, "Authentication")
     }
-
-    /*
-    private fun onPayClick(src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
-    {
-        val dialog = AuthenticationDialog()
-        if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints())
-        {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
-            dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
-            dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthentication(it, src, srcPk, dst, amount, fee, sk)
-            }
-            if (dialog.cryptoObjectToAuthenticateWith == null)
-            {
-                dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
-            }
-            else
-            {
-                dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
-            }
-        }
-        else
-        {
-            dialog.stage = AuthenticationDialog.Stage.PASSWORD
-        }
-        dialog.authenticationSuccessListener = {
-            //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
-            pay(src, srcPk, dst, amount, fee, sk)
-        }
-        dialog.passwordVerificationListener =
-                {
-                    validatePassword(it)
-                }
-        dialog.show(activity?.supportFragmentManager, "Authentication")
-    }
-    */
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
