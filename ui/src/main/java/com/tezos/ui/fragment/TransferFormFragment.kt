@@ -48,6 +48,7 @@ import android.widget.*
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
@@ -62,6 +63,8 @@ import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
 import com.tezos.ui.utils.toNoPrefixHexString
+import kotlinx.android.synthetic.main.fragment_payment_form.*
+import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONObject
 
 /**
@@ -123,6 +126,7 @@ class TransferFormFragment : Fragment()
     interface OnTransferListener
     {
         fun onTransferSucceed()
+        fun onTransferLoading(loading: Boolean)
     }
 
     override fun onAttach(context: Context)
@@ -164,8 +168,10 @@ class TransferFormFragment : Fragment()
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
+            transferLoading(isLoading())
+
             //TODO we got to keep in mind there's an id already.
-            if (mInitTransferLoading != null)
+            if (mInitTransferLoading)
             {
                 //TODO make it load
                 //refreshTextBalance(false)
@@ -174,7 +180,7 @@ class TransferFormFragment : Fragment()
             }
             else
             {
-                onInitTransferLoadComplete()
+                onInitTransferLoadComplete(null)
 
                 if (mFinalizeTransferLoading)
                 {
@@ -185,30 +191,56 @@ class TransferFormFragment : Fragment()
                 }
                 else
                 {
-                    onFinalizeTransferLoadComplete()
+                    onFinalizeTransferLoadComplete(null)
                 }
             }
         }
     }
 
-    private fun onInitTransferLoadComplete()
+    private fun onInitTransferLoadComplete(error:VolleyError?)
     {
         mInitTransferLoading = false
 
-        //mNavProgressBalance?.visibility = View.GONE
-        //refreshTextBalance(animating)
+        if (error != null)
+        {
+            // stop the moulinette only if an error occurred
+            transferLoading(false)
+
+            //TODO possibly analyze the error and snackbar it
+        }
+        else
+        {
+            // it's signed, looks like it worked.
+            //transferLoading(true)
+        }
     }
 
-    private fun onFinalizeTransferLoadComplete()
+    private fun onFinalizeTransferLoadComplete(error: VolleyError?)
     {
         mFinalizeTransferLoading = false
 
-        //mNavProgressBalance?.visibility = View.GONE
-        //refreshTextBalance(animating)
+        if (error != null)
+        {
+            transferLoading(false)
+
+            //TODO possibly analyze the error and snackbar it
+        }
+        else
+        {
+            //TODO it's called in onViewCreated, not only when transfer is succeed
+
+            listener?.onTransferSucceed()
+            // if everything
+            //transferLoading(true)
+        }
     }
 
     private fun startInitTransferLoading()
     {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        // this fragment always have mnemonics arg
         arguments?.let {
             val seedDataBundle = it.getBundle(Storage.TAG)
             val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
@@ -219,6 +251,10 @@ class TransferFormFragment : Fragment()
 
     private fun startFinalizeTransferLoading()
     {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        // this fragment always have mnemonics arg
         arguments?.let {
             val seedDataBundle = it.getBundle(Storage.TAG)
             val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
@@ -230,11 +266,6 @@ class TransferFormFragment : Fragment()
     // volley
     private fun startPostRequestLoadInitTransfer(mnemonicsData: Storage.MnemonicsData)
     {
-        //mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
-        //mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
-
-        //mNavProgressBalance?.visibility = View.VISIBLE
-
         val url = getString(R.string.transfer_url)
 
         //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
@@ -275,7 +306,7 @@ class TransferFormFragment : Fragment()
 
             //TODO check if the JSON is fine then launch the 2nd request
 
-            onInitTransferLoadComplete()
+            onInitTransferLoadComplete(null)
 
             mTransferId = answer.getInt("id")
             mTransferPayload = answer.getString("payload")
@@ -284,7 +315,7 @@ class TransferFormFragment : Fragment()
 
         }, Response.ErrorListener
         {
-            onInitTransferLoadComplete()
+            onInitTransferLoadComplete(it)
         })
         {
             @Throws(AuthFailureError::class)
@@ -306,16 +337,7 @@ class TransferFormFragment : Fragment()
     // volley
     private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
     {
-
-        //TODO first we need to verify we go id + payload
-
-        //TODO handle UI
-        //mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
-        //mNavProgressOperations?.visibility = View.VISIBLE
-
         val url = getString(R.string.transfer_finalize)
-
-        //val skBytes = sk.hexStringToByteArray()
 
         if (mTransferId != null && mTransferId != -1 && mTransferPayload != null)
         {
@@ -341,19 +363,12 @@ class TransferFormFragment : Fragment()
 
                 //TODO check the JSON object before calling success
 
-                onFinalizeTransferLoadComplete()
-
-                listener?.onTransferSucceed()
+                onFinalizeTransferLoadComplete(null)
 
             }, Response.ErrorListener
             {
 
-                //TODO check the volley error
-                //TODO add snackbar error here
-
-                onFinalizeTransferLoadComplete()
-
-                listener?.onTransferSucceed()
+                onFinalizeTransferLoadComplete(it)
             })
             {
                 @Throws(AuthFailureError::class)
@@ -371,6 +386,10 @@ class TransferFormFragment : Fragment()
 
             mFinalizeTransferLoading = true
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+        }
+        else
+        {
+            //something wrong happened. we got the finalizeTransfer boolean but not the payload + id
         }
     }
 
@@ -456,6 +475,31 @@ class TransferFormFragment : Fragment()
         validatePayButton(isInputDataValid())
 
         putEverythingInRed()
+    }
+
+    private fun isLoading():Boolean
+    {
+        return mInitTransferLoading || mFinalizeTransferLoading
+    }
+
+    private fun transferLoading(loading:Boolean)
+    {
+        if (loading)
+        {
+            mPayButtonLayout?.visibility = View.GONE
+            empty.visibility = View.VISIBLE
+            fee_spinner.isEnabled = false
+            amount_transfer.isEnabled = false
+        }
+        else
+        {
+            mPayButtonLayout?.visibility = View.VISIBLE
+            empty.visibility = View.INVISIBLE
+            fee_spinner.isEnabled = true
+            amount_transfer.isEnabled = true
+        }
+
+        listener?.onTransferLoading(loading)
     }
 
     private fun onPayClick()

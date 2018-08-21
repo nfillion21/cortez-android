@@ -30,17 +30,20 @@ package com.tezos.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.Toolbar
 import android.util.Log
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.fragment.TransferFormFragment
 import com.tezos.ui.utils.Storage
+import kotlinx.android.synthetic.main.activity_payment_form.*
 
 /**
  * Created by nfillion on 29/02/16.
@@ -115,6 +118,8 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
             finish()
         }
 
+        nav_progress.indeterminateDrawable.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId), PorterDuff.Mode.SRC_IN);
+
         val mTitleBar = findViewById<TextView>(R.id.barTitle)
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
@@ -132,5 +137,17 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
         //TODO transfer data to display?
         setResult(R.id.transfer_succeed, null)
         finish()
+    }
+
+    override fun onTransferLoading(loading:Boolean)
+    {
+        if (loading)
+        {
+            nav_progress.visibility = View.VISIBLE
+        }
+        else
+        {
+            nav_progress.visibility = View.INVISIBLE
+        }
     }
 }
