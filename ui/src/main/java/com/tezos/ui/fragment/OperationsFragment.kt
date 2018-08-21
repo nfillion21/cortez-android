@@ -30,7 +30,9 @@ package com.tezos.ui.fragment
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
@@ -380,16 +382,19 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
             sortedList.add(operation)
         }
-
-        sortedList.sortWith(object: Comparator<Operation>
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
-            override fun compare(o1: Operation, o2: Operation): Int = when {
+            sortedList.sortWith(object: Comparator<Operation>
+            {
+                @RequiresApi(Build.VERSION_CODES.O)
+                override fun compare(o1: Operation, o2: Operation): Int = when {
 
-                Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
-                Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
-                else -> 1
-            }
-        })
+                    Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
+                    Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
+                    else -> 1
+                }
+            })
+        }
 
         mRecyclerViewItems?.addAll(sortedList)
         mRecyclerView?.adapter?.notifyDataSetChanged()
