@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+0.1.2
+-----
+* Fixes the filter date bug on versions < Oreo.
+
 0.1.1
 -----
 * Add compatibility of Android 6.0 (Marshmallow).
