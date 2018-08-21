@@ -207,7 +207,6 @@ class TransferFormFragment : Fragment()
         //refreshTextBalance(animating)
     }
 
-    //TODO check if we should pass crypted mnemonics data as parameter
     private fun startInitTransferLoading()
     {
         arguments?.let {
@@ -297,7 +296,7 @@ class TransferFormFragment : Fragment()
             }
         }
 
-        //cancelRequests()
+        cancelRequests()
 
         jsObjRequest.tag = TRANSFER_INIT_TAG
         mInitTransferLoading = true
@@ -307,7 +306,6 @@ class TransferFormFragment : Fragment()
     // volley
     private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
     {
-        cancelRequests()
 
         //TODO first we need to verify we go id + payload
 
@@ -366,6 +364,8 @@ class TransferFormFragment : Fragment()
                     return headers
                 }
             }
+
+            cancelRequests()
 
             jsObjRequest.tag = TRANSFER_FINALIZE_TAG
 
@@ -753,94 +753,6 @@ class TransferFormFragment : Fragment()
         //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
         mPayButton!!.text = getString(R.string.pay, moneyFormatted2)
     }
-
-    /*
-    private fun pay(src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
-    {
-        val url = getString(R.string.transfer_url)
-
-        var postParams = JSONObject()
-
-        postParams.put("src", src)
-        postParams.put("src_pk", srcPk)
-        postParams.put("dst", dst)
-        postParams.put("amount", amount)
-        postParams.put("fee", fee)
-
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
-        { answer ->
-
-            signIt(answer.getInt("id"), answer.getString("payload"), sk, src)
-
-            //onOperationsLoadHistoryComplete()
-
-        }, Response.ErrorListener
-        {
-            Log.i(it.toString(), it.toString())
-            Log.i(it.toString(), it.toString())
-        })
-        {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String>
-            {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
-            }
-        }
-
-        jsObjRequest.tag = TRANSFER_INIT_TAG
-
-        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-    }
-    */
-
-    /*
-    private fun signIt(id: Int, payload:String, sk: String, pk: String)
-    {
-        val url = getString(R.string.transfer_finalize)
-
-        //val skBytes = sk.hexStringToByteArray()
-
-        val byteArrayThree = payload.hexToByteArray()
-        val signature = KeyPair.sign(sk, byteArrayThree)
-
-        val signVerified = KeyPair.verifySign(signature, byteArrayThree, pk)
-
-        var hexSign = signature.toNoPrefixHexString()
-
-        var postparams = JSONObject()
-        postparams.put("id",id)
-        postparams.put("payload", hexSign)
-        //le payload c'est la signature en hex, en 64 bytes donc 128 chars hex
-
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
-        {
-            answer ->
-
-            Log.i(answer.toString(), answer.toString())
-            listener?.onTransferSucceed()
-
-        }, Response.ErrorListener
-        {
-            Log.i(it.toString(), it.toString())
-            listener?.onTransferSucceed()
-        })
-        {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String>
-            {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
-            }
-        }
-
-        jsObjRequest.tag = TRANSFER_FINALIZE_TAG
-
-        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-    }
-    */
 
     /**
      * Fingerprint was invalidated, decide what to do in this case.
