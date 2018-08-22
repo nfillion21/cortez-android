@@ -219,22 +219,18 @@ class TransferFormFragment : Fragment()
 
     private fun onFinalizeTransferLoadComplete(error: VolleyError?)
     {
-        mFinalizeTransferLoading = false
+        // everything is over, there's no call to make
+        cancelRequests()
 
         if (error != null)
         {
             transferLoading(false)
 
-            //TODO possibly analyze the error and snackbar it
             listener?.onTransferFailed(error)
         }
         else
         {
-            //TODO it's called in onViewCreated, not only when transfer is succeed
-
-            listener?.onTransferSucceed()
-            // if everything
-            //transferLoading(true)
+            // the finish call is made already
         }
     }
 
@@ -367,11 +363,14 @@ class TransferFormFragment : Fragment()
                 //TODO check the JSON object before calling success
 
                 onFinalizeTransferLoadComplete(null)
+                listener?.onTransferSucceed()
 
             }, Response.ErrorListener
             {
 
                 onFinalizeTransferLoadComplete(it)
+                listener?.onTransferFailed(it)
+
             })
             {
                 @Throws(AuthFailureError::class)
