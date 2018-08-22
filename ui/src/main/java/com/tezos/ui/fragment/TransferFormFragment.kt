@@ -127,6 +127,7 @@ class TransferFormFragment : Fragment()
     {
         fun onTransferSucceed()
         fun onTransferLoading(loading: Boolean)
+        fun onTransferFailed(error: VolleyError?)
     }
 
     override fun onAttach(context: Context)
@@ -207,6 +208,7 @@ class TransferFormFragment : Fragment()
             transferLoading(false)
 
             //TODO possibly analyze the error and snackbar it
+            listener?.onTransferFailed(error)
         }
         else
         {
@@ -224,6 +226,7 @@ class TransferFormFragment : Fragment()
             transferLoading(false)
 
             //TODO possibly analyze the error and snackbar it
+            listener?.onTransferFailed(error)
         }
         else
         {
