@@ -189,7 +189,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
     private fun showSnackBar(resText:Int)
     {
-        val snackbar = Snackbar.make(findViewById(R.id.coordinator), resText, Snackbar.LENGTH_INDEFINITE)
+        val snackbar = Snackbar.make(findViewById(R.id.coordinator), resText, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                 android.R.color.holo_green_light)))
         snackbar.show()

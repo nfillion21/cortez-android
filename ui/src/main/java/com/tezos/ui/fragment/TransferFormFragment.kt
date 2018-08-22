@@ -33,6 +33,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -62,8 +63,6 @@ import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
 import com.tezos.ui.utils.toNoPrefixHexString
-import kotlinx.android.synthetic.main.fragment_payment_form.*
-import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONObject
 
 /**
@@ -76,6 +75,8 @@ class TransferFormFragment : Fragment()
 
     private val TRANSFER_ID_KEY = "transfer_id_key"
     private val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
+
+    private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
 
     private var mPayButton: Button? = null
     private var mPayButtonLayout: FrameLayout? = null
@@ -91,6 +92,8 @@ class TransferFormFragment : Fragment()
 
     private var mCurrencySpinner: AppCompatSpinner? = null
 
+    private var mProgressBar: ProgressBar? = null
+
     private var mAmount:TextInputEditText? = null
 
     private var mSrcAccount:Account? = null
@@ -103,6 +106,8 @@ class TransferFormFragment : Fragment()
 
     private var mTransferId:Int? = null
     private var mTransferPayload:String? = null
+
+    private var mAmountCache:Double = -1.0
 
     companion object
     {
@@ -169,6 +174,8 @@ class TransferFormFragment : Fragment()
 
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
+
+            mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
 
             transferLoading(isLoading())
 
@@ -267,7 +274,7 @@ class TransferFormFragment : Fragment()
 
         //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
 
-        var amount = mAmount?.text.toString().toDouble()
+        var amount = mAmountCache
         var fee = 0.0
         val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
 
@@ -303,16 +310,44 @@ class TransferFormFragment : Fragment()
 
             //TODO check if the JSON is fine then launch the 2nd request
 
-            onInitTransferLoadComplete(null)
-
             mTransferId = answer.getInt("id")
             mTransferPayload = answer.getString("payload")
 
+            onInitTransferLoadComplete(null)
+
             startFinalizeTransferLoading()
+
+            /*
+            val timer = object : CountDownTimer(10000, 1000)
+            {
+                override fun onFinish()
+                {
+                }
+
+                override fun onTick(millisUntilFinished: Long)
+                {
+                }
+            }
+            timer.start()
+            */
 
         }, Response.ErrorListener
         {
-            onInitTransferLoadComplete(it)
+
+            val timer = object : CountDownTimer(10000, 1000)
+            {
+                override fun onFinish()
+                {
+                    onInitTransferLoadComplete(it)
+                }
+
+                override fun onTick(millisUntilFinished: Long)
+                {
+                    //secondsRemaining = millisUntilFinished / 1000
+                    //updateCountdownUI()
+                }
+            }
+            timer.start()
         })
         {
             @Throws(AuthFailureError::class)
@@ -429,6 +464,8 @@ class TransferFormFragment : Fragment()
             override fun onNothingSelected(adapterView: AdapterView<*>) {}
         }
 
+        mProgressBar = view.findViewById(R.id.empty)
+
         mSrcButton = view.findViewById(R.id.transfer_src_button)
         mSrcButton!!.setOnClickListener { _ ->
             PaymentAccountsActivity.start(activity,
@@ -487,16 +524,16 @@ class TransferFormFragment : Fragment()
         if (loading)
         {
             mPayButtonLayout?.visibility = View.GONE
-            empty.visibility = View.VISIBLE
-            fee_spinner.isEnabled = false
-            amount_transfer.isEnabled = false
+            mProgressBar?.visibility = View.VISIBLE
+            mCurrencySpinner?.isEnabled = false
+            mAmount?.isEnabled = false
         }
         else
         {
             mPayButtonLayout?.visibility = View.VISIBLE
-            empty.visibility = View.INVISIBLE
-            fee_spinner.isEnabled = true
-            amount_transfer.isEnabled = true
+            mProgressBar?.visibility = View.INVISIBLE
+            mCurrencySpinner?.isEnabled = true
+            mAmount?.isEnabled = true
         }
 
         listener?.onTransferLoading(loading)
@@ -587,7 +624,6 @@ class TransferFormFragment : Fragment()
         }
     }
 
-
     private fun isTransferAmountValid():Boolean
     {
         val isAmountValid = false
@@ -601,17 +637,20 @@ class TransferFormFragment : Fragment()
 
                 if (amount >= 0.000001f)
                 {
+                    mAmountCache = amount
                     return true
                 }
             }
             catch (e: NumberFormatException)
             {
+                mAmountCache = -1.0
                 return false
             }
         }
 
         return isAmountValid
     }
+
     private fun focusChangeListener(): View.OnFocusChangeListener
     {
         return View.OnFocusChangeListener { v, hasFocus ->
@@ -865,6 +904,8 @@ class TransferFormFragment : Fragment()
             else -> outState.putInt(TRANSFER_ID_KEY, -1)
         }
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
+
+        outState.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
     }
 
     override fun onDetach()
