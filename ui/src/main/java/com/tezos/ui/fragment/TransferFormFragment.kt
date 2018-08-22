@@ -204,6 +204,7 @@ class TransferFormFragment : Fragment()
         {
             // stop the moulinette only if an error occurred
             transferLoading(false)
+            cancelRequests(true)
 
             listener?.onTransferFailed(error)
         }
@@ -217,7 +218,7 @@ class TransferFormFragment : Fragment()
     private fun onFinalizeTransferLoadComplete(error: VolleyError?)
     {
         // everything is over, there's no call to make
-        cancelRequests()
+        cancelRequests(true)
 
         if (error != null)
         {
@@ -323,7 +324,7 @@ class TransferFormFragment : Fragment()
             }
         }
 
-        cancelRequests()
+        cancelRequests(true)
 
         jsObjRequest.tag = TRANSFER_INIT_TAG
         mInitTransferLoading = true
@@ -379,7 +380,7 @@ class TransferFormFragment : Fragment()
                 }
             }
 
-            cancelRequests()
+            cancelRequests(true)
 
             jsObjRequest.tag = TRANSFER_FINALIZE_TAG
 
@@ -830,20 +831,23 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    private fun cancelRequests()
+    private fun cancelRequests(resetBooleans:Boolean)
     {
         val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
         requestQueue?.cancelAll(TRANSFER_INIT_TAG)
         requestQueue?.cancelAll(TRANSFER_FINALIZE_TAG)
 
-        mInitTransferLoading = false
-        mFinalizeTransferLoading = false
+        if (resetBooleans)
+        {
+            mInitTransferLoading = false
+            mFinalizeTransferLoading = false
+        }
     }
 
     override fun onDestroy()
     {
         super.onDestroy()
-        cancelRequests()
+        cancelRequests(false)
     }
 
     override fun onSaveInstanceState(outState: Bundle)
