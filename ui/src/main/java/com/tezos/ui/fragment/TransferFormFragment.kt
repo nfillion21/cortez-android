@@ -58,7 +58,6 @@ import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
@@ -77,9 +76,6 @@ class TransferFormFragment : Fragment()
 
     private val TRANSFER_ID_KEY = "transfer_id_key"
     private val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
-
-    private val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(activity?.baseContext!!) }
-    private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(activity?.applicationContext!!) }
 
     private var mPayButton: Button? = null
     private var mPayButtonLayout: FrameLayout? = null
@@ -128,6 +124,11 @@ class TransferFormFragment : Fragment()
         fun onTransferSucceed()
         fun onTransferLoading(loading: Boolean)
         fun onTransferFailed(error: VolleyError?)
+
+        fun isFingerprintAllowed():Boolean
+        fun hasEnrolledFingerprints():Boolean
+
+        fun saveFingerprintAllowed(useInFuture: Boolean)
     }
 
     override fun onAttach(context: Context)
@@ -174,9 +175,6 @@ class TransferFormFragment : Fragment()
             //TODO we got to keep in mind there's an id already.
             if (mInitTransferLoading)
             {
-                //TODO make it load
-                //refreshTextBalance(false)
-
                 startInitTransferLoading()
             }
             else
@@ -207,7 +205,6 @@ class TransferFormFragment : Fragment()
             // stop the moulinette only if an error occurred
             transferLoading(false)
 
-            //TODO possibly analyze the error and snackbar it
             listener?.onTransferFailed(error)
         }
         else
@@ -507,7 +504,7 @@ class TransferFormFragment : Fragment()
     private fun onPayClick()
     {
         val dialog = AuthenticationDialog()
-        if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints())
+        if (listener?.isFingerprintAllowed()!! && listener?.hasEnrolledFingerprints()!!)
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
@@ -805,7 +802,7 @@ class TransferFormFragment : Fragment()
      */
     private fun onFingerprintInvalidation(useInFuture: Boolean)
     {
-        storage.saveFingerprintAllowed(useInFuture)
+        listener?.saveFingerprintAllowed(useInFuture)
         if (useInFuture)
         {
             EncryptionServices(activity?.applicationContext!!).createFingerprintKey()

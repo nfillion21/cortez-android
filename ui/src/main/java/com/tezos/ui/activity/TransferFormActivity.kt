@@ -52,6 +52,7 @@ import kotlinx.android.synthetic.main.activity_payment_form.*
  */
 class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransferListener
 {
+    private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
     companion object
     {
@@ -162,6 +163,21 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
     override fun onTransferFailed(error: VolleyError?)
     {
         showSnackBar(error)
+    }
+
+    override fun isFingerprintAllowed():Boolean
+    {
+        return storage.isFingerprintAllowed()
+    }
+
+    override fun hasEnrolledFingerprints():Boolean
+    {
+        return systemServices.hasEnrolledFingerprints()
+    }
+
+    override fun saveFingerprintAllowed(useInFuture:Boolean)
+    {
+        storage.saveFingerprintAllowed(useInFuture)
     }
 
     override fun onTransferLoading(loading:Boolean)
