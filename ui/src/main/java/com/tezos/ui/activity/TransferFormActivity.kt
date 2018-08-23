@@ -132,7 +132,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
     {
         var error: String? = if (error != null)
         {
-            error.localizedMessage
+            error.toString()
         }
         else
         {

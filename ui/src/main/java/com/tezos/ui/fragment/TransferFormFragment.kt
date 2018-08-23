@@ -42,6 +42,7 @@ import android.support.v7.widget.AppCompatSpinner
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -77,6 +78,9 @@ class TransferFormFragment : Fragment()
     private val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
 
     private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
+    private val TRANSFER_FEE_KEY = "transfer_fee_key"
+
+    private val TRANSFER_SPINNER_POS_KEY = "transfer_spinner_pos_key"
 
     private var mPayButton: Button? = null
     private var mPayButtonLayout: FrameLayout? = null
@@ -107,6 +111,7 @@ class TransferFormFragment : Fragment()
     private var mTransferId:Int? = null
     private var mTransferPayload:String? = null
 
+    private var mSpinnerPosition:Int = 0
     private var mAmountCache:Double = -1.0
 
     companion object
@@ -152,7 +157,7 @@ class TransferFormFragment : Fragment()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
     {
         super.onViewCreated(view, savedInstanceState)
-        initContentViews(view)
+        initContentViews(view, savedInstanceState)
 
         if (savedInstanceState != null)
         {
@@ -176,8 +181,13 @@ class TransferFormFragment : Fragment()
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
             mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
+            mSpinnerPosition = savedInstanceState.getInt(TRANSFER_SPINNER_POS_KEY, 0)
 
             transferLoading(isLoading())
+
+            mCurrencySpinner!!.setSelection(mSpinnerPosition)
+
+            validatePayButton(isInputDataValid())
 
             //TODO we got to keep in mind there's an id already.
             if (mInitTransferLoading)
@@ -190,9 +200,6 @@ class TransferFormFragment : Fragment()
 
                 if (mFinalizeTransferLoading)
                 {
-                    //TODO ui stuff.
-                    //refreshRecyclerViewAndTextHistory()
-
                     startFinalizeTransferLoading()
                 }
                 else
@@ -276,13 +283,12 @@ class TransferFormFragment : Fragment()
 
         var amount = mAmountCache
         var fee = 0.0
-        val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
 
-        when (selectedItemThreeDS.toInt())
+        when (mSpinnerPosition)
         {
-            0 -> { fee = 0.05 }
+            0 -> { fee = 0.01 }
             1 -> { fee = 0.00 }
-            2 -> { fee = 0.01 }
+            2 -> { fee = 0.05 }
             else -> {}
         }
 
@@ -334,11 +340,11 @@ class TransferFormFragment : Fragment()
         }, Response.ErrorListener
         {
 
+            /*
             val timer = object : CountDownTimer(10000, 1000)
             {
                 override fun onFinish()
                 {
-                    onInitTransferLoadComplete(it)
                 }
 
                 override fun onTick(millisUntilFinished: Long)
@@ -348,6 +354,11 @@ class TransferFormFragment : Fragment()
                 }
             }
             timer.start()
+            */
+            onInitTransferLoadComplete(it)
+
+            Log.i("mTransferId", ""+mTransferId)
+            Log.i("mTransferPayload", ""+mTransferPayload)
         })
         {
             @Throws(AuthFailureError::class)
@@ -394,6 +405,7 @@ class TransferFormFragment : Fragment()
                 answer ->
 
                 //TODO check the JSON object before calling success
+                //{"result":"opD3EXAKajRxnLhFkYKMR9V1GpNMtQDcmVEp6MHCbYDu6bgUYDK"}
 
                 onFinalizeTransferLoadComplete(null)
                 listener?.onTransferSucceed()
@@ -434,7 +446,7 @@ class TransferFormFragment : Fragment()
         return inflater.inflate(R.layout.fragment_payment_form, container, false)
     }
 
-    private fun initContentViews(view: View)
+    private fun initContentViews(view: View, savedInstanceState: Bundle?)
     {
         val args = arguments
         val themeBundle = args!!.getBundle(CustomTheme.TAG)
@@ -459,6 +471,7 @@ class TransferFormFragment : Fragment()
             override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
             {
                 putAmountInRed(false)
+                mSpinnerPosition = i
             }
 
             override fun onNothingSelected(adapterView: AdapterView<*>) {}
@@ -499,6 +512,10 @@ class TransferFormFragment : Fragment()
             onPayClick()
         }
 
+        validatePayButton(isInputDataValid())
+
+        putEverythingInRed()
+
         arguments?.let {
 
             val seedDataBundle = it.getBundle(Storage.TAG)
@@ -508,10 +525,6 @@ class TransferFormFragment : Fragment()
             account.pubKeyHash = seedData.pkh
             switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, account)
         }
-
-        validatePayButton(isInputDataValid())
-
-        putEverythingInRed()
     }
 
     private fun isLoading():Boolean
@@ -906,6 +919,7 @@ class TransferFormFragment : Fragment()
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 
         outState.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
+        outState.putInt(TRANSFER_SPINNER_POS_KEY, mSpinnerPosition)
     }
 
     override fun onDetach()
