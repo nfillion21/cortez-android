@@ -54,7 +54,7 @@ class AboutActivity : BaseSecureActivity()
     {
         private val ABOUT_TAG = "AboutTag"
 
-        var SETTINGS_REQUEST_CODE = 0x2500 // arbitrary int
+        var SETTINGS_TAG_CODE = 0x2200 // arbitrary int
 
         fun start(activity: Activity, theme: CustomTheme)
         {

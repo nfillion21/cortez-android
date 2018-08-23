@@ -32,6 +32,7 @@ import android.content.Context
 import android.hardware.fingerprint.FingerprintManager
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.UserNotAuthenticatedException
+import android.support.v4.hardware.fingerprint.FingerprintManagerCompat
 import com.tezos.ui.encryption.CipherWrapper
 import com.tezos.ui.encryption.KeyStoreWrapper
 import java.security.InvalidKeyException

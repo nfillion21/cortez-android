@@ -382,6 +382,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
             sortedList.add(operation)
         }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             sortedList.sortWith(object: Comparator<Operation>

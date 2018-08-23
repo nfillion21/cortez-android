@@ -27,8 +27,6 @@
 
 package com.tezcore.cortez
 
-import android.app.Activity
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Build
@@ -62,14 +60,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         //switchToOperations(realSeed)
     }
 
-    companion object {
-        const val ADD_SECRET_REQUEST_CODE = 300
-        const val AUTHENTICATION_SCREEN_CODE = 301
-    }
-
     private var mProgressBar: ProgressBar? = null
-
-    private var isAuthenticating = false
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -83,28 +74,20 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 com.tezos.ui.R.color.theme_tezos_text)
 
         initActionBar(tezosTheme)
-
         val isPasswordSaved = Storage(this).isPasswordSaved()
-        if (isPasswordSaved)
-        {
-            val seed = Storage(baseContext).getMnemonics()
-            switchToOperations(seed)
-        }
-        else
-        {
-            switchToHome()
-        }
-
         setMenuItemEnabled(isPasswordSaved)
 
-        if (savedInstanceState != null)
+        if (savedInstanceState == null)
         {
-            //TODO not useful anymore, remote it.
-            //mPublicKeyHash = savedInstanceState.getString(pkHashKey, null)
-        }
-        else
-        {
-            //switchToHome()
+            if (isPasswordSaved)
+            {
+                val seed = Storage(baseContext).getMnemonics()
+                switchToOperations(seed)
+            }
+            else
+            {
+                switchToHome()
+            }
         }
     }
 
@@ -148,47 +131,16 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.create_wallet_succeed)
                 {
-                    /*
-                    if (data != null && data.hasExtra(CryptoUtils.WALLET_BUNDLE_KEY))
-                    {
-                        val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
-                        mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
-
-                        val snackbar = Snackbar.make(findViewById<Button>(R.id.coordinator), R.string.wallet_successfully_created, Snackbar.LENGTH_LONG)
-                        val snackBarView = snackbar.getView()
-                        snackBarView.setBackgroundColor((ContextCompat.getColor(this,
-                                R.color.tz_green)))
-                        snackbar.show()
-
-                        setMenuItemEnabled(true)
-
-                        switchToOperations(realSeed)
-                    }
-                    else
-                    {
-                        //Log.v("ProjectDetails", "data is null")
-                    }
-                        */
-
-                    //TODO check data later
                     if (data != null && data.hasExtra(CreateWalletActivity.SEED_DATA_KEY))
                     {
                         val seedDataKey = data.getBundleExtra(CreateWalletActivity.SEED_DATA_KEY)
                         val realSeed = Storage.fromBundle(seedDataKey)
 
-                        // TODO offset it
-                        val snackbar = Snackbar.make(findViewById(R.id.coordinator), R.string.wallet_successfully_created, Snackbar.LENGTH_LONG)
-                        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
-                                android.R.color.holo_green_light)))
-                        snackbar.show()
+                        showSnackBar(R.string.wallet_successfully_created)
 
                         setMenuItemEnabled(true)
 
                         switchToOperations(realSeed)
-                    }
-                    else
-                    {
-
                     }
                 }
             }
@@ -197,34 +149,26 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.restore_wallet_succeed)
                 {
-                    //val seeds = Storage(baseContext).getMnemonicsList()
-                    //val seedOne = seeds[0]
-
-                    // in marshmallow, you don't need any password
-                    //val mnemonics = EncryptionServices(applicationContext).decrypt(seedOne.mnemonics, "not useful for marshmallow")
-                    //val walletBundle = data.getBundleExtra(CryptoUtils.WALLET_BUNDLE_KEY)
-                    //mPublicKeyHash = walletBundle.getString(CryptoUtils.PUBLIC_KEY_HASH_KEY)
-
-                    //TODO check data later
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
                         val seedDataKey = data.getBundleExtra(RestoreWalletActivity.SEED_DATA_KEY)
                         val realSeed = Storage.fromBundle(seedDataKey)
 
-                        // TODO offset it
-                        val snackbar = Snackbar.make(findViewById(R.id.coordinator), R.string.wallet_successfully_restored, Snackbar.LENGTH_LONG)
-                        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
-                                android.R.color.holo_green_light)))
-                        snackbar.show()
+                        showSnackBar(R.string.wallet_successfully_restored)
 
                         setMenuItemEnabled(true)
 
                         switchToOperations(realSeed)
                     }
-                    else
-                    {
+                }
+            }
 
-                    }
+            TransferFormActivity.TRANSFER_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.transfer_succeed)
+                {
+                    showSnackBar(R.string.transfer_succeed)
+                    //TODO I need to refresh balance.
                 }
             }
 
@@ -237,19 +181,18 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
 
-            AUTHENTICATION_SCREEN_CODE ->
-            {
-                isAuthenticating = false
-                if (resultCode != Activity.RESULT_OK) {
-                    finish()
-                }
-            }
-
             else ->
             {
-                //handleVisibility()
             }
         }
+    }
+
+    private fun showSnackBar(resText:Int)
+    {
+        val snackbar = Snackbar.make(findViewById(R.id.coordinator), resText, Snackbar.LENGTH_LONG)
+        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
+                android.R.color.holo_green_light)))
+        snackbar.show()
     }
 
     private fun setMenuItemEnabled(enabled:Boolean)
@@ -309,23 +252,26 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         nav_view.setNavigationItemSelectedListener(this)
     }
 
-    override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+    override fun onBackPressed()
+    {
+        if (drawer_layout.isDrawerOpen(GravityCompat.START))
+        {
             drawer_layout.closeDrawer(GravityCompat.START)
-        } else {
-
+        }
+        else
+        {
             AlertDialog.Builder(this)
                     .setTitle(R.string.exit)
                     .setMessage(R.string.exit_info)
-                    .setPositiveButton(android.R.string.yes, DialogInterface.OnClickListener
-                    {
-                        dialog,
-                        which ->
+                    .setNegativeButton(android.R.string.no, null)
+                    .setPositiveButton(android.R.string.yes) {
+                        _,
+                        _ ->
 
                         super.onBackPressed()
 
-                    })
-                    .setNegativeButton(android.R.string.no, null).show()
+                    }
+                    .show()
         }
     }
 

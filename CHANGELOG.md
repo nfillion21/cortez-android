@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+0.1.3
+-----
+* Improves the transfer screen and error management.
+
 0.1.2
 -----
 * Fixes the filter date bug on versions < Oreo.

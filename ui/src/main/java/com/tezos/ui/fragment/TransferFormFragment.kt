@@ -27,11 +27,13 @@
 
 package com.tezos.ui.fragment
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -48,6 +50,7 @@ import android.widget.*
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
@@ -55,10 +58,8 @@ import com.tezos.core.models.Account
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.activity.PaymentAccountsActivity
-import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
@@ -70,8 +71,16 @@ import org.json.JSONObject
  */
 class TransferFormFragment : Fragment()
 {
-    private val systemServices by lazy(LazyThreadSafetyMode.NONE) { SystemServices(activity?.baseContext!!) }
-    private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(activity?.applicationContext!!) }
+    private val TRANSFER_INIT_TAG = "transfer_init"
+    private val TRANSFER_FINALIZE_TAG = "transfer_finalize"
+
+    private val TRANSFER_ID_KEY = "transfer_id_key"
+    private val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
+
+    private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
+    private val TRANSFER_FEE_KEY = "transfer_fee_key"
+
+    private val TRANSFER_SPINNER_POS_KEY = "transfer_spinner_pos_key"
 
     private var mPayButton: Button? = null
     private var mPayButtonLayout: FrameLayout? = null
@@ -87,11 +96,23 @@ class TransferFormFragment : Fragment()
 
     private var mCurrencySpinner: AppCompatSpinner? = null
 
+    private var mProgressBar: ProgressBar? = null
+
     private var mAmount:TextInputEditText? = null
-    //private var mAmountLayout: TextInputLayout? = null
 
     private var mSrcAccount:Account? = null
     private var mDstAccount:Account? = null
+
+    private var listener: OnTransferListener? = null
+
+    private var mInitTransferLoading:Boolean = false
+    private var mFinalizeTransferLoading:Boolean = false
+
+    private var mTransferId:Int? = null
+    private var mTransferPayload:String? = null
+
+    private var mSpinnerPosition:Int = 0
+    private var mAmountCache:Double = -1.0
 
     companion object
     {
@@ -108,14 +129,39 @@ class TransferFormFragment : Fragment()
         private const val DST_ACCOUNT_KEY = "dst_account_key"
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    interface OnTransferListener
+    {
+        fun onTransferSucceed()
+        fun onTransferLoading(loading: Boolean)
+        fun onTransferFailed(error: VolleyError?)
+
+        fun isFingerprintAllowed():Boolean
+        fun hasEnrolledFingerprints():Boolean
+
+        fun saveFingerprintAllowed(useInFuture: Boolean)
+    }
+
+    override fun onAttach(context: Context)
+    {
+        super.onAttach(context)
+        if (context is OnTransferListener)
+        {
+            listener = context
+        }
+        else
+        {
+            throw RuntimeException(context.toString() + " must implement OnTransferListener")
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?)
+    {
         super.onViewCreated(view, savedInstanceState)
-        initContentViews(view)
+        initContentViews(view, savedInstanceState)
 
         if (savedInstanceState != null)
         {
             val srcBundle = savedInstanceState.getParcelable<Bundle>(SRC_ACCOUNT_KEY)
-
             if (srcBundle != null)
             {
                 mSrcAccount = Account.fromBundle(srcBundle)
@@ -127,8 +173,271 @@ class TransferFormFragment : Fragment()
                 mDstAccount = Account.fromBundle(dstBundle)
                 switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
+
+            mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY, -1)
+            mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
+
+            mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
+            mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
+
+            mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
+            mSpinnerPosition = savedInstanceState.getInt(TRANSFER_SPINNER_POS_KEY, 0)
+
+            transferLoading(isLoading())
+
+            mCurrencySpinner!!.setSelection(mSpinnerPosition)
+
+            validatePayButton(isInputDataValid())
+
+            //TODO we got to keep in mind there's an id already.
+            if (mInitTransferLoading)
+            {
+                startInitTransferLoading()
+            }
+            else
+            {
+                onInitTransferLoadComplete(null)
+
+                if (mFinalizeTransferLoading)
+                {
+                    startFinalizeTransferLoading()
+                }
+                else
+                {
+                    onFinalizeTransferLoadComplete(null)
+                }
+            }
+        }
+    }
+
+    private fun onInitTransferLoadComplete(error:VolleyError?)
+    {
+        mInitTransferLoading = false
+
+        if (error != null)
+        {
+            // stop the moulinette only if an error occurred
+            transferLoading(false)
+            cancelRequests(true)
+
+            listener?.onTransferFailed(error)
+        }
+        else
+        {
+            // it's signed, looks like it worked.
+            //transferLoading(true)
+        }
+    }
+
+    private fun onFinalizeTransferLoadComplete(error: VolleyError?)
+    {
+        // everything is over, there's no call to make
+        cancelRequests(true)
+
+        if (error != null)
+        {
+            transferLoading(false)
+
+            listener?.onTransferFailed(error)
+        }
+        else
+        {
+            // the finish call is made already
+        }
+    }
+
+    private fun startInitTransferLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        // this fragment always have mnemonics arg
+        arguments?.let {
+            val seedDataBundle = it.getBundle(Storage.TAG)
+            val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
+
+            startPostRequestLoadInitTransfer(mnemonicsData)
+        }
+    }
+
+    private fun startFinalizeTransferLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        // this fragment always have mnemonics arg
+        arguments?.let {
+            val seedDataBundle = it.getBundle(Storage.TAG)
+            val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
+
+            startPostRequestLoadFinalizeTransfer(mnemonicsData)
+        }
+    }
+
+    // volley
+    private fun startPostRequestLoadInitTransfer(mnemonicsData: Storage.MnemonicsData)
+    {
+        val url = getString(R.string.transfer_url)
+
+        //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
+
+        var amount = mAmountCache
+        var fee = 0.0
+
+        when (mSpinnerPosition)
+        {
+            0 -> { fee = 0.01 }
+            1 -> { fee = 0.00 }
+            2 -> { fee = 0.05 }
+            else -> {}
         }
 
+        // convert in µꜩ
+        amount *= 1000000
+        fee *= 1000000
+
+        //TODO need to check if activity is not null
+
+        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val pk = CryptoUtils.generatePk(mnemonics, "")
+
+        val pkhSrc = mnemonicsData.pkh
+        val pkhDst = mDstAccount?.pubKeyHash
+
+        var postParams = JSONObject()
+        postParams.put("src", pkhSrc)
+        postParams.put("src_pk", pk)
+        postParams.put("dst", pkhDst)
+        postParams.put("amount", amount.toInt().toString())
+        postParams.put("fee", fee.toInt().toString())
+
+        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        { answer ->
+
+            //TODO check if the JSON is fine then launch the 2nd request
+
+            mTransferId = answer.getInt("id")
+            mTransferPayload = answer.getString("payload")
+
+            onInitTransferLoadComplete(null)
+
+            startFinalizeTransferLoading()
+
+            /*
+            val timer = object : CountDownTimer(10000, 1000)
+            {
+                override fun onFinish()
+                {
+                }
+
+                override fun onTick(millisUntilFinished: Long)
+                {
+                }
+            }
+            timer.start()
+            */
+
+        }, Response.ErrorListener
+        {
+
+            /*
+            val timer = object : CountDownTimer(10000, 1000)
+            {
+                override fun onFinish()
+                {
+                }
+
+                override fun onTick(millisUntilFinished: Long)
+                {
+                    //secondsRemaining = millisUntilFinished / 1000
+                    //updateCountdownUI()
+                }
+            }
+            timer.start()
+            */
+            onInitTransferLoadComplete(it)
+
+            Log.i("mTransferId", ""+mTransferId)
+            Log.i("mTransferPayload", ""+mTransferPayload)
+        })
+        {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String>
+            {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        cancelRequests(true)
+
+        jsObjRequest.tag = TRANSFER_INIT_TAG
+        mInitTransferLoading = true
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    // volley
+    private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
+    {
+        val url = getString(R.string.transfer_finalize)
+
+        if (mTransferId != null && mTransferId != -1 && mTransferPayload != null)
+        {
+            val byteArrayThree = mTransferPayload!!.hexToByteArray()
+
+            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val sk = CryptoUtils.generateSk(mnemonics, "")
+            val signature = KeyPair.sign(sk, byteArrayThree)
+
+            //TODO verify signature
+            //val signVerified = KeyPair.verifySign(signature, byteArrayThree, pk)
+
+            var hexSign = signature.toNoPrefixHexString()
+
+            var postparams = JSONObject()
+            postparams.put("id", mTransferId!!)
+            postparams.put("payload", hexSign)
+            //payload is hex signature, 64 bytes then 128 hex chars
+
+            val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
+            {
+                answer ->
+
+                //TODO check the JSON object before calling success
+                //{"result":"opD3EXAKajRxnLhFkYKMR9V1GpNMtQDcmVEp6MHCbYDu6bgUYDK"}
+
+                onFinalizeTransferLoadComplete(null)
+                listener?.onTransferSucceed()
+
+            }, Response.ErrorListener
+            {
+
+                onFinalizeTransferLoadComplete(it)
+                listener?.onTransferFailed(it)
+
+            })
+            {
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String>
+                {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    return headers
+                }
+            }
+
+            cancelRequests(true)
+
+            jsObjRequest.tag = TRANSFER_FINALIZE_TAG
+
+            mFinalizeTransferLoading = true
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+        }
+        else
+        {
+            //something wrong happened. we got the finalizeTransfer boolean but not the payload + id
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -137,7 +446,7 @@ class TransferFormFragment : Fragment()
         return inflater.inflate(R.layout.fragment_payment_form, container, false)
     }
 
-    private fun initContentViews(view: View)
+    private fun initContentViews(view: View, savedInstanceState: Bundle?)
     {
         val args = arguments
         val themeBundle = args!!.getBundle(CustomTheme.TAG)
@@ -162,19 +471,30 @@ class TransferFormFragment : Fragment()
             override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
             {
                 putAmountInRed(false)
+                mSpinnerPosition = i
             }
 
             override fun onNothingSelected(adapterView: AdapterView<*>) {}
         }
 
+        mProgressBar = view.findViewById(R.id.empty)
+
         mSrcButton = view.findViewById(R.id.transfer_src_button)
-        mSrcButton!!.setOnClickListener { v -> PaymentAccountsActivity.start(activity,
+        mSrcButton!!.setOnClickListener { _ ->
+            PaymentAccountsActivity.start(activity,
                 theme,
                 PaymentAccountsActivity.FromScreen.FromTransfer,
-                PaymentAccountsActivity.Selection.SelectionAccounts) }
+                PaymentAccountsActivity.Selection.SelectionAccounts)
+        }
 
         mDstButton = view.findViewById(R.id.transfer_dst_button)
-        mDstButton!!.setOnClickListener { v -> PaymentAccountsActivity.start(activity, theme, PaymentAccountsActivity.FromScreen.FromTransfer, PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses) }
+        mDstButton!!.setOnClickListener { _ ->
+            PaymentAccountsActivity.start(
+                    activity,
+                    theme,
+                    PaymentAccountsActivity.FromScreen.FromTransfer,
+                    PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses)
+        }
 
         mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled)
         mTransferDstFilled = view.findViewById(R.id.transfer_destination_filled)
@@ -184,49 +504,20 @@ class TransferFormFragment : Fragment()
 
         mPayButtonLayout!!.visibility = View.VISIBLE
 
-        val moneyFormatted = "ꜩ"
-
-        val moneyString = getString(R.string.pay, moneyFormatted)
+        val moneyString = getString(R.string.pay, "ꜩ")
 
         mPayButton!!.text = moneyString
 
-        mPayButtonLayout!!.setOnClickListener { v ->
-
-
-
-            val seedDataBundle = arguments?.getBundle(Storage.TAG)
-            val seedData = Storage.fromBundle(seedDataBundle!!)
-            val pkhSrc = seedData.pkh
-
-            val pkhDst = mDstAccount?.pubKeyHash
-
-            var amount = mAmount?.text.toString().toDouble()
-            var fee = 0.0
-            val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
-
-            when (selectedItemThreeDS.toInt())
-            {
-                0 -> { fee = 0.05 }
-                1 -> { fee = 0.00 }
-                2 -> { fee = 0.01 }
-                else -> {}
-            }
-
-            amount *= 1000000
-            fee *= 1000000
-
-            //TODO would be better to decrypt after the user succeed in password
-            val mnemonics = EncryptionServices(activity!!).decrypt(seedData.mnemonics, "not useful for marshmallow")
-            val sk = CryptoUtils.generateSk(mnemonics, "")
-
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
-            //TODO just pay
-            onPayClick(pkhSrc, pk, pkhDst!!, amount.toInt().toString(), fee.toInt().toString(), sk)
-
+        mPayButtonLayout!!.setOnClickListener { _ ->
+            onPayClick()
         }
 
+        validatePayButton(isInputDataValid())
+
+        putEverythingInRed()
+
         arguments?.let {
+
             val seedDataBundle = it.getBundle(Storage.TAG)
             val seedData = Storage.fromBundle(seedDataBundle)
 
@@ -234,19 +525,42 @@ class TransferFormFragment : Fragment()
             account.pubKeyHash = seedData.pkh
             switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, account)
         }
-        validatePayButton(isInputDataValid())
-
-        putEverythingInRed()
     }
 
-    private fun onPayClick(src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
+    private fun isLoading():Boolean
+    {
+        return mInitTransferLoading || mFinalizeTransferLoading
+    }
+
+    private fun transferLoading(loading:Boolean)
+    {
+        if (loading)
+        {
+            mPayButtonLayout?.visibility = View.GONE
+            mProgressBar?.visibility = View.VISIBLE
+            mCurrencySpinner?.isEnabled = false
+            mAmount?.isEnabled = false
+        }
+        else
+        {
+            mPayButtonLayout?.visibility = View.VISIBLE
+            mProgressBar?.visibility = View.INVISIBLE
+            mCurrencySpinner?.isEnabled = true
+            mAmount?.isEnabled = true
+        }
+
+        listener?.onTransferLoading(loading)
+    }
+
+    private fun onPayClick()
     {
         val dialog = AuthenticationDialog()
-        if (storage.isFingerprintAllowed() && systemServices.hasEnrolledFingerprints()) {
+        if (listener?.isFingerprintAllowed()!! && listener?.hasEnrolledFingerprints()!!)
+        {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthentication(it, src, srcPk, dst, amount, fee, sk)
+                validateKeyAuthentication(it)
             }
             if (dialog.cryptoObjectToAuthenticateWith == null)
             {
@@ -262,8 +576,7 @@ class TransferFormFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            //startSecretActivity(ADD_SECRET_REQUEST_CODE, SecretActivity.MODE_VIEW, it, secret)
-            pay(src, srcPk, dst, amount, fee, sk)
+            startInitTransferLoading()
         }
         dialog.passwordVerificationListener =
                 {
@@ -276,7 +589,7 @@ class TransferFormFragment : Fragment()
     {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == TransferFormActivity.TRANSFER_SELECT_REQUEST_CODE)
+        if (requestCode == PaymentAccountsActivity.TRANSFER_SELECT_REQUEST_CODE)
         {
             if (data != null && data.hasExtra(Account.TAG))
             {
@@ -296,31 +609,6 @@ class TransferFormFragment : Fragment()
                 }
             }
         }
-    }
-
-    private fun isTransferAmountValid():Boolean
-    {
-        val isAmountValid = false
-
-        if (mAmount != null && !TextUtils.isEmpty(mAmount?.text))
-        {
-            try
-            {
-                //val amount = java.lang.Double.parseDouble()
-                val amount = mAmount?.text!!.toString().toDouble()
-
-                if (amount >= 0.000001f)
-                {
-                    return true
-                }
-            }
-            catch (e: NumberFormatException)
-            {
-                return false
-            }
-        }
-
-        return isAmountValid
     }
 
     private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, account: Account)
@@ -347,6 +635,33 @@ class TransferFormFragment : Fragment()
                 //no-op
             }
         }
+    }
+
+    private fun isTransferAmountValid():Boolean
+    {
+        val isAmountValid = false
+
+        if (mAmount != null && !TextUtils.isEmpty(mAmount?.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val amount = mAmount?.text!!.toString().toDouble()
+
+                if (amount >= 0.000001f)
+                {
+                    mAmountCache = amount
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mAmountCache = -1.0
+                return false
+            }
+        }
+
+        return isAmountValid
     }
 
     private fun focusChangeListener(): View.OnFocusChangeListener
@@ -502,22 +817,26 @@ class TransferFormFragment : Fragment()
         {
             val elements = amount.substring(amount.indexOf("."))
 
-            if (elements.length > 7)
+            when
             {
-                amount = String.format("%.6f", amount.toDouble())
-                val d = amount.toDouble()
-                amount = d.toString()
-            }
-            else if (elements.length > 3)
-            {
-                //                        int length = elements.length() - 1;
-                //                        String format = "%." + length + "f";
-                //                        Float f = Float.parseFloat(amount);
-                //                        amount = String.format(format, f);
-            }
-            else
-            {
-                amount = String.format("%.2f", amount.toDouble())
+                elements.length > 7 ->
+                {
+                    amount = String.format("%.6f", amount.toDouble())
+                    val d = amount.toDouble()
+                    amount = d.toString()
+                }
+
+                elements.length <= 3 ->
+                {
+                    amount = String.format("%.2f", amount.toDouble())
+                }
+                else ->
+                {
+                    //                        int length = elements.length() - 1;
+                    //                        String format = "%." + length + "f";
+                    //                        Float f = Float.parseFloat(amount);
+                    //                        amount = String.format(format, f);
+                }
             }
         }
         else
@@ -531,170 +850,14 @@ class TransferFormFragment : Fragment()
         mPayButton!!.text = getString(R.string.pay, moneyFormatted2)
     }
 
-    override fun onSaveInstanceState(outState: Bundle)
-    {
-        super.onSaveInstanceState(outState)
-
-        outState.putParcelable(SRC_ACCOUNT_KEY, mSrcAccount?.toBundle())
-        outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
-    }
-
-    private fun pay(src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
-    {
-        val url = getString(R.string.transfer_url)
-
-        var postparams = JSONObject()
-        /*
-        postparams.put("src","tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk")
-        postparams.put("src_pk","edpkuw2nHYNcksmy2GK6xtG8R2iyHCC35jc8K1684Mc7SFjqZzch2a")
-        postparams.put("dst","tz1YEZRQrof1htK6iQoLzrz8KTz2sguhhtQg")
-        postparams.put("amount","15")
-        postparams.put("fee","12")
-        */
-
-        postparams.put("src", src)
-        postparams.put("src_pk", srcPk)
-        postparams.put("dst", dst)
-        postparams.put("amount", amount)
-        postparams.put("fee", fee)
-
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
-        { answer ->
-
-            signIt(answer.getInt("id"), answer.getString("payload"), sk, src)
-
-            //onOperationsLoadHistoryComplete()
-
-        }, Response.ErrorListener
-        {
-            Log.i(it.toString(), it.toString())
-            Log.i(it.toString(), it.toString())
-        }){
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers.put("Content-Type", "application/json")
-                return headers
-            }
-        }
-        /*
-        val jsonObjReq = object : JsonObjectRequest(Method.POST, url, postparams,
-                Response.Listener<JSONObject> { answer ->
-                    //Log.d(TAG, "/post request OK! Response: $response")
-                    Log.i(answer.toString(), answer.toString())
-                    Log.i(answer.toString(), answer.toString())
-                },
-                Response.ErrorListener { error ->
-                    //VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
-                    //completionHandler(null)
-                    Log.i(error.toString(), error.toString())
-                    Log.i(error.toString(), error.toString())
-                }) {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers.put("Content-Type", "application/json")
-                return headers
-            }
-        }
-        */
-
-        //jsObjRequest.tag = LOAD_OPERATIONS_TAG
-
-        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-
-    }
-
-    private fun signIt(id: Int, payload:String, sk: String, pk: String)
-    {
-        val url = getString(R.string.transfer_finalize)
-
-        //val skBytes = sk.hexStringToByteArray()
-
-        val byteArrayThree = payload.hexToByteArray()
-        val signature = KeyPair.sign(sk, byteArrayThree)
-
-        val signVerified = KeyPair.verifySign(signature, byteArrayThree, pk)
-
-        var hexSign = signature.toNoPrefixHexString()
-
-        var postparams = JSONObject()
-        postparams.put("id",id)
-        postparams.put("payload", hexSign)
-        //le payload c'est la signature en hex, en 64 bytes donc 128 chars hex
-
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
-        { answer ->
-
-            Log.i(answer.toString(), answer.toString())
-            Log.i(answer.toString(), answer.toString())
-
-            //startGetRequestLoadOperations()
-
-            activity?.finish()
-            //onOperationsLoadHistoryComplete()
-
-        }, Response.ErrorListener
-        {
-            Log.i(it.toString(), it.toString())
-            Log.i(it.toString(), it.toString())
-
-            activity?.finish()
-        }){
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
-            }
-        }
-
-        /*
-        // Request a string response from the provided URL.
-        val stringRequest = object : StringRequest(Request.Method.POST, url,
-                Response.Listener<String> { response ->
-                    //val response = response.replace("[^0-9]".toRegex(), "")
-                    //mBalanceItem = balance.toDouble()/1000000
-                    //animateBalance(mBalanceItem)
-                    Log.i(response.toString(), response.toString())
-                    Log.i(response.toString(), response.toString())
-
-                    //onBalanceLoadComplete(true)
-                    //startGetRequestLoadOperations()
-                }, Response.ErrorListener
-        {
-            Log.i(it.toString(), it.toString())
-            Log.i(it.toString(), it.toString())
-        }){
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
-            }
-
-            override fun getBody(): HashMap<String, String> {
-                var params = HashMap<String, String>()
-                params.put("id", postparams.getString("id"))
-                params.put("payload", postparams.getString("payload"))
-                return params
-            }
-
-            override fun getPostBody(): ByteArray {
-                return super.getPostBody()
-            }
-        }
-        */
-
-        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-    }
-
     /**
      * Fingerprint was invalidated, decide what to do in this case.
      */
-    private fun onFingerprintInvalidation(useInFuture: Boolean) {
-        storage.saveFingerprintAllowed(useInFuture)
-        if (useInFuture) {
+    private fun onFingerprintInvalidation(useInFuture: Boolean)
+    {
+        listener?.saveFingerprintAllowed(useInFuture)
+        if (useInFuture)
+        {
             EncryptionServices(activity?.applicationContext!!).createFingerprintKey()
         }
     }
@@ -708,15 +871,60 @@ class TransferFormFragment : Fragment()
         return EncryptionServices(activity?.applicationContext!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
     }
 
-    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject, src:String, srcPk:String, dst:String, amount: String, fee:String, sk: String)
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
     {
         if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
         {
-            pay(src, srcPk, dst, amount, fee, sk)
+            startInitTransferLoading()
         }
         else
         {
-            onPayClick(src, srcPk, dst, amount, fee, sk)
+            onPayClick()
         }
+    }
+
+    private fun cancelRequests(resetBooleans:Boolean)
+    {
+        val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
+        requestQueue?.cancelAll(TRANSFER_INIT_TAG)
+        requestQueue?.cancelAll(TRANSFER_FINALIZE_TAG)
+
+        if (resetBooleans)
+        {
+            mInitTransferLoading = false
+            mFinalizeTransferLoading = false
+        }
+    }
+
+    override fun onDestroy()
+    {
+        super.onDestroy()
+        cancelRequests(false)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        super.onSaveInstanceState(outState)
+
+        outState.putParcelable(SRC_ACCOUNT_KEY, mSrcAccount?.toBundle())
+        outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
+
+        outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
+        outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
+
+        when {
+            mTransferId != null -> outState.putInt(TRANSFER_ID_KEY, mTransferId!!)
+            else -> outState.putInt(TRANSFER_ID_KEY, -1)
+        }
+        outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
+
+        outState.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
+        outState.putInt(TRANSFER_SPINNER_POS_KEY, mSpinnerPosition)
+    }
+
+    override fun onDetach()
+    {
+        super.onDetach()
+        listener = null
     }
 }
