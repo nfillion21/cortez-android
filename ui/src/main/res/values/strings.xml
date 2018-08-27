@@ -81,6 +81,7 @@
     <string name="empty_list_operations">No operations</string>
 
     <string name="scan_address_permission">To scan the address, allow camera permission.</string>
+    <string name="scan_address">Scan the tezos address</string>
 
     <string name="operation_details_amount">Amount</string>
     <string name="operation_details_fee">Fee</string>

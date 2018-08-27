@@ -413,7 +413,7 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
         int resText = succeed ? R.string.address_successfuly_scanned : R.string.address_scan_failed;
         int resColor = succeed ? android.R.color.holo_green_light : android.R.color.holo_red_light;
 
-        Snackbar snackbar = Snackbar.make(findViewById(R.id.coordinator), resText, Snackbar.LENGTH_LONG);
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.content), resText, Snackbar.LENGTH_LONG);
         snackbar.getView().setBackgroundColor((ContextCompat.getColor(this,
                 resColor)));
         snackbar.show();

@@ -76,6 +76,22 @@
                 android:textColor="@color/colorAccent"
                 android:ellipsize="end" />
 
+            <Button
+                android:id="@+id/scan_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_photo_camera_black"
+                android:drawableStart="@drawable/ic_photo_camera_black"
+
+                style="@style/PaymentScreens.SourceButton"
+
+                android:text="@string/scan_address"
+
+                android:paddingLeft="@dimen/spacing_double"
+                android:paddingRight="@dimen/spacing_double"
+
+                android:layout_marginTop="@dimen/spacing_double" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
