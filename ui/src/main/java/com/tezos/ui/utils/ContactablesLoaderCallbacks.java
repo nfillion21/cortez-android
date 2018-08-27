@@ -44,7 +44,8 @@ public class ContactablesLoaderCallbacks implements LoaderManager.LoaderCallback
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int loaderIndex, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int loaderIndex, Bundle args)
+    {
         // Where the Contactables table excels is matching text queries,
         // not just data dumps from Contacts db.  One search term is used to query
         // display name, email address and phone number.  In this case, the query was extracted
@@ -77,7 +78,9 @@ public class ContactablesLoaderCallbacks implements LoaderManager.LoaderCallback
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> arg0, Cursor cursor) {
+    public void onLoadFinished(Loader<Cursor> arg0, Cursor cursor)
+    {
+        /*
         TextView tv  = (TextView) ((Activity)mContext).findViewById(R.id.sample_output);
         if(tv == null) {
             Log.e(TAG, "TextView is null?!");
@@ -89,6 +92,7 @@ public class ContactablesLoaderCallbacks implements LoaderManager.LoaderCallback
 
         // Reset text in case of a previous query
         tv.setText(mContext.getText(R.string.intro_message) + "\n\n");
+        */
 
         if (cursor.getCount() == 0) {
             return;
@@ -113,27 +117,32 @@ public class ContactablesLoaderCallbacks implements LoaderManager.LoaderCallback
             String currentLookupKey = cursor.getString(lookupColumnIndex);
             if (!lookupKey.equals(currentLookupKey)) {
                 String displayName = cursor.getString(nameColumnIndex);
-                tv.append(displayName + "\n");
+                //tv.append(displayName + "\n");
                 lookupKey = currentLookupKey;
             }
             // END_INCLUDE(lookup_key)
 
             // BEGIN_INCLUDE(retrieve_data)
             // The data type can be determined using the mime type column.
+
+            /*
             String mimeType = cursor.getString(typeColumnIndex);
             if (mimeType.equals(CommonDataKinds.Phone.CONTENT_ITEM_TYPE)) {
                 tv.append("\tPhone Number: " + cursor.getString(phoneColumnIndex) + "\n");
             } else if (mimeType.equals(CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
                 tv.append("\tEmail Address: " + cursor.getString(emailColumnIndex) + "\n");
             }
+            */
             // END_INCLUDE(retrieve_data)
 
             // Look at DDMS to see all the columns returned by a query to Contactables.
             // Behold, the firehose!
+            /*
             for(String column : cursor.getColumnNames()) {
                 Log.d(TAG, column + column + ": " +
                         cursor.getString(cursor.getColumnIndex(column)) + "\n");
             }
+            */
         } while (cursor.moveToNext());
     }
 
