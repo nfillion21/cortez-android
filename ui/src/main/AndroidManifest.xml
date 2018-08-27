@@ -2,6 +2,12 @@
     package="com.tezos.ui">
 
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Camera features - recommended -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
     <application
         android:name=".utils.ArchLifecycleApp">
 
@@ -38,6 +44,10 @@
 
         <activity
             android:name="com.tezos.ui.activity.AddressDetailsActivity"
+            android:theme="@style/PaymentScreens.AddressDetailsActivity" />
+
+        <activity
+            android:name="com.tezos.ui.activity.SimpleScannerActivity"
             android:theme="@style/PaymentScreens.AddressDetailsActivity" />
 
     </application>

@@ -78,6 +78,8 @@
     <string name="loading_balance">Loading balance…</string>
     <string name="empty_list_operations">No operations</string>
 
+    <string name="scan_address_permission">To scan the address, allow camera permission.</string>
+
     <string name="operation_details_amount">Amount</string>
     <string name="operation_details_fee">Fee</string>
     <string name="operation_details_operation_id">Operation id</string>
