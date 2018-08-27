@@ -123,7 +123,7 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 
         View dialogView = inflater.inflate(R.layout.dialog_search_word, null);
 
-        mSearchWordEditText = dialogView.findViewById(R.id.search_word_edittext);
+        mSearchWordEditText = dialogView.findViewById(R.id.search_name_edittext);
 
         int position = getArguments().getInt(CARD_POSITION_KEY);
         int cardPos = position + 1;
@@ -159,7 +159,7 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
         mCursorAdapter = new SimpleCursorAdapter(getActivity(),
                 R.layout.item_search_word, null,
                 new String[] {EnglishWordsDatabaseConstants.COL_WORD},
-                new int[] { R.id.word_item });
+                new int[] { R.id.word_item }, 0);
 
         mList = dialogView.findViewById(R.id.list);
         mList.setAdapter(mCursorAdapter);

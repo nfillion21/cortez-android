@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.support.design.widget.TextInputEditText
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.LoaderManager
@@ -15,9 +16,6 @@ import android.support.v4.widget.SimpleCursorAdapter
 import android.support.v7.app.AlertDialog
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ListView
 import com.tezos.core.database.EnglishWordsDatabaseConstants
@@ -51,94 +49,97 @@ import com.tezos.ui.R
 */
 
 /**
- * Created by nfillion on 3/9/18.
+ * Created by nfillion on 27/08/18.
  */
 
 class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<Cursor>
 {
     companion object
     {
-        val CARD_POSITION_KEY = "card_position"
-        val TAG = "search_word_dialog_fragment"
+        val QUERY_KEY = "query"
+        val TAG = "ContactablesLoaderCallbacks"
 
-        private val LOADER_ID = 42
+        private val LOADER_ID = 0
 
-        fun newInstance(cardPosition: Int): SearchWordDialogFragment {
-            val fragment = SearchWordDialogFragment()
-
-            val bundle = Bundle()
-            bundle.putInt(CARD_POSITION_KEY, cardPosition)
-
-            fragment.arguments = bundle
+        fun newInstance(): ContactsDialogFragment
+        {
+            val fragment = ContactsDialogFragment()
             return fragment
-            //Put the theme here
-
-            //TODO put here the number
         }
     }
-    private var mCallback: OnWordSelectedListener? = null
-    private var mSearchWordEditText: TextInputEditText? = null
+    private var mCallback: OnNameSelectedListener? = null
+    private var mSearchNameEditText: TextInputEditText? = null
 
     private var mCursorAdapter: CursorAdapter? = null
 
     private var mList: ListView? = null
 
-    interface OnWordSelectedListener {
-        fun onWordClicked(word: String, position: Int)
+    interface OnNameSelectedListener
+    {
+        fun onNameSelected(word: String)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         isCancelable = true
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context?)
+    {
         super.onAttach(context)
 
-        try {
-            mCallback = context as OnWordSelectedListener?
-        } catch (e: ClassCastException) {
-            throw ClassCastException(context!!.toString() + " must implement OnWordSelectedListener")
+        try
+        {
+            mCallback = context as OnNameSelectedListener?
         }
-
+        catch (e: ClassCastException)
+        {
+            throw ClassCastException(context!!.toString() + " must implement OnNameSelectedListener")
+        }
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog
+    {
         val builder = AlertDialog.Builder(activity!!)
         val inflater = activity!!.layoutInflater
 
-        val dialogView = inflater.inflate(R.layout.dialog_search_word, null)
+        val dialogView = inflater.inflate(R.layout.dialog_contacts, null)
 
-        mSearchWordEditText = dialogView.findViewById(R.id.search_word_edittext)
+        mSearchNameEditText = dialogView.findViewById(R.id.search_name_edittext)
+        mSearchNameEditText!!.hint = getString(R.string.contact_name)
 
+        /*
         val position = arguments!!.getInt(CARD_POSITION_KEY)
         val cardPos = position + 1
         if (position != -1) {
-            mSearchWordEditText!!.hint = "Word #$cardPos"
         }
+        */
 
-        mSearchWordEditText!!.addTextChangedListener(object : TextWatcher {
+        mSearchNameEditText!!.addTextChangedListener(object : TextWatcher
+        {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
 
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
 
-            override fun afterTextChanged(editable: Editable) {
-
+            override fun afterTextChanged(editable: Editable)
+            {
                 val query = editable.toString()
 
                 var queryBundle: Bundle? = null
-                if (!query.isEmpty()) {
+                if (!query.isEmpty())
+                {
                     queryBundle = Bundle()
                     queryBundle.putString("query", query)
                 }
-                activity!!.supportLoaderManager.restartLoader<Any>(LOADER_ID, queryBundle, this@SearchWordDialogFragment)
+                activity!!.supportLoaderManager.restartLoader(LOADER_ID, queryBundle, this@ContactsDialogFragment)
             }
         })
 
         mCursorAdapter = SimpleCursorAdapter(activity!!,
                 R.layout.item_search_word, null,
                 arrayOf(EnglishWordsDatabaseConstants.COL_WORD),
-                intArrayOf(R.id.word_item))
+                intArrayOf(R.id.word_item), 0)
 
         mList = dialogView.findViewById(R.id.list)
         mList!!.adapter = mCursorAdapter
@@ -148,24 +149,19 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
             cursor.moveToPosition(i)
             val item = cursor.getString(cursor.getColumnIndex(EnglishWordsDatabaseConstants.COL_WORD))
 
-            mCallback!!.onWordClicked(item, position)
+            mCallback?.onNameSelected(item)
 
             //getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, SearchWordDialogFragment.this);
             dialog.dismiss()
         }
 
         if (savedInstanceState == null) {
-            activity!!.supportLoaderManager.initLoader<Any>(LOADER_ID, null, this)
+            activity!!.supportLoaderManager.initLoader(LOADER_ID, null, this@ContactsDialogFragment)
         }
 
         builder.setView(dialogView)
 
         return builder.create()
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
-        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -174,11 +170,13 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
         dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
     }
 
-    override fun onCreateLoader(id: Int, bundle: Bundle?): Loader<*> {
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor>?
+    {
+        /*
         if (id == LOADER_ID) {
             var query: String? = null
-            if (bundle != null) {
-                query = bundle.getString("query")
+            if (args != null) {
+                query = args.getString("query")
             }
 
             // the
@@ -194,6 +192,41 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
         }
 
         return null
+        */
+
+        if (id == LOADER_ID)
+        {
+            // Where the Contactables table excels is matching text queries,
+            // not just data dumps from Contacts db.  One search term is used to query
+            // display name, email address and phone number.  In this case, the query was extracted
+            // from an incoming intent in the handleIntent() method, via the
+            // intent.getStringExtra() method.
+
+            // BEGIN_INCLUDE(uri_with_query)
+            val query = args?.getString(QUERY_KEY)
+            val uri = Uri.withAppendedPath(
+                    ContactsContract.CommonDataKinds.Contactables.CONTENT_FILTER_URI, query)
+            // END_INCLUDE(uri_with_query)
+
+
+            // BEGIN_INCLUDE(cursor_loader)
+            // Easy way to limit the query to contacts with phone numbers.
+            val selection = ContactsContract.CommonDataKinds.Contactables.HAS_PHONE_NUMBER + " = " + 1
+
+            // Sort results such that rows for the same contact stay together.
+            val sortBy = ContactsContract.CommonDataKinds.Contactables.LOOKUP_KEY
+
+            return CursorLoader(
+                    activity, // Context
+                    uri, // selection - Which rows to return (condition rows must match)
+                    null, // projection - the list of columns to return.  Null means "all"
+                    selection, null, // selection args - can be provided separately and subbed into selection.
+                    sortBy)// URI representing the table/resource to be queried
+            // string specifying sort order
+            // END_INCLUDE(cursor_loader)
+        }
+
+        return null
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>?)
@@ -201,17 +234,74 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
         mCursorAdapter!!.swapCursor(null)
     }
 
-    override fun onLoadFinished(loader: Loader<Cursor>?, data: Cursor?)
+    override fun onLoadFinished(loader: Loader<Cursor>?, cursor: Cursor?)
     {
-        if (data != null)
+        if (cursor != null)
         {
-            mCursorAdapter?.swapCursor(data)
+            //TODO verify later
+            mCursorAdapter?.swapCursor(cursor)
         }
+
+        /*
+
+        if (cursor.getCount() == 0) {
+            return;
+        }
+
+        // Pulling the relevant value from the cursor requires knowing the column index to pull
+        // it from.
+        // BEGIN_INCLUDE(get_columns)
+        int phoneColumnIndex = cursor.getColumnIndex(CommonDataKinds.Phone.NUMBER);
+        int emailColumnIndex = cursor.getColumnIndex(CommonDataKinds.Email.ADDRESS);
+        int nameColumnIndex = cursor.getColumnIndex(CommonDataKinds.Contactables.DISPLAY_NAME);
+        int lookupColumnIndex = cursor.getColumnIndex(CommonDataKinds.Contactables.LOOKUP_KEY);
+        int typeColumnIndex = cursor.getColumnIndex(CommonDataKinds.Contactables.MIMETYPE);
+        // END_INCLUDE(get_columns)
+
+        cursor.moveToFirst();
+        // Lookup key is the easiest way to verify a row of cursor is for the same
+        // contact as the previous row.
+        String lookupKey = "";
+        do {
+            // BEGIN_INCLUDE(lookup_key)
+            String currentLookupKey = cursor.getString(lookupColumnIndex);
+            if (!lookupKey.equals(currentLookupKey)) {
+                String displayName = cursor.getString(nameColumnIndex);
+                //tv.append(displayName + "\n");
+                lookupKey = currentLookupKey;
+            }
+            // END_INCLUDE(lookup_key)
+
+            // BEGIN_INCLUDE(retrieve_data)
+            // The cursor type can be determined using the mime type column.
+
+            /*
+            String mimeType = cursor.getString(typeColumnIndex);
+            if (mimeType.equals(CommonDataKinds.Phone.CONTENT_ITEM_TYPE)) {
+                tv.append("\tPhone Number: " + cursor.getString(phoneColumnIndex) + "\n");
+            } else if (mimeType.equals(CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
+                tv.append("\tEmail Address: " + cursor.getString(emailColumnIndex) + "\n");
+            }
+            */
+            // END_INCLUDE(retrieve_data)
+
+            // Look at DDMS to see all the columns returned by a query to Contactables.
+            // Behold, the firehose!
+            /*
+            for(String column : cursor.getColumnNames()) {
+                Log.d(TAG, column + column + ": " +
+                        cursor.getString(cursor.getColumnIndex(column)) + "\n");
+            }
+            */
+        } while (cursor.moveToNext());
+
+        */
     }
 
     override fun onDestroy()
     {
         super.onDestroy()
+        //TODO check if destroying loader is necessary
         activity!!.supportLoaderManager.destroyLoader(LOADER_ID)
     }
 }
