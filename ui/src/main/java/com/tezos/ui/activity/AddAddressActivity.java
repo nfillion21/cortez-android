@@ -83,7 +83,7 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
     private Button mAddButton;
     private FrameLayout mAddButtonLayout;
 
-    private ZXingScannerView mScannerView;
+    private Button mScanButton;
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -120,6 +120,11 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
         mTzAddress.addTextChangedListener(new GenericTextWatcher(mTzAddress));
         mTzAddress.setOnFocusChangeListener(focusChangeListener);
 
+        mScanButton = findViewById(R.id.scan_button);
+        mScanButton.setOnClickListener(v -> askForScanPermission());
+
+        boolean isPaymentCardScanButtonVisible = this.isScanButtonEnabled();
+        mScanButton.setVisibility(isPaymentCardScanButtonVisible ? View.VISIBLE : View.GONE);
 
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
@@ -130,10 +135,6 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
 
         mAddButtonLayout.setOnClickListener(v ->
         {
-
-            askForScanPermission();
-
-            /*
             String addressName = mOwner.getText().toString();
             String publicKeyHash = mTzAddress.getText().toString();
 
@@ -151,7 +152,6 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
                 setResult(R.id.add_address_succeed, null);
                 finish();
             }
-            */
         });
 
         validateAddButton(isInputDataValid());
@@ -467,6 +467,16 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
                 launchScanCard();
             }
         }
+    }
+
+    private boolean isScanButtonEnabled()
+    {
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
+        {
+            // this device has a camera
+            return true;
+        }
+        return false;
     }
 
     private void launchScanCard()
