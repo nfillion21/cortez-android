@@ -61,6 +61,7 @@ import com.google.zxing.Result;
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
+import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
@@ -164,7 +165,33 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
             //getSupportFragmentManager().beginTransaction()
                     //.replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(paymentPageRequestBundle, customThemeBundle)).commit();
         }
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SCAN_REQUEST_CODE)
+        {
+            if (resultCode == R.id.scan_succeed)
+            {
+                if (data != null && data.hasExtra(SimpleScannerActivity.EXTRA_SCAN_RESULT))
+                {
+                    mTzAddress.setText(data.getStringExtra(SimpleScannerActivity.EXTRA_SCAN_RESULT));
+                    showSnackBar(true);
+                }
+            }
+            else
+            if (resultCode == R.id.scan_failed)
+            {
+                showSnackBar(false);
+            }
+            else
+            {
+                // the user the popped the scan activity
+            }
+        }
     }
 
     @Override
@@ -177,7 +204,7 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
     {
         if (
                 this.isOwnerFormValid() &&
-                        this.isTzAddressValid()
+                        isTzAddressValid()
                 )
         {
             return true;
@@ -204,14 +231,7 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
 
         if (!TextUtils.isEmpty(mTzAddress.getText()))
         {
-            String addressText = mTzAddress.getText().toString();
-
-            if ((addressText.toLowerCase().startsWith("tz1") ||  addressText.toLowerCase().startsWith("tz2") || addressText.toLowerCase().startsWith("tz3"))
-                &&
-                    addressText.length() == 36)
-            {
-                isTzAddressValid = true;
-            }
+            return Utils.isTzAddressValid(mTzAddress.getText().toString());
         }
 
         return isTzAddressValid;
@@ -245,7 +265,7 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
 
         int color;
 
-        boolean tzAddressValid = this.isTzAddressValid();
+        boolean tzAddressValid = isTzAddressValid();
 
         if (red && !tzAddressValid) {
             color = R.color.tz_error;
@@ -388,6 +408,17 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
     }
 
+    private void showSnackBar(boolean succeed)
+    {
+        int resText = succeed ? R.string.address_successfuly_scanned : R.string.address_scan_failed;
+        int resColor = succeed ? android.R.color.holo_green_light : android.R.color.holo_red_light;
+
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.coordinator), resText, Snackbar.LENGTH_LONG);
+        snackbar.getView().setBackgroundColor((ContextCompat.getColor(this,
+                resColor)));
+        snackbar.show();
+    }
+
     private void askForScanPermission() {
 
         if (ContextCompat.checkSelfPermission(this,
@@ -446,6 +477,6 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
         //starter.putExtra(CustomTheme.TAG, themeBundle);
         //starter.putExtra(PKH_KEY, publicKeyHash);
 
-        ActivityCompat.startActivityForResult(this, starter, -1, null);
+        ActivityCompat.startActivityForResult(this, starter, SCAN_REQUEST_CODE, null);
     }
 }

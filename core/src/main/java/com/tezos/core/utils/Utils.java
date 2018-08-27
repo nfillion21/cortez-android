@@ -30,6 +30,7 @@ package com.tezos.core.utils;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
 
 import org.json.JSONException;
@@ -201,6 +202,25 @@ public class Utils {
         }
 
         return date;
+    }
+
+    public static boolean isTzAddressValid(String tzAddress)
+    {
+        boolean isTzAddressValid = false;
+
+        if (!TextUtils.isEmpty(tzAddress))
+        {
+            String addressText = tzAddress;
+
+            if ((addressText.toLowerCase().startsWith("tz1") ||  addressText.toLowerCase().startsWith("tz2") || addressText.toLowerCase().startsWith("tz3"))
+                    &&
+                    addressText.length() == 36)
+            {
+                isTzAddressValid = true;
+            }
+        }
+
+        return isTzAddressValid;
     }
 
     public static String bundleToString(Bundle bundle) {

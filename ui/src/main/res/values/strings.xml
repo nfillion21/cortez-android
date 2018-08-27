@@ -64,6 +64,8 @@
     <string name="alert_exit_account">Log Out</string>
     <string name="alert_exit_acccount_body">Please make sure you still have your 24 mnemonics words on a piece of paper or your data will be lost forever.</string>
     <string name="address_successfuly_added">Address successfully added!</string>
+    <string name="address_successfuly_scanned">Address successfully scanned!</string>
+    <string name="address_scan_failed">Please check the validity of the tezos address</string>
     <string name="general_passcode">Please enter a general password for the application.</string>
     <string name="incorrect_passcode">The passcode is incorrect, please try again.</string>
     <string name="confirm_passcode">Please confirm the passcode.</string>
