@@ -77,13 +77,13 @@
                 android:ellipsize="end" />
 
             <Button
-                android:id="@+id/scan_button"
+                android:id="@+id/contacts_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_photo_camera_black"
-                android:drawableStart="@drawable/ic_photo_camera_black"
+                android:drawableLeft="@drawable/ic_contacts_24"
+                android:drawableStart="@drawable/ic_contacts_24"
 
-                android:text="@string/scan_address"
+                android:text="@string/browse_contact_list"
                 style="@style/PaymentScreens.SourceButton"
 
                 android:paddingLeft="@dimen/spacing_double"
@@ -92,13 +92,13 @@
                 android:layout_marginTop="@dimen/spacing_double" />
 
             <Button
-                android:id="@+id/contacts_button"
+                android:id="@+id/scan_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_contacts_24"
-                android:drawableStart="@drawable/ic_contacts_24"
+                android:drawableLeft="@drawable/ic_photo_camera_black"
+                android:drawableStart="@drawable/ic_photo_camera_black"
 
-                android:text="@string/browse_contact_list"
+                android:text="@string/scan_address"
                 style="@style/PaymentScreens.SourceButton"
 
                 android:paddingLeft="@dimen/spacing_double"

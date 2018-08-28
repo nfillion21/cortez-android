@@ -52,6 +52,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -64,14 +65,13 @@ import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
 import com.tezos.ui.fragment.ContactsDialogFragment;
-import com.tezos.ui.fragment.SearchWordDialogFragment;
 
 import org.jetbrains.annotations.NotNull;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 
-public class AddAddressActivity extends BaseSecureActivity implements ZXingScannerView.ResultHandler, ContactsDialogFragment.OnNameSelectedListener
+public class AddAddressActivity extends BaseSecureActivity implements ContactsDialogFragment.OnNameSelectedListener
 {
     public static int ADD_ADDRESS_REQUEST_CODE = 0x2400; // arbitrary int
 
@@ -136,9 +136,7 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
         mContactsButton = findViewById(R.id.contacts_button);
         mContactsButton.setOnClickListener(v ->
 
-                {
-                    askForBrowseContactsPermission();
-                }
+                askForBrowseContactsPermission()
         );
 
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
@@ -293,13 +291,22 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
     }
 
     @Override
-    public void handleResult(Result result) {
+    public void onNameSelected(@NotNull String word)
+    {
+        mOwner.setText(word);
+        mTzAddress.requestFocus();
 
-    }
-
-    @Override
-    public void onNameSelected(@NotNull String word) {
-
+        /*
+        if (isInputDataValid())
+        {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mTzAddress.getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(mOwner.getWindowToken(), 0);
+        }
+        else
+        {
+        }
+        */
     }
 
     private class GenericTextWatcher implements TextWatcher
@@ -493,7 +500,7 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
                     startActivity(intent);
                 };
 
-                Snackbar.make(findViewById(R.id.content), getString(R.string.scan_address_permission), Snackbar.LENGTH_LONG)
+                Snackbar.make(findViewById(R.id.content), getString(R.string.read_contacts_permission), Snackbar.LENGTH_LONG)
                         .setAction(getString(R.string.settings), clickListener)
                         .setActionTextColor(Color.YELLOW)
                         .show();

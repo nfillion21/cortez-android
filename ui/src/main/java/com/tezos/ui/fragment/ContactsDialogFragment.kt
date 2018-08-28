@@ -60,7 +60,6 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
 
     companion object
     {
-
         @JvmStatic
         fun newInstance(): ContactsDialogFragment
         {

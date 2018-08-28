@@ -46,11 +46,14 @@
 
         <activity
             android:name="com.tezos.ui.activity.AddressDetailsActivity"
-            android:theme="@style/PaymentScreens.AddressDetailsActivity" />
+            android:theme="@style/PaymentScreens.AddressDetailsActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize"
+            />
 
         <activity
             android:name="com.tezos.ui.activity.SimpleScannerActivity"
-            android:theme="@style/PaymentScreens.AddressDetailsActivity" />
+            android:theme="@style/PaymentScreens.SimpleScannerActivity"
+            />
 
     </application>
 

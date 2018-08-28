@@ -82,6 +82,7 @@
     <string name="contact_name">Contact name</string>
 
     <string name="scan_address_permission">To scan the address, allow camera permission.</string>
+    <string name="read_contacts_permission">To select a name, allow read contacts permission.</string>
     <string name="scan_address">Scan the tezos address</string>
     <string name="browse_contact_list">Browse my contact list</string>
 
