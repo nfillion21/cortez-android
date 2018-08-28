@@ -86,9 +86,6 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 
         fragment.setArguments(bundle);
         return fragment;
-        //Put the theme here
-
-        //TODO put here the number
     }
 
     @Override
@@ -243,6 +240,13 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
     public void onLoaderReset(@NonNull Loader loader)
     {
         mCursorAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+        mCallback = null;
     }
 
     @Override

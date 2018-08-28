@@ -54,13 +54,14 @@ import com.tezos.ui.R
 
 class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<Cursor>
 {
+    private val QUERY_KEY = "query"
+    private val TAG = "DialogFragment"
+    private val LOADER_ID = 0
+
     companion object
     {
-        val QUERY_KEY = "query"
-        val TAG = "ContactablesLoaderCallbacks"
 
-        private val LOADER_ID = 0
-
+        @JvmStatic
         fun newInstance(): ContactsDialogFragment
         {
             val fragment = ContactsDialogFragment()
@@ -109,13 +110,6 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
         mSearchNameEditText = dialogView.findViewById(R.id.search_name_edittext)
         mSearchNameEditText!!.hint = getString(R.string.contact_name)
 
-        /*
-        val position = arguments!!.getInt(CARD_POSITION_KEY)
-        val cardPos = position + 1
-        if (position != -1) {
-        }
-        */
-
         mSearchNameEditText!!.addTextChangedListener(object : TextWatcher
         {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
@@ -138,7 +132,7 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
 
         mCursorAdapter = SimpleCursorAdapter(activity!!,
                 R.layout.item_search_word, null,
-                arrayOf(EnglishWordsDatabaseConstants.COL_WORD),
+                arrayOf(ContactsContract.CommonDataKinds.Contactables.DISPLAY_NAME),
                 intArrayOf(R.id.word_item), 0)
 
         mList = dialogView.findViewById(R.id.list)
@@ -147,7 +141,7 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
         mList!!.setOnItemClickListener { adapterView, view, i, l ->
             val cursor = mCursorAdapter!!.cursor
             cursor.moveToPosition(i)
-            val item = cursor.getString(cursor.getColumnIndex(EnglishWordsDatabaseConstants.COL_WORD))
+            val item = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Contactables.DISPLAY_NAME))
 
             mCallback?.onNameSelected(item)
 
@@ -170,71 +164,28 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
         dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor>?
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor>
     {
-        /*
-        if (id == LOADER_ID) {
-            var query: String? = null
-            if (args != null) {
-                query = args.getString("query")
-            }
+        // BEGIN_INCLUDE(uri_with_query)
+        val query = args?.getString(QUERY_KEY)
+        val uri = Uri.withAppendedPath(
+                ContactsContract.CommonDataKinds.Contactables.CONTENT_FILTER_URI, query)
 
-            // the
-            val packageName = activity!!.applicationContext.packageName
-            val packageProvider = "$packageName.provider"
-            val contentUri = Uri.parse("content://" + packageProvider
-                    + "/" + EnglishWordsDatabaseConstants.TABLE_WORD)
-
-            // it filters everything when I put null as a parameter
-            return CursorLoader(activity!!,
-                    contentUri,
-                    arrayOf(EnglishWordsDatabaseConstants.COL_ID, EnglishWordsDatabaseConstants.COL_WORD), null, arrayOf<String>(query), null)
-        }
-
-        return null
-        */
-
-        if (id == LOADER_ID)
-        {
-            // Where the Contactables table excels is matching text queries,
-            // not just data dumps from Contacts db.  One search term is used to query
-            // display name, email address and phone number.  In this case, the query was extracted
-            // from an incoming intent in the handleIntent() method, via the
-            // intent.getStringExtra() method.
-
-            // BEGIN_INCLUDE(uri_with_query)
-            val query = args?.getString(QUERY_KEY)
-            val uri = Uri.withAppendedPath(
-                    ContactsContract.CommonDataKinds.Contactables.CONTENT_FILTER_URI, query)
-            // END_INCLUDE(uri_with_query)
-
-
-            // BEGIN_INCLUDE(cursor_loader)
-            // Easy way to limit the query to contacts with phone numbers.
-            val selection = ContactsContract.CommonDataKinds.Contactables.HAS_PHONE_NUMBER + " = " + 1
-
-            // Sort results such that rows for the same contact stay together.
-            val sortBy = ContactsContract.CommonDataKinds.Contactables.LOOKUP_KEY
-
-            return CursorLoader(
-                    activity, // Context
-                    uri, // selection - Which rows to return (condition rows must match)
-                    null, // projection - the list of columns to return.  Null means "all"
-                    selection, null, // selection args - can be provided separately and subbed into selection.
-                    sortBy)// URI representing the table/resource to be queried
-            // string specifying sort order
-            // END_INCLUDE(cursor_loader)
-        }
-
-        return null
+        return CursorLoader(
+                activity!!, // Context
+                uri, // selection - Which rows to return (condition rows must match)
+                arrayOf("_id", ContactsContract.CommonDataKinds.Contactables.DISPLAY_NAME), // projection - the list of columns to return.  Null means "all"
+                null, // selection
+                null, // selection args - can be provided separately and subbed into selection.
+                null)// URI representing the table/resource to be queried
     }
 
-    override fun onLoaderReset(loader: Loader<Cursor>?)
+    override fun onLoaderReset(loader: Loader<Cursor>)
     {
         mCursorAdapter!!.swapCursor(null)
     }
 
-    override fun onLoadFinished(loader: Loader<Cursor>?, cursor: Cursor?)
+    override fun onLoadFinished(loader: Loader<Cursor>, cursor: Cursor)
     {
         if (cursor != null)
         {
@@ -244,9 +195,11 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
 
         /*
 
+        /*
         if (cursor.getCount() == 0) {
             return;
         }
+        */
 
         // Pulling the relevant value from the cursor requires knowing the column index to pull
         // it from.
@@ -293,9 +246,14 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
                         cursor.getString(cursor.getColumnIndex(column)) + "\n");
             }
             */
-        } while (cursor.moveToNext());
-
+        } while (cursor.moveToNext())
         */
+    }
+
+    override fun onDetach()
+    {
+        super.onDetach()
+        mCallback = null
     }
 
     override fun onDestroy()

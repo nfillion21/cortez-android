@@ -83,9 +83,8 @@
                 android:drawableLeft="@drawable/ic_photo_camera_black"
                 android:drawableStart="@drawable/ic_photo_camera_black"
 
-                style="@style/PaymentScreens.SourceButton"
-
                 android:text="@string/scan_address"
+                style="@style/PaymentScreens.SourceButton"
 
                 android:paddingLeft="@dimen/spacing_double"
                 android:paddingRight="@dimen/spacing_double"
@@ -99,9 +98,8 @@
                 android:drawableLeft="@drawable/ic_contacts_24"
                 android:drawableStart="@drawable/ic_contacts_24"
 
+                android:text="@string/browse_contact_list"
                 style="@style/PaymentScreens.SourceButton"
-
-                android:text="@string/scan_address"
 
                 android:paddingLeft="@dimen/spacing_double"
                 android:paddingRight="@dimen/spacing_double"

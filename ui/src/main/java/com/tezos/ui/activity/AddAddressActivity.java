@@ -63,16 +63,22 @@ import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
+import com.tezos.ui.fragment.ContactsDialogFragment;
+import com.tezos.ui.fragment.SearchWordDialogFragment;
+
+import org.jetbrains.annotations.NotNull;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 
-public class AddAddressActivity extends BaseSecureActivity implements ZXingScannerView.ResultHandler
+public class AddAddressActivity extends BaseSecureActivity implements ZXingScannerView.ResultHandler, ContactsDialogFragment.OnNameSelectedListener
 {
     public static int ADD_ADDRESS_REQUEST_CODE = 0x2400; // arbitrary int
 
     public static int SCAN_PERMISSION_REQUEST_CODE = 0x2800; // arbitrary int
     public static int SCAN_REQUEST_CODE = 0x2900; // arbitrary int
+
+    public static int READ_CONTACTS_PERMISSION_REQUEST_CODE = 0x3000; // arbitrary int
 
     private TextInputLayout mOwnerLayout;
     private TextInputEditText mOwner;
@@ -84,6 +90,7 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
     private FrameLayout mAddButtonLayout;
 
     private Button mScanButton;
+    private Button mContactsButton;
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -125,6 +132,14 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
 
         boolean isPaymentCardScanButtonVisible = this.isScanButtonEnabled();
         mScanButton.setVisibility(isPaymentCardScanButtonVisible ? View.VISIBLE : View.GONE);
+
+        mContactsButton = findViewById(R.id.contacts_button);
+        mContactsButton.setOnClickListener(v ->
+
+                {
+                    askForBrowseContactsPermission();
+                }
+        );
 
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
@@ -282,6 +297,11 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
 
     }
 
+    @Override
+    public void onNameSelected(@NotNull String word) {
+
+    }
+
     private class GenericTextWatcher implements TextWatcher
     {
         private View v;
@@ -419,8 +439,8 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
         snackbar.show();
     }
 
-    private void askForScanPermission() {
-
+    private void askForScanPermission()
+    {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED)
@@ -441,7 +461,6 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
                         .setAction(getString(R.string.settings), clickListener)
                         .setActionTextColor(Color.YELLOW)
                         .show();
-
             }
             else
             {
@@ -456,15 +475,60 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
         }
     }
 
+    private void askForBrowseContactsPermission()
+    {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_CONTACTS))
+            {
+                View.OnClickListener clickListener = v ->
+                {
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    startActivity(intent);
+                };
+
+                Snackbar.make(findViewById(R.id.content), getString(R.string.scan_address_permission), Snackbar.LENGTH_LONG)
+                        .setAction(getString(R.string.settings), clickListener)
+                        .setActionTextColor(Color.YELLOW)
+                        .show();
+            }
+            else
+            {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_CONTACTS},
+                        READ_CONTACTS_PERMISSION_REQUEST_CODE);
+            }
+        }
+        else
+        {
+            launchBrowseContacts();
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
 
         if (requestCode == SCAN_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
                 launchScanCard();
+            }
+        }
+        else
+        if (requestCode == READ_CONTACTS_PERMISSION_REQUEST_CODE)
+        {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                launchBrowseContacts();
             }
         }
     }
@@ -488,5 +552,11 @@ public class AddAddressActivity extends BaseSecureActivity implements ZXingScann
         //starter.putExtra(PKH_KEY, publicKeyHash);
 
         ActivityCompat.startActivityForResult(this, starter, SCAN_REQUEST_CODE, null);
+    }
+
+    private void launchBrowseContacts()
+    {
+        ContactsDialogFragment contactsDialogFragment = ContactsDialogFragment.newInstance();
+        contactsDialogFragment.show(getSupportFragmentManager(), "contactsDialog");
     }
 }
