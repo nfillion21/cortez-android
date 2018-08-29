@@ -22,7 +22,6 @@
                 android:padding="@dimen/spacing_double"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:layout_gravity="center"
                 android:orientation="vertical">
 
                 <TextView

@@ -64,6 +64,8 @@
     <string name="alert_exit_account">Log Out</string>
     <string name="alert_exit_acccount_body">Please make sure you still have your 24 mnemonics words on a piece of paper or your data will be lost forever.</string>
     <string name="address_successfuly_added">Address successfully added!</string>
+    <string name="address_successfuly_scanned">Address successfully scanned!</string>
+    <string name="address_scan_failed">Please check the validity of the tezos address</string>
     <string name="general_passcode">Please enter a general password for the application.</string>
     <string name="incorrect_passcode">The passcode is incorrect, please try again.</string>
     <string name="confirm_passcode">Please confirm the passcode.</string>
@@ -77,6 +79,12 @@
     <string name="loading_list_operations">Loading operations…</string>
     <string name="loading_balance">Loading balance…</string>
     <string name="empty_list_operations">No operations</string>
+    <string name="contact_name">Contact name</string>
+
+    <string name="scan_address_permission">To scan the address, allow camera permission.</string>
+    <string name="read_contacts_permission">To select a name, allow read contacts permission.</string>
+    <string name="scan_address">Scan the tezos address</string>
+    <string name="browse_contact_list">Browse my contact list</string>
 
     <string name="operation_details_amount">Amount</string>
     <string name="operation_details_fee">Fee</string>

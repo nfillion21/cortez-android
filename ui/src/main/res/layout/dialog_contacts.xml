@@ -29,7 +29,7 @@
             android:drawableStart="@drawable/search_black_24"
             android:drawablePadding="@dimen/spacing_normal"
             android:textColorHint="@color/tz_placeholder"
-            android:maxLength="5"
+            android:maxLength="15"
             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             android:maxLines="1"
             android:inputType="text|textNoSuggestions"

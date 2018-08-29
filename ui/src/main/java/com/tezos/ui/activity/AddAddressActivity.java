@@ -27,13 +27,19 @@
 
 package com.tezos.ui.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
@@ -46,20 +52,33 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.zxing.Result;
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
+import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
+import com.tezos.ui.fragment.ContactsDialogFragment;
+
+import org.jetbrains.annotations.NotNull;
+
+import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 
-public class AddAddressActivity extends BaseSecureActivity
+public class AddAddressActivity extends BaseSecureActivity implements ContactsDialogFragment.OnNameSelectedListener
 {
     public static int ADD_ADDRESS_REQUEST_CODE = 0x2400; // arbitrary int
+
+    public static int SCAN_PERMISSION_REQUEST_CODE = 0x2800; // arbitrary int
+    public static int SCAN_REQUEST_CODE = 0x2900; // arbitrary int
+
+    public static int READ_CONTACTS_PERMISSION_REQUEST_CODE = 0x3000; // arbitrary int
 
     private TextInputLayout mOwnerLayout;
     private TextInputEditText mOwner;
@@ -69,6 +88,9 @@ public class AddAddressActivity extends BaseSecureActivity
 
     private Button mAddButton;
     private FrameLayout mAddButtonLayout;
+
+    private Button mScanButton;
+    private Button mContactsButton;
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -105,6 +127,17 @@ public class AddAddressActivity extends BaseSecureActivity
         mTzAddress.addTextChangedListener(new GenericTextWatcher(mTzAddress));
         mTzAddress.setOnFocusChangeListener(focusChangeListener);
 
+        mScanButton = findViewById(R.id.scan_button);
+        mScanButton.setOnClickListener(v -> askForScanPermission());
+
+        boolean isPaymentCardScanButtonVisible = this.isScanButtonEnabled();
+        mScanButton.setVisibility(isPaymentCardScanButtonVisible ? View.VISIBLE : View.GONE);
+
+        mContactsButton = findViewById(R.id.contacts_button);
+        mContactsButton.setOnClickListener(v ->
+
+                askForBrowseContactsPermission()
+        );
 
         Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
         CustomTheme theme = CustomTheme.fromBundle(themeBundle);
@@ -145,7 +178,33 @@ public class AddAddressActivity extends BaseSecureActivity
             //getSupportFragmentManager().beginTransaction()
                     //.replace(R.id.form_fragment_container, AbstractPaymentFormFragment.newInstance(paymentPageRequestBundle, customThemeBundle)).commit();
         }
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SCAN_REQUEST_CODE)
+        {
+            if (resultCode == R.id.scan_succeed)
+            {
+                if (data != null && data.hasExtra(SimpleScannerActivity.EXTRA_SCAN_RESULT))
+                {
+                    mTzAddress.setText(data.getStringExtra(SimpleScannerActivity.EXTRA_SCAN_RESULT));
+                    showSnackBar(true);
+                }
+            }
+            else
+            if (resultCode == R.id.scan_failed)
+            {
+                showSnackBar(false);
+            }
+            else
+            {
+                // the user the popped the scan activity
+            }
+        }
     }
 
     @Override
@@ -158,7 +217,7 @@ public class AddAddressActivity extends BaseSecureActivity
     {
         if (
                 this.isOwnerFormValid() &&
-                        this.isTzAddressValid()
+                        isTzAddressValid()
                 )
         {
             return true;
@@ -185,14 +244,7 @@ public class AddAddressActivity extends BaseSecureActivity
 
         if (!TextUtils.isEmpty(mTzAddress.getText()))
         {
-            String addressText = mTzAddress.getText().toString();
-
-            if ((addressText.toLowerCase().startsWith("tz1") ||  addressText.toLowerCase().startsWith("tz2") || addressText.toLowerCase().startsWith("tz3"))
-                &&
-                    addressText.length() == 36)
-            {
-                isTzAddressValid = true;
-            }
+            return Utils.isTzAddressValid(mTzAddress.getText().toString());
         }
 
         return isTzAddressValid;
@@ -226,7 +278,7 @@ public class AddAddressActivity extends BaseSecureActivity
 
         int color;
 
-        boolean tzAddressValid = this.isTzAddressValid();
+        boolean tzAddressValid = isTzAddressValid();
 
         if (red && !tzAddressValid) {
             color = R.color.tz_error;
@@ -236,6 +288,25 @@ public class AddAddressActivity extends BaseSecureActivity
         }
 
         this.mTzAddress.setTextColor(ContextCompat.getColor(this, color));
+    }
+
+    @Override
+    public void onNameSelected(@NotNull String word)
+    {
+        mOwner.setText(word);
+        mTzAddress.requestFocus();
+
+        /*
+        if (isInputDataValid())
+        {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mTzAddress.getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(mOwner.getWindowToken(), 0);
+        }
+        else
+        {
+        }
+        */
     }
 
     private class GenericTextWatcher implements TextWatcher
@@ -362,5 +433,137 @@ public class AddAddressActivity extends BaseSecureActivity
 
         TextView mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+    }
+
+    private void showSnackBar(boolean succeed)
+    {
+        int resText = succeed ? R.string.address_successfuly_scanned : R.string.address_scan_failed;
+        int resColor = succeed ? android.R.color.holo_green_light : android.R.color.holo_red_light;
+
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.content), resText, Snackbar.LENGTH_LONG);
+        snackbar.getView().setBackgroundColor((ContextCompat.getColor(this,
+                resColor)));
+        snackbar.show();
+    }
+
+    private void askForScanPermission()
+    {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CAMERA))
+            {
+                View.OnClickListener clickListener = v ->
+                {
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    startActivity(intent);
+                };
+
+                Snackbar.make(findViewById(R.id.content), getString(R.string.scan_address_permission), Snackbar.LENGTH_LONG)
+                        .setAction(getString(R.string.settings), clickListener)
+                        .setActionTextColor(Color.YELLOW)
+                        .show();
+            }
+            else
+            {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CAMERA},
+                        SCAN_PERMISSION_REQUEST_CODE);
+            }
+        }
+        else
+        {
+            launchScanCard();
+        }
+    }
+
+    private void askForBrowseContactsPermission()
+    {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_CONTACTS))
+            {
+                View.OnClickListener clickListener = v ->
+                {
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    startActivity(intent);
+                };
+
+                Snackbar.make(findViewById(R.id.content), getString(R.string.read_contacts_permission), Snackbar.LENGTH_LONG)
+                        .setAction(getString(R.string.settings), clickListener)
+                        .setActionTextColor(Color.YELLOW)
+                        .show();
+            }
+            else
+            {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_CONTACTS},
+                        READ_CONTACTS_PERMISSION_REQUEST_CODE);
+            }
+        }
+        else
+        {
+            launchBrowseContacts();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+
+        if (requestCode == SCAN_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                launchScanCard();
+            }
+        }
+        else
+        if (requestCode == READ_CONTACTS_PERMISSION_REQUEST_CODE)
+        {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                launchBrowseContacts();
+            }
+        }
+    }
+
+    private boolean isScanButtonEnabled()
+    {
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
+        {
+            // this device has a camera
+            return true;
+        }
+        return false;
+    }
+
+    private void launchScanCard()
+    {
+        //SimpleScannerActivity activity = new SimpleScannerActivity()
+
+        Intent starter = new Intent(this, SimpleScannerActivity.class);
+        //starter.putExtra(CustomTheme.TAG, themeBundle);
+        //starter.putExtra(PKH_KEY, publicKeyHash);
+
+        ActivityCompat.startActivityForResult(this, starter, SCAN_REQUEST_CODE, null);
+    }
+
+    private void launchBrowseContacts()
+    {
+        ContactsDialogFragment contactsDialogFragment = ContactsDialogFragment.newInstance();
+        contactsDialogFragment.show(getSupportFragmentManager(), "contactsDialog");
     }
 }
