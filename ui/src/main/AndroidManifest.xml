@@ -24,7 +24,7 @@
         <activity
             android:name=".activity.AddAddressActivity"
             android:theme="@style/PaymentScreens.AddAddressActivity"
-            android:windowSoftInputMode="adjustPan|stateVisible"
+            android:windowSoftInputMode="adjustPan"
             />
 
         <activity
@@ -47,7 +47,6 @@
         <activity
             android:name="com.tezos.ui.activity.AddressDetailsActivity"
             android:theme="@style/PaymentScreens.AddressDetailsActivity"
-            android:windowSoftInputMode="adjustPan|adjustResize"
             />
 
         <activity
