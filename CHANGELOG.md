@@ -1,6 +1,11 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+0.2.0
+-----
+* Add the QR Code scan to select a tezos address.
+* Add the contact list browsing to select a display name.
+
 0.1.3
 -----
 * Improves the transfer screen and error management.
