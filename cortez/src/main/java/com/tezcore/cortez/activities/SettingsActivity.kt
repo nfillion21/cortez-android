@@ -30,6 +30,7 @@ package com.tezcore.cortez.activities
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -166,6 +167,7 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
 
             Snackbar.make(findViewById(android.R.id.content), R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
                     .setAction(R.string.sign_up_snack_action, { openSecuritySettings() })
+                    .setActionTextColor(Color.YELLOW)
                     .show()
         }
         else

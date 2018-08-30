@@ -141,11 +141,12 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         if (mSystemInformationsCallback.isDeviceSecure())
         {
             settingsList.add(getString(R.string.ask_for_credentials));
-        }
 
-        if (mSystemInformationsCallback.isFingerprintHardwareAvailable())
-        {
-            settingsList.add(getString(R.string.use_fingerprint));
+            // device needs to be secure to create fingerprint keys
+            if (mSystemInformationsCallback.isFingerprintHardwareAvailable())
+            {
+                settingsList.add(getString(R.string.use_fingerprint));
+            }
         }
 
         ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), settingsList);
