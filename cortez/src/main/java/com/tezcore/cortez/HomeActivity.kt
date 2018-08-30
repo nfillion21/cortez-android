@@ -33,13 +33,19 @@ import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
+import android.support.design.widget.TabLayout
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.tezcore.cortez.activities.AboutActivity
@@ -62,10 +68,27 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
     private var mProgressBar: ProgressBar? = null
 
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
+    private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        setSupportActionBar(toolbar)
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
+
+        // Set up the ViewPager with the sections adapter.
+        container.adapter = mSectionsPagerAdapter
+
+        container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
+        tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
+
+        fab.setOnClickListener { view ->
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+        }
 
         // first get the theme
         val tezosTheme = CustomTheme(
@@ -74,6 +97,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 com.tezos.ui.R.color.theme_tezos_text)
 
         initActionBar(tezosTheme)
+        /*
         val isPasswordSaved = Storage(this).isPasswordSaved()
         setMenuItemEnabled(isPasswordSaved)
 
@@ -89,6 +113,8 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 switchToHome()
             }
         }
+        */
+
     }
 
     private fun switchToOperations(realMnemonics: Storage.MnemonicsData)
@@ -106,6 +132,31 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, operationsFragment)
                 .commit()
+    }
+
+    /**
+     * A [FragmentPagerAdapter] that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm)
+    {
+        override fun getItem(position: Int): Fragment
+        {
+
+            val tezosTheme = CustomTheme(
+                    com.tezos.ui.R.color.theme_tezos_primary,
+                    com.tezos.ui.R.color.theme_tezos_primary_dark,
+                    com.tezos.ui.R.color.theme_tezos_text)
+
+            val homeFragment = HomeFragment.newInstance(tezosTheme)
+            return homeFragment
+        }
+
+        override fun getCount(): Int
+        {
+            // Show 3 total pages.
+            return 3
+        }
     }
 
     private fun switchToHome()
@@ -138,7 +189,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
                         showSnackBar(R.string.wallet_successfully_created)
 
-                        setMenuItemEnabled(true)
+                        //setMenuItemEnabled(true)
 
                         switchToOperations(realSeed)
                     }
@@ -156,7 +207,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
                         showSnackBar(R.string.wallet_successfully_restored)
 
-                        setMenuItemEnabled(true)
+                        //setMenuItemEnabled(true)
 
                         switchToOperations(realSeed)
                     }
@@ -177,7 +228,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 if (resultCode == R.id.logout_succeed)
                 {
                     switchToHome()
-                    setMenuItemEnabled(false)
+                    //setMenuItemEnabled(false)
                 }
             }
 
@@ -195,6 +246,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         snackbar.show()
     }
 
+    /*
     private fun setMenuItemEnabled(enabled:Boolean)
     {
         val navigationView = findViewById<View>(R.id.nav_view) as NavigationView
@@ -211,6 +263,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         val settingsMenuItem = menu.findItem(R.id.nav_settings)
         settingsMenuItem.isEnabled = enabled
     }
+    */
 
     private fun initActionBar(theme:CustomTheme)
     {
@@ -228,6 +281,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         setSupportActionBar(toolbar)
 
+        /*
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
@@ -250,10 +304,12 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+        */
     }
 
     override fun onBackPressed()
     {
+        /*
         if (drawer_layout.isDrawerOpen(GravityCompat.START))
         {
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -273,6 +329,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                     }
                     .show()
         }
+        */
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean
