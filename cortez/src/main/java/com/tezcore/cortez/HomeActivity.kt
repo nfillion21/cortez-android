@@ -28,7 +28,6 @@
 package com.tezcore.cortez
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -38,13 +37,10 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.ContextCompat
-import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.ProgressBar
-import android.widget.TextView
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezcore.cortez.fragments.HomeFragment
@@ -105,23 +101,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         }
 
         initActionBar(tezosTheme)
-        /*
-        val isPasswordSaved = Storage(this).isPasswordSaved()
-        setMenuItemEnabled(isPasswordSaved)
-
-        if (savedInstanceState == null)
-        {
-            if (isPasswordSaved)
-            {
-                val seed = Storage(baseContext).getMnemonics()
-                switchToOperations(seed)
-            }
-            else
-            {
-                switchToHome()
-            }
-        }
-        */
 
     }
 
@@ -150,6 +129,50 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
     {
         override fun getItem(position: Int): Fragment
         {
+            when (position)
+            {
+                0 -> {
+                    val tezosTheme = CustomTheme(
+                            com.tezos.ui.R.color.theme_tezos_primary,
+                            com.tezos.ui.R.color.theme_tezos_primary_dark,
+                            com.tezos.ui.R.color.theme_tezos_text)
+                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+                    //setMenuItemEnabled(isPasswordSaved)
+
+                    if (isPasswordSaved)
+                    {
+                        val mnemonicsData = Storage(baseContext).getMnemonics()
+
+                        var address = Address()
+                        address.description = "main address"
+                        address.pubKeyHash = mnemonicsData.pkh
+
+                        val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
+                        return operationsFragment
+                    }
+                    else
+                    {
+                        //switchToHome()
+
+                        val homeFragment = HomeFragment.newInstance(tezosTheme)
+                        return homeFragment
+
+                    }
+
+                }
+                1 ->
+                {
+                    //
+                }
+                2 ->
+                {
+                    //
+                }
+                else ->
+                {
+                    //
+                }
+            }
 
             val tezosTheme = CustomTheme(
                     com.tezos.ui.R.color.theme_tezos_primary,
@@ -324,20 +347,20 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         }
         else
         {
-            AlertDialog.Builder(this)
-                    .setTitle(R.string.exit)
-                    .setMessage(R.string.exit_info)
-                    .setNegativeButton(android.R.string.no, null)
-                    .setPositiveButton(android.R.string.yes) {
-                        _,
-                        _ ->
-
-                        super.onBackPressed()
-
-                    }
-                    .show()
         }
         */
+        AlertDialog.Builder(this)
+                .setTitle(R.string.exit)
+                .setMessage(R.string.exit_info)
+                .setNegativeButton(android.R.string.no, null)
+                .setPositiveButton(android.R.string.yes) {
+                    _,
+                    _ ->
+
+                    super.onBackPressed()
+
+                }
+                .show()
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean
