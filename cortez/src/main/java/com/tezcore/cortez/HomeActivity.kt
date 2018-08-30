@@ -42,10 +42,7 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.tezcore.cortez.activities.AboutActivity
@@ -378,5 +375,39 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         //drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        val id = item.itemId
+
+        if (id == R.id.action_settings)
+        {
+            val tezosTheme = CustomTheme(
+                    com.tezos.ui.R.color.theme_tezos_primary,
+                    com.tezos.ui.R.color.theme_tezos_primary_dark,
+                    com.tezos.ui.R.color.theme_tezos_text)
+            SettingsActivity.start(this, tezosTheme)
+            return true
+        }
+        else if (id == R.id.action_about)
+        {
+            val tezosTheme = CustomTheme(
+                    com.tezos.ui.R.color.theme_tezos_primary,
+                    com.tezos.ui.R.color.theme_tezos_primary_dark,
+                    com.tezos.ui.R.color.theme_tezos_text)
+            AboutActivity.start(this, tezosTheme)
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 }
