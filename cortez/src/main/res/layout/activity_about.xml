@@ -81,6 +81,17 @@
                     android:clipToPadding="false"
                     tools:ignore="UnusedAttribute,NewApi" />
 
+                <TextView
+                    android:id="@+id/versionText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    android:layout_marginRight="@dimen/spacing_double"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:textColor="@color/colorAccent"
+                    android:text="@string/cortez_for_android"
+                    tools:ignore="UnusedAttribute,NewApi" />
+
                 <TextView android:id="@id/text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

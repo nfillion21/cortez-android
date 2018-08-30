@@ -40,10 +40,12 @@ import android.support.v7.widget.Toolbar
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import com.tezos.android.BuildConfig
 import com.tezos.android.R
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.BaseSecureActivity
+import kotlinx.android.synthetic.main.activity_about.*
 
 
 class AboutActivity : BaseSecureActivity()
@@ -82,6 +84,8 @@ class AboutActivity : BaseSecureActivity()
                 com.tezos.ui.R.color.theme_tezos_text)
 
         initActionBar(tezosTheme)
+
+        versionText.text = String.format(getString(R.string.about_version), BuildConfig.VERSION_NAME)
 
         mMailButton = findViewById(R.id.mailButton)
         mMailButton?.setOnClickListener { _ ->

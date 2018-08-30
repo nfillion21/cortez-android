@@ -82,16 +82,27 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
-
         // first get the theme
         val tezosTheme = CustomTheme(
                 com.tezos.ui.R.color.theme_tezos_primary,
                 com.tezos.ui.R.color.theme_tezos_primary_dark,
                 com.tezos.ui.R.color.theme_tezos_text)
+        fab.setOnClickListener { view ->
+
+            val isPasswordSaved = Storage(this).isPasswordSaved()
+            if (isPasswordSaved)
+            {
+                val seed = Storage(baseContext).getMnemonics()
+                val seedBundle = Storage.toBundle(seed)
+                TransferFormActivity.start(this, seedBundle, tezosTheme)
+            }
+            else
+            {
+                //TODO this snackbar should be invisible
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
+            }
+        }
 
         initActionBar(tezosTheme)
         /*
