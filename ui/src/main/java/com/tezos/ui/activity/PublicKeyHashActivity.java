@@ -100,7 +100,8 @@ public class PublicKeyHashActivity extends BaseSecureActivity
         myImage.setImageBitmap(myBitmap);
 
         mLinearLayout = findViewById(R.id.pkh_info_layout);
-        mLinearLayout.setOnTouchListener((view, motionEvent) -> {
+        mLinearLayout.setOnTouchListener((view, motionEvent) ->
+        {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText(getString(R.string.copied_pkh), mPublicKeyHash);
             clipboard.setPrimaryClip(clip);

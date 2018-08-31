@@ -51,10 +51,11 @@ import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.OperationsFragment
 import com.tezos.ui.fragment.PaymentAccountsFragment
+import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
-class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelectedListener, HomeFragment.OnFragmentInteractionListener, PaymentAccountsFragment.OnCardSelectedListener
+class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionListener, PaymentAccountsFragment.OnCardSelectedListener
 {
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
@@ -102,7 +103,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         }
 
         initActionBar(mTezosTheme)
-
     }
 
     private fun switchToOperations(realMnemonics: Storage.MnemonicsData)
@@ -159,10 +159,12 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 2 ->
                 {
                     //
-                }
-                else ->
-                {
-                    //
+                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+                    if (isPasswordSaved)
+                    {
+                        val seed = Storage(baseContext).getMnemonics()
+                        return SharingAddressFragment.newInstance(seed.pkh, mTezosTheme)
+                    }
                 }
             }
 
@@ -310,13 +312,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         {
             //mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, R.color.colorTextToolbar), PorterDuff.Mode.SRC_IN);
         }
-
-        val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        nav_view.setNavigationItemSelectedListener(this)
         */
     }
 
@@ -343,50 +338,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
                 }
                 .show()
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean
-    {
-        // Handle navigation view item clicks here.
-
-        when (item.itemId)
-        {
-            R.id.nav_transfer ->
-            {
-                val isPasswordSaved = Storage(this).isPasswordSaved()
-                if (isPasswordSaved)
-                {
-                    val seed = Storage(baseContext).getMnemonics()
-                    val seedBundle = Storage.toBundle(seed)
-                    TransferFormActivity.start(this, seedBundle, mTezosTheme)
-                }
-            }
-            R.id.nav_publickey ->
-            {
-                val isPasswordSaved = Storage(this).isPasswordSaved()
-                if (isPasswordSaved)
-                {
-                    val seed = Storage(baseContext).getMnemonics()
-                    PublicKeyHashActivity.start(this, seed.pkh, mTezosTheme)
-                }
-            }
-            R.id.nav_addresses ->
-            {
-                //AddAddressActivity.start(this, tezosTheme)
-                PaymentAccountsActivity.start(this, mTezosTheme, PaymentAccountsActivity.FromScreen.FromHome, PaymentAccountsActivity.Selection.SelectionAddresses)
-            }
-            R.id.nav_settings ->
-            {
-                SettingsActivity.start(this, mTezosTheme)
-            }
-            R.id.nav_info ->
-            {
-                AboutActivity.start(this, mTezosTheme)
-            }
-        }
-
-        //drawer_layout.closeDrawer(GravityCompat.START)
-        return true
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
