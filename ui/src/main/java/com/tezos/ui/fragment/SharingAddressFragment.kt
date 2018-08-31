@@ -64,7 +64,6 @@ class SharingAddressFragment : Fragment()
                 }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
     {
         super.onViewCreated(view, savedInstanceState)
@@ -85,13 +84,14 @@ class SharingAddressFragment : Fragment()
         myImage.setImageBitmap(myBitmap)
 
         mLinearLayout = view.findViewById(R.id.pkh_info_layout)
-        mLinearLayout?.setOnTouchListener { _, _ ->
+
+        mLinearLayout?.setOnClickListener {
+
             val clipboard = activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
             val clip = ClipData.newPlainText(getString(R.string.copied_pkh), mPublicKeyHash)
             clipboard!!.primaryClip = clip
 
             Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
-            false
         }
 
         mShareButton = view.findViewById(R.id.shareButton)
@@ -109,7 +109,6 @@ class SharingAddressFragment : Fragment()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
     {
-        //return super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_sharing_address, container, false)
     }
 }
