@@ -50,11 +50,17 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.OperationsFragment
+import com.tezos.ui.fragment.PaymentAccountsFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
-class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelectedListener, HomeFragment.OnFragmentInteractionListener
+class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelectedListener, HomeFragment.OnFragmentInteractionListener, PaymentAccountsFragment.OnCardSelectedListener
 {
+    private val mTezosTheme: CustomTheme = CustomTheme(
+            com.tezos.ui.R.color.theme_tezos_primary,
+            com.tezos.ui.R.color.theme_tezos_primary_dark,
+            com.tezos.ui.R.color.theme_tezos_text)
+
     override fun onFragmentInteraction() {
         //switchToOperations(realSeed)
     }
@@ -78,11 +84,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
-        // first get the theme
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
         fab.setOnClickListener { view ->
 
             val isPasswordSaved = Storage(this).isPasswordSaved()
@@ -90,7 +91,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 val seed = Storage(baseContext).getMnemonics()
                 val seedBundle = Storage.toBundle(seed)
-                TransferFormActivity.start(this, seedBundle, tezosTheme)
+                TransferFormActivity.start(this, seedBundle, mTezosTheme)
             }
             else
             {
@@ -100,22 +101,17 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             }
         }
 
-        initActionBar(tezosTheme)
+        initActionBar(mTezosTheme)
 
     }
 
     private fun switchToOperations(realMnemonics: Storage.MnemonicsData)
     {
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
-
         var address = Address()
         address.description = "main address"
         address.pubKeyHash = realMnemonics.pkh
 
-        val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
+        val operationsFragment = OperationsFragment.newInstance(mTezosTheme, address)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, operationsFragment)
                 .commit()
@@ -131,11 +127,8 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         {
             when (position)
             {
-                0 -> {
-                    val tezosTheme = CustomTheme(
-                            com.tezos.ui.R.color.theme_tezos_primary,
-                            com.tezos.ui.R.color.theme_tezos_primary_dark,
-                            com.tezos.ui.R.color.theme_tezos_text)
+                0 ->
+                {
                     val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
                     //setMenuItemEnabled(isPasswordSaved)
 
@@ -147,22 +140,21 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                         address.description = "main address"
                         address.pubKeyHash = mnemonicsData.pkh
 
-                        val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
+                        val operationsFragment = OperationsFragment.newInstance(mTezosTheme, address)
                         return operationsFragment
                     }
                     else
                     {
                         //switchToHome()
 
-                        val homeFragment = HomeFragment.newInstance(tezosTheme)
+                        val homeFragment = HomeFragment.newInstance(mTezosTheme)
                         return homeFragment
 
                     }
-
                 }
                 1 ->
                 {
-                    //
+                    return PaymentAccountsFragment.newInstance(mTezosTheme.toBundle(), PaymentAccountsActivity.Selection.SelectionAddresses)
                 }
                 2 ->
                 {
@@ -174,12 +166,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
 
-            val tezosTheme = CustomTheme(
-                    com.tezos.ui.R.color.theme_tezos_primary,
-                    com.tezos.ui.R.color.theme_tezos_primary_dark,
-                    com.tezos.ui.R.color.theme_tezos_text)
-
-            val homeFragment = HomeFragment.newInstance(tezosTheme)
+            val homeFragment = HomeFragment.newInstance(mTezosTheme)
             return homeFragment
         }
 
@@ -192,12 +179,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
     private fun switchToHome()
     {
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
-
-        val homeFragment = HomeFragment.newInstance(tezosTheme)
+        val homeFragment = HomeFragment.newInstance(mTezosTheme)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, homeFragment)
                 .commit()
@@ -366,10 +348,6 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
     override fun onNavigationItemSelected(item: MenuItem): Boolean
     {
         // Handle navigation view item clicks here.
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
 
         when (item.itemId)
         {
@@ -380,7 +358,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 {
                     val seed = Storage(baseContext).getMnemonics()
                     val seedBundle = Storage.toBundle(seed)
-                    TransferFormActivity.start(this, seedBundle, tezosTheme)
+                    TransferFormActivity.start(this, seedBundle, mTezosTheme)
                 }
             }
             R.id.nav_publickey ->
@@ -389,21 +367,21 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 if (isPasswordSaved)
                 {
                     val seed = Storage(baseContext).getMnemonics()
-                    PublicKeyHashActivity.start(this, seed.pkh, tezosTheme)
+                    PublicKeyHashActivity.start(this, seed.pkh, mTezosTheme)
                 }
             }
             R.id.nav_addresses ->
             {
                 //AddAddressActivity.start(this, tezosTheme)
-                PaymentAccountsActivity.start(this, tezosTheme, PaymentAccountsActivity.FromScreen.FromHome, PaymentAccountsActivity.Selection.SelectionAddresses)
+                PaymentAccountsActivity.start(this, mTezosTheme, PaymentAccountsActivity.FromScreen.FromHome, PaymentAccountsActivity.Selection.SelectionAddresses)
             }
             R.id.nav_settings ->
             {
-                SettingsActivity.start(this, tezosTheme)
+                SettingsActivity.start(this, mTezosTheme)
             }
             R.id.nav_info ->
             {
-                AboutActivity.start(this, tezosTheme)
+                AboutActivity.start(this, mTezosTheme)
             }
         }
 
@@ -425,23 +403,20 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
 
         if (id == R.id.action_settings)
         {
-            val tezosTheme = CustomTheme(
-                    com.tezos.ui.R.color.theme_tezos_primary,
-                    com.tezos.ui.R.color.theme_tezos_primary_dark,
-                    com.tezos.ui.R.color.theme_tezos_text)
-            SettingsActivity.start(this, tezosTheme)
+            SettingsActivity.start(this, mTezosTheme)
             return true
         }
         else if (id == R.id.action_about)
         {
-            val tezosTheme = CustomTheme(
-                    com.tezos.ui.R.color.theme_tezos_primary,
-                    com.tezos.ui.R.color.theme_tezos_primary_dark,
-                    com.tezos.ui.R.color.theme_tezos_text)
-            AboutActivity.start(this, tezosTheme)
+            AboutActivity.start(this, mTezosTheme)
             return true
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onCardClicked(address: Address?)
+    {
+        //TODO implement it
     }
 }
