@@ -160,6 +160,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     {
         super.onViewCreated(view, savedInstanceState);
 
+        /*
         mAddFab = view.findViewById(R.id.add);
         mAddFab.setOnClickListener(v ->
         {
@@ -168,6 +169,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
             CustomTheme theme = CustomTheme.fromBundle(args.getBundle(CustomTheme.TAG));
             AddAddressActivity.start(getActivity(), theme);
         });
+        */
 
         if (savedInstanceState != null)
         {

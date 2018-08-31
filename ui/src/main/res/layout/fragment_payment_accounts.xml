@@ -21,6 +21,7 @@
         android:visibility="visible"
         app:spanCount="2" tools:ignore="UnusedAttribute" />
 
+    <!--
     <android.support.design.widget.FloatingActionButton
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -32,4 +33,5 @@
         android:layout_margin="@dimen/spacing_double"
         android:src="@drawable/ic_add_black"
         app:backgroundTint="@android:color/background_light" />
+        -->
 </android.support.design.widget.CoordinatorLayout>
