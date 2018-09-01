@@ -88,6 +88,6 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         app:tint="@android:color/white"
-        app:srcCompat="@drawable/ic_arrow_upward_24" />
+        app:srcCompat="@drawable/ic_transfers_24" />
 
 </android.support.design.widget.CoordinatorLayout>
