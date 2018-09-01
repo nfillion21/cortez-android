@@ -159,6 +159,46 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
             }
         }
 
+        fabSharing.setOnClickListener { view ->
+
+            val isPasswordSaved = Storage(this).isPasswordSaved()
+            if (isPasswordSaved)
+            {
+                val seed = Storage(baseContext).getMnemonics()
+
+                val sharingIntent = Intent(Intent.ACTION_SEND)
+                sharingIntent.type = "text/plain"
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, seed.pkh)
+                startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)))
+            }
+            else
+            {
+                //TODO this snackbar should be invisible
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
+            }
+        }
+
+        fabAddAddress.setOnClickListener { view ->
+
+            val isPasswordSaved = Storage(this).isPasswordSaved()
+            if (isPasswordSaved)
+            {
+                val seed = Storage(baseContext).getMnemonics()
+
+                val sharingIntent = Intent(Intent.ACTION_SEND)
+                sharingIntent.type = "text/plain"
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, seed.pkh)
+                startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)))
+            }
+            else
+            {
+                //TODO this snackbar should be invisible
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
+            }
+        }
+
         initActionBar(mTezosTheme)
     }
 

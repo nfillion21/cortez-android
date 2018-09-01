@@ -45,7 +45,6 @@ import net.glxn.qrgen.android.QRCode
 class SharingAddressFragment : Fragment()
 {
     private var mLinearLayout: LinearLayout? = null
-    private var mShareButton: Button? = null
     private var mPublicKeyHash: String? = null
 
     private var mPkhTextview: TextView? = null
@@ -77,7 +76,16 @@ class SharingAddressFragment : Fragment()
         }
 
         val dm = resources.displayMetrics
-        val width = dm.widthPixels / 2
+
+        val width:Int
+        width = if (dm.widthPixels < dm.heightPixels)
+        {
+            dm.widthPixels / 2
+        }
+        else
+        {
+            dm.heightPixels / 2
+        }
 
         val myBitmap = QRCode.from(mPublicKeyHash).withSize(width, width).bitmap()
         val myImage = view.findViewById<ImageView>(R.id.qr_code)
@@ -92,15 +100,6 @@ class SharingAddressFragment : Fragment()
             clipboard!!.primaryClip = clip
 
             Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
-        }
-
-        mShareButton = view.findViewById(R.id.shareButton)
-        mShareButton?.setOnClickListener { view ->
-
-            val sharingIntent = Intent(Intent.ACTION_SEND)
-            sharingIntent.type = "text/plain"
-            sharingIntent.putExtra(Intent.EXTRA_TEXT, mPublicKeyHash)
-            startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)))
         }
 
         mPkhTextview = view.findViewById(R.id.pkh_textview)
