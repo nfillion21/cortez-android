@@ -46,19 +46,18 @@ import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezcore.cortez.fragments.HomeFragment
 import com.tezos.android.R
-import com.tezos.core.models.Account
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.OperationsFragment
-import com.tezos.ui.fragment.PaymentAccountsFragment
+import com.tezos.ui.fragment.AddressBookFragment
 import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
 
-class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionListener, PaymentAccountsFragment.OnCardSelectedListener
+class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionListener, AddressBookFragment.OnCardSelectedListener
 {
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
@@ -231,7 +230,7 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
                 }
                 1 ->
                 {
-                    return PaymentAccountsFragment.newInstance(mTezosTheme.toBundle(), PaymentAccountsActivity.Selection.SelectionAddresses)
+                    return AddressBookFragment.newInstance(mTezosTheme.toBundle(), AddressBookActivity.Selection.SelectionAddresses)
                 }
                 2 ->
                 {

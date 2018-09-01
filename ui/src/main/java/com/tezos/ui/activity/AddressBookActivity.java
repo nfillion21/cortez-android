@@ -46,12 +46,12 @@ import com.tezos.core.models.Account;
 import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
-import com.tezos.ui.fragment.PaymentAccountsFragment;
+import com.tezos.ui.fragment.AddressBookFragment;
 
 /**
  * Created by nfillion on 25/02/16.
  */
-public class PaymentAccountsActivity extends BaseSecureActivity implements PaymentAccountsFragment.OnCardSelectedListener
+public class AddressBookActivity extends BaseSecureActivity implements AddressBookFragment.OnCardSelectedListener
 {
     public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
 
@@ -72,7 +72,7 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
     @NonNull
     static Intent getStartIntent(Context context, CustomTheme theme, Selection selection)
     {
-        Intent starter = new Intent(context, PaymentAccountsActivity.class);
+        Intent starter = new Intent(context, AddressBookActivity.class);
         starter.putExtra(CustomTheme.TAG, theme.toBundle());
         starter.putExtra(SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
 
@@ -152,7 +152,7 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
         TextView mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
-        String selectionString = getIntent().getStringExtra(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
+        String selectionString = getIntent().getStringExtra(AddressBookActivity.SELECTED_REQUEST_CODE_KEY);
 
         Selection selection = Selection.fromStringValue(selectionString);
         if (selection.equals(Selection.SelectionAccounts))
@@ -169,13 +169,13 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
     {
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.payment_products_container);
-        if (!(fragment instanceof PaymentAccountsFragment))
+        if (!(fragment instanceof AddressBookFragment))
         {
             Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
 
             Intent intent = getIntent();
             String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
-            fragment = PaymentAccountsFragment.newInstance(customThemeBundle, Selection.fromStringValue(selectionString));
+            fragment = AddressBookFragment.newInstance(customThemeBundle, Selection.fromStringValue(selectionString));
         }
 
         supportFragmentManager.beginTransaction()

@@ -41,7 +41,7 @@ import android.widget.TextView;
 import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
-import com.tezos.ui.activity.PaymentAccountsActivity;
+import com.tezos.ui.activity.AddressBookActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +50,7 @@ import java.util.List;
  * Created by nfillion on 29/02/16.
  */
 
-public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccountsAdapter.ViewHolder>
+public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.ViewHolder>
 {
     private final Resources mResources;
     private LayoutInflater mLayoutInflater;
@@ -71,7 +71,7 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
         void onLongClick(View view, Address address);
     }
 
-    public PaymentAccountsAdapter(Activity activity, PaymentAccountsActivity.Selection selection, CustomTheme customTheme)
+    public AddressBookAdapter(Activity activity, AddressBookActivity.Selection selection, CustomTheme customTheme)
     {
         mActivity = activity;
         mResources = mActivity.getResources();
@@ -82,11 +82,11 @@ public class PaymentAccountsAdapter extends RecyclerView.Adapter<PaymentAccounts
 
         /*
 
-        if (selection.equals(PaymentAccountsActivity.Selection.SelectionAccounts))
+        if (selection.equals(AddressBookActivity.Selection.SelectionAccounts))
         {
             removeAddresses(mAddresses);
         }
-        else if (selection.equals(PaymentAccountsActivity.Selection.SelectionAddresses))
+        else if (selection.equals(AddressBookActivity.Selection.SelectionAddresses))
         {
             removeAccounts(mAddresses);
         }

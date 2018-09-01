@@ -31,12 +31,9 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -46,17 +43,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
-import com.tezos.core.client.GatewayClient;
 import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
 import com.tezos.ui.activity.AddAddressActivity;
-import com.tezos.ui.activity.PaymentAccountsActivity;
-import com.tezos.ui.adapter.PaymentAccountsAdapter;
+import com.tezos.ui.activity.AddressBookActivity;
+import com.tezos.ui.adapter.AddressBookAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
 
 import java.util.ArrayList;
@@ -68,13 +63,13 @@ import java.util.Set;
  * Created by nfillion on 26/02/16.
  */
 
-public class PaymentAccountsFragment extends Fragment implements PaymentAccountsAdapter.OnItemClickListener, PaymentAccountsAdapter.OnItemLongClickListener
+public class AddressBookFragment extends Fragment implements AddressBookAdapter.OnItemClickListener, AddressBookAdapter.OnItemLongClickListener
 {
     private static final String ADDRESSES_ARRAYLIST = "addressList";
 
     private OnCardSelectedListener mCallback;
 
-    private PaymentAccountsAdapter mAdapter;
+    private AddressBookAdapter mAdapter;
     private RecyclerView mRecyclerView;
 
     private List<Address> mAddressList;
@@ -86,13 +81,13 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         void onCardClicked(Address address);
     }
 
-    public static PaymentAccountsFragment newInstance(Bundle customThemeBundle, PaymentAccountsActivity.Selection selection)
+    public static AddressBookFragment newInstance(Bundle customThemeBundle, AddressBookActivity.Selection selection)
     {
-        PaymentAccountsFragment fragment = new PaymentAccountsFragment();
+        AddressBookFragment fragment = new AddressBookFragment();
 
         Bundle bundle = new Bundle();
         bundle.putBundle(CustomTheme.TAG, customThemeBundle);
-        bundle.putString(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
+        bundle.putString(AddressBookActivity.SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
 
         fragment.setArguments(bundle);
         return fragment;
@@ -192,11 +187,11 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         categoriesView.addItemDecoration(new OffsetDecoration(spacing));
 
         Bundle args = getArguments();
-        String selectionString = args.getString(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
+        String selectionString = args.getString(AddressBookActivity.SELECTED_REQUEST_CODE_KEY);
         Bundle customThemeBundle = args.getBundle(CustomTheme.TAG);
         CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
 
-        mAdapter = new PaymentAccountsAdapter(getActivity(), PaymentAccountsActivity.Selection.fromStringValue(selectionString), customTheme);
+        mAdapter = new AddressBookAdapter(getActivity(), AddressBookActivity.Selection.fromStringValue(selectionString), customTheme);
         mAdapter.setOnItemClickListener(this);
         mAdapter.setOnItemLongClickListener(this);
 
