@@ -37,6 +37,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.ContextCompat
+import android.support.v4.view.ViewPager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import android.view.*
@@ -54,6 +55,12 @@ import com.tezos.ui.fragment.PaymentAccountsFragment
 import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
+import com.tezos.android.R.id.fab
+import com.tezos.android.R.id.fab
+
+
+
+
 
 class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionListener, PaymentAccountsFragment.OnCardSelectedListener
 {
@@ -83,6 +90,56 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
         container.adapter = mSectionsPagerAdapter
 
         container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
+        container.addOnPageChangeListener(object : ViewPager.OnPageChangeListener
+        {
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int)
+            {
+
+            }
+
+            override fun onPageSelected(position: Int)
+            {
+                when (position)
+                {
+                    0 ->
+                    {
+                        fab.show()
+                        fabAddAddress.hide()
+                        fabSharing.hide()
+                    }
+
+                    1 ->
+                    {
+                        fab.hide()
+                        fabAddAddress.show()
+                        fabSharing.hide()
+                    }
+
+                    2 ->
+                    {
+                        fab.hide()
+                        fabAddAddress.hide()
+                        fabSharing.show()
+                    }
+
+                    else ->
+                    {
+                        //no-op
+                    }
+                }
+            }
+
+            override fun onPageScrollStateChanged(state: Int)
+            {
+                /*
+                when (state) {
+                    ViewPager.SCROLL_STATE_IDLE -> fab.show()
+                    ViewPager.SCROLL_STATE_DRAGGING, ViewPager.SCROLL_STATE_SETTLING -> fab.hide()
+                }
+                */
+            }
+        })
+
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
         fab.setOnClickListener { view ->
