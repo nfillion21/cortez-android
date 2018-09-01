@@ -179,24 +179,8 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
             }
         }
 
-        fabAddAddress.setOnClickListener { view ->
-
-            val isPasswordSaved = Storage(this).isPasswordSaved()
-            if (isPasswordSaved)
-            {
-                val seed = Storage(baseContext).getMnemonics()
-
-                val sharingIntent = Intent(Intent.ACTION_SEND)
-                sharingIntent.type = "text/plain"
-                sharingIntent.putExtra(Intent.EXTRA_TEXT, seed.pkh)
-                startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)))
-            }
-            else
-            {
-                //TODO this snackbar should be invisible
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
-            }
+        fabAddAddress.setOnClickListener { _ ->
+            AddAddressActivity.start(this, mTezosTheme)
         }
 
         initActionBar(mTezosTheme)
@@ -344,6 +328,14 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
                 }
             }
 
+            AddAddressActivity.ADD_ADDRESS_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.add_address_succeed)
+                {
+                    showSnackBar(R.string.address_successfuly_added)
+                }
+            }
+
             else ->
             {
             }
@@ -352,7 +344,7 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
 
     private fun showSnackBar(resText:Int)
     {
-        val snackbar = Snackbar.make(findViewById(R.id.coordinator), resText, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(fab, resText, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                 android.R.color.holo_green_light)))
         snackbar.show()

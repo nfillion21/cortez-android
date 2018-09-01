@@ -230,6 +230,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
     public void onResume()
     {
         super.onResume();
+        reloadList();
     }
 
     @Override
