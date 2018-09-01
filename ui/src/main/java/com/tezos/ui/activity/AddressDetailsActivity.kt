@@ -48,6 +48,28 @@ class AddressDetailsActivity : BaseSecureActivity()
 {
     private var mToolbarBackButton: ImageButton? = null
 
+    companion object
+    {
+        private val ADDRESS_DETAILS_TAG = "AdressDetailsTag"
+
+        var ADDRESS_DETAILS_TAG_CODE = 0x3200 // arbitrary int
+
+        fun start(activity: Activity, theme: CustomTheme, address: Address)
+        {
+            var starter = getStartIntent(activity, theme, address)
+            ActivityCompat.startActivityForResult(activity, starter, -1, null)
+        }
+
+        private fun getStartIntent(context: Context, theme:CustomTheme, pkh:Address): Intent
+        {
+            val starter = Intent(context, AddressDetailsActivity::class.java)
+            starter.putExtra(CustomTheme.TAG, theme.toBundle())
+            starter.putExtra(Address.TAG, pkh.toBundle())
+
+            return starter
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -96,20 +118,6 @@ class AddressDetailsActivity : BaseSecureActivity()
         mToolbarBackButton?.setOnClickListener(View.OnClickListener {
             finish()
         })
-    }
-
-    fun start(activity: Activity, theme: CustomTheme)
-    {
-        var starter = getStartIntent(activity, theme)
-        ActivityCompat.startActivityForResult(activity, starter, -1, null)
-    }
-
-    private fun getStartIntent(context: Context, theme:CustomTheme): Intent
-    {
-        val starter = Intent(context, AddressDetailsActivity::class.java)
-        starter.putExtra(CustomTheme.TAG, theme.toBundle())
-
-        return starter
     }
 
     private fun switchToOperations(tezosTheme:CustomTheme, address: Address)

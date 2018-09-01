@@ -33,6 +33,7 @@ import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
 import android.support.design.widget.TabLayout
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
@@ -57,13 +58,14 @@ import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 import com.tezos.android.R.id.fab
 import com.tezos.android.R.id.fab
-
-
-
+import com.tezos.core.models.Account
 
 
 class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionListener, PaymentAccountsFragment.OnCardSelectedListener
 {
+    var SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey"
+    var FROM_SCREEN_KEY = "FromScreenKey"
+
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
             com.tezos.ui.R.color.theme_tezos_primary_dark,
@@ -350,25 +352,6 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
         snackbar.show()
     }
 
-    /*
-    private fun setMenuItemEnabled(enabled:Boolean)
-    {
-        val navigationView = findViewById<View>(R.id.nav_view) as NavigationView
-
-        // get menu from navigationView
-        val menu = navigationView.menu
-
-        val transferMenuItem = menu.findItem(R.id.nav_transfer)
-        transferMenuItem.isEnabled = enabled
-
-        val publicKeyMenuItem = menu.findItem(R.id.nav_publickey)
-        publicKeyMenuItem.isEnabled = enabled
-
-        val settingsMenuItem = menu.findItem(R.id.nav_settings)
-        settingsMenuItem.isEnabled = enabled
-    }
-    */
-
     private fun initActionBar(theme:CustomTheme)
     {
         if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP))
@@ -429,6 +412,10 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
                 .show()
     }
 
+    /*
+    MENU
+     */
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -455,8 +442,100 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
         return super.onOptionsItemSelected(item)
     }
 
+    /*
+    Addresses
+     */
+
     override fun onCardClicked(address: Address?)
     {
-        //TODO implement it
+        val intent = intent
+
+        val fromScreenString = intent.getStringExtra(FROM_SCREEN_KEY)
+        val fromScreen = FromScreen.fromStringValue(fromScreenString)
+        if (fromScreen == FromScreen.FromTransfer)
+        {
+            val selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY)
+
+            val selection = Selection.fromStringValue(selectionString)
+            intent.putExtra(Account.TAG, address?.toBundle())
+
+            when (selection)
+            {
+                PaymentAccountsActivity.Selection.SelectionAccounts ->
+                {
+                    setResult(com.tezos.ui.R.id.transfer_src_selection_succeed, intent)
+                }
+
+                PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses ->
+                {
+                    setResult(com.tezos.ui.R.id.transfer_dst_selection_succeed, intent)
+                }
+
+                else //no-op;
+                ->
+                {
+
+                }
+            }
+            finish()
+        }
+        else
+        {
+            AddressDetailsActivity.start(this, mTezosTheme, address!!)
+        }
+    }
+
+    enum class Selection constructor(val stringValue: String)
+    {
+        SelectionAccounts("SelectionAccounts"),
+        SelectionAddresses("SelectionAddresses"),
+        SelectionAccountsAndAddresses("SelectionAccountsAndAddresses");
+
+        companion object
+        {
+            fun fromStringValue(value: String?): Selection?
+            {
+                if (value == null) return null
+
+                if (value.equals(SelectionAccounts.stringValue, ignoreCase = true))
+                {
+                    return SelectionAccounts
+                }
+
+                if (value.equals(SelectionAddresses.stringValue, ignoreCase = true))
+                {
+                    return SelectionAddresses
+                }
+
+                return if (value.equals(SelectionAccountsAndAddresses.stringValue, ignoreCase = true))
+                {
+                    SelectionAccountsAndAddresses
+                } else null
+            }
+        }
+    }
+
+    enum class FromScreen constructor(val stringValue: String)
+    {
+        FromHome("FromHome"),
+        FromTransfer("FromTransfer");
+
+        companion object
+        {
+            fun fromStringValue(value: String?): FromScreen?
+            {
+                if (value == null) return null
+
+                if (value.equals(FromHome.stringValue, ignoreCase = true))
+                {
+                    return FromHome
+                }
+
+                return if (value.equals(FromTransfer.stringValue, ignoreCase = true))
+                {
+                    FromTransfer
+                } else null
+            }
+        }
     }
 }
