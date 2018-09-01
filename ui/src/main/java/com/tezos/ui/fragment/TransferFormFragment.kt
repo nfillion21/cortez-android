@@ -483,7 +483,6 @@ class TransferFormFragment : Fragment()
         mSrcButton!!.setOnClickListener { _ ->
             PaymentAccountsActivity.start(activity,
                 theme,
-                PaymentAccountsActivity.FromScreen.FromTransfer,
                 PaymentAccountsActivity.Selection.SelectionAccounts)
         }
 
@@ -492,7 +491,6 @@ class TransferFormFragment : Fragment()
             PaymentAccountsActivity.start(
                     activity,
                     theme,
-                    PaymentAccountsActivity.FromScreen.FromTransfer,
                     PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses)
         }
 

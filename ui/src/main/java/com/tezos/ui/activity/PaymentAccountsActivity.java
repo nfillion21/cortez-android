@@ -56,11 +56,10 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
     public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
 
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
-    public static String FROM_SCREEN_KEY = "FromScreenKey";
 
-    public static void start(Activity activity, CustomTheme theme, FromScreen fromScreen, Selection selection)
+    public static void start(Activity activity, CustomTheme theme, Selection selection)
     {
-        Intent starter = getStartIntent(activity, theme, fromScreen, selection);
+        Intent starter = getStartIntent(activity, theme, selection);
         ActivityCompat.startActivityForResult(activity, starter, TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
@@ -71,12 +70,11 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
     }
 
     @NonNull
-    static Intent getStartIntent(Context context, CustomTheme theme, FromScreen fromScreen, Selection selection)
+    static Intent getStartIntent(Context context, CustomTheme theme, Selection selection)
     {
         Intent starter = new Intent(context, PaymentAccountsActivity.class);
         starter.putExtra(CustomTheme.TAG, theme.toBundle());
         starter.putExtra(SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
-        starter.putExtra(FROM_SCREEN_KEY, fromScreen.getStringValue());
 
         return starter;
     }
@@ -156,28 +154,14 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
 
         String selectionString = getIntent().getStringExtra(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
 
-        String fromScreenString = getIntent().getStringExtra(FROM_SCREEN_KEY);
-        FromScreen fromScreen = FromScreen.fromStringValue(fromScreenString);
-
-        if (fromScreen.equals(FromScreen.FromHome))
+        Selection selection = Selection.fromStringValue(selectionString);
+        if (selection.equals(Selection.SelectionAccounts))
         {
-            mTitleBar.setText(getString(R.string.address_book_title));
+            mTitleBar.setText(getString(R.string.select_source_title));
         }
-        else if (fromScreen.equals(FromScreen.FromTransfer))
+        else if (selection.equals(Selection.SelectionAddresses))
         {
-            Selection selection = Selection.fromStringValue(selectionString);
-            if (selection.equals(Selection.SelectionAccounts))
-            {
-                mTitleBar.setText(getString(R.string.select_source_title));
-            }
-            else if (selection.equals(Selection.SelectionAddresses))
-            {
-                mTitleBar.setText(getString(R.string.select_destination_title));
-            }
-            else
-            {
-                //TODO accounts AND addresses
-            }
+            mTitleBar.setText(getString(R.string.select_destination_title));
         }
     }
 
@@ -203,45 +187,30 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
     public void onCardClicked(Address address)
     {
         Intent intent = getIntent();
+        String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
 
-        String fromScreenString = intent.getStringExtra(FROM_SCREEN_KEY);
-        FromScreen fromScreen = FromScreen.fromStringValue(fromScreenString);
-        if (fromScreen.equals(FromScreen.FromTransfer))
+        Selection selection = Selection.fromStringValue(selectionString);
+        intent.putExtra(Account.TAG, address.toBundle());
+
+        switch (selection)
         {
-            String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
-
-            Selection selection = Selection.fromStringValue(selectionString);
-            intent.putExtra(Account.TAG, address.toBundle());
-
-            switch (selection)
+            case SelectionAccounts:
             {
-                case SelectionAccounts:
-                {
-                    setResult(R.id.transfer_src_selection_succeed, intent);
-                }
-                break;
-
-                case SelectionAccountsAndAddresses:
-                {
-                    setResult(R.id.transfer_dst_selection_succeed, intent);
-                }
-                break;
-
-                default: //no-op;
-                    break;
+                setResult(R.id.transfer_src_selection_succeed, intent);
             }
+            break;
 
-            finish();
-        }
-        else
-        {
-            Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+            case SelectionAccountsAndAddresses:
+            {
+                setResult(R.id.transfer_dst_selection_succeed, intent);
+            }
+            break;
 
-            Intent starter = new Intent(this, AddressDetailsActivity.class);
-            starter.putExtra(CustomTheme.TAG, themeBundle);
-            starter.putExtra(Address.TAG, address.toBundle());
-            ActivityCompat.startActivityForResult(this, starter, -1, null);
+            default: //no-op;
+                break;
         }
+
+        finish();
     }
 
     public enum Selection
@@ -278,39 +247,6 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
             if (value.equalsIgnoreCase(SelectionAccountsAndAddresses.getStringValue()))
             {
                 return SelectionAccountsAndAddresses;
-            }
-            return null;
-        }
-    }
-
-    public enum FromScreen
-    {
-        FromHome ("FromHome"),
-        FromTransfer ("FromTransfer");
-
-        protected final String selection;
-        FromScreen(String method)
-        {
-            this.selection = method;
-        }
-
-        public String getStringValue()
-        {
-            return this.selection;
-        }
-
-        public static FromScreen fromStringValue(String value)
-        {
-            if (value == null) return null;
-
-            if (value.equalsIgnoreCase(FromHome.getStringValue()))
-            {
-                return FromHome;
-            }
-
-            if (value.equalsIgnoreCase(FromTransfer.getStringValue()))
-            {
-                return FromTransfer;
             }
             return null;
         }
