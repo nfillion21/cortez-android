@@ -216,8 +216,7 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
                         address.description = "main address"
                         address.pubKeyHash = mnemonicsData.pkh
 
-                        val operationsFragment = OperationsFragment.newInstance(mTezosTheme, address)
-                        return operationsFragment
+                        return OperationsFragment.newInstance(mTezosTheme, address)
                     }
                     else
                     {
@@ -230,7 +229,7 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
                 }
                 1 ->
                 {
-                    return AddressBookFragment.newInstance(mTezosTheme.toBundle(), AddressBookActivity.Selection.SelectionAddresses)
+                    return AddressBookFragment.newInstance(mTezosTheme.toBundle(), null)
                 }
                 2 ->
                 {
@@ -298,8 +297,6 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
 
                         showSnackBar(R.string.wallet_successfully_restored)
 
-                        //setMenuItemEnabled(true)
-
                         switchToOperations(realSeed)
                     }
                 }
@@ -319,7 +316,6 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
                 if (resultCode == R.id.logout_succeed)
                 {
                     switchToHome()
-                    //setMenuItemEnabled(false)
                 }
             }
 
@@ -382,15 +378,6 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
 
     override fun onBackPressed()
     {
-        /*
-        if (drawer_layout.isDrawerOpen(GravityCompat.START))
-        {
-            drawer_layout.closeDrawer(GravityCompat.START)
-        }
-        else
-        {
-        }
-        */
         AlertDialog.Builder(this)
                 .setTitle(R.string.exit)
                 .setMessage(R.string.exit_info)

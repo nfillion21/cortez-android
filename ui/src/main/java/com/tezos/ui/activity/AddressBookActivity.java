@@ -32,12 +32,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -57,16 +60,12 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
 
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
 
+    private FloatingActionButton mAddFab;
+
     public static void start(Activity activity, CustomTheme theme, Selection selection)
     {
         Intent starter = getStartIntent(activity, theme, selection);
         ActivityCompat.startActivityForResult(activity, starter, TRANSFER_SELECT_REQUEST_CODE, null);
-    }
-
-    @Override
-    protected void onStop()
-    {
-        super.onStop();
     }
 
     @NonNull
@@ -91,7 +90,15 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
                 Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.payment_products_container);
                 if (fragment != null)
                 {
-                    fragment.onActivityResult(requestCode, resultCode, data);
+                    Snackbar snackbar = Snackbar.make(mAddFab, R.string.address_successfuly_added,
+                            Snackbar.LENGTH_SHORT);
+                    View snackBarView = snackbar.getView();
+                    snackBarView.setBackgroundColor((ContextCompat.getColor(this,
+                            R.color.tz_green)));
+                    snackbar.show();
+
+                    AddressBookFragment addressBookFragment = (AddressBookFragment) fragment;
+                    addressBookFragment.reloadList();
                 }
             }
         }
@@ -102,9 +109,16 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_payment_accounts);
+        setContentView(R.layout.activity_address_book);
 
-        initToolbar();
+        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
+        initToolbar(theme);
+
+        mAddFab = findViewById(R.id.add);
+        mAddFab.setOnClickListener(v ->
+                AddAddressActivity.start(this, theme));
 
         if (savedInstanceState == null)
         {
@@ -112,19 +126,10 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
         }
     }
 
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-    }
-
-    private void initToolbar()
+    private void initToolbar(CustomTheme theme)
     {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
-        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
 
         toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));

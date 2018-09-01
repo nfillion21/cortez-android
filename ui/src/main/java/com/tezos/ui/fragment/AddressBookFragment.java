@@ -27,17 +27,11 @@
 
 package com.tezos.ui.fragment;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -49,7 +43,6 @@ import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
-import com.tezos.ui.activity.AddAddressActivity;
 import com.tezos.ui.activity.AddressBookActivity;
 import com.tezos.ui.adapter.AddressBookAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
@@ -74,8 +67,6 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
 
     private List<Address> mAddressList;
 
-    private FloatingActionButton mAddFab;
-
     public interface OnCardSelectedListener
     {
         void onCardClicked(Address address);
@@ -87,7 +78,10 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
 
         Bundle bundle = new Bundle();
         bundle.putBundle(CustomTheme.TAG, customThemeBundle);
-        bundle.putString(AddressBookActivity.SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
+        if (selection != null)
+        {
+            bundle.putString(AddressBookActivity.SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
+        }
 
         fragment.setArguments(bundle);
         return fragment;
@@ -116,27 +110,6 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == AddAddressActivity.ADD_ADDRESS_REQUEST_CODE)
-        {
-            if (resultCode == R.id.add_address_succeed)
-            {
-
-                Snackbar snackbar = Snackbar.make(mAddFab, R.string.address_successfuly_added,
-                        Snackbar.LENGTH_SHORT);
-                View snackBarView = snackbar.getView();
-                snackBarView.setBackgroundColor((ContextCompat.getColor(getActivity(),
-                        R.color.tz_green)));
-                snackbar.show();
-                reloadList();
-            }
-        }
-    }
-
-    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
@@ -146,25 +119,13 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        return inflater.inflate(R.layout.fragment_payment_accounts, container, false);
+        return inflater.inflate(R.layout.fragment_address_book, container, false);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-
-        /*
-        mAddFab = view.findViewById(R.id.add);
-        mAddFab.setOnClickListener(v ->
-        {
-            Bundle args = getArguments();
-
-            CustomTheme theme = CustomTheme.fromBundle(args.getBundle(CustomTheme.TAG));
-            AddAddressActivity.start(getActivity(), theme);
-        });
-        */
 
         if (savedInstanceState != null)
         {
@@ -200,7 +161,7 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
         reloadList();
     }
 
-    private void reloadList()
+    public void reloadList()
     {
         mAddressList.clear();
 
