@@ -57,18 +57,12 @@ import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
 
-class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionListener, AddressBookFragment.OnCardSelectedListener
+class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener
 {
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
             com.tezos.ui.R.color.theme_tezos_primary_dark,
             com.tezos.ui.R.color.theme_tezos_text)
-
-    override fun onFragmentInteraction() {
-        //switchToOperations(realSeed)
-    }
-
-    private var mProgressBar: ProgressBar? = null
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
@@ -88,9 +82,7 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
         container.addOnPageChangeListener(object : ViewPager.OnPageChangeListener
         {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int)
-            {
-
-            }
+            {}
 
             override fun onPageSelected(position: Int)
             {
@@ -125,14 +117,7 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
             }
 
             override fun onPageScrollStateChanged(state: Int)
-            {
-                /*
-                when (state) {
-                    ViewPager.SCROLL_STATE_IDLE -> fab.show()
-                    ViewPager.SCROLL_STATE_DRAGGING, ViewPager.SCROLL_STATE_SETTLING -> fab.hide()
-                }
-                */
-            }
+            {}
         })
 
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
@@ -179,18 +164,6 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
         }
 
         initActionBar(mTezosTheme)
-    }
-
-    private fun switchToOperations(realMnemonics: Storage.MnemonicsData)
-    {
-        var address = Address()
-        address.description = "main address"
-        address.pubKeyHash = realMnemonics.pkh
-
-        val operationsFragment = OperationsFragment.newInstance(mTezosTheme, address)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.main_fragments_container, operationsFragment)
-                .commit()
     }
 
     /**
@@ -254,14 +227,6 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
         }
     }
 
-    private fun switchToHome()
-    {
-        val homeFragment = HomeFragment.newInstance(mTezosTheme)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.main_fragments_container, homeFragment)
-                .commit()
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
         super.onActivityResult(requestCode, resultCode, data)
@@ -274,14 +239,7 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
                 {
                     if (data != null && data.hasExtra(CreateWalletActivity.SEED_DATA_KEY))
                     {
-                        val seedDataKey = data.getBundleExtra(CreateWalletActivity.SEED_DATA_KEY)
-                        val realSeed = Storage.fromBundle(seedDataKey)
-
                         showSnackBar(R.string.wallet_successfully_created)
-
-                        //setMenuItemEnabled(true)
-
-                        switchToOperations(realSeed)
                     }
                 }
             }
@@ -292,12 +250,7 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
                 {
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
-                        val seedDataKey = data.getBundleExtra(RestoreWalletActivity.SEED_DATA_KEY)
-                        val realSeed = Storage.fromBundle(seedDataKey)
-
                         showSnackBar(R.string.wallet_successfully_restored)
-
-                        switchToOperations(realSeed)
                     }
                 }
             }
@@ -315,7 +268,7 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
             {
                 if (resultCode == R.id.logout_succeed)
                 {
-                    switchToHome()
+                    showSnackBar(R.string.log_out_succeed)
                 }
             }
 
@@ -356,24 +309,6 @@ class HomeActivity : BaseSecureActivity(), HomeFragment.OnFragmentInteractionLis
         toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
 
         setSupportActionBar(toolbar)
-
-        /*
-        supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        val titleBar = findViewById<TextView>(R.id.barTitle)
-        titleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
-
-        mProgressBar = findViewById(R.id.nav_progress)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        {
-            mProgressBar?.indeterminateTintList = ColorStateList.valueOf(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        }
-        else
-        {
-            //mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, R.color.colorTextToolbar), PorterDuff.Mode.SRC_IN);
-        }
-        */
     }
 
     override fun onBackPressed()

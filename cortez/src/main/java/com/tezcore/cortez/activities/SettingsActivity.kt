@@ -108,34 +108,6 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
         super.onActivityResult(requestCode, resultCode, data)
-
-        /*
-        if (requestCode == PasscodeActivity.ASK_NEW_CODE_RESULT)
-        {
-            if (resultCode == R.id.passcode_succeed)
-            {
-                // success
-                String code = data.getStringExtra(PasscodeActivity.BUNDLE_CODE);
-
-                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString(PasscodeActivity.PASSCODE_KEY, code);
-                editor.apply();
-            }
-            //else if (resultCode == R.id.passcode_failed) {// should not happen actually}
-            else
-            {
-                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.settings_container);
-                if (fragment != null)
-                {
-                    SettingsFragment settingsFragment = (SettingsFragment)fragment;
-                    settingsFragment.notifyChanged();
-                }
-                // user just canceled
-                // uncheck the password.
-            }
-        }
-        */
     }
 
     private fun initActionBar() {
