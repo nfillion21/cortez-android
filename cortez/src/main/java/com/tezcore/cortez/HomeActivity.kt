@@ -193,11 +193,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     }
                     else
                     {
-                        //switchToHome()
-
                         val homeFragment = HomeFragment.newInstance(mTezosTheme)
                         return homeFragment
-
                     }
                 }
                 1 ->

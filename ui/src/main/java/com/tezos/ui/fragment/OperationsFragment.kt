@@ -37,6 +37,7 @@ import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
+import android.support.v4.widget.NestedScrollView
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -55,6 +56,7 @@ import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
+import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import org.json.JSONArray
 import java.time.Instant
@@ -94,11 +96,14 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     companion object
     {
         @JvmStatic
-        fun newInstance(theme: CustomTheme, address: Address) =
+        fun newInstance(theme: CustomTheme, address: Address?) =
                 OperationsFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
-                        putBundle(Address.TAG, address.toBundle())
+                        if (address != null)
+                        {
+                            putBundle(Address.TAG, address.toBundle())
+                        }
                     }
                 }
     }
@@ -121,6 +126,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             startGetRequestLoadBalance()
         }
 
+        var pkh:Address? = null
+        arguments?.let {
+            val addressBundle = it.getBundle(Address.TAG)
+            pkh = Address.fromBundle(addressBundle)
+        }
+
         if (savedInstanceState != null)
         {
             var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(OPERATIONS_ARRAYLIST_KEY)
@@ -134,7 +145,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             if (mGetBalanceLoading)
             {
                 refreshTextBalance(false)
-                startInitialLoadingBalance()
+
+                //TODO check if there is a key before launching request
+                if (pkh != null)
+                {
+                    startInitialLoadingBalance()
+                }
             }
             else
             {
@@ -143,7 +159,13 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                 if (mGetHistoryLoading)
                 {
                     refreshRecyclerViewAndTextHistory()
-                    startInitialLoadingHistory()
+
+                    //TODO check if there is a key before launching request
+
+                    if (pkh != null)
+                    {
+                        startInitialLoadingHistory()
+                    }
                 }
                 else
                 {
@@ -157,7 +179,10 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             //there's no need to initialize mBalanceItem
 
             //TODO we will start loading
-            startInitialLoadingBalance()
+
+            if (pkh != null) {
+                startInitialLoadingBalance()
+            }
         }
 
         var recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
@@ -170,6 +195,33 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         recyclerView.adapter = adapter
 
         mRecyclerView = recyclerView
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+
+        //TODO keep a boolean to know if a public key just appeared or disappeared
+
+        /*
+        val isPasswordSaved = Storage(activity).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            val mnemonicsData = Storage(baseContext).getMnemonics()
+
+            var address = Address()
+            address.description = "main address"
+            address.pubKeyHash = mnemonicsData.pkh
+
+            return OperationsFragment.newInstance(mTezosTheme, address)
+        }
+        else
+        {
+            cancelRequest(true, true)
+
+            //TODO hide the layout
+        }
+        */
     }
 
     private fun onOperationsLoadHistoryComplete()
