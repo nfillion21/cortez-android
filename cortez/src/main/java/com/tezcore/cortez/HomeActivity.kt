@@ -179,9 +179,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 0 ->
                 {
                     val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
-                    //setMenuItemEnabled(isPasswordSaved)
 
-                    if (isPasswordSaved)
+                    return if (isPasswordSaved)
                     {
                         val mnemonicsData = Storage(baseContext).getMnemonics()
 
@@ -189,12 +188,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         address.description = "main address"
                         address.pubKeyHash = mnemonicsData.pkh
 
-                        return OperationsFragment.newInstance(mTezosTheme, address)
+                        OperationsFragment.newInstance(mTezosTheme, address)
                     }
                     else
                     {
-                        val homeFragment = HomeFragment.newInstance(mTezosTheme)
-                        return homeFragment
+                        OperationsFragment.newInstance(mTezosTheme, null)
                     }
                 }
                 1 ->

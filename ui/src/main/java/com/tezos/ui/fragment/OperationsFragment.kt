@@ -44,8 +44,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
@@ -55,6 +54,8 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
+import com.tezos.ui.activity.CreateWalletActivity
+import com.tezos.ui.activity.RestoreWalletActivity
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
@@ -93,6 +94,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     private var mNavProgressBalance: ProgressBar? = null
     private var mNavProgressOperations: ProgressBar? = null
 
+    private var mRestoreWalletButton: Button? = null
+    private var mCreateWalletButton: Button? = null
+
+    private var mBalanceLayout: LinearLayout? = null
+    private var mCreateWalletLayout: RelativeLayout? = null
+
     companion object
     {
         @JvmStatic
@@ -112,6 +119,25 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     {
         super.onViewCreated(view, savedInstanceState)
 
+        var pkh:Address? = null
+        var tzTheme:CustomTheme? = null
+        arguments?.let {
+            val addressBundle = it.getBundle(Address.TAG)
+            if (addressBundle != null)
+            {
+                pkh = Address.fromBundle(addressBundle)
+            }
+
+            val themeBundle = it.getBundle(CustomTheme.TAG)
+            tzTheme = CustomTheme.fromBundle(themeBundle)
+        }
+
+        mCreateWalletButton = view.findViewById(R.id.createWalletButton)
+        mRestoreWalletButton = view.findViewById(R.id.restoreWalletButton)
+
+        mCreateWalletLayout = view.findViewById(R.id.create_wallet_layout)
+        mBalanceLayout = view.findViewById(R.id.balance_layout)
+
         mNavProgressBalance = view.findViewById(R.id.nav_progress_balance)
         mNavProgressOperations = view.findViewById(R.id.nav_progress_operations)
 
@@ -126,10 +152,14 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             startGetRequestLoadBalance()
         }
 
-        var pkh:Address? = null
-        arguments?.let {
-            val addressBundle = it.getBundle(Address.TAG)
-            pkh = Address.fromBundle(addressBundle)
+        mRestoreWalletButton = view.findViewById(R.id.restoreWalletButton)
+        mRestoreWalletButton!!.setOnClickListener {
+            RestoreWalletActivity.start(activity!!, tzTheme!!)
+        }
+
+        mCreateWalletButton = view.findViewById(R.id.createWalletButton)
+        mCreateWalletButton!!.setOnClickListener {
+            CreateWalletActivity.start(activity!!, tzTheme!!)
         }
 
         if (pkh == null)
@@ -137,6 +167,18 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             cancelRequest(true, true)
             mGetBalanceLoading = false
             mGetHistoryLoading = false
+
+            mBalanceLayout?.visibility = View.GONE
+            mCreateWalletLayout?.visibility = View.VISIBLE
+
+            mSwipeRefreshLayout?.isEnabled = false
+        }
+        else
+        {
+            mBalanceLayout?.visibility = View.VISIBLE
+            mCreateWalletLayout?.visibility = View.GONE
+
+            mSwipeRefreshLayout?.isEnabled = true
         }
 
         if (savedInstanceState != null)
