@@ -132,6 +132,13 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             pkh = Address.fromBundle(addressBundle)
         }
 
+        if (pkh == null)
+        {
+            cancelRequest(true, true)
+            mGetBalanceLoading = false
+            mGetHistoryLoading = false
+        }
+
         if (savedInstanceState != null)
         {
             var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(OPERATIONS_ARRAYLIST_KEY)
@@ -145,12 +152,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             if (mGetBalanceLoading)
             {
                 refreshTextBalance(false)
-
-                //TODO check if there is a key before launching request
-                if (pkh != null)
-                {
-                    startInitialLoadingBalance()
-                }
+                startInitialLoadingBalance()
             }
             else
             {
@@ -162,10 +164,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
                     //TODO check if there is a key before launching request
 
-                    if (pkh != null)
-                    {
-                        startInitialLoadingHistory()
-                    }
+                    startInitialLoadingHistory()
                 }
                 else
                 {
@@ -178,9 +177,9 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             mRecyclerViewItems = ArrayList()
             //there's no need to initialize mBalanceItem
 
-            //TODO we will start loading
-
-            if (pkh != null) {
+            //TODO we will start loading only if we got a pkh
+            if (pkh != null)
+            {
                 startInitialLoadingBalance()
             }
         }
