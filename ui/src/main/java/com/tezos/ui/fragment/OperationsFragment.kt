@@ -59,6 +59,7 @@ import com.tezos.ui.activity.RestoreWalletActivity
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
+import kotlinx.android.synthetic.main.activity_address_book.*
 import org.json.JSONArray
 import java.time.Instant
 import java.util.*
@@ -74,6 +75,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private val LOAD_OPERATIONS_TAG = "load_operations"
     private val LOAD_BALANCE_TAG = "load_balance"
+
+    private val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
     private var mSwipeRefreshLayout: SwipeRefreshLayout? = null
 
@@ -100,6 +103,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     private var mBalanceLayout: LinearLayout? = null
     private var mCreateWalletLayout: RelativeLayout? = null
 
+    private var mWalletEnabled:Boolean = false
+
     companion object
     {
         @JvmStatic
@@ -107,10 +112,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                 OperationsFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
-                        if (address != null)
-                        {
-                            putBundle(Address.TAG, address.toBundle())
-                        }
+                        putBundle(Address.TAG, address?.toBundle())
                     }
                 }
     }
@@ -191,6 +193,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
             mBalanceItem = savedInstanceState.getDouble(BALANCE_FLOAT_KEY, -1.0)
 
+            mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
+
             if (mGetBalanceLoading)
             {
                 refreshTextBalance(false)
@@ -244,25 +248,49 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         //TODO keep a boolean to know if a public key just appeared or disappeared
 
-        /*
-        val isPasswordSaved = Storage(activity).isPasswordSaved()
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
         if (isPasswordSaved)
         {
-            val mnemonicsData = Storage(baseContext).getMnemonics()
+            if (!mWalletEnabled)
+            {
+                mWalletEnabled = true
 
-            var address = Address()
-            address.description = "main address"
-            address.pubKeyHash = mnemonicsData.pkh
+                val mnemonicsData = Storage(activity!!).getMnemonics()
 
-            return OperationsFragment.newInstance(mTezosTheme, address)
+                var address = Address()
+                address.description = "main address"
+                address.pubKeyHash = mnemonicsData.pkh
+
+                val args = arguments
+                args?.putBundle(Address.TAG, address.toBundle())
+
+                // put the good layers
+                mBalanceLayout?.visibility = View.VISIBLE
+                mCreateWalletLayout?.visibility = View.GONE
+
+                startInitialLoadingBalance()
+            }
         }
         else
         {
             cancelRequest(true, true)
 
+            mSwipeRefreshLayout?.isEnabled = false
+            mSwipeRefreshLayout?.isRefreshing = false
+
+            if (mWalletEnabled)
+            {
+                mWalletEnabled = false
+                // put the good layers
+                mBalanceLayout?.visibility = View.GONE
+                mCreateWalletLayout?.visibility = View.VISIBLE
+
+                val args = arguments
+                args?.putBundle(Address.TAG, null)
+            }
+
             //TODO hide the layout
         }
-        */
     }
 
     private fun onOperationsLoadHistoryComplete()
@@ -271,6 +299,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mNavProgressOperations?.visibility = View.GONE
 
+        //TODO cancel the swipe refresh if you're not in the right layout
         mSwipeRefreshLayout?.isEnabled = true
         mSwipeRefreshLayout?.isRefreshing = false
 
@@ -539,6 +568,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         }
         outState.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
         outState.putBoolean(GET_BALANCE_LOADING_KEY, mGetBalanceLoading)
+
+        outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
     }
 
     private fun cancelRequest(operations: Boolean, balance:Boolean)
