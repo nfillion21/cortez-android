@@ -41,7 +41,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ProgressBar
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezcore.cortez.fragments.HomeFragment
@@ -57,7 +56,7 @@ import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
 
-class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener
+class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, OperationsFragment.HomeListener
 {
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
@@ -211,8 +210,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
             }
 
-            val homeFragment = HomeFragment.newInstance(mTezosTheme)
-            return homeFragment
+            return HomeFragment.newInstance(mTezosTheme)
         }
 
         override fun getCount(): Int
@@ -234,7 +232,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 {
                     if (data != null && data.hasExtra(CreateWalletActivity.SEED_DATA_KEY))
                     {
-                        showSnackBar(R.string.wallet_successfully_created)
+                        showSnackBar(getString(R.string.wallet_successfully_created), android.R.color.holo_green_light)
                     }
                 }
             }
@@ -245,7 +243,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 {
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
-                        showSnackBar(R.string.wallet_successfully_restored)
+                        showSnackBar(getString(R.string.wallet_successfully_restored), android.R.color.holo_green_light)
                     }
                 }
             }
@@ -254,7 +252,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 if (resultCode == R.id.transfer_succeed)
                 {
-                    showSnackBar(R.string.transfer_succeed)
+                    showSnackBar(getString(R.string.transfer_succeed), android.R.color.holo_green_light)
                     //TODO I need to refresh balance.
                 }
             }
@@ -263,7 +261,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 if (resultCode == R.id.logout_succeed)
                 {
-                    showSnackBar(R.string.log_out_succeed)
+                    showSnackBar(getString(R.string.log_out_succeed), android.R.color.holo_green_light)
                 }
             }
 
@@ -271,7 +269,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 if (resultCode == R.id.add_address_succeed)
                 {
-                    showSnackBar(R.string.address_successfuly_added)
+                    showSnackBar(getString(R.string.address_successfuly_added), android.R.color.holo_green_light)
                 }
             }
 
@@ -281,11 +279,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
     }
 
-    private fun showSnackBar(resText:Int)
+    override fun showSnackBar(resText:String, color:Int)
     {
         val snackbar = Snackbar.make(fab, resText, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
-                android.R.color.holo_green_light)))
+                color)))
         snackbar.show()
     }
 

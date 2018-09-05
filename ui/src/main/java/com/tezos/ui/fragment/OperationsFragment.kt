@@ -30,14 +30,12 @@ package com.tezos.ui.fragment
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.NestedScrollView
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -47,6 +45,7 @@ import android.view.ViewGroup
 import android.widget.*
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.StringRequest
 import com.tezos.core.models.Address
@@ -59,7 +58,6 @@ import com.tezos.ui.activity.RestoreWalletActivity
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
-import kotlinx.android.synthetic.main.activity_address_book.*
 import org.json.JSONArray
 import java.time.Instant
 import java.util.*
@@ -105,6 +103,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private var mWalletEnabled:Boolean = false
 
+    private var listener: HomeListener? = null
+
     companion object
     {
         @JvmStatic
@@ -115,6 +115,24 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                         putBundle(Address.TAG, address?.toBundle())
                     }
                 }
+    }
+
+    interface HomeListener
+    {
+        fun showSnackBar(res:String, color:Int)
+    }
+
+    override fun onAttach(context: Context)
+    {
+        super.onAttach(context)
+        if (context is HomeListener)
+        {
+            listener = context
+        }
+        else
+        {
+            throw RuntimeException(context.toString() + " must implement HomeListener")
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
@@ -398,7 +416,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                 Response.ErrorListener {
                     onBalanceLoadComplete(false)
                     onOperationsLoadHistoryComplete()
-                    showSnackbarError(true)
+                    showSnackbarError(it)
                 })
 
         stringRequest.tag = LOAD_BALANCE_TAG
@@ -455,7 +473,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         {
             onOperationsLoadHistoryComplete()
 
-            showSnackbarError(true)
+            showSnackbarError(it)
         })
 
         jsObjRequest.tag = LOAD_OPERATIONS_TAG
@@ -469,25 +487,21 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         return inflater.inflate(R.layout.fragment_operations, container, false)
     }
 
-    private fun showSnackbarError(network :Boolean)
+    private fun showSnackbarError(error:VolleyError?)
     {
-        var error:Int = if (network)
+        var error: String? = if (error != null)
         {
-            R.string.network_error
+            error.toString()
         }
         else
         {
-            R.string.generic_error
+            getString(R.string.generic_error)
         }
 
-        mEmptyLoadingTextView?.setText(error)
-        mEmptyLoadingBalanceTextview?.setText(error)
+        listener?.showSnackBar(error!!, android.R.color.holo_red_light)
 
-        val snackbar = Snackbar.make(mCoordinatorLayout!!, error, Snackbar.LENGTH_LONG)
-        val snackBarView = snackbar.view
-        snackBarView.setBackgroundColor((ContextCompat.getColor(activity!!,
-                android.R.color.holo_red_light)))
-        snackbar.show()
+        mEmptyLoadingTextView?.text = getString(R.string.generic_error)
+        mEmptyLoadingBalanceTextview?.text = getString(R.string.generic_error)
     }
 
     private fun addOperationItemsFromJSON(answer:JSONArray)
@@ -586,6 +600,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                 requestQueue.cancelAll(LOAD_BALANCE_TAG)
             }
         }
+    }
+
+    override fun onDetach()
+    {
+        super.onDetach()
+        listener = null
     }
 
     override fun onDestroy()
