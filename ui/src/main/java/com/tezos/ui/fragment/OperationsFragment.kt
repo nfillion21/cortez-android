@@ -264,8 +264,6 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     {
         super.onResume()
 
-        //TODO keep a boolean to know if a public key just appeared or disappeared
-
         val isPasswordSaved = Storage(activity!!).isPasswordSaved()
         if (isPasswordSaved)
         {
@@ -306,8 +304,6 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
                 val args = arguments
                 args?.putBundle(Address.TAG, null)
             }
-
-            //TODO hide the layout
         }
     }
 

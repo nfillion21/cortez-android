@@ -85,27 +85,40 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
             override fun onPageSelected(position: Int)
             {
+                val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+
                 when (position)
                 {
                     0 ->
                     {
-                        fab.show()
                         fabAddAddress.hide()
-                        fabSharing.hide()
+
+                        if (isPasswordSaved)
+                        {
+                            fabTransfer.show()
+                            fabSharing.hide()
+                        }
                     }
 
                     1 ->
                     {
-                        fab.hide()
                         fabAddAddress.show()
-                        fabSharing.hide()
+
+                        if (isPasswordSaved)
+                        {
+                            fabTransfer.hide()
+                            fabSharing.hide()
+                        }
                     }
 
                     2 ->
                     {
-                        fab.hide()
                         fabAddAddress.hide()
-                        fabSharing.show()
+                        if (isPasswordSaved)
+                        {
+                            fabTransfer.hide()
+                            fabSharing.show()
+                        }
                     }
 
                     else ->
@@ -121,7 +134,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
-        fab.setOnClickListener { view ->
+        fabTransfer.setOnClickListener { view ->
 
             val isPasswordSaved = Storage(this).isPasswordSaved()
             if (isPasswordSaved)
@@ -233,6 +246,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     if (data != null && data.hasExtra(CreateWalletActivity.SEED_DATA_KEY))
                     {
                         showSnackBar(getString(R.string.wallet_successfully_created), android.R.color.holo_green_light)
+
+                        fabTransfer.show()
                     }
                 }
             }
@@ -244,6 +259,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
                         showSnackBar(getString(R.string.wallet_successfully_restored), android.R.color.holo_green_light)
+
+                        fabTransfer.show()
                     }
                 }
             }
@@ -262,6 +279,9 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 if (resultCode == R.id.logout_succeed)
                 {
                     showSnackBar(getString(R.string.log_out_succeed), android.R.color.holo_green_light)
+
+                    fabTransfer.hide()
+                    fabSharing.hide()
                 }
             }
 
@@ -281,7 +301,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
     override fun showSnackBar(resText:String, color:Int)
     {
-        val snackbar = Snackbar.make(fab, resText, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(fabTransfer, resText, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                 color)))
         snackbar.show()
