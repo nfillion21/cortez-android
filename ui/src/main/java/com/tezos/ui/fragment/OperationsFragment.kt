@@ -99,7 +99,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     private var mCreateWalletButton: Button? = null
 
     private var mBalanceLayout: LinearLayout? = null
-    private var mCreateWalletLayout: RelativeLayout? = null
+    private var mCreateWalletLayout: LinearLayout? = null
 
     private var mWalletEnabled:Boolean = false
 

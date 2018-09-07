@@ -39,8 +39,10 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.ViewGroup
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezcore.cortez.fragments.HomeFragment
@@ -70,6 +72,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         setContentView(R.layout.activity_home)
 
         setSupportActionBar(toolbar)
+        initActionBar(mTezosTheme)
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
@@ -86,38 +90,44 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             override fun onPageSelected(position: Int)
             {
                 val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
-
                 when (position)
                 {
                     0 ->
                     {
-                        fabAddAddress.hide()
-
                         if (isPasswordSaved)
                         {
                             fabTransfer.show()
                             fabSharing.hide()
+                            fabAddAddress.hide()
+                        }
+                        else
+                        {
+                            fabTransfer.hide()
+                            fabSharing.hide()
+                            fabAddAddress.hide()
                         }
                     }
 
                     1 ->
                     {
+                        fabTransfer.hide()
                         fabAddAddress.show()
-
-                        if (isPasswordSaved)
-                        {
-                            fabTransfer.hide()
-                            fabSharing.hide()
-                        }
+                        fabSharing.hide()
                     }
 
                     2 ->
                     {
-                        fabAddAddress.hide()
                         if (isPasswordSaved)
                         {
                             fabTransfer.hide()
+                            fabAddAddress.hide()
                             fabSharing.show()
+                        }
+                        else
+                        {
+                            fabTransfer.hide()
+                            fabAddAddress.hide()
+                            fabSharing.hide()
                         }
                     }
 
@@ -184,6 +194,60 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
      */
     inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm)
     {
+
+        override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any)
+        {
+            super.setPrimaryItem(container, position, `object`)
+            val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+
+            when (position)
+            {
+                0 ->
+                {
+                    if (isPasswordSaved)
+                    {
+                        fabTransfer.show()
+                        fabSharing.hide()
+                        fabAddAddress.hide()
+                    }
+                    else
+                    {
+                        fabTransfer.hide()
+                        fabSharing.hide()
+                        fabAddAddress.hide()
+                    }
+                }
+
+                1 ->
+                {
+                    fabTransfer.hide()
+                    fabAddAddress.show()
+                    fabSharing.hide()
+                }
+
+                2 ->
+                {
+                    if (isPasswordSaved)
+                    {
+                        fabTransfer.hide()
+                        fabAddAddress.hide()
+                        fabSharing.show()
+                    }
+                    else
+                    {
+                        fabTransfer.hide()
+                        fabAddAddress.hide()
+                        fabSharing.hide()
+                    }
+                }
+
+                else ->
+                {
+                    //no-op
+                }
+            }
+        }
+
         override fun getItem(position: Int): Fragment
         {
             when (position)
@@ -246,8 +310,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     if (data != null && data.hasExtra(CreateWalletActivity.SEED_DATA_KEY))
                     {
                         showSnackBar(getString(R.string.wallet_successfully_created), android.R.color.holo_green_light)
-
-                        fabTransfer.show()
                     }
                 }
             }
@@ -259,8 +321,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
                         showSnackBar(getString(R.string.wallet_successfully_restored), android.R.color.holo_green_light)
-
-                        fabTransfer.show()
                     }
                 }
             }
@@ -279,9 +339,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 if (resultCode == R.id.logout_succeed)
                 {
                     showSnackBar(getString(R.string.log_out_succeed), android.R.color.holo_green_light)
-
-                    fabTransfer.hide()
-                    fabSharing.hide()
                 }
             }
 
