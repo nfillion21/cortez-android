@@ -30,6 +30,7 @@ package com.tezcore.cortez.activities
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -107,34 +108,6 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
         super.onActivityResult(requestCode, resultCode, data)
-
-        /*
-        if (requestCode == PasscodeActivity.ASK_NEW_CODE_RESULT)
-        {
-            if (resultCode == R.id.passcode_succeed)
-            {
-                // success
-                String code = data.getStringExtra(PasscodeActivity.BUNDLE_CODE);
-
-                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString(PasscodeActivity.PASSCODE_KEY, code);
-                editor.apply();
-            }
-            //else if (resultCode == R.id.passcode_failed) {// should not happen actually}
-            else
-            {
-                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.settings_container);
-                if (fragment != null)
-                {
-                    SettingsFragment settingsFragment = (SettingsFragment)fragment;
-                    settingsFragment.notifyChanged();
-                }
-                // user just canceled
-                // uncheck the password.
-            }
-        }
-        */
     }
 
     private fun initActionBar() {
@@ -166,6 +139,7 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
 
             Snackbar.make(findViewById(android.R.id.content), R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
                     .setAction(R.string.sign_up_snack_action, { openSecuritySettings() })
+                    .setActionTextColor(Color.YELLOW)
                     .show()
         }
         else

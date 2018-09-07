@@ -18,7 +18,7 @@
             android:theme="@style/PaymentScreens.PaymentFormActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".activity.PaymentAccountsActivity"
+            android:name=".activity.AddressBookActivity"
             android:theme="@style/PaymentScreens.PaymentAccountsActivity"
             />
         <activity

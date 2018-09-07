@@ -33,7 +33,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -57,7 +56,7 @@ import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
-import com.tezos.ui.activity.PaymentAccountsActivity
+import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
@@ -171,7 +170,7 @@ class TransferFormFragment : Fragment()
             if (dstBundle != null)
             {
                 mDstAccount = Account.fromBundle(dstBundle)
-                switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
 
             mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY, -1)
@@ -481,19 +480,17 @@ class TransferFormFragment : Fragment()
 
         mSrcButton = view.findViewById(R.id.transfer_src_button)
         mSrcButton!!.setOnClickListener { _ ->
-            PaymentAccountsActivity.start(activity,
+            AddressBookActivity.start(activity,
                 theme,
-                PaymentAccountsActivity.FromScreen.FromTransfer,
-                PaymentAccountsActivity.Selection.SelectionAccounts)
+                AddressBookActivity.Selection.SelectionAccounts)
         }
 
         mDstButton = view.findViewById(R.id.transfer_dst_button)
         mDstButton!!.setOnClickListener { _ ->
-            PaymentAccountsActivity.start(
+            AddressBookActivity.start(
                     activity,
                     theme,
-                    PaymentAccountsActivity.FromScreen.FromTransfer,
-                    PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses)
+                    AddressBookActivity.Selection.SelectionAccountsAndAddresses)
         }
 
         mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled)
@@ -523,7 +520,7 @@ class TransferFormFragment : Fragment()
 
             var account = Account()
             account.pubKeyHash = seedData.pkh
-            switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, account)
+            switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, account)
         }
     }
 
@@ -589,7 +586,7 @@ class TransferFormFragment : Fragment()
     {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == PaymentAccountsActivity.TRANSFER_SELECT_REQUEST_CODE)
+        if (requestCode == AddressBookActivity.TRANSFER_SELECT_REQUEST_CODE)
         {
             if (data != null && data.hasExtra(Account.TAG))
             {
@@ -599,23 +596,23 @@ class TransferFormFragment : Fragment()
                 if (resultCode == R.id.transfer_src_selection_succeed)
                 {
                     mSrcAccount = account
-                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccounts, mSrcAccount!!)
+                    switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, mSrcAccount!!)
                 }
                 else if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
                     mDstAccount = account
-                    switchButtonAndLayout(PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+                    switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
                     validatePayButton(isInputDataValid())
                 }
             }
         }
     }
 
-    private fun switchButtonAndLayout(selection: PaymentAccountsActivity.Selection, account: Account)
+    private fun switchButtonAndLayout(selection: AddressBookActivity.Selection, account: Account)
     {
         when (selection)
         {
-            PaymentAccountsActivity.Selection.SelectionAccounts ->
+            AddressBookActivity.Selection.SelectionAccounts ->
             {
                 mSrcButton?.visibility = View.GONE
                 mTransferSrcFilled?.visibility = View.VISIBLE
@@ -623,7 +620,7 @@ class TransferFormFragment : Fragment()
                 mTransferSrcPkh?.text = account.pubKeyHash
             }
 
-            PaymentAccountsActivity.Selection.SelectionAccountsAndAddresses ->
+            AddressBookActivity.Selection.SelectionAccountsAndAddresses ->
             {
                 mDstButton?.visibility = View.GONE
                 mTransferDstFilled?.visibility = View.VISIBLE

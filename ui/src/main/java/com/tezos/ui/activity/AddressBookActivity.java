@@ -32,12 +32,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -46,37 +49,31 @@ import com.tezos.core.models.Account;
 import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
-import com.tezos.ui.fragment.PaymentAccountsFragment;
+import com.tezos.ui.fragment.AddressBookFragment;
 
 /**
  * Created by nfillion on 25/02/16.
  */
-public class PaymentAccountsActivity extends BaseSecureActivity implements PaymentAccountsFragment.OnCardSelectedListener
+public class AddressBookActivity extends BaseSecureActivity implements AddressBookFragment.OnCardSelectedListener
 {
     public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
 
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
-    public static String FROM_SCREEN_KEY = "FromScreenKey";
 
-    public static void start(Activity activity, CustomTheme theme, FromScreen fromScreen, Selection selection)
+    private FloatingActionButton mAddFab;
+
+    public static void start(Activity activity, CustomTheme theme, Selection selection)
     {
-        Intent starter = getStartIntent(activity, theme, fromScreen, selection);
+        Intent starter = getStartIntent(activity, theme, selection);
         ActivityCompat.startActivityForResult(activity, starter, TRANSFER_SELECT_REQUEST_CODE, null);
     }
 
-    @Override
-    protected void onStop()
-    {
-        super.onStop();
-    }
-
     @NonNull
-    static Intent getStartIntent(Context context, CustomTheme theme, FromScreen fromScreen, Selection selection)
+    static Intent getStartIntent(Context context, CustomTheme theme, Selection selection)
     {
-        Intent starter = new Intent(context, PaymentAccountsActivity.class);
+        Intent starter = new Intent(context, AddressBookActivity.class);
         starter.putExtra(CustomTheme.TAG, theme.toBundle());
         starter.putExtra(SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
-        starter.putExtra(FROM_SCREEN_KEY, fromScreen.getStringValue());
 
         return starter;
     }
@@ -93,7 +90,15 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
                 Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.payment_products_container);
                 if (fragment != null)
                 {
-                    fragment.onActivityResult(requestCode, resultCode, data);
+                    Snackbar snackbar = Snackbar.make(mAddFab, R.string.address_successfuly_added,
+                            Snackbar.LENGTH_SHORT);
+                    View snackBarView = snackbar.getView();
+                    snackBarView.setBackgroundColor((ContextCompat.getColor(this,
+                            R.color.tz_green)));
+                    snackbar.show();
+
+                    AddressBookFragment addressBookFragment = (AddressBookFragment) fragment;
+                    addressBookFragment.reloadList();
                 }
             }
         }
@@ -104,9 +109,16 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_payment_accounts);
+        setContentView(R.layout.activity_address_book);
 
-        initToolbar();
+        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
+        initToolbar(theme);
+
+        mAddFab = findViewById(R.id.add);
+        mAddFab.setOnClickListener(v ->
+                AddAddressActivity.start(this, theme));
 
         if (savedInstanceState == null)
         {
@@ -114,19 +126,10 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
         }
     }
 
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-    }
-
-    private void initToolbar()
+    private void initToolbar(CustomTheme theme)
     {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
-        CustomTheme theme = CustomTheme.fromBundle(themeBundle);
 
         toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
@@ -154,30 +157,16 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
         TextView mTitleBar = findViewById(R.id.barTitle);
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
-        String selectionString = getIntent().getStringExtra(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
+        String selectionString = getIntent().getStringExtra(AddressBookActivity.SELECTED_REQUEST_CODE_KEY);
 
-        String fromScreenString = getIntent().getStringExtra(FROM_SCREEN_KEY);
-        FromScreen fromScreen = FromScreen.fromStringValue(fromScreenString);
-
-        if (fromScreen.equals(FromScreen.FromHome))
+        Selection selection = Selection.fromStringValue(selectionString);
+        if (selection.equals(Selection.SelectionAccounts))
         {
-            mTitleBar.setText(getString(R.string.address_book_title));
+            mTitleBar.setText(getString(R.string.select_source_title));
         }
-        else if (fromScreen.equals(FromScreen.FromTransfer))
+        else if (selection.equals(Selection.SelectionAddresses))
         {
-            Selection selection = Selection.fromStringValue(selectionString);
-            if (selection.equals(Selection.SelectionAccounts))
-            {
-                mTitleBar.setText(getString(R.string.select_source_title));
-            }
-            else if (selection.equals(Selection.SelectionAddresses))
-            {
-                mTitleBar.setText(getString(R.string.select_destination_title));
-            }
-            else
-            {
-                //TODO accounts AND addresses
-            }
+            mTitleBar.setText(getString(R.string.select_destination_title));
         }
     }
 
@@ -185,13 +174,13 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
     {
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.payment_products_container);
-        if (!(fragment instanceof PaymentAccountsFragment))
+        if (!(fragment instanceof AddressBookFragment))
         {
             Bundle customThemeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
 
             Intent intent = getIntent();
             String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
-            fragment = PaymentAccountsFragment.newInstance(customThemeBundle, Selection.fromStringValue(selectionString));
+            fragment = AddressBookFragment.newInstance(customThemeBundle, Selection.fromStringValue(selectionString));
         }
 
         supportFragmentManager.beginTransaction()
@@ -203,45 +192,30 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
     public void onCardClicked(Address address)
     {
         Intent intent = getIntent();
+        String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
 
-        String fromScreenString = intent.getStringExtra(FROM_SCREEN_KEY);
-        FromScreen fromScreen = FromScreen.fromStringValue(fromScreenString);
-        if (fromScreen.equals(FromScreen.FromTransfer))
+        Selection selection = Selection.fromStringValue(selectionString);
+        intent.putExtra(Account.TAG, address.toBundle());
+
+        switch (selection)
         {
-            String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
-
-            Selection selection = Selection.fromStringValue(selectionString);
-            intent.putExtra(Account.TAG, address.toBundle());
-
-            switch (selection)
+            case SelectionAccounts:
             {
-                case SelectionAccounts:
-                {
-                    setResult(R.id.transfer_src_selection_succeed, intent);
-                }
-                break;
-
-                case SelectionAccountsAndAddresses:
-                {
-                    setResult(R.id.transfer_dst_selection_succeed, intent);
-                }
-                break;
-
-                default: //no-op;
-                    break;
+                setResult(R.id.transfer_src_selection_succeed, intent);
             }
+            break;
 
-            finish();
-        }
-        else
-        {
-            Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+            case SelectionAccountsAndAddresses:
+            {
+                setResult(R.id.transfer_dst_selection_succeed, intent);
+            }
+            break;
 
-            Intent starter = new Intent(this, AddressDetailsActivity.class);
-            starter.putExtra(CustomTheme.TAG, themeBundle);
-            starter.putExtra(Address.TAG, address.toBundle());
-            ActivityCompat.startActivityForResult(this, starter, -1, null);
+            default: //no-op;
+                break;
         }
+
+        finish();
     }
 
     public enum Selection
@@ -278,39 +252,6 @@ public class PaymentAccountsActivity extends BaseSecureActivity implements Payme
             if (value.equalsIgnoreCase(SelectionAccountsAndAddresses.getStringValue()))
             {
                 return SelectionAccountsAndAddresses;
-            }
-            return null;
-        }
-    }
-
-    public enum FromScreen
-    {
-        FromHome ("FromHome"),
-        FromTransfer ("FromTransfer");
-
-        protected final String selection;
-        FromScreen(String method)
-        {
-            this.selection = method;
-        }
-
-        public String getStringValue()
-        {
-            return this.selection;
-        }
-
-        public static FromScreen fromStringValue(String value)
-        {
-            if (value == null) return null;
-
-            if (value.equalsIgnoreCase(FromHome.getStringValue()))
-            {
-                return FromHome;
-            }
-
-            if (value.equalsIgnoreCase(FromTransfer.getStringValue()))
-            {
-                return FromTransfer;
             }
             return null;
         }

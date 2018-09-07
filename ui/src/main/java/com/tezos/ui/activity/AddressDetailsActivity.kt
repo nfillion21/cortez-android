@@ -31,6 +31,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -44,9 +45,32 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.fragment.OperationsFragment
 
-class AddressDetailsActivity : BaseSecureActivity()
+class AddressDetailsActivity : BaseSecureActivity(), OperationsFragment.HomeListener
 {
+
     private var mToolbarBackButton: ImageButton? = null
+
+    companion object
+    {
+        private val ADDRESS_DETAILS_TAG = "AdressDetailsTag"
+
+        var ADDRESS_DETAILS_TAG_CODE = 0x3200 // arbitrary int
+
+        fun start(activity: Activity, theme: CustomTheme, address: Address)
+        {
+            var starter = getStartIntent(activity, theme, address)
+            ActivityCompat.startActivityForResult(activity, starter, -1, null)
+        }
+
+        private fun getStartIntent(context: Context, theme:CustomTheme, pkh:Address): Intent
+        {
+            val starter = Intent(context, AddressDetailsActivity::class.java)
+            starter.putExtra(CustomTheme.TAG, theme.toBundle())
+            starter.putExtra(Address.TAG, pkh.toBundle())
+
+            return starter
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -98,25 +122,19 @@ class AddressDetailsActivity : BaseSecureActivity()
         })
     }
 
-    fun start(activity: Activity, theme: CustomTheme)
-    {
-        var starter = getStartIntent(activity, theme)
-        ActivityCompat.startActivityForResult(activity, starter, -1, null)
-    }
-
-    private fun getStartIntent(context: Context, theme:CustomTheme): Intent
-    {
-        val starter = Intent(context, AddressDetailsActivity::class.java)
-        starter.putExtra(CustomTheme.TAG, theme.toBundle())
-
-        return starter
-    }
-
     private fun switchToOperations(tezosTheme:CustomTheme, address: Address)
     {
         val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, operationsFragment)
                 .commit()
+    }
+
+    override fun showSnackBar(resText:String, color:Int)
+    {
+        val snackbar = Snackbar.make(findViewById(android.R.id.content), resText, Snackbar.LENGTH_LONG)
+        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
+                color)))
+        snackbar.show()
     }
 }

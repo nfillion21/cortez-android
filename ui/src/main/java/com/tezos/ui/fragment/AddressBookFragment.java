@@ -27,36 +27,25 @@
 
 package com.tezos.ui.fragment;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
-import com.tezos.core.client.GatewayClient;
 import com.tezos.core.models.Address;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
 import com.tezos.core.utils.Utils;
 import com.tezos.ui.R;
-import com.tezos.ui.activity.AddAddressActivity;
-import com.tezos.ui.activity.PaymentAccountsActivity;
-import com.tezos.ui.adapter.PaymentAccountsAdapter;
+import com.tezos.ui.activity.AddressBookActivity;
+import com.tezos.ui.adapter.AddressBookAdapter;
 import com.tezos.ui.widget.OffsetDecoration;
 
 import java.util.ArrayList;
@@ -68,31 +57,33 @@ import java.util.Set;
  * Created by nfillion on 26/02/16.
  */
 
-public class PaymentAccountsFragment extends Fragment implements PaymentAccountsAdapter.OnItemClickListener, PaymentAccountsAdapter.OnItemLongClickListener
+public class AddressBookFragment extends Fragment implements AddressBookAdapter.OnItemClickListener, AddressBookAdapter.OnItemLongClickListener
 {
     private static final String ADDRESSES_ARRAYLIST = "addressList";
 
     private OnCardSelectedListener mCallback;
 
-    private PaymentAccountsAdapter mAdapter;
+    private AddressBookAdapter mAdapter;
     private RecyclerView mRecyclerView;
+    private NestedScrollView mNestedScrollview;
 
     private List<Address> mAddressList;
-
-    private FloatingActionButton mAddFab;
 
     public interface OnCardSelectedListener
     {
         void onCardClicked(Address address);
     }
 
-    public static PaymentAccountsFragment newInstance(Bundle customThemeBundle, PaymentAccountsActivity.Selection selection)
+    public static AddressBookFragment newInstance(Bundle customThemeBundle, AddressBookActivity.Selection selection)
     {
-        PaymentAccountsFragment fragment = new PaymentAccountsFragment();
+        AddressBookFragment fragment = new AddressBookFragment();
 
         Bundle bundle = new Bundle();
         bundle.putBundle(CustomTheme.TAG, customThemeBundle);
-        bundle.putString(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
+        if (selection != null)
+        {
+            bundle.putString(AddressBookActivity.SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
+        }
 
         fragment.setArguments(bundle);
         return fragment;
@@ -110,64 +101,21 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         catch (ClassCastException e)
         {
             throw new ClassCastException(context.toString()
-                    + " must implement OnWordSelectedListener");
+                    + " must implement OnCardSelectedListener");
         }
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == AddAddressActivity.ADD_ADDRESS_REQUEST_CODE)
-        {
-            if (resultCode == R.id.add_address_succeed)
-            {
-
-                Snackbar snackbar = Snackbar.make(mAddFab, R.string.address_successfuly_added,
-                        Snackbar.LENGTH_SHORT);
-                View snackBarView = snackbar.getView();
-                snackBarView.setBackgroundColor((ContextCompat.getColor(getActivity(),
-                        R.color.tz_green)));
-                snackbar.show();
-                reloadList();
-            }
-        }
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState)
-    {
-        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        return inflater.inflate(R.layout.fragment_payment_accounts, container, false);
+        return inflater.inflate(R.layout.fragment_address_book, container, false);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-
-        mAddFab = view.findViewById(R.id.add);
-        mAddFab.setOnClickListener(v ->
-        {
-            Bundle args = getArguments();
-
-            CustomTheme theme = CustomTheme.fromBundle(args.getBundle(CustomTheme.TAG));
-            AddAddressActivity.start(getActivity(), theme);
-        });
 
         if (savedInstanceState != null)
         {
@@ -179,8 +127,11 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
             mAddressList = new ArrayList<>();
         }
 
-        mRecyclerView = view.findViewById(R.id.products);
+        mNestedScrollview = view.findViewById(R.id.empty_nested_scrollview);
+
+        mRecyclerView = view.findViewById(R.id.addresses_recyclerview);
         setUpAccountGrid(mRecyclerView);
+
     }
 
     private void setUpAccountGrid(final RecyclerView categoriesView)
@@ -190,11 +141,11 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         categoriesView.addItemDecoration(new OffsetDecoration(spacing));
 
         Bundle args = getArguments();
-        String selectionString = args.getString(PaymentAccountsActivity.SELECTED_REQUEST_CODE_KEY);
+        String selectionString = args.getString(AddressBookActivity.SELECTED_REQUEST_CODE_KEY);
         Bundle customThemeBundle = args.getBundle(CustomTheme.TAG);
         CustomTheme customTheme = CustomTheme.fromBundle(customThemeBundle);
 
-        mAdapter = new PaymentAccountsAdapter(getActivity(), PaymentAccountsActivity.Selection.fromStringValue(selectionString), customTheme);
+        mAdapter = new AddressBookAdapter(getActivity(), AddressBookActivity.Selection.fromStringValue(selectionString), customTheme);
         mAdapter.setOnItemClickListener(this);
         mAdapter.setOnItemLongClickListener(this);
 
@@ -203,7 +154,7 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
         reloadList();
     }
 
-    private void reloadList()
+    public void reloadList()
     {
         mAddressList.clear();
 
@@ -219,15 +170,24 @@ public class PaymentAccountsFragment extends Fragment implements PaymentAccounts
                     mAddressList.add(address);
                 }
             }
-        }
 
-        mAdapter.updateAddresses(mAddressList);
+            mAdapter.updateAddresses(mAddressList);
+
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mNestedScrollview.setVisibility(View.GONE);
+        }
+        else
+        {
+            mRecyclerView.setVisibility(View.GONE);
+            mNestedScrollview.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void onResume()
     {
         super.onResume();
+        reloadList();
     }
 
     @Override

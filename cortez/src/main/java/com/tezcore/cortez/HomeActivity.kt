@@ -28,20 +28,21 @@
 package com.tezcore.cortez
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
-import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
+import android.support.design.widget.TabLayout
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.ContextCompat
-import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v4.view.ViewPager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
+import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.view.ViewGroup
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezcore.cortez.fragments.HomeFragment
@@ -51,74 +52,244 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.OperationsFragment
+import com.tezos.ui.fragment.AddressBookFragment
+import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
-class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelectedListener, HomeFragment.OnFragmentInteractionListener
+
+class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, OperationsFragment.HomeListener
 {
-    override fun onFragmentInteraction() {
-        //switchToOperations(realSeed)
-    }
+    private val mTezosTheme: CustomTheme = CustomTheme(
+            com.tezos.ui.R.color.theme_tezos_primary,
+            com.tezos.ui.R.color.theme_tezos_primary_dark,
+            com.tezos.ui.R.color.theme_tezos_text)
 
-    private var mProgressBar: ProgressBar? = null
+    private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        // first get the theme
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
+        setSupportActionBar(toolbar)
+        initActionBar(mTezosTheme)
 
-        initActionBar(tezosTheme)
-        val isPasswordSaved = Storage(this).isPasswordSaved()
-        setMenuItemEnabled(isPasswordSaved)
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
-        if (savedInstanceState == null)
+        // Set up the ViewPager with the sections adapter.
+        container.adapter = mSectionsPagerAdapter
+
+        container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
+        container.addOnPageChangeListener(object : ViewPager.OnPageChangeListener
         {
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int)
+            {}
+
+            override fun onPageSelected(position: Int)
+            {
+                val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+                when (position)
+                {
+                    0 ->
+                    {
+                        if (isPasswordSaved)
+                        {
+                            fabTransfer.show()
+                            fabSharing.hide()
+                            fabAddAddress.hide()
+                        }
+                        else
+                        {
+                            fabTransfer.hide()
+                            fabSharing.hide()
+                            fabAddAddress.hide()
+                        }
+                    }
+
+                    1 ->
+                    {
+                        fabTransfer.hide()
+                        fabAddAddress.show()
+                        fabSharing.hide()
+                    }
+
+                    2 ->
+                    {
+                        if (isPasswordSaved)
+                        {
+                            fabTransfer.hide()
+                            fabAddAddress.hide()
+                            fabSharing.show()
+                        }
+                        else
+                        {
+                            fabTransfer.hide()
+                            fabAddAddress.hide()
+                            fabSharing.hide()
+                        }
+                    }
+
+                    else ->
+                    {
+                        //no-op
+                    }
+                }
+            }
+
+            override fun onPageScrollStateChanged(state: Int)
+            {}
+        })
+
+        tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
+
+        fabTransfer.setOnClickListener { view ->
+
+            val isPasswordSaved = Storage(this).isPasswordSaved()
             if (isPasswordSaved)
             {
                 val seed = Storage(baseContext).getMnemonics()
-                switchToOperations(seed)
+                val seedBundle = Storage.toBundle(seed)
+                TransferFormActivity.start(this, seedBundle, mTezosTheme)
             }
             else
             {
-                switchToHome()
+                //TODO this snackbar should be invisible
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
             }
         }
+
+        fabSharing.setOnClickListener { view ->
+
+            val isPasswordSaved = Storage(this).isPasswordSaved()
+            if (isPasswordSaved)
+            {
+                val seed = Storage(baseContext).getMnemonics()
+
+                val sharingIntent = Intent(Intent.ACTION_SEND)
+                sharingIntent.type = "text/plain"
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, seed.pkh)
+                startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)))
+            }
+            else
+            {
+                //TODO this snackbar should be invisible
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
+            }
+        }
+
+        fabAddAddress.setOnClickListener { _ ->
+            AddAddressActivity.start(this, mTezosTheme)
+        }
+
+        initActionBar(mTezosTheme)
     }
 
-    private fun switchToOperations(realMnemonics: Storage.MnemonicsData)
+    /**
+     * A [FragmentPagerAdapter] that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm)
     {
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
 
-        var address = Address()
-        address.description = "main address"
-        address.pubKeyHash = realMnemonics.pkh
+        override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any)
+        {
+            super.setPrimaryItem(container, position, `object`)
+            val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
 
-        val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.main_fragments_container, operationsFragment)
-                .commit()
-    }
+            when (position)
+            {
+                0 ->
+                {
+                    if (isPasswordSaved)
+                    {
+                        fabTransfer.show()
+                        fabSharing.hide()
+                        fabAddAddress.hide()
+                    }
+                    else
+                    {
+                        fabTransfer.hide()
+                        fabSharing.hide()
+                        fabAddAddress.hide()
+                    }
+                }
 
-    private fun switchToHome()
-    {
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
+                1 ->
+                {
+                    fabTransfer.hide()
+                    fabAddAddress.show()
+                    fabSharing.hide()
+                }
 
-        val homeFragment = HomeFragment.newInstance(tezosTheme)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.main_fragments_container, homeFragment)
-                .commit()
+                2 ->
+                {
+                    if (isPasswordSaved)
+                    {
+                        fabTransfer.hide()
+                        fabAddAddress.hide()
+                        fabSharing.show()
+                    }
+                    else
+                    {
+                        fabTransfer.hide()
+                        fabAddAddress.hide()
+                        fabSharing.hide()
+                    }
+                }
+
+                else ->
+                {
+                    //no-op
+                }
+            }
+        }
+
+        override fun getItem(position: Int): Fragment
+        {
+            when (position)
+            {
+                0 ->
+                {
+                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+
+                    return if (isPasswordSaved)
+                    {
+                        val mnemonicsData = Storage(baseContext).getMnemonics()
+
+                        var address = Address()
+                        address.description = "main address"
+                        address.pubKeyHash = mnemonicsData.pkh
+
+                        OperationsFragment.newInstance(mTezosTheme, address)
+                    }
+                    else
+                    {
+                        OperationsFragment.newInstance(mTezosTheme, null)
+                    }
+                }
+                1 ->
+                {
+                    return AddressBookFragment.newInstance(mTezosTheme.toBundle(), null)
+                }
+                2 ->
+                {
+
+                    return SharingAddressFragment.newInstance(mTezosTheme)
+                }
+            }
+
+            return HomeFragment.newInstance(mTezosTheme)
+        }
+
+        override fun getCount(): Int
+        {
+            // Show 3 total pages.
+            return 3
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -133,14 +304,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 {
                     if (data != null && data.hasExtra(CreateWalletActivity.SEED_DATA_KEY))
                     {
-                        val seedDataKey = data.getBundleExtra(CreateWalletActivity.SEED_DATA_KEY)
-                        val realSeed = Storage.fromBundle(seedDataKey)
-
-                        showSnackBar(R.string.wallet_successfully_created)
-
-                        setMenuItemEnabled(true)
-
-                        switchToOperations(realSeed)
+                        showSnackBar(getString(R.string.wallet_successfully_created), android.R.color.holo_green_light)
                     }
                 }
             }
@@ -151,14 +315,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
                 {
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
-                        val seedDataKey = data.getBundleExtra(RestoreWalletActivity.SEED_DATA_KEY)
-                        val realSeed = Storage.fromBundle(seedDataKey)
-
-                        showSnackBar(R.string.wallet_successfully_restored)
-
-                        setMenuItemEnabled(true)
-
-                        switchToOperations(realSeed)
+                        showSnackBar(getString(R.string.wallet_successfully_restored), android.R.color.holo_green_light)
                     }
                 }
             }
@@ -167,7 +324,7 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.transfer_succeed)
                 {
-                    showSnackBar(R.string.transfer_succeed)
+                    showSnackBar(getString(R.string.transfer_succeed), android.R.color.holo_green_light)
                     //TODO I need to refresh balance.
                 }
             }
@@ -176,8 +333,15 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
             {
                 if (resultCode == R.id.logout_succeed)
                 {
-                    switchToHome()
-                    setMenuItemEnabled(false)
+                    showSnackBar(getString(R.string.log_out_succeed), android.R.color.holo_green_light)
+                }
+            }
+
+            AddAddressActivity.ADD_ADDRESS_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.add_address_succeed)
+                {
+                    showSnackBar(getString(R.string.address_successfuly_added), android.R.color.holo_green_light)
                 }
             }
 
@@ -187,29 +351,12 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         }
     }
 
-    private fun showSnackBar(resText:Int)
+    override fun showSnackBar(resText:String, color:Int)
     {
-        val snackbar = Snackbar.make(findViewById(R.id.coordinator), resText, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(fabTransfer, resText, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
-                android.R.color.holo_green_light)))
+                color)))
         snackbar.show()
-    }
-
-    private fun setMenuItemEnabled(enabled:Boolean)
-    {
-        val navigationView = findViewById<View>(R.id.nav_view) as NavigationView
-
-        // get menu from navigationView
-        val menu = navigationView.menu
-
-        val transferMenuItem = menu.findItem(R.id.nav_transfer)
-        transferMenuItem.isEnabled = enabled
-
-        val publicKeyMenuItem = menu.findItem(R.id.nav_publickey)
-        publicKeyMenuItem.isEnabled = enabled
-
-        val settingsMenuItem = menu.findItem(R.id.nav_settings)
-        settingsMenuItem.isEnabled = enabled
     }
 
     private fun initActionBar(theme:CustomTheme)
@@ -227,99 +374,60 @@ class HomeActivity : BaseSecureActivity(), NavigationView.OnNavigationItemSelect
         toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
 
         setSupportActionBar(toolbar)
-
-        supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        val titleBar = findViewById<TextView>(R.id.barTitle)
-        titleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
-
-        mProgressBar = findViewById(R.id.nav_progress)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        {
-            mProgressBar?.indeterminateTintList = ColorStateList.valueOf(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        }
-        else
-        {
-            //mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, R.color.colorTextToolbar), PorterDuff.Mode.SRC_IN);
-        }
-
-        val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        nav_view.setNavigationItemSelectedListener(this)
     }
 
     override fun onBackPressed()
     {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START))
-        {
-            drawer_layout.closeDrawer(GravityCompat.START)
-        }
-        else
-        {
-            AlertDialog.Builder(this)
-                    .setTitle(R.string.exit)
-                    .setMessage(R.string.exit_info)
-                    .setNegativeButton(android.R.string.no, null)
-                    .setPositiveButton(android.R.string.yes) {
-                        _,
-                        _ ->
+        AlertDialog.Builder(this)
+                .setTitle(R.string.exit)
+                .setMessage(R.string.exit_info)
+                .setNegativeButton(android.R.string.no, null)
+                .setPositiveButton(android.R.string.yes) {
+                    _,
+                    _ ->
 
-                        super.onBackPressed()
+                    super.onBackPressed()
 
-                    }
-                    .show()
-        }
+                }
+                .show()
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean
-    {
-        // Handle navigation view item clicks here.
-        val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
+    /*
+    MENU
+     */
 
-        when (item.itemId)
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        val id = item.itemId
+
+        if (id == R.id.action_settings)
         {
-            R.id.nav_transfer ->
-            {
-                val isPasswordSaved = Storage(this).isPasswordSaved()
-                if (isPasswordSaved)
-                {
-                    val seed = Storage(baseContext).getMnemonics()
-                    val seedBundle = Storage.toBundle(seed)
-                    TransferFormActivity.start(this, seedBundle, tezosTheme)
-                }
-            }
-            R.id.nav_publickey ->
-            {
-                val isPasswordSaved = Storage(this).isPasswordSaved()
-                if (isPasswordSaved)
-                {
-                    val seed = Storage(baseContext).getMnemonics()
-                    PublicKeyHashActivity.start(this, seed.pkh, tezosTheme)
-                }
-            }
-            R.id.nav_addresses ->
-            {
-                //AddAddressActivity.start(this, tezosTheme)
-                PaymentAccountsActivity.start(this, tezosTheme, PaymentAccountsActivity.FromScreen.FromHome, PaymentAccountsActivity.Selection.SelectionAddresses)
-            }
-            R.id.nav_settings ->
-            {
-                SettingsActivity.start(this, tezosTheme)
-            }
-            R.id.nav_info ->
-            {
-                AboutActivity.start(this, tezosTheme)
-            }
+            SettingsActivity.start(this, mTezosTheme)
+            return true
+        }
+        else if (id == R.id.action_about)
+        {
+            AboutActivity.start(this, mTezosTheme)
+            return true
         }
 
-        //drawer_layout.closeDrawer(GravityCompat.START)
-        return true
+        return super.onOptionsItemSelected(item)
+    }
+
+    /*
+    Addresses
+     */
+
+    override fun onCardClicked(address: Address?)
+    {
+        AddressDetailsActivity.start(this, mTezosTheme, address!!)
     }
 }

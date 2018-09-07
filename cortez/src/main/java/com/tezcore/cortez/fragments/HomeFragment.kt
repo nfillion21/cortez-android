@@ -44,8 +44,6 @@ import com.tezos.ui.activity.RestoreWalletActivity
 private const val ARG_THEME = "theme"
 class HomeFragment : Fragment()
 {
-    private var listener: OnFragmentInteractionListener? = null
-
     private var mRestoreWalletButton: Button? = null
     private var mCreateWalletButton: Button? = null
     private var mTezosLogo: ImageView? = null
@@ -76,26 +74,6 @@ class HomeFragment : Fragment()
         }
 
         mTezosLogo = view.findViewById(R.id.ic_logo)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is OnFragmentInteractionListener) {
-            listener = context
-        } else {
-            throw RuntimeException(context.toString() + " must implement OnFragmentInteractionListener")
-        }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        listener = null
-    }
-
-   interface OnFragmentInteractionListener
-   {
-        // TODO: Update argument type and name
-        fun onFragmentInteraction()
     }
 
     companion object

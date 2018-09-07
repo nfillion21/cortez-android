@@ -92,7 +92,7 @@ class PasswordDialog : AppCompatDialogFragment()
         }
         else
         {
-            throw RuntimeException(context.toString() + " must implement OnPasswordDialogListener")
+            throw RuntimeException(context.toString() + " must implement HomeListener")
         }
     }
 
