@@ -41,25 +41,26 @@ import android.widget.TextView
 import android.widget.Toast
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
+import com.tezos.ui.utils.Storage
 import net.glxn.qrgen.android.QRCode
 
 class SharingAddressFragment : Fragment()
 {
     private var mLinearLayout: LinearLayout? = null
-    private var mPublicKeyHash: String? = null
-
     private var mPkhTextview: TextView? = null
+
+    private var mPkhLayout: LinearLayout? = null
+    private var mPkhEmptyLayout: LinearLayout? = null
 
     companion object
     {
         const val PKH_KEY = "pkh_key"
 
         @JvmStatic
-        fun newInstance(publicKeyHash:String, theme: CustomTheme) =
+        fun newInstance(theme: CustomTheme) =
                 SharingAddressFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
-                        putString(PKH_KEY, publicKeyHash)
                     }
                 }
     }
@@ -72,39 +73,62 @@ class SharingAddressFragment : Fragment()
         arguments?.let {
             val themeBundle = it.getBundle(CustomTheme.TAG)
             theme = CustomTheme.fromBundle(themeBundle)
-
-            mPublicKeyHash = it.getString(PKH_KEY)
         }
 
-        val dm = resources.displayMetrics
-
-        val width:Int
-        width = if (dm.widthPixels < dm.heightPixels)
-        {
-            dm.widthPixels / 2
-        }
-        else
-        {
-            dm.heightPixels / 2
-        }
-
-        val myBitmap = QRCode.from(mPublicKeyHash).withSize(width, width).bitmap()
-        val myImage = view.findViewById<ImageView>(R.id.qr_code)
-        myImage.setImageBitmap(myBitmap)
+        mPkhLayout = view.findViewById(R.id.pkh_layout)
+        mPkhEmptyLayout = view.findViewById(R.id.pkh_empty_layout)
 
         mLinearLayout = view.findViewById(R.id.pkh_info_layout)
 
-        mLinearLayout?.setOnClickListener {
-
-            val clipboard = activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-            val clip = ClipData.newPlainText(getString(R.string.copied_pkh), mPublicKeyHash)
-            clipboard!!.primaryClip = clip
-
-            Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
-        }
-
         mPkhTextview = view.findViewById(R.id.pkh_textview)
-        mPkhTextview?.text = mPublicKeyHash
+
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            mPkhLayout?.visibility = View.VISIBLE
+            mPkhEmptyLayout?.visibility = View.GONE
+
+            val seed = Storage(activity!!).getMnemonics()
+            val pkh = seed.pkh
+
+            val dm = resources.displayMetrics
+
+            val width:Int
+            width = if (dm.widthPixels < dm.heightPixels)
+            {
+                dm.widthPixels / 2
+            }
+            else
+            {
+                dm.heightPixels / 2
+            }
+
+            val myBitmap = QRCode.from(pkh).withSize(width, width).bitmap()
+            val myImage = view?.findViewById<ImageView>(R.id.qr_code)
+            myImage?.setImageBitmap(myBitmap)
+
+            mLinearLayout?.setOnClickListener {
+
+                val clipboard = activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                val clip = ClipData.newPlainText(getString(R.string.copied_pkh), pkh)
+                clipboard!!.primaryClip = clip
+
+                Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
+            }
+
+            mPkhTextview?.text = pkh
+        }
+        else
+        {
+            mPkhLayout?.visibility = View.GONE
+            mPkhEmptyLayout?.visibility = View.VISIBLE
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?

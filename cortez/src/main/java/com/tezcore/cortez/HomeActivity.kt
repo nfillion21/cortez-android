@@ -277,13 +277,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
                 2 ->
                 {
-                    //
-                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
-                    if (isPasswordSaved)
-                    {
-                        val seed = Storage(baseContext).getMnemonics()
-                        return SharingAddressFragment.newInstance(seed.pkh, mTezosTheme)
-                    }
+
+                    return SharingAddressFragment.newInstance(mTezosTheme)
                 }
             }
 
