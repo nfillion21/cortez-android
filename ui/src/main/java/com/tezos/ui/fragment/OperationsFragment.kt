@@ -289,7 +289,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         }
         else
         {
-            cancelRequest(true, true)
+            //cancelRequest(true, true)
 
             mSwipeRefreshLayout?.isEnabled = false
             mSwipeRefreshLayout?.isRefreshing = false

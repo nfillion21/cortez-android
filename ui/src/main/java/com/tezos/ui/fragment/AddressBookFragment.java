@@ -32,6 +32,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -64,6 +65,7 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
 
     private AddressBookAdapter mAdapter;
     private RecyclerView mRecyclerView;
+    private NestedScrollView mNestedScrollview;
 
     private List<Address> mAddressList;
 
@@ -104,18 +106,6 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState)
-    {
-        super.onActivityCreated(savedInstanceState);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
@@ -137,8 +127,11 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
             mAddressList = new ArrayList<>();
         }
 
-        mRecyclerView = view.findViewById(R.id.products);
+        mNestedScrollview = view.findViewById(R.id.empty_nested_scrollview);
+
+        mRecyclerView = view.findViewById(R.id.addresses_recyclerview);
         setUpAccountGrid(mRecyclerView);
+
     }
 
     private void setUpAccountGrid(final RecyclerView categoriesView)
@@ -177,9 +170,17 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
                     mAddressList.add(address);
                 }
             }
-        }
 
-        mAdapter.updateAddresses(mAddressList);
+            mAdapter.updateAddresses(mAddressList);
+
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mNestedScrollview.setVisibility(View.GONE);
+        }
+        else
+        {
+            mRecyclerView.setVisibility(View.GONE);
+            mNestedScrollview.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
