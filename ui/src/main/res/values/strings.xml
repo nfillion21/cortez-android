@@ -19,7 +19,7 @@
     <string name="public_key_info_title">Here is your Public key hash</string>
     <string name="address_book_empty_title">Your address book is empty</string>
     <string name="public_key_info_empty_title">You have no public key</string>
-    <string name="address_book_empty_info_title">Please add addresses by clicking on the add button</string>
+    <string name="address_book_empty_info_title">Please fill in your address book by clicking on the add button</string>
     <string name="create_wallet">Create Wallet</string>
     <string name="create_wallet_title_1">Create Wallet 1/2</string>
     <string name="create_wallet_title_2">Create Wallet 2/2</string>

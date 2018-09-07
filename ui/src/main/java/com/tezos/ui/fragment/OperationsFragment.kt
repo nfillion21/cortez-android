@@ -344,7 +344,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private fun refreshRecyclerViewAndTextHistory()
     {
-        if (mRecyclerViewItems?.isEmpty()!!)
+        if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty()!!)
         {
             mRecyclerView?.visibility = View.GONE
 
