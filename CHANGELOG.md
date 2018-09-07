@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+0.3.0
+-----
+* Replaced the burger menu with a swipe navigation.
+
 0.2.0
 -----
 * Add the QR Code scan to select a tezos address.
