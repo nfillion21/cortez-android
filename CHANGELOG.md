@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+0.3.1
+-----
+* Fixed a specific crash during orientation changes.
+
 0.3.0
 -----
 * Replaced the burger menu with a swipe navigation.
