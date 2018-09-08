@@ -547,7 +547,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             }
             return items
         }
-        return null
+        
+        return ArrayList()
     }
 
     private fun itemsToBundles(items:ArrayList<Operation>?):ArrayList<Bundle>?
