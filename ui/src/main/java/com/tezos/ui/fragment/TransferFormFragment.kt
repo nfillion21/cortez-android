@@ -307,8 +307,8 @@ class TransferFormFragment : Fragment()
         postParams.put("src", pkhSrc)
         postParams.put("src_pk", pk)
         postParams.put("dst", pkhDst)
-        postParams.put("amount", amount.toInt().toString())
-        postParams.put("fee", fee.toInt().toString())
+        postParams.put("amount", amount.toLong().toString())
+        postParams.put("fee", fee.toLong().toString())
 
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
