@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+0.3.2
+-----
+* Fixed several bugs related to RPC calls
+
 0.3.1
 -----
 * Fixed a specific crash during orientation changes.

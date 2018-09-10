@@ -22,6 +22,7 @@
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/tz_background"
         android:id="@+id/empty_nested_scrollview">
 
         <LinearLayout
@@ -45,9 +46,11 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                 android:text="@string/address_book_empty_info_title"/>
+            <!--
             android:textColor="@color/colorAccent"
             android:layout_marginBottom="@dimen/spacing_double"
             android:ellipsize="end" />
+            -->
 
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,68 +9,83 @@
     android:orientation="vertical"
     tools:ignore="Overdraw,UnusedAttribute">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_height="wrap_content"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_weight="0"
-        android:theme="@style/PaymentScreens.AppBarOverlay">
+        android:layout_height="match_parent"
+        app:layout_behavior="com.tezos.ui.utils.FloatingActionButtonBehavior">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="match_parent">
 
-            app:popupTheme="@style/PaymentScreens.PopupOverlay"
-            tools:targetApi="lollipop">
-
-            <TextView android:id="@+id/barTitle"
-                android:text="@string/transfer_title"
-
-                android:paddingStart="@dimen/spacing_normal"
-                android:paddingLeft="@dimen/spacing_normal"
-                android:paddingTop="@dimen/spacing_micro"
-                android:paddingBottom="@dimen/spacing_micro"
-                android:layout_width="wrap_content"
-                android:singleLine="true"
-
-                android:maxLines="1"
-                style="@style/TextAppearance.AppCompat.Title"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical|center_horizontal"
-                tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
-
-            <ImageButton android:id="@+id/close_button"
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/bar_layout"
                 android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_alignParentTop="true"
+                android:theme="@style/PaymentScreens.AppBarOverlay">
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+
+                    app:popupTheme="@style/PaymentScreens.PopupOverlay"
+                    tools:targetApi="lollipop">
+
+                    <TextView android:id="@+id/barTitle"
+                        android:text="@string/transfer_title"
+
+                        android:paddingStart="@dimen/spacing_normal"
+                        android:paddingLeft="@dimen/spacing_normal"
+                        android:paddingTop="@dimen/spacing_micro"
+                        android:paddingBottom="@dimen/spacing_micro"
+                        android:layout_width="wrap_content"
+                        android:singleLine="true"
+
+                        android:maxLines="1"
+                        style="@style/TextAppearance.AppCompat.Title"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical|center_horizontal"
+                        tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
+
+                    <ImageButton android:id="@+id/close_button"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+
+                        android:contentDescription="@string/content_description"
+                        android:padding="@dimen/spacing_double"
+                        android:gravity="end"
+                        android:src="@drawable/close_black_24"
+                        android:background="@drawable/selector_subtle"
+                        android:layout_gravity="end|end|center_vertical"
+                        />
+
+                </android.support.v7.widget.Toolbar>
+            </android.support.design.widget.AppBarLayout>
+
+            <FrameLayout android:id="@+id/payment_products_container"
+                android:layout_below="@+id/bar_layout"
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:ignore="MergeRootFrame">
+            </FrameLayout>
+
+            <android.support.design.widget.FloatingActionButton
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                app:fabSize="normal"
+                android:id="@+id/add"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_margin="@dimen/spacing_double"
+                android:src="@drawable/ic_add_black"
+                app:backgroundTint="@android:color/background_light" />
 
-                android:contentDescription="@string/content_description"
-                android:padding="@dimen/spacing_double"
-                android:gravity="end"
-                android:src="@drawable/close_black_24"
-                android:background="@drawable/selector_subtle"
-                android:layout_gravity="end|end|center_vertical"
-                />
+        </RelativeLayout>
+    </LinearLayout>
 
-        </android.support.v7.widget.Toolbar>
-    </android.support.design.widget.AppBarLayout>
-
-    <FrameLayout android:id="@+id/payment_products_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        tools:ignore="MergeRootFrame">
-    </FrameLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        app:fabSize="normal"
-        android:id="@+id/add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right|end"
-        android:layout_margin="@dimen/spacing_double"
-        android:src="@drawable/ic_add_black"
-        app:backgroundTint="@android:color/background_light" />
-
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

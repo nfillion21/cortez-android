@@ -160,12 +160,13 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
 
         Set<String> set = AddressesDatabase.getInstance().getAddresses(getActivity());
 
-        if (set != null && !set.isEmpty()) {
-
-            for (String addressString : set) {
-
+        if (set != null && !set.isEmpty())
+        {
+            for (String addressString : set)
+            {
                 Bundle addressBundle = Utils.fromJSONString(addressString);
-                if (addressBundle != null) {
+                if (addressBundle != null)
+                {
                     Address address = Address.fromBundle(addressBundle);
                     mAddressList.add(address);
                 }
