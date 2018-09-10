@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,9 +9,10 @@
     tools:ignore="Overdraw,UnusedAttribute">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/bar_layout"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_weight="0"
+        android:layout_alignParentTop="true"
         android:theme="@style/PaymentScreens.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
@@ -54,9 +55,10 @@
     </android.support.design.widget.AppBarLayout>
 
     <FrameLayout android:id="@+id/payment_products_container"
+        android:layout_below="@+id/bar_layout"
+        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         tools:ignore="MergeRootFrame">
     </FrameLayout>
 
@@ -67,9 +69,10 @@
         android:id="@+id/add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right|end"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         android:layout_margin="@dimen/spacing_double"
         android:src="@drawable/ic_add_black"
         app:backgroundTint="@android:color/background_light" />
 
-</LinearLayout>
+</RelativeLayout>
