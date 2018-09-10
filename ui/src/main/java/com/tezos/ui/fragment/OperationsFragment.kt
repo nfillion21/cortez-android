@@ -395,28 +395,32 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         var pkh:Address? = null
         arguments?.let {
             val addressBundle = it.getBundle(Address.TAG)
-            pkh = Address.fromBundle(addressBundle)
+            if (addressBundle != null)
+            {
+                pkh = Address.fromBundle(addressBundle)
+
+                val url = String.format(getString(R.string.balance_url), pkh?.pubKeyHash)
+
+                // Request a string response from the provided URL.
+                val stringRequest = StringRequest(Request.Method.GET, url,
+                        Response.Listener<String> { response ->
+                            val balance = response.replace("[^0-9]".toRegex(), "")
+                            mBalanceItem = balance.toDouble()/1000000
+                            animateBalance(mBalanceItem)
+
+                            onBalanceLoadComplete(true)
+                            startGetRequestLoadOperations()
+                        },
+                        Response.ErrorListener {
+                            onBalanceLoadComplete(false)
+                            onOperationsLoadHistoryComplete()
+                            showSnackbarError(it)
+                        })
+
+                stringRequest.tag = LOAD_BALANCE_TAG
+                VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+            }
         }
-        val url = String.format(getString(R.string.balance_url), pkh?.pubKeyHash)
-
-        // Request a string response from the provided URL.
-        val stringRequest = StringRequest(Request.Method.GET, url,
-                Response.Listener<String> { response ->
-                    val balance = response.replace("[^0-9]".toRegex(), "")
-                    mBalanceItem = balance.toDouble()/1000000
-                    animateBalance(mBalanceItem)
-
-                    onBalanceLoadComplete(true)
-                    startGetRequestLoadOperations()
-                },
-                Response.ErrorListener {
-                    onBalanceLoadComplete(false)
-                    onOperationsLoadHistoryComplete()
-                    showSnackbarError(it)
-                })
-
-        stringRequest.tag = LOAD_BALANCE_TAG
-        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
     }
 
     private fun animateBalance(balance: Double?)
@@ -454,27 +458,32 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         var pkh:Address? = null
         arguments?.let {
             val addressBundle = it.getBundle(Address.TAG)
-            pkh = Address.fromBundle(addressBundle)
+
+            if (addressBundle != null)
+            {
+                pkh = Address.fromBundle(addressBundle)
+
+                val url = String.format(getString(R.string.history_url), pkh?.pubKeyHash)
+
+                val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+                { answer ->
+
+                    addOperationItemsFromJSON(answer)
+
+                    onOperationsLoadHistoryComplete()
+
+                }, Response.ErrorListener
+                {
+                    onOperationsLoadHistoryComplete()
+
+                    showSnackbarError(it)
+                })
+
+                jsObjRequest.tag = LOAD_OPERATIONS_TAG
+
+                VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+            }
         }
-        val url = String.format(getString(R.string.history_url), pkh?.pubKeyHash)
-
-        val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
-        { answer ->
-
-            addOperationItemsFromJSON(answer)
-
-            onOperationsLoadHistoryComplete()
-
-        }, Response.ErrorListener
-        {
-            onOperationsLoadHistoryComplete()
-
-            showSnackbarError(it)
-        })
-
-        jsObjRequest.tag = LOAD_OPERATIONS_TAG
-
-        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
