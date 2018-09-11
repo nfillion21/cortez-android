@@ -78,7 +78,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private var mSwipeRefreshLayout: SwipeRefreshLayout? = null
 
-    private var mRecyclerView: RecyclerView? = null
+    //private var mRecyclerView: RecyclerView? = null
     private var mRecyclerViewItems:ArrayList<Operation>? = null
     private var mBalanceItem:Double? = null
 
@@ -164,7 +164,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         mBalanceTextView = view.findViewById(R.id.balance_textview)
 
         mCoordinatorLayout = view.findViewById(R.id.coordinator)
-        mEmptyLoadingTextView = view.findViewById(R.id.empty_loading_textview)
+        //mEmptyLoadingTextView = view.findViewById(R.id.empty_loading_textview)
         mEmptyLoadingBalanceTextview = view.findViewById(R.id.empty_loading_balance_textview)
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
@@ -248,6 +248,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             }
         }
 
+        /*
         var recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         val layoutManager = LinearLayoutManager(activity)
         recyclerView.layoutManager = layoutManager
@@ -256,8 +257,9 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         adapter.setOnItemClickListener(this)
         recyclerView.adapter = adapter
+        */
 
-        mRecyclerView = recyclerView
+        //mRecyclerView = recyclerView
     }
 
     override fun onResume()
@@ -346,14 +348,14 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     {
         if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty()!!)
         {
-            mRecyclerView?.visibility = View.GONE
+            //mRecyclerView?.visibility = View.GONE
 
             mEmptyLoadingTextView?.visibility = View.VISIBLE
             mEmptyLoadingTextView?.setText(R.string.empty_list_operations)
         }
         else
         {
-            mRecyclerView?.visibility = View.VISIBLE
+            //mRecyclerView?.visibility = View.VISIBLE
             mEmptyLoadingTextView?.visibility = View.GONE
             mEmptyLoadingTextView?.text = null
         }
@@ -539,7 +541,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         }
 
         mRecyclerViewItems?.addAll(sortedList)
-        mRecyclerView?.adapter?.notifyDataSetChanged()
+        //mRecyclerView?.adapter?.notifyDataSetChanged()
     }
 
     private fun bundlesToItems( bundles:ArrayList<Bundle>?): ArrayList<Operation>?
