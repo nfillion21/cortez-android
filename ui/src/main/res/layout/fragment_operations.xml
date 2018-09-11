@@ -171,6 +171,7 @@
                         android:padding="@dimen/spacing_double"
                         android:layout_margin="@dimen/spacing_double"
                         android:background="@drawable/selector_rect_layout">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -178,7 +179,6 @@
                             >
 
                             <TextView
-                                android:id="@+id/tz_currency_bis"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="ꜩ"
@@ -186,31 +186,90 @@
                                 android:textStyle="bold"
                                 android:textColor="@color/colorPrimary"
                                 tools:ignore="UnusedAttribute,NewApi" />
+
                             <View
                                 android:layout_height="0dp"
                                 android:layout_width="@dimen/spacing_double" />
 
                             <TextView
-                                android:id="@+id/empty_loading_balance_textview_bis"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/colorAccent"
-                                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
-                                android:focusable="false"
-                                android:focusableInTouchMode="false"
-                                android:clickable="false" />
-                            <TextView
-                                android:id="@+id/balance_textview_bis"
+                                android:id="@+id/operation_amount_textview"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:elevation="@dimen/elevation_header"
                                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                                 android:textColor="@color/colorAccent"
                                 android:clipToPadding="false"
-                                android:visibility="gone"
+                                android:text="hello amount"
+                                android:visibility="visible"
                                 tools:ignore="UnusedAttribute,NewApi" />
 
                         </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ꜩ"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorPrimary"
+                                tools:ignore="UnusedAttribute,NewApi" />
+
+                            <View
+                                android:layout_height="0dp"
+                                android:layout_width="@dimen/spacing_double" />
+
+                            <TextView
+                                android:id="@+id/operation_fee_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:elevation="@dimen/elevation_header"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textColor="@color/colorAccent"
+                                android:clipToPadding="false"
+                                android:text="hello fee"
+                                android:visibility="visible"
+                                tools:ignore="UnusedAttribute,NewApi" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:elevation="@dimen/elevation_header"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                            android:textColor="@color/colorAccent"
+                            android:text="hello"
+                            android:clipToPadding="false"
+                            android:visibility="visible"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:elevation="@dimen/elevation_header"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                            android:textColor="@color/colorAccent"
+                            android:text="hello 2"
+                            android:clipToPadding="false"
+                            android:visibility="visible"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:elevation="@dimen/elevation_header"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                            android:textColor="@color/colorAccent"
+                            android:text="hello 3"
+                            android:clipToPadding="false"
+                            android:visibility="visible"
+                            tools:ignore="UnusedAttribute,NewApi" />
                     </LinearLayout>
 
                 </LinearLayout>

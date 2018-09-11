@@ -37,8 +37,6 @@ import android.support.annotation.RequiresApi
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -91,6 +89,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     private var mCoordinatorLayout: CoordinatorLayout? = null
 
     private var mBalanceTextView: TextView? = null
+    private var mOperationTextView: TextView? = null
 
     private var mNavProgressBalance: ProgressBar? = null
     private var mNavProgressOperations: ProgressBar? = null
@@ -162,6 +161,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         mNavProgressOperations = view.findViewById(R.id.nav_progress_operations)
 
         mBalanceTextView = view.findViewById(R.id.balance_textview)
+
+        mOperationTextView = view.findViewById(R.id.operation_amount_textview)
 
         mCoordinatorLayout = view.findViewById(R.id.coordinator)
         //mEmptyLoadingTextView = view.findViewById(R.id.empty_loading_textview)
@@ -541,6 +542,10 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         }
 
         mRecyclerViewItems?.addAll(sortedList)
+
+        val op = sortedList[0]
+        mOperationTextView?.text = op.amount.toString()
+
         //mRecyclerView?.adapter?.notifyDataSetChanged()
     }
 
