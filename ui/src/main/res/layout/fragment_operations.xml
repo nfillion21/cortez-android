@@ -85,7 +85,7 @@
                                     android:id="@+id/tz_currency"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="ꜩ"
+                                    android:text="@string/ꜩ"
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                                     android:textStyle="bold"
                                     android:textColor="@color/colorPrimary"
@@ -130,7 +130,7 @@
                                 android:layout_weight="1"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
-                                android:text="@string/operations_title"
+                                android:text="@string/last_operations_title"
                                 android:clipToPadding="false"
                                 tools:ignore="UnusedAttribute,NewApi" />
 
@@ -164,7 +164,29 @@
                         android:scrollbars="vertical" />
                     -->
 
-                    <LinearLayout
+
+
+
+
+
+
+                    <!--
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/theme_yellow_primary"
+                        >
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@color/red"
+                            >
+
+                        </RelativeLayout>
+                        -->
+
+                    <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -172,31 +194,52 @@
                         android:layout_margin="@dimen/spacing_double"
                         android:background="@drawable/selector_rect_layout">
 
+                        <TextView
+                            android:id="@+id/operation_date_textview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorAccent"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <TextView
+                            android:id="@+id/amount_textview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/operation_date_textview"
+                            android:text="@string/amount"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimary"
+                            android:layout_marginTop="@dimen/spacing_double"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
                         <LinearLayout
+                            android:id="@+id/operation_amount_layout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            >
+                            android:layout_below="@+id/amount_textview"
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="ꜩ"
-                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:text="@string/ꜩ"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                                 android:textStyle="bold"
                                 android:textColor="@color/colorPrimary"
                                 tools:ignore="UnusedAttribute,NewApi" />
 
-                            <View
+                            <Space
                                 android:layout_height="0dp"
-                                android:layout_width="@dimen/spacing_double" />
+                                android:layout_width="@dimen/spacing_normal" />
 
                             <TextView
                                 android:id="@+id/operation_amount_textview"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:elevation="@dimen/elevation_header"
-                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                                 android:textColor="@color/colorAccent"
                                 android:clipToPadding="false"
                                 android:text="hello amount"
@@ -205,31 +248,47 @@
 
                         </LinearLayout>
 
+                        <TextView
+                            android:id="@+id/fee_textview"
+                            android:layout_width="wrap_content"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/operation_amount_layout"
+                            android:elevation="@dimen/elevation_header"
+                            android:layout_marginTop="@dimen/spacing_double"
+                            android:text="@string/fee"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimary"
+                            android:clipToPadding="false"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
                         <LinearLayout
+                            android:id="@+id/operation_fee_layout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_below="@+id/fee_textview"
                             android:orientation="horizontal"
                             >
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="ꜩ"
-                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:text="@string/ꜩ"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                                 android:textStyle="bold"
                                 android:textColor="@color/colorPrimary"
                                 tools:ignore="UnusedAttribute,NewApi" />
 
-                            <View
+                            <Space
                                 android:layout_height="0dp"
-                                android:layout_width="@dimen/spacing_double" />
+                                android:layout_width="@dimen/spacing_normal" />
 
                             <TextView
                                 android:id="@+id/operation_fee_textview"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:elevation="@dimen/elevation_header"
-                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                                 android:textColor="@color/colorAccent"
                                 android:clipToPadding="false"
                                 android:text="hello fee"
@@ -237,7 +296,17 @@
                                 tools:ignore="UnusedAttribute,NewApi" />
 
                         </LinearLayout>
+                        
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/content_description"
+                            android:src="@drawable/ic_navigate_next_24"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            />
 
+                        <!--
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -270,7 +339,8 @@
                             android:clipToPadding="false"
                             android:visibility="visible"
                             tools:ignore="UnusedAttribute,NewApi" />
-                    </LinearLayout>
+                        -->
+                    </RelativeLayout>
 
                 </LinearLayout>
 
@@ -319,7 +389,7 @@
                             android:layout_marginBottom="@dimen/spacing_double"
                             />
                     </LinearLayout>
-                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
         </android.support.v4.widget.NestedScrollView>

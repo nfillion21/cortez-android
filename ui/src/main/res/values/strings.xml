@@ -61,6 +61,7 @@
     <string name="about_version">Version %1$s</string>
     <string name="balance_title">Balance</string>
     <string name="operations_title">Operations</string>
+    <string name="last_operations_title">Last operations</string>
     <string name="add_an_address">Add</string>
     <string name="about">About</string>
     <string name="exit">Exit</string>
@@ -86,6 +87,7 @@
     <string name="loading_balance">Loading balance…</string>
     <string name="empty_list_operations">No operations</string>
     <string name="contact_name">Contact name</string>
+    <string name="ꜩ">ꜩ</string>
 
     <string name="scan_address_permission">To scan the address, allow camera permission.</string>
     <string name="read_contacts_permission">To select a name, allow read contacts permission.</string>

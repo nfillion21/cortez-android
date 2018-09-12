@@ -57,6 +57,7 @@ import com.tezos.ui.adapter.OperationRecyclerViewAdapter
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import org.json.JSONArray
+import java.text.DateFormat
 import java.time.Instant
 import java.util.*
 import kotlin.collections.ArrayList
@@ -89,7 +90,9 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     private var mCoordinatorLayout: CoordinatorLayout? = null
 
     private var mBalanceTextView: TextView? = null
-    private var mOperationTextView: TextView? = null
+    private var mOperationAmountTextView: TextView? = null
+    private var mOperationFeeTextView: TextView? = null
+    private var mOperationDateTextView: TextView? = null
 
     private var mNavProgressBalance: ProgressBar? = null
     private var mNavProgressOperations: ProgressBar? = null
@@ -103,6 +106,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
     private var mWalletEnabled:Boolean = false
 
     private var listener: HomeListener? = null
+
+    private var mDateFormat:DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
 
     companion object
     {
@@ -162,7 +167,9 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mBalanceTextView = view.findViewById(R.id.balance_textview)
 
-        mOperationTextView = view.findViewById(R.id.operation_amount_textview)
+        mOperationAmountTextView = view.findViewById(R.id.operation_amount_textview)
+        mOperationFeeTextView = view.findViewById(R.id.operation_fee_textview)
+        mOperationDateTextView = view.findViewById(R.id.operation_date_textview)
 
         mCoordinatorLayout = view.findViewById(R.id.coordinator)
         //mEmptyLoadingTextView = view.findViewById(R.id.empty_loading_textview)
@@ -458,7 +465,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mNavProgressOperations?.visibility = View.VISIBLE
 
-        var pkh:Address? = null
+        var pkh:Address?
         arguments?.let {
             val addressBundle = it.getBundle(Address.TAG)
 
@@ -544,7 +551,13 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         mRecyclerViewItems?.addAll(sortedList)
 
         val op = sortedList[0]
-        mOperationTextView?.text = op.amount.toString()
+        mOperationAmountTextView?.text = (op.amount/1000000).toString()
+        mOperationFeeTextView?.text = (op.fee/1000000).toString()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(op.timestamp)))
+        }
 
         //mRecyclerView?.adapter?.notifyDataSetChanged()
     }
