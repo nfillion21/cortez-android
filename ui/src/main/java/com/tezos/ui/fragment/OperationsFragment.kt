@@ -60,12 +60,13 @@ import org.json.JSONArray
 import java.text.DateFormat
 import java.time.Instant
 import java.util.*
-import kotlin.collections.ArrayList
 
 class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickListener
 {
     private val OPERATIONS_ARRAYLIST_KEY = "operations_list"
     private val BALANCE_FLOAT_KEY = "balance_float_item"
+
+    private val LAST_OPERATION_KEY = "operations_list"
 
     private val GET_OPERATIONS_LOADING_KEY = "get_operations_loading"
     private val GET_BALANCE_LOADING_KEY = "get_balance_loading"
@@ -77,15 +78,16 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private var mSwipeRefreshLayout: SwipeRefreshLayout? = null
 
-    //private var mRecyclerView: RecyclerView? = null
     private var mRecyclerViewItems:ArrayList<Operation>? = null
     private var mBalanceItem:Double? = null
+    private var mLastOperation:Operation? = null
 
     private var mGetHistoryLoading:Boolean = false
     private var mGetBalanceLoading:Boolean = false
 
-    private var mEmptyLoadingTextView: TextView? = null
     private var mEmptyLoadingBalanceTextview: TextView? = null
+
+    private var mEmptyLoadingOperationsTextView:TextView? = null
 
     private var mCoordinatorLayout: CoordinatorLayout? = null
 
@@ -102,6 +104,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private var mBalanceLayout: LinearLayout? = null
     private var mCreateWalletLayout: LinearLayout? = null
+
+    private var mLastOperationLayout: RelativeLayout? = null
 
     private var mWalletEnabled:Boolean = false
 
@@ -156,6 +160,8 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             tzTheme = CustomTheme.fromBundle(themeBundle)
         }
 
+        mLastOperationLayout = view.findViewById(R.id.last_operation_layout)
+
         mCreateWalletButton = view.findViewById(R.id.createWalletButton)
         mRestoreWalletButton = view.findViewById(R.id.restoreWalletButton)
 
@@ -172,7 +178,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         mOperationDateTextView = view.findViewById(R.id.operation_date_textview)
 
         mCoordinatorLayout = view.findViewById(R.id.coordinator)
-        //mEmptyLoadingTextView = view.findViewById(R.id.empty_loading_textview)
+        mEmptyLoadingOperationsTextView = view.findViewById(R.id.empty_loading_operations_textview)
         mEmptyLoadingBalanceTextview = view.findViewById(R.id.empty_loading_balance_textview)
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
@@ -213,6 +219,12 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         {
             var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(OPERATIONS_ARRAYLIST_KEY)
             mRecyclerViewItems = bundlesToItems(messagesBundle)
+
+            val lastOperationBundle = savedInstanceState.getBundle(LAST_OPERATION_KEY)
+            if (lastOperationBundle != null)
+            {
+                mLastOperation = Operation.fromBundle(lastOperationBundle)
+            }
 
             mGetBalanceLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
             mGetHistoryLoading = savedInstanceState.getBoolean(GET_BALANCE_LOADING_KEY)
@@ -354,19 +366,31 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private fun refreshRecyclerViewAndTextHistory()
     {
-        if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty()!!)
-        {
-            //mRecyclerView?.visibility = View.GONE
 
-            mEmptyLoadingTextView?.visibility = View.VISIBLE
-            mEmptyLoadingTextView?.setText(R.string.empty_list_operations)
+        if (mLastOperation != null)
+        {
+            mLastOperationLayout?.visibility = View.VISIBLE
+            mEmptyLoadingOperationsTextView?.visibility = View.GONE
+            mEmptyLoadingOperationsTextView?.text = null
+
+            //mBalanceTextView?.visibility = View.VISIBLE
+
+            //TODO handle the animating stuff
+            //mBalanceTextView?.text = mBalanceItem.toString()
+
+            //mEmptyLoadingBalanceTextview?.visibility = View.GONE
+            //mEmptyLoadingBalanceTextview?.text = null
         }
         else
         {
-            //mRecyclerView?.visibility = View.VISIBLE
-            mEmptyLoadingTextView?.visibility = View.GONE
-            mEmptyLoadingTextView?.text = null
+
+            mLastOperationLayout?.visibility = View.GONE
+
+            //mBalanceTextView?.visibility = View.GONE
+            mEmptyLoadingOperationsTextView?.visibility = View.VISIBLE
+            mEmptyLoadingOperationsTextView?.text = "-"
         }
+
     }
 
     private fun refreshTextBalance(animating:Boolean)
@@ -397,7 +421,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mGetHistoryLoading = true
 
-        mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
+        mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
         mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
 
         mNavProgressBalance?.visibility = View.VISIBLE
@@ -461,7 +485,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mGetHistoryLoading = true
 
-        mEmptyLoadingTextView?.setText(R.string.loading_list_operations)
+        mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
 
         mNavProgressOperations?.visibility = View.VISIBLE
 
@@ -515,15 +539,13 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         listener?.showSnackBar(error!!, android.R.color.holo_red_light)
 
-        mEmptyLoadingTextView?.text = getString(R.string.generic_error)
+        mEmptyLoadingOperationsTextView?.text = getString(R.string.generic_error)
         mEmptyLoadingBalanceTextview?.text = getString(R.string.generic_error)
     }
 
     private fun addOperationItemsFromJSON(answer:JSONArray)
     {
         val response = DataExtractor.getJSONArrayFromField(answer,0)
-
-        mRecyclerViewItems?.clear()
 
         var sortedList = arrayListOf<Operation>()
         for (i in 0..(response.length() - 1))
@@ -550,16 +572,38 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
         mRecyclerViewItems?.addAll(sortedList)
 
-        val op = sortedList[0]
-        mOperationAmountTextView?.text = (op.amount/1000000).toString()
-        mOperationFeeTextView?.text = (op.fee/1000000).toString()
+        //TODO what if the list is empty
+        mLastOperation = sortedList[0]
+
+        //TODO put that
+        mOperationAmountTextView?.text = (mLastOperation!!.amount/1000000).toString()
+        mOperationFeeTextView?.text = (mLastOperation!!.fee/1000000).toString()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
-            mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(op.timestamp)))
+            mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(mLastOperation!!.timestamp)))
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        super.onSaveInstanceState(outState)
+
+        val bundles = itemsToBundles(mRecyclerViewItems)
+        outState.putParcelableArrayList(OPERATIONS_ARRAYLIST_KEY, bundles)
+
+        mBalanceItem?.let {
+            outState.putDouble(BALANCE_FLOAT_KEY, it)
         }
 
-        //mRecyclerView?.adapter?.notifyDataSetChanged()
+        mLastOperation?.let {
+            outState.putBundle(LAST_OPERATION_KEY, mLastOperation?.toBundle())
+        }
+
+        outState.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
+        outState.putBoolean(GET_BALANCE_LOADING_KEY, mGetBalanceLoading)
+
+        outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
     }
 
     private fun bundlesToItems( bundles:ArrayList<Bundle>?): ArrayList<Operation>?
@@ -576,7 +620,7 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             }
             return items
         }
-        
+
         return ArrayList()
     }
 
@@ -594,22 +638,6 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
             return bundles
         }
         return null
-    }
-
-    override fun onSaveInstanceState(outState: Bundle)
-    {
-        super.onSaveInstanceState(outState)
-
-        val bundles = itemsToBundles(mRecyclerViewItems)
-        outState.putParcelableArrayList(OPERATIONS_ARRAYLIST_KEY, bundles)
-
-        mBalanceItem?.let {
-            outState.putDouble(BALANCE_FLOAT_KEY, it)
-        }
-        outState.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
-        outState.putBoolean(GET_BALANCE_LOADING_KEY, mGetBalanceLoading)
-
-        outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
     }
 
     private fun cancelRequest(operations: Boolean, balance:Boolean)
