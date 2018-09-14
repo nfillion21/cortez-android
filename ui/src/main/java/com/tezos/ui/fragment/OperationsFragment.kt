@@ -366,27 +366,27 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
 
     private fun refreshRecyclerViewAndTextHistory()
     {
-
         if (mLastOperation != null)
         {
             mLastOperationLayout?.visibility = View.VISIBLE
+
+            mOperationAmountTextView?.text = (mLastOperation!!.amount/1000000).toString()
+            mOperationFeeTextView?.text = (mLastOperation!!.fee/1000000).toString()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(mLastOperation!!.timestamp)))
+            }
+
             mEmptyLoadingOperationsTextView?.visibility = View.GONE
             mEmptyLoadingOperationsTextView?.text = null
 
-            //mBalanceTextView?.visibility = View.VISIBLE
-
-            //TODO handle the animating stuff
-            //mBalanceTextView?.text = mBalanceItem.toString()
-
-            //mEmptyLoadingBalanceTextview?.visibility = View.GONE
-            //mEmptyLoadingBalanceTextview?.text = null
+            //TODO handle the click or not click.
         }
         else
         {
-
             mLastOperationLayout?.visibility = View.GONE
 
-            //mBalanceTextView?.visibility = View.GONE
             mEmptyLoadingOperationsTextView?.visibility = View.VISIBLE
             mEmptyLoadingOperationsTextView?.text = "-"
         }
