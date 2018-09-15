@@ -51,6 +51,7 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
+import com.tezos.ui.activity.AddAddressActivity
 import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.activity.RestoreWalletActivity
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
@@ -161,6 +162,20 @@ class OperationsFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickL
         }
 
         mLastOperationLayout = view.findViewById(R.id.last_operation_layout)
+
+        mLastOperationLayout?.setOnClickListener {
+
+            if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty() != true)
+            {
+                //Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
+
+                val mTezosTheme = CustomTheme(
+                        com.tezos.ui.R.color.theme_tezos_primary,
+                        com.tezos.ui.R.color.theme_tezos_primary_dark,
+                        com.tezos.ui.R.color.theme_tezos_text)
+                AddAddressActivity.start(activity, mTezosTheme)
+            }
+        }
 
         mCreateWalletButton = view.findViewById(R.id.createWalletButton)
         mRestoreWalletButton = view.findViewById(R.id.restoreWalletButton)
