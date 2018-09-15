@@ -50,12 +50,13 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.AddressBookFragment
+import com.tezos.ui.fragment.HomeFragment
 import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
 
-class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, com.tezos.ui.fragment.OperationsFragment.HomeFragment.HomeListener
+class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener
 {
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
@@ -279,7 +280,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
             }
 
-            return HomeFragment.newInstance(mTezosTheme)
+            return HomeFragment.newInstance(mTezosTheme, null)
         }
 
         override fun getCount(): Int

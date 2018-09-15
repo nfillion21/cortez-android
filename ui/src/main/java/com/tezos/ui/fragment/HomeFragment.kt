@@ -62,7 +62,7 @@ import java.text.DateFormat
 import java.time.Instant
 import java.util.*
 
-class HomeFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickListener
+class HomeFragment : Fragment()
 {
     private val OPERATIONS_ARRAYLIST_KEY = "operations_list"
     private val BALANCE_FLOAT_KEY = "balance_float_item"
@@ -681,11 +681,5 @@ class HomeFragment : Fragment(), OperationRecyclerViewAdapter.OnItemClickListene
     {
         super.onDestroy()
         cancelRequest(true, true)
-    }
-
-    override fun onOperationSelected(view: View?, operation: Operation?)
-    {
-        val operationDetailsFragment = OperationDetailsDialogFragment.newInstance(operation)
-        operationDetailsFragment.show(activity?.supportFragmentManager, OperationDetailsDialogFragment.TAG)
     }
 }
