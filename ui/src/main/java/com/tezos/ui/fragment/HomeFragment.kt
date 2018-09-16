@@ -176,8 +176,6 @@ class HomeFragment : Fragment()
                         com.tezos.ui.R.color.theme_tezos_text)
 
                 val bundles = itemsToBundles(mRecyclerViewItems)
-                //outState.putParcelableArrayList(OPERATIONS_ARRAYLIST_KEY, bundles)
-
                 OperationsActivity.start(activity!!, bundles!!, mTezosTheme)
             }
         }
@@ -287,19 +285,6 @@ class HomeFragment : Fragment()
                 startInitialLoadingBalance()
             }
         }
-
-        /*
-        var recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
-        val layoutManager = LinearLayoutManager(activity)
-        recyclerView.layoutManager = layoutManager
-
-        val adapter = OperationRecyclerViewAdapter(mRecyclerViewItems)
-
-        adapter.setOnItemClickListener(this)
-        recyclerView.adapter = adapter
-        */
-
-        //mRecyclerView = recyclerView
     }
 
     override fun onResume()
@@ -567,41 +552,46 @@ class HomeFragment : Fragment()
     {
         val response = DataExtractor.getJSONArrayFromField(answer,0)
 
-        var sortedList = arrayListOf<Operation>()
-        for (i in 0..(response.length() - 1))
+        if (response.length() > 0)
         {
-            val item = response.getJSONObject(i)
-            val operation = Operation.fromJSONObject(item)
+            var sortedList = arrayListOf<Operation>()
 
-            sortedList.add(operation)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            sortedList.sortWith(object: Comparator<Operation>
+            for (i in 0..(response.length() - 1))
             {
-                @RequiresApi(Build.VERSION_CODES.O)
-                override fun compare(o1: Operation, o2: Operation): Int = when {
+                val item = response.getJSONObject(i)
+                val operation = Operation.fromJSONObject(item)
 
-                    Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
-                    Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
-                    else -> 1
-                }
-            })
-        }
+                sortedList.add(operation)
+            }
 
-        mRecyclerViewItems?.addAll(sortedList)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                sortedList.sortWith(object: Comparator<Operation>
+                {
+                    @RequiresApi(Build.VERSION_CODES.O)
+                    override fun compare(o1: Operation, o2: Operation): Int = when {
 
-        //TODO what if the list is empty
-        mLastOperation = sortedList[0]
+                        Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
+                        Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
+                        else -> 1
+                    }
+                })
+            }
 
-        //TODO put that
-        mOperationAmountTextView?.text = (mLastOperation!!.amount/1000000).toString()
-        mOperationFeeTextView?.text = (mLastOperation!!.fee/1000000).toString()
+            //TODO take the 10 last operations in a better way
+            mRecyclerViewItems?.addAll(sortedList.subList(0, minOf(10, sortedList.size)))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(mLastOperation!!.timestamp)))
+            //TODO what if the list is empty
+            mLastOperation = sortedList[0]
+
+            //TODO put that
+            mOperationAmountTextView?.text = (mLastOperation!!.amount/1000000).toString()
+            mOperationFeeTextView?.text = (mLastOperation!!.fee/1000000).toString()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(mLastOperation!!.timestamp)))
+            }
         }
     }
 
