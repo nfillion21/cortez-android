@@ -42,6 +42,7 @@ import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.fragment.HomeFragment
+import com.tezos.ui.fragment.OperationsFragment
 
 class AddressDetailsActivity : BaseSecureActivity(), HomeFragment.HomeListener
 {
@@ -122,7 +123,7 @@ class AddressDetailsActivity : BaseSecureActivity(), HomeFragment.HomeListener
 
     private fun switchToOperations(tezosTheme:CustomTheme, address: Address)
     {
-        val operationsFragment = HomeFragment.newInstance(tezosTheme, address)
+        val operationsFragment = OperationsFragment.newInstance(tezosTheme, address)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.main_fragments_container, operationsFragment)
                 .commit()

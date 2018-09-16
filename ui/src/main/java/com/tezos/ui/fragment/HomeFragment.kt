@@ -63,7 +63,7 @@ import java.text.DateFormat
 import java.time.Instant
 import java.util.*
 
-class HomeFragment : Fragment()
+open class HomeFragment : Fragment()
 {
     private val OPERATIONS_ARRAYLIST_KEY = "operations_list"
     private val BALANCE_FLOAT_KEY = "balance_float_item"
@@ -287,49 +287,59 @@ class HomeFragment : Fragment()
         }
     }
 
+    open fun isHome():Boolean
+    {
+        return true
+    }
+
     override fun onResume()
     {
         super.onResume()
 
-        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
-        if (isPasswordSaved)
+        //avoid this call in OperationsFragment
+
+        if (isHome())
         {
-            if (!mWalletEnabled)
+            val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+            if (isPasswordSaved)
             {
-                mWalletEnabled = true
+                if (!mWalletEnabled)
+                {
+                    mWalletEnabled = true
 
-                val mnemonicsData = Storage(activity!!).getMnemonics()
+                    val mnemonicsData = Storage(activity!!).getMnemonics()
 
-                var address = Address()
-                address.description = "main address"
-                address.pubKeyHash = mnemonicsData.pkh
+                    var address = Address()
+                    address.description = "main address"
+                    address.pubKeyHash = mnemonicsData.pkh
 
-                val args = arguments
-                args?.putBundle(Address.TAG, address.toBundle())
+                    val args = arguments
+                    args?.putBundle(Address.TAG, address.toBundle())
 
-                // put the good layers
-                mBalanceLayout?.visibility = View.VISIBLE
-                mCreateWalletLayout?.visibility = View.GONE
+                    // put the good layers
+                    mBalanceLayout?.visibility = View.VISIBLE
+                    mCreateWalletLayout?.visibility = View.GONE
 
-                startInitialLoadingBalance()
+                    startInitialLoadingBalance()
+                }
             }
-        }
-        else
-        {
-            //cancelRequest(true, true)
-
-            mSwipeRefreshLayout?.isEnabled = false
-            mSwipeRefreshLayout?.isRefreshing = false
-
-            if (mWalletEnabled)
+            else
             {
-                mWalletEnabled = false
-                // put the good layers
-                mBalanceLayout?.visibility = View.GONE
-                mCreateWalletLayout?.visibility = View.VISIBLE
+                //cancelRequest(true, true)
 
-                val args = arguments
-                args?.putBundle(Address.TAG, null)
+                mSwipeRefreshLayout?.isEnabled = false
+                mSwipeRefreshLayout?.isRefreshing = false
+
+                if (mWalletEnabled)
+                {
+                    mWalletEnabled = false
+                    // put the good layers
+                    mBalanceLayout?.visibility = View.GONE
+                    mCreateWalletLayout?.visibility = View.VISIBLE
+
+                    val args = arguments
+                    args?.putBundle(Address.TAG, null)
+                }
             }
         }
     }
