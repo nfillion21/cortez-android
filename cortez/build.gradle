@@ -6,7 +6,7 @@ apply plugin: 'kotlin-android-extensions'
 
 def alphanetPropertiesFile = rootProject.file("cortez/deployment/alphanet.properties")
 def zeronetPropertiesFile = rootProject.file("cortez/deployment/zeronet.properties")
-def mainnetPropertiesFile = rootProject.file("cortez/deployment/betanet.properties")
+def mainnetPropertiesFile = rootProject.file("cortez/deployment/mainnet.properties")
 
 def keystoreAlphanetProperties = new Properties()
 def keystoreMainnetProperties = new Properties()

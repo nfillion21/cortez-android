@@ -78,7 +78,6 @@
     <string name="confirm_passcode">Please confirm the passcode.</string>
     <string name="error_different_passcodes">The passcode and the confirmation are not the same, please enter the passcode again.</string>
     <string name="title_passcode">Enter Passcode</string>
-    <string name="transfer_finalize" translatable="false">http://beth.luminar.eu.org:8776/transfer/finalize</string>
     <string name="fee_default">Default</string>
     <string name="loading_list_operations">Loading operations…</string>
     <string name="loading_balance">Loading balance…</string>

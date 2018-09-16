@@ -191,6 +191,7 @@
 
                         <TextView
                             android:id="@+id/empty_loading_operations_textview"
+                            android:visibility="visible"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@color/colorAccent"
@@ -199,6 +200,7 @@
 
                         <RelativeLayout
                             android:id="@+id/last_operation_layout"
+                            android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
 
