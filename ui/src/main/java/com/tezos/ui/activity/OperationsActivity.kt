@@ -43,6 +43,7 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.ui.R
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
+import com.tezos.ui.fragment.OperationDetailsDialogFragment
 
 class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.OnItemClickListener
 {
@@ -151,6 +152,7 @@ class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.On
 
     override fun onOperationSelected(view: View?, operation: Operation?)
     {
-
+        val operationDetailsFragment = OperationDetailsDialogFragment.newInstance(operation)
+        operationDetailsFragment.show(supportFragmentManager, OperationDetailsDialogFragment.TAG)
     }
 }
