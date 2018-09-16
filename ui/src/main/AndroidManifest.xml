@@ -54,6 +54,11 @@
             android:theme="@style/PaymentScreens.SimpleScannerActivity"
             />
 
+        <activity
+            android:name=".activity.OperationsActivity"
+            android:theme="@style/PaymentScreens.OperationsActivity"
+            />
+
     </application>
 
 </manifest>

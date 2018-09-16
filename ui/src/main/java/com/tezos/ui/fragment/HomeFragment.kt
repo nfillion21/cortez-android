@@ -53,6 +53,7 @@ import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
 import com.tezos.ui.activity.AddAddressActivity
 import com.tezos.ui.activity.CreateWalletActivity
+import com.tezos.ui.activity.OperationsActivity
 import com.tezos.ui.activity.RestoreWalletActivity
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
 import com.tezos.ui.utils.Storage
@@ -173,7 +174,11 @@ class HomeFragment : Fragment()
                         com.tezos.ui.R.color.theme_tezos_primary,
                         com.tezos.ui.R.color.theme_tezos_primary_dark,
                         com.tezos.ui.R.color.theme_tezos_text)
-                AddAddressActivity.start(activity, mTezosTheme)
+
+                val bundles = itemsToBundles(mRecyclerViewItems)
+                //outState.putParcelableArrayList(OPERATIONS_ARRAYLIST_KEY, bundles)
+
+                OperationsActivity.start(activity!!, bundles!!, mTezosTheme)
             }
         }
 

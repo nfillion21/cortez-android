@@ -1,29 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:orientation="vertical" android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<android.support.design.widget.AppBarLayout
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_weight="0"
+    android:theme="@style/PaymentScreens.AppBarOverlay">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+
+        app:popupTheme="@style/PaymentScreens.PopupOverlay"
+        tools:targetApi="lollipop">
+
+        <TextView android:id="@+id/barTitle"
+            android:text="@string/operations_title"
+
+            android:paddingStart="@dimen/spacing_normal"
+            android:paddingLeft="@dimen/spacing_normal"
+            android:paddingTop="@dimen/spacing_micro"
+            android:paddingBottom="@dimen/spacing_micro"
+            android:layout_width="wrap_content"
+            android:singleLine="true"
+
+            android:maxLines="1"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|center_horizontal"
+            tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
+
+        <ImageButton android:id="@+id/close_button"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+
+            android:contentDescription="@string/content_description"
+            android:padding="@dimen/spacing_double"
+            android:gravity="end"
+            android:src="@drawable/close_black_24"
+            android:background="@drawable/selector_subtle"
+            android:layout_gravity="end|end|center_vertical"
+            />
+
+    </android.support.v7.widget.Toolbar>
+
+</android.support.design.widget.AppBarLayout>
+
+<android.support.v7.widget.RecyclerView
+    android:id="@+id/recycler_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+    android:scrollbars="vertical" />
 
-    <!--
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/addresses_recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/spacing_nano"
-        android:clipToPadding="false"
-        android:scrollbarStyle="outsideOverlay"
-        android:scrollbars="vertical"
-        app:layoutManager="android.support.v7.widget.GridLayoutManager"
-        android:transitionGroup="false"
-        android:visibility="visible"
-        app:spanCount="2" tools:ignore="UnusedAttribute" />
-        -->
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-        android:scrollbars="vertical" />
-
-</android.support.design.widget.CoordinatorLayout>
+</LinearLayout>

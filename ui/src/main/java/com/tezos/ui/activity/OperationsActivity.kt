@@ -43,7 +43,6 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.ui.R
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
-import com.tezos.ui.fragment.RestoreWalletFragment
 
 class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.OnItemClickListener
 {
@@ -51,19 +50,40 @@ class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.On
 
     companion object
     {
-        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
+        const val OPERATIONS_KEY = "operations_key"
+
+        private fun getStartIntent(context: Context, list: ArrayList<Bundle>, themeBundle: Bundle): Intent
         {
             val starter = Intent(context, OperationsActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
+            starter.putParcelableArrayListExtra(OPERATIONS_KEY, list)
 
             return starter
         }
 
-        fun start(activity: Activity, theme: CustomTheme)
+        fun start(activity: Activity, list: ArrayList<Bundle>, theme: CustomTheme)
         {
-            val starter = getStartIntent(activity, theme.toBundle())
+            val starter = getStartIntent(activity, list, theme.toBundle())
             ActivityCompat.startActivity(activity, starter, null)
         }
+    }
+
+    private fun bundlesToItems( bundles:ArrayList<Bundle>?): ArrayList<Operation>?
+    {
+        if (bundles != null)
+        {
+            var items = ArrayList<Operation>(bundles.size)
+            if (!bundles.isEmpty())
+            {
+                bundles.forEach {
+                    val op = Operation.fromBundle(it)
+                    items.add(op)
+                }
+            }
+            return items
+        }
+
+        return ArrayList()
     }
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -76,10 +96,10 @@ class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.On
         val theme = CustomTheme.fromBundle(themeBundle)
         initToolbar(theme)
 
-
         var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
 
-        val adapter = OperationRecyclerViewAdapter(mRecyclerViewItems)
+        val elements = intent.getParcelableArrayListExtra<Bundle>(OPERATIONS_KEY)
+        val adapter = OperationRecyclerViewAdapter(bundlesToItems(elements))
 
         adapter.setOnItemClickListener(this)
         recyclerView.adapter = adapter
@@ -88,10 +108,12 @@ class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.On
 
         if (savedInstanceState == null)
         {
-            val restoreWalletFragment = RestoreWalletFragment.newInstance(themeBundle)
+            /*
+            val restoreWalletFragment = OperationsFragment.newInstance(themeBundle)
             supportFragmentManager.beginTransaction()
                     .add(R.id.restorewallet_container, restoreWalletFragment)
                     .commit()
+            */
         }
     }
 
@@ -129,6 +151,6 @@ class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.On
 
     override fun onOperationSelected(view: View?, operation: Operation?)
     {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 }

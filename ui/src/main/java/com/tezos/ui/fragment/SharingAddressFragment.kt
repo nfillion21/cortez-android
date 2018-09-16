@@ -54,8 +54,6 @@ class SharingAddressFragment : Fragment()
 
     companion object
     {
-        const val PKH_KEY = "pkh_key"
-
         @JvmStatic
         fun newInstance(theme: CustomTheme) =
                 SharingAddressFragment().apply {
