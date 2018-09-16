@@ -6,23 +6,23 @@ apply plugin: 'kotlin-android-extensions'
 
 def alphanetPropertiesFile = rootProject.file("cortez/deployment/alphanet.properties")
 def zeronetPropertiesFile = rootProject.file("cortez/deployment/zeronet.properties")
-def betanetPropertiesFile = rootProject.file("cortez/deployment/betanet.properties")
+def mainnetPropertiesFile = rootProject.file("cortez/deployment/betanet.properties")
 
 def keystoreAlphanetProperties = new Properties()
-def keystoreBetanetProperties = new Properties()
+def keystoreMainnetProperties = new Properties()
 def keystoreZeronetProperties = new Properties()
 
 keystoreAlphanetProperties.load(new FileInputStream(alphanetPropertiesFile))
-keystoreBetanetProperties.load(new FileInputStream(betanetPropertiesFile))
+keystoreMainnetProperties.load(new FileInputStream(mainnetPropertiesFile))
 keystoreZeronetProperties.load(new FileInputStream(zeronetPropertiesFile))
 
 android {
     signingConfigs {
-        betanetConfig {
-            keyAlias keystoreBetanetProperties['keyAlias']
-            keyPassword keystoreBetanetProperties['keyPassword']
-            storeFile file(keystoreBetanetProperties['storeFile'])
-            storePassword keystoreBetanetProperties['storePassword']
+        mainnetConfig {
+            keyAlias keystoreMainnetProperties['keyAlias']
+            keyPassword keystoreMainnetProperties['keyPassword']
+            storeFile file(keystoreMainnetProperties['storeFile'])
+            storePassword keystoreMainnetProperties['storePassword']
         }
         alphanetConfig {
             keyAlias keystoreAlphanetProperties['keyAlias']
@@ -65,17 +65,15 @@ android {
             dimension "version"
             signingConfig signingConfigs.zeronetConfig
         }
-        betanet {
-            applicationIdSuffix ".betanet"
-            dimension "version"
-            versionNameSuffix "-betanet"
-            signingConfig signingConfigs.betanetConfig
-        }
         alphanet {
             applicationIdSuffix ".alphanet"
             versionNameSuffix "-alphanet"
             dimension "version"
             signingConfig signingConfigs.alphanetConfig
+        }
+        mainnet {
+            dimension "version"
+            signingConfig signingConfigs.mainnetConfig
         }
     }
 }
