@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_url" translatable="false">http://beth.luminar.eu.org:8776/history?ks=%1$s</string>
+    <string name="balance_url" translatable="false">http://beth.luminar.eu.org:18732/chains/main/blocks/head/context/contracts/%1$s/balance</string>
+    <string name="transfer_url" translatable="false">http://beth.luminar.eu.org:8776/transfer/init</string>
+</resources>
