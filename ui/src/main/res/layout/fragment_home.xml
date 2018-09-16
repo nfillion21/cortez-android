@@ -311,41 +311,6 @@
                                 android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
                                 />
-
-                            <!--
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:elevation="@dimen/elevation_header"
-                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-                                android:textColor="@color/colorAccent"
-                                android:text="hello"
-                                android:clipToPadding="false"
-                                android:visibility="visible"
-                                tools:ignore="UnusedAttribute,NewApi" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:elevation="@dimen/elevation_header"
-                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-                                android:textColor="@color/colorAccent"
-                                android:text="hello 2"
-                                android:clipToPadding="false"
-                                android:visibility="visible"
-                                tools:ignore="UnusedAttribute,NewApi" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:elevation="@dimen/elevation_header"
-                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-                                android:textColor="@color/colorAccent"
-                                android:text="hello 3"
-                                android:clipToPadding="false"
-                                android:visibility="visible"
-                                tools:ignore="UnusedAttribute,NewApi" />
-                            -->
                         </RelativeLayout>
                     </RelativeLayout>
 

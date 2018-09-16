@@ -20,7 +20,7 @@ android:layout_height="match_parent">
         tools:targetApi="lollipop">
 
         <TextView android:id="@+id/barTitle"
-            android:text="@string/operations_title"
+            android:text="@string/last_operations_title"
 
             android:paddingStart="@dimen/spacing_normal"
             android:paddingLeft="@dimen/spacing_normal"
@@ -55,6 +55,8 @@ android:layout_height="match_parent">
     android:id="@+id/recycler_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_normal"
     app:layoutManager="android.support.v7.widget.LinearLayoutManager"
     android:scrollbars="vertical" />
 

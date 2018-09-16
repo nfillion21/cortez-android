@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/message_item_card_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -14,14 +15,142 @@
     android:layout_marginEnd="@dimen/spacing_double"
 
     android:layout_marginBottom="@dimen/spacing_normal"
-
     android:padding="@dimen/spacing_normal"
-
     android:minHeight="@dimen/min_height_touch_target"
 
     card_view:cardCornerRadius="@dimen/spacing_nano"
-    card_view:cardElevation="@dimen/spacing_micro" >
+    card_view:cardElevation="@dimen/spacing_micro">
 
+    <!--
+    <TextView
+        android:id="@+id/empty_loading_operations_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorAccent"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+        tools:ignore="UnusedAttribute,NewApi" />
+    -->
+
+    <RelativeLayout
+        android:id="@+id/last_operation_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_double"
+        >
+
+        <TextView
+            android:id="@+id/operation_item_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorAccent"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <TextView
+            android:id="@+id/amount_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/operation_item_date"
+            android:text="@string/amount"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:layout_marginTop="@dimen/spacing_double"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <LinearLayout
+            android:id="@+id/operation_amount_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/amount_textview"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ꜩ"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+            <Space
+                android:layout_height="0dp"
+                android:layout_width="@dimen/spacing_normal" />
+
+            <TextView
+                android:id="@+id/operation_item_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                android:textColor="@color/colorAccent"
+                android:clipToPadding="false"
+                android:visibility="visible"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/fee_textview"
+            android:layout_width="wrap_content"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/operation_amount_layout"
+            android:elevation="@dimen/elevation_header"
+            android:layout_marginTop="@dimen/spacing_double"
+            android:text="@string/fee"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:clipToPadding="false"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <LinearLayout
+            android:id="@+id/operation_fee_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/fee_textview"
+            android:orientation="horizontal"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ꜩ"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+            <Space
+                android:layout_height="0dp"
+                android:layout_width="@dimen/spacing_normal" />
+
+            <TextView
+                android:id="@+id/operation_item_fee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                android:textColor="@color/colorAccent"
+                android:clipToPadding="false"
+                android:visibility="visible"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_navigate_next_24"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            />
+
+    </RelativeLayout>
+
+    <!--
     <LinearLayout
         android:layout_width="match_parent"
         android:background="@color/tz_light"
@@ -90,6 +219,8 @@
             android:inputType="textFilter"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
     </LinearLayout>
+
+    -->
 
 </android.support.v7.widget.CardView>
 
