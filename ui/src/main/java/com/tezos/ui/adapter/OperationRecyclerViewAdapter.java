@@ -168,13 +168,7 @@ public class OperationRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
                     operationItemHolder.itemDate.setText(operationItem.getTimestamp());
                 }
 
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view)
-                    {
-                        mOnItemClickListener.onOperationSelected(view, operationItem);
-                    }
-                });
+                holder.itemView.setOnClickListener(view -> mOnItemClickListener.onOperationSelected(view, operationItem));
             }
             break;
 

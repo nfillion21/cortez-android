@@ -24,6 +24,19 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
+
+    flavorDimensions "version"
+    productFlavors {
+        zeronet {
+            dimension "version"
+        }
+        alphanet {
+            dimension "version"
+        }
+        mainnet {
+            dimension "version"
+        }
+    }
 }
 
 ext {

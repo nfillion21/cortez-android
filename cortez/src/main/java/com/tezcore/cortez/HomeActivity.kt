@@ -39,26 +39,24 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
-import com.tezcore.cortez.fragments.HomeFragment
 import com.tezos.android.R
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
-import com.tezos.ui.fragment.OperationsFragment
 import com.tezos.ui.fragment.AddressBookFragment
+import com.tezos.ui.fragment.HomeFragment
 import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
 
-class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, OperationsFragment.HomeListener
+class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener
 {
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
@@ -264,11 +262,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         address.description = "main address"
                         address.pubKeyHash = mnemonicsData.pkh
 
-                        OperationsFragment.newInstance(mTezosTheme, address)
+                        HomeFragment.newInstance(mTezosTheme, address)
                     }
                     else
                     {
-                        OperationsFragment.newInstance(mTezosTheme, null)
+                        HomeFragment.newInstance(mTezosTheme, null)
                     }
                 }
                 1 ->
@@ -282,7 +280,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
             }
 
-            return HomeFragment.newInstance(mTezosTheme)
+            return HomeFragment.newInstance(mTezosTheme, null)
         }
 
         override fun getCount(): Int
