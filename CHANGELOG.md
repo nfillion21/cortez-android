@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.0.0
+-----
+* First major version of the Cortez wallet for Android
+
 0.3.2
 -----
 * Fixed several bugs related to RPC calls
