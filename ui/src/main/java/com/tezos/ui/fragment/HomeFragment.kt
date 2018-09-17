@@ -51,24 +51,21 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
-import com.tezos.ui.activity.AddAddressActivity
 import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.activity.OperationsActivity
 import com.tezos.ui.activity.RestoreWalletActivity
-import com.tezos.ui.adapter.OperationRecyclerViewAdapter
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import org.json.JSONArray
 import java.text.DateFormat
 import java.time.Instant
 import java.util.*
+import kotlin.collections.ArrayList
 
 open class HomeFragment : Fragment()
 {
     private val OPERATIONS_ARRAYLIST_KEY = "operations_list"
     private val BALANCE_FLOAT_KEY = "balance_float_item"
-
-    private val LAST_OPERATION_KEY = "operations_list"
 
     private val GET_OPERATIONS_LOADING_KEY = "get_operations_loading"
     private val GET_BALANCE_LOADING_KEY = "get_balance_loading"
@@ -82,7 +79,6 @@ open class HomeFragment : Fragment()
 
     private var mRecyclerViewItems:ArrayList<Operation>? = null
     private var mBalanceItem:Double? = null
-    private var mLastOperation:Operation? = null
 
     private var mGetHistoryLoading:Boolean = false
     private var mGetBalanceLoading:Boolean = false
@@ -238,12 +234,6 @@ open class HomeFragment : Fragment()
             var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(OPERATIONS_ARRAYLIST_KEY)
             mRecyclerViewItems = bundlesToItems(messagesBundle)
 
-            val lastOperationBundle = savedInstanceState.getBundle(LAST_OPERATION_KEY)
-            if (lastOperationBundle != null)
-            {
-                mLastOperation = Operation.fromBundle(lastOperationBundle)
-            }
-
             mGetBalanceLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
             mGetHistoryLoading = savedInstanceState.getBoolean(GET_BALANCE_LOADING_KEY)
 
@@ -339,6 +329,16 @@ open class HomeFragment : Fragment()
 
                     val args = arguments
                     args?.putBundle(Address.TAG, null)
+
+                    if (mRecyclerViewItems != null)
+                    {
+                        mRecyclerViewItems?.clear()
+                    }
+
+                    if (mBalanceItem != null)
+                    {
+                        mBalanceItem = -1.0
+                    }
                 }
             }
         }
@@ -381,16 +381,18 @@ open class HomeFragment : Fragment()
 
     private fun refreshRecyclerViewAndTextHistory()
     {
-        if (mLastOperation != null)
+        if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty() == false)
         {
             mLastOperationLayout?.visibility = View.VISIBLE
 
-            mOperationAmountTextView?.text = (mLastOperation!!.amount/1000000).toString()
-            mOperationFeeTextView?.text = (mLastOperation!!.fee/1000000).toString()
+            val lastOperation = mRecyclerViewItems!![0]
+
+            mOperationAmountTextView?.text = (lastOperation.amount/1000000).toString()
+            mOperationFeeTextView?.text = (lastOperation.fee/1000000).toString()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
-                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(mLastOperation!!.timestamp)))
+                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
             }
 
             mEmptyLoadingOperationsTextView?.visibility = View.GONE
@@ -405,7 +407,6 @@ open class HomeFragment : Fragment()
             mEmptyLoadingOperationsTextView?.visibility = View.VISIBLE
             mEmptyLoadingOperationsTextView?.text = "-"
         }
-
     }
 
     private fun refreshTextBalance(animating:Boolean)
@@ -441,7 +442,7 @@ open class HomeFragment : Fragment()
 
         mNavProgressBalance?.visibility = View.VISIBLE
 
-        var pkh:Address? = null
+        var pkh:Address?
         arguments?.let {
             val addressBundle = it.getBundle(Address.TAG)
             if (addressBundle != null)
@@ -589,18 +590,23 @@ open class HomeFragment : Fragment()
             }
 
             //TODO take the 10 last operations in a better way
+            if (mRecyclerViewItems == null)
+            {
+                mRecyclerViewItems = ArrayList()
+            }
+            mRecyclerViewItems?.clear()
             mRecyclerViewItems?.addAll(sortedList.subList(0, minOf(10, sortedList.size)))
 
             //TODO what if the list is empty
-            mLastOperation = sortedList[0]
+            val lastOperation = sortedList[0]
 
             //TODO put that
-            mOperationAmountTextView?.text = (mLastOperation!!.amount/1000000).toString()
-            mOperationFeeTextView?.text = (mLastOperation!!.fee/1000000).toString()
+            mOperationAmountTextView?.text = (lastOperation!!.amount/1000000).toString()
+            mOperationFeeTextView?.text = (lastOperation!!.fee/1000000).toString()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
-                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(mLastOperation!!.timestamp)))
+                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(lastOperation!!.timestamp)))
             }
         }
     }
@@ -614,10 +620,6 @@ open class HomeFragment : Fragment()
 
         mBalanceItem?.let {
             outState.putDouble(BALANCE_FLOAT_KEY, it)
-        }
-
-        mLastOperation?.let {
-            outState.putBundle(LAST_OPERATION_KEY, mLastOperation?.toBundle())
         }
 
         outState.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
