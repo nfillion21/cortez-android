@@ -46,11 +46,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.android.volley.AuthFailureError
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.VolleyError
+import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
@@ -63,7 +62,10 @@ import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
 import com.tezos.ui.utils.toNoPrefixHexString
+import org.json.JSONArray
 import org.json.JSONObject
+import java.io.UnsupportedEncodingException
+import kotlin.coroutines.experimental.ContinuationInterceptor
 
 /**
  * Created by nfillion on 20/04/16.
@@ -107,7 +109,7 @@ class TransferFormFragment : Fragment()
     private var mInitTransferLoading:Boolean = false
     private var mFinalizeTransferLoading:Boolean = false
 
-    private var mTransferId:Int? = null
+    //private var mTransferId:Int? = null
     private var mTransferPayload:String? = null
 
     private var mSpinnerPosition:Int = 0
@@ -173,7 +175,7 @@ class TransferFormFragment : Fragment()
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
 
-            mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY, -1)
+            //mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY, -1)
             mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
 
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
@@ -276,7 +278,7 @@ class TransferFormFragment : Fragment()
     // volley
     private fun startPostRequestLoadInitTransfer(mnemonicsData: Storage.MnemonicsData)
     {
-        val url = getString(R.string.transfer_url)
+        val url = getString(R.string.transfer_forge)
 
         //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
 
@@ -306,57 +308,35 @@ class TransferFormFragment : Fragment()
         var postParams = JSONObject()
         postParams.put("src", pkhSrc)
         postParams.put("src_pk", pk)
-        postParams.put("dst", pkhDst)
-        postParams.put("amount", amount.toLong().toString())
-        postParams.put("fee", fee.toLong().toString())
+
+        var dstObjects = JSONArray()
+
+        var dstObject = JSONObject()
+        dstObject.put("dst", pkhDst)
+        dstObject.put("amount", amount.toLong().toString())
+        dstObject.put("fee", fee.toLong().toString())
+
+        dstObjects.put(dstObject)
+
+        postParams.put("dsts", dstObjects)
 
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
 
-            mTransferId = answer.getInt("id")
-            mTransferPayload = answer.getString("payload")
+            //mTransferId = answer.getInt("id")
+            mTransferPayload = answer.getString("result")
 
             onInitTransferLoadComplete(null)
 
             startFinalizeTransferLoading()
 
-            /*
-            val timer = object : CountDownTimer(10000, 1000)
-            {
-                override fun onFinish()
-                {
-                }
-
-                override fun onTick(millisUntilFinished: Long)
-                {
-                }
-            }
-            timer.start()
-            */
-
         }, Response.ErrorListener
         {
-
-            /*
-            val timer = object : CountDownTimer(10000, 1000)
-            {
-                override fun onFinish()
-                {
-                }
-
-                override fun onTick(millisUntilFinished: Long)
-                {
-                    //secondsRemaining = millisUntilFinished / 1000
-                    //updateCountdownUI()
-                }
-            }
-            timer.start()
-            */
             onInitTransferLoadComplete(it)
 
-            Log.i("mTransferId", ""+mTransferId)
+            //Log.i("mTransferId", ""+mTransferId)
             Log.i("mTransferPayload", ""+mTransferPayload)
         })
         {
@@ -379,44 +359,64 @@ class TransferFormFragment : Fragment()
     // volley
     private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
     {
-        val url = getString(R.string.transfer_finalize)
+        val url = getString(R.string.transfer_injection_operation)
 
-        if (mTransferId != null && mTransferId != -1 && mTransferPayload != null)
+        if (/*mTransferId != null && mTransferId != -1 && */mTransferPayload != null)
         {
+            //val payload = mTransferPayload
+            val zeroThree = "0x03".hexToByteArray()
+
             val byteArrayThree = mTransferPayload!!.hexToByteArray()
+
+            //val payload = "0x03".toByte().plus(byteArrayThree)
+
+            val xLen = zeroThree.size
+            val yLen = byteArrayThree.size
+            val result = ByteArray(xLen + yLen)
+
+            System.arraycopy(zeroThree, 0, result, 0, xLen)
+            System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
+
 
             val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
             val sk = CryptoUtils.generateSk(mnemonics, "")
-            val signature = KeyPair.sign(sk, byteArrayThree)
+            val pk = CryptoUtils.generatePk(mnemonics, "")
+
+            val payload_hash = KeyPair.b2b(result)
+            val signature = KeyPair.sign(sk, payload_hash, pk)
 
             //TODO verify signature
-            //val signVerified = KeyPair.verifySign(signature, byteArrayThree, pk)
+            //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
 
-            var hexSign = signature.toNoPrefixHexString()
+            val pLen = byteArrayThree.size
+            val sLen = signature.size
+            val newResult = ByteArray(pLen + sLen)
 
-            var postparams = JSONObject()
-            postparams.put("id", mTransferId!!)
-            postparams.put("payload", hexSign)
-            //payload is hex signature, 64 bytes then 128 hex chars
+            System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
+            System.arraycopy(signature, 0, newResult, pLen, sLen)
 
-            val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
+            var payloadsign = newResult.toNoPrefixHexString()
+
+            val stringRequest = object : StringRequest(Request.Method.POST, url,
+                    Response.Listener<String> { response ->
+
+                        onFinalizeTransferLoadComplete(null)
+                        listener?.onTransferSucceed()
+                    },
+                    Response.ErrorListener
+                    {
+                        onFinalizeTransferLoadComplete(it)
+                        listener?.onTransferFailed(it)
+                    }
+            )
             {
-                answer ->
+                @Throws(AuthFailureError::class)
+                override fun getBody(): ByteArray
+                {
+                    val pay = "\""+payloadsign+"\""
+                    return pay!!.toByteArray()
+                }
 
-                //TODO check the JSON object before calling success
-                //{"result":"opD3EXAKajRxnLhFkYKMR9V1GpNMtQDcmVEp6MHCbYDu6bgUYDK"}
-
-                onFinalizeTransferLoadComplete(null)
-                listener?.onTransferSucceed()
-
-            }, Response.ErrorListener
-            {
-
-                onFinalizeTransferLoadComplete(it)
-                listener?.onTransferFailed(it)
-
-            })
-            {
                 @Throws(AuthFailureError::class)
                 override fun getHeaders(): Map<String, String>
                 {
@@ -428,14 +428,15 @@ class TransferFormFragment : Fragment()
 
             cancelRequests(true)
 
-            jsObjRequest.tag = TRANSFER_FINALIZE_TAG
+            stringRequest.tag = TRANSFER_FINALIZE_TAG
 
             mFinalizeTransferLoading = true
-            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
         }
         else
         {
-            //something wrong happened. we got the finalizeTransfer boolean but not the payload + id
+
+//something wrong happened. we got the finalizeTransfer boolean but not the payload + id
         }
     }
 
@@ -481,8 +482,8 @@ class TransferFormFragment : Fragment()
         mSrcButton = view.findViewById(R.id.transfer_src_button)
         mSrcButton!!.setOnClickListener { _ ->
             AddressBookActivity.start(activity,
-                theme,
-                AddressBookActivity.Selection.SelectionAccounts)
+                    theme,
+                    AddressBookActivity.Selection.SelectionAccounts)
         }
 
         mDstButton = view.findViewById(R.id.transfer_dst_button)
@@ -748,7 +749,7 @@ class TransferFormFragment : Fragment()
         this.putAmountInRed(true)
     }
 
-    // put everything in RED
+// put everything in RED
 
     private fun putAmountInRed(red: Boolean)
     {
@@ -782,7 +783,7 @@ class TransferFormFragment : Fragment()
     private fun setTextPayButton(amount: String)
     {
         var amount = amount
-        //var amountDouble: Double = java.lang.Double.parseDouble(amount)
+//var amountDouble: Double = java.lang.Double.parseDouble(amount)
         var amountDouble: Double = amount.toDouble()
 
         val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
@@ -806,10 +807,10 @@ class TransferFormFragment : Fragment()
             }
         }
 
-        //amount = java.lang.Double.toString(amountDouble)
+//amount = java.lang.Double.toString(amountDouble)
         amount = amountDouble.toString()
 
-        //check the correct amount
+//check the correct amount
         if (amount.contains("."))
         {
             val elements = amount.substring(amount.indexOf("."))
@@ -839,11 +840,11 @@ class TransferFormFragment : Fragment()
         else
         {
             amount = String.format("%.2f", amount.toDouble())
-            //amount = Double.parseDouble(amount).toString();
+//amount = Double.parseDouble(amount).toString();
         }
 
         val moneyFormatted2 = "$amount ꜩ"
-        //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
+//String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
         mPayButton!!.text = getString(R.string.pay, moneyFormatted2)
     }
 
@@ -909,10 +910,12 @@ class TransferFormFragment : Fragment()
         outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
-        when {
-            mTransferId != null -> outState.putInt(TRANSFER_ID_KEY, mTransferId!!)
-            else -> outState.putInt(TRANSFER_ID_KEY, -1)
-        }
+/*
+when {
+mTransferId != null -> outState.putInt(TRANSFER_ID_KEY, mTransferId!!)
+else -> outState.putInt(TRANSFER_ID_KEY, -1)
+}
+*/
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 
         outState.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)

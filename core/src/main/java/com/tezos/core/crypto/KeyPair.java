@@ -29,19 +29,21 @@ import static org.libsodium.jni.SodiumConstants.SECRETKEY_BYTES;
 import static org.libsodium.jni.SodiumConstants.SIGNATURE_BYTES;
 import static org.libsodium.jni.crypto.Util.zeros;
 
-public class KeyPair {
-
+public class KeyPair
+{
     private byte[] publicKey;
     private byte[] seed;
     private final byte[] secretKey;
 
-    public KeyPair() {
+    public KeyPair()
+    {
         this.secretKey = zeros(SECRETKEY_BYTES*2);
         this.publicKey = zeros(PUBLICKEY_BYTES);
         sodium().crypto_box_curve25519xsalsa20poly1305_keypair(publicKey, secretKey);
     }
 
-    public KeyPair(byte[] seed){
+    public KeyPair(byte[] seed)
+    {
         //Util.checkLength(seed, SECRETKEY_BYTES);
         this.seed = seed;
         this.secretKey = zeros(SECRETKEY_BYTES*2);
@@ -55,20 +57,24 @@ public class KeyPair {
     //        checkLength(this.secretKey, SECRETKEY_BYTES);
     //    }
 
-    public KeyPair(String secretKey, Encoder encoder) {
+    public KeyPair(String secretKey, Encoder encoder)
+    {
         this(encoder.decode(secretKey));
     }
 
-    public PublicKey getPublicKey() {
+    public PublicKey getPublicKey()
+    {
         Point point = new Point();
         byte[] key = publicKey != null ? publicKey : point.mult(secretKey).toBytes();
         return new PublicKey(key);
     }
 
-    public PrivateKey getPrivateKey() {
+    public PrivateKey getPrivateKey()
+    {
         return new PrivateKey(secretKey);
     }
 
+    /*
     public static byte[] sign(String sk, byte[] data)
     {
 
@@ -100,11 +106,62 @@ public class KeyPair {
 
         return signature;
     }
+    //*/
 
-    public static int verifySign(byte[] signature, byte[] data, String pk)
+    public static byte[] sign(String sk, byte[] payload_hash, String pk)
+    {
+        byte[] decodeChecked = Base58.decode(sk);
+        //byte[] decodeCheckedWithoutfirst = Arrays.copyOfRange(decodeChecked, 4, 68);
+        byte[] decodeCheckedWithoutfirstSk = Arrays.copyOfRange(decodeChecked, 4, 68);
+
+        byte[] signature = new byte[SIGNATURE_BYTES];
+        sodium().crypto_sign_detached(signature, new int[]{signature.length}, payload_hash, payload_hash.length, decodeCheckedWithoutfirstSk);
+        //SodiumJNI.crypto_sign_detached(signature, new int[]{signature.length}, data, data.length, removeLast);
+
+
+
+        byte[] decodeCheckedPk = Base58.decodeChecked(pk);
+        byte[] decodeCheckedWithoutfirst = Arrays.copyOfRange(decodeCheckedPk, 4, 68);
+
+        int signed2 = SodiumJNI.crypto_sign_verify_detached(signature, payload_hash, payload_hash.length, decodeCheckedWithoutfirst);
+        int signed = sodium().crypto_sign_verify_detached(signature, payload_hash, payload_hash.length, decodeCheckedWithoutfirst);
+
+        //int verifySign = verifySign()
+
+        return signature;
+    }
+
+    public static byte[] b2b(byte[] data)
+    {
+        byte[] payload_hash = new byte[32];
+        sodium().crypto_generichash(payload_hash, payload_hash.length, data, data.length, new byte[]{0}, 0);
+        return payload_hash;
+
+        /*
+        byte[] decodeChecked = Base58.decodeChecked(sk);
+        //byte[] decodeCheckedWithoutfirst = Arrays.copyOfRange(decodeChecked, 4, 68);
+
+        byte[] signature = new byte[SIGNATURE_BYTES];
+        sodium().crypto_sign_detached(signature, new int[]{signature.length}, payload_hash, payload_hash.length, decodeChecked);
+        //SodiumJNI.crypto_sign_detached(signature, new int[]{signature.length}, data, data.length, removeLast);
+
+        //int verifySign = verifySign()
+
+        return signature;
+        */
+    }
+
+    public static int verifySign(byte[] signature, String pk, byte[] payload_hash)
     {
         byte[] decodeChecked = Base58.decodeChecked(pk);
-        byte[] decodeCheckedWithoutfirst = Arrays.copyOfRange(decodeChecked, 4, 68);
-        return sodium().crypto_sign_verify_detached(signature, data, data.length, decodeCheckedWithoutfirst);
+
+        //byte[] decodeCheckedWithoutfirst = Arrays.copyOfRange(decodeChecked, 4, 68);
+
+        //byte[] payload_hash = new byte[32];
+        //sodium().crypto_generichash(payload_hash, payload_hash.length, data, data.length, new byte[]{0}, 0);
+
+
+        return sodium().crypto_sign_verify_detached(signature, payload_hash, payload_hash.length, decodeChecked);
+        //return sodium().crypto_sign_verify_detached(signature, data, data.length, decodeChecked);
     }
 }
