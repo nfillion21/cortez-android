@@ -9,7 +9,7 @@
     <string name="address_book_title">Address book</string>
     <string name="transfer_title">Transfer</string>
     <string name="card_expiration">Expiry date</string>
-    <string name="amount_default" translatable="false">60.05</string>
+    <string name="amount_default" translatable="false">0.05</string>
     <string name="amount">Amount</string>
     <string name="fee">Fee</string>
     <string name="fees_default">0.001</string>
