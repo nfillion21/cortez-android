@@ -50,10 +50,12 @@ import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.authentication.AuthenticationDialog
@@ -65,6 +67,8 @@ import com.tezos.ui.utils.toNoPrefixHexString
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.UnsupportedEncodingException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.coroutines.experimental.ContinuationInterceptor
 
 /**
@@ -283,15 +287,20 @@ class TransferFormFragment : Fragment()
         //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
 
         var amount = mAmountCache
+        //var amount = 0.000002
         var fee = 0.0
 
+        //var fee = 0.000004
+
+        //*
         when (mSpinnerPosition)
         {
             0 -> { fee = 0.01 }
-            1 -> { fee = 0.00 }
+            1 -> { fee = 0.000002 }
             2 -> { fee = 0.05 }
             else -> {}
         }
+        //*/
 
         // convert in µꜩ
         amount *= 1000000
@@ -327,6 +336,82 @@ class TransferFormFragment : Fragment()
 
             //mTransferId = answer.getInt("id")
             mTransferPayload = answer.getString("result")
+            val data = mTransferPayload!!.hexToByteArray()
+
+
+
+
+            //val payload = mTransferPayload
+            val zeroThree = "0x03".hexToByteArray()
+
+            val byteArrayThree = mTransferPayload!!.hexToByteArray()
+
+            //val payload = "0x03".toByte().plus(byteArrayThree)
+
+            val xLen = zeroThree.size
+            val yLen = byteArrayThree.size
+            val result = ByteArray(xLen + yLen)
+
+            System.arraycopy(zeroThree, 0, result, 0, xLen)
+            System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
+
+
+
+
+            var elementOne = data[0].toInt()
+
+            val str = Integer.toBinaryString(elementOne)
+
+            val zero = Integer.toBinaryString(0)
+            val zero2 = Integer.toUnsignedString(0)
+
+            val array = ArrayList<String>()
+            val numbers = ArrayList<Int>()
+
+            Utils.byteToBigInteger(data)
+
+            data.forEach {
+                val bin = Integer.toBinaryString(it.toInt())
+
+                //array.add(bin)
+                val data2 = it.toByte().toString()
+                var data25 = Integer.toUnsignedString(it.toInt())
+
+                data25 = data25.replace("[^0-9]".toRegex(), "")
+
+                //val unsignedValue = it.toInt() & 0xFF
+
+                //val data3 = String.toString(it)
+                //val integerPos = data25.toInt()
+                val integerNewPos = Utils.byteToUnsignedInt(it)
+
+                numbers.add(integerNewPos)
+
+                val data34 = integerNewPos.toString(2)
+
+                array.add(data34)
+                val data35 = it.toString()
+                //var short = ByteBuffer.wrap(it).order(ByteOrder.LITTLE_ENDIAN).short
+            }
+
+
+            val slice = data.slice(34..54)
+            val slice2 = slice.toByteArray()
+
+
+            //Utils.base58encode(slice.toByteArray())
+
+            /*
+            var posNumbers = ArrayList<Byte>()
+            slice.forEach {
+
+                val integerNewPos = Utils.byteToUnsignedInt(it)
+                posNumbers.add(integerNewPos.toByte())
+            }
+            */
+
+            val tz = Base58.encode(slice2)
+            val tz1 = CryptoUtils.generatePkh(slice2)
 
             onInitTransferLoadComplete(null)
 

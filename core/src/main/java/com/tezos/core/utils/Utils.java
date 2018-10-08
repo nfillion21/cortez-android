@@ -33,6 +33,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 
+import com.tezos.core.crypto.Base58;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -434,6 +437,36 @@ public class Utils {
             }
         }
         return sb.toString();
+    }
+
+    public static int bytesToUnsignedShort(byte byte1, byte byte2, boolean bigEndian)
+    {
+        if (bigEndian)
+            return ( ( (byte1 & 0xFF) << 8) | (byte2 & 0xFF) );
+
+
+        return ( ( (byte2 & 0xFF) << 8) | (byte1 & 0xFF) );
+
+    }
+
+    public static int byteToUnsignedInt(byte b)
+    {
+        int i = b & 0xFF;
+        return i;
+        //return Integer.toHexString(i);
+    }
+
+    public static BigInteger byteToBigInteger(byte[] byteArray)
+    {
+        BigInteger bigInteger = new BigInteger(byteArray);
+        BigInteger bigInteger2 = new BigInteger(byteArray);
+        //return Integer.toHexString(i);
+        return bigInteger;
+    }
+
+    public static String base58encode(byte[] byteArray)
+    {
+        return Base58.encode(byteArray);
     }
 
     /*

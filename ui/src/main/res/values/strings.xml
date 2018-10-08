@@ -16,7 +16,7 @@
     <string name="public_key_hash">Public Key Hash</string>
     <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
-    <string name="public_key_info_title">Here is your Public key hash</string>
+    <string name="public_key_info_title">Here is your Address</string>
     <string name="address_book_empty_title">Your address book is empty</string>
     <string name="public_key_info_empty_title">You have no public key</string>
     <string name="address_book_empty_info_title">Please fill in your address book by clicking on the add button</string>
