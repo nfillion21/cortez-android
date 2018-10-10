@@ -285,10 +285,7 @@ class TransferFormFragment : Fragment()
         //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
 
         var amount = mAmountCache
-        //var amount = 0.000002
         var fee = 0.0
-
-        //var fee = 0.000004
 
         //*
         when (mSpinnerPosition)
@@ -302,9 +299,7 @@ class TransferFormFragment : Fragment()
 
         // convert in µꜩ
         amount *= 1000000
-        //fee *= 1000000
-        fee = 2.0
-        amount = 500.0
+        fee *= 1000000
 
         //TODO need to check if activity is not null
 
@@ -370,26 +365,39 @@ class TransferFormFragment : Fragment()
     private fun isPayloadValid(payload:String, params:JSONObject):Boolean
     {
         var isValid = false
+        if (payload != null && params != null)
+        {
+            val data = payload.hexToByteArray()
+
+            /*
+            var postParams = JSONObject()
+            postParams.put("src", pkhSrc)
+            postParams.put("src_pk", pk)
+
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+            dstObject.put("dst", pkhDst)
+            dstObject.put("amount", amount.toLong().toString())
+            dstObject.put("fee", fee.toLong().toString())
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+            */
+
+            val isHeight = data[32].compareTo(8) == 0
 
 
-        val data = mTransferPayload!!.hexToByteArray()
+            val src = data.slice(35..54).toByteArray()
 
-        val numbers = ArrayList<Int>()
+            val pkh = params["src"]
+            val isSrcValid = pkh == CryptoUtils.genericHashToPkh(src)
 
-        data.forEach {
-            val integerNewPos = Utils.byteToUnsignedInt(it)
-            numbers.add(integerNewPos)
+
+            isValid = isHeight && isSrcValid
+
         }
-
-        val slice = data.slice(35..54)
-        val slice2 = slice.toByteArray()
-
-
-        val tz1 = CryptoUtils.genericHashToPkh(slice2)
-
-        //TODO check if this tz1 is equal to our pkh
-
-
         return isValid
     }
 
