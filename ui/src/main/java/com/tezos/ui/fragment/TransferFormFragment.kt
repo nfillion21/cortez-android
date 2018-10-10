@@ -52,7 +52,6 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
@@ -68,6 +67,7 @@ import com.tezos.ui.utils.hexToByteArray
 import com.tezos.ui.utils.toNoPrefixHexString
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.ArrayList
 
 /**
  * Created by nfillion on 20/04/16.
@@ -386,7 +386,10 @@ class TransferFormFragment : Fragment()
             postParams.put("dsts", dstObjects)
             */
 
-            val isHeight = data[32].compareTo(8) == 0
+            val obj = params["dsts"] as JSONArray
+            val dstObj = obj[0] as JSONObject
+
+            val isHeightValid = data[32].compareTo(8) == 0
 
 
             val src = data.slice(35..54).toByteArray()
@@ -395,10 +398,113 @@ class TransferFormFragment : Fragment()
             val isSrcValid = pkh == CryptoUtils.genericHashToPkh(src)
 
 
-            isValid = isHeight && isSrcValid
+            val size = data.size
+            val fee = data.slice(55 until size).toByteArray()
+
+            val feeList = ArrayList<Int>()
+            var i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(fee[i])
+
+                feeList.add(bytePos)
+                i++
+
+            } while (bytePos > 128)
+
+            val dstFees = dstObj["fee"] as String
+
+            val isFeesValid = addBytesLittleEndian(feeList) == dstFees.toInt()
+
+
+            val counter = fee.slice(i until fee.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(counter[i])
+                i++
+
+            } while (bytePos > 128)
+
+            val gasLimit = counter.slice(i until counter.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
+                i++
+
+            } while (bytePos > 128)
+
+
+            val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
+                i++
+
+            } while (bytePos > 128)
+
+
+            val amount = storageLimit.slice(i until storageLimit.size).toByteArray()
+
+            val amountList = ArrayList<Int>()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(amount[i])
+
+                amountList.add(bytePos)
+                i++
+
+            } while (bytePos > 128)
+
+            val dstAmount = dstObj["amount"] as String
+
+            val isAmountValid = addBytesLittleEndian(amountList) == dstAmount.toInt()
+
+
+            val dst = amount.slice(i+2 until amount.size).toByteArray()
+            //TODO handle the first two bytes
+
+            val dstPkh = dstObj["dst"]
+            val isDstValid = dstPkh == CryptoUtils.genericHashToPkh(dst)
+
+            isValid = isHeightValid && isSrcValid && isFeesValid && isAmountValid && isDstValid
 
         }
         return isValid
+    }
+
+    private fun addBytesLittleEndian(bytes:ArrayList<Int>):Int
+    {
+        val reversed = bytes.reversed()
+
+        var accum = 0
+
+        for (i in reversed.indices)
+        {
+            val bytePos = reversed[i]
+
+            if (bytePos < 128)
+            {
+                accum += bytePos
+                if (i != reversed.size - 1)
+                {
+                    accum *= 128
+                }
+            }
+            else
+            {
+                accum += bytePos - 128
+                if (i != reversed.size - 1)
+                {
+                    accum *= 128
+                }
+            }
+        }
+
+        return accum
     }
 
     // volley
@@ -408,12 +514,9 @@ class TransferFormFragment : Fragment()
 
         if (/*mTransferId != null && mTransferId != -1 && */mTransferPayload != null)
         {
-            //val payload = mTransferPayload
             val zeroThree = "0x03".hexToByteArray()
 
             val byteArrayThree = mTransferPayload!!.hexToByteArray()
-
-            //val payload = "0x03".toByte().plus(byteArrayThree)
 
             val xLen = zeroThree.size
             val yLen = byteArrayThree.size
@@ -422,13 +525,9 @@ class TransferFormFragment : Fragment()
             System.arraycopy(zeroThree, 0, result, 0, xLen)
             System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
-
             val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
             val sk = CryptoUtils.generateSk(mnemonics, "")
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
-            val payload_hash = KeyPair.b2b(result)
-            val signature = KeyPair.sign(sk, payload_hash, pk)
+            val signature = KeyPair.sign(sk, result)
 
             //TODO verify signature
             //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
