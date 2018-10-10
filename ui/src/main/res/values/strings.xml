@@ -56,7 +56,7 @@
     <string name="settings_title">Settings</string>
     <string name="about_title">About</string>
     <string name="exit_button">Log Out</string>
-    <string name="privacy">Privacy</string>
+    <string name="privacy">Privacy and Security</string>
     <string name="cortez_for_android">Cortez for Android</string>
     <string name="about_version">Version %1$s</string>
     <string name="balance_title">Balance</string>

@@ -46,10 +46,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.android.volley.*
+import com.android.volley.AuthFailureError
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
@@ -66,10 +68,6 @@ import com.tezos.ui.utils.hexToByteArray
 import com.tezos.ui.utils.toNoPrefixHexString
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.UnsupportedEncodingException
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import kotlin.coroutines.experimental.ContinuationInterceptor
 
 /**
  * Created by nfillion on 20/04/16.
@@ -296,7 +294,7 @@ class TransferFormFragment : Fragment()
         when (mSpinnerPosition)
         {
             0 -> { fee = 0.01 }
-            1 -> { fee = 0.000002 }
+            1 -> { fee = 0.00 }
             2 -> { fee = 0.05 }
             else -> {}
         }
@@ -304,7 +302,9 @@ class TransferFormFragment : Fragment()
 
         // convert in µꜩ
         amount *= 1000000
-        fee *= 1000000
+        //fee *= 1000000
+        fee = 2.0
+        amount = 500.0
 
         //TODO need to check if activity is not null
 
@@ -334,84 +334,10 @@ class TransferFormFragment : Fragment()
 
             //TODO check if the JSON is fine then launch the 2nd request
 
-            //mTransferId = answer.getInt("id")
             mTransferPayload = answer.getString("result")
-            val data = mTransferPayload!!.hexToByteArray()
 
+            isPayloadValid(answer.getString("result"), postParams)
 
-
-
-            //val payload = mTransferPayload
-            val zeroThree = "0x03".hexToByteArray()
-
-            val byteArrayThree = mTransferPayload!!.hexToByteArray()
-
-            //val payload = "0x03".toByte().plus(byteArrayThree)
-
-            val xLen = zeroThree.size
-            val yLen = byteArrayThree.size
-            val result = ByteArray(xLen + yLen)
-
-            System.arraycopy(zeroThree, 0, result, 0, xLen)
-            System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
-
-
-
-
-            var elementOne = data[0].toInt()
-
-            val str = Integer.toBinaryString(elementOne)
-
-            val zero = Integer.toBinaryString(0)
-            val zero2 = Integer.toUnsignedString(0)
-
-            val array = ArrayList<String>()
-            val numbers = ArrayList<Int>()
-
-            Utils.byteToBigInteger(data)
-
-            data.forEach {
-                val bin = Integer.toBinaryString(it.toInt())
-
-                //array.add(bin)
-                val data2 = it.toByte().toString()
-                var data25 = Integer.toUnsignedString(it.toInt())
-
-                data25 = data25.replace("[^0-9]".toRegex(), "")
-
-                //val unsignedValue = it.toInt() & 0xFF
-
-                //val data3 = String.toString(it)
-                //val integerPos = data25.toInt()
-                val integerNewPos = Utils.byteToUnsignedInt(it)
-
-                numbers.add(integerNewPos)
-
-                val data34 = integerNewPos.toString(2)
-
-                array.add(data34)
-                val data35 = it.toString()
-                //var short = ByteBuffer.wrap(it).order(ByteOrder.LITTLE_ENDIAN).short
-            }
-
-
-            val slice = data.slice(34..54)
-            val slice2 = slice.toByteArray()
-
-
-            //Utils.base58encode(slice.toByteArray())
-
-            /*
-            var posNumbers = ArrayList<Byte>()
-            slice.forEach {
-
-                val integerNewPos = Utils.byteToUnsignedInt(it)
-                posNumbers.add(integerNewPos.toByte())
-            }
-            */
-
-            val tz = Base58.encode(slice2)
-            val tz1 = CryptoUtils.generatePkh(slice2)
 
             onInitTransferLoadComplete(null)
 
@@ -439,6 +365,32 @@ class TransferFormFragment : Fragment()
         jsObjRequest.tag = TRANSFER_INIT_TAG
         mInitTransferLoading = true
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    private fun isPayloadValid(payload:String, params:JSONObject):Boolean
+    {
+        var isValid = false
+
+
+        val data = mTransferPayload!!.hexToByteArray()
+
+        val numbers = ArrayList<Int>()
+
+        data.forEach {
+            val integerNewPos = Utils.byteToUnsignedInt(it)
+            numbers.add(integerNewPos)
+        }
+
+        val slice = data.slice(35..54)
+        val slice2 = slice.toByteArray()
+
+
+        val tz1 = CryptoUtils.genericHashToPkh(slice2)
+
+        //TODO check if this tz1 is equal to our pkh
+
+
+        return isValid
     }
 
     // volley

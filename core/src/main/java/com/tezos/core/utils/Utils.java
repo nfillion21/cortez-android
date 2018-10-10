@@ -456,14 +456,6 @@ public class Utils {
         //return Integer.toHexString(i);
     }
 
-    public static BigInteger byteToBigInteger(byte[] byteArray)
-    {
-        BigInteger bigInteger = new BigInteger(byteArray);
-        BigInteger bigInteger2 = new BigInteger(byteArray);
-        //return Integer.toHexString(i);
-        return bigInteger;
-    }
-
     public static String base58encode(byte[] byteArray)
     {
         return Base58.encode(byteArray);
