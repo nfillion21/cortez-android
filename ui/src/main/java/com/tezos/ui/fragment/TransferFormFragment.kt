@@ -331,12 +331,17 @@ class TransferFormFragment : Fragment()
 
             mTransferPayload = answer.getString("result")
 
-            isPayloadValid(answer.getString("result"), postParams)
+            if (mTransferPayload != null && isPayloadValid(mTransferPayload!!, postParams))
+            {
+                onInitTransferLoadComplete(null)
 
-
-            onInitTransferLoadComplete(null)
-
-            startFinalizeTransferLoading()
+                startFinalizeTransferLoading()
+            }
+            else
+            {
+                val volleyError = VolleyError(getString(R.string.generic_error))
+                onInitTransferLoadComplete(volleyError)
+            }
 
         }, Response.ErrorListener
         {
