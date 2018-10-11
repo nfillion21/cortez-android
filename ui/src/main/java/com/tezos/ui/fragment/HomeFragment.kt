@@ -554,7 +554,7 @@ open class HomeFragment : Fragment()
             getString(R.string.generic_error)
         }
 
-        listener?.showSnackBar(error!!, ContextCompat.getColor(context, android.R.color.holo_red_light), ContextCompat.getColor(context, R.color.tz_light))
+        listener?.showSnackBar(error!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
         mEmptyLoadingOperationsTextView?.text = getString(R.string.generic_error)
         mEmptyLoadingBalanceTextview?.text = getString(R.string.generic_error)

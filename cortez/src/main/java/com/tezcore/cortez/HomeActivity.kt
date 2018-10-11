@@ -350,9 +350,9 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
     }
 
-    fun showSnackBar(resText:String, color:Int, textColor:Int)
+    override fun showSnackBar(text:String, color:Int, textColor:Int)
     {
-        val snackbar = Snackbar.make(fabTransfer, resText, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(fabTransfer, text, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor(color)
         snackbar.setActionTextColor(textColor)
         snackbar.show()
@@ -442,7 +442,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             //Snackbar.make(fabTransfer, "Replace with your own action", Snackbar.LENGTH_LONG)
                     //.setAction("Action", null).show()
 
-            showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent) ,Color.YELLOW)
+            showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
         }
     }
 }
