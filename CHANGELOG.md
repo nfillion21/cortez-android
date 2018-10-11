@@ -1,6 +1,11 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.1.0
+-----
+* Update the API endpoints for transfers.
+* Update the Cortez logo.
+
 1.0.0
 -----
 * First major version of the Cortez wallet for Android
