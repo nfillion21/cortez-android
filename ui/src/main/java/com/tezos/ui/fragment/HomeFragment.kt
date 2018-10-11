@@ -36,6 +36,7 @@ import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
@@ -125,7 +126,7 @@ open class HomeFragment : Fragment()
 
     interface HomeListener
     {
-        fun showSnackBar(res:String, color:Int)
+        fun showSnackBar(res:String, color:Int, textColor:Int)
     }
 
     override fun onAttach(context: Context)
@@ -553,7 +554,7 @@ open class HomeFragment : Fragment()
             getString(R.string.generic_error)
         }
 
-        listener?.showSnackBar(error!!, android.R.color.holo_red_light)
+        listener?.showSnackBar(error!!, ContextCompat.getColor(context, android.R.color.holo_red_light), ContextCompat.getColor(context, R.color.tz_light))
 
         mEmptyLoadingOperationsTextView?.text = getString(R.string.generic_error)
         mEmptyLoadingBalanceTextview?.text = getString(R.string.generic_error)
