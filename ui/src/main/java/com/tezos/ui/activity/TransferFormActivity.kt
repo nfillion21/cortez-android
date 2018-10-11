@@ -41,6 +41,7 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import com.android.volley.VolleyError
+import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.fragment.TransferFormFragment
@@ -58,18 +59,23 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
     {
         var TRANSFER_REQUEST_CODE = 0x2100 // arbitrary int
 
-        private fun getStartIntent(context: Context, seedBundle: Bundle, themeBundle: Bundle): Intent
+        private fun getStartIntent(context: Context, seedBundle: Bundle, address: Address?, themeBundle: Bundle): Intent
         {
             val starter = Intent(context, TransferFormActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
             starter.putExtra(Storage.TAG, seedBundle)
 
+            if (address != null)
+            {
+                starter.putExtra(Address.TAG, address.toBundle())
+            }
+
             return starter
         }
 
-        fun start(activity: Activity, seedBundle: Bundle, theme: CustomTheme)
+        fun start(activity: Activity, seedBundle: Bundle, address: Address?, theme: CustomTheme)
         {
-            val starter = getStartIntent(activity, seedBundle, theme.toBundle())
+            val starter = getStartIntent(activity, seedBundle, address, theme.toBundle())
             ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_REQUEST_CODE, null)
         }
     }
@@ -83,14 +89,15 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
         val theme = CustomTheme.fromBundle(themeBundle)
 
         val seedDataBundle = intent.getBundleExtra(Storage.TAG)
-        //Storage.MnemonicsData seedData = Storage.Companion.fromBundle(seedDataBundle);
+
+        val dstAddressBundle = intent.getBundleExtra(Address.TAG)
 
         initToolbar(theme)
 
         if (savedInstanceState == null)
         {
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.form_fragment_container, TransferFormFragment.newInstance(seedDataBundle, themeBundle)).commit()
+                    .replace(R.id.form_fragment_container, TransferFormFragment.newInstance(seedDataBundle, dstAddressBundle, themeBundle)).commit()
         }
     }
 

@@ -9,14 +9,14 @@
     <string name="address_book_title">Address book</string>
     <string name="transfer_title">Transfer</string>
     <string name="card_expiration">Expiry date</string>
-    <string name="amount_default" translatable="false">60.05</string>
+    <string name="amount_default" translatable="false">0.05</string>
     <string name="amount">Amount</string>
     <string name="fee">Fee</string>
     <string name="fees_default">0.001</string>
     <string name="public_key_hash">Public Key Hash</string>
     <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
-    <string name="public_key_info_title">Here is your Public key hash</string>
+    <string name="public_key_info_title">Here is your Address</string>
     <string name="address_book_empty_title">Your address book is empty</string>
     <string name="public_key_info_empty_title">You have no public key</string>
     <string name="address_book_empty_info_title">Please fill in your address book by clicking on the add button</string>
@@ -36,6 +36,7 @@
     <string name="copied_your_pkh">Copied your public key hash</string>
     <string name="copied">Copied %1$s</string>
     <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key</string>
+    <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez</string>
     <string name="tap_to_copy_info">Tap to copy your address or share it with the sender via email or text</string>
     <string name="share">Share</string>
     <string name="contact_us">Contact us</string>
@@ -56,7 +57,7 @@
     <string name="settings_title">Settings</string>
     <string name="about_title">About</string>
     <string name="exit_button">Log Out</string>
-    <string name="privacy">Privacy</string>
+    <string name="privacy">Privacy and Security</string>
     <string name="cortez_for_android">Cortez for Android</string>
     <string name="about_version">Version %1$s</string>
     <string name="balance_title">Balance</string>

@@ -51,10 +51,13 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
+import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.authentication.AuthenticationDialog
@@ -63,7 +66,9 @@ import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
 import com.tezos.ui.utils.toNoPrefixHexString
+import org.json.JSONArray
 import org.json.JSONObject
+import java.util.ArrayList
 
 /**
  * Created by nfillion on 20/04/16.
@@ -99,15 +104,15 @@ class TransferFormFragment : Fragment()
 
     private var mAmount:TextInputEditText? = null
 
-    private var mSrcAccount:Account? = null
-    private var mDstAccount:Account? = null
+    private var mSrcAccount:Address? = null
+    private var mDstAccount:Address? = null
 
     private var listener: OnTransferListener? = null
 
     private var mInitTransferLoading:Boolean = false
     private var mFinalizeTransferLoading:Boolean = false
 
-    private var mTransferId:Int? = null
+    //private var mTransferId:Int? = null
     private var mTransferPayload:String? = null
 
     private var mSpinnerPosition:Int = 0
@@ -116,11 +121,16 @@ class TransferFormFragment : Fragment()
     companion object
     {
         @JvmStatic
-        fun newInstance(seedDataBundle:Bundle, customTheme:Bundle) =
+        fun newInstance(seedDataBundle:Bundle, address:Bundle?, customTheme:Bundle) =
                 TransferFormFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, customTheme)
                         putBundle(Storage.TAG, seedDataBundle)
+
+                        if (address != null)
+                        {
+                            putBundle(Address.TAG, address)
+                        }
                     }
                 }
 
@@ -173,7 +183,7 @@ class TransferFormFragment : Fragment()
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
 
-            mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY, -1)
+            //mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY, -1)
             mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
 
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
@@ -276,13 +286,14 @@ class TransferFormFragment : Fragment()
     // volley
     private fun startPostRequestLoadInitTransfer(mnemonicsData: Storage.MnemonicsData)
     {
-        val url = getString(R.string.transfer_url)
+        val url = getString(R.string.transfer_forge)
 
         //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
 
         var amount = mAmountCache
         var fee = 0.0
 
+        //*
         when (mSpinnerPosition)
         {
             0 -> { fee = 0.01 }
@@ -290,6 +301,7 @@ class TransferFormFragment : Fragment()
             2 -> { fee = 0.05 }
             else -> {}
         }
+        //*/
 
         // convert in µꜩ
         amount *= 1000000
@@ -306,57 +318,42 @@ class TransferFormFragment : Fragment()
         var postParams = JSONObject()
         postParams.put("src", pkhSrc)
         postParams.put("src_pk", pk)
-        postParams.put("dst", pkhDst)
-        postParams.put("amount", amount.toLong().toString())
-        postParams.put("fee", fee.toLong().toString())
+
+        var dstObjects = JSONArray()
+
+        var dstObject = JSONObject()
+        dstObject.put("dst", pkhDst)
+        dstObject.put("amount", amount.toLong().toString())
+        dstObject.put("fee", fee.toLong().toString())
+
+        dstObjects.put(dstObject)
+
+        postParams.put("dsts", dstObjects)
 
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
 
-            mTransferId = answer.getInt("id")
-            mTransferPayload = answer.getString("payload")
+            mTransferPayload = answer.getString("result")
 
-            onInitTransferLoadComplete(null)
-
-            startFinalizeTransferLoading()
-
-            /*
-            val timer = object : CountDownTimer(10000, 1000)
+            if (mTransferPayload != null && isPayloadValid(mTransferPayload!!, postParams))
             {
-                override fun onFinish()
-                {
-                }
+                onInitTransferLoadComplete(null)
 
-                override fun onTick(millisUntilFinished: Long)
-                {
-                }
+                startFinalizeTransferLoading()
             }
-            timer.start()
-            */
+            else
+            {
+                val volleyError = VolleyError(getString(R.string.generic_error))
+                onInitTransferLoadComplete(volleyError)
+            }
 
         }, Response.ErrorListener
         {
-
-            /*
-            val timer = object : CountDownTimer(10000, 1000)
-            {
-                override fun onFinish()
-                {
-                }
-
-                override fun onTick(millisUntilFinished: Long)
-                {
-                    //secondsRemaining = millisUntilFinished / 1000
-                    //updateCountdownUI()
-                }
-            }
-            timer.start()
-            */
             onInitTransferLoadComplete(it)
 
-            Log.i("mTransferId", ""+mTransferId)
+            //Log.i("mTransferId", ""+mTransferId)
             Log.i("mTransferPayload", ""+mTransferPayload)
         })
         {
@@ -376,47 +373,222 @@ class TransferFormFragment : Fragment()
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
+    private fun isPayloadValid(payload:String, params:JSONObject):Boolean
+    {
+        var isValid = false
+        if (payload != null && params != null)
+        {
+            val data = payload.hexToByteArray()
+
+            /*
+            var postParams = JSONObject()
+            postParams.put("src", pkhSrc)
+            postParams.put("src_pk", pk)
+
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+            dstObject.put("dst", pkhDst)
+            dstObject.put("amount", amount.toLong().toString())
+            dstObject.put("fee", fee.toLong().toString())
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+            */
+
+            val obj = params["dsts"] as JSONArray
+            val dstObj = obj[0] as JSONObject
+
+            val isHeightValid = data[32].compareTo(8) == 0
+            if (!isHeightValid)
+            {
+                return false
+            }
+
+
+            val src = data.slice(35..54).toByteArray()
+
+            val pkh = params["src"]
+            val isSrcValid = pkh == CryptoUtils.genericHashToPkh(src)
+
+            if (!isSrcValid)
+            {
+                return false
+            }
+
+            val size = data.size
+            val fee = data.slice(55 until size).toByteArray()
+
+            val feeList = ArrayList<Int>()
+            var i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(fee[i])
+
+                feeList.add(bytePos)
+                i++
+
+            } while (bytePos > 128)
+
+            val dstFees = dstObj["fee"] as String
+
+            val isFeesValid = addBytesLittleEndian(feeList) == dstFees.toInt()
+
+            if (!isFeesValid)
+            {
+                return false
+            }
+
+
+            val counter = fee.slice(i until fee.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(counter[i])
+                i++
+
+            } while (bytePos > 128)
+
+            val gasLimit = counter.slice(i until counter.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
+                i++
+
+            } while (bytePos > 128)
+
+
+            val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
+                i++
+
+            } while (bytePos > 128)
+
+
+            val amount = storageLimit.slice(i until storageLimit.size).toByteArray()
+
+            val amountList = ArrayList<Int>()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(amount[i])
+
+                amountList.add(bytePos)
+                i++
+
+            } while (bytePos > 128)
+
+            val dstAmount = dstObj["amount"] as String
+
+            val isAmountValid = addBytesLittleEndian(amountList) == dstAmount.toInt()
+            if (!isAmountValid)
+            {
+                return false
+            }
+
+
+            val dst = amount.slice(i+2 until amount.size).toByteArray()
+            //TODO handle the first two bytes
+
+            val dstPkh = dstObj["dst"]
+            val isDstValid = dstPkh == CryptoUtils.genericHashToPkh(dst)
+
+            isValid = isHeightValid && isSrcValid && isFeesValid && isAmountValid && isDstValid
+
+        }
+        return isValid
+    }
+
+    private fun addBytesLittleEndian(bytes:ArrayList<Int>):Int
+    {
+        val reversed = bytes.reversed()
+
+        var accum = 0
+
+        for (i in reversed.indices)
+        {
+            val bytePos = reversed[i]
+
+            if (bytePos < 128)
+            {
+                accum += bytePos
+                if (i != reversed.size - 1)
+                {
+                    accum *= 128
+                }
+            }
+            else
+            {
+                accum += bytePos - 128
+                if (i != reversed.size - 1)
+                {
+                    accum *= 128
+                }
+            }
+        }
+
+        return accum
+    }
+
     // volley
     private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
     {
-        val url = getString(R.string.transfer_finalize)
+        val url = getString(R.string.transfer_injection_operation)
 
-        if (mTransferId != null && mTransferId != -1 && mTransferPayload != null)
+        if (/*mTransferId != null && mTransferId != -1 && */mTransferPayload != null)
         {
+            val zeroThree = "0x03".hexToByteArray()
+
             val byteArrayThree = mTransferPayload!!.hexToByteArray()
+
+            val xLen = zeroThree.size
+            val yLen = byteArrayThree.size
+            val result = ByteArray(xLen + yLen)
+
+            System.arraycopy(zeroThree, 0, result, 0, xLen)
+            System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
             val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
             val sk = CryptoUtils.generateSk(mnemonics, "")
-            val signature = KeyPair.sign(sk, byteArrayThree)
+            val signature = KeyPair.sign(sk, result)
 
             //TODO verify signature
-            //val signVerified = KeyPair.verifySign(signature, byteArrayThree, pk)
+            //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
 
-            var hexSign = signature.toNoPrefixHexString()
+            val pLen = byteArrayThree.size
+            val sLen = signature.size
+            val newResult = ByteArray(pLen + sLen)
 
-            var postparams = JSONObject()
-            postparams.put("id", mTransferId!!)
-            postparams.put("payload", hexSign)
-            //payload is hex signature, 64 bytes then 128 hex chars
+            System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
+            System.arraycopy(signature, 0, newResult, pLen, sLen)
 
-            val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postparams, Response.Listener<JSONObject>
+            var payloadsign = newResult.toNoPrefixHexString()
+
+            val stringRequest = object : StringRequest(Request.Method.POST, url,
+                    Response.Listener<String> { response ->
+
+                        onFinalizeTransferLoadComplete(null)
+                        listener?.onTransferSucceed()
+                    },
+                    Response.ErrorListener
+                    {
+                        onFinalizeTransferLoadComplete(it)
+                        listener?.onTransferFailed(it)
+                    }
+            )
             {
-                answer ->
+                @Throws(AuthFailureError::class)
+                override fun getBody(): ByteArray
+                {
+                    val pay = "\""+payloadsign+"\""
+                    return pay!!.toByteArray()
+                }
 
-                //TODO check the JSON object before calling success
-                //{"result":"opD3EXAKajRxnLhFkYKMR9V1GpNMtQDcmVEp6MHCbYDu6bgUYDK"}
-
-                onFinalizeTransferLoadComplete(null)
-                listener?.onTransferSucceed()
-
-            }, Response.ErrorListener
-            {
-
-                onFinalizeTransferLoadComplete(it)
-                listener?.onTransferFailed(it)
-
-            })
-            {
                 @Throws(AuthFailureError::class)
                 override fun getHeaders(): Map<String, String>
                 {
@@ -428,14 +600,15 @@ class TransferFormFragment : Fragment()
 
             cancelRequests(true)
 
-            jsObjRequest.tag = TRANSFER_FINALIZE_TAG
+            stringRequest.tag = TRANSFER_FINALIZE_TAG
 
             mFinalizeTransferLoading = true
-            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
         }
         else
         {
-            //something wrong happened. we got the finalizeTransfer boolean but not the payload + id
+
+//something wrong happened. we got the finalizeTransfer boolean but not the payload + id
         }
     }
 
@@ -481,8 +654,8 @@ class TransferFormFragment : Fragment()
         mSrcButton = view.findViewById(R.id.transfer_src_button)
         mSrcButton!!.setOnClickListener { _ ->
             AddressBookActivity.start(activity,
-                theme,
-                AddressBookActivity.Selection.SelectionAccounts)
+                    theme,
+                    AddressBookActivity.Selection.SelectionAccounts)
         }
 
         mDstButton = view.findViewById(R.id.transfer_dst_button)
@@ -518,9 +691,17 @@ class TransferFormFragment : Fragment()
             val seedDataBundle = it.getBundle(Storage.TAG)
             val seedData = Storage.fromBundle(seedDataBundle)
 
-            var account = Account()
+            var account = Address()
             account.pubKeyHash = seedData.pkh
             switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, account)
+
+            val address = it.getBundle(Address.TAG)
+            if (address != null)
+            {
+                mDstAccount = Address.fromBundle(address)
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+                validatePayButton(isInputDataValid())
+            }
         }
     }
 
@@ -608,7 +789,7 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    private fun switchButtonAndLayout(selection: AddressBookActivity.Selection, account: Account)
+    private fun switchButtonAndLayout(selection: AddressBookActivity.Selection, address: Address)
     {
         when (selection)
         {
@@ -617,14 +798,14 @@ class TransferFormFragment : Fragment()
                 mSrcButton?.visibility = View.GONE
                 mTransferSrcFilled?.visibility = View.VISIBLE
 
-                mTransferSrcPkh?.text = account.pubKeyHash
+                mTransferSrcPkh?.text = address.pubKeyHash
             }
 
             AddressBookActivity.Selection.SelectionAccountsAndAddresses ->
             {
                 mDstButton?.visibility = View.GONE
                 mTransferDstFilled?.visibility = View.VISIBLE
-                mTransferDstPkh?.text = account.pubKeyHash
+                mTransferDstPkh?.text = address.pubKeyHash
             }
 
             else ->
@@ -748,7 +929,7 @@ class TransferFormFragment : Fragment()
         this.putAmountInRed(true)
     }
 
-    // put everything in RED
+// put everything in RED
 
     private fun putAmountInRed(red: Boolean)
     {
@@ -782,7 +963,7 @@ class TransferFormFragment : Fragment()
     private fun setTextPayButton(amount: String)
     {
         var amount = amount
-        //var amountDouble: Double = java.lang.Double.parseDouble(amount)
+//var amountDouble: Double = java.lang.Double.parseDouble(amount)
         var amountDouble: Double = amount.toDouble()
 
         val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
@@ -806,10 +987,10 @@ class TransferFormFragment : Fragment()
             }
         }
 
-        //amount = java.lang.Double.toString(amountDouble)
+//amount = java.lang.Double.toString(amountDouble)
         amount = amountDouble.toString()
 
-        //check the correct amount
+//check the correct amount
         if (amount.contains("."))
         {
             val elements = amount.substring(amount.indexOf("."))
@@ -839,11 +1020,11 @@ class TransferFormFragment : Fragment()
         else
         {
             amount = String.format("%.2f", amount.toDouble())
-            //amount = Double.parseDouble(amount).toString();
+//amount = Double.parseDouble(amount).toString();
         }
 
         val moneyFormatted2 = "$amount ꜩ"
-        //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
+//String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
         mPayButton!!.text = getString(R.string.pay, moneyFormatted2)
     }
 
@@ -909,10 +1090,12 @@ class TransferFormFragment : Fragment()
         outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
-        when {
-            mTransferId != null -> outState.putInt(TRANSFER_ID_KEY, mTransferId!!)
-            else -> outState.putInt(TRANSFER_ID_KEY, -1)
-        }
+/*
+when {
+mTransferId != null -> outState.putInt(TRANSFER_ID_KEY, mTransferId!!)
+else -> outState.putInt(TRANSFER_ID_KEY, -1)
+}
+*/
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 
         outState.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
