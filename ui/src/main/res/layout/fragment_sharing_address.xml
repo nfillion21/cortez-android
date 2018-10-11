@@ -75,9 +75,14 @@
 
                     <TextView
                         android:id="@+id/pkh_textview"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:background="@drawable/selector_rect_layout"
+                        android:paddingTop="@dimen/spacing_micro"
+                        android:paddingBottom="@dimen/spacing_micro"
+                        android:paddingLeft="@dimen/spacing_normal"
+                        android:paddingRight="@dimen/spacing_normal"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                         android:textColor="@color/colorAccent"
                         android:layout_marginBottom="@dimen/spacing_double"

@@ -28,6 +28,7 @@
 package com.tezcore.cortez
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -149,7 +150,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 val seed = Storage(baseContext).getMnemonics()
                 val seedBundle = Storage.toBundle(seed)
-                TransferFormActivity.start(this, seedBundle, mTezosTheme)
+                TransferFormActivity.start(this, seedBundle, null, mTezosTheme)
             }
             else
             {
@@ -302,7 +303,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 {
                     if (data != null && data.hasExtra(CreateWalletActivity.SEED_DATA_KEY))
                     {
-                        showSnackBar(getString(R.string.wallet_successfully_created), android.R.color.holo_green_light)
+                        showSnackBar(getString(R.string.wallet_successfully_created), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                     }
                 }
             }
@@ -313,7 +314,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 {
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
-                        showSnackBar(getString(R.string.wallet_successfully_restored), android.R.color.holo_green_light)
+                        showSnackBar(getString(R.string.wallet_successfully_restored), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                     }
                 }
             }
@@ -322,7 +323,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 if (resultCode == R.id.transfer_succeed)
                 {
-                    showSnackBar(getString(R.string.transfer_succeed), android.R.color.holo_green_light)
+                    showSnackBar(getString(R.string.transfer_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                     //TODO I need to refresh balance.
                 }
             }
@@ -331,7 +332,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 if (resultCode == R.id.logout_succeed)
                 {
-                    showSnackBar(getString(R.string.log_out_succeed), android.R.color.holo_green_light)
+                    showSnackBar(getString(R.string.log_out_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
             }
 
@@ -339,7 +340,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 if (resultCode == R.id.add_address_succeed)
                 {
-                    showSnackBar(getString(R.string.address_successfuly_added), android.R.color.holo_green_light)
+                    showSnackBar(getString(R.string.address_successfuly_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
             }
 
@@ -349,11 +350,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
     }
 
-    override fun showSnackBar(resText:String, color:Int)
+    override fun showSnackBar(text:String, color:Int, textColor:Int)
     {
-        val snackbar = Snackbar.make(fabTransfer, resText, Snackbar.LENGTH_LONG)
-        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
-                color)))
+        val snackbar = Snackbar.make(fabTransfer, text, Snackbar.LENGTH_LONG)
+        snackbar.view.setBackgroundColor(color)
+        snackbar.setActionTextColor(textColor)
         snackbar.show()
     }
 
@@ -426,6 +427,22 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
     override fun onCardClicked(address: Address?)
     {
-        AddressDetailsActivity.start(this, mTezosTheme, address!!)
+        //AddressDetailsActivity.start(this, mTezosTheme, address!!)
+
+        val isPasswordSaved = Storage(this).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            val seed = Storage(baseContext).getMnemonics()
+            val seedBundle = Storage.toBundle(seed)
+            TransferFormActivity.start(this, seedBundle, address, mTezosTheme)
+        }
+        else
+        {
+            //TODO this snackbar should be invisible
+            //Snackbar.make(fabTransfer, "Replace with your own action", Snackbar.LENGTH_LONG)
+                    //.setAction("Action", null).show()
+
+            showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
+        }
     }
 }

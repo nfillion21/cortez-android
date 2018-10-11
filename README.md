@@ -5,7 +5,7 @@
 This native Android app aims to bring maximum security and best user experience the Android operating system can bring to its users.
 
 Feel free to download it on Google Play:  
-<https://play.google.com/store/apps/details?id=com.tezcore.cortez.zeronet>
+<https://play.google.com/store/apps/details?id=com.tezcore.cortez>
 
 ## Features
 
