@@ -55,6 +55,7 @@ import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
+import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.Utils
 import com.tezos.ui.R
@@ -103,8 +104,8 @@ class TransferFormFragment : Fragment()
 
     private var mAmount:TextInputEditText? = null
 
-    private var mSrcAccount:Account? = null
-    private var mDstAccount:Account? = null
+    private var mSrcAccount:Address? = null
+    private var mDstAccount:Address? = null
 
     private var listener: OnTransferListener? = null
 
@@ -120,11 +121,16 @@ class TransferFormFragment : Fragment()
     companion object
     {
         @JvmStatic
-        fun newInstance(seedDataBundle:Bundle, customTheme:Bundle) =
+        fun newInstance(seedDataBundle:Bundle, address:Bundle?, customTheme:Bundle) =
                 TransferFormFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, customTheme)
                         putBundle(Storage.TAG, seedDataBundle)
+
+                        if (address != null)
+                        {
+                            putBundle(Address.TAG, address)
+                        }
                     }
                 }
 
@@ -395,6 +401,10 @@ class TransferFormFragment : Fragment()
             val dstObj = obj[0] as JSONObject
 
             val isHeightValid = data[32].compareTo(8) == 0
+            if (!isHeightValid)
+            {
+                return false
+            }
 
 
             val src = data.slice(35..54).toByteArray()
@@ -402,6 +412,10 @@ class TransferFormFragment : Fragment()
             val pkh = params["src"]
             val isSrcValid = pkh == CryptoUtils.genericHashToPkh(src)
 
+            if (!isSrcValid)
+            {
+                return false
+            }
 
             val size = data.size
             val fee = data.slice(55 until size).toByteArray()
@@ -420,6 +434,11 @@ class TransferFormFragment : Fragment()
             val dstFees = dstObj["fee"] as String
 
             val isFeesValid = addBytesLittleEndian(feeList) == dstFees.toInt()
+
+            if (!isFeesValid)
+            {
+                return false
+            }
 
 
             val counter = fee.slice(i until fee.size).toByteArray()
@@ -467,6 +486,10 @@ class TransferFormFragment : Fragment()
             val dstAmount = dstObj["amount"] as String
 
             val isAmountValid = addBytesLittleEndian(amountList) == dstAmount.toInt()
+            if (!isAmountValid)
+            {
+                return false
+            }
 
 
             val dst = amount.slice(i+2 until amount.size).toByteArray()
@@ -668,9 +691,17 @@ class TransferFormFragment : Fragment()
             val seedDataBundle = it.getBundle(Storage.TAG)
             val seedData = Storage.fromBundle(seedDataBundle)
 
-            var account = Account()
+            var account = Address()
             account.pubKeyHash = seedData.pkh
             switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, account)
+
+            val address = it.getBundle(Address.TAG)
+            if (address != null)
+            {
+                mDstAccount = Address.fromBundle(address)
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+                validatePayButton(isInputDataValid())
+            }
         }
     }
 
@@ -758,7 +789,7 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    private fun switchButtonAndLayout(selection: AddressBookActivity.Selection, account: Account)
+    private fun switchButtonAndLayout(selection: AddressBookActivity.Selection, address: Address)
     {
         when (selection)
         {
@@ -767,14 +798,14 @@ class TransferFormFragment : Fragment()
                 mSrcButton?.visibility = View.GONE
                 mTransferSrcFilled?.visibility = View.VISIBLE
 
-                mTransferSrcPkh?.text = account.pubKeyHash
+                mTransferSrcPkh?.text = address.pubKeyHash
             }
 
             AddressBookActivity.Selection.SelectionAccountsAndAddresses ->
             {
                 mDstButton?.visibility = View.GONE
                 mTransferDstFilled?.visibility = View.VISIBLE
-                mTransferDstPkh?.text = account.pubKeyHash
+                mTransferDstPkh?.text = address.pubKeyHash
             }
 
             else ->

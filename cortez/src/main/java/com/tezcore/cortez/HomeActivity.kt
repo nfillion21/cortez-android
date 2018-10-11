@@ -149,7 +149,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 val seed = Storage(baseContext).getMnemonics()
                 val seedBundle = Storage.toBundle(seed)
-                TransferFormActivity.start(this, seedBundle, mTezosTheme)
+                TransferFormActivity.start(this, seedBundle, null, mTezosTheme)
             }
             else
             {
@@ -426,6 +426,20 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
     override fun onCardClicked(address: Address?)
     {
-        AddressDetailsActivity.start(this, mTezosTheme, address!!)
+        //AddressDetailsActivity.start(this, mTezosTheme, address!!)
+
+        val isPasswordSaved = Storage(this).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            val seed = Storage(baseContext).getMnemonics()
+            val seedBundle = Storage.toBundle(seed)
+            TransferFormActivity.start(this, seedBundle, address, mTezosTheme)
+        }
+        else
+        {
+            //TODO this snackbar should be invisible
+            Snackbar.make(fabTransfer, "Replace with your own action", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+        }
     }
 }
