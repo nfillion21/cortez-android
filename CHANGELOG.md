@@ -1,6 +1,11 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.1.1
+-----
+* Update the API endpoints for zeronet network
+* Correct the binary payload verification
+
 1.1.0
 -----
 * Update the API endpoints for transfers.
