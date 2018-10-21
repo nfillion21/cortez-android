@@ -433,7 +433,7 @@ class TransferFormFragment : Fragment()
 
             val dstFees = dstObj["fee"] as String
 
-            val isFeesValid = addBytesLittleEndian(feeList) == dstFees.toInt()
+            val isFeesValid = addBytesLittleEndian(feeList) == dstFees.toLong()
 
             if (!isFeesValid)
             {
@@ -448,7 +448,7 @@ class TransferFormFragment : Fragment()
                 val bytePos = Utils.byteToUnsignedInt(counter[i])
                 i++
 
-            } while (bytePos > 128)
+            } while (bytePos >= 128)
 
             val gasLimit = counter.slice(i until counter.size).toByteArray()
             i = 0
@@ -457,7 +457,7 @@ class TransferFormFragment : Fragment()
                 val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
                 i++
 
-            } while (bytePos > 128)
+            } while (bytePos >= 128)
 
 
             val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
@@ -467,7 +467,7 @@ class TransferFormFragment : Fragment()
                 val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
                 i++
 
-            } while (bytePos > 128)
+            } while (bytePos >= 128)
 
 
             val amount = storageLimit.slice(i until storageLimit.size).toByteArray()
@@ -481,11 +481,11 @@ class TransferFormFragment : Fragment()
                 amountList.add(bytePos)
                 i++
 
-            } while (bytePos > 128)
+            } while (bytePos >= 128)
 
             val dstAmount = dstObj["amount"] as String
 
-            val isAmountValid = addBytesLittleEndian(amountList) == dstAmount.toInt()
+            val isAmountValid = addBytesLittleEndian(amountList) == dstAmount.toLong()
             if (!isAmountValid)
             {
                 return false
@@ -504,17 +504,17 @@ class TransferFormFragment : Fragment()
         return isValid
     }
 
-    private fun addBytesLittleEndian(bytes:ArrayList<Int>):Int
+    private fun addBytesLittleEndian(bytes:ArrayList<Int>):Long
     {
         val reversed = bytes.reversed()
 
-        var accum = 0
+        var accum = 0L
 
         for (i in reversed.indices)
         {
             val bytePos = reversed[i]
 
-            if (bytePos < 128)
+            if (bytePos < 128L)
             {
                 accum += bytePos
                 if (i != reversed.size - 1)
