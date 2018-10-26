@@ -84,7 +84,7 @@
     <string name="loading_balance">Loading balance…</string>
     <string name="empty_list_operations">No operations</string>
     <string name="contact_name">Contact name</string>
-    <string name="ꜩ">ꜩ</string>
+    <string name="tez">ꜩ</string>
 
     <string name="scan_address_permission">To scan the address, allow camera permission.</string>
     <string name="read_contacts_permission">To select a name, allow read contacts permission.</string>
