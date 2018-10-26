@@ -400,16 +400,25 @@ class TransferFormFragment : Fragment()
             val obj = params["dsts"] as JSONArray
             val dstObj = obj[0] as JSONObject
 
-            val isHeightValid = data[32].compareTo(8) == 0
+            var i: Int
+            i = when {
+                data.size > 100 -> 94
+                else -> 32
+            }
+
+            val isHeightValid = data[i].compareTo(8) == 0
             if (!isHeightValid)
             {
                 return false
             }
 
 
-            val src = data.slice(35..54).toByteArray()
+            val src = data.slice((i+3)..(i+3+19)).toByteArray()
 
             val pkh = params["src"]
+
+
+
             val isSrcValid = pkh == CryptoUtils.genericHashToPkh(src)
 
             if (!isSrcValid)
@@ -418,10 +427,10 @@ class TransferFormFragment : Fragment()
             }
 
             val size = data.size
-            val fee = data.slice(55 until size).toByteArray()
+            val fee = data.slice((i+3+19+1) until size).toByteArray()
 
             val feeList = ArrayList<Int>()
-            var i = 0
+            i = 0
             do
             {
                 val bytePos = Utils.byteToUnsignedInt(fee[i])
@@ -586,7 +595,7 @@ class TransferFormFragment : Fragment()
                 override fun getBody(): ByteArray
                 {
                     val pay = "\""+payloadsign+"\""
-                    return pay!!.toByteArray()
+                    return pay.toByteArray()
                 }
 
                 @Throws(AuthFailureError::class)

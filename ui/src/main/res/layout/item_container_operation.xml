@@ -68,7 +68,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/ꜩ"
+                android:text="@string/tez"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                 android:textStyle="bold"
                 android:textColor="@color/colorPrimary"
@@ -116,7 +116,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/ꜩ"
+                android:text="@string/tez"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                 android:textStyle="bold"
                 android:textColor="@color/colorPrimary"

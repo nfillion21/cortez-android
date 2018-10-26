@@ -4,15 +4,12 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-def alphanetPropertiesFile = rootProject.file("cortez/deployment/alphanet.properties")
 def zeronetPropertiesFile = rootProject.file("cortez/deployment/zeronet.properties")
 def mainnetPropertiesFile = rootProject.file("cortez/deployment/mainnet.properties")
 
-def keystoreAlphanetProperties = new Properties()
 def keystoreMainnetProperties = new Properties()
 def keystoreZeronetProperties = new Properties()
 
-keystoreAlphanetProperties.load(new FileInputStream(alphanetPropertiesFile))
 keystoreMainnetProperties.load(new FileInputStream(mainnetPropertiesFile))
 keystoreZeronetProperties.load(new FileInputStream(zeronetPropertiesFile))
 
@@ -23,12 +20,6 @@ android {
             keyPassword keystoreMainnetProperties['keyPassword']
             storeFile file(keystoreMainnetProperties['storeFile'])
             storePassword keystoreMainnetProperties['storePassword']
-        }
-        alphanetConfig {
-            keyAlias keystoreAlphanetProperties['keyAlias']
-            keyPassword keystoreAlphanetProperties['keyPassword']
-            storeFile file(keystoreAlphanetProperties['storeFile'])
-            storePassword keystoreAlphanetProperties['storePassword']
         }
         zeronetConfig {
             keyAlias keystoreZeronetProperties['keyAlias']
@@ -42,8 +33,8 @@ android {
         applicationId 'com.tezcore.cortez'
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 11
-        versionName "1.1.1"
+        versionCode 12
+        versionName "1.1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -64,12 +55,6 @@ android {
             versionNameSuffix "-zeronet"
             dimension "version"
             signingConfig signingConfigs.zeronetConfig
-        }
-        alphanet {
-            applicationIdSuffix ".alphanet"
-            versionNameSuffix "-alphanet"
-            dimension "version"
-            signingConfig signingConfigs.alphanetConfig
         }
         mainnet {
             dimension "version"

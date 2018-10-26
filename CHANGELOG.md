@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.1.2
+-----
+* Handle the non originated accounts for transfers
+
 1.1.1
 -----
 * Update the API endpoints for zeronet network
