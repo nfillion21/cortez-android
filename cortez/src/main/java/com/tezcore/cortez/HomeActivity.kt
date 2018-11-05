@@ -279,6 +279,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                     return SharingAddressFragment.newInstance(mTezosTheme)
                 }
+
+                3 ->
+                {
+                    return AddressBookFragment.newInstance(mTezosTheme.toBundle(), null)
+                }
             }
 
             return HomeFragment.newInstance(mTezosTheme, null)
@@ -287,7 +292,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         override fun getCount(): Int
         {
             // Show 3 total pages.
-            return 3
+            return 4
         }
     }
 
