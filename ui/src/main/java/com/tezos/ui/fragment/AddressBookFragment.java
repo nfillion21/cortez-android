@@ -156,7 +156,14 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
 
     public void reloadList()
     {
-        mAddressList.clear();
+        if (mAddressList != null)
+        {
+            mAddressList.clear();
+        }
+        else
+        {
+            mAddressList = new ArrayList<>();
+        }
 
         Set<String> set = AddressesDatabase.getInstance().getAddresses(getActivity());
 
