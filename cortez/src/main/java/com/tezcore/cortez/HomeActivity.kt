@@ -51,6 +51,7 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.AddressBookFragment
+import com.tezos.ui.fragment.DelegationFragment
 import com.tezos.ui.fragment.HomeFragment
 import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
@@ -282,7 +283,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                 3 ->
                 {
-                    return AddressBookFragment.newInstance(mTezosTheme.toBundle(), null)
+                    return DelegationFragment.newInstance(mTezosTheme)
                 }
             }
 
