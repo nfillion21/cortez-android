@@ -50,6 +50,7 @@ import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
 import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.AddressBookFragment
+import com.tezos.ui.fragment.DelegateFragment
 import com.tezos.ui.fragment.HomeFragment
 import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
@@ -149,6 +150,13 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                             fabAddAddress.hide()
                             fabSharing.hide()
                         }
+                    }
+
+                    3 ->
+                    {
+                        fabTransfer.hide()
+                        fabAddAddress.hide()
+                        fabSharing.hide()
                     }
 
                     else ->
@@ -261,6 +269,13 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                     }
                 }
 
+                3 ->
+                {
+                    fabTransfer.hide()
+                    fabAddAddress.hide()
+                    fabSharing.hide()
+                }
+
                 else ->
                 {
                     //no-op
@@ -300,6 +315,11 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
 
                     return SharingAddressFragment.newInstance(mTezosTheme)
                 }
+
+                3 ->
+                {
+                    return DelegateFragment.newInstance(mTezosTheme)
+                }
             }
 
             return HomeFragment.newInstance(mTezosTheme, null)
@@ -308,7 +328,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
         override fun getCount(): Int
         {
             // Show 3 total pages.
-            return 3
+            return 4
         }
     }
 
@@ -385,6 +405,8 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
         toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
         toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
 
+        toolbar.title = "Delegated Address #1"
+
         setSupportActionBar(toolbar)
     }
 
@@ -394,12 +416,12 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                 .setTitle(R.string.exit)
                 .setMessage(R.string.exit_info)
                 .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes) {
+                .setPositiveButton(android.R.string.yes)
+                {
                     _,
                     _ ->
 
                     super.onBackPressed()
-
                 }
                 .show()
     }

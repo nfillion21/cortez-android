@@ -159,4 +159,5 @@
     <string name="tab_address_book">Address book</string>
     <string name="tab_receive">Receive</string>
     <string name="tab_delegation">Delegation</string>
+    <string name="tab_delegate">Delegate</string>
 </resources>
