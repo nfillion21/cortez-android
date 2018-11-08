@@ -27,9 +27,6 @@
 
 package com.tezos.ui.fragment
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -38,7 +35,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
+import com.tezcore.ui.activity.DelegateActivity
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.utils.Storage
@@ -111,11 +108,10 @@ class DelegationFragment : Fragment()
 
             mLinearLayout?.setOnClickListener {
 
-                val clipboard = activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-                val clip = ClipData.newPlainText(getString(R.string.copied_pkh), pkh)
-                clipboard!!.primaryClip = clip
-
-                Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
+                arguments?.let {
+                    val themeBundle = it.getBundle(CustomTheme.TAG)
+                    DelegateActivity.start(activity!!, CustomTheme.fromBundle(themeBundle))
+                }
             }
 
             mPkhTextview?.text = pkh

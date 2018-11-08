@@ -154,4 +154,9 @@
         This app requires to register at least one fingerprint.
         To continue working with this app, please got to Settings and register fingerprint.
     </string>
+
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_address_book">Address book</string>
+    <string name="tab_receive">Receive</string>
+    <string name="tab_delegation">Delegation</string>
 </resources>

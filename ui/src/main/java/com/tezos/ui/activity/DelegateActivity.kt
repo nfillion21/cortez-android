@@ -25,14 +25,17 @@
 (*****************************************************************************)
 */
 
-package com.tezcore.cortez
+package com.tezcore.ui.activity
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.TabLayout
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
@@ -40,25 +43,20 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
-import android.view.Menu
-import android.view.MenuItem
 import android.view.ViewGroup
-import com.tezcore.cortez.activities.AboutActivity
-import com.tezcore.cortez.activities.SettingsActivity
-import com.tezos.android.R
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
+import com.tezos.ui.R
 import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.AddressBookFragment
-import com.tezos.ui.fragment.DelegationFragment
 import com.tezos.ui.fragment.HomeFragment
 import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
-import kotlinx.android.synthetic.main.activity_home.*
+import kotlinx.android.synthetic.main.activity_delegate.*
 
 
-class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener
+class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener
 {
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
@@ -67,9 +65,31 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    companion object
+    {
+        private val TAG_DELEGATE = "DelegateTag"
+
+        var DELEGATE_REQUEST_CODE = 0x2900 // arbitrary int
+
+        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
+        {
+            val starter = Intent(context, DelegateActivity::class.java)
+            starter.putExtra(CustomTheme.TAG, themeBundle)
+
+            return starter
+        }
+
+        fun start(activity: Activity, theme: CustomTheme)
+        {
+            val starter = getStartIntent(activity, theme.toBundle())
+            ActivityCompat.startActivityForResult(activity, starter, DELEGATE_REQUEST_CODE, null)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
+        setContentView(R.layout.activity_delegate)
 
         setSupportActionBar(toolbar)
         initActionBar(mTezosTheme)
@@ -89,7 +109,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
             override fun onPageSelected(position: Int)
             {
-                val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+                val isPasswordSaved = Storage(this@DelegateActivity).isPasswordSaved()
                 when (position)
                 {
                     0 ->
@@ -129,13 +149,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                             fabAddAddress.hide()
                             fabSharing.hide()
                         }
-                    }
-
-                    3 ->
-                    {
-                        fabTransfer.hide()
-                        fabAddAddress.hide()
-                        fabSharing.hide()
                     }
 
                     else ->
@@ -205,7 +218,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any)
         {
             super.setPrimaryItem(container, position, `object`)
-            val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+            val isPasswordSaved = Storage(this@DelegateActivity).isPasswordSaved()
 
             when (position)
             {
@@ -248,13 +261,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     }
                 }
 
-                3 ->
-                {
-                    fabTransfer.hide()
-                    fabAddAddress.hide()
-                    fabSharing.hide()
-                }
-
                 else ->
                 {
                     //no-op
@@ -268,7 +274,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 0 ->
                 {
-                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+                    val isPasswordSaved = Storage(this@DelegateActivity).isPasswordSaved()
 
                     return if (isPasswordSaved)
                     {
@@ -294,11 +300,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                     return SharingAddressFragment.newInstance(mTezosTheme)
                 }
-
-                3 ->
-                {
-                    return DelegationFragment.newInstance(mTezosTheme)
-                }
             }
 
             return HomeFragment.newInstance(mTezosTheme, null)
@@ -307,7 +308,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         override fun getCount(): Int
         {
             // Show 3 total pages.
-            return 4
+            return 3
         }
     }
 
@@ -345,14 +346,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 {
                     showSnackBar(getString(R.string.transfer_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                     //TODO I need to refresh balance.
-                }
-            }
-
-            SettingsActivity.SETTINGS_REQUEST_CODE ->
-            {
-                if (resultCode == R.id.logout_succeed)
-                {
-                    showSnackBar(getString(R.string.log_out_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
             }
 
@@ -412,36 +405,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
     }
 
     /*
-    MENU
-     */
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
-
-        if (id == R.id.action_settings)
-        {
-            SettingsActivity.start(this, mTezosTheme)
-            return true
-        }
-        else if (id == R.id.action_about)
-        {
-            AboutActivity.start(this, mTezosTheme)
-            return true
-        }
-
-        return super.onOptionsItemSelected(item)
-    }
-
-    /*
     Addresses
      */
 
@@ -460,7 +423,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         {
             //TODO this snackbar should be invisible
             //Snackbar.make(fabTransfer, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    //.setAction("Action", null).show()
+            //.setAction("Action", null).show()
 
             showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
         }

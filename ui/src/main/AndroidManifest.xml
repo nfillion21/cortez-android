@@ -59,6 +59,11 @@
             android:theme="@style/PaymentScreens.OperationsActivity"
             />
 
+        <activity
+            android:name="com.tezcore.ui.activity.DelegateActivity"
+            android:theme="@style/PaymentScreens.DelegateActivity"
+            />
+
     </application>
 
 </manifest>

@@ -38,4 +38,8 @@
     <style name="PaymentScreens.OperationsActivity" parent="PaymentScreens.NoActionBar">
         <item name="android:windowBackground">@color/tz_background</item>
     </style>
+
+    <style name="PaymentScreens.DelegateActivity" parent="PaymentScreens.NoActionBar">
+        <item name="android:windowBackground">@color/tz_background</item>
+    </style>
 </resources>

@@ -11,11 +11,6 @@
     <string name="amount_info">Amount:</string>
     <string name="fee_info">Fee:</string>
 
-    <string name="tab_dashboard">Dashboard</string>
-    <string name="tab_address_book">Address book</string>
-    <string name="tab_receive">Receive</string>
-    <string name="tab_delegate">Delegate</string>
-
     <string name="about_info">
         Cortez for Android is a native mobile wallet for the Tezos blockchain.\n\nDeveloped in Paris by a core mobile team, this native Android app aims to bring maximum security and best user experience the Android operating system can bring to its users.\n\nCortez is 100% open source. Check it out at https://gitlab.com/tezos/cortez-android\n\nFeel free to mail us by clicking on the button below.
         </string>
