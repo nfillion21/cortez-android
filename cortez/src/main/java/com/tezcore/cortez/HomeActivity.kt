@@ -60,6 +60,7 @@ import kotlinx.android.synthetic.main.activity_home.*
 
 class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener
 {
+
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
             com.tezos.ui.R.color.theme_tezos_primary_dark,
@@ -291,8 +292,17 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
                 2 ->
                 {
+                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
 
-                    return SharingAddressFragment.newInstance(mTezosTheme)
+                    return if (isPasswordSaved)
+                    {
+                        val mnemonicsData = Storage(baseContext).getMnemonics()
+                        return SharingAddressFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
+                    }
+                    else
+                    {
+                        return SharingAddressFragment.newInstance(mTezosTheme, null)
+                    }
                 }
 
                 3 ->

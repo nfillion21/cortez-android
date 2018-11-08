@@ -41,7 +41,6 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import android.view.ViewGroup
 import com.tezos.core.models.Address
@@ -55,7 +54,6 @@ import com.tezos.ui.fragment.HomeFragment
 import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_delegate.*
-
 
 class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener
 {
@@ -313,7 +311,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                 2 ->
                 {
 
-                    return SharingAddressFragment.newInstance(mTezosTheme)
+                    return SharingAddressFragment.newInstance(mTezosTheme, "KT1----")
                 }
 
                 3 ->
@@ -410,30 +408,12 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
         setSupportActionBar(toolbar)
     }
 
-    override fun onBackPressed()
-    {
-        AlertDialog.Builder(this)
-                .setTitle(R.string.exit)
-                .setMessage(R.string.exit_info)
-                .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes)
-                {
-                    _,
-                    _ ->
-
-                    super.onBackPressed()
-                }
-                .show()
-    }
-
     /*
     Addresses
      */
 
     override fun onCardClicked(address: Address?)
     {
-        //AddressDetailsActivity.start(this, mTezosTheme, address!!)
-
         val isPasswordSaved = Storage(this).isPasswordSaved()
         if (isPasswordSaved)
         {
@@ -443,10 +423,6 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
         }
         else
         {
-            //TODO this snackbar should be invisible
-            //Snackbar.make(fabTransfer, "Replace with your own action", Snackbar.LENGTH_LONG)
-            //.setAction("Action", null).show()
-
             showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
         }
     }
