@@ -287,22 +287,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
             {
                 0 ->
                 {
-                    val isPasswordSaved = Storage(this@DelegateActivity).isPasswordSaved()
-
-                    return if (isPasswordSaved)
-                    {
-                        val mnemonicsData = Storage(baseContext).getMnemonics()
-
-                        var address = Address()
-                        address.description = "main address"
-                        address.pubKeyHash = mnemonicsData.pkh
-
-                        HomeFragment.newInstance(mTezosTheme, address)
-                    }
-                    else
-                    {
-                        HomeFragment.newInstance(mTezosTheme, null)
-                    }
+                    HomeFragment.newInstance(mTezosTheme, "KT1WckkuUK46AiSZBhDVAiS6GCZWwSZC37EG")
                 }
                 1 ->
                 {
@@ -311,7 +296,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                 2 ->
                 {
 
-                    return SharingAddressFragment.newInstance(mTezosTheme, "KT1----")
+                    return SharingAddressFragment.newInstance(mTezosTheme, "KT1WckkuUK46AiSZBhDVAiS6GCZWwSZC37EG")
                 }
 
                 3 ->

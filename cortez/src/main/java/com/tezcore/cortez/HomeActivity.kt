@@ -275,11 +275,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     {
                         val mnemonicsData = Storage(baseContext).getMnemonics()
 
-                        var address = Address()
-                        address.description = "main address"
-                        address.pubKeyHash = mnemonicsData.pkh
-
-                        HomeFragment.newInstance(mTezosTheme, address)
+                        HomeFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
                     }
                     else
                     {

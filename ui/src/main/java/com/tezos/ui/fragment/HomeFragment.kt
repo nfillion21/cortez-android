@@ -114,12 +114,14 @@ open class HomeFragment : Fragment()
 
     companion object
     {
+        const val PKH_TAG = "PkhTag"
+
         @JvmStatic
-        fun newInstance(theme: CustomTheme, address: Address?) =
+        fun newInstance(theme: CustomTheme, pkh: String?) =
                 HomeFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
-                        putBundle(Address.TAG, address?.toBundle())
+                        putString(PKH_TAG, pkh)
                     }
                 }
     }
@@ -127,6 +129,27 @@ open class HomeFragment : Fragment()
     interface HomeListener
     {
         fun showSnackBar(res:String, color:Int, textColor:Int)
+    }
+
+    fun pkh():String?
+    {
+        var pkh:String? = null
+        arguments?.let {
+
+            pkh = it.getString(PKH_TAG)
+        }
+
+        if (pkh == null)
+        {
+            val mnemonicsData = Storage(activity!!).getMnemonics()
+
+            val args = arguments
+            args?.putString(PKH_TAG, mnemonicsData.pkh)
+
+            pkh = mnemonicsData.pkh
+        }
+
+        return pkh
     }
 
     override fun onAttach(context: Context)
@@ -146,14 +169,12 @@ open class HomeFragment : Fragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        var pkh:Address? = null
+        var pkh:String? = null
         var tzTheme:CustomTheme? = null
+
         arguments?.let {
-            val addressBundle = it.getBundle(Address.TAG)
-            if (addressBundle != null)
-            {
-                pkh = Address.fromBundle(addressBundle)
-            }
+
+            pkh = it.getString(PKH_TAG)
 
             val themeBundle = it.getBundle(CustomTheme.TAG)
             tzTheme = CustomTheme.fromBundle(themeBundle)
@@ -300,12 +321,8 @@ open class HomeFragment : Fragment()
 
                     val mnemonicsData = Storage(activity!!).getMnemonics()
 
-                    var address = Address()
-                    address.description = "main address"
-                    address.pubKeyHash = mnemonicsData.pkh
-
                     val args = arguments
-                    args?.putBundle(Address.TAG, address.toBundle())
+                    args?.putString(PKH_TAG, mnemonicsData.pkh)
 
                     // put the good layers
                     mBalanceLayout?.visibility = View.VISIBLE
@@ -443,34 +460,30 @@ open class HomeFragment : Fragment()
 
         mNavProgressBalance?.visibility = View.VISIBLE
 
-        var pkh:Address?
-        arguments?.let {
-            val addressBundle = it.getBundle(Address.TAG)
-            if (addressBundle != null)
-            {
-                pkh = Address.fromBundle(addressBundle)
 
-                val url = String.format(getString(R.string.balance_url), pkh?.pubKeyHash)
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.balance_url), pkh)
 
-                // Request a string response from the provided URL.
-                val stringRequest = StringRequest(Request.Method.GET, url,
-                        Response.Listener<String> { response ->
-                            val balance = response.replace("[^0-9]".toRegex(), "")
-                            mBalanceItem = balance.toDouble()/1000000
-                            animateBalance(mBalanceItem)
+            // Request a string response from the provided URL.
+            val stringRequest = StringRequest(Request.Method.GET, url,
+                    Response.Listener<String> { response ->
+                        val balance = response.replace("[^0-9]".toRegex(), "")
+                        mBalanceItem = balance.toDouble()/1000000
+                        animateBalance(mBalanceItem)
 
-                            onBalanceLoadComplete(true)
-                            startGetRequestLoadOperations()
-                        },
-                        Response.ErrorListener {
-                            onBalanceLoadComplete(false)
-                            onOperationsLoadHistoryComplete()
-                            showSnackbarError(it)
-                        })
+                        onBalanceLoadComplete(true)
+                        startGetRequestLoadOperations()
+                    },
+                    Response.ErrorListener {
+                        onBalanceLoadComplete(false)
+                        onOperationsLoadHistoryComplete()
+                        showSnackbarError(it)
+                    })
 
-                stringRequest.tag = LOAD_BALANCE_TAG
-                VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
-            }
+            stringRequest.tag = LOAD_BALANCE_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
         }
     }
 
@@ -506,34 +519,29 @@ open class HomeFragment : Fragment()
 
         mNavProgressOperations?.visibility = View.VISIBLE
 
-        var pkh:Address?
-        arguments?.let {
-            val addressBundle = it.getBundle(Address.TAG)
+        val pkh = pkh()
 
-            if (addressBundle != null)
-            {
-                pkh = Address.fromBundle(addressBundle)
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.history_url), pkh)
 
-                val url = String.format(getString(R.string.history_url), pkh?.pubKeyHash)
+            val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            { answer ->
 
-                val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
-                { answer ->
+                addOperationItemsFromJSON(answer)
 
-                    addOperationItemsFromJSON(answer)
+                onOperationsLoadHistoryComplete()
 
-                    onOperationsLoadHistoryComplete()
+            }, Response.ErrorListener
+            { volleyError ->
+                onOperationsLoadHistoryComplete()
 
-                }, Response.ErrorListener
-                {
-                    onOperationsLoadHistoryComplete()
+                showSnackbarError(volleyError)
+            })
 
-                    showSnackbarError(it)
-                })
+            jsObjRequest.tag = LOAD_OPERATIONS_TAG
 
-                jsObjRequest.tag = LOAD_OPERATIONS_TAG
-
-                VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-            }
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
         }
     }
 
