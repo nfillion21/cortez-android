@@ -48,10 +48,7 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
 import com.tezos.ui.activity.*
-import com.tezos.ui.fragment.AddressBookFragment
-import com.tezos.ui.fragment.DelegateFragment
-import com.tezos.ui.fragment.HomeFragment
-import com.tezos.ui.fragment.SharingAddressFragment
+import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_delegate.*
 
@@ -287,7 +284,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
             {
                 0 ->
                 {
-                    HomeFragment.newInstance(mTezosTheme, "KT1WckkuUK46AiSZBhDVAiS6GCZWwSZC37EG")
+                    HomeDelegateFragment.newInstance(mTezosTheme, "KT1WckkuUK46AiSZBhDVAiS6GCZWwSZC37EG")
                 }
                 1 ->
                 {

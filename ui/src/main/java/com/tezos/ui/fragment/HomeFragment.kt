@@ -131,7 +131,7 @@ open class HomeFragment : Fragment()
         fun showSnackBar(res:String, color:Int, textColor:Int)
     }
 
-    fun pkh():String?
+    open fun pkh():String?
     {
         var pkh:String? = null
         arguments?.let {
@@ -266,6 +266,8 @@ open class HomeFragment : Fragment()
             if (mGetBalanceLoading)
             {
                 refreshTextBalance(false)
+
+                mWalletEnabled = true
                 startInitialLoadingBalance()
             }
             else
@@ -294,6 +296,7 @@ open class HomeFragment : Fragment()
             //TODO we will start loading only if we got a pkh
             if (pkh != null)
             {
+                mWalletEnabled = true
                 startInitialLoadingBalance()
             }
         }
@@ -309,6 +312,7 @@ open class HomeFragment : Fragment()
         super.onResume()
 
         //avoid this call in OperationsFragment
+        //this call is necessary to reload when
 
         if (isHome())
         {
@@ -319,10 +323,10 @@ open class HomeFragment : Fragment()
                 {
                     mWalletEnabled = true
 
-                    val mnemonicsData = Storage(activity!!).getMnemonics()
+                    val pkh = pkh()
 
                     val args = arguments
-                    args?.putString(PKH_TAG, mnemonicsData.pkh)
+                    args?.putString(PKH_TAG, pkh)
 
                     // put the good layers
                     mBalanceLayout?.visibility = View.VISIBLE
@@ -334,6 +338,9 @@ open class HomeFragment : Fragment()
             else
             {
                 //cancelRequest(true, true)
+
+                mBalanceItem = -1.0
+                refreshTextBalance(false)
 
                 mSwipeRefreshLayout?.isEnabled = false
                 mSwipeRefreshLayout?.isRefreshing = false
