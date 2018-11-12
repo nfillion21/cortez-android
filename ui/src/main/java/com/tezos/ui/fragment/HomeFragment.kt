@@ -131,22 +131,12 @@ open class HomeFragment : Fragment()
         fun showSnackBar(res:String, color:Int, textColor:Int)
     }
 
-    open fun pkh():String?
+    fun pkh():String?
     {
         var pkh:String? = null
         arguments?.let {
 
             pkh = it.getString(PKH_TAG)
-        }
-
-        if (pkh == null)
-        {
-            val mnemonicsData = Storage(activity!!).getMnemonics()
-
-            val args = arguments
-            args?.putString(PKH_TAG, mnemonicsData.pkh)
-
-            pkh = mnemonicsData.pkh
         }
 
         return pkh
@@ -169,12 +159,10 @@ open class HomeFragment : Fragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        var pkh:String? = null
+        var pkh:String? = pkh()
         var tzTheme:CustomTheme? = null
 
         arguments?.let {
-
-            pkh = it.getString(PKH_TAG)
 
             val themeBundle = it.getBundle(CustomTheme.TAG)
             tzTheme = CustomTheme.fromBundle(themeBundle)
@@ -302,11 +290,6 @@ open class HomeFragment : Fragment()
         }
     }
 
-    open fun isHome():Boolean
-    {
-        return true
-    }
-
     override fun onResume()
     {
         super.onResume()
@@ -314,56 +297,48 @@ open class HomeFragment : Fragment()
         //avoid this call in OperationsFragment
         //this call is necessary to reload when
 
-        if (isHome())
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
         {
-            val isPasswordSaved = Storage(activity!!).isPasswordSaved()
-            if (isPasswordSaved)
+            if (!mWalletEnabled)
             {
-                if (!mWalletEnabled)
-                {
-                    mWalletEnabled = true
+                mWalletEnabled = true
 
-                    val pkh = pkh()
+                // put the good layers
+                mBalanceLayout?.visibility = View.VISIBLE
+                mCreateWalletLayout?.visibility = View.GONE
 
-                    val args = arguments
-                    args?.putString(PKH_TAG, pkh)
-
-                    // put the good layers
-                    mBalanceLayout?.visibility = View.VISIBLE
-                    mCreateWalletLayout?.visibility = View.GONE
-
-                    startInitialLoadingBalance()
-                }
+                startInitialLoadingBalance()
             }
-            else
+        }
+        else
+        {
+            //cancelRequest(true, true)
+
+            mBalanceItem = -1.0
+            refreshTextBalance(false)
+
+            mSwipeRefreshLayout?.isEnabled = false
+            mSwipeRefreshLayout?.isRefreshing = false
+
+            if (mWalletEnabled)
             {
-                //cancelRequest(true, true)
+                mWalletEnabled = false
+                // put the good layers
+                mBalanceLayout?.visibility = View.GONE
+                mCreateWalletLayout?.visibility = View.VISIBLE
 
-                mBalanceItem = -1.0
-                refreshTextBalance(false)
+                val args = arguments
+                args?.putBundle(Address.TAG, null)
 
-                mSwipeRefreshLayout?.isEnabled = false
-                mSwipeRefreshLayout?.isRefreshing = false
-
-                if (mWalletEnabled)
+                if (mRecyclerViewItems != null)
                 {
-                    mWalletEnabled = false
-                    // put the good layers
-                    mBalanceLayout?.visibility = View.GONE
-                    mCreateWalletLayout?.visibility = View.VISIBLE
+                    mRecyclerViewItems?.clear()
+                }
 
-                    val args = arguments
-                    args?.putBundle(Address.TAG, null)
-
-                    if (mRecyclerViewItems != null)
-                    {
-                        mRecyclerViewItems?.clear()
-                    }
-
-                    if (mBalanceItem != null)
-                    {
-                        mBalanceItem = -1.0
-                    }
+                if (mBalanceItem != null)
+                {
+                    mBalanceItem = -1.0
                 }
             }
         }

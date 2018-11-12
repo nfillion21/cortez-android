@@ -284,7 +284,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
             {
                 0 ->
                 {
-                    HomeDelegateFragment.newInstance(mTezosTheme, "KT1WckkuUK46AiSZBhDVAiS6GCZWwSZC37EG")
+                    return HomeDelegateFragment.newInstance(mTezosTheme, "KT1WckkuUK46AiSZBhDVAiS6GCZWwSZC37EG")
                 }
                 1 ->
                 {
@@ -302,7 +302,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                 }
             }
 
-            return HomeFragment.newInstance(mTezosTheme, null)
+            return HomeDelegateFragment.newInstance(mTezosTheme, null)
         }
 
         override fun getCount(): Int

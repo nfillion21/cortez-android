@@ -17,9 +17,4 @@ class OperationsFragment: HomeFragment()
                     }
                 }
     }
-
-    override fun isHome():Boolean
-    {
-        return false
-    }
 }
