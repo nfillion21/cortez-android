@@ -7,7 +7,8 @@
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
 
         <LinearLayout
             android:id="@+id/pkh_info_layout"
@@ -43,5 +44,46 @@
 
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
-</LinearLayout>
 
+    <RelativeLayout
+        android:layout_weight="0"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="?attr/actionBarSize"
+        android:layout_marginRight="@dimen/spacing_double"
+        android:layout_marginLeft="@dimen/spacing_double"
+        android:layout_height="?android:attr/actionBarSize">
+
+        <FrameLayout
+            android:id="@+id/add_button_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            style="@style/PaymentScreens.Button"
+            android:enabled="false"
+            android:layout_centerInParent="true"
+            android:visibility="visible"
+            >
+
+            <Button
+                android:id="@+id/add_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/delegate"
+
+                android:drawableLeft="@drawable/ic_lock_black"
+                android:drawableStart="@drawable/ic_lock_black"
+                android:drawableTint="@color/tz_light"
+                android:drawablePadding="@dimen/spacing_normal"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                android:layout_gravity="center"
+                android:enabled="false"
+
+                android:background="@null"
+                android:clickable="false"
+                android:focusable="false"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                />
+
+        </FrameLayout>
+    </RelativeLayout>
+</LinearLayout>

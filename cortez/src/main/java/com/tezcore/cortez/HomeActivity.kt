@@ -284,7 +284,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
                 1 ->
                 {
-                    return AddressBookFragment.newInstance(mTezosTheme.toBundle(), null)
+                    return AddressBookFragment.newInstance(mTezosTheme, null, null)
                 }
                 2 ->
                 {

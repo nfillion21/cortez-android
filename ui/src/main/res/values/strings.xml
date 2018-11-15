@@ -64,6 +64,7 @@
     <string name="operations_title">Operations</string>
     <string name="last_operations_title">Last operations</string>
     <string name="add_an_address">Add</string>
+    <string name="delegate">Delegate</string>
     <string name="about">About</string>
     <string name="exit">Exit</string>
     <string name="exit_info">Are you sure you want to exit?</string>

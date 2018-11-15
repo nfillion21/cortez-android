@@ -180,7 +180,7 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
 
             Intent intent = getIntent();
             String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
-            fragment = AddressBookFragment.newInstance(customThemeBundle, Selection.fromStringValue(selectionString));
+            fragment = AddressBookFragment.newInstance(CustomTheme.fromBundle(customThemeBundle), null, Selection.fromStringValue(selectionString));
         }
 
         supportFragmentManager.beginTransaction()

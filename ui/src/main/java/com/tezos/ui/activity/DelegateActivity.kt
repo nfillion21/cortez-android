@@ -288,7 +288,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                 }
                 1 ->
                 {
-                    return AddressBookFragment.newInstance(mTezosTheme.toBundle(), null)
+                    return AddressBookFragment.newInstance(mTezosTheme, null, null)
                 }
                 2 ->
                 {
