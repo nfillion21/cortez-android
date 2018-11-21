@@ -30,7 +30,6 @@ package com.tezos.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
@@ -39,6 +38,8 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.widget.Toolbar
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -46,13 +47,10 @@ import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.TextView
 import com.android.volley.VolleyError
-import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
-import com.tezos.ui.fragment.TransferFormFragment
 import com.tezos.ui.utils.Storage
-import kotlinx.android.synthetic.main.activity_payment_form.*
-import kotlinx.android.synthetic.main.fragment_delegate.*
+import kotlinx.android.synthetic.main.activity_add_delegate.*
 
 /**
  * Created by nfillion on 20/11/18.
@@ -198,17 +196,145 @@ class AddDelegateActivity : BaseSecureActivity()
         }
     }
 
-    private fun isInputDataValid(): Boolean
-    {
-        return true
-    }
-
     private fun makeSelector(theme: CustomTheme): StateListDrawable
     {
         val res = StateListDrawable()
         res.addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(ContextCompat.getColor(this, theme.colorPrimaryDarkId)))
         res.addState(intArrayOf(), ColorDrawable(ContextCompat.getColor(this, theme.colorPrimaryId)))
         return res
+    }
+
+    private inner class GenericTextWatcher internal constructor(private val v: View) : TextWatcher
+    {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+
+        override fun afterTextChanged(editable: Editable)
+        {
+            val i = v.id
+
+            if (i == R.id.amount_transfer)
+            {
+                putAmountInRed(false)
+            }
+            else
+            {
+                throw UnsupportedOperationException(
+                        "OnClick has not been implemented for " + resources.getResourceName(v.id))
+            }
+            validateAddButton(isInputDataValid())
+        }
+    }
+
+    fun isInputDataValid(): Boolean
+    {
+        return isTransferAmountValid()
+                && mDstAccount != null
+    }
+
+    private fun putEverythingInRed()
+    {
+        this.putAmountInRed(true)
+    }
+
+// put everything in RED
+
+    private fun putAmountInRed(red: Boolean)
+    {
+        val color: Int
+
+        val amountValid = isTransferAmountValid()
+
+        if (red && !amountValid)
+        {
+            color = R.color.tz_error
+            add_delegate_button.text = getString(R.string.pay, "")
+        }
+        else
+        {
+            color = R.color.tz_accent
+
+            if (amountValid)
+            {
+                val amount = mAmount!!.text.toString()
+                this.setTextPayButton(amount)
+            }
+            else
+            {
+                add_delegate_button.text = getString(R.string.pay, "")
+            }
+        }
+
+        mAmount?.setTextColor(ContextCompat.getColor(this, color))
+    }
+
+    private fun setTextPayButton(amount: String)
+    {
+        var amount = amount
+//var amountDouble: Double = java.lang.Double.parseDouble(amount)
+        var amountDouble: Double = amount.toDouble()
+
+        val selectedItemThreeDS = fee_spinner.selectedItemId
+
+        when (selectedItemThreeDS.toInt())
+        {
+            0 -> {
+                amountDouble += 0.01
+            }
+
+            1 -> {
+                amountDouble += 0.00
+            }
+
+            2 -> {
+                amountDouble += 0.05
+            }
+
+            else -> {
+                //no-op
+            }
+        }
+
+//amount = java.lang.Double.toString(amountDouble)
+        amount = amountDouble.toString()
+
+//check the correct amount
+        if (amount.contains("."))
+        {
+            val elements = amount.substring(amount.indexOf("."))
+
+            when
+            {
+                elements.length > 7 ->
+                {
+                    amount = String.format("%.6f", amount.toDouble())
+                    val d = amount.toDouble()
+                    amount = d.toString()
+                }
+
+                elements.length <= 3 ->
+                {
+                    amount = String.format("%.2f", amount.toDouble())
+                }
+                else ->
+                {
+                    //                        int length = elements.length() - 1;
+                    //                        String format = "%." + length + "f";
+                    //                        Float f = Float.parseFloat(amount);
+                    //                        amount = String.format(format, f);
+                }
+            }
+        }
+        else
+        {
+            amount = String.format("%.2f", amount.toDouble())
+//amount = Double.parseDouble(amount).toString();
+        }
+
+        val moneyFormatted2 = "$amount ꜩ"
+//String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
+        add_delegate_button.text = getString(R.string.pay, moneyFormatted2)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
