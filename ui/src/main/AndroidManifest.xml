@@ -64,6 +64,11 @@
             android:theme="@style/PaymentScreens.DelegateActivity"
             android:windowSoftInputMode="adjustPan" />
 
+        <activity
+            android:name="com.tezos.ui.activity.AddDelegateActivity"
+            android:theme="@style/PaymentScreens.AddDelegateActivity"
+            android:windowSoftInputMode="adjustPan" />
+
     </application>
 
 </manifest>

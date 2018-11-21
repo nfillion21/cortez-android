@@ -28,6 +28,7 @@
     <string name="next_step_button">Next step</string>
     <string name="restore_wallet">Restore Wallet</string>
     <string name="add_address_title">Add an address</string>
+    <string name="add_delegate_title">Add a delegate</string>
     <string name="receive_title">Receive</string>
     <string name="restore_wallet_info">Please fill your 24 english words in the right order to recover your accounts.</string>
     <string name="verify_creation_wallet_info">Please fill these 6 random words from the mnemonics to make sure you have previously noted it.</string>
@@ -37,6 +38,7 @@
     <string name="copied_pkh">Copied public key hash</string>
     <string name="copied_your_pkh">Copied your public key hash</string>
     <string name="copied">Copied %1$s</string>
+    <string name="delegate_address_info">Please fill the form to delegate your tez. This will create a KT1 address and delegate it to the tz1 delegate address you choose.</string>
     <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key</string>
     <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez</string>
     <string name="tap_to_copy_info">Tap to copy your address or share it with the sender via email or text</string>

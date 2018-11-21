@@ -199,6 +199,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             AddAddressActivity.start(this, mTezosTheme)
         }
 
+        fabAddDelegate.setOnClickListener { _ ->
+            AddDelegateActivity.start(this, mTezosTheme)
+        }
+
         initActionBar(mTezosTheme)
     }
 
