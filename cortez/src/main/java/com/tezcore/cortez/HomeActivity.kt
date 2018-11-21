@@ -100,12 +100,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                             fabTransfer.show()
                             fabSharing.hide()
                             fabAddAddress.hide()
+                            fabAddDelegate.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabSharing.hide()
                             fabAddAddress.hide()
+                            fabAddDelegate.hide()
                         }
                     }
 
@@ -114,6 +116,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         fabTransfer.hide()
                         fabAddAddress.show()
                         fabSharing.hide()
+                        fabAddDelegate.hide()
                     }
 
                     2 ->
@@ -123,12 +126,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                             fabTransfer.hide()
                             fabAddAddress.hide()
                             fabSharing.show()
+                            fabAddDelegate.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabAddAddress.hide()
                             fabSharing.hide()
+                            fabAddDelegate.hide()
                         }
                     }
 
@@ -137,6 +142,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         fabTransfer.hide()
                         fabAddAddress.hide()
                         fabSharing.hide()
+                        fabAddDelegate.show()
                     }
 
                     else ->
@@ -217,12 +223,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         fabTransfer.show()
                         fabSharing.hide()
                         fabAddAddress.hide()
+                        fabAddDelegate.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabSharing.hide()
                         fabAddAddress.hide()
+                        fabAddDelegate.hide()
                     }
                 }
 
@@ -231,6 +239,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     fabTransfer.hide()
                     fabAddAddress.show()
                     fabSharing.hide()
+                    fabAddDelegate.hide()
                 }
 
                 2 ->
@@ -240,12 +249,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         fabTransfer.hide()
                         fabAddAddress.hide()
                         fabSharing.show()
+                        fabAddDelegate.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabAddAddress.hide()
                         fabSharing.hide()
+                        fabAddDelegate.hide()
                     }
                 }
 
@@ -254,6 +265,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     fabTransfer.hide()
                     fabAddAddress.hide()
                     fabSharing.hide()
+                    fabAddDelegate.show()
                 }
 
                 else ->
