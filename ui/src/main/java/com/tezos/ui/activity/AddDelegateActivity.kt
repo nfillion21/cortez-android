@@ -39,6 +39,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.widget.Toolbar
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
@@ -59,9 +60,13 @@ class AddDelegateActivity : BaseSecureActivity()
 {
     private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
+    private var mAmountCache:Double = -1.0
+
     companion object
     {
         var ADD_DELEGATE_REQUEST_CODE = 0x3100 // arbitrary int
+
+        private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
 
         private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
         {
@@ -70,14 +75,6 @@ class AddDelegateActivity : BaseSecureActivity()
 
             return starter
         }
-
-        /*
-        fun start(activity: Activity, seedBundle: Bundle, address: Address?, theme: CustomTheme)
-        {
-            val starter = getStartIntent(activity, seedBundle, address, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_REQUEST_CODE, null)
-        }
-        */
 
         fun start(activity: Activity, theme: CustomTheme)
         {
@@ -94,9 +91,14 @@ class AddDelegateActivity : BaseSecureActivity()
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
         val theme = CustomTheme.fromBundle(themeBundle)
 
-        validateAddButton(isInputDataValid(), theme)
+        validateAddButton(isInputDataValid())
 
         initToolbar(theme)
+
+        amount_transfer.addTextChangedListener(GenericTextWatcher(amount_transfer))
+
+        val focusChangeListener = this.focusChangeListener()
+        amount_transfer.onFocusChangeListener = focusChangeListener
 
         val adapter = ArrayAdapter.createFromResource(this,
                 R.array.array_fee, android.R.layout.simple_spinner_item)
@@ -106,16 +108,35 @@ class AddDelegateActivity : BaseSecureActivity()
         {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
             {
-                //putAmountInRed(false)
+                putAmountInRed(false)
                 //mSpinnerPosition = i
             }
 
             override fun onNothingSelected(adapterView: AdapterView<*>) {}
         }
 
-        if (savedInstanceState == null)
+        if (savedInstanceState != null)
         {
+            mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
+        }
 
+        putEverythingInRed()
+    }
+
+    private fun focusChangeListener(): View.OnFocusChangeListener
+    {
+        return View.OnFocusChangeListener { v, hasFocus ->
+            val i = v.id
+
+            if (i == R.id.amount_transfer)
+            {
+                putAmountInRed(!hasFocus)
+            }
+            else
+            {
+                throw UnsupportedOperationException(
+                        "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
+            }
         }
     }
 
@@ -170,8 +191,11 @@ class AddDelegateActivity : BaseSecureActivity()
         snackbar.show()
     }
 
-    private fun validateAddButton(validate: Boolean, theme: CustomTheme)
+    private fun validateAddButton(validate: Boolean)
     {
+        val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
+        val theme = CustomTheme.fromBundle(themeBundle)
+
         if (validate)
         {
             add_delegate_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
@@ -223,6 +247,7 @@ class AddDelegateActivity : BaseSecureActivity()
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
             }
+
             validateAddButton(isInputDataValid())
         }
     }
@@ -230,7 +255,33 @@ class AddDelegateActivity : BaseSecureActivity()
     fun isInputDataValid(): Boolean
     {
         return isTransferAmountValid()
-                && mDstAccount != null
+    }
+
+    private fun isTransferAmountValid():Boolean
+    {
+        val isAmountValid = false
+
+        if (amount_transfer != null && !TextUtils.isEmpty(amount_transfer.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val amount = amount_transfer.text!!.toString().toDouble()
+
+                if (amount >= 0.000001f)
+                {
+                    mAmountCache = amount
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mAmountCache = -1.0
+                return false
+            }
+        }
+
+        return isAmountValid
     }
 
     private fun putEverythingInRed()
@@ -257,7 +308,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
             if (amountValid)
             {
-                val amount = mAmount!!.text.toString()
+                val amount = amount_transfer.text.toString()
                 this.setTextPayButton(amount)
             }
             else
@@ -266,7 +317,7 @@ class AddDelegateActivity : BaseSecureActivity()
             }
         }
 
-        mAmount?.setTextColor(ContextCompat.getColor(this, color))
+        amount_transfer.setTextColor(ContextCompat.getColor(this, color))
     }
 
     private fun setTextPayButton(amount: String)
@@ -343,5 +394,12 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val fragment = supportFragmentManager.findFragmentById(R.id.form_fragment_container)
         fragment?.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?)
+    {
+        super.onSaveInstanceState(outState)
+
+        outState?.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
     }
 }
