@@ -49,6 +49,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import com.android.volley.VolleyError
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_add_delegate.*
@@ -102,6 +103,10 @@ class AddDelegateActivity : BaseSecureActivity()
         val focusChangeListener = this.focusChangeListener()
         amount_transfer.onFocusChangeListener = focusChangeListener
 
+        tezos_address.addTextChangedListener(GenericTextWatcher(tezos_address))
+
+        tezos_address.onFocusChangeListener = focusChangeListener
+
         val adapter = ArrayAdapter.createFromResource(this,
                 R.array.array_fee, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -136,6 +141,10 @@ class AddDelegateActivity : BaseSecureActivity()
             if (i == R.id.amount_transfer)
             {
                 putAmountInRed(!hasFocus)
+            }
+            else if (i == R.id.tezos_address)
+            {
+                putTzAddressInRed(!hasFocus)
             }
             else
             {
@@ -248,6 +257,11 @@ class AddDelegateActivity : BaseSecureActivity()
                 putAmountInRed(false)
                 mSpinnerPosition = i
             }
+
+            else if (i == R.id.tezos_address)
+            {
+                putTzAddressInRed(false)
+            }
             else
             {
                 throw UnsupportedOperationException(
@@ -260,8 +274,21 @@ class AddDelegateActivity : BaseSecureActivity()
 
     fun isInputDataValid(): Boolean
     {
-        return isTransferAmountValid()
+        return isTransferAmountValid() && isTzAddressValid()
     }
+
+    private fun isTzAddressValid(): Boolean
+    {
+        val isTzAddressValid = false
+
+        return if (!TextUtils.isEmpty(tezos_address.text))
+        {
+            Utils.isTzAddressValid(tezos_address.text!!.toString())
+        }
+
+        else isTzAddressValid
+    }
+
 
     private fun isTransferAmountValid():Boolean
     {
@@ -293,6 +320,25 @@ class AddDelegateActivity : BaseSecureActivity()
     private fun putEverythingInRed()
     {
         this.putAmountInRed(true)
+        this.putTzAddressInRed(true)
+    }
+
+    private fun putTzAddressInRed(red: Boolean)
+    {
+        val color: Int
+
+        val tzAddressValid = isTzAddressValid()
+
+        if (red && !tzAddressValid)
+        {
+            color = R.color.tz_error
+        }
+        else
+        {
+            color = R.color.tz_accent
+        }
+
+        tezos_address.setTextColor(ContextCompat.getColor(this, color))
     }
 
 // put everything in RED
