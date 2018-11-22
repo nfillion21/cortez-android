@@ -61,12 +61,14 @@ class AddDelegateActivity : BaseSecureActivity()
     private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
     private var mAmountCache:Double = -1.0
+    private var mSpinnerPosition:Int = 0
 
     companion object
     {
         var ADD_DELEGATE_REQUEST_CODE = 0x3100 // arbitrary int
 
         private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
+        private val TRANSFER_SPINNER_POS_KEY = "transfer_spinner_pos_key"
 
         private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
         {
@@ -109,7 +111,7 @@ class AddDelegateActivity : BaseSecureActivity()
             override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
             {
                 putAmountInRed(false)
-                //mSpinnerPosition = i
+                mSpinnerPosition = i
             }
 
             override fun onNothingSelected(adapterView: AdapterView<*>) {}
@@ -118,7 +120,10 @@ class AddDelegateActivity : BaseSecureActivity()
         if (savedInstanceState != null)
         {
             mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
+            mSpinnerPosition = savedInstanceState.getInt(TRANSFER_SPINNER_POS_KEY, 0)
         }
+
+        fee_spinner.setSelection(mSpinnerPosition)
 
         putEverythingInRed()
     }
@@ -241,6 +246,7 @@ class AddDelegateActivity : BaseSecureActivity()
             if (i == R.id.amount_transfer)
             {
                 putAmountInRed(false)
+                mSpinnerPosition = i
             }
             else
             {
@@ -300,7 +306,7 @@ class AddDelegateActivity : BaseSecureActivity()
         if (red && !amountValid)
         {
             color = R.color.tz_error
-            add_delegate_button.text = getString(R.string.pay, "")
+            add_delegate_button.text = getString(R.string.delegate_format, "")
         }
         else
         {
@@ -313,7 +319,7 @@ class AddDelegateActivity : BaseSecureActivity()
             }
             else
             {
-                add_delegate_button.text = getString(R.string.pay, "")
+                add_delegate_button.text = getString(R.string.delegate_format, "")
             }
         }
 
@@ -385,7 +391,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val moneyFormatted2 = "$amount ꜩ"
 //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        add_delegate_button.text = getString(R.string.pay, moneyFormatted2)
+        add_delegate_button.text = getString(R.string.delegate_format, moneyFormatted2)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -401,5 +407,6 @@ class AddDelegateActivity : BaseSecureActivity()
         super.onSaveInstanceState(outState)
 
         outState?.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
+        outState?.putInt(TRANSFER_SPINNER_POS_KEY, mSpinnerPosition)
     }
 }

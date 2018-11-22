@@ -232,8 +232,8 @@ tools:ignore="UselessParent,UnusedAttribute">
                 android:layout_height="wrap_content"
                 android:text="@string/add_an_address"
 
-                android:drawableLeft="@drawable/add_circle_24"
-                android:drawableStart="@drawable/add_circle_24"
+                android:drawableLeft="@drawable/ic_lock_black"
+                android:drawableStart="@drawable/ic_lock_black"
                 android:drawableTint="@color/tz_light"
                 android:drawablePadding="@dimen/spacing_normal"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"

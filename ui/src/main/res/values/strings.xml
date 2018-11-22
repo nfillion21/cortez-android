@@ -2,6 +2,7 @@
     <string name="app_name">ui</string>
     <string name="content_description" translatable="false">Content description</string>
     <string name="pay">Pay %1$s</string>
+    <string name="delegate_format">Delegate %1$s</string>
     <string name="select_source">Select source transfer</string>
     <string name="select_destination">Select recipient</string>
     <string name="select_source_title">Select source</string>
