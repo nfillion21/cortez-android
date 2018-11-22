@@ -115,7 +115,7 @@ class AddDelegateActivity : BaseSecureActivity()
         {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
             {
-                putAmountInRed(false)
+                //putAmountInRed(false)
                 mSpinnerPosition = i
             }
 
@@ -129,8 +129,6 @@ class AddDelegateActivity : BaseSecureActivity()
         }
 
         fee_spinner.setSelection(mSpinnerPosition)
-
-        putEverythingInRed()
     }
 
     private fun focusChangeListener(): View.OnFocusChangeListener
@@ -315,6 +313,13 @@ class AddDelegateActivity : BaseSecureActivity()
         }
 
         return isAmountValid
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+
+        putEverythingInRed()
     }
 
     private fun putEverythingInRed()

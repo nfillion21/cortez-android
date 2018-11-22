@@ -651,7 +651,7 @@ class TransferFormFragment : Fragment()
         {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
             {
-                putAmountInRed(false)
+                //putAmountInRed(false)
                 mSpinnerPosition = i
             }
 
