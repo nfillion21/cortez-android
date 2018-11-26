@@ -32,23 +32,13 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import com.tezcore.ui.activity.DelegateActivity
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.utils.Storage
-import net.glxn.qrgen.android.QRCode
+import kotlinx.android.synthetic.main.fragment_delegation.*
 
 class DelegationFragment : Fragment()
 {
-    private var mLinearLayout: LinearLayout? = null
-    private var mPkhTextview: TextView? = null
-
-    private var mPkhLayout: LinearLayout? = null
-    private var mPkhEmptyLayout: LinearLayout? = null
-
     companion object
     {
         @JvmStatic
@@ -67,14 +57,6 @@ class DelegationFragment : Fragment()
         arguments?.let {
             val themeBundle = it.getBundle(CustomTheme.TAG)
         }
-
-        mPkhLayout = view.findViewById(R.id.pkh_layout)
-        mPkhEmptyLayout = view.findViewById(R.id.pkh_empty_layout)
-
-        mLinearLayout = view.findViewById(R.id.pkh_info_layout)
-
-        mPkhTextview = view.findViewById(R.id.pkh_textview)
-
     }
 
     override fun onResume()
@@ -84,42 +66,13 @@ class DelegationFragment : Fragment()
         val isPasswordSaved = Storage(activity!!).isPasswordSaved()
         if (isPasswordSaved)
         {
-            mPkhLayout?.visibility = View.VISIBLE
-            mPkhEmptyLayout?.visibility = View.GONE
-
-            val seed = Storage(activity!!).getMnemonics()
-            val pkh = seed.pkh
-
-            val dm = resources.displayMetrics
-
-            val width:Int
-            width = if (dm.widthPixels < dm.heightPixels)
-            {
-                dm.widthPixels / 2
-            }
-            else
-            {
-                dm.heightPixels / 2
-            }
-
-            val myBitmap = QRCode.from(pkh).withSize(width, width).bitmap()
-            val myImage = view?.findViewById<ImageView>(R.id.qr_code)
-            myImage?.setImageBitmap(myBitmap)
-
-            mLinearLayout?.setOnClickListener {
-
-                arguments?.let {
-                    val themeBundle = it.getBundle(CustomTheme.TAG)
-                    DelegateActivity.start(activity!!, CustomTheme.fromBundle(themeBundle))
-                }
-            }
-
-            mPkhTextview?.text = pkh
+            delegates_empty_layout.visibility = View.GONE
+            delegates_layout.visibility = View.VISIBLE
         }
         else
         {
-            mPkhLayout?.visibility = View.GONE
-            mPkhEmptyLayout?.visibility = View.VISIBLE
+            delegates_empty_layout.visibility = View.VISIBLE
+            delegates_layout.visibility = View.GONE
         }
     }
 

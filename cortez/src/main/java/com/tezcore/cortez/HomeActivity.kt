@@ -50,10 +50,7 @@ import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
-import com.tezos.ui.fragment.AddressBookFragment
-import com.tezos.ui.fragment.DelegationFragment
-import com.tezos.ui.fragment.HomeFragment
-import com.tezos.ui.fragment.SharingAddressFragment
+import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
@@ -139,10 +136,20 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                     3 ->
                     {
-                        fabTransfer.hide()
-                        fabAddAddress.hide()
-                        fabSharing.hide()
-                        fabAddDelegate.show()
+                        if (isPasswordSaved)
+                        {
+                            fabTransfer.hide()
+                            fabAddAddress.hide()
+                            fabSharing.hide()
+                            fabAddDelegate.show()
+                        }
+                        else
+                        {
+                            fabTransfer.hide()
+                            fabAddAddress.hide()
+                            fabSharing.hide()
+                            fabAddDelegate.hide()
+                        }
                     }
 
                     else ->
@@ -266,10 +273,20 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                 3 ->
                 {
-                    fabTransfer.hide()
-                    fabAddAddress.hide()
-                    fabSharing.hide()
-                    fabAddDelegate.show()
+                    if (isPasswordSaved)
+                    {
+                        fabTransfer.hide()
+                        fabAddAddress.hide()
+                        fabSharing.hide()
+                        fabAddDelegate.show()
+                    }
+                    else
+                    {
+                        fabTransfer.hide()
+                        fabAddAddress.hide()
+                        fabSharing.hide()
+                        fabAddDelegate.hide()
+                    }
                 }
 
                 else ->

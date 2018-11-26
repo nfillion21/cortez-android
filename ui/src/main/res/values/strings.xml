@@ -21,9 +21,12 @@
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
     <string name="public_key_info_title">Here is your Address</string>
     <string name="address_book_empty_title">Your address book is empty</string>
+    <string name="delegated_addresses_empty_title">You don\'t have any delegated addresses</string>
     <string name="public_key_info_empty_title">You have no public key</string>
+    <string name="account_info_empty_title">You cannot delegate</string>
     <string name="delegate_title">Delegate</string>
     <string name="address_book_empty_info_title">Please fill in your address book by clicking on the add button</string>
+    <string name="delegated_addresses_empty_info_title">Please delegate your tez by clicking on the add button</string>
     <string name="create_wallet">Create Wallet</string>
     <string name="create_wallet_title_1">Create Wallet 1/2</string>
     <string name="create_wallet_title_2">Create Wallet 2/2</string>
@@ -42,6 +45,7 @@
     <string name="copied">Copied %1$s</string>
     <string name="delegate_address_info">Please fill the form to delegate your tez. This will create a KT1 address and delegate it to the tz1 delegate address you choose.</string>
     <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key</string>
+    <string name="create_restore_wallet_delegate_info">Please create or restore a wallet to be able to delegate your tez</string>
     <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez</string>
     <string name="tap_to_copy_info">Tap to copy your address or share it with the sender via email or text</string>
     <string name="share">Share</string>

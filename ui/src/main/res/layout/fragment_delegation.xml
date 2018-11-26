@@ -10,31 +10,31 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/pkh_info_layout"
+            android:id="@+id/delegates_info_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/pkh_empty_layout"
+                android:id="@+id/delegates_empty_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/pkh_info_empty_title_textview"
+                    android:id="@+id/delegates_info_empty_title_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
                     android:layout_marginBottom="@dimen/spacing_normal"
-                    android:text="@string/public_key_info_empty_title"/>
+                    android:text="@string/account_info_empty_title"/>
 
                 <TextView
-                    android:id="@+id/pkh_info_empty_textview"
+                    android:id="@+id/delegates_info_empty_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:text="@string/create_restore_wallet_info"
+                    android:text="@string/create_restore_wallet_delegate_info"
                     android:textColor="@color/colorAccent"
                     android:layout_marginBottom="@dimen/spacing_double"
                     android:ellipsize="end" />
@@ -42,59 +42,30 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/pkh_layout"
+                android:id="@+id/delegates_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/pkh_info_title_textview"
+                    android:id="@+id/delegated_addresses_empty_title_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
                     android:layout_marginBottom="@dimen/spacing_normal"
-                    android:text="@string/public_key_info_title"/>
+                    android:text="@string/delegated_addresses_empty_title"/>
 
                 <TextView
-                    android:id="@+id/pkh_info_textview"
+                    android:id="@+id/delegated_addresses_empty_info_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:text="@string/tap_to_copy_info"
-                    android:textColor="@color/colorAccent"
-                    android:layout_marginBottom="@dimen/spacing_double"
-                    android:ellipsize="end" />
-
-                <ImageView
-                    android:id="@+id/qr_code"
-                    android:padding="1dp"
-                    android:background="@drawable/shadow_border"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
-
-                <TextView
-                    android:id="@+id/pkh_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@drawable/selector_rect_layout"
-                    android:paddingTop="@dimen/spacing_micro"
-                    android:paddingBottom="@dimen/spacing_micro"
-                    android:paddingLeft="@dimen/spacing_normal"
-                    android:paddingRight="@dimen/spacing_normal"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:textColor="@color/colorAccent"
-                    android:layout_marginBottom="@dimen/spacing_double"
-                    android:layout_marginTop="@dimen/spacing_double"
-                    android:autoSizeMinTextSize="12sp"
-                    android:autoSizeMaxTextSize="14sp"
-                    android:autoSizeStepGranularity="2sp"
-                    android:autoSizeTextType="uniform" />
+                    android:text="@string/delegated_addresses_empty_info_title"/>
 
             </LinearLayout>
 
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 </LinearLayout>
+
 
