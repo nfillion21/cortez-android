@@ -32,6 +32,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
+import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -51,6 +52,8 @@ import com.android.volley.VolleyError
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.Utils
 import com.tezos.ui.R
+import com.tezos.ui.authentication.AuthenticationDialog
+import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_add_delegate.*
 
@@ -95,6 +98,10 @@ class AddDelegateActivity : BaseSecureActivity()
         val theme = CustomTheme.fromBundle(themeBundle)
 
         validateAddButton(isInputDataValid())
+
+        add_delegate_button_layout.setOnClickListener {
+            onPayClick()
+        }
 
         initToolbar(theme)
 
@@ -450,8 +457,89 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         super.onActivityResult(requestCode, resultCode, data)
 
-        val fragment = supportFragmentManager.findFragmentById(R.id.form_fragment_container)
-        fragment?.onActivityResult(requestCode, resultCode, data)
+        //val fragment = supportFragmentManager.findFragmentById(R.id.form_fragment_container)
+        //fragment?.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun onPayClick()
+    {
+        val dialog = AuthenticationDialog()
+        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        {
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(this).prepareFingerprintCryptoObject()
+            dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
+            dialog.fingerprintAuthenticationSuccessListener = {
+                validateKeyAuthentication(it)
+            }
+            if (dialog.cryptoObjectToAuthenticateWith == null)
+            {
+                dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
+            }
+            else
+            {
+                dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
+            }
+        }
+        else
+        {
+            dialog.stage = AuthenticationDialog.Stage.PASSWORD
+        }
+        dialog.authenticationSuccessListener = {
+            //startInitTransferLoading()
+        }
+        dialog.passwordVerificationListener =
+                {
+                    validatePassword(it)
+                }
+        dialog.show(supportFragmentManager, "Authentication")
+    }
+
+    private fun isFingerprintAllowed():Boolean
+    {
+        return storage.isFingerprintAllowed()
+    }
+
+    private fun hasEnrolledFingerprints():Boolean
+    {
+        return systemServices.hasEnrolledFingerprints()
+    }
+
+    private fun saveFingerprintAllowed(useInFuture:Boolean)
+    {
+        storage.saveFingerprintAllowed(useInFuture)
+    }
+
+    /**
+     * Fingerprint was invalidated, decide what to do in this case.
+     */
+    private fun onFingerprintInvalidation(useInFuture: Boolean)
+    {
+        saveFingerprintAllowed(useInFuture)
+        if (useInFuture)
+        {
+            EncryptionServices(this).createFingerprintKey()
+        }
+    }
+
+    /**
+     * Validate password inputted from Authentication Dialog.
+     */
+    private fun validatePassword(inputtedPassword: String): Boolean
+    {
+        val storage = Storage(this)
+        return EncryptionServices(this).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
+    }
+
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
+    {
+        if (EncryptionServices(this).validateFingerprintAuthentication(cryptoObject))
+        {
+            //startInitTransferLoading()
+        }
+        else
+        {
+            onPayClick()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle?)

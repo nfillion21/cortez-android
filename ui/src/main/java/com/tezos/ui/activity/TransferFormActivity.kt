@@ -124,7 +124,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
 
         val mCloseButton = findViewById<ImageButton>(R.id.close_button)
         mCloseButton.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        mCloseButton.setOnClickListener { _ ->
+        mCloseButton.setOnClickListener {
             //requests stop in onDestroy.
             finish()
         }
