@@ -56,6 +56,7 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_add_delegate.*
+import kotlinx.android.synthetic.main.delegate_form_card_info.*
 
 /**
  * Created by nfillion on 20/11/18.
@@ -100,7 +101,7 @@ class AddDelegateActivity : BaseSecureActivity()
         validateAddButton(isInputDataValid())
 
         add_delegate_button_layout.setOnClickListener {
-            onPayClick()
+            onDelegateClick()
         }
 
         initToolbar(theme)
@@ -461,7 +462,7 @@ class AddDelegateActivity : BaseSecureActivity()
         //fragment?.onActivityResult(requestCode, resultCode, data)
     }
 
-    private fun onPayClick()
+    private fun onDelegateClick()
     {
         val dialog = AuthenticationDialog()
         if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
@@ -538,7 +539,7 @@ class AddDelegateActivity : BaseSecureActivity()
         }
         else
         {
-            onPayClick()
+            onDelegateClick()
         }
     }
 

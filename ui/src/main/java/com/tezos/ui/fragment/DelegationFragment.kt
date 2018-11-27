@@ -79,7 +79,7 @@ class DelegationFragment : Fragment()
 
         arguments?.let {
             val themeBundle = it.getBundle(CustomTheme.TAG)
-            address_button.setOnClickListener { DelegateActivity.start(activity!!, CustomTheme.fromBundle(themeBundle)) }
+            address_button.setOnClickListener { DelegateActivity.start(activity!!,"KT1WckkuUK46AiSZBhDVAiS6GCZWwSZC37EG", CustomTheme.fromBundle(themeBundle)) }
         }
     }
 

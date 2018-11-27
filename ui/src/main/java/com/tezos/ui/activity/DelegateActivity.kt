@@ -64,20 +64,22 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
     companion object
     {
         private val TAG_DELEGATE = "DelegateTag"
+        private val TAG_PKH = "PkhTag"
 
         var DELEGATE_REQUEST_CODE = 0x2900 // arbitrary int
 
-        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
+        private fun getStartIntent(context: Context, pkh: String, themeBundle: Bundle): Intent
         {
             val starter = Intent(context, DelegateActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
+            starter.putExtra(TAG_PKH, pkh)
 
             return starter
         }
 
-        fun start(activity: Activity, theme: CustomTheme)
+        fun start(activity: Activity, pkh:String, theme: CustomTheme)
         {
-            val starter = getStartIntent(activity, theme.toBundle())
+            val starter = getStartIntent(activity, pkh, theme.toBundle())
             ActivityCompat.startActivityForResult(activity, starter, DELEGATE_REQUEST_CODE, null)
         }
     }
@@ -284,7 +286,8 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
             {
                 0 ->
                 {
-                    return HomeDelegateFragment.newInstance(mTezosTheme, "KT1WckkuUK46AiSZBhDVAiS6GCZWwSZC37EG")
+                    val pkh = intent.getStringExtra(TAG_PKH)
+                    return HomeDelegateFragment.newInstance(mTezosTheme, pkh)
                 }
                 1 ->
                 {
@@ -292,8 +295,8 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                 }
                 2 ->
                 {
-
-                    return SharingAddressFragment.newInstance(mTezosTheme, "KT1WckkuUK46AiSZBhDVAiS6GCZWwSZC37EG")
+                    val pkh = intent.getStringExtra(TAG_PKH)
+                    return SharingAddressFragment.newInstance(mTezosTheme, pkh)
                 }
 
                 3 ->
