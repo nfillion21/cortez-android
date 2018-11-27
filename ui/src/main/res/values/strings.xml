@@ -26,7 +26,7 @@
     <string name="account_info_empty_title">You cannot delegate</string>
     <string name="delegate_title">Delegate</string>
     <string name="address_book_empty_info_title">Please fill in your address book by clicking on the add button</string>
-    <string name="delegated_addresses_empty_info_title">Please delegate your tez by clicking on the add button</string>
+    <string name="delegated_addresses_empty_info_title">Please create a delegated address and delegate your tez by clicking on the add button</string>
     <string name="create_wallet">Create Wallet</string>
     <string name="create_wallet_title_1">Create Wallet 1/2</string>
     <string name="create_wallet_title_2">Create Wallet 2/2</string>

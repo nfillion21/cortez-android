@@ -32,6 +32,8 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import com.tezcore.ui.activity.DelegateActivity
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.utils.Storage
@@ -73,6 +75,11 @@ class DelegationFragment : Fragment()
         {
             delegates_empty_layout.visibility = View.VISIBLE
             delegates_layout.visibility = View.GONE
+        }
+
+        arguments?.let {
+            val themeBundle = it.getBundle(CustomTheme.TAG)
+            address_button.setOnClickListener { DelegateActivity.start(activity!!, CustomTheme.fromBundle(themeBundle)) }
         }
     }
 

@@ -380,11 +380,11 @@ class AddDelegateActivity : BaseSecureActivity()
     private fun setTextPayButton(amount: String)
     {
         var amount = amount
-//var amountDouble: Double = java.lang.Double.parseDouble(amount)
         var amountDouble: Double = amount.toDouble()
 
-        val selectedItemThreeDS = fee_spinner.selectedItemId
+        //val selectedItemThreeDS = fee_spinner.selectedItemId
 
+        /*
         when (selectedItemThreeDS.toInt())
         {
             0 -> {
@@ -403,6 +403,7 @@ class AddDelegateActivity : BaseSecureActivity()
                 //no-op
             }
         }
+        */
 
 //amount = java.lang.Double.toString(amountDouble)
         amount = amountDouble.toString()
