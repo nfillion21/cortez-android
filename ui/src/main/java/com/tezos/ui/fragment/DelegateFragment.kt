@@ -27,36 +27,37 @@
 
 package com.tezos.ui.fragment
 
-import android.content.Intent.getIntent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
+import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
+import com.tezos.ui.authentication.AuthenticationDialog
+import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
+import kotlinx.android.synthetic.main.delegate_form_card_info.*
+import kotlinx.android.synthetic.main.fragment_delegate.*
 
 class DelegateFragment : Fragment()
 {
-    private var mLinearLayout: LinearLayout? = null
-    private var mPkhTextview: TextView? = null
-
-    private var mPkhEmptyLayout: LinearLayout? = null
-
-    private var mAddDelegateButton: Button? = null
-    private var mAddDelegateButtonLayout: FrameLayout? = null
+    private var mSpinnerPosition:Int = 0
+    private var mTheme:CustomTheme? = null
 
     companion object
     {
+        private val DELEGATE_SPINNER_POS_KEY = "delegate_spinner_pos_key"
+
         @JvmStatic
         fun newInstance(theme: CustomTheme) =
                 DelegateFragment().apply {
@@ -70,36 +71,79 @@ class DelegateFragment : Fragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        mPkhEmptyLayout = view.findViewById(R.id.pkh_empty_layout)
-
-        mLinearLayout = view.findViewById(R.id.pkh_info_layout)
-
-        mPkhTextview = view.findViewById(R.id.pkh_textview)
-
-        mAddDelegateButton = view.findViewById(R.id.add_delegate_button)
-        mAddDelegateButtonLayout = view.findViewById(R.id.add_delegate_button_layout)
-
-        mAddDelegateButtonLayout?.setOnClickListener { v ->
+        add_delegate_button_layout?.setOnClickListener { v ->
         }
 
         arguments?.let {
             val themeBundle = it.getBundle(CustomTheme.TAG)
-            validateAddButton(isInputDataValid(), CustomTheme.fromBundle(themeBundle))
+            mTheme = CustomTheme.fromBundle(themeBundle)
         }
+
+        validateAddButton(isInputDataValid())
+
+        validateAddButton(isInputDataValid())
+
+        add_delegate_button_layout.setOnClickListener {
+            onDelegateClick()
+        }
+
+        amount_transfer.addTextChangedListener(GenericTextWatcher(amount_transfer))
+
+        val focusChangeListener = this.focusChangeListener()
+        amount_transfer.onFocusChangeListener = focusChangeListener
+
+        tezos_address.addTextChangedListener(GenericTextWatcher(tezos_address))
+
+        tezos_address.onFocusChangeListener = focusChangeListener
+
+        val adapter = ArrayAdapter.createFromResource(activity,
+                R.array.array_fee, android.R.layout.simple_spinner_item)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        fee_spinner.adapter = adapter
+        fee_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener
+        {
+            override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
+            {
+                //putAmountInRed(false)
+                mSpinnerPosition = i
+            }
+
+            override fun onNothingSelected(adapterView: AdapterView<*>) {}
+        }
+
+        if (savedInstanceState != null)
+        {
+            mSpinnerPosition = savedInstanceState.getInt(DELEGATE_SPINNER_POS_KEY, 0)
+        }
+
+        fee_spinner.setSelection(mSpinnerPosition)
+
     }
 
     override fun onResume()
     {
         super.onResume()
+    }
 
-        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
-        if (isPasswordSaved)
-        {
 
-        }
-        else
-        {
-            mPkhEmptyLayout?.visibility = View.VISIBLE
+    private fun focusChangeListener(): View.OnFocusChangeListener
+    {
+        return View.OnFocusChangeListener { v, hasFocus ->
+            val i = v.id
+
+            if (i == R.id.amount_transfer)
+            {
+                putAmountInRed(!hasFocus)
+            }
+            else if (i == R.id.tezos_address)
+            {
+                putTzAddressInRed(!hasFocus)
+            }
+            else
+            {
+                throw UnsupportedOperationException(
+                        "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
+            }
         }
     }
 
@@ -108,29 +152,32 @@ class DelegateFragment : Fragment()
         return inflater.inflate(R.layout.fragment_delegate, container, false)
     }
 
-    private fun validateAddButton(validate: Boolean, theme: CustomTheme)
+    private fun validateAddButton(validate: Boolean)
     {
-        if (validate)
+        if (mTheme != null)
         {
-            mAddDelegateButton?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            mAddDelegateButtonLayout?.isEnabled = true
-            mAddDelegateButtonLayout?.background = makeSelector(theme)
+            if (validate)
+            {
+                add_delegate_button.setTextColor(ContextCompat.getColor(activity!!, mTheme!!.textColorPrimaryId))
+                add_delegate_button_layout.isEnabled = true
+                add_delegate_button_layout.background = makeSelector(mTheme!!)
 
-            val drawables = mAddDelegateButton?.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-        }
-        else
-        {
-            mAddDelegateButton?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-            mAddDelegateButtonLayout?.isEnabled = false
+                val drawables = add_delegate_button.compoundDrawables
+                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, mTheme!!.textColorPrimaryId))
+            }
+            else
+            {
+                add_delegate_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                add_delegate_button_layout.isEnabled = false
 
-            val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            mAddDelegateButtonLayout?.background = makeSelector(greyTheme)
+                val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+                add_delegate_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = mAddDelegateButton?.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+                val drawables = add_delegate_button.compoundDrawables
+                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+            }
         }
     }
 
@@ -145,5 +192,253 @@ class DelegateFragment : Fragment()
         res.addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryDarkId)))
         res.addState(intArrayOf(), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryId)))
         return res
+    }
+
+    private fun putEverythingInRed()
+    {
+        this.putAmountInRed(true)
+        this.putTzAddressInRed(true)
+    }
+
+    private fun putTzAddressInRed(red: Boolean)
+    {
+        val color: Int
+
+        //val tzAddressValid = isTzAddressValid()
+        val tzAddressValid = true
+
+        if (red && !tzAddressValid)
+        {
+            color = R.color.tz_error
+        }
+        else
+        {
+            color = R.color.tz_accent
+        }
+
+        tezos_address.setTextColor(ContextCompat.getColor(activity!!, color))
+    }
+
+// put everything in RED
+
+    private fun putAmountInRed(red: Boolean)
+    {
+        val color: Int
+
+        //val amountValid = isTransferAmountValid()
+        val amountValid = true
+
+        if (red && !amountValid)
+        {
+            color = R.color.tz_error
+            add_delegate_button.text = getString(R.string.delegate_format, "")
+        }
+        else
+        {
+            color = R.color.tz_accent
+
+            if (amountValid)
+            {
+                val amount = amount_transfer.text.toString()
+                this.setTextPayButton(amount)
+            }
+            else
+            {
+                add_delegate_button.text = getString(R.string.delegate_format, "")
+            }
+        }
+
+        amount_transfer.setTextColor(ContextCompat.getColor(activity!!, color))
+    }
+
+    private fun setTextPayButton(amount: String)
+    {
+        var amount = amount
+        var amountDouble: Double = amount.toDouble()
+
+        //val selectedItemThreeDS = fee_spinner.selectedItemId
+
+        /*
+        when (selectedItemThreeDS.toInt())
+        {
+            0 -> {
+                amountDouble += 0.01
+            }
+
+            1 -> {
+                amountDouble += 0.00
+            }
+
+            2 -> {
+                amountDouble += 0.05
+            }
+
+            else -> {
+                //no-op
+            }
+        }
+        */
+
+//amount = java.lang.Double.toString(amountDouble)
+        amount = amountDouble.toString()
+
+//check the correct amount
+        if (amount.contains("."))
+        {
+            val elements = amount.substring(amount.indexOf("."))
+
+            when
+            {
+                elements.length > 7 ->
+                {
+                    amount = String.format("%.6f", amount.toDouble())
+                    val d = amount.toDouble()
+                    amount = d.toString()
+                }
+
+                elements.length <= 3 ->
+                {
+                    amount = String.format("%.2f", amount.toDouble())
+                }
+                else ->
+                {
+                    //                        int length = elements.length() - 1;
+                    //                        String format = "%." + length + "f";
+                    //                        Float f = Float.parseFloat(amount);
+                    //                        amount = String.format(format, f);
+                }
+            }
+        }
+        else
+        {
+            amount = String.format("%.2f", amount.toDouble())
+//amount = Double.parseDouble(amount).toString();
+        }
+
+        val moneyFormatted2 = "$amount ꜩ"
+//String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
+        add_delegate_button.text = getString(R.string.delegate_format, moneyFormatted2)
+    }
+
+    private fun onDelegateClick()
+    {
+        val dialog = AuthenticationDialog()
+        //if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+            if (true)
+        {
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity!!).prepareFingerprintCryptoObject()
+            dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
+            dialog.fingerprintAuthenticationSuccessListener = {
+                validateKeyAuthentication(it)
+            }
+            if (dialog.cryptoObjectToAuthenticateWith == null)
+            {
+                dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
+            }
+            else
+            {
+                dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
+            }
+        }
+        else
+        {
+            dialog.stage = AuthenticationDialog.Stage.PASSWORD
+        }
+        dialog.authenticationSuccessListener = {
+            //startInitTransferLoading()
+        }
+        dialog.passwordVerificationListener =
+                {
+                    validatePassword(it)
+                }
+        dialog.show(activity!!.supportFragmentManager, "Authentication")
+    }
+
+    /*
+    private fun isFingerprintAllowed():Boolean
+    {
+        return storage.isFingerprintAllowed()
+    }
+
+    private fun hasEnrolledFingerprints():Boolean
+    {
+        return systemServices.hasEnrolledFingerprints()
+    }
+
+    private fun saveFingerprintAllowed(useInFuture:Boolean)
+    {
+        storage.saveFingerprintAllowed(useInFuture)
+    }
+    */
+
+    /**
+     * Fingerprint was invalidated, decide what to do in this case.
+     */
+    private fun onFingerprintInvalidation(useInFuture: Boolean)
+    {
+        //saveFingerprintAllowed(useInFuture)
+        if (useInFuture)
+        {
+            EncryptionServices(activity!!).createFingerprintKey()
+        }
+    }
+
+    /**
+     * Validate password inputted from Authentication Dialog.
+     */
+    private fun validatePassword(inputtedPassword: String): Boolean
+    {
+        val storage = Storage(activity!!)
+        return EncryptionServices(activity!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
+    }
+
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
+    {
+        if (EncryptionServices(activity!!).validateFingerprintAuthentication(cryptoObject))
+        {
+            //startInitTransferLoading()
+        }
+        else
+        {
+            onDelegateClick()
+        }
+    }
+
+
+    private inner class GenericTextWatcher internal constructor(private val v: View) : TextWatcher
+    {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+
+        override fun afterTextChanged(editable: Editable)
+        {
+            val i = v.id
+
+            if (i == R.id.amount_transfer)
+            {
+                putAmountInRed(false)
+                mSpinnerPosition = i
+            }
+
+            else if (i == R.id.tezos_address)
+            {
+                putTzAddressInRed(false)
+            }
+            else
+            {
+                throw UnsupportedOperationException(
+                        "OnClick has not been implemented for " + resources.getResourceName(v.id))
+            }
+
+            validateAddButton(isInputDataValid())
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        super.onSaveInstanceState(outState)
+
+        outState.putInt(DELEGATE_SPINNER_POS_KEY, mSpinnerPosition)
     }
 }
