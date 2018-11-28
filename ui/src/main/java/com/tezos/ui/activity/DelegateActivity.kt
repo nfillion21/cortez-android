@@ -52,14 +52,17 @@ import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_delegate.*
 
-class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener
+class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, DelegateFragment.OnDelegateListener
 {
+
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
             com.tezos.ui.R.color.theme_tezos_primary_dark,
             com.tezos.ui.R.color.theme_tezos_text)
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
+
+    private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
     companion object
     {
@@ -410,5 +413,20 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
         {
             showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
         }
+    }
+
+    override fun isFingerprintAllowed():Boolean
+    {
+        return storage.isFingerprintAllowed()
+    }
+
+    override fun hasEnrolledFingerprints():Boolean
+    {
+        return systemServices.hasEnrolledFingerprints()
+    }
+
+    override fun saveFingerprintAllowed(useInFuture:Boolean)
+    {
+        storage.saveFingerprintAllowed(useInFuture)
     }
 }

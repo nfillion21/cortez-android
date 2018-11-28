@@ -27,6 +27,7 @@
 
 package com.tezos.ui.fragment
 
+import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
@@ -35,6 +36,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
@@ -42,6 +44,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -53,6 +56,8 @@ class DelegateFragment : Fragment()
 {
     private var mSpinnerPosition:Int = 0
     private var mTheme:CustomTheme? = null
+
+    private var listener: OnDelegateListener? = null
 
     companion object
     {
@@ -87,10 +92,7 @@ class DelegateFragment : Fragment()
             onDelegateClick()
         }
 
-        amount_transfer.addTextChangedListener(GenericTextWatcher(amount_transfer))
-
         val focusChangeListener = this.focusChangeListener()
-        amount_transfer.onFocusChangeListener = focusChangeListener
 
         tezos_address.addTextChangedListener(GenericTextWatcher(tezos_address))
 
@@ -123,19 +125,29 @@ class DelegateFragment : Fragment()
     override fun onResume()
     {
         super.onResume()
+
+        putEverythingInRed()
     }
 
+    override fun onAttach(context: Context)
+    {
+        super.onAttach(context)
+        if (context is OnDelegateListener)
+        {
+            listener = context
+        }
+        else
+        {
+            throw RuntimeException(context.toString() + " must implement OnDelegateListener")
+        }
+    }
 
     private fun focusChangeListener(): View.OnFocusChangeListener
     {
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_transfer)
-            {
-                putAmountInRed(!hasFocus)
-            }
-            else if (i == R.id.tezos_address)
+            if (i == R.id.tezos_address)
             {
                 putTzAddressInRed(!hasFocus)
             }
@@ -183,7 +195,19 @@ class DelegateFragment : Fragment()
 
     private fun isInputDataValid(): Boolean
     {
-        return true
+        return isTzAddressValid()
+    }
+
+    private fun isTzAddressValid(): Boolean
+    {
+        val isTzAddressValid = false
+
+        return if (!TextUtils.isEmpty(tezos_address.text))
+        {
+            Utils.isTzAddressValid(tezos_address.text!!.toString())
+        }
+
+        else isTzAddressValid
     }
 
     private fun makeSelector(theme: CustomTheme): StateListDrawable
@@ -196,7 +220,6 @@ class DelegateFragment : Fragment()
 
     private fun putEverythingInRed()
     {
-        this.putAmountInRed(true)
         this.putTzAddressInRed(true)
     }
 
@@ -204,8 +227,7 @@ class DelegateFragment : Fragment()
     {
         val color: Int
 
-        //val tzAddressValid = isTzAddressValid()
-        val tzAddressValid = true
+        val tzAddressValid = isTzAddressValid()
 
         if (red && !tzAddressValid)
         {
@@ -220,36 +242,6 @@ class DelegateFragment : Fragment()
     }
 
 // put everything in RED
-
-    private fun putAmountInRed(red: Boolean)
-    {
-        val color: Int
-
-        //val amountValid = isTransferAmountValid()
-        val amountValid = true
-
-        if (red && !amountValid)
-        {
-            color = R.color.tz_error
-            add_delegate_button.text = getString(R.string.delegate_format, "")
-        }
-        else
-        {
-            color = R.color.tz_accent
-
-            if (amountValid)
-            {
-                val amount = amount_transfer.text.toString()
-                this.setTextPayButton(amount)
-            }
-            else
-            {
-                add_delegate_button.text = getString(R.string.delegate_format, "")
-            }
-        }
-
-        amount_transfer.setTextColor(ContextCompat.getColor(activity!!, color))
-    }
 
     private fun setTextPayButton(amount: String)
     {
@@ -323,8 +315,7 @@ class DelegateFragment : Fragment()
     private fun onDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        //if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
-            if (true)
+        if (listener?.isFingerprintAllowed()!! && listener?.hasEnrolledFingerprints()!!)
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity!!).prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
@@ -354,6 +345,14 @@ class DelegateFragment : Fragment()
         dialog.show(activity!!.supportFragmentManager, "Authentication")
     }
 
+    interface OnDelegateListener
+    {
+        fun isFingerprintAllowed():Boolean
+        fun hasEnrolledFingerprints():Boolean
+
+        fun saveFingerprintAllowed(useInFuture: Boolean)
+    }
+
     /*
     private fun isFingerprintAllowed():Boolean
     {
@@ -376,7 +375,7 @@ class DelegateFragment : Fragment()
      */
     private fun onFingerprintInvalidation(useInFuture: Boolean)
     {
-        //saveFingerprintAllowed(useInFuture)
+        listener?.saveFingerprintAllowed(useInFuture)
         if (useInFuture)
         {
             EncryptionServices(activity!!).createFingerprintKey()
@@ -415,13 +414,7 @@ class DelegateFragment : Fragment()
         {
             val i = v.id
 
-            if (i == R.id.amount_transfer)
-            {
-                putAmountInRed(false)
-                mSpinnerPosition = i
-            }
-
-            else if (i == R.id.tezos_address)
+            if (i == R.id.tezos_address)
             {
                 putTzAddressInRed(false)
             }
