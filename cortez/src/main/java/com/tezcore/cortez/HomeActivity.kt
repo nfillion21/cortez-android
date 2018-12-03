@@ -55,8 +55,11 @@ import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
 
-class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener
+class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, DelegationFragmentBis.OnDelegateAddressSelectedListener
 {
+    override fun onDelegateAddressClicked(address: Address) {
+        //
+    }
 
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
@@ -323,20 +326,27 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 {
                     val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
 
-                    return if (isPasswordSaved)
-                    {
+                    return return if (isPasswordSaved) {
                         val mnemonicsData = Storage(baseContext).getMnemonics()
-                        return SharingAddressFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
-                    }
-                    else
-                    {
-                        return SharingAddressFragment.newInstance(mTezosTheme, null)
+                        SharingAddressFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
+                    } else {
+                        SharingAddressFragment.newInstance(mTezosTheme, null)
                     }
                 }
 
                 3 ->
                 {
-                    return DelegationFragment.newInstance(mTezosTheme)
+                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+
+                    return if (isPasswordSaved)
+                    {
+                        val mnemonicsData = Storage(baseContext).getMnemonics()
+                        DelegationFragmentBis.newInstance(mTezosTheme)
+                    }
+                    else
+                    {
+                        DelegationFragment.newInstance(mTezosTheme)
+                    }
                 }
             }
 

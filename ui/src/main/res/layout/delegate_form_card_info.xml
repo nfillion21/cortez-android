@@ -29,7 +29,7 @@
         android:maxLines="1"
         android:singleLine="true"
         android:textColorHint="@color/tz_placeholder"
-        android:imeOptions="actionNext"
+        android:imeOptions="actionDone"
         android:inputType="textPersonName|textNoSuggestions"
         android:textSize="@dimen/size_edit_text" />
 

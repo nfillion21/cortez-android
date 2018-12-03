@@ -661,14 +661,14 @@ class TransferFormFragment : Fragment()
         mProgressBar = view.findViewById(R.id.empty)
 
         mSrcButton = view.findViewById(R.id.transfer_src_button)
-        mSrcButton!!.setOnClickListener { _ ->
+        mSrcButton!!.setOnClickListener {
             AddressBookActivity.start(activity,
                     theme,
                     AddressBookActivity.Selection.SelectionAccounts)
         }
 
         mDstButton = view.findViewById(R.id.transfer_dst_button)
-        mDstButton!!.setOnClickListener { _ ->
+        mDstButton!!.setOnClickListener {
             AddressBookActivity.start(
                     activity,
                     theme,
