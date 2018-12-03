@@ -28,6 +28,7 @@
 package com.tezos.ui.adapter
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.Resources
 import android.support.annotation.ColorRes
 import android.support.v4.content.ContextCompat
@@ -46,7 +47,7 @@ import java.util.*
  * Created by nfillion on 29/02/16.
  */
 
-class DelegateAddressesAdapter(private val mActivity: Activity, private val mCustomTheme: CustomTheme) : RecyclerView.Adapter<DelegateAddressesAdapter.ViewHolder>()
+class DelegateAddressesAdapter(private val mContext: Context, private val mCustomTheme: CustomTheme) : RecyclerView.Adapter<DelegateAddressesAdapter.ViewHolder>()
 {
     private val mResources: Resources
     private val mLayoutInflater: LayoutInflater
@@ -67,8 +68,8 @@ class DelegateAddressesAdapter(private val mActivity: Activity, private val mCus
 
     init
     {
-        mResources = mActivity.resources
-        mLayoutInflater = LayoutInflater.from(mActivity.applicationContext)
+        mResources = mContext.resources
+        mLayoutInflater = LayoutInflater.from(mContext)
 
         mAddresses = ArrayList()
     }
@@ -132,7 +133,7 @@ class DelegateAddressesAdapter(private val mActivity: Activity, private val mCus
      */
     private fun getColor(@ColorRes colorRes: Int): Int
     {
-        return ContextCompat.getColor(mActivity, colorRes)
+        return ContextCompat.getColor(mContext, colorRes)
     }
 
     class ViewHolder(container: View) : RecyclerView.ViewHolder(container)
