@@ -33,6 +33,9 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.AddressesDatabase
@@ -40,6 +43,7 @@ import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.adapter.DelegateAddressesAdapter
 import com.tezos.ui.utils.Storage
+import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.widget.OffsetDecoration
 import kotlinx.android.synthetic.main.fragment_delegation.*
 import java.util.*
@@ -57,10 +61,14 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
     private var mAddressList: MutableList<Address>? = null
 
-    companion object {
-        private val ADDRESSES_ARRAYLIST = "addressList"
+    private var mGetDelegatedAddressesLoading:Boolean = false
 
-        private val PUBLIC_KEY = "publicKeyTag"
+    companion object {
+
+        private const val PUBLIC_KEY = "publicKeyTag"
+        private const val LOAD_DELEGATED_ADDRESSES_TAG = "load_delegated_addresses_tag"
+
+        private const val GET_DELEGATED_ADDRESSES_LOADING_KEY = "get_delegated_addresses_loading"
 
         fun newInstance(customTheme: CustomTheme, pkh: String?): DelegationFragment
         {
@@ -106,14 +114,49 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        var pkh:String? = pkh()
+
+        if (pkh == null)
+        {
+            cancelRequest()
+            mGetDelegatedAddressesLoading = false
+
+            //mBalanceLayout?.visibility = View.GONE
+            //mCreateWalletLayout?.visibility = View.VISIBLE
+
+            swipe_refresh_layout.isEnabled = false
+        }
+        else
+        {
+            //mBalanceLayout?.visibility = View.VISIBLE
+            //mCreateWalletLayout?.visibility = View.GONE
+
+            swipe_refresh_layout.isEnabled = true
+        }
+
         if (savedInstanceState != null)
         {
-            val messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(ADDRESSES_ARRAYLIST)
-            mAddressList = bundlesToItems(messagesBundle)
+            mGetDelegatedAddressesLoading = savedInstanceState.getBoolean(GET_DELEGATED_ADDRESSES_LOADING_KEY)
+
+            if (mGetDelegatedAddressesLoading)
+            {
+                //refreshTextBalance(false)
+
+                //mWalletEnabled = true
+                startInitialLoadingDelegatedAddresses()
+            }
+            else
+            {
+                onDelegatedAddressesComplete(false)
+            }
         }
         else
         {
             mAddressList = ArrayList()
+        }
+
+        swipe_refresh_layout.setOnRefreshListener {
+            startGetRequestLoadDelegatedAddresses()
         }
     }
 
@@ -194,6 +237,60 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         }
     }
 
+    //requests
+    private fun startInitialLoadingDelegatedAddresses()
+    {
+        swipe_refresh_layout.isEnabled = false
+
+        startGetRequestLoadDelegatedAddresses()
+    }
+
+    private fun onDelegatedAddressesComplete(animating:Boolean)
+    {
+        mGetDelegatedAddressesLoading = false
+        //mNavProgressBalance?.visibility = View.GONE
+
+        swipe_refresh_layout.isEnabled = true
+        swipe_refresh_layout.isRefreshing = false
+        //refreshTextBalance(animating)
+    }
+
+    // volley
+    private fun startGetRequestLoadDelegatedAddresses()
+    {
+        cancelRequest()
+
+        mGetDelegatedAddressesLoading = true
+
+        //mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
+        //mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
+
+        //mNavProgressBalance?.visibility = View.VISIBLE
+
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.balance_url), pkh)
+
+            // Request a string response from the provided URL.
+            val stringRequest = StringRequest(Request.Method.GET, url,
+                    Response.Listener<String> { response ->
+                        //val balance = response.replace("[^0-9]".toRegex(), "")
+                        //mBalanceItem = balance.toDouble()/1000000
+                        //animateBalance(mBalanceItem)
+
+                        onDelegatedAddressesComplete(true)
+                    },
+                    Response.ErrorListener {
+                        onDelegatedAddressesComplete(false)
+                        //showSnackbarError(it)
+                    })
+
+            stringRequest.tag = LOAD_DELEGATED_ADDRESSES_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+        }
+    }
+
     private fun itemsToBundles(items: List<Address>?): ArrayList<Bundle>?
     {
         if (items != null)
@@ -228,6 +325,42 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         }
 
         return null
+    }
+
+    private fun cancelRequest()
+    {
+        val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
+        requestQueue?.cancelAll(LOAD_DELEGATED_ADDRESSES_TAG)
+    }
+
+    fun pkh():String?
+    {
+        var pkh:String? = null
+        arguments?.let {
+
+            pkh = it.getString(PUBLIC_KEY)
+        }
+
+        return pkh
+    }
+
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        super.onSaveInstanceState(outState)
+
+        outState.putBoolean(GET_DELEGATED_ADDRESSES_LOADING_KEY, mGetDelegatedAddressesLoading)
+    }
+
+    override fun onDestroy()
+    {
+        super.onDestroy()
+        cancelRequest()
+    }
+
+    override fun onDetach()
+    {
+        super.onDetach()
+        mCallback = null
     }
 
     override fun onClick(view: View, address: Address)
