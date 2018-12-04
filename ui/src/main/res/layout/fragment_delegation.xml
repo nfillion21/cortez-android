@@ -9,22 +9,57 @@
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coordinator"
-        android:padding="@dimen/spacing_double"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/addresses_recyclerview"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="@dimen/spacing_nano"
-            android:clipToPadding="false"
-            android:scrollbarStyle="outsideOverlay"
-            android:scrollbars="vertical"
-            app:layoutManager="android.support.v7.widget.GridLayoutManager"
-            android:transitionGroup="false"
-            android:visibility="visible"
-            app:spanCount="2" tools:ignore="UnusedAttribute" />
+            android:id="@+id/addresses_recyclerview_layout"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_double"
+                android:layout_marginLeft="@dimen/spacing_double"
+                android:layout_marginRight="@dimen/spacing_double"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+                    android:layout_marginBottom="@dimen/spacing_normal"
+                    android:text="@string/delegation_title"/>
+
+                <ProgressBar
+                    android:id="@+id/nav_progress_balance"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:visibility="visible" />
+
+            </LinearLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/addresses_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/spacing_micro"
+                android:clipToPadding="false"
+                android:scrollbarStyle="outsideOverlay"
+                android:scrollbars="vertical"
+                app:layoutManager="android.support.v7.widget.GridLayoutManager"
+                android:transitionGroup="false"
+                android:visibility="visible"
+                app:spanCount="2" tools:ignore="UnusedAttribute" />
+
+        </LinearLayout>
 
         <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -38,17 +73,38 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/cannot_delegate_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_marginTop="@dimen/spacing_double"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    android:layout_marginRight="@dimen/spacing_double"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
                         android:layout_marginBottom="@dimen/spacing_normal"
                         android:text="@string/delegation_title"/>
+
+                    <ProgressBar
+                        android:id="@+id/nav_progress_no_delegate"
+                        style="?android:attr/progressBarStyleSmall"
+                        android:layout_gravity="center_vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:visibility="visible" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cannot_delegate_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/spacing_double"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/delegates_info_empty_title_textview"
@@ -75,14 +131,8 @@
                     android:id="@+id/no_delegates_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/spacing_double"
                     android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
-                        android:layout_marginBottom="@dimen/spacing_normal"
-                        android:text="@string/delegation_title"/>
 
                     <TextView
                         android:layout_width="match_parent"

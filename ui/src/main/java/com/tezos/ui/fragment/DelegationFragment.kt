@@ -30,11 +30,13 @@ package com.tezos.ui.fragment
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
@@ -90,6 +92,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     interface OnDelegateAddressSelectedListener
     {
         fun onDelegateAddressClicked(address: Address)
+        fun showSnackBar(res:String, color:Int, textColor:Int)
     }
 
     override fun onAttach(context: Context?)
@@ -205,12 +208,12 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
             mAdapter!!.updateAddresses(mAddressList)
 
-            addresses_recyclerview.visibility = View.VISIBLE
+            addresses_recyclerview_layout.visibility = View.VISIBLE
             empty_nested_scrollview.visibility = View.GONE
         }
         else
         {
-            addresses_recyclerview.visibility = View.GONE
+            addresses_recyclerview_layout.visibility = View.GONE
             empty_nested_scrollview.visibility = View.VISIBLE
 
             no_delegates_layout.visibility = View.VISIBLE
@@ -231,7 +234,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         {
             cancelRequest()
 
-            addresses_recyclerview.visibility = View.GONE
+            addresses_recyclerview_layout.visibility = View.GONE
             empty_nested_scrollview.visibility = View.VISIBLE
 
             cannot_delegate_layout.visibility = View.VISIBLE
@@ -288,12 +291,29 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
                     },
                     Response.ErrorListener {
                         onDelegatedAddressesComplete(false)
-                        //showSnackbarError(it)
+                        showSnackbarError(it)
                     })
 
             stringRequest.tag = LOAD_DELEGATED_ADDRESSES_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
         }
+    }
+
+    private fun showSnackbarError(error: VolleyError?)
+    {
+        var error: String? = if (error != null)
+        {
+            error.toString()
+        }
+        else
+        {
+            getString(R.string.generic_error)
+        }
+
+        mCallback?.showSnackBar(error!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+
+        //mEmptyLoadingOperationsTextView?.text = getString(R.string.generic_error)
+        //mEmptyLoadingBalanceTextview?.text = getString(R.string.generic_error)
     }
 
     private fun itemsToBundles(items: List<Address>?): ArrayList<Bundle>?
