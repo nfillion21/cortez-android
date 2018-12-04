@@ -229,11 +229,16 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         }
         else
         {
+            cancelRequest()
+
             addresses_recyclerview.visibility = View.GONE
             empty_nested_scrollview.visibility = View.VISIBLE
 
             cannot_delegate_layout.visibility = View.VISIBLE
             no_delegates_layout.visibility = View.GONE
+
+            swipe_refresh_layout.isEnabled = false
+            swipe_refresh_layout.isRefreshing = false
         }
     }
 

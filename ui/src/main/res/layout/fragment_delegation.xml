@@ -5,11 +5,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/swipe_refresh_layout"
     android:layout_width="match_parent"
-    android:padding="@dimen/spacing_double"
     android:layout_height="match_parent">
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coordinator"
+        android:padding="@dimen/spacing_double"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
@@ -97,7 +97,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                        android:textColor="@color/colorAccent"
                         android:text="@string/delegated_addresses_empty_info_title"/>
 
                     <Button
