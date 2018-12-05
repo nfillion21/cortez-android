@@ -27,6 +27,9 @@
 
 package com.tezos.ui.fragment
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -65,12 +68,20 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
     private var mGetDelegatedAddressesLoading:Boolean = false
 
+    private var mAddresses:Int = 1
+
+    private var mWalletEnabled:Boolean = false
+
     companion object {
 
         private const val PUBLIC_KEY = "publicKeyTag"
         private const val LOAD_DELEGATED_ADDRESSES_TAG = "load_delegated_addresses_tag"
 
         private const val GET_DELEGATED_ADDRESSES_LOADING_KEY = "get_delegated_addresses_loading"
+
+        private const val ADDRESSES_INT_KEY = "addresses_int_item"
+
+        private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
         fun newInstance(customTheme: CustomTheme, pkh: String?): DelegationFragment
         {
@@ -117,6 +128,10 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        swipe_refresh_layout.setOnRefreshListener {
+            startGetRequestLoadDelegatedAddresses()
+        }
+
         var pkh:String? = pkh()
 
         if (pkh == null)
@@ -124,28 +139,30 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             cancelRequest()
             mGetDelegatedAddressesLoading = false
 
-            //mBalanceLayout?.visibility = View.GONE
-            //mCreateWalletLayout?.visibility = View.VISIBLE
+            //no_delegates_text_layout.visibility = View.GONE
 
-            swipe_refresh_layout.isEnabled = false
+            //swipe_refresh_layout.isEnabled = false
         }
         else
         {
-            //mBalanceLayout?.visibility = View.VISIBLE
-            //mCreateWalletLayout?.visibility = View.GONE
+            //no_delegates_text_layout.visibility = View.VISIBLE
 
-            swipe_refresh_layout.isEnabled = true
+            //swipe_refresh_layout.isEnabled = true
         }
 
         if (savedInstanceState != null)
         {
             mGetDelegatedAddressesLoading = savedInstanceState.getBoolean(GET_DELEGATED_ADDRESSES_LOADING_KEY)
 
+            mAddresses = savedInstanceState.getInt(ADDRESSES_INT_KEY, -1)
+
+            mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
+
             if (mGetDelegatedAddressesLoading)
             {
-                //refreshTextBalance(false)
+                mWalletEnabled = true
+                refreshTextUnderDelegation(false)
 
-                //mWalletEnabled = true
                 startInitialLoadingDelegatedAddresses()
             }
             else
@@ -156,10 +173,12 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         else
         {
             mAddressList = ArrayList()
-        }
-
-        swipe_refresh_layout.setOnRefreshListener {
-            startGetRequestLoadDelegatedAddresses()
+            //TODO we will start loading only if we got a pkh
+            if (pkh != null)
+            {
+                mWalletEnabled = true
+                startInitialLoadingDelegatedAddresses()
+            }
         }
     }
 
@@ -179,6 +198,27 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         addresses_recyclerview.adapter = mAdapter
 
         reloadList()
+    }
+
+    private fun refreshTextUnderDelegation(animating:Boolean)
+    {
+        if (mAddresses != -1 && mAddresses != null)
+        {
+            no_delegates_text_layout.visibility = View.VISIBLE
+            if (!animating)
+            {
+                //no_delegates_text_layout.text = mBalanceItem.toString()
+            }
+
+            empty_loading_addresses_textview.visibility = View.GONE
+            empty_loading_addresses_textview.text = null
+        }
+        else
+        {
+            no_delegates_text_layout.visibility = View.GONE
+            empty_loading_addresses_textview.visibility = View.VISIBLE
+            empty_loading_addresses_textview.text = "-"
+        }
     }
 
     private fun reloadList()
@@ -228,11 +268,44 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         val isPasswordSaved = Storage(activity!!).isPasswordSaved()
         if (isPasswordSaved)
         {
-            setUpAccountGrid()
+            if (!mWalletEnabled)
+            {
+                mWalletEnabled = true
+
+                // put the good layers
+                //mBalanceLayout?.visibility = View.VISIBLE
+                //mCreateWalletLayout?.visibility = View.GONE
+
+                startInitialLoadingDelegatedAddresses()
+
+            }
         }
         else
         {
+            mAddresses = -1
+            refreshTextUnderDelegation(false)
+
             cancelRequest()
+
+            if (mWalletEnabled)
+            {
+                mWalletEnabled = false
+
+                // put the good layers
+
+                // put the available layers:
+                // mBalanceLayout visibility
+
+                //val args = arguments
+                //args?.putBundle(Address.TAG, null)
+
+                //if (mRecyclerViewItems != null)
+                //{
+                    //mRecyclerViewItems?.clear()
+                //}
+
+                mAddresses = -1
+            }
 
             addresses_recyclerview_layout.visibility = View.GONE
             empty_nested_scrollview.visibility = View.VISIBLE
@@ -256,11 +329,12 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     private fun onDelegatedAddressesComplete(animating:Boolean)
     {
         mGetDelegatedAddressesLoading = false
-        //mNavProgressBalance?.visibility = View.GONE
+        nav_progress_no_delegate.visibility = View.GONE
 
         swipe_refresh_layout.isEnabled = true
         swipe_refresh_layout.isRefreshing = false
-        //refreshTextBalance(animating)
+
+        refreshTextUnderDelegation(animating)
     }
 
     // volley
@@ -270,10 +344,9 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
         mGetDelegatedAddressesLoading = true
 
-        //mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
-        //mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
+        empty_loading_addresses_textview.setText(R.string.loading_delegated_addresses)
 
-        //mNavProgressBalance?.visibility = View.VISIBLE
+        nav_progress_no_delegate.visibility = View.VISIBLE
 
         val pkh = pkh()
         if (pkh != null)
@@ -283,9 +356,10 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             // Request a string response from the provided URL.
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
-                        //val balance = response.replace("[^0-9]".toRegex(), "")
-                        //mBalanceItem = balance.toDouble()/1000000
-                        //animateBalance(mBalanceItem)
+
+                        setUpAccountGrid()
+
+                        animateBalance()
 
                         onDelegatedAddressesComplete(true)
                     },
@@ -312,8 +386,28 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
         mCallback?.showSnackBar(error!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
-        //mEmptyLoadingOperationsTextView?.text = getString(R.string.generic_error)
-        //mEmptyLoadingBalanceTextview?.text = getString(R.string.generic_error)
+        empty_loading_addresses_textview.text = getString(R.string.generic_error)
+    }
+
+    private fun animateBalance()
+    {
+        val objectAnimator = ObjectAnimator.ofFloat(no_delegates_text_layout, View.ALPHA, 0f)
+        objectAnimator.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {}
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+            override fun onAnimationEnd(animation: Animator) {
+                //mBalanceTextView?.text = balance.toString()
+            }
+        })
+
+        val objectAnimator2 = ObjectAnimator.ofFloat(no_delegates_text_layout, View.ALPHA, 1f)
+
+        //mBalanceTextView?.text = balance.toString()
+
+        val animatorSet = AnimatorSet()
+        animatorSet.play(objectAnimator).before(objectAnimator2)
+        animatorSet.start()
     }
 
     private fun itemsToBundles(items: List<Address>?): ArrayList<Bundle>?

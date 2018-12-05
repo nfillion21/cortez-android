@@ -94,6 +94,7 @@
     <string name="fee_default">Default</string>
     <string name="loading_list_operations">Loading operations…</string>
     <string name="loading_balance">Loading balance…</string>
+    <string name="loading_delegated_addresses">Loading delegated addresses…</string>
     <string name="empty_list_operations">No operations</string>
     <string name="contact_name">Contact name</string>
     <string name="tez">ꜩ</string>
