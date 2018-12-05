@@ -51,7 +51,7 @@ import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.widget.OffsetDecoration
 import kotlinx.android.synthetic.main.fragment_delegation.*
-import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -64,24 +64,22 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
     private var mAdapter: DelegateAddressesAdapter? = null
 
-    private var mAddressList: MutableList<Address>? = null
+    private var mAddressList: ArrayList<Address>? = null
 
     private var mGetDelegatedAddressesLoading:Boolean = false
 
-    private var mAddresses:Int = 1
-
     private var mWalletEnabled:Boolean = false
 
-    companion object {
-
+    companion object
+    {
         private const val PUBLIC_KEY = "publicKeyTag"
         private const val LOAD_DELEGATED_ADDRESSES_TAG = "load_delegated_addresses_tag"
 
         private const val GET_DELEGATED_ADDRESSES_LOADING_KEY = "get_delegated_addresses_loading"
 
-        private const val ADDRESSES_INT_KEY = "addresses_int_item"
-
         private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
+
+        private const val DELEGATED_ADDRESSES_ARRAYLIST_KEY = "delegated_addresses_arraylist_key"
 
         fun newInstance(customTheme: CustomTheme, pkh: String?): DelegationFragment
         {
@@ -132,6 +130,8 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             startGetRequestLoadDelegatedAddresses()
         }
 
+        setUpAccountGrid()
+
         var pkh:String? = pkh()
 
         if (pkh == null)
@@ -140,23 +140,25 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             mGetDelegatedAddressesLoading = false
 
             //no_delegates_text_layout.visibility = View.GONE
-
             //swipe_refresh_layout.isEnabled = false
         }
         else
         {
             //no_delegates_text_layout.visibility = View.VISIBLE
-
             //swipe_refresh_layout.isEnabled = true
         }
+
+        addresses_recyclerview_layout.visibility = View.GONE
+        empty_nested_scrollview.visibility = View.GONE
 
         if (savedInstanceState != null)
         {
             mGetDelegatedAddressesLoading = savedInstanceState.getBoolean(GET_DELEGATED_ADDRESSES_LOADING_KEY)
 
-            mAddresses = savedInstanceState.getInt(ADDRESSES_INT_KEY, -1)
-
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
+
+            var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(DELEGATED_ADDRESSES_ARRAYLIST_KEY)
+            mAddressList = bundlesToItems(messagesBundle)
 
             if (mGetDelegatedAddressesLoading)
             {
@@ -172,7 +174,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         }
         else
         {
-            mAddressList = ArrayList()
+            //mAddressList = ArrayList()
             //TODO we will start loading only if we got a pkh
             if (pkh != null)
             {
@@ -196,28 +198,52 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         mAdapter!!.setOnItemClickListener(this)
 
         addresses_recyclerview.adapter = mAdapter
-
-        reloadList()
     }
 
     private fun refreshTextUnderDelegation(animating:Boolean)
     {
-        if (mAddresses != -1 && mAddresses != null)
+        //this method handles the data and loading texts
+
+        if (mAddressList != null && mAddressList!!.size >= 0)
         {
-            no_delegates_text_layout.visibility = View.VISIBLE
+            if (mAddressList!!.size == 0)
+            {
+                empty_nested_scrollview.visibility = View.VISIBLE
+                no_delegates_layout.visibility = View.VISIBLE
+
+                addresses_recyclerview_layout.visibility = View.GONE
+                cannot_delegate_layout.visibility = View.GONE
+            }
+            else
+            {
+                // show recyclerview layout
+                addresses_recyclerview_layout.visibility = View.VISIBLE
+
+                // hide nested scrollview
+                empty_nested_scrollview.visibility = View.GONE
+                no_delegates_layout.visibility = View.GONE
+
+                mAdapter!!.updateAddresses(mAddressList)
+            }
+
             if (!animating)
             {
                 //no_delegates_text_layout.text = mBalanceItem.toString()
+
+                //reloadList()
             }
 
-            empty_loading_addresses_textview.visibility = View.GONE
-            empty_loading_addresses_textview.text = null
+            empty_loading_textview.visibility = View.GONE
+            empty_loading_textview.text = null
         }
         else
         {
-            no_delegates_text_layout.visibility = View.GONE
-            empty_loading_addresses_textview.visibility = View.VISIBLE
-            empty_loading_addresses_textview.text = "-"
+            // mAddressList is null then just show "-"
+
+            //no_delegates_text_layout.visibility = View.GONE
+
+            empty_loading_textview.visibility = View.VISIBLE
+            empty_loading_textview.text = "-"
         }
     }
 
@@ -248,16 +274,16 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
             mAdapter!!.updateAddresses(mAddressList)
 
-            addresses_recyclerview_layout.visibility = View.VISIBLE
-            empty_nested_scrollview.visibility = View.GONE
+            //addresses_recyclerview_layout.visibility = View.VISIBLE
+            //empty_nested_scrollview.visibility = View.GONE
         }
         else
         {
-            addresses_recyclerview_layout.visibility = View.GONE
-            empty_nested_scrollview.visibility = View.VISIBLE
+            //addresses_recyclerview_layout.visibility = View.GONE
+            //empty_nested_scrollview.visibility = View.VISIBLE
 
-            no_delegates_layout.visibility = View.VISIBLE
-            cannot_delegate_layout.visibility = View.GONE
+            //no_delegates_layout.visibility = View.VISIBLE
+            //cannot_delegate_layout.visibility = View.GONE
         }
     }
 
@@ -272,40 +298,17 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             {
                 mWalletEnabled = true
 
-                // put the good layers
-                //mBalanceLayout?.visibility = View.VISIBLE
-                //mCreateWalletLayout?.visibility = View.GONE
-
                 startInitialLoadingDelegatedAddresses()
-
             }
         }
         else
         {
-            mAddresses = -1
+            mAddressList = null
             refreshTextUnderDelegation(false)
 
             cancelRequest()
 
-            if (mWalletEnabled)
-            {
-                mWalletEnabled = false
-
-                // put the good layers
-
-                // put the available layers:
-                // mBalanceLayout visibility
-
-                //val args = arguments
-                //args?.putBundle(Address.TAG, null)
-
-                //if (mRecyclerViewItems != null)
-                //{
-                    //mRecyclerViewItems?.clear()
-                //}
-
-                mAddresses = -1
-            }
+            mWalletEnabled = false
 
             addresses_recyclerview_layout.visibility = View.GONE
             empty_nested_scrollview.visibility = View.VISIBLE
@@ -329,7 +332,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     private fun onDelegatedAddressesComplete(animating:Boolean)
     {
         mGetDelegatedAddressesLoading = false
-        nav_progress_no_delegate.visibility = View.GONE
+        nav_progress.visibility = View.GONE
 
         swipe_refresh_layout.isEnabled = true
         swipe_refresh_layout.isRefreshing = false
@@ -344,9 +347,9 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
         mGetDelegatedAddressesLoading = true
 
-        empty_loading_addresses_textview.setText(R.string.loading_delegated_addresses)
+        empty_loading_textview.setText(R.string.loading_delegated_addresses)
 
-        nav_progress_no_delegate.visibility = View.VISIBLE
+        nav_progress.visibility = View.VISIBLE
 
         val pkh = pkh()
         if (pkh != null)
@@ -357,14 +360,17 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
 
-                        setUpAccountGrid()
+                        //animateDelegatedAddresses()
 
-                        animateBalance()
-
+                        reloadList()
                         onDelegatedAddressesComplete(true)
                     },
                     Response.ErrorListener {
+
+                        //mAddressList = null
+
                         onDelegatedAddressesComplete(false)
+
                         showSnackbarError(it)
                     })
 
@@ -386,10 +392,10 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
         mCallback?.showSnackBar(error!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
-        empty_loading_addresses_textview.text = getString(R.string.generic_error)
+        empty_loading_textview.text = getString(R.string.generic_error)
     }
 
-    private fun animateBalance()
+    private fun animateDelegatedAddresses()
     {
         val objectAnimator = ObjectAnimator.ofFloat(no_delegates_text_layout, View.ALPHA, 0f)
         objectAnimator.addListener(object : Animator.AnimatorListener {
@@ -468,6 +474,10 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         super.onSaveInstanceState(outState)
 
         outState.putBoolean(GET_DELEGATED_ADDRESSES_LOADING_KEY, mGetDelegatedAddressesLoading)
+        outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
+
+        val bundles = itemsToBundles(mAddressList)
+        outState.putParcelableArrayList(DELEGATED_ADDRESSES_ARRAYLIST_KEY, bundles)
     }
 
     override fun onDestroy()

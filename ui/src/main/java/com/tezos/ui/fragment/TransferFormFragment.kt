@@ -337,7 +337,8 @@ class TransferFormFragment : Fragment()
 
             mTransferPayload = answer.getString("result")
 
-            if (mTransferPayload != null && isPayloadValid(mTransferPayload!!, postParams))
+            //if (mTransferPayload != null && isPayloadValid(mTransferPayload!!, postParams))
+                if (mTransferPayload != null)
             {
                 onInitTransferLoadComplete(null)
 
