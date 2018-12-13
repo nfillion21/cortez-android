@@ -115,7 +115,6 @@ class TransferFormFragment : Fragment()
     //private var mTransferId:Int? = null
     private var mTransferPayload:String? = null
 
-    private var mSpinnerPosition:Int = 0
     private var mAmountCache:Double = -1.0
 
     companion object
@@ -190,12 +189,11 @@ class TransferFormFragment : Fragment()
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
             mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
-            mSpinnerPosition = savedInstanceState.getInt(TRANSFER_SPINNER_POS_KEY, 0)
 
             transferLoading(isLoading())
 
-            mCurrencySpinner!!.setSelection(mSpinnerPosition)
-
+            //TODO view created
+            //TODO load again but only if we don't have any same forged data.
             validatePayButton(isInputDataValid())
 
             //TODO we got to keep in mind there's an id already.
@@ -291,17 +289,9 @@ class TransferFormFragment : Fragment()
         //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
 
         var amount = mAmountCache
-        var fee = 0.0
 
-        //*
-        when (mSpinnerPosition)
-        {
-            0 -> { fee = 0.01 }
-            1 -> { fee = 0.00 }
-            2 -> { fee = 0.05 }
-            else -> {}
-        }
-        //*/
+        //TODO handle the new fees
+        var fee = 0.0
 
         // convert in µꜩ
         amount *= 1000000
@@ -642,22 +632,6 @@ class TransferFormFragment : Fragment()
         mPayButton = view.findViewById(R.id.pay_button)
         mPayButtonLayout = view.findViewById(R.id.pay_button_layout)
 
-        mCurrencySpinner = view.findViewById(R.id.fee_spinner)
-        val adapter = ArrayAdapter.createFromResource(activity!!,
-                R.array.array_fee, android.R.layout.simple_spinner_item)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mCurrencySpinner!!.adapter = adapter
-        mCurrencySpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener
-        {
-            override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
-            {
-                putAmountInRed(false)
-                mSpinnerPosition = i
-            }
-
-            override fun onNothingSelected(adapterView: AdapterView<*>) {}
-        }
-
         mProgressBar = view.findViewById(R.id.empty)
 
         mSrcButton = view.findViewById(R.id.transfer_src_button)
@@ -691,8 +665,6 @@ class TransferFormFragment : Fragment()
             onPayClick()
         }
 
-        validatePayButton(isInputDataValid())
-
         putEverythingInRed()
 
         arguments?.let {
@@ -709,9 +681,12 @@ class TransferFormFragment : Fragment()
             {
                 mDstAccount = Address.fromBundle(address)
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
-                validatePayButton(isInputDataValid())
             }
         }
+
+        //TODO fragment recreated
+        //TODO load again but only if we don't have any same forged data.
+        validatePayButton(isInputDataValid())
     }
 
     private fun isLoading():Boolean
@@ -792,6 +767,9 @@ class TransferFormFragment : Fragment()
                 {
                     mDstAccount = account
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+
+                    //TODO destination loaded
+                    //TODO load again but only if we don't have any same forged data.
                     validatePayButton(isInputDataValid())
                 }
             }
@@ -923,6 +901,9 @@ class TransferFormFragment : Fragment()
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
             }
+
+            //TODO text changed
+            //TODO load again but only if we don't have any same forged data.
             validatePayButton(isInputDataValid())
         }
     }
@@ -1099,16 +1080,9 @@ class TransferFormFragment : Fragment()
         outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
-/*
-when {
-mTransferId != null -> outState.putInt(TRANSFER_ID_KEY, mTransferId!!)
-else -> outState.putInt(TRANSFER_ID_KEY, -1)
-}
-*/
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 
         outState.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
-        outState.putInt(TRANSFER_SPINNER_POS_KEY, mSpinnerPosition)
     }
 
     override fun onDetach()

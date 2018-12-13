@@ -11,6 +11,9 @@
     <string name="card_expiration">Expiry date</string>
     <string name="amount_default" translatable="false">0.05</string>
     <string name="amount">Amount</string>
+    <string name="gas">Gas (default value)</string>
+    <string name="fee_minimum">Fee (minimum value)</string>
+    <string name="delegate">Delegate</string>
     <string name="fee">Fee</string>
     <string name="fees_default">0.001</string>
     <string name="public_key_hash">Public Key Hash</string>
