@@ -66,6 +66,8 @@ import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
 import com.tezos.ui.utils.toNoPrefixHexString
+import kotlinx.android.synthetic.main.fragment_payment_form.*
+import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.ArrayList
@@ -78,29 +80,10 @@ class TransferFormFragment : Fragment()
     private val TRANSFER_INIT_TAG = "transfer_init"
     private val TRANSFER_FINALIZE_TAG = "transfer_finalize"
 
-    private val TRANSFER_ID_KEY = "transfer_id_key"
     private val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
 
     private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
     private val TRANSFER_FEE_KEY = "transfer_fee_key"
-
-    private val TRANSFER_SPINNER_POS_KEY = "transfer_spinner_pos_key"
-
-    private var mPayButton: Button? = null
-    private var mPayButtonLayout: FrameLayout? = null
-
-    private var mSrcButton: Button? = null
-    private var mDstButton: Button? = null
-
-    private var mTransferSrcFilled: LinearLayout? = null
-    private var mTransferDstFilled: LinearLayout? = null
-
-    private var mTransferSrcPkh: TextView? = null
-    private var mTransferDstPkh: TextView? = null
-
-    private var mCurrencySpinner: AppCompatSpinner? = null
-
-    private var mProgressBar: ProgressBar? = null
 
     private var mAmount:TextInputEditText? = null
 
@@ -629,39 +612,26 @@ class TransferFormFragment : Fragment()
         mAmount?.addTextChangedListener(GenericTextWatcher(mAmount!!))
         mAmount?.onFocusChangeListener = focusChangeListener
 
-        mPayButton = view.findViewById(R.id.pay_button)
-        mPayButtonLayout = view.findViewById(R.id.pay_button_layout)
-
-        mProgressBar = view.findViewById(R.id.empty)
-
-        mSrcButton = view.findViewById(R.id.transfer_src_button)
-        mSrcButton!!.setOnClickListener { _ ->
+        transfer_src_button.setOnClickListener { _ ->
             AddressBookActivity.start(activity,
                     theme,
                     AddressBookActivity.Selection.SelectionAccounts)
         }
 
-        mDstButton = view.findViewById(R.id.transfer_dst_button)
-        mDstButton!!.setOnClickListener { _ ->
+        transfer_dst_button.setOnClickListener { _ ->
             AddressBookActivity.start(
                     activity,
                     theme,
                     AddressBookActivity.Selection.SelectionAccountsAndAddresses)
         }
 
-        mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled)
-        mTransferDstFilled = view.findViewById(R.id.transfer_destination_filled)
-
-        mTransferSrcPkh = view.findViewById(R.id.src_payment_account_pub_key_hash)
-        mTransferDstPkh = view.findViewById(R.id.dst_payment_account_pub_key_hash)
-
-        mPayButtonLayout!!.visibility = View.VISIBLE
+        pay_button_layout.visibility = View.VISIBLE
 
         val moneyString = getString(R.string.pay, "ꜩ")
 
-        mPayButton!!.text = moneyString
+        pay_button.text = moneyString
 
-        mPayButtonLayout!!.setOnClickListener { _ ->
+        pay_button_layout.setOnClickListener { _ ->
             onPayClick()
         }
 
@@ -698,16 +668,14 @@ class TransferFormFragment : Fragment()
     {
         if (loading)
         {
-            mPayButtonLayout?.visibility = View.GONE
-            mProgressBar?.visibility = View.VISIBLE
-            mCurrencySpinner?.isEnabled = false
+            pay_button_layout.visibility = View.GONE
+            empty.visibility = View.VISIBLE
             mAmount?.isEnabled = false
         }
         else
         {
-            mPayButtonLayout?.visibility = View.VISIBLE
-            mProgressBar?.visibility = View.INVISIBLE
-            mCurrencySpinner?.isEnabled = true
+            pay_button_layout.visibility = View.VISIBLE
+            empty.visibility = View.INVISIBLE
             mAmount?.isEnabled = true
         }
 
@@ -782,17 +750,17 @@ class TransferFormFragment : Fragment()
         {
             AddressBookActivity.Selection.SelectionAccounts ->
             {
-                mSrcButton?.visibility = View.GONE
-                mTransferSrcFilled?.visibility = View.VISIBLE
+                transfer_src_button.visibility = View.GONE
+                transfer_source_filled.visibility = View.VISIBLE
 
-                mTransferSrcPkh?.text = address.pubKeyHash
+                src_payment_account_pub_key_hash.text = address.pubKeyHash
             }
 
             AddressBookActivity.Selection.SelectionAccountsAndAddresses ->
             {
-                mDstButton?.visibility = View.GONE
-                mTransferDstFilled?.visibility = View.VISIBLE
-                mTransferDstPkh?.text = address.pubKeyHash
+                transfer_dst_button.visibility = View.GONE
+                transfer_destination_filled.visibility = View.VISIBLE
+                dst_payment_account_pub_key_hash.text = address.pubKeyHash
             }
 
             else ->
@@ -853,22 +821,22 @@ class TransferFormFragment : Fragment()
             val customThemeBundle = arguments!!.getBundle(CustomTheme.TAG)
             val theme = CustomTheme.fromBundle(customThemeBundle)
 
-            mPayButton!!.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            mPayButtonLayout!!.isEnabled = true
-            mPayButtonLayout!!.background = makeSelector(theme)
+            pay_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            pay_button_layout.isEnabled = true
+            pay_button_layout.background = makeSelector(theme)
 
-            val drawables = mPayButton!!.compoundDrawables
+            val drawables = pay_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
         }
         else
         {
-            mPayButton!!.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-            mPayButtonLayout!!.isEnabled = false
+            pay_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            pay_button_layout.isEnabled = false
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            mPayButtonLayout!!.background = makeSelector(greyTheme)
+            pay_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = mPayButton!!.compoundDrawables
+            val drawables = pay_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
@@ -930,7 +898,7 @@ class TransferFormFragment : Fragment()
         if (red && !amountValid)
         {
             color = R.color.tz_error
-            mPayButton!!.text = getString(R.string.pay, "")
+            pay_button.text = getString(R.string.pay, "")
         }
         else
         {
@@ -943,7 +911,7 @@ class TransferFormFragment : Fragment()
             }
             else
             {
-                mPayButton!!.text = getString(R.string.pay, "")
+                pay_button.text = getString(R.string.pay, "")
             }
         }
 
@@ -955,27 +923,6 @@ class TransferFormFragment : Fragment()
         var amount = amount
 //var amountDouble: Double = java.lang.Double.parseDouble(amount)
         var amountDouble: Double = amount.toDouble()
-
-        val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
-
-        when (selectedItemThreeDS.toInt())
-        {
-            0 -> {
-                amountDouble += 0.01
-            }
-
-            1 -> {
-                amountDouble += 0.00
-            }
-
-            2 -> {
-                amountDouble += 0.05
-            }
-
-            else -> {
-                //no-op
-            }
-        }
 
 //amount = java.lang.Double.toString(amountDouble)
         amount = amountDouble.toString()
@@ -1015,7 +962,7 @@ class TransferFormFragment : Fragment()
 
         val moneyFormatted2 = "$amount ꜩ"
 //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        mPayButton!!.text = getString(R.string.pay, moneyFormatted2)
+        pay_button.text = getString(R.string.pay, moneyFormatted2)
     }
 
     /**
