@@ -85,8 +85,6 @@ class TransferFormFragment : Fragment()
     private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
     private val TRANSFER_FEE_KEY = "transfer_fee_key"
 
-    private var mAmount:TextInputEditText? = null
-
     private var mSrcAccount:Address? = null
     private var mDstAccount:Address? = null
 
@@ -608,9 +606,8 @@ class TransferFormFragment : Fragment()
 
         val focusChangeListener = this.focusChangeListener()
 
-        mAmount = view.findViewById(R.id.amount_transfer)
-        mAmount?.addTextChangedListener(GenericTextWatcher(mAmount!!))
-        mAmount?.onFocusChangeListener = focusChangeListener
+        amount_transfer.addTextChangedListener(GenericTextWatcher(amount_transfer))
+        amount_transfer.onFocusChangeListener = focusChangeListener
 
         transfer_src_button.setOnClickListener { _ ->
             AddressBookActivity.start(activity,
@@ -670,13 +667,13 @@ class TransferFormFragment : Fragment()
         {
             pay_button_layout.visibility = View.GONE
             empty.visibility = View.VISIBLE
-            mAmount?.isEnabled = false
+            amount_transfer.isEnabled = false
         }
         else
         {
             pay_button_layout.visibility = View.VISIBLE
             empty.visibility = View.INVISIBLE
-            mAmount?.isEnabled = true
+            amount_transfer.isEnabled = true
         }
 
         listener?.onTransferLoading(loading)
@@ -774,12 +771,12 @@ class TransferFormFragment : Fragment()
     {
         val isAmountValid = false
 
-        if (mAmount != null && !TextUtils.isEmpty(mAmount?.text))
+        if (amount_transfer != null && !TextUtils.isEmpty(amount_transfer.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = mAmount?.text!!.toString().toDouble()
+                val amount = amount_transfer.text!!.toString().toDouble()
 
                 if (amount >= 0.000001f)
                 {
@@ -906,7 +903,7 @@ class TransferFormFragment : Fragment()
 
             if (amountValid)
             {
-                val amount = mAmount!!.text.toString()
+                val amount = amount_transfer.text.toString()
                 this.setTextPayButton(amount)
             }
             else
@@ -915,7 +912,7 @@ class TransferFormFragment : Fragment()
             }
         }
 
-        mAmount?.setTextColor(ContextCompat.getColor(activity!!, color))
+        amount_transfer.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
     private fun setTextPayButton(amount: String)
