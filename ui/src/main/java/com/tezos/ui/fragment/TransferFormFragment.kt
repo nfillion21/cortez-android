@@ -33,11 +33,9 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
-import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v7.widget.AppCompatSpinner
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -45,7 +43,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
@@ -71,6 +68,13 @@ import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.Map
+import kotlin.collections.indices
+import kotlin.collections.reversed
+import kotlin.collections.set
+import kotlin.collections.slice
+import kotlin.collections.toByteArray
 
 /**
  * Created by nfillion on 20/04/16.
@@ -93,8 +97,8 @@ class TransferFormFragment : Fragment()
     private var mInitTransferLoading:Boolean = false
     private var mFinalizeTransferLoading:Boolean = false
 
-    //private var mTransferId:Int? = null
     private var mTransferPayload:String? = null
+    private var mTransferFees:Long? = -1
 
     private var mAmountCache:Double = -1.0
 
@@ -177,6 +181,8 @@ class TransferFormFragment : Fragment()
             //TODO load again but only if we don't have any same forged data.
             validatePayButton(isInputDataValid())
 
+            validatePayButton(isInputDataValid())
+
             //TODO we got to keep in mind there's an id already.
             if (mInitTransferLoading)
             {
@@ -212,6 +218,8 @@ class TransferFormFragment : Fragment()
         }
         else
         {
+            transferLoading(false)
+            cancelRequests(true)
             // it's signed, looks like it worked.
             //transferLoading(true)
         }
@@ -295,7 +303,7 @@ class TransferFormFragment : Fragment()
         var dstObject = JSONObject()
         dstObject.put("dst", pkhDst)
         dstObject.put("amount", amount.toLong().toString())
-        dstObject.put("fee", fee.toLong().toString())
+        //dstObject.put("fee", fee.toLong().toString())
 
         dstObjects.put(dstObject)
 
@@ -307,12 +315,26 @@ class TransferFormFragment : Fragment()
             //TODO check if the JSON is fine then launch the 2nd request
 
             mTransferPayload = answer.getString("result")
+            mTransferFees = answer.getLong("total_fee")
 
-            if (mTransferPayload != null && isPayloadValid(mTransferPayload!!, postParams))
+            // get back the object and
+
+            val dstsArray = postParams["dsts"] as JSONArray
+            val dstObj = dstsArray[0] as JSONObject
+
+            dstObj.put("fee", mTransferFees.toString())
+            dstsArray.put(0, dstObj)
+
+            postParams.put("dsts", dstsArray)
+
+            if (mTransferPayload != null && mTransferFees != null && isPayloadValid(mTransferPayload!!, postParams))
             {
                 onInitTransferLoadComplete(null)
 
-                startFinalizeTransferLoading()
+                val feeInTez = mTransferFees!!.toDouble()/1000000
+                fee_edittext.setText(feeInTez.toString())
+
+                //startFinalizeTransferLoading()
             }
             else
             {
@@ -350,23 +372,6 @@ class TransferFormFragment : Fragment()
         if (payload != null && params != null)
         {
             val data = payload.hexToByteArray()
-
-            /*
-            var postParams = JSONObject()
-            postParams.put("src", pkhSrc)
-            postParams.put("src_pk", pk)
-
-            var dstObjects = JSONArray()
-
-            var dstObject = JSONObject()
-            dstObject.put("dst", pkhDst)
-            dstObject.put("amount", amount.toLong().toString())
-            dstObject.put("fee", fee.toLong().toString())
-
-            dstObjects.put(dstObject)
-
-            postParams.put("dsts", dstObjects)
-            */
 
             val obj = params["dsts"] as JSONArray
             val dstObj = obj[0] as JSONObject
@@ -870,6 +875,11 @@ class TransferFormFragment : Fragment()
             //TODO text changed
             //TODO load again but only if we don't have any same forged data.
             validatePayButton(isInputDataValid())
+
+            if (isInputDataValid())
+            {
+                startInitTransferLoading()
+            }
         }
     }
 
