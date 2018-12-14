@@ -100,7 +100,7 @@ class TransferFormFragment : Fragment()
     private var mTransferPayload:String? = null
     private var mTransferFees:Long = -1
 
-    private var mAmountCache:Double = -1.0
+    private var mTransferAmount:Double = -1.0
 
     companion object
     {
@@ -173,7 +173,7 @@ class TransferFormFragment : Fragment()
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
-            mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
+            mTransferAmount = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
 
             mTransferFees = savedInstanceState.getLong(TRANSFER_FEE_KEY, -1)
 
@@ -281,7 +281,7 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_forge)
 
-        var amount = mAmountCache
+        var amount = mTransferAmount
 
         // convert in µꜩ
         amount *= 1000000
@@ -331,7 +331,7 @@ class TransferFormFragment : Fragment()
             {
                 onInitTransferLoadComplete(null)
 
-                val feeInTez = mTransferFees.toDouble()/1000000
+                val feeInTez = mTransferFees.toDouble()/1000000.0
                 fee_edittext.setText(feeInTez.toString())
 
                 validatePayButton(isInputDataValid() && isTransferFeeValid())
@@ -340,8 +340,7 @@ class TransferFormFragment : Fragment()
                 {
                     validatePayButton(true)
 
-                    val amount = amount_transfer.text.toString()
-                    this.setTextPayButton(amount)
+                    this.setTextPayButton()
                 }
                 else
                 {
@@ -810,13 +809,13 @@ class TransferFormFragment : Fragment()
 
                 if (amount >= 0.000001f)
                 {
-                    mAmountCache = amount
+                    mTransferAmount = amount
                     return true
                 }
             }
             catch (e: NumberFormatException)
             {
-                mAmountCache = -1.0
+                mTransferAmount = -1.0
                 return false
             }
         }
@@ -839,7 +838,8 @@ class TransferFormFragment : Fragment()
 
                 if (fee >= 0.000001f)
                 {
-                    mTransferFees = fee.toLong()
+                    val longTransferFee = fee*1000000
+                    mTransferFees = longTransferFee.toLong()
                     return true
                 }
             }
@@ -994,12 +994,14 @@ class TransferFormFragment : Fragment()
         amount_transfer.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
-    private fun setTextPayButton(amount: String)
+    private fun setTextPayButton()
     {
-        var amount = amount
-        var amountDouble: Double = amount.toDouble()
+        var amountDouble: Double = mTransferAmount
 
-        amount = amountDouble.toString()
+        //amountDouble += fee_edittext.text.toString().toLong()/1000000
+        amountDouble += mTransferFees.toDouble()/1000000.0
+
+        var amount = amountDouble.toString()
 
         if (amount.contains("."))
         {
@@ -1102,7 +1104,7 @@ class TransferFormFragment : Fragment()
 
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 
-        outState.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
+        outState.putDouble(TRANSFER_AMOUNT_KEY, mTransferAmount)
 
         outState.putLong(TRANSFER_FEE_KEY, mTransferFees)
     }
