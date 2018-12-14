@@ -248,6 +248,7 @@ class TransferFormFragment : Fragment()
         transferLoading(true)
 
         putFeesToNegative()
+        putPayButtonToNull()
 
         // validatePay cannot be valid if there is no fees
         validatePayButton(false)
@@ -334,6 +335,19 @@ class TransferFormFragment : Fragment()
                 fee_edittext.setText(feeInTez.toString())
 
                 validatePayButton(isInputDataValid() && isTransferFeeValid())
+
+                if (isInputDataValid() && isTransferFeeValid())
+                {
+                    validatePayButton(true)
+
+                    val amount = amount_transfer.text.toString()
+                    this.setTextPayButton(amount)
+                }
+                else
+                {
+                    // should no happen
+                    validatePayButton(false)
+                }
             }
             else
             {
@@ -749,7 +763,10 @@ class TransferFormFragment : Fragment()
             }
             else
             {
+                validatePayButton(false)
+
                 putFeesToNegative()
+                putPayButtonToNull()
             }
         }
     }
@@ -912,13 +929,17 @@ class TransferFormFragment : Fragment()
             //TODO text changed
             //TODO load again but only if we don't have any same forged data.
 
+
             if (isInputDataValid())
             {
                 startInitTransferLoading()
             }
             else
             {
+                validatePayButton(false)
+
                 putFeesToNegative()
+                putPayButtonToNull()
             }
         }
     }
@@ -947,6 +968,11 @@ class TransferFormFragment : Fragment()
         mTransferFees = -1
     }
 
+    private fun putPayButtonToNull()
+    {
+        pay_button.text = getString(R.string.pay, "")
+    }
+
 // put everything in RED
 
     private fun putAmountInRed(red: Boolean)
@@ -963,16 +989,6 @@ class TransferFormFragment : Fragment()
         else
         {
             color = R.color.tz_accent
-
-            if (amountValid)
-            {
-                val amount = amount_transfer.text.toString()
-                this.setTextPayButton(amount)
-            }
-            else
-            {
-                pay_button.text = getString(R.string.pay, "")
-            }
         }
 
         amount_transfer.setTextColor(ContextCompat.getColor(activity!!, color))
