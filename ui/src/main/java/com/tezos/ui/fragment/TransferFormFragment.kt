@@ -333,7 +333,7 @@ class TransferFormFragment : Fragment()
                 val feeInTez = mTransferFees.toDouble()/1000000
                 fee_edittext.setText(feeInTez.toString())
 
-                //startFinalizeTransferLoading()
+                validatePayButton(isInputDataValid() && isTransferFeeValid())
             }
             else
             {
@@ -524,7 +524,7 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (/*mTransferId != null && mTransferId != -1 && */mTransferPayload != null)
+        if (isPayButtonValid())
         {
             val zeroThree = "0x03".hexToByteArray()
 
@@ -707,7 +707,7 @@ class TransferFormFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startInitTransferLoading()
+            startFinalizeTransferLoading()
         }
         dialog.passwordVerificationListener =
                 {
@@ -1047,7 +1047,7 @@ class TransferFormFragment : Fragment()
     {
         if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
         {
-            startInitTransferLoading()
+            startFinalizeTransferLoading()
         }
         else
         {
