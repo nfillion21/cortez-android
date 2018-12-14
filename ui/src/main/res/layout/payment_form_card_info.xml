@@ -225,7 +225,7 @@
                 android:minWidth="@dimen/spacing_huge"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"
-                android:hint="-"
+                android:hint="@string/neutral"
                 android:enabled="false"
                 android:inputType="numberDecimal"
                 android:textColorHint="@color/tz_placeholder"

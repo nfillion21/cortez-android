@@ -98,7 +98,7 @@ class TransferFormFragment : Fragment()
     private var mFinalizeTransferLoading:Boolean = false
 
     private var mTransferPayload:String? = null
-    private var mTransferFees:Long? = -1
+    private var mTransferFees:Long = -1
 
     private var mAmountCache:Double = -1.0
 
@@ -175,12 +175,12 @@ class TransferFormFragment : Fragment()
 
             mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
 
+            mTransferFees = savedInstanceState.getLong(TRANSFER_FEE_KEY, -1)
+
             transferLoading(isLoading())
 
             //TODO view created
             //TODO load again but only if we don't have any same forged data.
-            validatePayButton(isInputDataValid())
-
             validatePayButton(isInputDataValid())
 
             //TODO we got to keep in mind there's an id already.
@@ -247,6 +247,11 @@ class TransferFormFragment : Fragment()
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
 
+        putFeesToNegative()
+
+        // validatePay cannot be valid if there is no fees
+        validatePayButton(false)
+
         // this fragment always have mnemonics arg
         arguments?.let {
             val seedDataBundle = it.getBundle(Storage.TAG)
@@ -275,16 +280,10 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_forge)
 
-        //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
-
         var amount = mAmountCache
-
-        //TODO handle the new fees
-        var fee = 0.0
 
         // convert in µꜩ
         amount *= 1000000
-        fee *= 1000000
 
         //TODO need to check if activity is not null
 
@@ -331,7 +330,7 @@ class TransferFormFragment : Fragment()
             {
                 onInitTransferLoadComplete(null)
 
-                val feeInTez = mTransferFees!!.toDouble()/1000000
+                val feeInTez = mTransferFees.toDouble()/1000000
                 fee_edittext.setText(feeInTez.toString())
 
                 //startFinalizeTransferLoading()
@@ -672,13 +671,13 @@ class TransferFormFragment : Fragment()
         {
             pay_button_layout.visibility = View.GONE
             empty.visibility = View.VISIBLE
-            amount_transfer.isEnabled = false
+            //amount_transfer.isEnabled = false
         }
         else
         {
             pay_button_layout.visibility = View.VISIBLE
             empty.visibility = View.INVISIBLE
-            amount_transfer.isEnabled = true
+            //amount_transfer.isEnabled = true
         }
 
         listener?.onTransferLoading(loading)
@@ -740,8 +739,17 @@ class TransferFormFragment : Fragment()
 
                     //TODO destination loaded
                     //TODO load again but only if we don't have any same forged data.
-                    validatePayButton(isInputDataValid())
+                    //validatePayButton(isInputDataValid())
                 }
+            }
+
+            if (isInputDataValid())
+            {
+                startInitTransferLoading()
+            }
+            else
+            {
+                putFeesToNegative()
             }
         }
     }
@@ -776,7 +784,7 @@ class TransferFormFragment : Fragment()
     {
         val isAmountValid = false
 
-        if (amount_transfer != null && !TextUtils.isEmpty(amount_transfer.text))
+        if (amount_transfer.text != null && !TextUtils.isEmpty(amount_transfer.text))
         {
             try
             {
@@ -797,6 +805,35 @@ class TransferFormFragment : Fragment()
         }
 
         return isAmountValid
+    }
+
+    //TODO need a method to verify if the fees
+
+    private fun isTransferFeeValid():Boolean
+    {
+        val isFeeValid = false
+
+        if (fee_edittext.text != null && !TextUtils.isEmpty(fee_edittext.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val fee = fee_edittext.text.toString().toDouble()
+
+                if (fee >= 0.000001f)
+                {
+                    mTransferFees = fee.toLong()
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mTransferFees = -1
+                return false
+            }
+        }
+
+        return isFeeValid
     }
 
     private fun focusChangeListener(): View.OnFocusChangeListener
@@ -874,11 +911,14 @@ class TransferFormFragment : Fragment()
 
             //TODO text changed
             //TODO load again but only if we don't have any same forged data.
-            validatePayButton(isInputDataValid())
 
             if (isInputDataValid())
             {
                 startInitTransferLoading()
+            }
+            else
+            {
+                putFeesToNegative()
             }
         }
     }
@@ -889,9 +929,22 @@ class TransferFormFragment : Fragment()
                 && mDstAccount != null
     }
 
+    fun isPayButtonValid(): Boolean
+    {
+        return mTransferPayload != null
+        && isTransferFeeValid()
+        && isInputDataValid()
+    }
+
     private fun putEverythingInRed()
     {
         this.putAmountInRed(true)
+    }
+
+    private fun putFeesToNegative()
+    {
+        fee_edittext.setText("")
+        mTransferFees = -1
     }
 
 // put everything in RED
@@ -928,13 +981,10 @@ class TransferFormFragment : Fragment()
     private fun setTextPayButton(amount: String)
     {
         var amount = amount
-//var amountDouble: Double = java.lang.Double.parseDouble(amount)
         var amountDouble: Double = amount.toDouble()
 
-//amount = java.lang.Double.toString(amountDouble)
         amount = amountDouble.toString()
 
-//check the correct amount
         if (amount.contains("."))
         {
             val elements = amount.substring(amount.indexOf("."))
@@ -1037,6 +1087,8 @@ class TransferFormFragment : Fragment()
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 
         outState.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
+
+        outState.putLong(TRANSFER_FEE_KEY, mTransferFees)
     }
 
     override fun onDetach()
