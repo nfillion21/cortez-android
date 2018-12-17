@@ -41,6 +41,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import com.android.volley.AuthFailureError
@@ -214,6 +215,20 @@ class TransferFormFragment : Fragment()
             transferLoading(false)
             cancelRequests(true)
 
+            //TODO should cancel the payloadTransfer too
+            mTransferPayload = null
+
+            //TODO we should give access to the fees button
+
+            fee_edittext.isEnabled = true
+            fee_edittext.isFocusable = false
+            fee_edittext.isLongClickable = false
+            fee_edittext.hint = "Click to recaculate"
+
+            fee_edittext.setOnClickListener {
+                startInitTransferLoading()
+            }
+
             listener?.onTransferFailed(error)
         }
         else
@@ -303,6 +318,8 @@ class TransferFormFragment : Fragment()
         var dstObject = JSONObject()
         dstObject.put("dst", pkhDst)
         dstObject.put("amount", amount.toLong().toString())
+
+        //we don't need fees anymore
         //dstObject.put("fee", fee.toLong().toString())
 
         dstObjects.put(dstObject)
@@ -327,6 +344,7 @@ class TransferFormFragment : Fragment()
 
             postParams.put("dsts", dstsArray)
 
+            // we use this call to ask for payload and fees
             if (mTransferPayload != null && mTransferFees != null && isPayloadValid(mTransferPayload!!, postParams))
             {
                 onInitTransferLoadComplete(null)
@@ -352,6 +370,8 @@ class TransferFormFragment : Fragment()
             {
                 val volleyError = VolleyError(getString(R.string.generic_error))
                 onInitTransferLoadComplete(volleyError)
+
+                //the call failed
             }
 
         }, Response.ErrorListener
@@ -376,6 +396,85 @@ class TransferFormFragment : Fragment()
         jsObjRequest.tag = TRANSFER_INIT_TAG
         mInitTransferLoading = true
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+
+    // volley
+    private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
+    {
+        val url = getString(R.string.transfer_injection_operation)
+
+        //TODO we got to verify at this very moment.
+        if (isPayButtonValid())
+        {
+            val zeroThree = "0x03".hexToByteArray()
+
+            val byteArrayThree = mTransferPayload!!.hexToByteArray()
+
+            val xLen = zeroThree.size
+            val yLen = byteArrayThree.size
+            val result = ByteArray(xLen + yLen)
+
+            System.arraycopy(zeroThree, 0, result, 0, xLen)
+            System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
+
+            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val sk = CryptoUtils.generateSk(mnemonics, "")
+            val signature = KeyPair.sign(sk, result)
+
+            //TODO verify signature
+            //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+
+            val pLen = byteArrayThree.size
+            val sLen = signature.size
+            val newResult = ByteArray(pLen + sLen)
+
+            System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
+            System.arraycopy(signature, 0, newResult, pLen, sLen)
+
+            var payloadsign = newResult.toNoPrefixHexString()
+
+            val stringRequest = object : StringRequest(Request.Method.POST, url,
+                    Response.Listener<String> { response ->
+
+                        onFinalizeTransferLoadComplete(null)
+                        listener?.onTransferSucceed()
+                    },
+                    Response.ErrorListener
+                    {
+                        onFinalizeTransferLoadComplete(it)
+                        listener?.onTransferFailed(it)
+                    }
+            )
+            {
+                @Throws(AuthFailureError::class)
+                override fun getBody(): ByteArray
+                {
+                    val pay = "\""+payloadsign+"\""
+                    return pay.toByteArray()
+                }
+
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String>
+                {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    return headers
+                }
+            }
+
+            cancelRequests(true)
+
+            stringRequest.tag = TRANSFER_FINALIZE_TAG
+
+            mFinalizeTransferLoading = true
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+        }
+        else
+        {
+
+//something wrong happened. we got the finalizeTransfer boolean but not the payload + id
+        }
     }
 
     private fun isPayloadValid(payload:String, params:JSONObject):Boolean
@@ -530,83 +629,6 @@ class TransferFormFragment : Fragment()
         }
 
         return accum
-    }
-
-    // volley
-    private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
-    {
-        val url = getString(R.string.transfer_injection_operation)
-
-        if (isPayButtonValid())
-        {
-            val zeroThree = "0x03".hexToByteArray()
-
-            val byteArrayThree = mTransferPayload!!.hexToByteArray()
-
-            val xLen = zeroThree.size
-            val yLen = byteArrayThree.size
-            val result = ByteArray(xLen + yLen)
-
-            System.arraycopy(zeroThree, 0, result, 0, xLen)
-            System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
-
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
-            val sk = CryptoUtils.generateSk(mnemonics, "")
-            val signature = KeyPair.sign(sk, result)
-
-            //TODO verify signature
-            //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
-
-            val pLen = byteArrayThree.size
-            val sLen = signature.size
-            val newResult = ByteArray(pLen + sLen)
-
-            System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
-            System.arraycopy(signature, 0, newResult, pLen, sLen)
-
-            var payloadsign = newResult.toNoPrefixHexString()
-
-            val stringRequest = object : StringRequest(Request.Method.POST, url,
-                    Response.Listener<String> { response ->
-
-                        onFinalizeTransferLoadComplete(null)
-                        listener?.onTransferSucceed()
-                    },
-                    Response.ErrorListener
-                    {
-                        onFinalizeTransferLoadComplete(it)
-                        listener?.onTransferFailed(it)
-                    }
-            )
-            {
-                @Throws(AuthFailureError::class)
-                override fun getBody(): ByteArray
-                {
-                    val pay = "\""+payloadsign+"\""
-                    return pay.toByteArray()
-                }
-
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): Map<String, String>
-                {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json"
-                    return headers
-                }
-            }
-
-            cancelRequests(true)
-
-            stringRequest.tag = TRANSFER_FINALIZE_TAG
-
-            mFinalizeTransferLoading = true
-            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
-        }
-        else
-        {
-
-//something wrong happened. we got the finalizeTransfer boolean but not the payload + id
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -929,7 +951,6 @@ class TransferFormFragment : Fragment()
             //TODO text changed
             //TODO load again but only if we don't have any same forged data.
 
-
             if (isInputDataValid())
             {
                 startInitTransferLoading()
@@ -965,6 +986,10 @@ class TransferFormFragment : Fragment()
     private fun putFeesToNegative()
     {
         fee_edittext.setText("")
+
+        fee_edittext.isEnabled = false
+        fee_edittext.hint = getString(R.string.neutral)
+
         mTransferFees = -1
     }
 
