@@ -41,7 +41,6 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import com.android.volley.AuthFailureError
@@ -70,12 +69,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.ArrayList
 import kotlin.collections.HashMap
-import kotlin.collections.Map
-import kotlin.collections.indices
-import kotlin.collections.reversed
 import kotlin.collections.set
-import kotlin.collections.slice
-import kotlin.collections.toByteArray
 
 /**
  * Created by nfillion on 20/04/16.
@@ -168,7 +162,6 @@ class TransferFormFragment : Fragment()
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
 
-            //mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY, -1)
             mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
 
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
@@ -182,7 +175,7 @@ class TransferFormFragment : Fragment()
 
             //TODO view created
             //TODO load again but only if we don't have any same forged data.
-            validatePayButton(isInputDataValid())
+            validatePayButton(isInputDataValid() && isTransferFeeValid())
 
             //TODO we got to keep in mind there's an id already.
             if (mInitTransferLoading)
@@ -222,8 +215,9 @@ class TransferFormFragment : Fragment()
 
             fee_edittext.isEnabled = true
             fee_edittext.isFocusable = false
+            fee_edittext.isClickable = false
             fee_edittext.isLongClickable = false
-            fee_edittext.hint = "Click to recaculate"
+            fee_edittext.hint = getString(R.string.click_for_fees)
 
             fee_edittext.setOnClickListener {
                 startInitTransferLoading()
@@ -648,13 +642,13 @@ class TransferFormFragment : Fragment()
         amount_transfer.addTextChangedListener(GenericTextWatcher(amount_transfer))
         amount_transfer.onFocusChangeListener = focusChangeListener
 
-        transfer_src_button.setOnClickListener { _ ->
+        transfer_src_button.setOnClickListener {
             AddressBookActivity.start(activity,
                     theme,
                     AddressBookActivity.Selection.SelectionAccounts)
         }
 
-        transfer_dst_button.setOnClickListener { _ ->
+        transfer_dst_button.setOnClickListener {
             AddressBookActivity.start(
                     activity,
                     theme,
@@ -667,7 +661,7 @@ class TransferFormFragment : Fragment()
 
         pay_button.text = moneyString
 
-        pay_button_layout.setOnClickListener { _ ->
+        pay_button_layout.setOnClickListener {
             onPayClick()
         }
 
@@ -692,7 +686,7 @@ class TransferFormFragment : Fragment()
 
         //TODO fragment recreated
         //TODO load again but only if we don't have any same forged data.
-        validatePayButton(isInputDataValid())
+        validatePayButton(isInputDataValid() && isTransferFeeValid())
     }
 
     private fun isLoading():Boolean
@@ -771,10 +765,6 @@ class TransferFormFragment : Fragment()
                 {
                     mDstAccount = account
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
-
-                    //TODO destination loaded
-                    //TODO load again but only if we don't have any same forged data.
-                    //validatePayButton(isInputDataValid())
                 }
             }
 
@@ -785,6 +775,9 @@ class TransferFormFragment : Fragment()
             else
             {
                 validatePayButton(false)
+
+                cancelRequests(true)
+                transferLoading(false)
 
                 putFeesToNegative()
                 putPayButtonToNull()
@@ -930,9 +923,18 @@ class TransferFormFragment : Fragment()
 
     private inner class GenericTextWatcher internal constructor(private val v: View) : TextWatcher
     {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+        private var hasTextChanged = false
 
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+
+            if (!s.isEmpty())
+            {
+                hasTextChanged = true
+            }
+        }
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+        }
 
         override fun afterTextChanged(editable: Editable)
         {
@@ -941,26 +943,29 @@ class TransferFormFragment : Fragment()
             if (i == R.id.amount_transfer)
             {
                 putAmountInRed(false)
+
+                //TODO text changed
+                //TODO load again but only if we don't have any same forged data.
+
+                if (hasTextChanged && isInputDataValid())
+                {
+                    startInitTransferLoading()
+                }
+                else
+                {
+                    validatePayButton(false)
+
+                    cancelRequests(true)
+                    transferLoading(false)
+
+                    putFeesToNegative()
+                    putPayButtonToNull()
+                }
             }
             else
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
-            }
-
-            //TODO text changed
-            //TODO load again but only if we don't have any same forged data.
-
-            if (isInputDataValid())
-            {
-                startInitTransferLoading()
-            }
-            else
-            {
-                validatePayButton(false)
-
-                putFeesToNegative()
-                putPayButtonToNull()
             }
         }
     }
@@ -991,6 +996,8 @@ class TransferFormFragment : Fragment()
         fee_edittext.hint = getString(R.string.neutral)
 
         mTransferFees = -1
+
+        mTransferPayload = null
     }
 
     private fun putPayButtonToNull()
