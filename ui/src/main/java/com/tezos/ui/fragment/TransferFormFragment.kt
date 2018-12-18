@@ -77,14 +77,6 @@ import kotlin.collections.set
  */
 class TransferFormFragment : Fragment()
 {
-    private val TRANSFER_INIT_TAG = "transfer_init"
-    private val TRANSFER_FINALIZE_TAG = "transfer_finalize"
-
-    private val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
-
-    private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
-    private val TRANSFER_FEE_KEY = "transfer_fee_key"
-
     private var mSrcAccount:Address? = null
     private var mDstAccount:Address? = null
 
@@ -97,6 +89,8 @@ class TransferFormFragment : Fragment()
     private var mTransferFees:Long = -1
 
     private var mTransferAmount:Double = -1.0
+
+    private var mClickCalculate:Boolean = false
 
     companion object
     {
@@ -116,6 +110,16 @@ class TransferFormFragment : Fragment()
 
         private const val SRC_ACCOUNT_KEY = "src_account_key"
         private const val DST_ACCOUNT_KEY = "dst_account_key"
+
+        private const val TRANSFER_INIT_TAG = "transfer_init"
+        private const val TRANSFER_FINALIZE_TAG = "transfer_finalize"
+
+        private const val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
+
+        private const val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
+        private const val TRANSFER_FEE_KEY = "transfer_fee_key"
+
+        private const val FEES_CALCULATE_KEY = "calculate_fee_key"
     }
 
     interface OnTransferListener
@@ -172,6 +176,8 @@ class TransferFormFragment : Fragment()
 
             mTransferFees = savedInstanceState.getLong(TRANSFER_FEE_KEY, -1)
 
+            mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
+
             transferLoading(isLoading())
         }
     }
@@ -180,7 +186,11 @@ class TransferFormFragment : Fragment()
     {
         super.onResume()
 
-        validatePayButton(isInputDataValid() && isTransferFeeValid())
+        if (isInputDataValid() && isTransferFeeValid())
+        {
+            validatePayButton(true)
+            this.setTextPayButton()
+        }
 
         //TODO we got to keep in mind there's an id already.
         if (mInitTransferLoading)
@@ -206,7 +216,7 @@ class TransferFormFragment : Fragment()
     {
         mInitTransferLoading = false
 
-        if (error != null)
+        if (error != null || mClickCalculate)
         {
             // stop the moulinette only if an error occurred
             transferLoading(false)
@@ -227,7 +237,10 @@ class TransferFormFragment : Fragment()
                 startInitTransferLoading()
             }
 
-            listener?.onTransferFailed(error)
+            if(error != null)
+            {
+                listener?.onTransferFailed(error)
+            }
         }
         else
         {
@@ -368,6 +381,7 @@ class TransferFormFragment : Fragment()
             {
                 val volleyError = VolleyError(getString(R.string.generic_error))
                 onInitTransferLoadComplete(volleyError)
+                mClickCalculate = true
 
                 //the call failed
             }
@@ -376,6 +390,7 @@ class TransferFormFragment : Fragment()
         {
             onInitTransferLoadComplete(it)
 
+            mClickCalculate = true
             //Log.i("mTransferId", ""+mTransferId)
             Log.i("mTransferPayload", ""+mTransferPayload)
         })
@@ -1030,6 +1045,7 @@ class TransferFormFragment : Fragment()
     {
         fee_edittext.setText("")
 
+        mClickCalculate = false
         fee_edittext.isEnabled = false
         fee_edittext.hint = getString(R.string.neutral)
 
@@ -1177,6 +1193,8 @@ class TransferFormFragment : Fragment()
         outState.putDouble(TRANSFER_AMOUNT_KEY, mTransferAmount)
 
         outState.putLong(TRANSFER_FEE_KEY, mTransferFees)
+
+        outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
     }
 
     override fun onDetach()
