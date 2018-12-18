@@ -307,13 +307,6 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_forge)
 
-        var amount = mTransferAmount
-
-        // convert in µꜩ
-        amount *= 1000000
-
-        //TODO need to check if activity is not null
-
         val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
@@ -328,9 +321,9 @@ class TransferFormFragment : Fragment()
 
         var dstObject = JSONObject()
         dstObject.put("dst", pkhDst)
-        dstObject.put("amount", amount.toLong().toString())
+        dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
 
-        //we don't need fees anymore
+        //we don't need fees to forge
         //dstObject.put("fee", fee.toLong().toString())
 
         dstObjects.put(dstObject)
@@ -356,7 +349,7 @@ class TransferFormFragment : Fragment()
             postParams.put("dsts", dstsArray)
 
             // we use this call to ask for payload and fees
-            if (mTransferPayload != null && mTransferFees != null && isPayloadValid(mTransferPayload!!, postParams))
+            if (mTransferPayload != null && mTransferFees != null)
             {
                 onInitTransferLoadComplete(null)
 
@@ -418,75 +411,106 @@ class TransferFormFragment : Fragment()
         val url = getString(R.string.transfer_injection_operation)
 
         //TODO we got to verify at this very moment.
-        if (isPayButtonValid())
+        if (isPayButtonValid() && mTransferPayload != null)
         {
-            val zeroThree = "0x03".hexToByteArray()
-
-            val byteArrayThree = mTransferPayload!!.hexToByteArray()
-
-            val xLen = zeroThree.size
-            val yLen = byteArrayThree.size
-            val result = ByteArray(xLen + yLen)
-
-            System.arraycopy(zeroThree, 0, result, 0, xLen)
-            System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
+            val pkhSrc = mnemonicsData.pkh
+            val pkhDst = mDstAccount?.pubKeyHash
 
             val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
-            val sk = CryptoUtils.generateSk(mnemonics, "")
-            val signature = KeyPair.sign(sk, result)
+            val pk = CryptoUtils.generatePk(mnemonics, "")
 
-            //TODO verify signature
-            //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+            var postParams = JSONObject()
+            postParams.put("src", pkhSrc)
+            postParams.put("src_pk", pk)
 
-            val pLen = byteArrayThree.size
-            val sLen = signature.size
-            val newResult = ByteArray(pLen + sLen)
+            var dstObjects = JSONArray()
 
-            System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
-            System.arraycopy(signature, 0, newResult, pLen, sLen)
+            var dstObject = JSONObject()
+            dstObject.put("dst", pkhDst)
 
-            var payloadsign = newResult.toNoPrefixHexString()
+            val mutezAmount = (mTransferAmount*1000000.0).toLong().toString()
+            dstObject.put("amount", mutezAmount)
 
-            val stringRequest = object : StringRequest(Request.Method.POST, url,
-                    Response.Listener<String> { response ->
+            dstObject.put("fee", mTransferFees.toString())
 
-                        onFinalizeTransferLoadComplete(null)
-                        listener?.onTransferSucceed()
-                    },
-                    Response.ErrorListener
-                    {
-                        onFinalizeTransferLoadComplete(it)
-                        listener?.onTransferFailed(it)
-                    }
-            )
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+
+            if (isPayloadValid(mTransferPayload!!, postParams))
             {
-                @Throws(AuthFailureError::class)
-                override fun getBody(): ByteArray
+                val zeroThree = "0x03".hexToByteArray()
+
+                val byteArrayThree = mTransferPayload!!.hexToByteArray()
+
+                val xLen = zeroThree.size
+                val yLen = byteArrayThree.size
+                val result = ByteArray(xLen + yLen)
+
+                System.arraycopy(zeroThree, 0, result, 0, xLen)
+                System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
+
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+                val signature = KeyPair.sign(sk, result)
+
+                //TODO verify signature
+                //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+
+                val pLen = byteArrayThree.size
+                val sLen = signature.size
+                val newResult = ByteArray(pLen + sLen)
+
+                System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
+                System.arraycopy(signature, 0, newResult, pLen, sLen)
+
+                var payloadsign = newResult.toNoPrefixHexString()
+
+                val stringRequest = object : StringRequest(Request.Method.POST, url,
+                        Response.Listener<String> { response ->
+
+                            onFinalizeTransferLoadComplete(null)
+                            listener?.onTransferSucceed()
+                        },
+                        Response.ErrorListener
+                        {
+                            onFinalizeTransferLoadComplete(it)
+                            listener?.onTransferFailed(it)
+                        }
+                )
                 {
-                    val pay = "\""+payloadsign+"\""
-                    return pay.toByteArray()
+                    @Throws(AuthFailureError::class)
+                    override fun getBody(): ByteArray
+                    {
+                        val pay = "\""+payloadsign+"\""
+                        return pay.toByteArray()
+                    }
+
+                    @Throws(AuthFailureError::class)
+                    override fun getHeaders(): Map<String, String>
+                    {
+                        val headers = HashMap<String, String>()
+                        headers["Content-Type"] = "application/json"
+                        return headers
+                    }
                 }
 
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): Map<String, String>
-                {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json"
-                    return headers
-                }
+                cancelRequests(true)
+
+                stringRequest.tag = TRANSFER_FINALIZE_TAG
+
+                mFinalizeTransferLoading = true
+                VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
             }
-
-            cancelRequests(true)
-
-            stringRequest.tag = TRANSFER_FINALIZE_TAG
-
-            mFinalizeTransferLoading = true
-            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+            else
+            {
+                val volleyError = VolleyError(getString(R.string.generic_error))
+                onFinalizeTransferLoadComplete(volleyError)
+            }
         }
         else
         {
-
-//something wrong happened. we got the finalizeTransfer boolean but not the payload + id
+            val volleyError = VolleyError(getString(R.string.generic_error))
+            onFinalizeTransferLoadComplete(volleyError)
         }
     }
 
