@@ -33,6 +33,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
+import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -172,28 +173,31 @@ class TransferFormFragment : Fragment()
             mTransferFees = savedInstanceState.getLong(TRANSFER_FEE_KEY, -1)
 
             transferLoading(isLoading())
+        }
+    }
 
-            //TODO view created
-            //TODO load again but only if we don't have any same forged data.
-            validatePayButton(isInputDataValid() && isTransferFeeValid())
+    override fun onResume()
+    {
+        super.onResume()
 
-            //TODO we got to keep in mind there's an id already.
-            if (mInitTransferLoading)
+        validatePayButton(isInputDataValid() && isTransferFeeValid())
+
+        //TODO we got to keep in mind there's an id already.
+        if (mInitTransferLoading)
+        {
+            startInitTransferLoading()
+        }
+        else
+        {
+            onInitTransferLoadComplete(null)
+
+            if (mFinalizeTransferLoading)
             {
-                startInitTransferLoading()
+                startFinalizeTransferLoading()
             }
             else
             {
-                onInitTransferLoadComplete(null)
-
-                if (mFinalizeTransferLoading)
-                {
-                    startFinalizeTransferLoading()
-                }
-                else
-                {
-                    onFinalizeTransferLoadComplete(null)
-                }
+                onFinalizeTransferLoadComplete(null)
             }
         }
     }
@@ -639,8 +643,8 @@ class TransferFormFragment : Fragment()
 
         val focusChangeListener = this.focusChangeListener()
 
-        amount_transfer.addTextChangedListener(GenericTextWatcher(amount_transfer))
-        amount_transfer.onFocusChangeListener = focusChangeListener
+        amount_transfer_edittext.addTextChangedListener(GenericTextWatcher(amount_transfer_edittext))
+        amount_transfer_edittext.onFocusChangeListener = focusChangeListener
 
         transfer_src_button.setOnClickListener {
             AddressBookActivity.start(activity,
@@ -815,12 +819,12 @@ class TransferFormFragment : Fragment()
     {
         val isAmountValid = false
 
-        if (amount_transfer.text != null && !TextUtils.isEmpty(amount_transfer.text))
+        if (amount_transfer_edittext.text != null && !TextUtils.isEmpty(amount_transfer_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = amount_transfer.text!!.toString().toDouble()
+                val amount = amount_transfer_edittext.text!!.toString().toDouble()
 
                 if (amount >= 0.000001f)
                 {
@@ -836,6 +840,28 @@ class TransferFormFragment : Fragment()
         }
 
         return isAmountValid
+    }
+
+    private fun isTransferAmountEquals(editable: Editable):Boolean
+    {
+        val isAmountEquals = false
+
+        if (editable != null && !TextUtils.isEmpty(editable))
+        {
+            try
+            {
+                val amount = editable.toString().toDouble()
+                if (amount != -1.0 && amount == mTransferAmount)
+                {
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                return false
+            }
+        }
+        return isAmountEquals
     }
 
     //TODO need a method to verify if the fees
@@ -873,7 +899,7 @@ class TransferFormFragment : Fragment()
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_transfer)
+            if (i == R.id.amount_transfer_edittext)
             {
                 putAmountInRed(!hasFocus)
             }
@@ -923,43 +949,52 @@ class TransferFormFragment : Fragment()
 
     private inner class GenericTextWatcher internal constructor(private val v: View) : TextWatcher
     {
-        private var hasTextChanged = false
+        private var hasTextChanged = true
 
         override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
 
             if (!s.isEmpty())
             {
-                hasTextChanged = true
+                //hasTextChanged = true
             }
         }
 
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+            if (!s.isEmpty())
+            {
+                //hasTextChanged = true
+            }
         }
 
         override fun afterTextChanged(editable: Editable)
         {
             val i = v.id
 
-            if (i == R.id.amount_transfer)
+            if (i == R.id.amount_transfer_edittext)
             {
-                putAmountInRed(false)
-
-                //TODO text changed
-                //TODO load again but only if we don't have any same forged data.
-
-                if (hasTextChanged && isInputDataValid())
+                if (!isTransferAmountEquals(editable))
                 {
-                    startInitTransferLoading()
-                }
-                else
-                {
-                    validatePayButton(false)
+                    putAmountInRed(false)
 
-                    cancelRequests(true)
-                    transferLoading(false)
+                    //TODO text changed
+                    //TODO load again but only if we don't have any same forged data.
 
-                    putFeesToNegative()
-                    putPayButtonToNull()
+                    //val amount = java.lang.Double.parseDouble()
+
+                    //TODO check if it's already
+
+                    if (isInputDataValid()) {
+                        startInitTransferLoading()
+                    } else {
+                        validatePayButton(false)
+
+                        cancelRequests(true)
+                        transferLoading(false)
+
+                        putFeesToNegative()
+                        putPayButtonToNull()
+                    }
                 }
             }
             else
@@ -972,8 +1007,11 @@ class TransferFormFragment : Fragment()
 
     fun isInputDataValid(): Boolean
     {
-        return isTransferAmountValid()
-                && mDstAccount != null
+        val isTransferAmountValid = isTransferAmountValid()
+        val isDstAccount = mDstAccount != null
+        return isTransferAmountValid && isDstAccount
+                //return isTransferAmountValid()
+                // mDstAccount != null
     }
 
     fun isPayButtonValid(): Boolean
@@ -1023,7 +1061,7 @@ class TransferFormFragment : Fragment()
             color = R.color.tz_accent
         }
 
-        amount_transfer.setTextColor(ContextCompat.getColor(activity!!, color))
+        amount_transfer_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
     private fun setTextPayButton()
