@@ -11,6 +11,9 @@
     <string name="card_expiration">Expiry date</string>
     <string name="amount_default" translatable="false">0.05</string>
     <string name="amount">Amount</string>
+    <string name="gas">Gas (default value)</string>
+    <string name="fee_minimum">Fee (calculated minimum value)</string>
+    <string name="delegate">Delegate</string>
     <string name="fee">Fee</string>
     <string name="fees_default">0.001</string>
     <string name="public_key_hash">Public Key Hash</string>
@@ -62,7 +65,7 @@
     <string name="about_version">Version %1$s</string>
     <string name="balance_title">Balance</string>
     <string name="operations_title">Operations</string>
-    <string name="last_operations_title">Last operations</string>
+    <string name="last_operations_title">Latest operations</string>
     <string name="add_an_address">Add</string>
     <string name="about">About</string>
     <string name="exit">Exit</string>
@@ -82,6 +85,8 @@
     <string name="fee_default">Default</string>
     <string name="loading_list_operations">Loading operations…</string>
     <string name="loading_balance">Loading balance…</string>
+    <string name="neutral">-</string>
+    <string name="click_for_fees">Click to recaculate</string>
     <string name="empty_list_operations">No operations</string>
     <string name="contact_name">Contact name</string>
     <string name="tez">ꜩ</string>
