@@ -1,9 +1,13 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.2.0
+-----
+* Adapt the transfer screen for minimal fees.
+
 1.1.2
 -----
-* Handle the non originated accounts for transfers
+* Handle the non originated accounts for transfers.
 
 1.1.1
 -----
