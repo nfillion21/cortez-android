@@ -37,7 +37,6 @@ import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v7.widget.AppCompatSpinner
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -45,7 +44,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
@@ -66,44 +64,19 @@ import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.utils.hexToByteArray
 import com.tezos.ui.utils.toNoPrefixHexString
+import kotlinx.android.synthetic.main.fragment_payment_form.*
+import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.set
 
 /**
  * Created by nfillion on 20/04/16.
  */
 class TransferFormFragment : Fragment()
 {
-    private val TRANSFER_INIT_TAG = "transfer_init"
-    private val TRANSFER_FINALIZE_TAG = "transfer_finalize"
-
-    private val TRANSFER_ID_KEY = "transfer_id_key"
-    private val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
-
-    private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
-    private val TRANSFER_FEE_KEY = "transfer_fee_key"
-
-    private val TRANSFER_SPINNER_POS_KEY = "transfer_spinner_pos_key"
-
-    private var mPayButton: Button? = null
-    private var mPayButtonLayout: FrameLayout? = null
-
-    private var mSrcButton: Button? = null
-    private var mDstButton: Button? = null
-
-    private var mTransferSrcFilled: LinearLayout? = null
-    private var mTransferDstFilled: LinearLayout? = null
-
-    private var mTransferSrcPkh: TextView? = null
-    private var mTransferDstPkh: TextView? = null
-
-    private var mCurrencySpinner: AppCompatSpinner? = null
-
-    private var mProgressBar: ProgressBar? = null
-
-    private var mAmount:TextInputEditText? = null
-
     private var mSrcAccount:Address? = null
     private var mDstAccount:Address? = null
 
@@ -112,11 +85,12 @@ class TransferFormFragment : Fragment()
     private var mInitTransferLoading:Boolean = false
     private var mFinalizeTransferLoading:Boolean = false
 
-    //private var mTransferId:Int? = null
     private var mTransferPayload:String? = null
+    private var mTransferFees:Long = -1
 
-    private var mSpinnerPosition:Int = 0
-    private var mAmountCache:Double = -1.0
+    private var mTransferAmount:Double = -1.0
+
+    private var mClickCalculate:Boolean = false
 
     companion object
     {
@@ -136,6 +110,16 @@ class TransferFormFragment : Fragment()
 
         private const val SRC_ACCOUNT_KEY = "src_account_key"
         private const val DST_ACCOUNT_KEY = "dst_account_key"
+
+        private const val TRANSFER_INIT_TAG = "transfer_init"
+        private const val TRANSFER_FINALIZE_TAG = "transfer_finalize"
+
+        private const val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
+
+        private const val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
+        private const val TRANSFER_FEE_KEY = "transfer_fee_key"
+
+        private const val FEES_CALCULATE_KEY = "calculate_fee_key"
     }
 
     interface OnTransferListener
@@ -183,38 +167,47 @@ class TransferFormFragment : Fragment()
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
 
-            //mTransferId = savedInstanceState.getInt(TRANSFER_ID_KEY, -1)
             mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
 
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
-            mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
-            mSpinnerPosition = savedInstanceState.getInt(TRANSFER_SPINNER_POS_KEY, 0)
+            mTransferAmount = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
+
+            mTransferFees = savedInstanceState.getLong(TRANSFER_FEE_KEY, -1)
+
+            mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
             transferLoading(isLoading())
+        }
+    }
 
-            mCurrencySpinner!!.setSelection(mSpinnerPosition)
+    override fun onResume()
+    {
+        super.onResume()
 
-            validatePayButton(isInputDataValid())
+        if (isInputDataValid() && isTransferFeeValid())
+        {
+            validatePayButton(true)
+            this.setTextPayButton()
+        }
 
-            //TODO we got to keep in mind there's an id already.
-            if (mInitTransferLoading)
+        //TODO we got to keep in mind there's an id already.
+        if (mInitTransferLoading)
+        {
+            startInitTransferLoading()
+        }
+        else
+        {
+            onInitTransferLoadComplete(null)
+
+            if (mFinalizeTransferLoading)
             {
-                startInitTransferLoading()
+                startFinalizeTransferLoading()
             }
             else
             {
-                onInitTransferLoadComplete(null)
-
-                if (mFinalizeTransferLoading)
-                {
-                    startFinalizeTransferLoading()
-                }
-                else
-                {
-                    onFinalizeTransferLoadComplete(null)
-                }
+                onFinalizeTransferLoadComplete(null)
             }
         }
     }
@@ -223,16 +216,36 @@ class TransferFormFragment : Fragment()
     {
         mInitTransferLoading = false
 
-        if (error != null)
+        if (error != null || mClickCalculate)
         {
             // stop the moulinette only if an error occurred
             transferLoading(false)
             cancelRequests(true)
 
-            listener?.onTransferFailed(error)
+            //TODO should cancel the payloadTransfer too
+            mTransferPayload = null
+
+            //TODO we should give access to the fees button
+
+            fee_edittext.isEnabled = true
+            fee_edittext.isFocusable = false
+            fee_edittext.isClickable = false
+            fee_edittext.isLongClickable = false
+            fee_edittext.hint = getString(R.string.click_for_fees)
+
+            fee_edittext.setOnClickListener {
+                startInitTransferLoading()
+            }
+
+            if(error != null)
+            {
+                listener?.onTransferFailed(error)
+            }
         }
         else
         {
+            transferLoading(false)
+            cancelRequests(true)
             // it's signed, looks like it worked.
             //transferLoading(true)
         }
@@ -259,6 +272,12 @@ class TransferFormFragment : Fragment()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
+
+        putFeesToNegative()
+        putPayButtonToNull()
+
+        // validatePay cannot be valid if there is no fees
+        validatePayButton(false)
 
         // this fragment always have mnemonics arg
         arguments?.let {
@@ -288,27 +307,6 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_forge)
 
-        //TODO lock the UI and put this stuff in savedInstance, in case we turn the screen
-
-        var amount = mAmountCache
-        var fee = 0.0
-
-        //*
-        when (mSpinnerPosition)
-        {
-            0 -> { fee = 0.01 }
-            1 -> { fee = 0.00 }
-            2 -> { fee = 0.05 }
-            else -> {}
-        }
-        //*/
-
-        // convert in µꜩ
-        amount *= 1000000
-        fee *= 1000000
-
-        //TODO need to check if activity is not null
-
         val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
@@ -323,8 +321,10 @@ class TransferFormFragment : Fragment()
 
         var dstObject = JSONObject()
         dstObject.put("dst", pkhDst)
-        dstObject.put("amount", amount.toLong().toString())
-        dstObject.put("fee", fee.toLong().toString())
+        dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+
+        //we don't need fees to forge
+        //dstObject.put("fee", fee.toLong().toString())
 
         dstObjects.put(dstObject)
 
@@ -336,24 +336,54 @@ class TransferFormFragment : Fragment()
             //TODO check if the JSON is fine then launch the 2nd request
 
             mTransferPayload = answer.getString("result")
+            mTransferFees = answer.getLong("total_fee")
 
-            //if (mTransferPayload != null && isPayloadValid(mTransferPayload!!, postParams))
-                if (mTransferPayload != null)
+            // get back the object and
+
+            val dstsArray = postParams["dsts"] as JSONArray
+            val dstObj = dstsArray[0] as JSONObject
+
+            dstObj.put("fee", mTransferFees.toString())
+            dstsArray.put(0, dstObj)
+
+            postParams.put("dsts", dstsArray)
+
+            // we use this call to ask for payload and fees
+            if (mTransferPayload != null && mTransferFees != null)
             {
                 onInitTransferLoadComplete(null)
 
-                startFinalizeTransferLoading()
+                val feeInTez = mTransferFees.toDouble()/1000000.0
+                fee_edittext.setText(feeInTez.toString())
+
+                validatePayButton(isInputDataValid() && isTransferFeeValid())
+
+                if (isInputDataValid() && isTransferFeeValid())
+                {
+                    validatePayButton(true)
+
+                    this.setTextPayButton()
+                }
+                else
+                {
+                    // should no happen
+                    validatePayButton(false)
+                }
             }
             else
             {
                 val volleyError = VolleyError(getString(R.string.generic_error))
                 onInitTransferLoadComplete(volleyError)
+                mClickCalculate = true
+
+                //the call failed
             }
 
         }, Response.ErrorListener
         {
             onInitTransferLoadComplete(it)
 
+            mClickCalculate = true
             //Log.i("mTransferId", ""+mTransferId)
             Log.i("mTransferPayload", ""+mTransferPayload)
         })
@@ -374,14 +404,21 @@ class TransferFormFragment : Fragment()
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
-    private fun isPayloadValid(payload:String, params:JSONObject):Boolean
-    {
-        var isValid = false
-        if (payload != null && params != null)
-        {
-            val data = payload.hexToByteArray()
 
-            /*
+    // volley
+    private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
+    {
+        val url = getString(R.string.transfer_injection_operation)
+
+        //TODO we got to verify at this very moment.
+        if (isPayButtonValid() && mTransferPayload != null)
+        {
+            val pkhSrc = mnemonicsData.pkh
+            val pkhDst = mDstAccount?.pubKeyHash
+
+            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val pk = CryptoUtils.generatePk(mnemonics, "")
+
             var postParams = JSONObject()
             postParams.put("src", pkhSrc)
             postParams.put("src_pk", pk)
@@ -390,13 +427,99 @@ class TransferFormFragment : Fragment()
 
             var dstObject = JSONObject()
             dstObject.put("dst", pkhDst)
-            dstObject.put("amount", amount.toLong().toString())
-            dstObject.put("fee", fee.toLong().toString())
+
+            val mutezAmount = (mTransferAmount*1000000.0).toLong().toString()
+            dstObject.put("amount", mutezAmount)
+
+            dstObject.put("fee", mTransferFees.toString())
 
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
-            */
+
+            if (isPayloadValid(mTransferPayload!!, postParams))
+            {
+                val zeroThree = "0x03".hexToByteArray()
+
+                val byteArrayThree = mTransferPayload!!.hexToByteArray()
+
+                val xLen = zeroThree.size
+                val yLen = byteArrayThree.size
+                val result = ByteArray(xLen + yLen)
+
+                System.arraycopy(zeroThree, 0, result, 0, xLen)
+                System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
+
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+                val signature = KeyPair.sign(sk, result)
+
+                //TODO verify signature
+                //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+
+                val pLen = byteArrayThree.size
+                val sLen = signature.size
+                val newResult = ByteArray(pLen + sLen)
+
+                System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
+                System.arraycopy(signature, 0, newResult, pLen, sLen)
+
+                var payloadsign = newResult.toNoPrefixHexString()
+
+                val stringRequest = object : StringRequest(Request.Method.POST, url,
+                        Response.Listener<String> { response ->
+
+                            onFinalizeTransferLoadComplete(null)
+                            listener?.onTransferSucceed()
+                        },
+                        Response.ErrorListener
+                        {
+                            onFinalizeTransferLoadComplete(it)
+                            listener?.onTransferFailed(it)
+                        }
+                )
+                {
+                    @Throws(AuthFailureError::class)
+                    override fun getBody(): ByteArray
+                    {
+                        val pay = "\""+payloadsign+"\""
+                        return pay.toByteArray()
+                    }
+
+                    @Throws(AuthFailureError::class)
+                    override fun getHeaders(): Map<String, String>
+                    {
+                        val headers = HashMap<String, String>()
+                        headers["Content-Type"] = "application/json"
+                        return headers
+                    }
+                }
+
+                cancelRequests(true)
+
+                stringRequest.tag = TRANSFER_FINALIZE_TAG
+
+                mFinalizeTransferLoading = true
+                VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+            }
+            else
+            {
+                val volleyError = VolleyError(getString(R.string.generic_error))
+                onFinalizeTransferLoadComplete(volleyError)
+            }
+        }
+        else
+        {
+            val volleyError = VolleyError(getString(R.string.generic_error))
+            onFinalizeTransferLoadComplete(volleyError)
+        }
+    }
+
+    private fun isPayloadValid(payload:String, params:JSONObject):Boolean
+    {
+        var isValid = false
+        if (payload != null && params != null)
+        {
+            val data = payload.hexToByteArray()
 
             val obj = params["dsts"] as JSONArray
             val dstObj = obj[0] as JSONObject
@@ -545,83 +668,6 @@ class TransferFormFragment : Fragment()
         return accum
     }
 
-    // volley
-    private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
-    {
-        val url = getString(R.string.transfer_injection_operation)
-
-        if (/*mTransferId != null && mTransferId != -1 && */mTransferPayload != null)
-        {
-            val zeroThree = "0x03".hexToByteArray()
-
-            val byteArrayThree = mTransferPayload!!.hexToByteArray()
-
-            val xLen = zeroThree.size
-            val yLen = byteArrayThree.size
-            val result = ByteArray(xLen + yLen)
-
-            System.arraycopy(zeroThree, 0, result, 0, xLen)
-            System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
-
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
-            val sk = CryptoUtils.generateSk(mnemonics, "")
-            val signature = KeyPair.sign(sk, result)
-
-            //TODO verify signature
-            //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
-
-            val pLen = byteArrayThree.size
-            val sLen = signature.size
-            val newResult = ByteArray(pLen + sLen)
-
-            System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
-            System.arraycopy(signature, 0, newResult, pLen, sLen)
-
-            var payloadsign = newResult.toNoPrefixHexString()
-
-            val stringRequest = object : StringRequest(Request.Method.POST, url,
-                    Response.Listener<String> { response ->
-
-                        onFinalizeTransferLoadComplete(null)
-                        listener?.onTransferSucceed()
-                    },
-                    Response.ErrorListener
-                    {
-                        onFinalizeTransferLoadComplete(it)
-                        listener?.onTransferFailed(it)
-                    }
-            )
-            {
-                @Throws(AuthFailureError::class)
-                override fun getBody(): ByteArray
-                {
-                    val pay = "\""+payloadsign+"\""
-                    return pay.toByteArray()
-                }
-
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): Map<String, String>
-                {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json"
-                    return headers
-                }
-            }
-
-            cancelRequests(true)
-
-            stringRequest.tag = TRANSFER_FINALIZE_TAG
-
-            mFinalizeTransferLoading = true
-            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
-        }
-        else
-        {
-
-//something wrong happened. we got the finalizeTransfer boolean but not the payload + id
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
     {
@@ -636,63 +682,31 @@ class TransferFormFragment : Fragment()
 
         val focusChangeListener = this.focusChangeListener()
 
-        mAmount = view.findViewById(R.id.amount_transfer)
-        mAmount?.addTextChangedListener(GenericTextWatcher(mAmount!!))
-        mAmount?.onFocusChangeListener = focusChangeListener
+        amount_transfer_edittext.addTextChangedListener(GenericTextWatcher(amount_transfer_edittext))
+        amount_transfer_edittext.onFocusChangeListener = focusChangeListener
 
-        mPayButton = view.findViewById(R.id.pay_button)
-        mPayButtonLayout = view.findViewById(R.id.pay_button_layout)
-
-        mCurrencySpinner = view.findViewById(R.id.fee_spinner)
-        val adapter = ArrayAdapter.createFromResource(activity!!,
-                R.array.array_fee, android.R.layout.simple_spinner_item)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mCurrencySpinner!!.adapter = adapter
-        mCurrencySpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener
-        {
-            override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
-            {
-                //putAmountInRed(false)
-                mSpinnerPosition = i
-            }
-
-            override fun onNothingSelected(adapterView: AdapterView<*>) {}
-        }
-
-        mProgressBar = view.findViewById(R.id.empty)
-
-        mSrcButton = view.findViewById(R.id.transfer_src_button)
-        mSrcButton!!.setOnClickListener {
+        transfer_src_button.setOnClickListener {
             AddressBookActivity.start(activity,
                     theme,
                     AddressBookActivity.Selection.SelectionAccounts)
         }
 
-        mDstButton = view.findViewById(R.id.transfer_dst_button)
-        mDstButton!!.setOnClickListener {
+        transfer_dst_button.setOnClickListener {
             AddressBookActivity.start(
                     activity,
                     theme,
                     AddressBookActivity.Selection.SelectionAccountsAndAddresses)
         }
 
-        mTransferSrcFilled = view.findViewById(R.id.transfer_source_filled)
-        mTransferDstFilled = view.findViewById(R.id.transfer_destination_filled)
-
-        mTransferSrcPkh = view.findViewById(R.id.src_payment_account_pub_key_hash)
-        mTransferDstPkh = view.findViewById(R.id.dst_payment_account_pub_key_hash)
-
-        mPayButtonLayout!!.visibility = View.VISIBLE
+        pay_button_layout.visibility = View.VISIBLE
 
         val moneyString = getString(R.string.pay, "ꜩ")
 
-        mPayButton!!.text = moneyString
+        pay_button.text = moneyString
 
-        mPayButtonLayout!!.setOnClickListener { _ ->
+        pay_button_layout.setOnClickListener {
             onPayClick()
         }
-
-        validatePayButton(isInputDataValid())
 
         putEverythingInRed()
 
@@ -710,9 +724,12 @@ class TransferFormFragment : Fragment()
             {
                 mDstAccount = Address.fromBundle(address)
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
-                validatePayButton(isInputDataValid())
             }
         }
+
+        //TODO fragment recreated
+        //TODO load again but only if we don't have any same forged data.
+        validatePayButton(isInputDataValid() && isTransferFeeValid())
     }
 
     private fun isLoading():Boolean
@@ -724,17 +741,15 @@ class TransferFormFragment : Fragment()
     {
         if (loading)
         {
-            mPayButtonLayout?.visibility = View.GONE
-            mProgressBar?.visibility = View.VISIBLE
-            mCurrencySpinner?.isEnabled = false
-            mAmount?.isEnabled = false
+            pay_button_layout.visibility = View.GONE
+            empty.visibility = View.VISIBLE
+            //amount_transfer.isEnabled = false
         }
         else
         {
-            mPayButtonLayout?.visibility = View.VISIBLE
-            mProgressBar?.visibility = View.INVISIBLE
-            mCurrencySpinner?.isEnabled = true
-            mAmount?.isEnabled = true
+            pay_button_layout.visibility = View.VISIBLE
+            empty.visibility = View.INVISIBLE
+            //amount_transfer.isEnabled = true
         }
 
         listener?.onTransferLoading(loading)
@@ -764,7 +779,7 @@ class TransferFormFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startInitTransferLoading()
+            startFinalizeTransferLoading()
         }
         dialog.passwordVerificationListener =
                 {
@@ -793,8 +808,22 @@ class TransferFormFragment : Fragment()
                 {
                     mDstAccount = account
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
-                    validatePayButton(isInputDataValid())
                 }
+            }
+
+            if (isInputDataValid())
+            {
+                startInitTransferLoading()
+            }
+            else
+            {
+                validatePayButton(false)
+
+                cancelRequests(true)
+                transferLoading(false)
+
+                putFeesToNegative()
+                putPayButtonToNull()
             }
         }
     }
@@ -805,17 +834,17 @@ class TransferFormFragment : Fragment()
         {
             AddressBookActivity.Selection.SelectionAccounts ->
             {
-                mSrcButton?.visibility = View.GONE
-                mTransferSrcFilled?.visibility = View.VISIBLE
+                transfer_src_button.visibility = View.GONE
+                transfer_source_filled.visibility = View.VISIBLE
 
-                mTransferSrcPkh?.text = address.pubKeyHash
+                src_payment_account_pub_key_hash.text = address.pubKeyHash
             }
 
             AddressBookActivity.Selection.SelectionAccountsAndAddresses ->
             {
-                mDstButton?.visibility = View.GONE
-                mTransferDstFilled?.visibility = View.VISIBLE
-                mTransferDstPkh?.text = address.pubKeyHash
+                transfer_dst_button.visibility = View.GONE
+                transfer_destination_filled.visibility = View.VISIBLE
+                dst_payment_account_pub_key_hash.text = address.pubKeyHash
             }
 
             else ->
@@ -829,22 +858,22 @@ class TransferFormFragment : Fragment()
     {
         val isAmountValid = false
 
-        if (mAmount != null && !TextUtils.isEmpty(mAmount?.text))
+        if (amount_transfer_edittext.text != null && !TextUtils.isEmpty(amount_transfer_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = mAmount?.text!!.toString().toDouble()
+                val amount = amount_transfer_edittext.text!!.toString().toDouble()
 
                 if (amount >= 0.000001f)
                 {
-                    mAmountCache = amount
+                    mTransferAmount = amount
                     return true
                 }
             }
             catch (e: NumberFormatException)
             {
-                mAmountCache = -1.0
+                mTransferAmount = -1.0
                 return false
             }
         }
@@ -852,12 +881,64 @@ class TransferFormFragment : Fragment()
         return isAmountValid
     }
 
+    private fun isTransferAmountEquals(editable: Editable):Boolean
+    {
+        val isAmountEquals = false
+
+        if (editable != null && !TextUtils.isEmpty(editable))
+        {
+            try
+            {
+                val amount = editable.toString().toDouble()
+                if (amount != -1.0 && amount == mTransferAmount)
+                {
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                return false
+            }
+        }
+        return isAmountEquals
+    }
+
+    //TODO need a method to verify if the fees
+
+    private fun isTransferFeeValid():Boolean
+    {
+        val isFeeValid = false
+
+        if (fee_edittext.text != null && !TextUtils.isEmpty(fee_edittext.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val fee = fee_edittext.text.toString().toDouble()
+
+                if (fee >= 0.000001f)
+                {
+                    val longTransferFee = fee*1000000
+                    mTransferFees = longTransferFee.toLong()
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mTransferFees = -1
+                return false
+            }
+        }
+
+        return isFeeValid
+    }
+
     private fun focusChangeListener(): View.OnFocusChangeListener
     {
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_transfer)
+            if (i == R.id.amount_transfer_edittext)
             {
                 putAmountInRed(!hasFocus)
             }
@@ -876,22 +957,22 @@ class TransferFormFragment : Fragment()
             val customThemeBundle = arguments!!.getBundle(CustomTheme.TAG)
             val theme = CustomTheme.fromBundle(customThemeBundle)
 
-            mPayButton!!.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            mPayButtonLayout!!.isEnabled = true
-            mPayButtonLayout!!.background = makeSelector(theme)
+            pay_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            pay_button_layout.isEnabled = true
+            pay_button_layout.background = makeSelector(theme)
 
-            val drawables = mPayButton!!.compoundDrawables
+            val drawables = pay_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
         }
         else
         {
-            mPayButton!!.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-            mPayButtonLayout!!.isEnabled = false
+            pay_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            pay_button_layout.isEnabled = false
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            mPayButtonLayout!!.background = makeSelector(greyTheme)
+            pay_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = mPayButton!!.compoundDrawables
+            val drawables = pay_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
@@ -907,36 +988,99 @@ class TransferFormFragment : Fragment()
 
     private inner class GenericTextWatcher internal constructor(private val v: View) : TextWatcher
     {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+        private var hasTextChanged = true
 
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+
+            if (!s.isEmpty())
+            {
+                //hasTextChanged = true
+            }
+        }
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+            if (!s.isEmpty())
+            {
+                //hasTextChanged = true
+            }
+        }
 
         override fun afterTextChanged(editable: Editable)
         {
             val i = v.id
 
-            if (i == R.id.amount_transfer)
+            if (i == R.id.amount_transfer_edittext)
             {
-                putAmountInRed(false)
+                if (!isTransferAmountEquals(editable))
+                {
+                    putAmountInRed(false)
+
+                    //TODO text changed
+                    //TODO load again but only if we don't have any same forged data.
+
+                    //val amount = java.lang.Double.parseDouble()
+
+                    //TODO check if it's already
+
+                    if (isInputDataValid()) {
+                        startInitTransferLoading()
+                    } else {
+                        validatePayButton(false)
+
+                        cancelRequests(true)
+                        transferLoading(false)
+
+                        putFeesToNegative()
+                        putPayButtonToNull()
+                    }
+                }
             }
             else
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
             }
-            validatePayButton(isInputDataValid())
         }
     }
 
     fun isInputDataValid(): Boolean
     {
-        return isTransferAmountValid()
-                && mDstAccount != null
+        val isTransferAmountValid = isTransferAmountValid()
+        val isDstAccount = mDstAccount != null
+        return isTransferAmountValid && isDstAccount
+                //return isTransferAmountValid()
+                // mDstAccount != null
+    }
+
+    fun isPayButtonValid(): Boolean
+    {
+        return mTransferPayload != null
+        && isTransferFeeValid()
+        && isInputDataValid()
     }
 
     private fun putEverythingInRed()
     {
         this.putAmountInRed(true)
+    }
+
+    private fun putFeesToNegative()
+    {
+        fee_edittext.setText("")
+
+        mClickCalculate = false
+        fee_edittext.isEnabled = false
+        fee_edittext.hint = getString(R.string.neutral)
+
+        mTransferFees = -1
+
+        mTransferPayload = null
+    }
+
+    private fun putPayButtonToNull()
+    {
+        pay_button.text = getString(R.string.pay, "")
     }
 
 // put everything in RED
@@ -950,57 +1094,25 @@ class TransferFormFragment : Fragment()
         if (red && !amountValid)
         {
             color = R.color.tz_error
-            mPayButton!!.text = getString(R.string.pay, "")
+            pay_button.text = getString(R.string.pay, "")
         }
         else
         {
             color = R.color.tz_accent
-
-            if (amountValid)
-            {
-                val amount = mAmount!!.text.toString()
-                this.setTextPayButton(amount)
-            }
-            else
-            {
-                mPayButton!!.text = getString(R.string.pay, "")
-            }
         }
 
-        mAmount?.setTextColor(ContextCompat.getColor(activity!!, color))
+        amount_transfer_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
-    private fun setTextPayButton(amount: String)
+    private fun setTextPayButton()
     {
-        var amount = amount
-//var amountDouble: Double = java.lang.Double.parseDouble(amount)
-        var amountDouble: Double = amount.toDouble()
+        var amountDouble: Double = mTransferAmount
 
-        val selectedItemThreeDS = mCurrencySpinner!!.selectedItemId
+        //amountDouble += fee_edittext.text.toString().toLong()/1000000
+        amountDouble += mTransferFees.toDouble()/1000000.0
 
-        when (selectedItemThreeDS.toInt())
-        {
-            0 -> {
-                amountDouble += 0.01
-            }
+        var amount = amountDouble.toString()
 
-            1 -> {
-                amountDouble += 0.00
-            }
-
-            2 -> {
-                amountDouble += 0.05
-            }
-
-            else -> {
-                //no-op
-            }
-        }
-
-//amount = java.lang.Double.toString(amountDouble)
-        amount = amountDouble.toString()
-
-//check the correct amount
         if (amount.contains("."))
         {
             val elements = amount.substring(amount.indexOf("."))
@@ -1035,7 +1147,7 @@ class TransferFormFragment : Fragment()
 
         val moneyFormatted2 = "$amount ꜩ"
 //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        mPayButton!!.text = getString(R.string.pay, moneyFormatted2)
+        pay_button.text = getString(R.string.pay, moneyFormatted2)
     }
 
     /**
@@ -1063,7 +1175,7 @@ class TransferFormFragment : Fragment()
     {
         if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
         {
-            startInitTransferLoading()
+            startFinalizeTransferLoading()
         }
         else
         {
@@ -1100,16 +1212,13 @@ class TransferFormFragment : Fragment()
         outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
-/*
-when {
-mTransferId != null -> outState.putInt(TRANSFER_ID_KEY, mTransferId!!)
-else -> outState.putInt(TRANSFER_ID_KEY, -1)
-}
-*/
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 
-        outState.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
-        outState.putInt(TRANSFER_SPINNER_POS_KEY, mSpinnerPosition)
+        outState.putDouble(TRANSFER_AMOUNT_KEY, mTransferAmount)
+
+        outState.putLong(TRANSFER_FEE_KEY, mTransferFees)
+
+        outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
     }
 
     override fun onDetach()
