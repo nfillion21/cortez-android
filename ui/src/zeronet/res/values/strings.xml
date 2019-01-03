@@ -2,10 +2,9 @@
 <resources>
     <string name="history_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/history?ks=%1$s</string>
     <string name="balance_url" translatable="false">https://aleph.luminar.eu.org/tezos/zeronet/chains/main/blocks/head/context/contracts/%1$s/balance</string>
-    <string name="transfer_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/transfer/init</string>
-    <string name="transfer_finalize" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/transfer/finalize</string>
 
     <string name="transfer_forge" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/forge_transfer</string>
     <string name="transfer_injection_operation" translatable="false">https://aleph.luminar.eu.org/tezos/zeronet/injection/operation</string>
 
+    <string name="contracts_url" translatable="false">https://beth.luminar.eu.org/mezos/mainnet/contracts?mgrs=%1$s</string>
 </resources>

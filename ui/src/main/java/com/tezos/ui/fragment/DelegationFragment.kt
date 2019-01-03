@@ -354,7 +354,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         val pkh = pkh()
         if (pkh != null)
         {
-            val url = String.format(getString(R.string.balance_url), pkh)
+            val url = String.format(getString(R.string.contracts_url), pkh)
 
             // Request a string response from the provided URL.
             val stringRequest = StringRequest(Request.Method.GET, url,
