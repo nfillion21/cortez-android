@@ -101,25 +101,11 @@ class DelegateFragment : Fragment()
         val adapter = ArrayAdapter.createFromResource(activity,
                 R.array.array_fee, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        fee_spinner.adapter = adapter
-        fee_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener
-        {
-            override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
-            {
-                //putAmountInRed(false)
-                mSpinnerPosition = i
-            }
-
-            override fun onNothingSelected(adapterView: AdapterView<*>) {}
-        }
 
         if (savedInstanceState != null)
         {
             mSpinnerPosition = savedInstanceState.getInt(DELEGATE_SPINNER_POS_KEY, 0)
         }
-
-        fee_spinner.setSelection(mSpinnerPosition)
-
     }
 
     override fun onResume()

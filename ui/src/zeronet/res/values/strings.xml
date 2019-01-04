@@ -6,5 +6,6 @@
     <string name="transfer_forge" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/forge_transfer</string>
     <string name="transfer_injection_operation" translatable="false">https://aleph.luminar.eu.org/tezos/zeronet/injection/operation</string>
 
-    <string name="contracts_url" translatable="false">https://beth.luminar.eu.org/mezos/mainnet/contracts?mgrs=%1$s</string>
+    <string name="contracts_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/contracts?mgrs=%1$s</string>
+    <string name="originate_account_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/originate_account</string>
 </resources>

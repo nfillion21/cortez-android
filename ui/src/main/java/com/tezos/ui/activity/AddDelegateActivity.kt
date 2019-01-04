@@ -118,25 +118,12 @@ class AddDelegateActivity : BaseSecureActivity()
         val adapter = ArrayAdapter.createFromResource(this,
                 R.array.array_fee, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        fee_spinner.adapter = adapter
-        fee_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener
-        {
-            override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long)
-            {
-                //putAmountInRed(false)
-                mSpinnerPosition = i
-            }
-
-            override fun onNothingSelected(adapterView: AdapterView<*>) {}
-        }
 
         if (savedInstanceState != null)
         {
             mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
             mSpinnerPosition = savedInstanceState.getInt(TRANSFER_SPINNER_POS_KEY, 0)
         }
-
-        fee_spinner.setSelection(mSpinnerPosition)
     }
 
     private fun focusChangeListener(): View.OnFocusChangeListener
