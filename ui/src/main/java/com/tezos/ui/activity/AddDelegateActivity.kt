@@ -48,15 +48,22 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.TextView
+import com.android.volley.Request
+import com.android.volley.Response
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonObjectRequest
+import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
+import com.tezos.ui.utils.VolleySingleton
 import kotlinx.android.synthetic.main.activity_add_delegate.*
 import kotlinx.android.synthetic.main.delegate_form_card_info.*
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * Created by nfillion on 20/11/18.
@@ -65,15 +72,29 @@ class AddDelegateActivity : BaseSecureActivity()
 {
     private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
-    private var mAmountCache:Double = -1.0
-    private var mSpinnerPosition:Int = 0
+    private var mInitDelegateLoading:Boolean = false
+    private var mFinalizeDelegateLoading:Boolean = false
+
+    private var mDelegatePayload:String? = null
+    private var mDelegateFees:Long = -1
+
+    private var mDelegateAmount:Double = -1.0
+
+    private var mClickCalculate:Boolean = false
 
     companion object
     {
         var ADD_DELEGATE_REQUEST_CODE = 0x3100 // arbitrary int
 
-        private val TRANSFER_AMOUNT_KEY = "transfer_amount_key"
-        private val TRANSFER_SPINNER_POS_KEY = "transfer_spinner_pos_key"
+        private const val DELEGATE_INIT_TAG = "delegate_init"
+        private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
+
+        private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
+
+        private const val DELEGATE_AMOUNT_KEY = "delegate_amount_key"
+        private const val DELEGATE_FEE_KEY = "delegate_fee_key"
+
+        private const val FEES_CALCULATE_KEY = "calculate_fee_key"
 
         private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
         {
@@ -86,7 +107,7 @@ class AddDelegateActivity : BaseSecureActivity()
         fun start(activity: Activity, theme: CustomTheme)
         {
             val starter = getStartIntent(activity, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_REQUEST_CODE, null)
+            ActivityCompat.startActivityForResult(activity, starter, ADD_DELEGATE_REQUEST_CODE, null)
         }
     }
 
@@ -121,8 +142,16 @@ class AddDelegateActivity : BaseSecureActivity()
 
         if (savedInstanceState != null)
         {
-            mAmountCache = savedInstanceState.getDouble(TRANSFER_AMOUNT_KEY, -1.0)
-            mSpinnerPosition = savedInstanceState.getInt(TRANSFER_SPINNER_POS_KEY, 0)
+            mDelegatePayload = savedInstanceState.getString(DELEGATE_PAYLOAD_KEY, null)
+
+            mInitDelegateLoading = savedInstanceState.getBoolean(DELEGATE_INIT_TAG)
+            mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
+
+            mDelegateAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
+
+            mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
+
+            mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
         }
     }
 
@@ -179,6 +208,198 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val mTitleBar = findViewById<TextView>(R.id.barTitle)
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+    }
+
+    private fun startInitDelegationLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        putFeesToNegative()
+        putPayButtonToNull()
+
+        // validatePay cannot be valid if there is no fees
+        validatePayButton(false)
+
+        startPostRequestLoadInitDelegation()
+    }
+
+    private fun onInitTransferLoadComplete(error:VolleyError?)
+    {
+        mInitDelegateLoading = false
+
+        if (error != null || mClickCalculate)
+        {
+            // stop the moulinette only if an error occurred
+            transferLoading(false)
+            cancelRequests(true)
+
+            //TODO should cancel the payloadTransfer too
+            mDelegatePayload = null
+
+            //TODO we should give access to the fees button
+
+            fee_edittext.isEnabled = true
+            fee_edittext.isFocusable = false
+            fee_edittext.isClickable = false
+            fee_edittext.isLongClickable = false
+            fee_edittext.hint = getString(R.string.click_for_fees)
+
+            fee_edittext.setOnClickListener {
+                startInitDelegateLoading()
+            }
+
+            if(error != null)
+            {
+                listener?.onTransferFailed(error)
+            }
+        }
+        else
+        {
+            transferLoading(false)
+            cancelRequests(true)
+            // it's signed, looks like it worked.
+            //transferLoading(true)
+        }
+    }
+
+    // volley
+    private fun startPostRequestLoadInitDelegation()
+    {
+        val mnemonicsData = Storage(baseContext).getMnemonics()
+
+        val url = getString(R.string.originate_account_url)
+
+        val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val pk = CryptoUtils.generatePk(mnemonics, "")
+
+        val pkhSrc = mnemonicsData.pkh
+        //val pkhDst = mDstAccount?.pubKeyHash
+
+        var postParams = JSONObject()
+        postParams.put("src", pkhSrc)
+        postParams.put("src_pk", pk)
+
+        var dstObjects = JSONArray()
+
+        var dstObject = JSONObject()
+        dstObject.put("manager", pk)
+
+        //TODO put the delegate element
+        dstObject.put("delegate", pk)
+
+        //TODO put the right amount
+        //dstObject.put("credit", (mTransferAmount*1000000).toLong().toString())
+        dstObject.put("credit", 1000000.toString())
+        dstObject.put("delegatable", true)
+
+        dstObjects.put(dstObject)
+
+        postParams.put("dsts", dstObjects)
+
+        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        { answer ->
+
+            //TODO check if the JSON is fine then launch the 2nd request
+
+            mDelegatePayload = answer.getString("result")
+            mDelegateFees = answer.getLong("total_fee")
+
+            // get back the object and
+
+            val dstsArray = postParams["dsts"] as JSONArray
+            val dstObj = dstsArray[0] as JSONObject
+
+            dstObj.put("fee", mDelegateFees.toString())
+            dstsArray.put(0, dstObj)
+
+            postParams.put("dsts", dstsArray)
+
+            // we use this call to ask for payload and fees
+            if (mDelegatePayload != null && mDelegateFees != null)
+            {
+                onInitDelegateLoadComplete(null)
+
+                val feeInTez = mTransferFees.toDouble()/1000000.0
+                fee_edittext.setText(feeInTez.toString())
+
+                validatePayButton(isInputDataValid() && isTransferFeeValid())
+
+                if (isInputDataValid() && isTransferFeeValid())
+                {
+                    validatePayButton(true)
+
+                    this.setTextPayButton()
+                }
+                else
+                {
+                    // should no happen
+                    validatePayButton(false)
+                }
+            }
+            else
+            {
+                val volleyError = VolleyError(getString(R.string.generic_error))
+                onInitDelegateLoadComplete(volleyError)
+                mClickCalculate = true
+
+                //the call failed
+            }
+
+        }, Response.ErrorListener
+        {
+            onInitTransferLoadComplete(it)
+
+            mClickCalculate = true
+            //Log.i("mTransferId", ""+mTransferId)
+            Log.i("mTransferPayload", ""+mTransferPayload)
+        })
+        {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String>
+            {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        cancelRequests(true)
+
+        jsObjRequest.tag = DELEGATE_INIT_TAG
+        mInitDelegateLoading = true
+        VolleySingleton.getInstance(applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    private fun transferLoading(loading:Boolean)
+    {
+        if (loading)
+        {
+            pay_button_layout.visibility = View.GONE
+            empty.visibility = View.VISIBLE
+            //amount_transfer.isEnabled = false
+        }
+        else
+        {
+            pay_button_layout.visibility = View.VISIBLE
+            empty.visibility = View.INVISIBLE
+            //amount_transfer.isEnabled = true
+        }
+
+        listener?.onTransferLoading(loading)
+    }
+
+    private fun putFeesToNegative()
+    {
+        fee_edittext.setText("")
+
+        mClickCalculate = false
+        fee_edittext.isEnabled = false
+        fee_edittext.hint = getString(R.string.neutral)
+
+        mDelegateFees = -1
+
+        mDelegatePayload = null
     }
 
     private fun showSnackBar(error:VolleyError?)
@@ -294,6 +515,7 @@ class AddDelegateActivity : BaseSecureActivity()
                 //val amount = java.lang.Double.parseDouble()
                 val amount = amount_transfer.text!!.toString().toDouble()
 
+                //TODO there's no need to put money in there.
                 if (amount >= 0.000001f)
                 {
                     mAmountCache = amount
@@ -527,6 +749,19 @@ class AddDelegateActivity : BaseSecureActivity()
         else
         {
             onDelegateClick()
+        }
+    }
+
+    private fun cancelRequests(resetBooleans:Boolean)
+    {
+        val requestQueue = VolleySingleton.getInstance(applicationContext).requestQueue
+        requestQueue?.cancelAll(DELEGATE_INIT_TAG)
+        requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
+
+        if (resetBooleans)
+        {
+            mInitTransferLoading = false
+            mFinalizeTransferLoading = false
         }
     }
 
