@@ -33,7 +33,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
-import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -682,8 +681,8 @@ class TransferFormFragment : Fragment()
 
         val focusChangeListener = this.focusChangeListener()
 
-        amount_transfer_edittext.addTextChangedListener(GenericTextWatcher(amount_transfer_edittext))
-        amount_transfer_edittext.onFocusChangeListener = focusChangeListener
+        delegate_edittext.addTextChangedListener(GenericTextWatcher(delegate_edittext))
+        delegate_edittext.onFocusChangeListener = focusChangeListener
 
         transfer_src_button.setOnClickListener {
             AddressBookActivity.start(activity,
@@ -858,12 +857,12 @@ class TransferFormFragment : Fragment()
     {
         val isAmountValid = false
 
-        if (amount_transfer_edittext.text != null && !TextUtils.isEmpty(amount_transfer_edittext.text))
+        if (delegate_edittext.text != null && !TextUtils.isEmpty(delegate_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = amount_transfer_edittext.text!!.toString().toDouble()
+                val amount = delegate_edittext.text!!.toString().toDouble()
 
                 if (amount >= 0.000001f)
                 {
@@ -938,7 +937,7 @@ class TransferFormFragment : Fragment()
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_transfer_edittext)
+            if (i == R.id.delegate_edittext)
             {
                 putAmountInRed(!hasFocus)
             }
@@ -1010,7 +1009,7 @@ class TransferFormFragment : Fragment()
         {
             val i = v.id
 
-            if (i == R.id.amount_transfer_edittext)
+            if (i == R.id.delegate_edittext)
             {
                 if (!isTransferAmountEquals(editable))
                 {
@@ -1101,7 +1100,7 @@ class TransferFormFragment : Fragment()
             color = R.color.tz_accent
         }
 
-        amount_transfer_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
+        delegate_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
     private fun setTextPayButton()

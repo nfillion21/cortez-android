@@ -44,10 +44,10 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.TextView
+import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
@@ -60,6 +60,7 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
+import kotlinx.android.synthetic.main.activity_add_address.*
 import kotlinx.android.synthetic.main.activity_add_delegate.*
 import kotlinx.android.synthetic.main.delegate_form_card_info.*
 import org.json.JSONArray
@@ -127,14 +128,14 @@ class AddDelegateActivity : BaseSecureActivity()
 
         initToolbar(theme)
 
-        amount_transfer.addTextChangedListener(GenericTextWatcher(amount_transfer))
+        delegate_edittext.addTextChangedListener(GenericTextWatcher(delegate_edittext))
 
         val focusChangeListener = this.focusChangeListener()
-        amount_transfer.onFocusChangeListener = focusChangeListener
+        delegate_edittext.onFocusChangeListener = focusChangeListener
 
-        tezos_address.addTextChangedListener(GenericTextWatcher(tezos_address))
+        tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
 
-        tezos_address.onFocusChangeListener = focusChangeListener
+        tezos_address_edittext.onFocusChangeListener = focusChangeListener
 
         val adapter = ArrayAdapter.createFromResource(this,
                 R.array.array_fee, android.R.layout.simple_spinner_item)
@@ -160,11 +161,11 @@ class AddDelegateActivity : BaseSecureActivity()
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_transfer)
+            if (i == R.id.delegate_edittext)
             {
                 putAmountInRed(!hasFocus)
             }
-            else if (i == R.id.tezos_address)
+            else if (i == R.id.tezos_address_edittext)
             {
                 putTzAddressInRed(!hasFocus)
             }
@@ -219,12 +220,12 @@ class AddDelegateActivity : BaseSecureActivity()
         putPayButtonToNull()
 
         // validatePay cannot be valid if there is no fees
-        validatePayButton(false)
+        validateAddButton(false)
 
         startPostRequestLoadInitDelegation()
     }
 
-    private fun onInitTransferLoadComplete(error:VolleyError?)
+    private fun onInitDelegateLoadComplete(error:VolleyError?)
     {
         mInitDelegateLoading = false
 
@@ -246,12 +247,12 @@ class AddDelegateActivity : BaseSecureActivity()
             fee_edittext.hint = getString(R.string.click_for_fees)
 
             fee_edittext.setOnClickListener {
-                startInitDelegateLoading()
+                startInitDelegationLoading()
             }
 
             if(error != null)
             {
-                listener?.onTransferFailed(error)
+                showSnackBar(error)
             }
         }
         else
@@ -320,21 +321,21 @@ class AddDelegateActivity : BaseSecureActivity()
             {
                 onInitDelegateLoadComplete(null)
 
-                val feeInTez = mTransferFees.toDouble()/1000000.0
+                val feeInTez = mDelegateFees.toDouble()/1000000.0
                 fee_edittext.setText(feeInTez.toString())
 
-                validatePayButton(isInputDataValid() && isTransferFeeValid())
+                validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
-                if (isInputDataValid() && isTransferFeeValid())
+                if (isInputDataValid() && isDelegateFeeValid())
                 {
-                    validatePayButton(true)
+                    validateAddButton(true)
 
                     this.setTextPayButton()
                 }
                 else
                 {
                     // should no happen
-                    validatePayButton(false)
+                    validateAddButton(false)
                 }
             }
             else
@@ -348,11 +349,11 @@ class AddDelegateActivity : BaseSecureActivity()
 
         }, Response.ErrorListener
         {
-            onInitTransferLoadComplete(it)
+            onInitDelegateLoadComplete(it)
 
             mClickCalculate = true
             //Log.i("mTransferId", ""+mTransferId)
-            Log.i("mTransferPayload", ""+mTransferPayload)
+            Log.i("mDelegatePayload", ""+mDelegatePayload)
         })
         {
             @Throws(AuthFailureError::class)
@@ -375,18 +376,16 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         if (loading)
         {
-            pay_button_layout.visibility = View.GONE
-            empty.visibility = View.VISIBLE
+            add_delegate_button_layout.visibility = View.GONE
+            nav_progress.visibility = View.VISIBLE
             //amount_transfer.isEnabled = false
         }
         else
         {
-            pay_button_layout.visibility = View.VISIBLE
-            empty.visibility = View.INVISIBLE
+            add_delegate_button_layout.visibility = View.VISIBLE
+            nav_progress.visibility = View.INVISIBLE
             //amount_transfer.isEnabled = true
         }
-
-        listener?.onTransferLoading(loading)
     }
 
     private fun putFeesToNegative()
@@ -400,6 +399,11 @@ class AddDelegateActivity : BaseSecureActivity()
         mDelegateFees = -1
 
         mDelegatePayload = null
+    }
+
+    private fun putPayButtonToNull()
+    {
+        add_delegate_button.text = getString(R.string.pay, "")
     }
 
     private fun showSnackBar(error:VolleyError?)
@@ -466,16 +470,38 @@ class AddDelegateActivity : BaseSecureActivity()
         {
             val i = v.id
 
-            if (i == R.id.amount_transfer)
+            if (i == R.id.delegate_edittext || i == R.id.tezos_address_edittext)
             {
                 putAmountInRed(false)
-                mSpinnerPosition = i
+
+                if (!isDelegateAmountEquals(editable))
+                {
+                    putAmountInRed(false)
+
+                    //TODO text changed
+                    //TODO load again but only if we don't have any same forged data.
+
+                    //val amount = java.lang.Double.parseDouble()
+
+                    //TODO check if it's already
+
+                    if (isInputDataValid())
+                    {
+                        startInitDelegationLoading()
+                    }
+                    else
+                    {
+                        validateAddButton(false)
+
+                        cancelRequests(true)
+                        transferLoading(false)
+
+                        putFeesToNegative()
+                        putPayButtonToNull()
+                    }
+                }
             }
 
-            else if (i == R.id.tezos_address)
-            {
-                putTzAddressInRed(false)
-            }
             else
             {
                 throw UnsupportedOperationException(
@@ -484,53 +510,104 @@ class AddDelegateActivity : BaseSecureActivity()
 
             validateAddButton(isInputDataValid())
         }
+
+        private fun isDelegateAmountEquals(editable: Editable):Boolean
+        {
+            val isAmountEquals = false
+
+            if (editable != null && !TextUtils.isEmpty(editable))
+            {
+                try
+                {
+                    val amount = editable.toString().toDouble()
+                    if (amount != -1.0 && amount == mDelegateAmount)
+                    {
+                        return true
+                    }
+                }
+                catch (e: NumberFormatException)
+                {
+                    return false
+                }
+            }
+            return isAmountEquals
+        }
+
     }
 
     fun isInputDataValid(): Boolean
     {
-        return isTransferAmountValid() && isTzAddressValid()
+        return isDelegateAmountValid() && isTzAddressValid()
     }
 
     private fun isTzAddressValid(): Boolean
     {
         val isTzAddressValid = false
 
-        return if (!TextUtils.isEmpty(tezos_address.text))
+        return if (!TextUtils.isEmpty(tezos_address_edittext.text))
         {
-            Utils.isTzAddressValid(tezos_address.text!!.toString())
+            Utils.isTzAddressValid(tezos_address_edittext.text!!.toString())
         }
 
         else isTzAddressValid
     }
 
-
-    private fun isTransferAmountValid():Boolean
+    private fun isDelegateFeeValid():Boolean
     {
-        val isAmountValid = false
+        val isFeeValid = false
 
-        if (amount_transfer != null && !TextUtils.isEmpty(amount_transfer.text))
+        if (fee_edittext.text != null && !TextUtils.isEmpty(fee_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = amount_transfer.text!!.toString().toDouble()
+                val fee = fee_edittext.text.toString().toDouble()
 
-                //TODO there's no need to put money in there.
-                if (amount >= 0.000001f)
+                if (fee >= 0.000001f)
                 {
-                    mAmountCache = amount
+                    val longTransferFee = fee*1000000
+                    mDelegateFees = longTransferFee.toLong()
                     return true
                 }
             }
             catch (e: NumberFormatException)
             {
-                mAmountCache = -1.0
+                mDelegateFees = -1
+                return false
+            }
+        }
+
+        return isFeeValid
+    }
+
+    private fun isDelegateAmountValid():Boolean
+    {
+        val isAmountValid = false
+
+        if (delegate_edittext.text != null && !TextUtils.isEmpty(delegate_edittext.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val amount = delegate_edittext.text!!.toString().toDouble()
+
+                //no need
+                if (amount >= 0.0f)
+                {
+                    mDelegateAmount = amount
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mDelegateAmount = -1.0
                 return false
             }
         }
 
         return isAmountValid
     }
+
 
     override fun onResume()
     {
@@ -560,7 +637,7 @@ class AddDelegateActivity : BaseSecureActivity()
             color = R.color.tz_accent
         }
 
-        tezos_address.setTextColor(ContextCompat.getColor(this, color))
+        tezos_address_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
 // put everything in RED
@@ -569,7 +646,7 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         val color: Int
 
-        val amountValid = isTransferAmountValid()
+        val amountValid = isDelegateAmountValid()
 
         if (red && !amountValid)
         {
@@ -582,8 +659,8 @@ class AddDelegateActivity : BaseSecureActivity()
 
             if (amountValid)
             {
-                val amount = amount_transfer.text.toString()
-                this.setTextPayButton(amount)
+                //val amount = delegate_transfer_edittext.text.toString()
+                this.setTextPayButton()
             }
             else
             {
@@ -591,41 +668,18 @@ class AddDelegateActivity : BaseSecureActivity()
             }
         }
 
-        amount_transfer.setTextColor(ContextCompat.getColor(this, color))
+        delegate_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
-    private fun setTextPayButton(amount: String)
+    private fun setTextPayButton()
     {
-        var amount = amount
-        var amountDouble: Double = amount.toDouble()
+        var amountDouble: Double = mDelegateAmount
 
-        //val selectedItemThreeDS = fee_spinner.selectedItemId
+        //amountDouble += fee_edittext.text.toString().toLong()/1000000
+        amountDouble += mDelegateFees.toDouble()/1000000.0
 
-        /*
-        when (selectedItemThreeDS.toInt())
-        {
-            0 -> {
-                amountDouble += 0.01
-            }
+        var amount = amountDouble.toString()
 
-            1 -> {
-                amountDouble += 0.00
-            }
-
-            2 -> {
-                amountDouble += 0.05
-            }
-
-            else -> {
-                //no-op
-            }
-        }
-        */
-
-//amount = java.lang.Double.toString(amountDouble)
-        amount = amountDouble.toString()
-
-//check the correct amount
         if (amount.contains("."))
         {
             val elements = amount.substring(amount.indexOf("."))
@@ -660,7 +714,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val moneyFormatted2 = "$amount ꜩ"
 //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        add_delegate_button.text = getString(R.string.delegate_format, moneyFormatted2)
+        add_delegate_button.text = getString(R.string.pay, moneyFormatted2)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -760,16 +814,24 @@ class AddDelegateActivity : BaseSecureActivity()
 
         if (resetBooleans)
         {
-            mInitTransferLoading = false
-            mFinalizeTransferLoading = false
+            mInitDelegateLoading = false
+            mFinalizeDelegateLoading = false
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?)
+    override fun onSaveInstanceState(outState: Bundle)
     {
         super.onSaveInstanceState(outState)
 
-        outState?.putDouble(TRANSFER_AMOUNT_KEY, mAmountCache)
-        outState?.putInt(TRANSFER_SPINNER_POS_KEY, mSpinnerPosition)
+        outState.putBoolean(DELEGATE_INIT_TAG, mInitDelegateLoading)
+        outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
+
+        outState.putString(DELEGATE_PAYLOAD_KEY, mDelegatePayload)
+
+        outState.putDouble(DELEGATE_AMOUNT_KEY, mDelegateAmount)
+
+        outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
+
+        outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
     }
 }

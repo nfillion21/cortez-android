@@ -17,7 +17,7 @@
         tools:ignore="UnusedAttribute,NewApi" />
 
     <android.support.design.widget.TextInputEditText
-        android:id="@+id/tezos_address"
+        android:id="@+id/tezos_address_edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/address_pkh_placeholder"
@@ -63,7 +63,7 @@
             android:clipToPadding="false"
             tools:ignore="UnusedAttribute,NewApi" />
         <android.support.design.widget.TextInputEditText
-            android:id="@+id/amount_transfer"
+            android:id="@+id/delegate_edittext"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:minWidth="@dimen/spacing_huge"
