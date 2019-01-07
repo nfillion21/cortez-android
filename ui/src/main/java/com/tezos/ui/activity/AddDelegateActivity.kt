@@ -137,10 +137,6 @@ class AddDelegateActivity : BaseSecureActivity()
 
         tezos_address_edittext.onFocusChangeListener = focusChangeListener
 
-        val adapter = ArrayAdapter.createFromResource(this,
-                R.array.array_fee, android.R.layout.simple_spinner_item)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
         if (savedInstanceState != null)
         {
             mDelegatePayload = savedInstanceState.getString(DELEGATE_PAYLOAD_KEY, null)
@@ -284,10 +280,10 @@ class AddDelegateActivity : BaseSecureActivity()
         var dstObjects = JSONArray()
 
         var dstObject = JSONObject()
-        dstObject.put("manager", pk)
+        dstObject.put("manager", pkhSrc)
 
         //TODO put the delegate element
-        dstObject.put("delegate", pk)
+        dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
 
         //TODO put the right amount
         //dstObject.put("credit", (mTransferAmount*1000000).toLong().toString())
@@ -472,8 +468,6 @@ class AddDelegateActivity : BaseSecureActivity()
 
             if (i == R.id.delegate_edittext || i == R.id.tezos_address_edittext)
             {
-                putAmountInRed(false)
-
                 if (!isDelegateAmountEquals(editable))
                 {
                     putAmountInRed(false)
@@ -608,18 +602,51 @@ class AddDelegateActivity : BaseSecureActivity()
         return isAmountValid
     }
 
-
     override fun onResume()
     {
         super.onResume()
 
         putEverythingInRed()
+
+        if (isInputDataValid() && isDelegateFeeValid())
+        {
+            validateAddButton(true)
+            this.setTextPayButton()
+        }
+
+        //TODO we got to keep in mind there's an id already.
+        if (mInitDelegateLoading)
+        {
+            startInitDelegationLoading()
+        }
+        else
+        {
+            onInitDelegateLoadComplete(null)
+
+            if (mFinalizeDelegateLoading)
+            {
+                //TODO decomment it
+                //startFinalizeDelegationLoading()
+            }
+            else
+            {
+                //TODO decomment it
+                //onFinalizeTransferLoadComplete(null)
+            }
+        }
     }
 
     private fun putEverythingInRed()
     {
         this.putAmountInRed(true)
         this.putTzAddressInRed(true)
+    }
+
+    fun isAddButtonValid(): Boolean
+    {
+        return mDelegatePayload != null
+                && isDelegateFeeValid()
+                && isInputDataValid()
     }
 
     private fun putTzAddressInRed(red: Boolean)
@@ -833,5 +860,11 @@ class AddDelegateActivity : BaseSecureActivity()
         outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
 
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
+    }
+
+    override fun onDestroy()
+    {
+        super.onDestroy()
+        cancelRequests(false)
     }
 }
