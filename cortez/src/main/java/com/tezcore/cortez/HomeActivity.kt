@@ -409,7 +409,15 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 if (resultCode == R.id.add_address_succeed)
                 {
-                    showSnackBar(getString(R.string.address_successfuly_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    showSnackBar(getString(R.string.address_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
+            }
+
+            AddDelegateActivity.ADD_DELEGATE_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.add_address_succeed)
+                {
+                    showSnackBar(getString(R.string.address_successfully_delegated), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
             }
 

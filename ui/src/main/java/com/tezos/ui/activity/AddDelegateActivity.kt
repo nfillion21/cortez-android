@@ -238,11 +238,10 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        //TODO we got to verify at this very moment.
         if (isAddButtonValid() && mDelegatePayload != null)
         {
             val pkhSrc = mnemonicsData.pkh
-            val pkhDst = mDstAccount?.pubKeyHash
+            //val pkhDst = mDstAccount?.pubKeyHash
 
             val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
             val pk = CryptoUtils.generatePk(mnemonics, "")
@@ -254,7 +253,7 @@ class AddDelegateActivity : BaseSecureActivity()
             var dstObjects = JSONArray()
 
             var dstObject = JSONObject()
-            dstObject.put("dst", pkhDst)
+            //dstObject.put("dst", pkhDst)
 
             val mutezAmount = (mDelegateAmount*1000000.0).toLong().toString()
             dstObject.put("amount", mutezAmount)
@@ -265,7 +264,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
             postParams.put("dsts", dstObjects)
 
-            if (isPayloadValid(mDelegatePayload!!, postParams))
+            if (!isPayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -296,13 +295,19 @@ class AddDelegateActivity : BaseSecureActivity()
                 val stringRequest = object : StringRequest(Request.Method.POST, url,
                         Response.Listener<String> { response ->
 
-                            onFinalizeDelegationLoadComplete(null)
-                            listener?.onTransferSucceed()
+                            //there's no need to do anything because we call finish()
+                            //onFinalizeDelegationLoadComplete(null)
+
+                            setResult(R.id.add_address_succeed, null)
+                            finish()
                         },
                         Response.ErrorListener
                         {
                             onFinalizeDelegationLoadComplete(it)
-                            listener?.onTransferFailed(it)
+
+                            //TODO failed, show snackBar
+                            showSnackBar(it)
+                            //listener?.onTransferFailed(it)
                         }
                 )
                 {
@@ -352,7 +357,7 @@ class AddDelegateActivity : BaseSecureActivity()
         {
             transferLoading(false)
 
-            listener?.onTransferFailed(error)
+            showSnackBar(error)
         }
         else
         {
@@ -787,7 +792,7 @@ class AddDelegateActivity : BaseSecureActivity()
             }
             else
             {
-                onFinalizeTransferLoadComplete(null)
+                onFinalizeDelegationLoadComplete(null)
             }
         }
     }
