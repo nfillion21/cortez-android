@@ -681,8 +681,8 @@ class TransferFormFragment : Fragment()
 
         val focusChangeListener = this.focusChangeListener()
 
-        delegate_edittext.addTextChangedListener(GenericTextWatcher(delegate_edittext))
-        delegate_edittext.onFocusChangeListener = focusChangeListener
+        amount_edittext.addTextChangedListener(GenericTextWatcher(amount_edittext))
+        amount_edittext.onFocusChangeListener = focusChangeListener
 
         transfer_src_button.setOnClickListener {
             AddressBookActivity.start(activity,
@@ -857,12 +857,12 @@ class TransferFormFragment : Fragment()
     {
         val isAmountValid = false
 
-        if (delegate_edittext.text != null && !TextUtils.isEmpty(delegate_edittext.text))
+        if (amount_edittext.text != null && !TextUtils.isEmpty(amount_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = delegate_edittext.text!!.toString().toDouble()
+                val amount = amount_edittext.text!!.toString().toDouble()
 
                 if (amount >= 0.000001f)
                 {
@@ -937,7 +937,7 @@ class TransferFormFragment : Fragment()
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.delegate_edittext)
+            if (i == R.id.amount_edittext)
             {
                 putAmountInRed(!hasFocus)
             }
@@ -995,7 +995,7 @@ class TransferFormFragment : Fragment()
         {
             val i = v.id
 
-            if (i == R.id.delegate_edittext)
+            if (i == R.id.amount_edittext)
             {
                 if (!isTransferAmountEquals(editable))
                 {
@@ -1086,7 +1086,7 @@ class TransferFormFragment : Fragment()
             color = R.color.tz_accent
         }
 
-        delegate_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
+        amount_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
     private fun setTextPayButton()

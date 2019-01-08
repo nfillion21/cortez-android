@@ -44,7 +44,6 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.TextView
 import com.android.volley.AuthFailureError
@@ -60,7 +59,6 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
-import kotlinx.android.synthetic.main.activity_add_address.*
 import kotlinx.android.synthetic.main.activity_add_delegate.*
 import kotlinx.android.synthetic.main.delegate_form_card_info.*
 import org.json.JSONArray
@@ -80,6 +78,7 @@ class AddDelegateActivity : BaseSecureActivity()
     private var mDelegateFees:Long = -1
 
     private var mDelegateAmount:Double = -1.0
+    private var mDelegateTezosAddress:String? = null
 
     private var mClickCalculate:Boolean = false
 
@@ -93,6 +92,7 @@ class AddDelegateActivity : BaseSecureActivity()
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
         private const val DELEGATE_AMOUNT_KEY = "delegate_amount_key"
+        private const val DELEGATE_TEZOS_ADDRESS_KEY = "delegate_tezos_address_key"
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
@@ -120,7 +120,7 @@ class AddDelegateActivity : BaseSecureActivity()
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
         val theme = CustomTheme.fromBundle(themeBundle)
 
-        validateAddButton(isInputDataValid())
+        validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
         add_delegate_button_layout.setOnClickListener {
             onDelegateClick()
@@ -128,10 +128,10 @@ class AddDelegateActivity : BaseSecureActivity()
 
         initToolbar(theme)
 
-        delegate_edittext.addTextChangedListener(GenericTextWatcher(delegate_edittext))
+        amount_edittext.addTextChangedListener(GenericTextWatcher(amount_edittext))
 
         val focusChangeListener = this.focusChangeListener()
-        delegate_edittext.onFocusChangeListener = focusChangeListener
+        amount_edittext.onFocusChangeListener = focusChangeListener
 
         tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
 
@@ -146,6 +146,8 @@ class AddDelegateActivity : BaseSecureActivity()
 
             mDelegateAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
 
+            mDelegateTezosAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
+
             mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
@@ -157,7 +159,7 @@ class AddDelegateActivity : BaseSecureActivity()
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.delegate_edittext)
+            if (i == R.id.amount_edittext)
             {
                 putAmountInRed(!hasFocus)
             }
@@ -466,43 +468,47 @@ class AddDelegateActivity : BaseSecureActivity()
         {
             val i = v.id
 
-            if (i == R.id.delegate_edittext || i == R.id.tezos_address_edittext)
+            if ((i == R.id.amount_edittext && !isDelegateAmountEquals(editable))
+                            ||
+                 (i == R.id.tezos_address_edittext && !isDelegateTezosAddressEquals(editable)))
             {
-                if (!isDelegateAmountEquals(editable))
+                if (i == R.id.amount_edittext )
                 {
                     putAmountInRed(false)
+                }
 
-                    //TODO text changed
-                    //TODO load again but only if we don't have any same forged data.
+                if (i == R.id.tezos_address_edittext)
+                {
+                    putTzAddressInRed(false)
+                }
 
-                    //val amount = java.lang.Double.parseDouble()
+                //TODO text changed
+                //TODO load again but only if we don't have any same forged data.
 
-                    //TODO check if it's already
+                //val amount = java.lang.Double.parseDouble()
 
-                    if (isInputDataValid())
-                    {
-                        startInitDelegationLoading()
-                    }
-                    else
-                    {
-                        validateAddButton(false)
+                //TODO check if it's already
 
-                        cancelRequests(true)
-                        transferLoading(false)
+                if (isInputDataValid())
+                {
+                    startInitDelegationLoading()
+                }
+                else
+                {
+                    validateAddButton(false)
 
-                        putFeesToNegative()
-                        putPayButtonToNull()
-                    }
+                    cancelRequests(true)
+                    transferLoading(false)
+
+                    putFeesToNegative()
+                    putPayButtonToNull()
                 }
             }
-
-            else
+            else if (i != R.id.amount_edittext && i != R.id.tezos_address_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
             }
-
-            validateAddButton(isInputDataValid())
         }
 
         private fun isDelegateAmountEquals(editable: Editable):Boolean
@@ -526,7 +532,21 @@ class AddDelegateActivity : BaseSecureActivity()
             }
             return isAmountEquals
         }
+    }
 
+    private fun isDelegateTezosAddressEquals(editable: Editable):Boolean
+    {
+        val isTezosAddressEquals = false
+
+        if (editable != null && !TextUtils.isEmpty(editable))
+        {
+            val tezosAddress = editable.toString()
+            if (tezosAddress == mDelegateTezosAddress)
+            {
+                return true
+            }
+        }
+        return isTezosAddressEquals
     }
 
     fun isInputDataValid(): Boolean
@@ -578,12 +598,12 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         val isAmountValid = false
 
-        if (delegate_edittext.text != null && !TextUtils.isEmpty(delegate_edittext.text))
+        if (amount_edittext.text != null && !TextUtils.isEmpty(amount_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = delegate_edittext.text!!.toString().toDouble()
+                val amount = amount_edittext.text!!.toString().toDouble()
 
                 //no need
                 if (amount >= 0.0f)
@@ -695,7 +715,7 @@ class AddDelegateActivity : BaseSecureActivity()
             }
         }
 
-        delegate_edittext.setTextColor(ContextCompat.getColor(this, color))
+        amount_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
     private fun setTextPayButton()
@@ -856,6 +876,8 @@ class AddDelegateActivity : BaseSecureActivity()
         outState.putString(DELEGATE_PAYLOAD_KEY, mDelegatePayload)
 
         outState.putDouble(DELEGATE_AMOUNT_KEY, mDelegateAmount)
+
+        outState.putString(DELEGATE_TEZOS_ADDRESS_KEY, mDelegateTezosAddress)
 
         outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
 
