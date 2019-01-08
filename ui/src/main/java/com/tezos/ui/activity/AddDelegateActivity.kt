@@ -51,14 +51,15 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
+import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.utils.Storage
-import com.tezos.ui.utils.VolleySingleton
+import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.activity_add_delegate.*
 import kotlinx.android.synthetic.main.delegate_form_card_info.*
 import org.json.JSONArray
@@ -222,6 +223,143 @@ class AddDelegateActivity : BaseSecureActivity()
 
         startPostRequestLoadInitDelegation()
     }
+
+    private fun startFinalizeDelegationLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        val mnemonicsData = Storage(baseContext).getMnemonics()
+        startPostRequestLoadFinalizeDelegate(mnemonicsData)
+    }
+
+    // volley
+    private fun startPostRequestLoadFinalizeDelegate(mnemonicsData: Storage.MnemonicsData)
+    {
+        val url = getString(R.string.transfer_injection_operation)
+
+        //TODO we got to verify at this very moment.
+        if (isAddButtonValid() && mDelegatePayload != null)
+        {
+            val pkhSrc = mnemonicsData.pkh
+            val pkhDst = mDstAccount?.pubKeyHash
+
+            val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val pk = CryptoUtils.generatePk(mnemonics, "")
+
+            var postParams = JSONObject()
+            postParams.put("src", pkhSrc)
+            postParams.put("src_pk", pk)
+
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+            dstObject.put("dst", pkhDst)
+
+            val mutezAmount = (mDelegateAmount*1000000.0).toLong().toString()
+            dstObject.put("amount", mutezAmount)
+
+            dstObject.put("fee", mDelegateFees.toString())
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+
+            if (isPayloadValid(mDelegatePayload!!, postParams))
+            {
+                val zeroThree = "0x03".hexToByteArray()
+
+                val byteArrayThree = mDelegatePayload!!.hexToByteArray()
+
+                val xLen = zeroThree.size
+                val yLen = byteArrayThree.size
+                val result = ByteArray(xLen + yLen)
+
+                System.arraycopy(zeroThree, 0, result, 0, xLen)
+                System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
+
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+                val signature = KeyPair.sign(sk, result)
+
+                //TODO verify signature
+                //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+
+                val pLen = byteArrayThree.size
+                val sLen = signature.size
+                val newResult = ByteArray(pLen + sLen)
+
+                System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
+                System.arraycopy(signature, 0, newResult, pLen, sLen)
+
+                var payloadsign = newResult.toNoPrefixHexString()
+
+                val stringRequest = object : StringRequest(Request.Method.POST, url,
+                        Response.Listener<String> { response ->
+
+                            onFinalizeDelegationLoadComplete(null)
+                            listener?.onTransferSucceed()
+                        },
+                        Response.ErrorListener
+                        {
+                            onFinalizeDelegationLoadComplete(it)
+                            listener?.onTransferFailed(it)
+                        }
+                )
+                {
+                    @Throws(AuthFailureError::class)
+                    override fun getBody(): ByteArray
+                    {
+                        val pay = "\""+payloadsign+"\""
+                        return pay.toByteArray()
+                    }
+
+                    @Throws(AuthFailureError::class)
+                    override fun getHeaders(): Map<String, String>
+                    {
+                        val headers = HashMap<String, String>()
+                        headers["Content-Type"] = "application/json"
+                        return headers
+                    }
+                }
+
+                cancelRequests(true)
+
+                stringRequest.tag = DELEGATE_FINALIZE_TAG
+
+                mFinalizeDelegateLoading = true
+                VolleySingleton.getInstance(applicationContext).addToRequestQueue(stringRequest)
+            }
+            else
+            {
+                val volleyError = VolleyError(getString(R.string.generic_error))
+                onFinalizeDelegationLoadComplete(volleyError)
+            }
+        }
+        else
+        {
+            val volleyError = VolleyError(getString(R.string.generic_error))
+            onFinalizeDelegationLoadComplete(volleyError)
+        }
+    }
+
+
+    private fun onFinalizeDelegationLoadComplete(error: VolleyError?)
+    {
+        // everything is over, there's no call to make
+        cancelRequests(true)
+
+        if (error != null)
+        {
+            transferLoading(false)
+
+            listener?.onTransferFailed(error)
+        }
+        else
+        {
+            // the finish call is made already
+        }
+    }
+
 
     private fun onInitDelegateLoadComplete(error:VolleyError?)
     {
@@ -645,13 +783,11 @@ class AddDelegateActivity : BaseSecureActivity()
 
             if (mFinalizeDelegateLoading)
             {
-                //TODO decomment it
-                //startFinalizeDelegationLoading()
+                startFinalizeDelegationLoading()
             }
             else
             {
-                //TODO decomment it
-                //onFinalizeTransferLoadComplete(null)
+                onFinalizeTransferLoadComplete(null)
             }
         }
     }
@@ -845,7 +981,7 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         if (EncryptionServices(this).validateFingerprintAuthentication(cryptoObject))
         {
-            //startInitTransferLoading()
+            startFinalizeDelegationLoading()
         }
         else
         {
