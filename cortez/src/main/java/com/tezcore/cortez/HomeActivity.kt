@@ -521,7 +521,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
     }
 
-    override fun onDelegateAddressClicked(address: String) {
-        DelegateActivity.start(this, address, mTezosTheme)
+    override fun onDelegateAddressClicked(address: String, position: Int) {
+        DelegateActivity.start(this, address, position, mTezosTheme)
     }
 }

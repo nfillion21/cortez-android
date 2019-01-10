@@ -41,11 +41,8 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
-import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.AddressesDatabase
 import com.tezos.core.utils.DataExtractor
-import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.adapter.DelegateAddressesAdapter
 import com.tezos.ui.utils.Storage
@@ -53,7 +50,6 @@ import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.widget.OffsetDecoration
 import kotlinx.android.synthetic.main.fragment_delegation.*
 import org.json.JSONArray
-import kotlin.collections.ArrayList
 
 
 /**
@@ -102,7 +98,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
     interface OnDelegateAddressSelectedListener
     {
-        fun onDelegateAddressClicked(address: String)
+        fun onDelegateAddressClicked(address: String, pos: Int)
         fun showSnackBar(res:String, color:Int, textColor:Int)
     }
 
@@ -209,22 +205,22 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         {
             if (mRecyclerViewAddresses!!.size == 0)
             {
-                empty_nested_scrollview.visibility = View.VISIBLE
-                no_delegates_layout.visibility = View.VISIBLE
+                empty_nested_scrollview?.visibility = View.VISIBLE
+                no_delegates_layout?.visibility = View.VISIBLE
 
-                addresses_recyclerview_layout.visibility = View.GONE
-                cannot_delegate_layout.visibility = View.GONE
+                addresses_recyclerview_layout?.visibility = View.GONE
+                cannot_delegate_layout?.visibility = View.GONE
             }
             else
             {
                 // show recyclerview layout
-                addresses_recyclerview_layout.visibility = View.VISIBLE
+                addresses_recyclerview_layout?.visibility = View.VISIBLE
 
                 // hide nested scrollview
-                empty_nested_scrollview.visibility = View.GONE
-                no_delegates_layout.visibility = View.GONE
+                empty_nested_scrollview?.visibility = View.GONE
+                no_delegates_layout?.visibility = View.GONE
 
-                mAdapter!!.updateAddresses(mRecyclerViewAddresses)
+                mAdapter?.updateAddresses(mRecyclerViewAddresses)
             }
 
             if (!animating)
@@ -234,8 +230,8 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
                 //reloadList()
             }
 
-            empty_loading_textview.visibility = View.GONE
-            empty_loading_textview.text = null
+            empty_loading_textview?.visibility = View.GONE
+            empty_loading_textview?.text = null
         }
         else
         {
@@ -243,8 +239,8 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
             //no_delegates_text_layout.visibility = View.GONE
 
-            empty_loading_textview.visibility = View.VISIBLE
-            empty_loading_textview.text = "-"
+            empty_loading_textview?.visibility = View.VISIBLE
+            empty_loading_textview?.text = "-"
         }
     }
 
@@ -259,11 +255,11 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         {
             mRecyclerViewAddresses = ArrayList()
 
-            addresses_recyclerview_layout.visibility = View.GONE
-            empty_nested_scrollview.visibility = View.VISIBLE
+            addresses_recyclerview_layout?.visibility = View.GONE
+            empty_nested_scrollview?.visibility = View.VISIBLE
 
-            no_delegates_layout.visibility = View.VISIBLE
-            cannot_delegate_layout.visibility = View.GONE
+            no_delegates_layout?.visibility = View.VISIBLE
+            cannot_delegate_layout?.visibility = View.GONE
         }
     }
 
@@ -312,10 +308,10 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     private fun onDelegatedAddressesComplete(animating:Boolean)
     {
         mGetDelegatedAddressesLoading = false
-        nav_progress.visibility = View.GONE
+        nav_progress?.visibility = View.GONE
 
-        swipe_refresh_layout.isEnabled = true
-        swipe_refresh_layout.isRefreshing = false
+        swipe_refresh_layout?.isEnabled = true
+        swipe_refresh_layout?.isRefreshing = false
 
         refreshTextUnderDelegation(animating)
     }
@@ -339,7 +335,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             // Request a string response from the provided URL.
             val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
             {
-                addContractAddressesFromJSON(it)
+                addContractAddressesFromJSON(it, pkh)
 
                 reloadList()
                 onDelegatedAddressesComplete(true)
@@ -356,7 +352,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         }
     }
 
-    private fun addContractAddressesFromJSON(answer: JSONArray)
+    private fun addContractAddressesFromJSON(answer: JSONArray, pkh: String?)
     {
         val contracts = DataExtractor.getJSONArrayFromField(answer,0)
 
@@ -367,7 +363,10 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             for (i in 0..(contracts.length() - 1))
             {
                 val item = contracts.getString(i)
-                contractsList.add(item)
+                if (item != pkh)
+                {
+                    contractsList.add(item)
+                }
             }
 
             if (mRecyclerViewAddresses == null)
@@ -395,7 +394,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
         mCallback?.showSnackBar(error!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
-        empty_loading_textview.text = getString(R.string.generic_error)
+        empty_loading_textview?.text = getString(R.string.generic_error)
     }
 
     private fun animateDelegatedAddresses()
@@ -456,14 +455,15 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     override fun onDetach()
     {
         super.onDetach()
+        cancelRequest()
         mCallback = null
     }
 
-    override fun onClick(view: View, address: String)
+    override fun onClick(view: View, address: String, pos:Int)
     {
         if (mCallback != null)
         {
-            mCallback!!.onDelegateAddressClicked(address)
+            mCallback!!.onDelegateAddressClicked(address, pos)
         }
     }
 }

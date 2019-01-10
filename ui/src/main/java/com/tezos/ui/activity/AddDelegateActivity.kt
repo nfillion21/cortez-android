@@ -30,6 +30,7 @@ package com.tezos.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
@@ -197,14 +198,13 @@ class AddDelegateActivity : BaseSecureActivity()
             Log.getStackTraceString(e)
         }
 
-        val mCloseButton = findViewById<ImageButton>(R.id.close_button)
-        mCloseButton.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        mCloseButton.setOnClickListener { _ ->
+        close_button.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId))
+        close_button.setOnClickListener {
             //requests stop in onDestroy.
             finish()
         }
 
-        //nav_progress.indeterminateDrawable.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId), PorterDuff.Mode.SRC_IN)
+        nav_progress.indeterminateDrawable.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId), PorterDuff.Mode.SRC_IN)
 
         val mTitleBar = findViewById<TextView>(R.id.barTitle)
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))

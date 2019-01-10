@@ -57,7 +57,7 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
 
     interface OnItemClickListener
     {
-        fun onClick(view: View, paymentProduct: String)
+        fun onClick(view: View, paymentProduct: String, position: Int)
     }
 
     init
@@ -80,14 +80,14 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
 
         holder.pubKeyHash.text = address
 
-        holder.title.text = "#$position"
+        holder.title.text = "#${holder.adapterPosition+1}"
 
         holder.title.setTextColor(getColor(mCustomTheme.textColorPrimaryId))
         holder.title.setBackgroundColor(getColor(mCustomTheme.colorPrimaryId))
 
         holder.itemView.setBackgroundColor(getColor(android.R.color.background_light))
 
-        holder.itemView.setOnClickListener { v: View -> mOnItemClickListener!!.onClick(v, getItem(holder.adapterPosition)) }
+        holder.itemView.setOnClickListener { v: View -> mOnItemClickListener!!.onClick(v, getItem(holder.adapterPosition), holder.adapterPosition+1) }
     }
 
     override fun getItemCount(): Int

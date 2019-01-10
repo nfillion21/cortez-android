@@ -67,22 +67,24 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
     companion object
     {
         private val TAG_DELEGATE = "DelegateTag"
-        private val TAG_PKH = "PkhTag"
+        private const val TAG_PKH = "PkhTag"
+        private const val POS_KEY = "PosKey"
 
         var DELEGATE_REQUEST_CODE = 0x2900 // arbitrary int
 
-        private fun getStartIntent(context: Context, pkh: String, themeBundle: Bundle): Intent
+        private fun getStartIntent(context: Context, pkh: String, position: Int, themeBundle: Bundle): Intent
         {
             val starter = Intent(context, DelegateActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
             starter.putExtra(TAG_PKH, pkh)
+            starter.putExtra(POS_KEY, position)
 
             return starter
         }
 
-        fun start(activity: Activity, pkh:String, theme: CustomTheme)
+        fun start(activity: Activity, pkh:String, position: Int, theme: CustomTheme)
         {
-            val starter = getStartIntent(activity, pkh, theme.toBundle())
+            val starter = getStartIntent(activity, pkh, position, theme.toBundle())
             ActivityCompat.startActivityForResult(activity, starter, DELEGATE_REQUEST_CODE, null)
         }
     }
@@ -391,7 +393,8 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
         toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
         toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
 
-        toolbar.title = "Delegated Address #1"
+        val position = intent.getIntExtra(POS_KEY, 0)
+        toolbar.title = "Delegated Address #$position"
 
         setSupportActionBar(toolbar)
     }
