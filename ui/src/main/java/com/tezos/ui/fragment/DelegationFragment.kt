@@ -40,10 +40,11 @@ import android.view.ViewGroup
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
-import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.JsonArrayRequest
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.AddressesDatabase
+import com.tezos.core.utils.DataExtractor
 import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.adapter.DelegateAddressesAdapter
@@ -51,6 +52,7 @@ import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.widget.OffsetDecoration
 import kotlinx.android.synthetic.main.fragment_delegation.*
+import org.json.JSONArray
 import kotlin.collections.ArrayList
 
 
@@ -64,11 +66,11 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
     private var mAdapter: DelegateAddressesAdapter? = null
 
-    private var mAddressList: ArrayList<Address>? = null
-
     private var mGetDelegatedAddressesLoading:Boolean = false
 
     private var mWalletEnabled:Boolean = false
+
+    private var mRecyclerViewAddresses:ArrayList<String>? = null
 
     companion object
     {
@@ -100,7 +102,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
     interface OnDelegateAddressSelectedListener
     {
-        fun onDelegateAddressClicked(address: Address)
+        fun onDelegateAddressClicked(address: String)
         fun showSnackBar(res:String, color:Int, textColor:Int)
     }
 
@@ -157,8 +159,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
 
-            var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(DELEGATED_ADDRESSES_ARRAYLIST_KEY)
-            mAddressList = bundlesToItems(messagesBundle)
+            mRecyclerViewAddresses = savedInstanceState.getStringArrayList(DELEGATED_ADDRESSES_ARRAYLIST_KEY)
 
             if (mGetDelegatedAddressesLoading)
             {
@@ -204,9 +205,9 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     {
         //this method handles the data and loading texts
 
-        if (mAddressList != null && mAddressList!!.size >= 0)
+        if (mRecyclerViewAddresses != null && mRecyclerViewAddresses!!.size >= 0)
         {
-            if (mAddressList!!.size == 0)
+            if (mRecyclerViewAddresses!!.size == 0)
             {
                 empty_nested_scrollview.visibility = View.VISIBLE
                 no_delegates_layout.visibility = View.VISIBLE
@@ -223,7 +224,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
                 empty_nested_scrollview.visibility = View.GONE
                 no_delegates_layout.visibility = View.GONE
 
-                mAdapter!!.updateAddresses(mAddressList)
+                mAdapter!!.updateAddresses(mRecyclerViewAddresses)
             }
 
             if (!animating)
@@ -249,41 +250,20 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
     private fun reloadList()
     {
-        if (mAddressList != null)
+        if (mRecyclerViewAddresses != null)
         {
-            mAddressList!!.clear()
+            mAdapter!!.updateAddresses(mRecyclerViewAddresses)
+            //mRecyclerViewAddresses!!.clear()
         }
         else
         {
-            mAddressList = ArrayList()
-        }
+            mRecyclerViewAddresses = ArrayList()
 
-        val set = AddressesDatabase.getInstance().getAddresses(activity)
+            addresses_recyclerview_layout.visibility = View.GONE
+            empty_nested_scrollview.visibility = View.VISIBLE
 
-        if (set != null && !set.isEmpty())
-        {
-            for (addressString in set)
-            {
-                val addressBundle = Utils.fromJSONString(addressString)
-                if (addressBundle != null)
-                {
-                    val address = Address.fromBundle(addressBundle)
-                    mAddressList!!.add(address)
-                }
-            }
-
-            mAdapter!!.updateAddresses(mAddressList)
-
-            //addresses_recyclerview_layout.visibility = View.VISIBLE
-            //empty_nested_scrollview.visibility = View.GONE
-        }
-        else
-        {
-            //addresses_recyclerview_layout.visibility = View.GONE
-            //empty_nested_scrollview.visibility = View.VISIBLE
-
-            //no_delegates_layout.visibility = View.VISIBLE
-            //cannot_delegate_layout.visibility = View.GONE
+            no_delegates_layout.visibility = View.VISIBLE
+            cannot_delegate_layout.visibility = View.GONE
         }
     }
 
@@ -303,7 +283,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         }
         else
         {
-            mAddressList = null
+            mRecyclerViewAddresses = null
             refreshTextUnderDelegation(false)
 
             cancelRequest()
@@ -357,25 +337,49 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             val url = String.format(getString(R.string.contracts_url), pkh)
 
             // Request a string response from the provided URL.
-            val stringRequest = StringRequest(Request.Method.GET, url,
-                    Response.Listener<String> { response ->
+            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            {
+                addContractAddressesFromJSON(it)
 
-                        //animateDelegatedAddresses()
-
-                        reloadList()
-                        onDelegatedAddressesComplete(true)
-                    },
+                reloadList()
+                onDelegatedAddressesComplete(true)
+            },
                     Response.ErrorListener {
-
-                        //mAddressList = null
 
                         onDelegatedAddressesComplete(false)
 
                         showSnackbarError(it)
                     })
 
-            stringRequest.tag = LOAD_DELEGATED_ADDRESSES_TAG
-            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+            jsonArrayRequest.tag = LOAD_DELEGATED_ADDRESSES_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
+    private fun addContractAddressesFromJSON(answer: JSONArray)
+    {
+        val contracts = DataExtractor.getJSONArrayFromField(answer,0)
+
+        if (contracts != null && contracts.length() > 0)
+        {
+            var contractsList = arrayListOf<String>()
+
+            for (i in 0..(contracts.length() - 1))
+            {
+                val item = contracts.getString(i)
+                contractsList.add(item)
+            }
+
+            //TODO take the 10 last operations in a better way
+            if (mRecyclerViewAddresses == null)
+            {
+                mRecyclerViewAddresses = ArrayList()
+            }
+            else
+            {
+                mRecyclerViewAddresses?.clear()
+            }
+            mRecyclerViewAddresses?.addAll(contractsList)
         }
     }
 
@@ -416,42 +420,6 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         animatorSet.start()
     }
 
-    private fun itemsToBundles(items: List<Address>?): ArrayList<Bundle>?
-    {
-        if (items != null)
-        {
-            val bundles = ArrayList<Bundle>(items.size)
-            if (!items.isEmpty())
-            {
-                for (it in items)
-                {
-                    bundles.add(it.toBundle())
-                }
-            }
-            return bundles
-        }
-
-        return null
-    }
-
-    private fun bundlesToItems(bundles: ArrayList<Bundle>?): ArrayList<Address>?
-    {
-        if (bundles != null)
-        {
-            val items = ArrayList<Address>(bundles.size)
-            if (!bundles.isEmpty())
-            {
-                for (bundle in bundles)
-                {
-                    items.add(Address.fromBundle(bundle))
-                }
-            }
-            return items
-        }
-
-        return null
-    }
-
     private fun cancelRequest()
     {
         val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
@@ -475,9 +443,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
         outState.putBoolean(GET_DELEGATED_ADDRESSES_LOADING_KEY, mGetDelegatedAddressesLoading)
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
-
-        val bundles = itemsToBundles(mAddressList)
-        outState.putParcelableArrayList(DELEGATED_ADDRESSES_ARRAYLIST_KEY, bundles)
+        outState.putStringArrayList(DELEGATED_ADDRESSES_ARRAYLIST_KEY, mRecyclerViewAddresses)
     }
 
     override fun onDestroy()
@@ -492,7 +458,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         mCallback = null
     }
 
-    override fun onClick(view: View, address: Address)
+    override fun onClick(view: View, address: String)
     {
         if (mCallback != null)
         {

@@ -51,19 +51,19 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
 {
     private val mResources: Resources
     private val mLayoutInflater: LayoutInflater
-    private val mAddresses: MutableList<Address>
+    private val mAddresses: MutableList<String>
 
     private var mOnItemClickListener: OnItemClickListener? = null
     private var mOnItemLongClickListener: OnItemLongClickListener? = null
 
     interface OnItemClickListener
     {
-        fun onClick(view: View, paymentProduct: Address)
+        fun onClick(view: View, paymentProduct: String)
     }
 
     interface OnItemLongClickListener
     {
-        fun onLongClick(view: View, address: Address)
+        fun onLongClick(view: View, address: String)
     }
 
     init
@@ -77,16 +77,17 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder
     {
         return ViewHolder(mLayoutInflater
-                .inflate(R.layout.item_payment_account, parent, false))
+                .inflate(R.layout.item_delegated_address, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int)
     {
         val address = mAddresses[holder.adapterPosition]
 
-        holder.pubKeyHash.text = address.pubKeyHash
+        holder.pubKeyHash.text = address
 
-        holder.title.text = address.description
+        holder.title.text = "#$position"
+
         holder.title.setTextColor(getColor(mCustomTheme.textColorPrimaryId))
         holder.title.setBackgroundColor(getColor(mCustomTheme.colorPrimaryId))
 
@@ -105,7 +106,7 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
         return mAddresses.size
     }
 
-    fun getItem(position: Int): Address
+    fun getItem(position: Int): String
     {
         return mAddresses[position]
     }
@@ -115,7 +116,7 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
         mOnItemClickListener = onItemClickListener
     }
 
-    fun updateAddresses(addresses: List<Address>?)
+    fun updateAddresses(addresses: List<String>?)
     {
         mAddresses.clear()
         if (addresses != null && !addresses.isEmpty())

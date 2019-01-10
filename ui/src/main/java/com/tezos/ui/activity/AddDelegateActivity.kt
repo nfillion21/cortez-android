@@ -304,10 +304,6 @@ class AddDelegateActivity : BaseSecureActivity()
                         Response.ErrorListener
                         {
                             onFinalizeDelegationLoadComplete(it)
-
-                            //TODO failed, show snackBar
-                            showSnackBar(it)
-                            //listener?.onTransferFailed(it)
                         }
                 )
                 {
@@ -428,11 +424,17 @@ class AddDelegateActivity : BaseSecureActivity()
         dstObject.put("manager", pkhSrc)
 
         //TODO put the delegate element
-        dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
+        //dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
+
+        dstObject.put("delegate", mDelegateTezosAddress)
 
         //TODO put the right amount
         //dstObject.put("credit", (mTransferAmount*1000000).toLong().toString())
-        dstObject.put("credit", 1000000.toString())
+        //dstObject.put("credit", 1000000.toString())
+
+        //TODO be careful, do it in mutez.
+        dstObject.put("credit", (mDelegateAmount*1000000).toLong().toString())
+
         dstObject.put("delegatable", true)
 
         dstObjects.put(dstObject)

@@ -57,7 +57,7 @@ import kotlinx.android.synthetic.main.activity_home.*
 
 class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, DelegationFragment.OnDelegateAddressSelectedListener
 {
-    override fun onDelegateAddressClicked(address: Address) {
+    override fun onDelegateAddressClicked(address: String) {
         //
     }
 
