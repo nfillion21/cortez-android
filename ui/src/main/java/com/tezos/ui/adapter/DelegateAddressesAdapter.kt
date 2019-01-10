@@ -54,16 +54,10 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
     private val mAddresses: MutableList<String>
 
     private var mOnItemClickListener: OnItemClickListener? = null
-    private var mOnItemLongClickListener: OnItemLongClickListener? = null
 
     interface OnItemClickListener
     {
         fun onClick(view: View, paymentProduct: String)
-    }
-
-    interface OnItemLongClickListener
-    {
-        fun onLongClick(view: View, address: String)
     }
 
     init
@@ -94,11 +88,6 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
         holder.itemView.setBackgroundColor(getColor(android.R.color.background_light))
 
         holder.itemView.setOnClickListener { v: View -> mOnItemClickListener!!.onClick(v, getItem(holder.adapterPosition)) }
-
-        holder.itemView.setOnLongClickListener { view ->
-            mOnItemLongClickListener!!.onLongClick(view, getItem(holder.adapterPosition))
-            false
-        }
     }
 
     override fun getItemCount(): Int

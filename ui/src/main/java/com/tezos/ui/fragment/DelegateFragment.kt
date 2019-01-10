@@ -51,6 +51,7 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.delegate_form_card_info.*
 import kotlinx.android.synthetic.main.fragment_delegate.*
+import kotlinx.android.synthetic.main.redelegate_form_card_info.*
 
 class DelegateFragment : Fragment()
 {
@@ -94,9 +95,9 @@ class DelegateFragment : Fragment()
 
         val focusChangeListener = this.focusChangeListener()
 
-        tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
+        tezos_address.addTextChangedListener(GenericTextWatcher(tezos_address))
 
-        tezos_address_edittext.onFocusChangeListener = focusChangeListener
+        tezos_address.onFocusChangeListener = focusChangeListener
 
         val adapter = ArrayAdapter.createFromResource(activity,
                 R.array.array_fee, android.R.layout.simple_spinner_item)
@@ -188,9 +189,9 @@ class DelegateFragment : Fragment()
     {
         val isTzAddressValid = false
 
-        return if (!TextUtils.isEmpty(tezos_address_edittext.text))
+        return if (!TextUtils.isEmpty(tezos_address.text))
         {
-            Utils.isTzAddressValid(tezos_address_edittext.text!!.toString())
+            Utils.isTzAddressValid(tezos_address.text!!.toString())
         }
 
         else isTzAddressValid
@@ -224,7 +225,7 @@ class DelegateFragment : Fragment()
             color = R.color.tz_accent
         }
 
-        tezos_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
+        tezos_address.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
 // put everything in RED

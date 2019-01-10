@@ -45,6 +45,7 @@ import android.view.MenuItem
 import android.view.ViewGroup
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
+import com.tezcore.ui.activity.DelegateActivity
 import com.tezos.android.R
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
@@ -57,9 +58,6 @@ import kotlinx.android.synthetic.main.activity_home.*
 
 class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, DelegationFragment.OnDelegateAddressSelectedListener
 {
-    override fun onDelegateAddressClicked(address: String) {
-        //
-    }
 
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
@@ -521,5 +519,9 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
             showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
         }
+    }
+
+    override fun onDelegateAddressClicked(address: String) {
+        DelegateActivity.start(this, address, mTezosTheme)
     }
 }

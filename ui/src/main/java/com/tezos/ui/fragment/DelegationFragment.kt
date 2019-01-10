@@ -370,7 +370,6 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
                 contractsList.add(item)
             }
 
-            //TODO take the 10 last operations in a better way
             if (mRecyclerViewAddresses == null)
             {
                 mRecyclerViewAddresses = ArrayList()
@@ -429,6 +428,8 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     fun pkh():String?
     {
         var pkh:String? = null
+
+        //TODO there won't be pkh anymore if we logout, handle this case for fragments
         arguments?.let {
 
             pkh = it.getString(PUBLIC_KEY)
