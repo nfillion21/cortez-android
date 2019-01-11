@@ -12,6 +12,7 @@ class HomeDelegateFragment: HomeFragment()
                 HomeDelegateFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
+                        putString(PKH_KEY, pkh)
                     }
                 }
     }

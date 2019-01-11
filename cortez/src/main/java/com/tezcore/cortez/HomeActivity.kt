@@ -303,18 +303,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 0 ->
                 {
-                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
-
-                    return if (isPasswordSaved)
-                    {
-                        val mnemonicsData = Storage(baseContext).getMnemonics()
-
-                        HomeFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
-                    }
-                    else
-                    {
-                        HomeFragment.newInstance(mTezosTheme, null)
-                    }
+                    HomeFragment.newInstance(mTezosTheme)
                 }
                 1 ->
                 {
@@ -348,7 +337,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
             }
 
-            return HomeFragment.newInstance(mTezosTheme, null)
+            return HomeFragment.newInstance(mTezosTheme)
         }
 
         override fun getCount(): Int

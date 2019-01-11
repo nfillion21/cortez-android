@@ -114,8 +114,9 @@ open class HomeFragment : Fragment()
 
     companion object
     {
+        const val PKH_KEY = "PKH_KEY"
         @JvmStatic
-        fun newInstance(theme: CustomTheme, pkh: String?) =
+        fun newInstance(theme: CustomTheme) =
                 HomeFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
@@ -135,8 +136,12 @@ open class HomeFragment : Fragment()
         val isPasswordSaved = Storage(activity!!).isPasswordSaved()
         if (isPasswordSaved)
         {
-            val seed = Storage(activity!!).getMnemonics()
-            pkh = seed.pkh
+            pkh = arguments!!.getString(PKH_KEY)
+            if (pkh == null)
+            {
+                val seed = Storage(activity!!).getMnemonics()
+                pkh = seed.pkh
+            }
         }
 
         return pkh
