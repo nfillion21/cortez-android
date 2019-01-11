@@ -114,14 +114,11 @@ open class HomeFragment : Fragment()
 
     companion object
     {
-        const val PKH_TAG = "PkhTag"
-
         @JvmStatic
         fun newInstance(theme: CustomTheme, pkh: String?) =
                 HomeFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
-                        putString(PKH_TAG, pkh)
                     }
                 }
     }
@@ -134,9 +131,12 @@ open class HomeFragment : Fragment()
     fun pkh():String?
     {
         var pkh:String? = null
-        arguments?.let {
 
-            pkh = it.getString(PKH_TAG)
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            val seed = Storage(activity!!).getMnemonics()
+            pkh = seed.pkh
         }
 
         return pkh
