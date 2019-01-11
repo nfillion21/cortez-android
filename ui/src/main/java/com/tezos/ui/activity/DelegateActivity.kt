@@ -52,9 +52,8 @@ import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_delegate.*
 
-class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, DelegateFragment.OnDelegateListener
+class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener
 {
-
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
             com.tezos.ui.R.color.theme_tezos_primary_dark,
