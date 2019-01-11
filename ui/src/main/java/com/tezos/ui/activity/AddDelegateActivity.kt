@@ -642,7 +642,7 @@ class AddDelegateActivity : BaseSecureActivity()
                 {
                     validateAddButton(false)
 
-                    cancelRequests(true)
+                    cancelRequests(false)
                     transferLoading(false)
 
                     putFeesToNegative()

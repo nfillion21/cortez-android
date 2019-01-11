@@ -491,14 +491,14 @@ class DelegateFragment : Fragment()
             add_delegate_button_layout.visibility = View.GONE
 
             //TODO check where is the nav_progress
-            //nav_progress.visibility = View.VISIBLE
+            nav_progress.visibility = View.VISIBLE
         }
         else
         {
             add_delegate_button_layout.visibility = View.VISIBLE
 
             //TODO check where is the nav_progress
-            //nav_progress.visibility = View.INVISIBLE
+            nav_progress.visibility = View.INVISIBLE
         }
     }
 
@@ -615,7 +615,7 @@ class DelegateFragment : Fragment()
                 {
                     validateAddButton(false)
 
-                    cancelRequests(true)
+                    cancelRequests(false)
                     transferLoading(false)
 
                     putFeesToNegative()
