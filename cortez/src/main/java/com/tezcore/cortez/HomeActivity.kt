@@ -303,7 +303,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 0 ->
                 {
-                    HomeFragment.newInstance(mTezosTheme)
+                    return HomeFragment.newInstance(mTezosTheme)
                 }
                 1 ->
                 {
@@ -311,14 +311,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
                 2 ->
                 {
-                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
-
-                    return return if (isPasswordSaved) {
-                        val mnemonicsData = Storage(baseContext).getMnemonics()
-                        SharingAddressFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
-                    } else {
-                        SharingAddressFragment.newInstance(mTezosTheme, null)
-                    }
+                    return SharingAddressFragment.newInstance(mTezosTheme, null)
                 }
 
                 3 ->
@@ -335,14 +328,17 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         DelegationFragment.newInstance(mTezosTheme, null)
                     }
                 }
+                else ->
+                {
+                    //should not happen
+                    return Fragment()
+                }
             }
-
-            return HomeFragment.newInstance(mTezosTheme)
         }
 
         override fun getCount(): Int
         {
-            // Show 3 total pages.
+            // Show 4 total pages.
             return 4
         }
     }

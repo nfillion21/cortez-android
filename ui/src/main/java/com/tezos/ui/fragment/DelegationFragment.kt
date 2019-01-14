@@ -428,10 +428,11 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
     {
         var pkh:String? = null
 
-        //TODO there won't be pkh anymore if we logout, handle this case for fragments
-        arguments?.let {
-
-            pkh = it.getString(PUBLIC_KEY)
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            val seed = Storage(activity!!).getMnemonics()
+            pkh = seed.pkh
         }
 
         return pkh

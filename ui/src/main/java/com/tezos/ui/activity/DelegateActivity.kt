@@ -195,11 +195,11 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
             val isPasswordSaved = Storage(this).isPasswordSaved()
             if (isPasswordSaved)
             {
-                val seed = Storage(baseContext).getMnemonics()
+                val pkh = intent.getStringExtra(TAG_PKH)
 
                 val sharingIntent = Intent(Intent.ACTION_SEND)
                 sharingIntent.type = "text/plain"
-                sharingIntent.putExtra(Intent.EXTRA_TEXT, seed.pkh)
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, pkh)
                 startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)))
             }
             else
@@ -210,7 +210,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
             }
         }
 
-        fabAddAddress.setOnClickListener { _ ->
+        fabAddAddress.setOnClickListener {
             AddAddressActivity.start(this, mTezosTheme)
         }
 
