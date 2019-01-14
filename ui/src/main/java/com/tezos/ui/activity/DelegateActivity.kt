@@ -305,7 +305,8 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
 
                 3 ->
                 {
-                    return DelegateFragment.newInstance(mTezosTheme)
+                    val pkh = intent.getStringExtra(TAG_PKH)
+                    return DelegateFragment.newInstance(mTezosTheme, pkh)
                 }
             }
 

@@ -70,34 +70,32 @@ class DelegateFragment : Fragment()
     private var mDelegatePayload:String? = null
     private var mDelegateFees:Long = -1
 
-    private var mDelegateAmount:Double = -1.0
     private var mDelegateTezosAddress:String? = null
 
     private var mClickCalculate:Boolean = false
 
     companion object
     {
+        private const val CONTRACT_KEY = "CONTRACT_KEY"
+
         private const val DELEGATE_INIT_TAG = "delegate_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
-        private const val DELEGATE_AMOUNT_KEY = "delegate_amount_key"
         private const val DELEGATE_TEZOS_ADDRESS_KEY = "delegate_tezos_address_key"
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
 
-        fun newInstance(customTheme: CustomTheme): DelegateFragment
-        {
-            val fragment = DelegateFragment()
-
-            val bundle = Bundle()
-            bundle.putBundle(CustomTheme.TAG, customTheme.toBundle())
-
-            fragment.arguments = bundle
-            return fragment
-        }
+        @JvmStatic
+        fun newInstance(theme: CustomTheme, contract: String?) =
+                DelegateFragment().apply {
+                    arguments = Bundle().apply {
+                        putBundle(CustomTheme.TAG, theme.toBundle())
+                        putString(CONTRACT_KEY, contract)
+                    }
+                }
     }
 
     interface OnAddedDelegationListener
@@ -141,14 +139,9 @@ class DelegateFragment : Fragment()
             onDelegateClick()
         }
 
-        amount_edittext.addTextChangedListener(GenericTextWatcher(amount_edittext))
-
-        val focusChangeListener = this.focusChangeListener()
-        amount_edittext.onFocusChangeListener = focusChangeListener
-
         tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
 
-        tezos_address_edittext.onFocusChangeListener = focusChangeListener
+        tezos_address_edittext.onFocusChangeListener = focusChangeListener()
 
         if (savedInstanceState != null)
         {
@@ -156,8 +149,6 @@ class DelegateFragment : Fragment()
 
             mInitDelegateLoading = savedInstanceState.getBoolean(DELEGATE_INIT_TAG)
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
-
-            mDelegateAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
 
             mDelegateTezosAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
 
@@ -171,12 +162,7 @@ class DelegateFragment : Fragment()
     {
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
-
-            if (i == R.id.amount_edittext)
-            {
-                putAmountInRed(!hasFocus)
-            }
-            else if (i == R.id.tezos_address_edittext)
+            if (i == R.id.tezos_address_edittext)
             {
                 putTzAddressInRed(!hasFocus)
             }
@@ -186,6 +172,25 @@ class DelegateFragment : Fragment()
                         "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
             }
         }
+    }
+
+    fun pkh():String?
+    {
+        var pkh:String? = null
+
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            pkh = arguments!!.getString(CONTRACT_KEY)
+            if (pkh == null)
+            {
+                //should now happen
+                //val seed = Storage(activity!!).getMnemonics()
+                //pkh = seed.pkh
+            }
+        }
+
+        return pkh
     }
 
     private fun startInitDelegationLoading()
@@ -218,30 +223,25 @@ class DelegateFragment : Fragment()
 
         if (isAddButtonValid() && mDelegatePayload != null)
         {
-            val pkhSrc = mnemonicsData.pkh
+            //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
 
             val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
-            postParams.put("src", pkhSrc)
+            postParams.put("src", pkh())
             postParams.put("src_pk", pk)
 
             var dstObjects = JSONArray()
 
             var dstObject = JSONObject()
-            //dstObject.put("dst", pkhDst)
-
-            val mutezAmount = (mDelegateAmount*1000000.0).toLong().toString()
-            dstObject.put("amount", mutezAmount)
-
-            dstObject.put("fee", mDelegateFees.toString())
 
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
 
+            //TODO verify binary payload
             if (!isPayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
@@ -274,7 +274,7 @@ class DelegateFragment : Fragment()
                         Response.Listener<String> { response ->
 
                             //there's no need to do anything because we call finish()
-                            //onFinalizeDelegationLoadComplete(null)
+                            onFinalizeDelegationLoadComplete(null)
 
                             //TODO handle the result snackbar
                             //setResult(R.id.add_address_succeed, null)
@@ -384,29 +384,26 @@ class DelegateFragment : Fragment()
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
 
-        val url = getString(R.string.originate_account_url)
+        val url = getString(R.string.change_delegate_url)
 
         val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
-        val pkhSrc = mnemonicsData.pkh
+        //val pkhSrc = mnemonicsData.pkh
         //val pkhDst = mDstAccount?.pubKeyHash
 
         var postParams = JSONObject()
-        postParams.put("src", pkhSrc)
+        postParams.put("src", pkh())
         postParams.put("src_pk", pk)
 
         var dstObjects = JSONArray()
 
-        var dstObject = JSONObject()
-        dstObject.put("manager", pkhSrc)
+        //var dstObject = JSONObject()
+        //dstObject.put("delegate", mDelegateTezosAddress)
+        //just delete it for now
+        //dstObject.put("delegate", null)
 
-        dstObject.put("delegate", mDelegateTezosAddress)
-        dstObject.put("credit", (mDelegateAmount*1000000).toLong().toString())
-
-        dstObject.put("delegatable", true)
-
-        dstObjects.put(dstObject)
+        //dstObjects.put(dstObject)
 
         postParams.put("dsts", dstObjects)
 
@@ -420,13 +417,13 @@ class DelegateFragment : Fragment()
 
             // get back the object and
 
-            val dstsArray = postParams["dsts"] as JSONArray
-            val dstObj = dstsArray[0] as JSONObject
+            //val dstsArray = postParams["dsts"] as JSONArray
+            //val dstObj = dstsArray[0] as JSONObject
 
-            dstObj.put("fee", mDelegateFees.toString())
-            dstsArray.put(0, dstObj)
+            //dstObj.put("fee", mDelegateFees.toString())
+            //dstsArray.put(0, dstObj)
 
-            postParams.put("dsts", dstsArray)
+            //postParams.put("dsts", dstsArray)
 
             // we use this call to ask for payload and fees
             if (mDelegatePayload != null && mDelegateFees != null)
@@ -586,26 +583,12 @@ class DelegateFragment : Fragment()
         {
             val i = v.id
 
-            if ((i == R.id.amount_edittext && !isDelegateAmountEquals(editable))
-                    ||
-                    (i == R.id.tezos_address_edittext && !isDelegateTezosAddressEquals(editable)))
+            if (i == R.id.tezos_address_edittext && !isDelegateTezosAddressEquals(editable))
             {
-                if (i == R.id.amount_edittext )
-                {
-                    putAmountInRed(false)
-                }
-
-                if (i == R.id.tezos_address_edittext)
-                {
-                    putTzAddressInRed(false)
-                }
+                putTzAddressInRed(false)
 
                 //TODO text changed
                 //TODO load again but only if we don't have any same forged data.
-
-                //val amount = java.lang.Double.parseDouble()
-
-                //TODO check if it's already
 
                 if (isInputDataValid())
                 {
@@ -628,28 +611,6 @@ class DelegateFragment : Fragment()
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
             }
         }
-
-        private fun isDelegateAmountEquals(editable: Editable):Boolean
-        {
-            val isAmountEquals = false
-
-            if (editable != null && !TextUtils.isEmpty(editable))
-            {
-                try
-                {
-                    val amount = editable.toString().toDouble()
-                    if (amount != -1.0 && amount == mDelegateAmount)
-                    {
-                        return true
-                    }
-                }
-                catch (e: NumberFormatException)
-                {
-                    return false
-                }
-            }
-            return isAmountEquals
-        }
     }
 
     private fun isDelegateTezosAddressEquals(editable: Editable):Boolean
@@ -669,7 +630,7 @@ class DelegateFragment : Fragment()
 
     fun isInputDataValid(): Boolean
     {
-        return isDelegateAmountValid() && isTzAddressValid()
+        return isTzAddressValid()
     }
 
     private fun isTzAddressValid(): Boolean
@@ -712,34 +673,6 @@ class DelegateFragment : Fragment()
         return isFeeValid
     }
 
-    private fun isDelegateAmountValid():Boolean
-    {
-        val isAmountValid = false
-
-        if (amount_edittext.text != null && !TextUtils.isEmpty(amount_edittext.text))
-        {
-            try
-            {
-                //val amount = java.lang.Double.parseDouble()
-                val amount = amount_edittext.text!!.toString().toDouble()
-
-                //no need
-                if (amount >= 0.0f)
-                {
-                    mDelegateAmount = amount
-                    return true
-                }
-            }
-            catch (e: NumberFormatException)
-            {
-                mDelegateAmount = -1.0
-                return false
-            }
-        }
-
-        return isAmountValid
-    }
-
     override fun onResume()
     {
         super.onResume()
@@ -774,7 +707,6 @@ class DelegateFragment : Fragment()
 
     private fun putEverythingInRed()
     {
-        this.putAmountInRed(true)
         this.putTzAddressInRed(true)
     }
 
@@ -803,43 +735,10 @@ class DelegateFragment : Fragment()
         tezos_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
-// put everything in RED
-
-    private fun putAmountInRed(red: Boolean)
-    {
-        val color: Int
-
-        val amountValid = isDelegateAmountValid()
-
-        if (red && !amountValid)
-        {
-            color = R.color.tz_error
-            add_delegate_button.text = getString(R.string.delegate_format, "")
-        }
-        else
-        {
-            color = R.color.tz_accent
-
-            if (amountValid)
-            {
-                //val amount = delegate_transfer_edittext.text.toString()
-                this.setTextPayButton()
-            }
-            else
-            {
-                add_delegate_button.text = getString(R.string.delegate_format, "")
-            }
-        }
-
-        amount_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
-    }
-
     private fun setTextPayButton()
     {
-        var amountDouble: Double = mDelegateAmount
-
         //amountDouble += fee_edittext.text.toString().toLong()/1000000
-        amountDouble += mDelegateFees.toDouble()/1000000.0
+        var amountDouble = mDelegateFees.toDouble()/1000000.0
 
         var amount = amountDouble.toString()
 
@@ -982,8 +881,6 @@ class DelegateFragment : Fragment()
         outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
 
         outState.putString(DELEGATE_PAYLOAD_KEY, mDelegatePayload)
-
-        outState.putDouble(DELEGATE_AMOUNT_KEY, mDelegateAmount)
 
         outState.putString(DELEGATE_TEZOS_ADDRESS_KEY, mDelegateTezosAddress)
 
