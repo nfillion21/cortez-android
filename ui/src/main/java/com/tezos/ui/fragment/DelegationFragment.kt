@@ -27,9 +27,6 @@
 
 package com.tezos.ui.fragment
 
-import android.animation.Animator
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment

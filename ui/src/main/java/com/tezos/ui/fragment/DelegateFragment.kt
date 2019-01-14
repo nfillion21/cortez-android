@@ -439,7 +439,7 @@ class DelegateFragment : Fragment()
                 {
                     validateAddButton(true)
 
-                    this.setTextPayButton()
+                    //this.setTextPayButton()
                 }
                 else
                 {
@@ -514,7 +514,7 @@ class DelegateFragment : Fragment()
 
     private fun putPayButtonToNull()
     {
-        add_delegate_button.text = getString(R.string.pay, "")
+        add_delegate_button.text = getString(R.string.delegate_format, "")
     }
 
     private fun showSnackBar(error:VolleyError?, message:String?)
@@ -675,7 +675,7 @@ class DelegateFragment : Fragment()
         if (isInputDataValid() && isDelegateFeeValid())
         {
             validateAddButton(true)
-            this.setTextPayButton()
+            //this.setTextPayButton()
         }
 
         //TODO we got to keep in mind there's an id already.
@@ -728,6 +728,7 @@ class DelegateFragment : Fragment()
         tezos_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
+    /*
     private fun setTextPayButton()
     {
         //amountDouble += fee_edittext.text.toString().toLong()/1000000
@@ -769,8 +770,9 @@ class DelegateFragment : Fragment()
 
         val moneyFormatted2 = "$amount ꜩ"
 //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        add_delegate_button.text = getString(R.string.pay, moneyFormatted2)
+        add_delegate_button.text = getString(R.string.delegate_format, moneyFormatted2)
     }
+    */
 
     private fun onDelegateClick()
     {

@@ -9,4 +9,5 @@
     <string name="contracts_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/contracts?mgrs=%1$s</string>
     <string name="originate_account_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/originate_account</string>
     <string name="change_delegate_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/change_delegate</string>
+    <string name="contract_info_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/contract_info?ks=%1$s</string>
 </resources>
