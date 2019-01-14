@@ -279,6 +279,7 @@ class DelegateFragment : Fragment()
                             //TODO handle the result snackbar
                             //setResult(R.id.add_address_succeed, null)
                             //finish()
+                            showSnackBar(null, getString(R.string.delegation_successfully_deleted))
                         },
                         Response.ErrorListener
                         {
@@ -332,15 +333,14 @@ class DelegateFragment : Fragment()
         {
             transferLoading(false)
 
-            //TODO handle the showSnackbar later
-            //showSnackBar(error)
+            showSnackBar(error, null)
         }
         else
         {
-            // the finish call is made already
+            // there is no finish
+            transferLoading(false)
         }
     }
-
 
     private fun onInitDelegateLoadComplete(error:VolleyError?)
     {
@@ -367,7 +367,7 @@ class DelegateFragment : Fragment()
             if(error != null)
             {
                 //TODO handle the show snackbar
-                //showSnackBar(error)
+                showSnackBar(error, null)
             }
         }
         else
@@ -495,7 +495,7 @@ class DelegateFragment : Fragment()
             add_delegate_button_layout.visibility = View.VISIBLE
 
             //TODO check where is the nav_progress
-            nav_progress.visibility = View.INVISIBLE
+            nav_progress.visibility = View.GONE
         }
     }
 
@@ -517,24 +517,17 @@ class DelegateFragment : Fragment()
         add_delegate_button.text = getString(R.string.pay, "")
     }
 
-    /*
-    private fun showSnackBar(error:VolleyError?)
+    private fun showSnackBar(error:VolleyError?, message:String?)
     {
-        var error: String? = if (error != null)
+        if (error != null)
         {
-            error.toString()
+            mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
         }
-        else
+        else if (message != null)
         {
-            getString(R.string.generic_error)
+            mCallback?.showSnackBar(message, ContextCompat.getColor(context!!, android.R.color.holo_green_light), ContextCompat.getColor(context!!, R.color.tz_light))
         }
-
-        val snackbar = Snackbar.make(findViewById(R.id.content), error.toString(), Snackbar.LENGTH_LONG)
-        snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
-                android.R.color.holo_red_light)))
-        snackbar.show()
     }
-    */
 
     private fun validateAddButton(validate: Boolean)
     {
