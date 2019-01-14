@@ -53,7 +53,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:text="@string/create_restore_wallet_info"
+                    android:text="@string/redelegate_address_info"
                     android:textColor="@color/colorAccent"
                     android:layout_marginBottom="@dimen/spacing_double"
                     android:ellipsize="end" />

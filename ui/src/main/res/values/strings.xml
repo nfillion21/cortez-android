@@ -47,6 +47,7 @@
     <string name="copied_your_pkh">Copied your public key hash</string>
     <string name="copied">Copied %1$s</string>
     <string name="delegate_address_info">Please fill the form to delegate your tez. This will create a KT1 address and delegate it to the tz1 delegate address you choose.</string>
+    <string name="redelegate_address_info">Please fill the form to delegate your tez to your chosen baker\'s delegate address.</string>
     <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string>
     <string name="create_restore_wallet_delegate_info">Please create or restore a wallet to be able to delegate your tez.</string>
     <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez.</string>

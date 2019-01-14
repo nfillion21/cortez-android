@@ -803,7 +803,7 @@ class DelegateFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            //startInitTransferLoading()
+            startFinalizeDelegationLoading()
         }
         dialog.passwordVerificationListener =
                 {

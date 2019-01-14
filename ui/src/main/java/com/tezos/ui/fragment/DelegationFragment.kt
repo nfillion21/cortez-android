@@ -397,27 +397,6 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
         empty_loading_textview?.text = getString(R.string.generic_error)
     }
 
-    private fun animateDelegatedAddresses()
-    {
-        val objectAnimator = ObjectAnimator.ofFloat(no_delegates_text_layout, View.ALPHA, 0f)
-        objectAnimator.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator) {}
-            override fun onAnimationCancel(animation: Animator) {}
-            override fun onAnimationRepeat(animation: Animator) {}
-            override fun onAnimationEnd(animation: Animator) {
-                //mBalanceTextView?.text = balance.toString()
-            }
-        })
-
-        val objectAnimator2 = ObjectAnimator.ofFloat(no_delegates_text_layout, View.ALPHA, 1f)
-
-        //mBalanceTextView?.text = balance.toString()
-
-        val animatorSet = AnimatorSet()
-        animatorSet.play(objectAnimator).before(objectAnimator2)
-        animatorSet.start()
-    }
-
     private fun cancelRequest()
     {
         val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
