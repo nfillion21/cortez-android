@@ -156,6 +156,8 @@ class DelegateFragment : Fragment()
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
         }
+
+        validateExitButton(true)
     }
 
     private fun focusChangeListener(): View.OnFocusChangeListener
@@ -554,6 +556,34 @@ class DelegateFragment : Fragment()
 
             val drawables = add_delegate_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+        }
+    }
+
+    private fun validateExitButton(validate: Boolean)
+    {
+        if (validate)
+        {
+
+            val theme = CustomTheme(R.color.tz_error, R.color.tz_accent, R.color.tz_light)
+
+            remove_delegate_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            remove_delegate_button_layout.isEnabled = true
+            remove_delegate_button_layout.background = makeSelector(theme)
+
+            val drawables = remove_delegate_button.compoundDrawables
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+
+        } else {
+
+            remove_delegate_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            remove_delegate_button_layout.isEnabled = false
+            val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+            remove_delegate_button_layout.background = makeSelector(greyTheme)
+
+            val drawables = remove_delegate_button.compoundDrawables
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
     }
