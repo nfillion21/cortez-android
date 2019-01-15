@@ -107,7 +107,7 @@ tools:ignore="UselessParent,UnusedAttribute">
                         android:text="@string/delegate_title"/>
 
                     <TextView
-                        android:id="@+id/pkh_info_empty_textview"
+                        android:id="@+id/redelegate_info_textview"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"

@@ -49,6 +49,7 @@
     <string name="copied">Copied %1$s</string>
     <string name="delegate_address_info">Please fill the form to delegate your tez. This will create a KT1 address and delegate it to the tz1 delegate address you choose.</string>
     <string name="redelegate_address_info">Please fill the form to delegate your tez to your chosen baker\'s delegate address.</string>
+    <string name="remove_delegate_info">Your baker is:</string>
     <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string>
     <string name="create_restore_wallet_delegate_info">Please create or restore a wallet to be able to delegate your tez.</string>
     <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez.</string>
@@ -101,6 +102,7 @@
     <string name="loading_list_operations">Loading operations…</string>
     <string name="loading_balance">Loading balance…</string>
     <string name="loading_delegated_addresses">Loading delegated addresses…</string>
+    <string name="loading_contract_info">Loading contract informations…</string>
     <string name="neutral">-</string>
     <string name="click_for_fees">Click to recaculate</string>
     <string name="empty_list_operations">No operations</string>

@@ -45,6 +45,7 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
@@ -66,6 +67,7 @@ class DelegateFragment : Fragment()
 
     private var mInitDelegateLoading:Boolean = false
     private var mFinalizeDelegateLoading:Boolean = false
+    private var mContractInfoLoading:Boolean = false
 
     private var mDelegatePayload:String? = null
     private var mDelegateFees:Long = -1
@@ -74,12 +76,27 @@ class DelegateFragment : Fragment()
 
     private var mClickCalculate:Boolean = false
 
+    private var mContract:Contract? = null
+
+    private var mRecyclerViewAddresses:ArrayList<String>? = null
+
+    data class Contract
+    (
+            val blk: String,
+            val mgr: String,
+            val spendable: Boolean,
+            val delegatable: Boolean,
+            val delegate: String?
+    )
+
     companion object
     {
         private const val CONTRACT_KEY = "CONTRACT_KEY"
 
         private const val DELEGATE_INIT_TAG = "delegate_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
+
+        private const val CONTRACT_INFO_TAG = "contract_info"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
@@ -130,12 +147,13 @@ class DelegateFragment : Fragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(themeBundle)
-
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
         add_delegate_button_layout.setOnClickListener {
+            onDelegateClick()
+        }
+
+        remove_delegate_button_layout.setOnClickListener {
             onDelegateClick()
         }
 
@@ -149,6 +167,8 @@ class DelegateFragment : Fragment()
 
             mInitDelegateLoading = savedInstanceState.getBoolean(DELEGATE_INIT_TAG)
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
+
+            mContractInfoLoading = savedInstanceState.getBoolean(CONTRACT_INFO_TAG)
 
             mDelegateTezosAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
 
@@ -186,13 +206,26 @@ class DelegateFragment : Fragment()
             pkh = arguments!!.getString(CONTRACT_KEY)
             if (pkh == null)
             {
-                //should now happen
+                //should not happen
                 //val seed = Storage(activity!!).getMnemonics()
                 //pkh = seed.pkh
             }
         }
 
         return pkh
+    }
+
+    private fun startContractInfoLoading()
+    {
+        transferLoading(true)
+
+        //putFeesToNegative()
+        //putPayButtonToNull()
+
+        // validatePay cannot be valid if there is no fees
+        validateAddButton(false)
+
+        startPostRequestLoadInitDelegation()
     }
 
     private fun startInitDelegationLoading()
@@ -216,6 +249,103 @@ class DelegateFragment : Fragment()
 
         val mnemonicsData = Storage(activity!!).getMnemonics()
         startPostRequestLoadFinalizeDelegate(mnemonicsData)
+    }
+
+    // volley
+    private fun startGetRequestLoadContractInfo()
+    {
+        cancelRequests(true)
+
+        mContractInfoLoading = true
+
+        loading_textview.setText(R.string.loading_contract_info)
+
+        nav_progress.visibility = View.VISIBLE
+
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.contracts_url), pkh)
+
+            // Request a string response from the provided URL.
+            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            {
+
+                //addContractAddressesFromJSON(it, pkh)
+                //reloadList()
+                //onDelegatedAddressesComplete(true)
+            },
+                    Response.ErrorListener {
+
+                        onContractInfoComplete(false)
+
+                        showSnackBar(it, null)
+                    })
+
+            jsonArrayRequest.tag = CONTRACT_INFO_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
+    private fun onContractInfoComplete(animating:Boolean)
+    {
+        mContractInfoLoading = false
+        nav_progress?.visibility = View.GONE
+
+        //TODO handle the swipe refresh
+        //swipe_refresh_layout?.isEnabled = true
+        //swipe_refresh_layout?.isRefreshing = false
+
+        refreshTextUnderDelegation(animating)
+    }
+
+    private fun refreshTextUnderDelegation(animating:Boolean)
+    {
+        //this method handles the data and loading texts
+
+        if (mContract != null)
+        {
+            if (mContract!!.delegate != null)
+            {
+                redelegate_info_textview?.visibility = View.GONE
+                redelegate_form_card_info.visibility = View.GONE
+                add_delegate_button_layout?.visibility = View.GONE
+
+                remove_delegate_info_textview.visibility = View.VISIBLE
+                remove_delegate_button_layout?.visibility = View.VISIBLE
+
+                //TODO show everything related to the removing
+            }
+            else
+            {
+                redelegate_info_textview?.visibility = View.VISIBLE
+                redelegate_form_card_info.visibility = View.VISIBLE
+                add_delegate_button_layout?.visibility = View.VISIBLE
+
+                remove_delegate_info_textview.visibility = View.GONE
+                remove_delegate_button_layout?.visibility = View.GONE
+
+                //TODO show everything related to the form
+            }
+
+            if (!animating)
+            {
+                //no_delegates_text_layout.text = mBalanceItem.toString()
+
+                //reloadList()
+            }
+
+            loading_textview?.visibility = View.GONE
+            loading_textview?.text = null
+        }
+        else
+        {
+            // mContract is null then just show "-"
+            //loading_textview will be hidden behind other textview
+
+            loading_textview?.visibility = View.VISIBLE
+            loading_textview?.text = "-"
+        }
     }
 
     // volley
@@ -890,11 +1020,13 @@ class DelegateFragment : Fragment()
         val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
         requestQueue?.cancelAll(DELEGATE_INIT_TAG)
         requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
+        requestQueue?.cancelAll(CONTRACT_INFO_TAG)
 
         if (resetBooleans)
         {
             mInitDelegateLoading = false
             mFinalizeDelegateLoading = false
+            mContractInfoLoading = false
         }
     }
 
@@ -904,6 +1036,8 @@ class DelegateFragment : Fragment()
 
         outState.putBoolean(DELEGATE_INIT_TAG, mInitDelegateLoading)
         outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
+
+        outState.putBoolean(CONTRACT_INFO_TAG, mContractInfoLoading)
 
         outState.putString(DELEGATE_PAYLOAD_KEY, mDelegatePayload)
 

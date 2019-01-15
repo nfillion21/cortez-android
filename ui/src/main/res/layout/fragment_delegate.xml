@@ -49,7 +49,17 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/pkh_info_empty_textview"
+                    android:id="@+id/loading_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:text="@string/loading_contract_info"
+                    android:textColor="@color/colorAccent"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/redelegate_info_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
@@ -58,9 +68,20 @@
                     android:layout_marginBottom="@dimen/spacing_double"
                     android:ellipsize="end" />
 
+                <TextView
+                    android:id="@+id/remove_delegate_info_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:text="@string/remove_delegate_info"
+                    android:textColor="@color/colorAccent"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    android:ellipsize="end" />
+
             </LinearLayout>
 
             <include
+                android:id="@+id/redelegate_form_card_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 layout="@layout/redelegate_form_card_info"
