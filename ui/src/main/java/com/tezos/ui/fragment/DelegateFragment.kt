@@ -210,6 +210,10 @@ class DelegateFragment : Fragment()
             onDelegateClick()
         }
 
+        swipe_refresh_layout.setOnRefreshListener {
+            startContractInfoLoading()
+        }
+
         validateRemoveDelegateButton(true)
 
         tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
@@ -345,6 +349,8 @@ class DelegateFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateAddButton(false)
 
+        swipe_refresh_layout.isEnabled = false
+
         startGetRequestLoadContractInfo()
     }
 
@@ -427,8 +433,8 @@ class DelegateFragment : Fragment()
         nav_progress?.visibility = View.GONE
 
         //TODO handle the swipe refresh
-        //swipe_refresh_layout?.isEnabled = true
-        //swipe_refresh_layout?.isRefreshing = false
+        swipe_refresh_layout?.isEnabled = true
+        swipe_refresh_layout?.isRefreshing = false
 
         refreshTextUnderDelegation(animating)
     }
@@ -906,15 +912,12 @@ class DelegateFragment : Fragment()
 
     private fun isDelegateTezosAddressEquals(editable: Editable):Boolean
     {
-        val isTezosAddressEquals = false
+        val isTezosAddressEquals = true
 
         if (editable != null && !TextUtils.isEmpty(editable))
         {
             val tezosAddress = editable.toString()
-            if (tezosAddress == mDelegateTezosAddress)
-            {
-                return true
-            }
+            return tezosAddress == mDelegateTezosAddress
         }
         return isTezosAddressEquals
     }
