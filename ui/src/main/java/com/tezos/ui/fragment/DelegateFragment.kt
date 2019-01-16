@@ -51,6 +51,7 @@ import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.utils.DataExtractor
 import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
@@ -77,8 +78,6 @@ class DelegateFragment : Fragment()
     private var mClickCalculate:Boolean = false
 
     private var mContract:Contract? = null
-
-    private var mRecyclerViewAddresses:ArrayList<String>? = null
 
     data class Contract
     (
@@ -225,7 +224,7 @@ class DelegateFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateAddButton(false)
 
-        startPostRequestLoadInitDelegation()
+        startGetRequestLoadContractInfo()
     }
 
     private fun startInitDelegationLoading()
@@ -265,15 +264,13 @@ class DelegateFragment : Fragment()
         val pkh = pkh()
         if (pkh != null)
         {
-            val url = String.format(getString(R.string.contracts_url), pkh)
+            val url = String.format(getString(R.string.contract_info_url), pkh)
 
             // Request a string response from the provided URL.
             val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
             {
-
-                //addContractAddressesFromJSON(it, pkh)
-                //reloadList()
-                //onDelegatedAddressesComplete(true)
+                addContractInfoFromJSON(it)
+                onContractInfoComplete(true)
             },
                     Response.ErrorListener {
 
@@ -284,6 +281,22 @@ class DelegateFragment : Fragment()
 
             jsonArrayRequest.tag = CONTRACT_INFO_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
+    private fun addContractInfoFromJSON(answer: JSONArray)
+    {
+        if (answer != null && answer.length() > 0)
+        {
+            val contractJSON = DataExtractor.getJSONObjectFromField(answer,0)
+
+            val blk = DataExtractor.getStringFromField(contractJSON, "blk")
+            val mgr = DataExtractor.getStringFromField(contractJSON, "mgr")
+            val spendable = DataExtractor.getBooleanFromField(contractJSON, "spendable")
+            val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
+            val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
+
+            mContract = Contract(blk as String, mgr as String, spendable as Boolean, delegatable as Boolean, delegate)
         }
     }
 
@@ -308,10 +321,10 @@ class DelegateFragment : Fragment()
             if (mContract!!.delegate != null)
             {
                 redelegate_info_textview?.visibility = View.GONE
-                redelegate_form_card_info.visibility = View.GONE
+                redelegate_form_card_info?.visibility = View.GONE
                 add_delegate_button_layout?.visibility = View.GONE
 
-                remove_delegate_info_textview.visibility = View.VISIBLE
+                remove_delegate_info_textview?.visibility = View.VISIBLE
                 remove_delegate_button_layout?.visibility = View.VISIBLE
 
                 //TODO show everything related to the removing
@@ -319,7 +332,7 @@ class DelegateFragment : Fragment()
             else
             {
                 redelegate_info_textview?.visibility = View.VISIBLE
-                redelegate_form_card_info.visibility = View.VISIBLE
+                redelegate_form_card_info?.visibility = View.VISIBLE
                 add_delegate_button_layout?.visibility = View.VISIBLE
 
                 remove_delegate_info_textview.visibility = View.GONE
@@ -838,6 +851,8 @@ class DelegateFragment : Fragment()
             //this.setTextPayButton()
         }
 
+        startContractInfoLoading()
+
         //TODO we got to keep in mind there's an id already.
         if (mInitDelegateLoading)
         {
@@ -845,7 +860,7 @@ class DelegateFragment : Fragment()
         }
         else
         {
-            onInitDelegateLoadComplete(null)
+            //onInitDelegateLoadComplete(null)
 
             if (mFinalizeDelegateLoading)
             {
@@ -853,7 +868,7 @@ class DelegateFragment : Fragment()
             }
             else
             {
-                onFinalizeDelegationLoadComplete(null)
+                //onFinalizeDelegationLoadComplete(null)
             }
         }
     }

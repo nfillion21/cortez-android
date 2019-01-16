@@ -60,6 +60,7 @@
 
                 <TextView
                     android:id="@+id/redelegate_info_textview"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
@@ -70,6 +71,7 @@
 
                 <TextView
                     android:id="@+id/remove_delegate_info_textview"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
@@ -82,6 +84,7 @@
 
             <include
                 android:id="@+id/redelegate_form_card_info"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 layout="@layout/redelegate_form_card_info"
@@ -103,7 +106,7 @@
             style="@style/PaymentScreens.Button"
             android:enabled="false"
             android:layout_centerInParent="true"
-            android:visibility="visible"
+            android:visibility="gone"
             >
 
             <Button
@@ -136,7 +139,7 @@
             style="@style/PaymentScreens.Button"
             android:enabled="false"
             android:layout_centerInParent="true"
-            android:visibility="visible"
+            android:visibility="gone"
             >
 
             <Button
