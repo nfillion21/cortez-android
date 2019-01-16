@@ -134,6 +134,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             cancelRequest()
             mGetDelegatedAddressesLoading = false
 
+
             //no_delegates_text_layout.visibility = View.GONE
             //swipe_refresh_layout.isEnabled = false
         }

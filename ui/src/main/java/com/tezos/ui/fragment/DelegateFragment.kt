@@ -79,6 +79,8 @@ class DelegateFragment : Fragment()
 
     private var mContract:Contract? = null
 
+    private var mWalletEnabled:Boolean = false
+
     data class Contract
     (
             val blk: String,
@@ -86,7 +88,55 @@ class DelegateFragment : Fragment()
             val spendable: Boolean,
             val delegatable: Boolean,
             val delegate: String?
+
     )
+
+    internal class ContractSerialization internal constructor(private val contract: Contract)
+    {
+        internal fun getSerializedBundle():Bundle
+        {
+            val contractBundle = Bundle()
+
+            contractBundle.putString("blk", contract.blk)
+            contractBundle.putString("mgr", contract.mgr)
+            contractBundle.putBoolean("spendable", contract.spendable)
+            contractBundle.putBoolean("delegatable", contract.delegatable)
+            contractBundle.putString("delegate", contract.delegate)
+
+            return contractBundle
+
+        }
+    }
+
+    internal class ContractMapper internal constructor(private val bundle: Bundle)
+    {
+        internal fun mappedObjectFromBundle(): Contract
+        {
+            val blk = this.bundle.getString("blk", null)
+            val mgr = this.bundle.getString("mgr", null)
+            val spendable = this.bundle.getBoolean("spendable", false)
+            val delegatable = this.bundle.getBoolean("delegatable", false)
+            val delegate = this.bundle.getString("delegate", null)
+
+            return Contract(blk, mgr, spendable, delegatable, delegate)
+        }
+    }
+
+    fun toBundle(contract: Contract?): Bundle?
+    {
+        if (contract != null)
+        {
+            val serializer = ContractSerialization(contract)
+            return serializer.getSerializedBundle()
+        }
+        return null
+    }
+
+    fun fromBundle(bundle: Bundle): Contract
+    {
+        val mapper = ContractMapper(bundle)
+        return mapper.mappedObjectFromBundle()
+    }
 
     companion object
     {
@@ -103,6 +153,10 @@ class DelegateFragment : Fragment()
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
+
+        private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
+
+        private const val CONTRACT_DATA_KEY = "contract_data_key"
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -156,6 +210,8 @@ class DelegateFragment : Fragment()
             onDelegateClick()
         }
 
+        validateRemoveDelegateButton(true)
+
         tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
 
         tezos_address_edittext.onFocusChangeListener = focusChangeListener()
@@ -174,9 +230,74 @@ class DelegateFragment : Fragment()
             mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
+
+            mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
+
+            val contractBundle = savedInstanceState.getBundle(CONTRACT_DATA_KEY)
+            if (contractBundle != null)
+            {
+                mContract = this.fromBundle(contractBundle)
+            }
+
+            if (mContractInfoLoading)
+            {
+                refreshTextUnderDelegation(false)
+                mWalletEnabled = true
+                startContractInfoLoading()
+            }
+            else
+            {
+                onContractInfoComplete(false)
+
+                //TODO we got to keep in mind there's an id already.
+                if (mInitDelegateLoading)
+                {
+                    startInitDelegationLoading()
+                }
+                else
+                {
+                    onInitDelegateLoadComplete(null)
+
+                    if (mFinalizeDelegateLoading)
+                    {
+                        startFinalizeDelegationLoading()
+                    }
+                    else
+                    {
+                        onFinalizeDelegationLoadComplete(null)
+                    }
+                }
+            }
+        }
+        else
+        {
+            mWalletEnabled = true
+            startContractInfoLoading()
+        }
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+
+        putEverythingInRed()
+
+        if (isInputDataValid() && isDelegateFeeValid())
+        {
+            validateAddButton(true)
+            //this.setTextPayButton()
         }
 
-        validateExitButton(true)
+        if (!mWalletEnabled)
+        {
+            mWalletEnabled = true
+
+            // put the good layers
+            //mBalanceLayout?.visibility = View.VISIBLE
+            //mCreateWalletLayout?.visibility = View.GONE
+
+            startContractInfoLoading()
+        }
     }
 
     private fun focusChangeListener(): View.OnFocusChangeListener
@@ -628,16 +749,18 @@ class DelegateFragment : Fragment()
 
     private fun transferLoading(loading:Boolean)
     {
+        // handle the visibility of bottom buttons
+
         if (loading)
         {
-            add_delegate_button_layout.visibility = View.GONE
+            //add_delegate_button_layout.visibility = View.GONE
 
             //TODO check where is the nav_progress
             nav_progress.visibility = View.VISIBLE
         }
         else
         {
-            add_delegate_button_layout.visibility = View.VISIBLE
+            //add_delegate_button_layout.visibility = View.VISIBLE
 
             //TODO check where is the nav_progress
             nav_progress.visibility = View.GONE
@@ -667,6 +790,8 @@ class DelegateFragment : Fragment()
         if (error != null)
         {
             mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+
+            loading_textview?.text = getString(R.string.generic_error)
         }
         else if (message != null)
         {
@@ -703,7 +828,7 @@ class DelegateFragment : Fragment()
         }
     }
 
-    private fun validateExitButton(validate: Boolean)
+    private fun validateRemoveDelegateButton(validate: Boolean)
     {
         if (validate)
         {
@@ -839,40 +964,6 @@ class DelegateFragment : Fragment()
         return isFeeValid
     }
 
-    override fun onResume()
-    {
-        super.onResume()
-
-        putEverythingInRed()
-
-        if (isInputDataValid() && isDelegateFeeValid())
-        {
-            validateAddButton(true)
-            //this.setTextPayButton()
-        }
-
-        startContractInfoLoading()
-
-        //TODO we got to keep in mind there's an id already.
-        if (mInitDelegateLoading)
-        {
-            startInitDelegationLoading()
-        }
-        else
-        {
-            //onInitDelegateLoadComplete(null)
-
-            if (mFinalizeDelegateLoading)
-            {
-                startFinalizeDelegationLoading()
-            }
-            else
-            {
-                //onFinalizeDelegationLoadComplete(null)
-            }
-        }
-    }
-
     private fun putEverythingInRed()
     {
         this.putTzAddressInRed(true)
@@ -902,52 +993,6 @@ class DelegateFragment : Fragment()
 
         tezos_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
-
-    /*
-    private fun setTextPayButton()
-    {
-        //amountDouble += fee_edittext.text.toString().toLong()/1000000
-        var amountDouble = mDelegateFees.toDouble()/1000000.0
-
-        var amount = amountDouble.toString()
-
-        if (amount.contains("."))
-        {
-            val elements = amount.substring(amount.indexOf("."))
-
-            when
-            {
-                elements.length > 7 ->
-                {
-                    amount = String.format("%.6f", amount.toDouble())
-                    val d = amount.toDouble()
-                    amount = d.toString()
-                }
-
-                elements.length <= 3 ->
-                {
-                    amount = String.format("%.2f", amount.toDouble())
-                }
-                else ->
-                {
-                    //                        int length = elements.length() - 1;
-                    //                        String format = "%." + length + "f";
-                    //                        Float f = Float.parseFloat(amount);
-                    //                        amount = String.format(format, f);
-                }
-            }
-        }
-        else
-        {
-            amount = String.format("%.2f", amount.toDouble())
-//amount = Double.parseDouble(amount).toString();
-        }
-
-        val moneyFormatted2 = "$amount ꜩ"
-//String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        add_delegate_button.text = getString(R.string.delegate_format, moneyFormatted2)
-    }
-    */
 
     private fun onDelegateClick()
     {
@@ -1061,6 +1106,10 @@ class DelegateFragment : Fragment()
         outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
 
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
+
+        outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
+
+        outState.putBundle(CONTRACT_DATA_KEY, this.toBundle(mContract))
     }
 
     override fun onDestroy()
