@@ -68,6 +68,10 @@ class DelegateFragment : Fragment()
 
     private var mInitDelegateLoading:Boolean = false
     private var mFinalizeDelegateLoading:Boolean = false
+
+    private var mInitRemoveDelegateLoading:Boolean = false
+    private var mFinalizeRemoveDelegateLoading:Boolean = false
+
     private var mContractInfoLoading:Boolean = false
 
     private var mDelegatePayload:String? = null
@@ -145,6 +149,9 @@ class DelegateFragment : Fragment()
         private const val DELEGATE_INIT_TAG = "delegate_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
 
+        private const val REMOVE_DELEGATE_INIT_TAG = "remove_delegate_init"
+        private const val REMOVE_DELEGATE_FINALIZE_TAG = "remove_delegate_finalize"
+
         private const val CONTRACT_INFO_TAG = "contract_info"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
@@ -201,6 +208,7 @@ class DelegateFragment : Fragment()
         super.onViewCreated(view, savedInstanceState)
 
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
+        validateRemoveDelegateButton(isDelegateFeeValid())
 
         add_delegate_button_layout.setOnClickListener {
             onDelegateClick()
@@ -214,8 +222,6 @@ class DelegateFragment : Fragment()
             startContractInfoLoading()
         }
 
-        validateRemoveDelegateButton(true)
-
         tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
 
         tezos_address_edittext.onFocusChangeListener = focusChangeListener()
@@ -226,6 +232,9 @@ class DelegateFragment : Fragment()
 
             mInitDelegateLoading = savedInstanceState.getBoolean(DELEGATE_INIT_TAG)
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
+
+            mInitRemoveDelegateLoading = savedInstanceState.getBoolean(REMOVE_DELEGATE_INIT_TAG)
+            mFinalizeRemoveDelegateLoading = savedInstanceState.getBoolean(REMOVE_DELEGATE_FINALIZE_TAG)
 
             mContractInfoLoading = savedInstanceState.getBoolean(CONTRACT_INFO_TAG)
 
@@ -253,22 +262,40 @@ class DelegateFragment : Fragment()
             {
                 onContractInfoComplete(false)
 
-                //TODO we got to keep in mind there's an id already.
-                if (mInitDelegateLoading)
+                if (mInitRemoveDelegateLoading)
                 {
-                    startInitDelegationLoading()
+                    startInitRemoveDelegateLoading()
                 }
                 else
                 {
-                    onInitDelegateLoadComplete(null)
+                    onInitRemoveDelegateLoadComplete(null)
 
-                    if (mFinalizeDelegateLoading)
+                    if (mFinalizeRemoveDelegateLoading)
                     {
-                        startFinalizeAddDelegateLoading()
+                        startFinalizeRemoveDelegateLoading()
                     }
                     else
                     {
                         onFinalizeDelegationLoadComplete(null)
+
+                        //TODO we got to keep in mind there's an id already.
+                        if (mInitDelegateLoading)
+                        {
+                            startInitDelegationLoading()
+                        }
+                        else
+                        {
+                            onInitDelegateLoadComplete(null)
+
+                            if (mFinalizeDelegateLoading)
+                            {
+                                startFinalizeAddDelegateLoading()
+                            }
+                            else
+                            {
+                                onFinalizeDelegationLoadComplete(null)
+                            }
+                        }
                     }
                 }
             }
@@ -286,10 +313,14 @@ class DelegateFragment : Fragment()
 
         putEverythingInRed()
 
-        if (isInputDataValid() && isDelegateFeeValid())
+        if (isDelegateFeeValid())
         {
-            validateAddButton(true)
-            //this.setTextPayButton()
+            validateRemoveDelegateButton(true)
+
+            if (isInputDataValid())
+            {
+                validateAddButton(true)
+            }
         }
 
         if (!mWalletEnabled)
@@ -377,9 +408,9 @@ class DelegateFragment : Fragment()
         putPayButtonToNull()
 
         // validatePay cannot be valid if there is no fees
-        validateAddButton(false)
+        validateRemoveDelegateButton(false)
 
-        startPostRequestLoadRemoveDelegate()
+        startPostRequestLoadInitRemoveDelegate()
     }
 
     private fun startFinalizeAddDelegateLoading()
@@ -421,6 +452,11 @@ class DelegateFragment : Fragment()
             {
                 addContractInfoFromJSON(it)
                 onContractInfoComplete(true)
+
+                if (mContract?.delegate != null)
+                {
+                    startInitRemoveDelegateLoading()
+                }
             },
                     Response.ErrorListener {
 
@@ -631,7 +667,7 @@ class DelegateFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isAddButtonValid() && mDelegatePayload != null)
+        if (isRemoveButtonValid() && mDelegatePayload != null)
         {
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
@@ -788,6 +824,43 @@ class DelegateFragment : Fragment()
         }
     }
 
+    private fun onInitRemoveDelegateLoadComplete(error:VolleyError?)
+    {
+        mInitRemoveDelegateLoading = false
+
+        if (error != null || mClickCalculate)
+        {
+            // stop the moulinette only if an error occurred
+            transferLoading(false)
+            cancelRequests(true)
+
+            mDelegatePayload = null
+
+            fee_edittext.isEnabled = true
+            fee_edittext.isFocusable = false
+            fee_edittext.isClickable = false
+            fee_edittext.isLongClickable = false
+            fee_edittext.hint = getString(R.string.click_for_fees)
+
+            fee_edittext.setOnClickListener {
+                startInitRemoveDelegateLoading()
+            }
+
+            if(error != null)
+            {
+                //TODO handle the show snackbar
+                showSnackBar(error, null)
+            }
+        }
+        else
+        {
+            transferLoading(false)
+            cancelRequests(true)
+            // it's signed, looks like it worked.
+            //transferLoading(true)
+        }
+    }
+
     // volley
     private fun startPostRequestLoadInitDelegation()
     {
@@ -891,7 +964,7 @@ class DelegateFragment : Fragment()
     }
 
     // volley
-    private fun startPostRequestLoadRemoveDelegate()
+    private fun startPostRequestLoadInitRemoveDelegate()
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
 
@@ -915,42 +988,20 @@ class DelegateFragment : Fragment()
             mDelegatePayload = answer.getString("result")
             mDelegateFees = answer.getLong("total_fee")
 
-            // get back the object and
-
-            //val dstsArray = postParams["dsts"] as JSONArray
-            //val dstObj = dstsArray[0] as JSONObject
-
-            //dstObj.put("fee", mDelegateFees.toString())
-            //dstsArray.put(0, dstObj)
-
-            //postParams.put("dsts", dstsArray)
-
             // we use this call to ask for payload and fees
             if (mDelegatePayload != null && mDelegateFees != null)
             {
-                onInitDelegateLoadComplete(null)
+                onInitRemoveDelegateLoadComplete(null)
 
                 val feeInTez = mDelegateFees.toDouble()/1000000.0
                 fee_edittext.setText(feeInTez.toString())
 
-                validateAddButton(isInputDataValid() && isDelegateFeeValid())
-
-                if (isInputDataValid() && isDelegateFeeValid())
-                {
-                    validateAddButton(true)
-
-                    //this.setTextPayButton()
-                }
-                else
-                {
-                    // should no happen
-                    validateAddButton(false)
-                }
+                validateRemoveDelegateButton(isDelegateFeeValid())
             }
             else
             {
                 val volleyError = VolleyError(getString(R.string.generic_error))
-                onInitDelegateLoadComplete(volleyError)
+                onInitRemoveDelegateLoadComplete(volleyError)
                 mClickCalculate = true
 
                 //the call failed
@@ -958,7 +1009,7 @@ class DelegateFragment : Fragment()
 
         }, Response.ErrorListener
         {
-            onInitDelegateLoadComplete(it)
+            onInitRemoveDelegateLoadComplete(it)
 
             mClickCalculate = true
             //Log.i("mTransferId", ""+mTransferId)
@@ -976,8 +1027,8 @@ class DelegateFragment : Fragment()
 
         cancelRequests(true)
 
-        jsObjRequest.tag = DELEGATE_INIT_TAG
-        mInitDelegateLoading = true
+        jsObjRequest.tag = REMOVE_DELEGATE_INIT_TAG
+        mInitRemoveDelegateLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
@@ -1200,6 +1251,12 @@ class DelegateFragment : Fragment()
                 && isInputDataValid()
     }
 
+    fun isRemoveButtonValid(): Boolean
+    {
+        return mDelegatePayload != null
+                && isDelegateFeeValid()
+    }
+
     private fun putTzAddressInRed(red: Boolean)
     {
         val color: Int
@@ -1259,7 +1316,7 @@ class DelegateFragment : Fragment()
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity!!).prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthentication(it)
+                validateKeyAuthenticationRemoveDelegate(it)
             }
             if (dialog.cryptoObjectToAuthenticateWith == null)
             {
@@ -1275,7 +1332,6 @@ class DelegateFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeAddDelegateLoading()
             startFinalizeRemoveDelegateLoading()
         }
         dialog.passwordVerificationListener =
@@ -1333,17 +1389,33 @@ class DelegateFragment : Fragment()
         }
     }
 
+    private fun validateKeyAuthenticationRemoveDelegate(cryptoObject: FingerprintManager.CryptoObject)
+    {
+        if (EncryptionServices(activity!!).validateFingerprintAuthentication(cryptoObject))
+        {
+            startFinalizeRemoveDelegateLoading()
+        }
+        else
+        {
+            onRemoveDelegateClick()
+        }
+    }
+
     private fun cancelRequests(resetBooleans:Boolean)
     {
         val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
         requestQueue?.cancelAll(DELEGATE_INIT_TAG)
         requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
+        requestQueue?.cancelAll(REMOVE_DELEGATE_INIT_TAG)
+        requestQueue?.cancelAll(REMOVE_DELEGATE_FINALIZE_TAG)
         requestQueue?.cancelAll(CONTRACT_INFO_TAG)
 
         if (resetBooleans)
         {
             mInitDelegateLoading = false
             mFinalizeDelegateLoading = false
+            mInitRemoveDelegateLoading = false
+            mFinalizeRemoveDelegateLoading = false
             mContractInfoLoading = false
         }
     }
@@ -1354,6 +1426,9 @@ class DelegateFragment : Fragment()
 
         outState.putBoolean(DELEGATE_INIT_TAG, mInitDelegateLoading)
         outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
+
+        outState.putBoolean(REMOVE_DELEGATE_INIT_TAG, mInitRemoveDelegateLoading)
+        outState.putBoolean(REMOVE_DELEGATE_FINALIZE_TAG, mFinalizeRemoveDelegateLoading)
 
         outState.putBoolean(CONTRACT_INFO_TAG, mContractInfoLoading)
 
