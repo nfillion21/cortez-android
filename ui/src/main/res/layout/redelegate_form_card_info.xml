@@ -6,38 +6,46 @@ android:padding="@dimen/spacing_double"
 android:background="@drawable/selector_rect_layout"
 xmlns:android="http://schemas.android.com/apk/res/android">
 
-<TextView
-    android:id="@+id/address_textview"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/address_delegate"
-    android:textStyle="bold"
-    android:textColor="@color/colorPrimary"
-    android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-    tools:ignore="UnusedAttribute,NewApi" />
+    <LinearLayout
+        android:id="@+id/tezos_address_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/spacing_double"
+        android:orientation="vertical">
 
-<android.support.design.widget.TextInputEditText
-    android:id="@+id/tezos_address_edittext"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="@string/address_pkh_placeholder"
-    android:drawableRight="@drawable/account_wallet_24"
-    android:drawableEnd="@drawable/account_wallet_24"
-    android:drawablePadding="@dimen/spacing_double"
-    android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    android:maxLength="36"
-    android:maxLines="1"
-    android:singleLine="true"
-    android:textColorHint="@color/tz_placeholder"
-    android:imeOptions="actionDone"
-    android:inputType="textPersonName|textNoSuggestions"
-    android:textSize="@dimen/size_edit_text" />
+        <TextView
+            android:id="@+id/address_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/address_delegate"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/tezos_address_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/address_pkh_placeholder"
+            android:drawableRight="@drawable/account_wallet_24"
+            android:drawableEnd="@drawable/account_wallet_24"
+            android:drawablePadding="@dimen/spacing_double"
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            android:maxLength="36"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textColorHint="@color/tz_placeholder"
+            android:imeOptions="actionDone"
+            android:inputType="textPersonName|textNoSuggestions"
+            android:textSize="@dimen/size_edit_text" />
+
+    </LinearLayout>
 
 <TextView
     android:id="@+id/gas_textview"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/spacing_double"
     android:text="@string/fee_minimum"
     android:textStyle="bold"
     android:textColor="@color/colorPrimary"

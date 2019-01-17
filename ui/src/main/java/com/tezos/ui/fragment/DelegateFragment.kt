@@ -264,7 +264,7 @@ class DelegateFragment : Fragment()
 
                     if (mFinalizeDelegateLoading)
                     {
-                        startFinalizeDelegationLoading()
+                        startFinalizeAddDelegateLoading()
                     }
                     else
                     {
@@ -368,13 +368,36 @@ class DelegateFragment : Fragment()
         startPostRequestLoadInitDelegation()
     }
 
-    private fun startFinalizeDelegationLoading()
+    private fun startInitRemoveDelegateLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        putFeesToNegative()
+        putPayButtonToNull()
+
+        // validatePay cannot be valid if there is no fees
+        validateAddButton(false)
+
+        startPostRequestLoadRemoveDelegate()
+    }
+
+    private fun startFinalizeAddDelegateLoading()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
 
         val mnemonicsData = Storage(activity!!).getMnemonics()
-        startPostRequestLoadFinalizeDelegate(mnemonicsData)
+        startPostRequestLoadFinalizeAddDelegate(mnemonicsData)
+    }
+
+    private fun startFinalizeRemoveDelegateLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+        startPostRequestLoadFinalizeRemoveDelegate(mnemonicsData)
     }
 
     // volley
@@ -448,11 +471,16 @@ class DelegateFragment : Fragment()
             if (mContract!!.delegate != null)
             {
                 redelegate_info_textview?.visibility = View.GONE
-                redelegate_form_card_info?.visibility = View.GONE
+                redelegate_form_card_info?.visibility = View.VISIBLE
+
+                tezos_address_layout?.visibility = View.GONE
+
                 add_delegate_button_layout?.visibility = View.GONE
 
-                remove_delegate_info_textview?.visibility = View.VISIBLE
                 remove_delegate_button_layout?.visibility = View.VISIBLE
+
+                remove_delegate_info_textview?.visibility = View.VISIBLE
+                remove_delegate_info_textview?.text = getString(R.string.remove_delegate_info, mContract?.delegate)
 
                 //TODO show everything related to the removing
             }
@@ -460,6 +488,9 @@ class DelegateFragment : Fragment()
             {
                 redelegate_info_textview?.visibility = View.VISIBLE
                 redelegate_form_card_info?.visibility = View.VISIBLE
+
+                tezos_address_layout?.visibility = View.VISIBLE
+
                 add_delegate_button_layout?.visibility = View.VISIBLE
 
                 remove_delegate_info_textview.visibility = View.GONE
@@ -489,7 +520,7 @@ class DelegateFragment : Fragment()
     }
 
     // volley
-    private fun startPostRequestLoadFinalizeDelegate(mnemonicsData: Storage.MnemonicsData)
+    private fun startPostRequestLoadFinalizeRemoveDelegate(mnemonicsData: Storage.MnemonicsData)
     {
         val url = getString(R.string.transfer_injection_operation)
 
@@ -595,6 +626,112 @@ class DelegateFragment : Fragment()
         }
     }
 
+    // volley
+    private fun startPostRequestLoadFinalizeAddDelegate(mnemonicsData: Storage.MnemonicsData)
+    {
+        val url = getString(R.string.transfer_injection_operation)
+
+        if (isAddButtonValid() && mDelegatePayload != null)
+        {
+            //val pkhSrc = mnemonicsData.pkh
+            //val pkhDst = mDstAccount?.pubKeyHash
+
+            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val pk = CryptoUtils.generatePk(mnemonics, "")
+
+            var postParams = JSONObject()
+            postParams.put("src", pkh())
+            postParams.put("src_pk", pk)
+
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+
+            //TODO verify binary payload
+            if (!isPayloadValid(mDelegatePayload!!, postParams))
+            {
+                val zeroThree = "0x03".hexToByteArray()
+
+                val byteArrayThree = mDelegatePayload!!.hexToByteArray()
+
+                val xLen = zeroThree.size
+                val yLen = byteArrayThree.size
+                val result = ByteArray(xLen + yLen)
+
+                System.arraycopy(zeroThree, 0, result, 0, xLen)
+                System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
+
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+                val signature = KeyPair.sign(sk, result)
+
+                //TODO verify signature
+                //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+
+                val pLen = byteArrayThree.size
+                val sLen = signature.size
+                val newResult = ByteArray(pLen + sLen)
+
+                System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
+                System.arraycopy(signature, 0, newResult, pLen, sLen)
+
+                var payloadsign = newResult.toNoPrefixHexString()
+
+                val stringRequest = object : StringRequest(Request.Method.POST, url,
+                        Response.Listener<String> { response ->
+
+                            //there's no need to do anything because we call finish()
+                            onFinalizeDelegationLoadComplete(null)
+
+                            //TODO handle the result snackbar
+                            //setResult(R.id.add_address_succeed, null)
+                            //finish()
+                            showSnackBar(null, getString(R.string.delegation_successfully_deleted))
+                        },
+                        Response.ErrorListener
+                        {
+                            onFinalizeDelegationLoadComplete(it)
+                        }
+                )
+                {
+                    @Throws(AuthFailureError::class)
+                    override fun getBody(): ByteArray
+                    {
+                        val pay = "\""+payloadsign+"\""
+                        return pay.toByteArray()
+                    }
+
+                    @Throws(AuthFailureError::class)
+                    override fun getHeaders(): Map<String, String>
+                    {
+                        val headers = HashMap<String, String>()
+                        headers["Content-Type"] = "application/json"
+                        return headers
+                    }
+                }
+
+                cancelRequests(true)
+
+                stringRequest.tag = DELEGATE_FINALIZE_TAG
+
+                mFinalizeDelegateLoading = true
+                VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(stringRequest)
+            }
+            else
+            {
+                val volleyError = VolleyError(getString(R.string.generic_error))
+                onFinalizeDelegationLoadComplete(volleyError)
+            }
+        }
+        else
+        {
+            val volleyError = VolleyError(getString(R.string.generic_error))
+            onFinalizeDelegationLoadComplete(volleyError)
+        }
+    }
 
     private fun onFinalizeDelegationLoadComplete(error: VolleyError?)
     {
@@ -753,22 +890,107 @@ class DelegateFragment : Fragment()
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
+    // volley
+    private fun startPostRequestLoadRemoveDelegate()
+    {
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+
+        val url = getString(R.string.change_delegate_url)
+
+        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val pk = CryptoUtils.generatePk(mnemonics, "")
+
+        var postParams = JSONObject()
+        postParams.put("src", pkh())
+        postParams.put("src_pk", pk)
+
+        var dstObjects = JSONArray()
+        postParams.put("dsts", dstObjects)
+
+        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        { answer ->
+
+            //TODO check if the JSON is fine then launch the 2nd request
+
+            mDelegatePayload = answer.getString("result")
+            mDelegateFees = answer.getLong("total_fee")
+
+            // get back the object and
+
+            //val dstsArray = postParams["dsts"] as JSONArray
+            //val dstObj = dstsArray[0] as JSONObject
+
+            //dstObj.put("fee", mDelegateFees.toString())
+            //dstsArray.put(0, dstObj)
+
+            //postParams.put("dsts", dstsArray)
+
+            // we use this call to ask for payload and fees
+            if (mDelegatePayload != null && mDelegateFees != null)
+            {
+                onInitDelegateLoadComplete(null)
+
+                val feeInTez = mDelegateFees.toDouble()/1000000.0
+                fee_edittext.setText(feeInTez.toString())
+
+                validateAddButton(isInputDataValid() && isDelegateFeeValid())
+
+                if (isInputDataValid() && isDelegateFeeValid())
+                {
+                    validateAddButton(true)
+
+                    //this.setTextPayButton()
+                }
+                else
+                {
+                    // should no happen
+                    validateAddButton(false)
+                }
+            }
+            else
+            {
+                val volleyError = VolleyError(getString(R.string.generic_error))
+                onInitDelegateLoadComplete(volleyError)
+                mClickCalculate = true
+
+                //the call failed
+            }
+
+        }, Response.ErrorListener
+        {
+            onInitDelegateLoadComplete(it)
+
+            mClickCalculate = true
+            //Log.i("mTransferId", ""+mTransferId)
+            //Log.i("mDelegatePayload", ""+mDelegatePayload)
+        })
+        {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String>
+            {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        cancelRequests(true)
+
+        jsObjRequest.tag = DELEGATE_INIT_TAG
+        mInitDelegateLoading = true
+        VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
     private fun transferLoading(loading:Boolean)
     {
         // handle the visibility of bottom buttons
 
         if (loading)
         {
-            //add_delegate_button_layout.visibility = View.GONE
-
-            //TODO check where is the nav_progress
             nav_progress.visibility = View.VISIBLE
         }
         else
         {
-            //add_delegate_button_layout.visibility = View.VISIBLE
-
-            //TODO check where is the nav_progress
             nav_progress.visibility = View.GONE
         }
     }
@@ -838,7 +1060,6 @@ class DelegateFragment : Fragment()
     {
         if (validate)
         {
-
             val theme = CustomTheme(R.color.tz_error, R.color.tz_accent, R.color.tz_light)
 
             remove_delegate_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
@@ -848,9 +1069,9 @@ class DelegateFragment : Fragment()
             val drawables = remove_delegate_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-
-        } else {
-
+        }
+        else
+        {
             remove_delegate_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
             remove_delegate_button_layout.isEnabled = false
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
@@ -1021,7 +1242,41 @@ class DelegateFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeDelegationLoading()
+            startFinalizeAddDelegateLoading()
+        }
+        dialog.passwordVerificationListener =
+                {
+                    validatePassword(it)
+                }
+        dialog.show(activity!!.supportFragmentManager, "Authentication")
+    }
+
+    private fun onRemoveDelegateClick()
+    {
+        val dialog = AuthenticationDialog()
+        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        {
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity!!).prepareFingerprintCryptoObject()
+            dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
+            dialog.fingerprintAuthenticationSuccessListener = {
+                validateKeyAuthentication(it)
+            }
+            if (dialog.cryptoObjectToAuthenticateWith == null)
+            {
+                dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
+            }
+            else
+            {
+                dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
+            }
+        }
+        else
+        {
+            dialog.stage = AuthenticationDialog.Stage.PASSWORD
+        }
+        dialog.authenticationSuccessListener = {
+            startFinalizeAddDelegateLoading()
+            startFinalizeRemoveDelegateLoading()
         }
         dialog.passwordVerificationListener =
                 {
@@ -1070,7 +1325,7 @@ class DelegateFragment : Fragment()
     {
         if (EncryptionServices(activity!!).validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeDelegationLoading()
+            startFinalizeAddDelegateLoading()
         }
         else
         {
