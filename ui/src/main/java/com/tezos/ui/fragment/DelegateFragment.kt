@@ -457,6 +457,10 @@ class DelegateFragment : Fragment()
                 {
                     startInitRemoveDelegateLoading()
                 }
+                else
+                {
+                    validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                }
             },
                     Response.ErrorListener {
 
@@ -560,7 +564,7 @@ class DelegateFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isAddButtonValid() && mDelegatePayload != null)
+        if (isRemoveButtonValid() && mDelegatePayload != null)
         {
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
@@ -667,7 +671,7 @@ class DelegateFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isRemoveButtonValid() && mDelegatePayload != null)
+        if (isAddButtonValid() && mDelegatePayload != null)
         {
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
@@ -1201,14 +1205,18 @@ class DelegateFragment : Fragment()
 
     private fun isTzAddressValid(): Boolean
     {
-        val isTzAddressValid = false
+        var isTzAddressValid = false
 
-        return if (!TextUtils.isEmpty(tezos_address_edittext.text))
+        if (!TextUtils.isEmpty(tezos_address_edittext.text))
         {
-            Utils.isTzAddressValid(tezos_address_edittext.text!!.toString())
+            if (Utils.isTzAddressValid(tezos_address_edittext.text!!.toString()))
+            {
+                mDelegateTezosAddress = tezos_address_edittext.text.toString()
+                isTzAddressValid = true
+            }
         }
 
-        else isTzAddressValid
+        return isTzAddressValid
     }
 
     private fun isDelegateFeeValid():Boolean

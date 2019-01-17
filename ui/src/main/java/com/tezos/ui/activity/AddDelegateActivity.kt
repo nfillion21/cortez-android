@@ -681,15 +681,12 @@ class AddDelegateActivity : BaseSecureActivity()
 
     private fun isDelegateTezosAddressEquals(editable: Editable):Boolean
     {
-        val isTezosAddressEquals = false
+        val isTezosAddressEquals = true
 
         if (editable != null && !TextUtils.isEmpty(editable))
         {
             val tezosAddress = editable.toString()
-            if (tezosAddress == mDelegateTezosAddress)
-            {
-                return true
-            }
+            return tezosAddress == mDelegateTezosAddress
         }
         return isTezosAddressEquals
     }
@@ -701,15 +698,20 @@ class AddDelegateActivity : BaseSecureActivity()
 
     private fun isTzAddressValid(): Boolean
     {
-        val isTzAddressValid = false
+        var isTzAddressValid = false
 
-        return if (!TextUtils.isEmpty(tezos_address_edittext.text))
+        if (!TextUtils.isEmpty(tezos_address_edittext.text))
         {
-            Utils.isTzAddressValid(tezos_address_edittext.text!!.toString())
+            if (Utils.isTzAddressValid(tezos_address_edittext.text!!.toString()))
+            {
+                mDelegateTezosAddress = tezos_address_edittext.text.toString()
+                isTzAddressValid = true
+            }
         }
 
-        else isTzAddressValid
+        return isTzAddressValid
     }
+
 
     private fun isDelegateFeeValid():Boolean
     {
