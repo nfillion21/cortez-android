@@ -447,7 +447,6 @@ open class HomeFragment : Fragment()
 
         mNavProgressBalance?.visibility = View.VISIBLE
 
-
         val pkh = pkh()
         if (pkh != null)
         {
