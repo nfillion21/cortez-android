@@ -215,7 +215,7 @@ class DelegateFragment : Fragment()
         }
 
         remove_delegate_button_layout.setOnClickListener {
-            onDelegateClick()
+            onRemoveDelegateClick()
         }
 
         swipe_refresh_layout.setOnRefreshListener {
@@ -396,7 +396,7 @@ class DelegateFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateAddButton(false)
 
-        startPostRequestLoadInitDelegation()
+        startPostRequestLoadInitAddDelegate()
     }
 
     private fun startInitRemoveDelegateLoading()
@@ -729,7 +729,7 @@ class DelegateFragment : Fragment()
                             //TODO handle the result snackbar
                             //setResult(R.id.add_address_succeed, null)
                             //finish()
-                            showSnackBar(null, getString(R.string.delegation_successfully_deleted))
+                            showSnackBar(null, getString(R.string.delegate_successfully_added))
                         },
                         Response.ErrorListener
                         {
@@ -866,7 +866,7 @@ class DelegateFragment : Fragment()
     }
 
     // volley
-    private fun startPostRequestLoadInitDelegation()
+    private fun startPostRequestLoadInitAddDelegate()
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
 
@@ -883,6 +883,8 @@ class DelegateFragment : Fragment()
         postParams.put("src_pk", pk)
 
         var dstObjects = JSONArray()
+
+        dstObjects.put(mDelegateTezosAddress)
 
         //var dstObject = JSONObject()
         //dstObject.put("delegate", mDelegateTezosAddress)
