@@ -45,7 +45,6 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
 import android.widget.TextView
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
@@ -256,15 +255,17 @@ class AddDelegateActivity : BaseSecureActivity()
             //dstObject.put("dst", pkhDst)
 
             val mutezAmount = (mDelegateAmount*1000000.0).toLong().toString()
-            dstObject.put("amount", mutezAmount)
+            dstObject.put("balance", mutezAmount)
 
             dstObject.put("fee", mDelegateFees.toString())
+
+            dstObject.put("delegate", mDelegateTezosAddress)
 
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
 
-            if (!isPayloadValid(mDelegatePayload!!, postParams))
+            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -941,7 +942,7 @@ class AddDelegateActivity : BaseSecureActivity()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            //startInitTransferLoading()
+            startFinalizeDelegationLoading()
         }
         dialog.passwordVerificationListener =
                 {

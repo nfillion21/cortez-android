@@ -54,7 +54,6 @@ import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.authentication.AuthenticationDialog
@@ -64,7 +63,6 @@ import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
@@ -433,7 +431,7 @@ class TransferFormFragment : Fragment()
 
             postParams.put("dsts", dstObjects)
 
-            if (isPayloadValid(mTransferPayload!!, postParams))
+            if (isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 

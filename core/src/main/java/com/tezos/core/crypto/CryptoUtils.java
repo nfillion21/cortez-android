@@ -215,7 +215,6 @@ public class CryptoUtils
         return pkHash;
     }
 
-
     public static String generateSk(String mnemonics, String passphrase)
     {
         byte[] src_seed = generateSeed(mnemonics, passphrase);

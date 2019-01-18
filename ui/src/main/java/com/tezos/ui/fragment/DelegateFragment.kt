@@ -585,7 +585,7 @@ class DelegateFragment : Fragment()
             postParams.put("dsts", dstObjects)
 
             //TODO verify binary payload
-            if (!isPayloadValid(mDelegatePayload!!, postParams))
+            if (!isTransferPayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -692,7 +692,7 @@ class DelegateFragment : Fragment()
             postParams.put("dsts", dstObjects)
 
             //TODO verify binary payload
-            if (!isPayloadValid(mDelegatePayload!!, postParams))
+            if (!isTransferPayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
