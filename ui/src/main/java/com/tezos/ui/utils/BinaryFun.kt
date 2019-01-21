@@ -267,15 +267,12 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
     {
         val data = payload.hexToByteArray()
 
-        val obj = params["dsts"] as JSONArray
-        val dstObj = obj[0] as JSONObject
-
         // 32 first bytes are the block hash
         var i = 32
 
         //Reveal Tag 7
-        val isOriginationTag = data[i++].compareTo(7) == 0
-        if (!isOriginationTag)
+        val revealTag = data[i++].compareTo(7) == 0
+        if (!revealTag)
         {
             return false
         }
@@ -311,6 +308,7 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         val fees = addBytesLittleEndian(feeList)
         val isFeesValid = fees == dstFees
 
+        //TODO fees are not valid for now
         if (!isFeesValid)
         {
             return false
@@ -334,7 +332,6 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 
         } while (bytePos >= 128)
 
-
         val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
         i = 0
         do
@@ -344,87 +341,17 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 
         } while (bytePos >= 128)
 
-        //TODO on recupere les 21 prochains bytes
+        // we don't read the first byte (0)
+        val publicKey = storageLimit.slice(i+1 until storageLimit.size).toByteArray()
+        val binaryToPk = CryptoUtils.genericHashToPk(publicKey)
+        val isPublicKeyValid = params["src_pk"] == binaryToPk
 
-        val mngrPubKey = storageLimit.slice(i+1 .. i+1+20).toByteArray()
-        //TODO handle the first byte associated to tz1 (ed255-19)
-
-        val mngrPkh = params["src"]
-        val isMngrPubKeyValid = mngrPkh == CryptoUtils.genericHashToPkh(mngrPubKey)
-
-        if (!isMngrPubKeyValid)
+        if (!isPublicKeyValid)
         {
             return false
         }
 
-        val balance = storageLimit.slice(i+1+20 until storageLimit.size).toByteArray()
-
-        val balanceList = ArrayList<Int>()
-        i = 0
-        do
-        {
-            val bytePos = Utils.byteToUnsignedInt(balance[i])
-
-            balanceList.add(bytePos)
-            i++
-
-        } while (bytePos >= 128)
-
-
-        // balance
-        val dstBalance = dstObj["balance"] as String
-
-        val isBalanceValid =  addBytesLittleEndian(balanceList) == dstBalance.toLong()
-        if (!isBalanceValid)
-        {
-            return false
-        }
-
-        val spendable = balance.slice(i until balance.size).toByteArray()
-        i = 0
-        val isSpendable = Utils.byteToUnsignedInt(spendable[i++]).compareTo(255) == 0
-        if (!isSpendable)
-        {
-            return false
-        }
-
-        val delegatable = spendable.slice(i until spendable.size).toByteArray()
-        i = 0
-        val isDelegatable = Utils.byteToUnsignedInt(delegatable[i++]).compareTo(255) == 0
-        if (!isDelegatable)
-        {
-            return false
-        }
-
-        val delegatableField = delegatable.slice(i until delegatable.size).toByteArray()
-        i = 0
-        val isDelegatableFieldValid = Utils.byteToUnsignedInt(delegatableField[i++]).compareTo(255) == 0
-        if (!isDelegatableFieldValid)
-        {
-            return false
-        }
-
-        val delegate = delegatableField.slice(i until delegatableField.size).toByteArray()
-        val delegateParse = delegate.slice(1 .. 20).toByteArray()
-        val delegatePkh = dstObj["delegate"]
-
-        val cryptoDelegate = CryptoUtils.genericHashToPkh(delegateParse)
-        val isDelegateValid = delegatePkh == cryptoDelegate
-
-        if (!isDelegateValid)
-        {
-            return false
-        }
-
-        val script = delegate.slice(21 until delegate.size).toByteArray()
-
-        val isScriptNull = (script[0]).compareTo(0) == 0
-        if (!isScriptNull)
-        {
-            return false
-        }
-
-        isValid = isOriginationTag && isFeesValid && isMngrPubKeyValid && isBalanceValid && isSpendable && isDelegatable && isDelegatableFieldValid && isDelegateValid && isScriptNull
+        isValid = revealTag && isContractValid && isFeesValid && isPublicKeyValid
     }
     return isValid
 }

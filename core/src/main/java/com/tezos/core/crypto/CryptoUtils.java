@@ -197,6 +197,29 @@ public class CryptoUtils
         return pkHash;
     }
 
+    public static String genericHashToPk(byte[] genericHash)
+    {
+        // These are our prefixes
+        byte[] edpkPrefix = {(byte) 13, (byte) 15, (byte) 37, (byte) 217};
+
+        // begins eztz b58encode
+
+        // Create Tezos PK.
+        byte[] prefixedPubKey = new byte[36];
+
+        System.arraycopy(edpkPrefix, 0, prefixedPubKey, 0, 4);
+        System.arraycopy(genericHash, 0, prefixedPubKey, 4, 32);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
+        byte[] prefixedPubKeyWithChecksum = new byte[40];
+
+        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
+
+        String tezosPkString = Base58.encode(prefixedPubKeyWithChecksum);
+        return tezosPkString;
+    }
+
     public static String genericHashToPkh(byte[] genericHash)
     {
         byte[] tz1Prefix = {(byte) 6, (byte) 161, (byte) 159};
