@@ -165,97 +165,101 @@ fun isChangeDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         var i = 32
 
         //Reveal Tag 10
-        val delegationTag = data[i++].compareTo(10) == 0
-        if (!delegationTag)
+        val firstTag = data[i++]
+        if (firstTag.compareTo(10) == 0)
         {
-            return false
+            val contract = data.slice(i until data.size).toByteArray()
+
+            i = 22
+            val contractParse = contract.slice(1 until i).toByteArray()
+
+            val contractKT = params["src"]
+
+            val isContractValid = contractKT == CryptoUtils.genericHashToKT(contractParse)
+            if (!isContractValid)
+            {
+                return false
+            }
+
+            val fee = contract.slice(i until contract.size).toByteArray()
+
+            val feeList = ArrayList<Int>()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(fee[i])
+
+                feeList.add(bytePos)
+                i++
+
+            } while (bytePos > 128)
+
+            val dstFees = params["fee"] as Long
+
+            val fees = addBytesLittleEndian(feeList)
+            val isFeesValid = fees == dstFees
+
+            if (!isFeesValid)
+            {
+                return false
+            }
+
+            val counter = fee.slice(i until fee.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(counter[i])
+                i++
+
+            } while (bytePos >= 128)
+
+            val gasLimit = counter.slice(i until counter.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
+                i++
+
+            } while (bytePos >= 128)
+
+
+            val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
+                i++
+
+            } while (bytePos >= 128)
+
+            val delegatableField = storageLimit.slice(i until storageLimit.size).toByteArray()
+            i = 0
+            val isDelegatableFieldValid = Utils.byteToUnsignedInt(delegatableField[i++]).compareTo(255) == 0
+            if (!isDelegatableFieldValid)
+            {
+                return false
+            }
+
+            val delegate = delegatableField.slice(i until delegatableField.size).toByteArray()
+            val delegateParse = delegate.slice(1 .. 20).toByteArray()
+            val delegatePkh = params["delegate"]
+
+            val cryptoDelegate = CryptoUtils.genericHashToPkh(delegateParse)
+            val isDelegateValid = delegatePkh == cryptoDelegate
+
+            if (!isDelegateValid)
+            {
+                return false
+            }
+
+            return true
+        }
+        else if (firstTag.compareTo(7) == 0)
+        {
+
         }
 
-        val contract = data.slice(i until data.size).toByteArray()
-
-        i = 22
-        val contractParse = contract.slice(1 until i).toByteArray()
-
-        val contractKT = params["src"]
-
-        val isContractValid = contractKT == CryptoUtils.genericHashToKT(contractParse)
-        if (!isContractValid)
-        {
-            return false
-        }
-
-        val fee = contract.slice(i until contract.size).toByteArray()
-
-        val feeList = ArrayList<Int>()
-        i = 0
-        do
-        {
-            val bytePos = Utils.byteToUnsignedInt(fee[i])
-
-            feeList.add(bytePos)
-            i++
-
-        } while (bytePos > 128)
-
-        val dstFees = params["fee"] as Long
-
-        val fees = addBytesLittleEndian(feeList)
-        val isFeesValid = fees == dstFees
-
-        if (!isFeesValid)
-        {
-            return false
-        }
-
-        val counter = fee.slice(i until fee.size).toByteArray()
-        i = 0
-        do
-        {
-            val bytePos = Utils.byteToUnsignedInt(counter[i])
-            i++
-
-        } while (bytePos >= 128)
-
-        val gasLimit = counter.slice(i until counter.size).toByteArray()
-        i = 0
-        do
-        {
-            val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
-            i++
-
-        } while (bytePos >= 128)
-
-
-        val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
-        i = 0
-        do
-        {
-            val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
-            i++
-
-        } while (bytePos >= 128)
-
-        val delegatableField = storageLimit.slice(i until storageLimit.size).toByteArray()
-        i = 0
-        val isDelegatableFieldValid = Utils.byteToUnsignedInt(delegatableField[i++]).compareTo(255) == 0
-        if (!isDelegatableFieldValid)
-        {
-            return false
-        }
-
-        val delegate = delegatableField.slice(i until delegatableField.size).toByteArray()
-        val delegateParse = delegate.slice(1 .. 20).toByteArray()
-        val delegatePkh = params["delegate"]
-
-        val cryptoDelegate = CryptoUtils.genericHashToPkh(delegateParse)
-        val isDelegateValid = delegatePkh == cryptoDelegate
-
-        if (!isDelegateValid)
-        {
-            return false
-        }
-
-        isValid = delegationTag && isContractValid && isFeesValid && isDelegatableFieldValid && isDelegateValid
+        //isValid = delegationTag && isContractValid && isFeesValid && isDelegatableFieldValid && isDelegateValid
     }
     return isValid
 }
@@ -270,93 +274,167 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         // 32 first bytes are the block hash
         var i = 32
 
-
         //TODO check if it's a reveal or a delegation
 
         //Reveal Tag 7
-        val revealTag = data[i++].compareTo(7) == 0
-        if (!revealTag)
+        val firstTag = data[i++]
+        if (firstTag.compareTo(7) == 0)
         {
-            return false
+            val contract = data.slice(i until data.size).toByteArray()
+
+            i = 22
+            val contractParse = contract.slice(1 until i).toByteArray()
+
+            val contractKT = params["src"]
+
+            val isContractValid = contractKT == CryptoUtils.genericHashToKT(contractParse)
+            if (!isContractValid)
+            {
+                return false
+            }
+
+            val fee = contract.slice(i until contract.size).toByteArray()
+
+            val feeList = ArrayList<Int>()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(fee[i])
+
+                feeList.add(bytePos)
+                i++
+
+            } while (bytePos > 128)
+
+            val dstFees = params["fee"] as Long
+
+            val fees = addBytesLittleEndian(feeList)
+            val isFeesValid = fees == dstFees
+
+            /*
+            //TODO fees are not valid for now
+            if (!isFeesValid)
+            {
+                return false
+            }
+            */
+
+            val counter = fee.slice(i until fee.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(counter[i])
+                i++
+
+            } while (bytePos >= 128)
+
+            val gasLimit = counter.slice(i until counter.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
+                i++
+
+            } while (bytePos >= 128)
+
+            val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
+                i++
+
+            } while (bytePos >= 128)
+
+            // we don't read the first byte (0)
+            val publicKey = storageLimit.slice(i+1 until storageLimit.size).toByteArray()
+            val binaryToPk = CryptoUtils.genericHashToPk(publicKey)
+            val isPublicKeyValid = params["src_pk"] == binaryToPk
+
+            if (!isPublicKeyValid)
+            {
+                return false
+            }
+
+            return true
         }
-
-        val contract = data.slice(i until data.size).toByteArray()
-
-        i = 22
-        val contractParse = contract.slice(1 until i).toByteArray()
-
-        val contractKT = params["src"]
-
-        val isContractValid = contractKT == CryptoUtils.genericHashToKT(contractParse)
-        if (!isContractValid)
+        else if (firstTag.compareTo(10) == 0)
         {
-            return false
+
+            val contract = data.slice(i until data.size).toByteArray()
+
+            i = 22
+            val contractParse = contract.slice(1 until i).toByteArray()
+
+            val contractKT = params["src"]
+
+            val isContractValid = contractKT == CryptoUtils.genericHashToKT(contractParse)
+            if (!isContractValid)
+            {
+                return false
+            }
+
+            val fee = contract.slice(i until contract.size).toByteArray()
+
+            val feeList = ArrayList<Int>()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(fee[i])
+
+                feeList.add(bytePos)
+                i++
+
+            } while (bytePos > 128)
+
+            val dstFees = params["fee"] as Long
+
+            val fees = addBytesLittleEndian(feeList)
+            val isFeesValid = fees == dstFees
+
+            if (!isFeesValid)
+            {
+                return false
+            }
+
+            val counter = fee.slice(i until fee.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(counter[i])
+                i++
+
+            } while (bytePos >= 128)
+
+            val gasLimit = counter.slice(i until counter.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
+                i++
+
+            } while (bytePos >= 128)
+
+
+            val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
+            i = 0
+            do
+            {
+                val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
+                i++
+
+            } while (bytePos >= 128)
+
+            val delegatableField = storageLimit.slice(i until storageLimit.size).toByteArray()
+            i = 0
+            val isDelegatableFieldValid = Utils.byteToUnsignedInt(delegatableField[i++]).compareTo(0) == 0
+            if (!isDelegatableFieldValid)
+            {
+                return false
+            }
+
+            return true
         }
-
-        val fee = contract.slice(i until contract.size).toByteArray()
-
-        val feeList = ArrayList<Int>()
-        i = 0
-        do
-        {
-            val bytePos = Utils.byteToUnsignedInt(fee[i])
-
-            feeList.add(bytePos)
-            i++
-
-        } while (bytePos > 128)
-
-        val dstFees = params["fee"] as Long
-
-        val fees = addBytesLittleEndian(feeList)
-        val isFeesValid = fees == dstFees
-
-        /*
-        //TODO fees are not valid for now
-        if (!isFeesValid)
-        {
-            return false
-        }
-        */
-
-        val counter = fee.slice(i until fee.size).toByteArray()
-        i = 0
-        do
-        {
-            val bytePos = Utils.byteToUnsignedInt(counter[i])
-            i++
-
-        } while (bytePos >= 128)
-
-        val gasLimit = counter.slice(i until counter.size).toByteArray()
-        i = 0
-        do
-        {
-            val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
-            i++
-
-        } while (bytePos >= 128)
-
-        val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
-        i = 0
-        do
-        {
-            val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
-            i++
-
-        } while (bytePos >= 128)
-
-        // we don't read the first byte (0)
-        val publicKey = storageLimit.slice(i+1 until storageLimit.size).toByteArray()
-        val binaryToPk = CryptoUtils.genericHashToPk(publicKey)
-        val isPublicKeyValid = params["src_pk"] == binaryToPk
-
-        if (!isPublicKeyValid)
-        {
-            return false
-        }
-
-        isValid = revealTag && isContractValid && !isFeesValid && isPublicKeyValid
     }
     return isValid
 }
@@ -412,7 +490,6 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         {
             return false
         }
-
 
         val counter = fee.slice(i until fee.size).toByteArray()
         i = 0
