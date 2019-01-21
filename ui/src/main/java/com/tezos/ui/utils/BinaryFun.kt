@@ -270,6 +270,9 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         // 32 first bytes are the block hash
         var i = 32
 
+
+        //TODO check if it's a reveal or a delegation
+
         //Reveal Tag 7
         val revealTag = data[i++].compareTo(7) == 0
         if (!revealTag)
@@ -308,11 +311,13 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         val fees = addBytesLittleEndian(feeList)
         val isFeesValid = fees == dstFees
 
+        /*
         //TODO fees are not valid for now
         if (!isFeesValid)
         {
             return false
         }
+        */
 
         val counter = fee.slice(i until fee.size).toByteArray()
         i = 0
@@ -351,7 +356,7 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
             return false
         }
 
-        isValid = revealTag && isContractValid && isFeesValid && isPublicKeyValid
+        isValid = revealTag && isContractValid && !isFeesValid && isPublicKeyValid
     }
     return isValid
 }

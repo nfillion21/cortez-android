@@ -178,6 +178,7 @@ class DelegateFragment : Fragment()
     interface OnAddedDelegationListener
     {
         fun showSnackBar(res:String, color:Int, textColor:Int)
+        fun finish(res:Int)
 
         fun isFingerprintAllowed():Boolean
         fun hasEnrolledFingerprints():Boolean
@@ -621,10 +622,7 @@ class DelegateFragment : Fragment()
                             //there's no need to do anything because we call finish()
                             onFinalizeDelegationLoadComplete(null)
 
-                            //TODO handle the result snackbar
-                            //setResult(R.id.add_address_succeed, null)
-                            //finish()
-                            showSnackBar(null, getString(R.string.delegation_successfully_deleted))
+                            mCallback?.finish(R.id.remove_delegate_succeed)
                         },
                         Response.ErrorListener
                         {
@@ -722,10 +720,7 @@ class DelegateFragment : Fragment()
                             //there's no need to do anything because we call finish()
                             onFinalizeDelegationLoadComplete(null)
 
-                            //TODO handle the result snackbar
-                            //setResult(R.id.add_address_succeed, null)
-                            //finish()
-                            showSnackBar(null, getString(R.string.delegate_successfully_added))
+                            mCallback?.finish(R.id.add_delegate_succeed)
                         },
                         Response.ErrorListener
                         {

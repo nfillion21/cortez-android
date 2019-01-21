@@ -203,11 +203,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             }
         }
 
-        fabAddAddress.setOnClickListener { _ ->
+        fabAddAddress.setOnClickListener {
             AddAddressActivity.start(this, mTezosTheme)
         }
 
-        fabAddDelegate.setOnClickListener { _ ->
+        fabAddDelegate.setOnClickListener {
             AddDelegateActivity.start(this, mTezosTheme)
         }
 
@@ -401,6 +401,18 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 if (resultCode == R.id.add_address_succeed)
                 {
                     showSnackBar(getString(R.string.address_successfully_delegated), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
+            }
+
+            DelegateActivity.DELEGATE_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.remove_delegate_succeed)
+                {
+                    showSnackBar(getString(R.string.delegation_successfully_deleted), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
+                else if (resultCode == R.id.add_delegate_succeed)
+                {
+                    showSnackBar(getString(R.string.delegate_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
             }
 

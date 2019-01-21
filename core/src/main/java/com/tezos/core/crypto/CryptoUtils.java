@@ -27,14 +27,8 @@
 
 package com.tezos.core.crypto;
 
-import android.os.Bundle;
 import android.text.TextUtils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.spongycastle.crypto.engines.TEAEngine;
-
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
@@ -335,19 +329,13 @@ public class CryptoUtils
         byte[] prefixedPubKey = new byte[36];
 
         System.arraycopy(edpkPrefix, 0, prefixedPubKey, 0, 4);
-
         System.arraycopy(sodiumPublicKey, 0, prefixedPubKey, 4, 32);
 
         byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
-
-
         byte[] prefixedPubKeyWithChecksum = new byte[40];
 
         System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
-
-
         System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
-
 
         String tezosPkString = Base58.encode(prefixedPubKeyWithChecksum);
         return tezosPkString;

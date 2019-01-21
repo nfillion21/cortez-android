@@ -413,4 +413,10 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
     {
         storage.saveFingerprintAllowed(useInFuture)
     }
+
+    override fun finish(res: Int)
+    {
+        setResult(res)
+        finish()
+    }
 }
