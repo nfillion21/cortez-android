@@ -564,7 +564,7 @@ class DelegateFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isRemoveButtonValid() && mDelegatePayload != null)
+        if (isRemoveButtonValid() && mDelegatePayload != null && mDelegateFees != null)
         {
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
@@ -575,6 +575,8 @@ class DelegateFragment : Fragment()
             var postParams = JSONObject()
             postParams.put("src", pkh())
             postParams.put("src_pk", pk)
+
+            postParams.put("fee", mDelegateFees)
 
             var dstObjects = JSONArray()
 
@@ -671,7 +673,7 @@ class DelegateFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isAddButtonValid() && mDelegatePayload != null)
+        if (isAddButtonValid() && mDelegatePayload != null && mDelegateTezosAddress != null && mDelegateFees != null)
         {
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
@@ -682,17 +684,11 @@ class DelegateFragment : Fragment()
             var postParams = JSONObject()
             postParams.put("src", pkh())
             postParams.put("src_pk", pk)
-
-            var dstObjects = JSONArray()
-
-            var dstObject = JSONObject()
-
-            dstObjects.put(dstObject)
-
-            postParams.put("dsts", dstObjects)
+            postParams.put("delegate", mDelegateTezosAddress)
+            postParams.put("fee", mDelegateFees)
 
             //TODO verify binary payload
-            if (!isTransferPayloadValid(mDelegatePayload!!, postParams))
+            if (isChangeDelegatePayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -885,13 +881,7 @@ class DelegateFragment : Fragment()
         var dstObjects = JSONArray()
 
         dstObjects.put(mDelegateTezosAddress)
-
-        //var dstObject = JSONObject()
-        //dstObject.put("delegate", mDelegateTezosAddress)
-        //just delete it for now
-        //dstObject.put("delegate", null)
-
-        //dstObjects.put(dstObject)
+        //dstObjects.put("tz1boot1pK9h2BVGXdyvfQSv8kd1LQM6H889")
 
         postParams.put("dsts", dstObjects)
 
@@ -902,16 +892,6 @@ class DelegateFragment : Fragment()
 
             mDelegatePayload = answer.getString("result")
             mDelegateFees = answer.getLong("total_fee")
-
-            // get back the object and
-
-            //val dstsArray = postParams["dsts"] as JSONArray
-            //val dstObj = dstsArray[0] as JSONObject
-
-            //dstObj.put("fee", mDelegateFees.toString())
-            //dstsArray.put(0, dstObj)
-
-            //postParams.put("dsts", dstsArray)
 
             // we use this call to ask for payload and fees
             if (mDelegatePayload != null && mDelegateFees != null)
@@ -988,8 +968,6 @@ class DelegateFragment : Fragment()
 
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
-
-            //TODO check if the JSON is fine then launch the 2nd request
 
             mDelegatePayload = answer.getString("result")
             mDelegateFees = answer.getLong("total_fee")

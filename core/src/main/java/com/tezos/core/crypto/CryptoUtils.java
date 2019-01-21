@@ -215,6 +215,24 @@ public class CryptoUtils
         return pkHash;
     }
 
+    public static String genericHashToKT(byte[] genericHash)
+    {
+        byte[] tz1Prefix = {(byte) 2, (byte) 90, (byte) 121};
+
+        byte[] prefixedGenericHash = new byte[23];
+        System.arraycopy(tz1Prefix, 0, prefixedGenericHash, 0, 3);
+        System.arraycopy(genericHash, 0, prefixedGenericHash, 3, 20);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedGenericHash);
+        byte[] prefixedPKhashWithChecksum = new byte[27];
+        System.arraycopy(prefixedGenericHash, 0, prefixedPKhashWithChecksum, 0, 23);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPKhashWithChecksum, 23, 4);
+
+        String pkHash = Base58.encode(prefixedPKhashWithChecksum);
+
+        return pkHash;
+    }
+
     public static String generateSk(String mnemonics, String passphrase)
     {
         byte[] src_seed = generateSeed(mnemonics, passphrase);
