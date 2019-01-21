@@ -37,12 +37,6 @@
                 android:text="@string/tab_dashboard" />
 
             <android.support.design.widget.TabItem
-                android:id="@+id/tabItemAddressBook"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tab_address_book" />
-
-            <android.support.design.widget.TabItem
                 android:id="@+id/tabItemReceive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

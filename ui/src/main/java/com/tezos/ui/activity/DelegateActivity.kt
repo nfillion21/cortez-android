@@ -132,13 +132,6 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
 
                     1 ->
                     {
-                        fabTransfer.hide()
-                        fabAddAddress.show()
-                        fabSharing.hide()
-                    }
-
-                    2 ->
-                    {
                         if (isPasswordSaved)
                         {
                             fabTransfer.hide()
@@ -153,7 +146,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                         }
                     }
 
-                    3 ->
+                    2 ->
                     {
                         fabTransfer.hide()
                         fabAddAddress.hide()
@@ -223,7 +216,6 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
      */
     inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm)
     {
-
         override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any)
         {
             super.setPrimaryItem(container, position, `object`)
@@ -249,13 +241,6 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
 
                 1 ->
                 {
-                    fabTransfer.hide()
-                    fabAddAddress.show()
-                    fabSharing.hide()
-                }
-
-                2 ->
-                {
                     if (isPasswordSaved)
                     {
                         fabTransfer.hide()
@@ -270,7 +255,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                     }
                 }
 
-                3 ->
+                2 ->
                 {
                     fabTransfer.hide()
                     fabAddAddress.hide()
@@ -295,15 +280,11 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
                 }
                 1 ->
                 {
-                    return AddressBookFragment.newInstance(mTezosTheme, null, null)
-                }
-                2 ->
-                {
                     val pkh = intent.getStringExtra(TAG_PKH)
                     return SharingAddressFragment.newInstance(mTezosTheme, pkh)
                 }
 
-                3 ->
+                2 ->
                 {
                     val pkh = intent.getStringExtra(TAG_PKH)
                     return DelegateFragment.newInstance(mTezosTheme, pkh)
@@ -316,7 +297,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
         override fun getCount(): Int
         {
             // Show 3 total pages.
-            return 4
+            return 3
         }
     }
 
