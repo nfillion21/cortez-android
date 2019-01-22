@@ -422,10 +422,10 @@ class TransferFormFragment : Fragment()
             var dstObject = JSONObject()
             dstObject.put("dst", pkhDst)
 
-            val mutezAmount = (mTransferAmount*1000000.0).toLong().toString()
+            val mutezAmount = (mTransferAmount*1000000.0).toLong()
             dstObject.put("amount", mutezAmount)
 
-            dstObject.put("fee", mTransferFees.toString())
+            dstObject.put("fee", mTransferFees)
 
             dstObjects.put(dstObject)
 
