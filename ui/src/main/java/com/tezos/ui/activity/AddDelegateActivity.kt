@@ -254,10 +254,10 @@ class AddDelegateActivity : BaseSecureActivity()
             var dstObject = JSONObject()
             //dstObject.put("dst", pkhDst)
 
-            val mutezAmount = (mDelegateAmount*1000000.0).toLong().toString()
+            val mutezAmount = (mDelegateAmount*1000000.0).toLong()
             dstObject.put("balance", mutezAmount)
 
-            dstObject.put("fee", mDelegateFees.toString())
+            dstObject.put("fee", mDelegateFees)
 
             dstObject.put("delegate", mDelegateTezosAddress)
 

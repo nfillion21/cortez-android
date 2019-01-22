@@ -64,7 +64,7 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
             val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long)
             if (transactionFees != -1L)
             {
-                if (transactionFees == params["fee"])
+                if (transactionFees == dstObj["fee"])
                 {
                     return true
                 }
@@ -174,12 +174,6 @@ fun isChangeDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 
             return true
         }
-        else if (firstTag.compareTo(7) == 0)
-        {
-
-        }
-
-        //isValid = delegationTag && isContractValid && isFeesValid && isDelegatableFieldValid && isDelegateValid
     }
     return isValid
 }
@@ -446,19 +440,7 @@ private fun isDelegationTagCorrect(payload: ByteArray, src:String):Long
 
         } while (bytePos > 128)
 
-        //val dstFees = feeParam
-
         val fees = addBytesLittleEndian(feeList)
-
-
-        //val isFeesValid = fees == dstFees
-
-        /*
-        if (!isFeesValid)
-        {
-            return -1
-        }
-        */
 
         val counter = fee.slice(i until fee.size).toByteArray()
         i = 0
@@ -501,37 +483,25 @@ private fun isDelegationTagCorrect(payload: ByteArray, src:String):Long
     return -1L
 }
 
-fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
+private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balanceParam:Long, delegateParam:String):Long
 {
-    var isValid = false
-    if (payload != null && params != null)
+    var i = 0
+
+    val isOriginationTag = data[i++]
+
+    if (isOriginationTag.compareTo(9) == 0)
     {
-        val data = payload.hexToByteArray()
+        val src = data.slice((i+2)..(i+2+19)).toByteArray()
 
-        val obj = params["dsts"] as JSONArray
-        val dstObj = obj[0] as JSONObject
-
-        // 32 first bytes are the block hash
-        var i = 32
-
-        val isOriginationTag = data[i].compareTo(9) == 0
-        if (!isOriginationTag)
-        {
-            return false
-        }
-
-        val src = data.slice((i+3)..(i+3+19)).toByteArray()
-        val pkh = params["src"]
-
-        val isSrcValid = pkh == CryptoUtils.genericHashToPkh(src)
+        val isSrcValid = srcParam == CryptoUtils.genericHashToPkh(src)
 
         if (!isSrcValid)
         {
-            return false
+            return -1L
         }
 
         val size = data.size
-        val fee = data.slice((i+3+19+1) until size).toByteArray()
+        val fee = data.slice((i+2+19+1) until size).toByteArray()
 
         val feeList = ArrayList<Int>()
         i = 0
@@ -544,14 +514,9 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 
         } while (bytePos > 128)
 
-        val dstFees = dstObj["fee"] as String
+        //val dstFees = dstObj["fee"] as String
 
-        val isFeesValid = addBytesLittleEndian(feeList) == dstFees.toLong()
-
-        if (!isFeesValid)
-        {
-            return false
-        }
+        val retFee = addBytesLittleEndian(feeList)
 
         val counter = fee.slice(i until fee.size).toByteArray()
         i = 0
@@ -586,12 +551,11 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         val mngrPubKey = storageLimit.slice(i+1 .. i+1+20).toByteArray()
         //TODO handle the first byte associated to tz1 (ed255-19)
 
-        val mngrPkh = params["src"]
-        val isMngrPubKeyValid = mngrPkh == CryptoUtils.genericHashToPkh(mngrPubKey)
+        val isMngrPubKeyValid = srcParam == CryptoUtils.genericHashToPkh(mngrPubKey)
 
         if (!isMngrPubKeyValid)
         {
-            return false
+            return -1L
         }
 
         val balance = storageLimit.slice(i+1+20 until storageLimit.size).toByteArray()
@@ -607,14 +571,10 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 
         } while (bytePos >= 128)
 
-
-        // balance
-        val dstBalance = dstObj["balance"] as String
-
-        val isBalanceValid =  addBytesLittleEndian(balanceList) == dstBalance.toLong()
+        val isBalanceValid =  addBytesLittleEndian(balanceList) == balanceParam
         if (!isBalanceValid)
         {
-            return false
+            return -1L
         }
 
         val spendable = balance.slice(i until balance.size).toByteArray()
@@ -622,7 +582,7 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         val isSpendable = Utils.byteToUnsignedInt(spendable[i++]).compareTo(255) == 0
         if (!isSpendable)
         {
-            return false
+            return -1L
         }
 
         val delegatable = spendable.slice(i until spendable.size).toByteArray()
@@ -630,7 +590,7 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         val isDelegatable = Utils.byteToUnsignedInt(delegatable[i++]).compareTo(255) == 0
         if (!isDelegatable)
         {
-            return false
+            return -1L
         }
 
         val delegatableField = delegatable.slice(i until delegatable.size).toByteArray()
@@ -638,19 +598,18 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         val isDelegatableFieldValid = Utils.byteToUnsignedInt(delegatableField[i++]).compareTo(255) == 0
         if (!isDelegatableFieldValid)
         {
-            return false
+            return -1L
         }
 
         val delegate = delegatableField.slice(i until delegatableField.size).toByteArray()
         val delegateParse = delegate.slice(1 .. 20).toByteArray()
-        val delegatePkh = dstObj["delegate"]
 
         val cryptoDelegate = CryptoUtils.genericHashToPkh(delegateParse)
-        val isDelegateValid = delegatePkh == cryptoDelegate
+        val isDelegateValid = delegateParam == cryptoDelegate
 
         if (!isDelegateValid)
         {
-            return false
+            return -1L
         }
 
         val script = delegate.slice(21 until delegate.size).toByteArray()
@@ -658,12 +617,53 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         val isScriptNull = (script[0]).compareTo(0) == 0
         if (!isScriptNull)
         {
-            return false
+            return -1L
         }
-
-        isValid = isOriginationTag && isSrcValid && isFeesValid && isMngrPubKeyValid && isBalanceValid && isSpendable && isDelegatable && isDelegatableFieldValid && isDelegateValid && isScriptNull
+        return  retFee
     }
-    return isValid
+
+    return -1L
+}
+
+fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
+{
+    if (payload != null && params != null)
+    {
+        val data = payload.hexToByteArray()
+
+        val obj = params["dsts"] as JSONArray
+        val dstObj = obj[0] as JSONObject
+
+        val dataField = data.slice(32 until data.size).toByteArray()
+
+        val revealFees = isRevealTagCorrect(dataField, params["src"] as String, false, params["src_pk"] as String)
+        if (revealFees.first != -1L)
+        {
+            val delegationByteArray = revealFees.second
+
+            val originationFees = isOriginationTagCorrect(delegationByteArray!!, params["src"] as String, dstObj["balance"] as Long, dstObj["delegate"] as String)
+            if (originationFees != -1L)
+            {
+                val totalFees = revealFees.first + originationFees
+                if (totalFees == dstObj["fee"])
+                {
+                    return true
+                }
+            }
+        }
+        else
+        {
+            val originationFees = isOriginationTagCorrect(dataField, params["src"] as String, dstObj["balance"] as Long, dstObj["delegate"] as String)
+            if (originationFees != -1L)
+            {
+                if (originationFees == dstObj["fee"])
+                {
+                    return true
+                }
+            }
+        }
+    }
+    return false
 }
 
 private fun addBytesLittleEndian(bytes:ArrayList<Int>):Long
