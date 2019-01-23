@@ -281,13 +281,7 @@ class TransferFormFragment : Fragment()
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
 
-        // this fragment always have mnemonics arg
-        arguments?.let {
-            val seedDataBundle = it.getBundle(Storage.TAG)
-            val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
-
-            startPostRequestLoadFinalizeTransfer(mnemonicsData)
-        }
+        startPostRequestLoadFinalizeTransfer()
     }
 
     // volley
@@ -396,21 +390,23 @@ class TransferFormFragment : Fragment()
 
 
     // volley
-    private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
+    private fun startPostRequestLoadFinalizeTransfer()
     {
         val url = getString(R.string.transfer_injection_operation)
+
+        val seed = Storage(activity!!).getMnemonics()
 
         //TODO we got to verify at this very moment.
         if (isPayButtonValid() && mTransferPayload != null)
         {
-            val pkhSrc = mnemonicsData.pkh
+            //val pkhSrc = seed.pkh
             val pkhDst = mDstAccount
 
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val mnemonics = EncryptionServices(activity!!).decrypt(seed.mnemonics, "not useful for marshmallow")
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
-            postParams.put("src", pkhSrc)
+            postParams.put("src", mSrcAccount)
             postParams.put("src_pk", pk)
 
             var dstObjects = JSONArray()

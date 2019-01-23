@@ -49,7 +49,10 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
         {
             val transactionByteArray = revealFees.second
 
-            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long)
+            val srcParam = params["src"] as String
+            val dstParam = params["dst"] as String
+
+            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long)
             if (transactionFees != -1L)
             {
                 val totalFees = revealFees.first + transactionFees
@@ -319,9 +322,10 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
     val firstTag = payload[i++]
     if (firstTag.compareTo(8) == 0)
     {
-        val src = payload.slice((i+2)..(i+2+19)).toByteArray()
 
-        val isSrcValid = srcParam == CryptoUtils.genericHashToPkh(src)
+        val src = payload.slice((i+(if (srcParam.startsWith("KT1", true)) 1 else 2))..(i+(if (srcParam.startsWith("KT1", true)) 1 else 2)+19)).toByteArray()
+
+        val isSrcValid = srcParam == if (srcParam.startsWith("KT1", true)) CryptoUtils.genericHashToKT(src) else CryptoUtils.genericHashToPkh(src)
 
         if (!isSrcValid)
         {
@@ -392,7 +396,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             return -1L
         }
 
-        val dst = amount.slice(i+2 until amount.size).toByteArray()
+        val dst = amount.slice(i+(if (dstParam.startsWith("KT1", true)) 1 else 2) until amount.size).toByteArray()
         //TODO handle the first two bytes
 
         val isDstValid = dstParam == CryptoUtils.genericHashToPkh(dst)
