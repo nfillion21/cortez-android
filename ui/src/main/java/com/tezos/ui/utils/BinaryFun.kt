@@ -50,7 +50,7 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
             val transactionByteArray = revealFees.second
 
             val srcParam = params["src"] as String
-            val dstParam = params["dst"] as String
+            val dstParam = dstObj["dst"] as String
 
             val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long)
             if (transactionFees != -1L)

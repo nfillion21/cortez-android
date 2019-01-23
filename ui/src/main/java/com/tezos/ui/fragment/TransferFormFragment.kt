@@ -152,7 +152,7 @@ class TransferFormFragment : Fragment()
             mSrcAccount = savedInstanceState.getString(SRC_ACCOUNT_KEY)
             if (mSrcAccount != null)
             {
-                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, mSrcAccount!!)
             }
 
             mDstAccount = savedInstanceState.getString(DST_ACCOUNT_KEY)

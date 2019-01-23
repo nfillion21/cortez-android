@@ -1015,11 +1015,11 @@ class DelegateFragment : Fragment()
 
         if (loading)
         {
-            nav_progress.visibility = View.VISIBLE
+            nav_progress?.visibility = View.VISIBLE
         }
         else
         {
-            nav_progress.visibility = View.GONE
+            nav_progress?.visibility = View.GONE
         }
     }
 
