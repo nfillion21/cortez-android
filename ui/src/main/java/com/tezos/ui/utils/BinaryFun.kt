@@ -44,7 +44,7 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
 
         val dataField = data.slice(32 until data.size).toByteArray()
 
-        val revealFees = isRevealTagCorrect(dataField, params["src"] as String, false, params["src_pk"] as String)
+        val revealFees = isRevealTagCorrect(dataField, params["src"] as String, params["src_pk"] as String)
         if (revealFees.first != -1L)
         {
             val transactionByteArray = revealFees.second
@@ -190,7 +190,7 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         val data = payload.hexToByteArray()
         val dataField = data.slice(32 until data.size).toByteArray()
 
-        val revealFees = isRevealTagCorrect(dataField, params["src"] as String, true, params["src_pk"] as String)
+        val revealFees = isRevealTagCorrect(dataField, params["src"] as String, params["src_pk"] as String)
         if (revealFees.first != -1L)
         {
             val delegationByteArray = revealFees.second
@@ -222,7 +222,7 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
     return false
 }
 
-private fun isRevealTagCorrect(payload: ByteArray, src:String, isSrcKT:Boolean, srcPk:String):Pair<Long, ByteArray?>
+private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pair<Long, ByteArray?>
 {
     var i = 0
 
@@ -233,9 +233,9 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, isSrcKT:Boolean, 
         val contract = payload.slice(i until payload.size).toByteArray()
 
         i = 22
-        val contractParse = contract.slice((if (isSrcKT) 1 else 2) until i).toByteArray()
+        val contractParse = contract.slice((if (src.startsWith("KT1", true)) 1 else 2) until i).toByteArray()
 
-        val hash = if (isSrcKT)
+        val hash = if (src.startsWith("KT1", true))
         {
             CryptoUtils.genericHashToKT(contractParse)
         }
@@ -366,7 +366,6 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         } while (bytePos >= 128)
 
-
         val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
         i = 0
         do
@@ -375,7 +374,6 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             i++
 
         } while (bytePos >= 128)
-
 
         val amount = storageLimit.slice(i until storageLimit.size).toByteArray()
 
@@ -399,7 +397,15 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         val dst = amount.slice(i+(if (dstParam.startsWith("KT1", true)) 1 else 2) until amount.size).toByteArray()
         //TODO handle the first two bytes
 
-        val isDstValid = dstParam == CryptoUtils.genericHashToPkh(dst)
+        val isDstValid = if (dstParam.startsWith("KT1", true))
+        {
+            dstParam == CryptoUtils.genericHashToKT(dst)
+        }
+        else
+        {
+            dstParam == CryptoUtils.genericHashToPkh(dst)
+        }
+
         if (!isDstValid)
         {
             return -1L
@@ -640,7 +646,7 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 
         val dataField = data.slice(32 until data.size).toByteArray()
 
-        val revealFees = isRevealTagCorrect(dataField, params["src"] as String, false, params["src_pk"] as String)
+        val revealFees = isRevealTagCorrect(dataField, params["src"] as String, params["src_pk"] as String)
         if (revealFees.first != -1L)
         {
             val delegationByteArray = revealFees.second

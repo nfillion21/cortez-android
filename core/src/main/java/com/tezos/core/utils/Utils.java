@@ -215,9 +215,13 @@ public class Utils {
         {
             String addressText = tzAddress;
 
-            if ((addressText.toLowerCase().startsWith("tz1") ||  addressText.toLowerCase().startsWith("tz2") || addressText.toLowerCase().startsWith("tz3"))
-                    &&
-                    addressText.length() == 36)
+            if (
+                    (addressText.toLowerCase().startsWith("tz1") ||
+                            addressText.toLowerCase().startsWith("tz2") ||
+                            addressText.toLowerCase().startsWith("tz3")) ||
+                            addressText.toLowerCase().startsWith("kt1")
+            )
+
             {
                 isTzAddressValid = true;
             }
