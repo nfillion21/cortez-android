@@ -52,7 +52,7 @@ import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_delegate.*
 
-class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener
+class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener
 {
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
@@ -171,9 +171,8 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
             val isPasswordSaved = Storage(this).isPasswordSaved()
             if (isPasswordSaved)
             {
-                val seed = Storage(baseContext).getMnemonics()
-                val seedBundle = Storage.toBundle(seed)
-                TransferFormActivity.start(this, seedBundle, null, mTezosTheme)
+                val pkh = intent.getStringExtra(TAG_PKH)
+                TransferFormActivity.start(this, pkh, null, mTezosTheme)
             }
             else
             {
@@ -384,6 +383,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
     Addresses
      */
 
+    /*
     override fun onCardClicked(address: Address?)
     {
         val isPasswordSaved = Storage(this).isPasswordSaved()
@@ -398,6 +398,7 @@ class DelegateActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelecte
             showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
         }
     }
+    */
 
     override fun isFingerprintAllowed():Boolean
     {

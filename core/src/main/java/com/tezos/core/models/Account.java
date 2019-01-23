@@ -29,10 +29,7 @@ package com.tezos.core.models;
 
 import android.os.Bundle;
 
-import com.tezos.core.mapper.AbstractMapper;
 import com.tezos.core.mapper.interfaces.MapMapper;
-import com.tezos.core.serialization.AbstractSerializationMapper;
-import com.tezos.core.serialization.interfaces.AbstractSerialization;
 
 import java.util.Map;
 
@@ -41,8 +38,6 @@ public class Account extends Address
     public static final String TAG = "Account";
 
     protected String privateKeyHash;
-
-    public Account() {}
 
     public String getPrivateKeyHash() {
         return privateKeyHash;

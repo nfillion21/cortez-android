@@ -56,6 +56,7 @@ import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.activity.AddressBookActivity
+import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
@@ -71,8 +72,8 @@ import kotlin.collections.set
  */
 class TransferFormFragment : Fragment()
 {
-    private var mSrcAccount:Address? = null
-    private var mDstAccount:Address? = null
+    private var mSrcAccount:String? = null
+    private var mDstAccount:String? = null
 
     private var listener: OnTransferListener? = null
 
@@ -89,15 +90,15 @@ class TransferFormFragment : Fragment()
     companion object
     {
         @JvmStatic
-        fun newInstance(seedDataBundle:Bundle, address:Bundle?, customTheme:Bundle) =
+        fun newInstance(srcAddress:String, address:Bundle?, customTheme:Bundle) =
                 TransferFormFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, customTheme)
-                        putBundle(Storage.TAG, seedDataBundle)
+                        putString(Address.TAG, srcAddress)
 
                         if (address != null)
                         {
-                            putBundle(Address.TAG, address)
+                            putBundle(TransferFormActivity.DST_ADDRESS_KEY, address)
                         }
                     }
                 }
@@ -148,16 +149,11 @@ class TransferFormFragment : Fragment()
 
         if (savedInstanceState != null)
         {
-            val srcBundle = savedInstanceState.getParcelable<Bundle>(SRC_ACCOUNT_KEY)
-            if (srcBundle != null)
-            {
-                mSrcAccount = Account.fromBundle(srcBundle)
-            }
+            mSrcAccount = savedInstanceState.getString(SRC_ACCOUNT_KEY)
+            mDstAccount = savedInstanceState.getString(DST_ACCOUNT_KEY)
 
-            val dstBundle = savedInstanceState.getParcelable<Bundle>(DST_ACCOUNT_KEY)
-            if (dstBundle != null)
+            if (mDstAccount != null)
             {
-                mDstAccount = Account.fromBundle(dstBundle)
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
 
@@ -304,17 +300,17 @@ class TransferFormFragment : Fragment()
         val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
-        val pkhSrc = mnemonicsData.pkh
-        val pkhDst = mDstAccount?.pubKeyHash
+        //val pkhSrc = mnemonicsData.pkh
+        //val pkhDst = mDstAccount?.pubKeyHash
 
         var postParams = JSONObject()
-        postParams.put("src", pkhSrc)
+        postParams.put("src", mSrcAccount)
         postParams.put("src_pk", pk)
 
         var dstObjects = JSONArray()
 
         var dstObject = JSONObject()
-        dstObject.put("dst", pkhDst)
+        dstObject.put("dst", mDstAccount)
         dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
 
         //we don't need fees to forge
@@ -408,7 +404,7 @@ class TransferFormFragment : Fragment()
         if (isPayButtonValid() && mTransferPayload != null)
         {
             val pkhSrc = mnemonicsData.pkh
-            val pkhDst = mDstAccount?.pubKeyHash
+            val pkhDst = mDstAccount
 
             val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
             val pk = CryptoUtils.generatePk(mnemonics, "")
@@ -552,18 +548,14 @@ class TransferFormFragment : Fragment()
 
         arguments?.let {
 
-            val seedDataBundle = it.getBundle(Storage.TAG)
-            val seedData = Storage.fromBundle(seedDataBundle)
+            val srcAddress = it.getString(Address.TAG)
+            switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, srcAddress)
 
-            var account = Address()
-            account.pubKeyHash = seedData.pkh
-            switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, account)
-
-            val address = it.getBundle(Address.TAG)
-            if (address != null)
+            val dstAddress = it.getString(DST_ACCOUNT_KEY)
+            if (dstAddress != null)
             {
-                mDstAccount = Address.fromBundle(address)
-                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+                mDstAccount = dstAddress
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, dstAddress)
             }
         }
 
@@ -636,8 +628,7 @@ class TransferFormFragment : Fragment()
         {
             if (data != null && data.hasExtra(Account.TAG))
             {
-                val accountBundle = data.getBundleExtra(Account.TAG)
-                val account = Account.fromBundle(accountBundle)
+                val account = data.getStringExtra(Account.TAG)
 
                 if (resultCode == R.id.transfer_src_selection_succeed)
                 {
@@ -668,7 +659,7 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    private fun switchButtonAndLayout(selection: AddressBookActivity.Selection, address: Address)
+    private fun switchButtonAndLayout(selection: AddressBookActivity.Selection, address: String)
     {
         when (selection)
         {
@@ -677,14 +668,14 @@ class TransferFormFragment : Fragment()
                 transfer_src_button.visibility = View.GONE
                 transfer_source_filled.visibility = View.VISIBLE
 
-                src_payment_account_pub_key_hash.text = address.pubKeyHash
+                src_payment_account_pub_key_hash.text = address
             }
 
             AddressBookActivity.Selection.SelectionAccountsAndAddresses ->
             {
                 transfer_dst_button.visibility = View.GONE
                 transfer_destination_filled.visibility = View.VISIBLE
-                dst_payment_account_pub_key_hash.text = address.pubKeyHash
+                dst_payment_account_pub_key_hash.text = address
             }
 
             else ->
@@ -1032,8 +1023,8 @@ class TransferFormFragment : Fragment()
     {
         super.onSaveInstanceState(outState)
 
-        outState.putParcelable(SRC_ACCOUNT_KEY, mSrcAccount?.toBundle())
-        outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
+        outState.putString(SRC_ACCOUNT_KEY, mSrcAccount)
+        outState.putString(DST_ACCOUNT_KEY, mDstAccount)
 
         outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)

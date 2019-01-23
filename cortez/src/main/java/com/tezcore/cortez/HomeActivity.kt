@@ -172,8 +172,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             if (isPasswordSaved)
             {
                 val seed = Storage(baseContext).getMnemonics()
-                val seedBundle = Storage.toBundle(seed)
-                TransferFormActivity.start(this, seedBundle, null, mTezosTheme)
+                //val seedBundle = Storage.toBundle(seed)
+                TransferFormActivity.start(this, seed.pkh, null, mTezosTheme)
             }
             else
             {
@@ -505,8 +505,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         if (isPasswordSaved)
         {
             val seed = Storage(baseContext).getMnemonics()
-            val seedBundle = Storage.toBundle(seed)
-            TransferFormActivity.start(this, seedBundle, address, mTezosTheme)
+            //val seedBundle = Storage.toBundle(seed)
+            TransferFormActivity.start(this, seed.pkh, address, mTezosTheme)
         }
         else
         {
