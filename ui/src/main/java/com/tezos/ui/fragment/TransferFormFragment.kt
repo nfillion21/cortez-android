@@ -150,8 +150,12 @@ class TransferFormFragment : Fragment()
         if (savedInstanceState != null)
         {
             mSrcAccount = savedInstanceState.getString(SRC_ACCOUNT_KEY)
-            mDstAccount = savedInstanceState.getString(DST_ACCOUNT_KEY)
+            if (mSrcAccount != null)
+            {
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+            }
 
+            mDstAccount = savedInstanceState.getString(DST_ACCOUNT_KEY)
             if (mDstAccount != null)
             {
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
@@ -269,13 +273,7 @@ class TransferFormFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validatePayButton(false)
 
-        // this fragment always have mnemonics arg
-        arguments?.let {
-            val seedDataBundle = it.getBundle(Storage.TAG)
-            val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
-
-            startPostRequestLoadInitTransfer(mnemonicsData)
-        }
+        startPostRequestLoadInitTransfer()
     }
 
     private fun startFinalizeTransferLoading()
@@ -293,11 +291,13 @@ class TransferFormFragment : Fragment()
     }
 
     // volley
-    private fun startPostRequestLoadInitTransfer(mnemonicsData: Storage.MnemonicsData)
+    private fun startPostRequestLoadInitTransfer()
     {
         val url = getString(R.string.transfer_forge)
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val seed = Storage(activity!!).getMnemonics()
+
+        val mnemonics = EncryptionServices(activity!!).decrypt(seed.mnemonics, "not useful for marshmallow")
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         //val pkhSrc = mnemonicsData.pkh
@@ -549,7 +549,11 @@ class TransferFormFragment : Fragment()
         arguments?.let {
 
             val srcAddress = it.getString(Address.TAG)
-            switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, srcAddress)
+            if (srcAddress != null)
+            {
+                mSrcAccount = srcAddress
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, srcAddress)
+            }
 
             val dstAddress = it.getString(DST_ACCOUNT_KEY)
             if (dstAddress != null)
@@ -628,16 +632,17 @@ class TransferFormFragment : Fragment()
         {
             if (data != null && data.hasExtra(Account.TAG))
             {
-                val account = data.getStringExtra(Account.TAG)
+                val accountBundle = data.getBundleExtra(Account.TAG)
+                val account = Address.fromBundle(accountBundle)
 
                 if (resultCode == R.id.transfer_src_selection_succeed)
                 {
-                    mSrcAccount = account
+                    mSrcAccount = account.pubKeyHash
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, mSrcAccount!!)
                 }
                 else if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
-                    mDstAccount = account
+                    mDstAccount = account.pubKeyHash
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
                 }
             }
