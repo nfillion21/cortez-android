@@ -82,6 +82,16 @@ public class DataExtractor {
         return null;
     }
 
+    public static Boolean getBooleanFromField(JSONObject jsonObject, String field)
+    {
+        if (checkParams(jsonObject, field))
+        {
+            Boolean optBoolean = jsonObject.optBoolean(field, false);
+            return optBoolean;
+        }
+        return null;
+    }
+
     public static Integer getIntegerFromField(JSONArray jsonArray, int i) {
 
         if (checkParams(jsonArray, i)) {

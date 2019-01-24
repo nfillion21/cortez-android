@@ -36,7 +36,7 @@ import com.tezos.core.serialization.interfaces.AbstractSerialization;
 
 import java.util.Map;
 
-public class Address extends AbstractModel
+public class /**/Address extends AbstractModel
 {
     public static final String TAG = "Address";
 

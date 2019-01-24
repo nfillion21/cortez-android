@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.tezcore.cortez.HomeActivity">
+    tools:context="com.tezcore.ui.activity.DelegateActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -37,12 +37,6 @@
                 android:text="@string/tab_dashboard" />
 
             <android.support.design.widget.TabItem
-                android:id="@+id/tabItemAddressBook"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tab_address_book" />
-
-            <android.support.design.widget.TabItem
                 android:id="@+id/tabItemReceive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -52,7 +46,7 @@
                 android:id="@+id/tabItemDelegate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/tab_delegation" />
+                android:text="@string/tab_delegate" />
 
         </android.support.design.widget.TabLayout>
     </android.support.design.widget.AppBarLayout>
@@ -96,13 +90,5 @@
         app:tint="@android:color/white"
         app:srcCompat="@drawable/ic_transfers_24" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabAddDelegate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="@dimen/fab_margin"
-        app:tint="@android:color/white"
-        app:srcCompat="@drawable/ic_add_black" />
-
 </android.support.design.widget.CoordinatorLayout>
+

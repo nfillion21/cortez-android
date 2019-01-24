@@ -2,7 +2,5 @@
 <resources>
     <string name="history_url" translatable="false">https://beth.luminar.eu.org/mezos/alphanet/history?ks=%1$s</string>
     <string name="balance_url" translatable="false">https://beth.luminar.eu.org/tezos/alphanet/chains/main/blocks/head/context/contracts/%1$s/balance</string>
-    <string name="transfer_url" translatable="false">https://beth.luminar.eu.org/mezos/alphanet/transfer/init</string>
-    <string name="transfer_finalize" translatable="false">https://beth.luminar.eu.org/mezos/alphanet/transfer/finalize</string>
 </resources>
 

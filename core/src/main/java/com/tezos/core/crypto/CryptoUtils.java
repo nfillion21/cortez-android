@@ -27,14 +27,8 @@
 
 package com.tezos.core.crypto;
 
-import android.os.Bundle;
 import android.text.TextUtils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.spongycastle.crypto.engines.TEAEngine;
-
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
@@ -197,6 +191,29 @@ public class CryptoUtils
         return pkHash;
     }
 
+    public static String genericHashToPk(byte[] genericHash)
+    {
+        // These are our prefixes
+        byte[] edpkPrefix = {(byte) 13, (byte) 15, (byte) 37, (byte) 217};
+
+        // begins eztz b58encode
+
+        // Create Tezos PK.
+        byte[] prefixedPubKey = new byte[36];
+
+        System.arraycopy(edpkPrefix, 0, prefixedPubKey, 0, 4);
+        System.arraycopy(genericHash, 0, prefixedPubKey, 4, 32);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
+        byte[] prefixedPubKeyWithChecksum = new byte[40];
+
+        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
+
+        String tezosPkString = Base58.encode(prefixedPubKeyWithChecksum);
+        return tezosPkString;
+    }
+
     public static String genericHashToPkh(byte[] genericHash)
     {
         byte[] tz1Prefix = {(byte) 6, (byte) 161, (byte) 159};
@@ -215,6 +232,23 @@ public class CryptoUtils
         return pkHash;
     }
 
+    public static String genericHashToKT(byte[] genericHash)
+    {
+        byte[] tz1Prefix = {(byte) 2, (byte) 90, (byte) 121};
+
+        byte[] prefixedGenericHash = new byte[23];
+        System.arraycopy(tz1Prefix, 0, prefixedGenericHash, 0, 3);
+        System.arraycopy(genericHash, 0, prefixedGenericHash, 3, 20);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedGenericHash);
+        byte[] prefixedPKhashWithChecksum = new byte[27];
+        System.arraycopy(prefixedGenericHash, 0, prefixedPKhashWithChecksum, 0, 23);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPKhashWithChecksum, 23, 4);
+
+        String pkHash = Base58.encode(prefixedPKhashWithChecksum);
+
+        return pkHash;
+    }
 
     public static String generateSk(String mnemonics, String passphrase)
     {
@@ -295,19 +329,13 @@ public class CryptoUtils
         byte[] prefixedPubKey = new byte[36];
 
         System.arraycopy(edpkPrefix, 0, prefixedPubKey, 0, 4);
-
         System.arraycopy(sodiumPublicKey, 0, prefixedPubKey, 4, 32);
 
         byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
-
-
         byte[] prefixedPubKeyWithChecksum = new byte[40];
 
         System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
-
-
         System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
-
 
         String tezosPkString = Base58.encode(prefixedPubKeyWithChecksum);
         return tezosPkString;

@@ -30,7 +30,6 @@ package com.tezos.ui.fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
@@ -61,6 +60,8 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
 {
     private static final String ADDRESSES_ARRAYLIST = "addressList";
 
+    private static final String PUBLIC_KEY = "publicKeyTag";
+
     private OnCardSelectedListener mCallback;
 
     private AddressBookAdapter mAdapter;
@@ -74,12 +75,13 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
         void onCardClicked(Address address);
     }
 
-    public static AddressBookFragment newInstance(Bundle customThemeBundle, AddressBookActivity.Selection selection)
+    public static AddressBookFragment newInstance(CustomTheme customTheme, String pkh, AddressBookActivity.Selection selection)
     {
         AddressBookFragment fragment = new AddressBookFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putBundle(CustomTheme.TAG, customThemeBundle);
+        bundle.putBundle(CustomTheme.TAG, customTheme.toBundle());
+        bundle.putString(PUBLIC_KEY, pkh);
         if (selection != null)
         {
             bundle.putString(AddressBookActivity.SELECTED_REQUEST_CODE_KEY, selection.getStringValue());
@@ -156,7 +158,14 @@ public class AddressBookFragment extends Fragment implements AddressBookAdapter.
 
     public void reloadList()
     {
-        mAddressList.clear();
+        if (mAddressList != null)
+        {
+            mAddressList.clear();
+        }
+        else
+        {
+            mAddressList = new ArrayList<>();
+        }
 
         Set<String> set = AddressesDatabase.getInstance().getAddresses(getActivity());
 

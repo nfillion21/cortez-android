@@ -33,7 +33,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
-import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -55,20 +54,16 @@ import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.activity.AddressBookActivity
+import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.utils.Storage
-import com.tezos.ui.utils.VolleySingleton
-import com.tezos.ui.utils.hexToByteArray
-import com.tezos.ui.utils.toNoPrefixHexString
+import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
@@ -77,8 +72,8 @@ import kotlin.collections.set
  */
 class TransferFormFragment : Fragment()
 {
-    private var mSrcAccount:Address? = null
-    private var mDstAccount:Address? = null
+    private var mSrcAccount:String? = null
+    private var mDstAccount:String? = null
 
     private var listener: OnTransferListener? = null
 
@@ -95,15 +90,15 @@ class TransferFormFragment : Fragment()
     companion object
     {
         @JvmStatic
-        fun newInstance(seedDataBundle:Bundle, address:Bundle?, customTheme:Bundle) =
+        fun newInstance(srcAddress:String, address:Bundle?, customTheme:Bundle) =
                 TransferFormFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, customTheme)
-                        putBundle(Storage.TAG, seedDataBundle)
+                        putString(Address.TAG, srcAddress)
 
                         if (address != null)
                         {
-                            putBundle(Address.TAG, address)
+                            putBundle(TransferFormActivity.DST_ADDRESS_KEY, address)
                         }
                     }
                 }
@@ -154,16 +149,15 @@ class TransferFormFragment : Fragment()
 
         if (savedInstanceState != null)
         {
-            val srcBundle = savedInstanceState.getParcelable<Bundle>(SRC_ACCOUNT_KEY)
-            if (srcBundle != null)
+            mSrcAccount = savedInstanceState.getString(SRC_ACCOUNT_KEY)
+            if (mSrcAccount != null)
             {
-                mSrcAccount = Account.fromBundle(srcBundle)
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, mSrcAccount!!)
             }
 
-            val dstBundle = savedInstanceState.getParcelable<Bundle>(DST_ACCOUNT_KEY)
-            if (dstBundle != null)
+            mDstAccount = savedInstanceState.getString(DST_ACCOUNT_KEY)
+            if (mDstAccount != null)
             {
-                mDstAccount = Account.fromBundle(dstBundle)
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
 
@@ -279,13 +273,7 @@ class TransferFormFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validatePayButton(false)
 
-        // this fragment always have mnemonics arg
-        arguments?.let {
-            val seedDataBundle = it.getBundle(Storage.TAG)
-            val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
-
-            startPostRequestLoadInitTransfer(mnemonicsData)
-        }
+        startPostRequestLoadInitTransfer()
     }
 
     private fun startFinalizeTransferLoading()
@@ -293,34 +281,30 @@ class TransferFormFragment : Fragment()
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
 
-        // this fragment always have mnemonics arg
-        arguments?.let {
-            val seedDataBundle = it.getBundle(Storage.TAG)
-            val mnemonicsData = Storage.fromBundle(seedDataBundle!!)
-
-            startPostRequestLoadFinalizeTransfer(mnemonicsData)
-        }
+        startPostRequestLoadFinalizeTransfer()
     }
 
     // volley
-    private fun startPostRequestLoadInitTransfer(mnemonicsData: Storage.MnemonicsData)
+    private fun startPostRequestLoadInitTransfer()
     {
         val url = getString(R.string.transfer_forge)
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val seed = Storage(activity!!).getMnemonics()
+
+        val mnemonics = EncryptionServices(activity!!).decrypt(seed.mnemonics, "not useful for marshmallow")
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
-        val pkhSrc = mnemonicsData.pkh
-        val pkhDst = mDstAccount?.pubKeyHash
+        //val pkhSrc = mnemonicsData.pkh
+        //val pkhDst = mDstAccount?.pubKeyHash
 
         var postParams = JSONObject()
-        postParams.put("src", pkhSrc)
+        postParams.put("src", mSrcAccount)
         postParams.put("src_pk", pk)
 
         var dstObjects = JSONArray()
 
         var dstObject = JSONObject()
-        dstObject.put("dst", pkhDst)
+        dstObject.put("dst", mDstAccount)
         dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
 
         //we don't need fees to forge
@@ -406,21 +390,23 @@ class TransferFormFragment : Fragment()
 
 
     // volley
-    private fun startPostRequestLoadFinalizeTransfer(mnemonicsData: Storage.MnemonicsData)
+    private fun startPostRequestLoadFinalizeTransfer()
     {
         val url = getString(R.string.transfer_injection_operation)
+
+        val seed = Storage(activity!!).getMnemonics()
 
         //TODO we got to verify at this very moment.
         if (isPayButtonValid() && mTransferPayload != null)
         {
-            val pkhSrc = mnemonicsData.pkh
-            val pkhDst = mDstAccount?.pubKeyHash
+            //val pkhSrc = seed.pkh
+            val pkhDst = mDstAccount
 
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val mnemonics = EncryptionServices(activity!!).decrypt(seed.mnemonics, "not useful for marshmallow")
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
-            postParams.put("src", pkhSrc)
+            postParams.put("src", mSrcAccount)
             postParams.put("src_pk", pk)
 
             var dstObjects = JSONArray()
@@ -428,16 +414,16 @@ class TransferFormFragment : Fragment()
             var dstObject = JSONObject()
             dstObject.put("dst", pkhDst)
 
-            val mutezAmount = (mTransferAmount*1000000.0).toLong().toString()
+            val mutezAmount = (mTransferAmount*1000000.0).toLong()
             dstObject.put("amount", mutezAmount)
 
-            dstObject.put("fee", mTransferFees.toString())
+            dstObject.put("fee", mTransferFees)
 
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
 
-            if (isPayloadValid(mTransferPayload!!, postParams))
+            if (isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -514,160 +500,6 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    private fun isPayloadValid(payload:String, params:JSONObject):Boolean
-    {
-        var isValid = false
-        if (payload != null && params != null)
-        {
-            val data = payload.hexToByteArray()
-
-            val obj = params["dsts"] as JSONArray
-            val dstObj = obj[0] as JSONObject
-
-            var i: Int
-            i = when {
-                data.size > 100 -> 94
-                else -> 32
-            }
-
-            val isHeightValid = data[i].compareTo(8) == 0
-            if (!isHeightValid)
-            {
-                return false
-            }
-
-
-            val src = data.slice((i+3)..(i+3+19)).toByteArray()
-
-            val pkh = params["src"]
-
-
-
-            val isSrcValid = pkh == CryptoUtils.genericHashToPkh(src)
-
-            if (!isSrcValid)
-            {
-                return false
-            }
-
-            val size = data.size
-            val fee = data.slice((i+3+19+1) until size).toByteArray()
-
-            val feeList = ArrayList<Int>()
-            i = 0
-            do
-            {
-                val bytePos = Utils.byteToUnsignedInt(fee[i])
-
-                feeList.add(bytePos)
-                i++
-
-            } while (bytePos > 128)
-
-            val dstFees = dstObj["fee"] as String
-
-            val isFeesValid = addBytesLittleEndian(feeList) == dstFees.toLong()
-
-            if (!isFeesValid)
-            {
-                return false
-            }
-
-
-            val counter = fee.slice(i until fee.size).toByteArray()
-            i = 0
-            do
-            {
-                val bytePos = Utils.byteToUnsignedInt(counter[i])
-                i++
-
-            } while (bytePos >= 128)
-
-            val gasLimit = counter.slice(i until counter.size).toByteArray()
-            i = 0
-            do
-            {
-                val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
-                i++
-
-            } while (bytePos >= 128)
-
-
-            val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
-            i = 0
-            do
-            {
-                val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
-                i++
-
-            } while (bytePos >= 128)
-
-
-            val amount = storageLimit.slice(i until storageLimit.size).toByteArray()
-
-            val amountList = ArrayList<Int>()
-            i = 0
-            do
-            {
-                val bytePos = Utils.byteToUnsignedInt(amount[i])
-
-                amountList.add(bytePos)
-                i++
-
-            } while (bytePos >= 128)
-
-            val dstAmount = dstObj["amount"] as String
-
-            val isAmountValid = addBytesLittleEndian(amountList) == dstAmount.toLong()
-            if (!isAmountValid)
-            {
-                return false
-            }
-
-
-            val dst = amount.slice(i+2 until amount.size).toByteArray()
-            //TODO handle the first two bytes
-
-            val dstPkh = dstObj["dst"]
-            val isDstValid = dstPkh == CryptoUtils.genericHashToPkh(dst)
-
-            isValid = isHeightValid && isSrcValid && isFeesValid && isAmountValid && isDstValid
-
-        }
-        return isValid
-    }
-
-    private fun addBytesLittleEndian(bytes:ArrayList<Int>):Long
-    {
-        val reversed = bytes.reversed()
-
-        var accum = 0L
-
-        for (i in reversed.indices)
-        {
-            val bytePos = reversed[i]
-
-            if (bytePos < 128L)
-            {
-                accum += bytePos
-                if (i != reversed.size - 1)
-                {
-                    accum *= 128
-                }
-            }
-            else
-            {
-                accum += bytePos - 128
-                if (i != reversed.size - 1)
-                {
-                    accum *= 128
-                }
-            }
-        }
-
-        return accum
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
     {
@@ -682,8 +514,8 @@ class TransferFormFragment : Fragment()
 
         val focusChangeListener = this.focusChangeListener()
 
-        amount_transfer_edittext.addTextChangedListener(GenericTextWatcher(amount_transfer_edittext))
-        amount_transfer_edittext.onFocusChangeListener = focusChangeListener
+        amount_edittext.addTextChangedListener(GenericTextWatcher(amount_edittext))
+        amount_edittext.onFocusChangeListener = focusChangeListener
 
         transfer_src_button.setOnClickListener {
             AddressBookActivity.start(activity,
@@ -712,18 +544,18 @@ class TransferFormFragment : Fragment()
 
         arguments?.let {
 
-            val seedDataBundle = it.getBundle(Storage.TAG)
-            val seedData = Storage.fromBundle(seedDataBundle)
-
-            var account = Address()
-            account.pubKeyHash = seedData.pkh
-            switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, account)
-
-            val address = it.getBundle(Address.TAG)
-            if (address != null)
+            val srcAddress = it.getString(Address.TAG)
+            if (srcAddress != null)
             {
-                mDstAccount = Address.fromBundle(address)
-                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+                mSrcAccount = srcAddress
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, srcAddress)
+            }
+
+            val dstAddress = it.getString(DST_ACCOUNT_KEY)
+            if (dstAddress != null)
+            {
+                mDstAccount = dstAddress
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, dstAddress)
             }
         }
 
@@ -797,16 +629,16 @@ class TransferFormFragment : Fragment()
             if (data != null && data.hasExtra(Account.TAG))
             {
                 val accountBundle = data.getBundleExtra(Account.TAG)
-                val account = Account.fromBundle(accountBundle)
+                val account = Address.fromBundle(accountBundle)
 
                 if (resultCode == R.id.transfer_src_selection_succeed)
                 {
-                    mSrcAccount = account
+                    mSrcAccount = account.pubKeyHash
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, mSrcAccount!!)
                 }
                 else if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
-                    mDstAccount = account
+                    mDstAccount = account.pubKeyHash
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
                 }
             }
@@ -828,7 +660,7 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    private fun switchButtonAndLayout(selection: AddressBookActivity.Selection, address: Address)
+    private fun switchButtonAndLayout(selection: AddressBookActivity.Selection, address: String)
     {
         when (selection)
         {
@@ -837,14 +669,14 @@ class TransferFormFragment : Fragment()
                 transfer_src_button.visibility = View.GONE
                 transfer_source_filled.visibility = View.VISIBLE
 
-                src_payment_account_pub_key_hash.text = address.pubKeyHash
+                src_payment_account_pub_key_hash.text = address
             }
 
             AddressBookActivity.Selection.SelectionAccountsAndAddresses ->
             {
                 transfer_dst_button.visibility = View.GONE
                 transfer_destination_filled.visibility = View.VISIBLE
-                dst_payment_account_pub_key_hash.text = address.pubKeyHash
+                dst_payment_account_pub_key_hash.text = address
             }
 
             else ->
@@ -858,12 +690,12 @@ class TransferFormFragment : Fragment()
     {
         val isAmountValid = false
 
-        if (amount_transfer_edittext.text != null && !TextUtils.isEmpty(amount_transfer_edittext.text))
+        if (amount_edittext.text != null && !TextUtils.isEmpty(amount_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = amount_transfer_edittext.text!!.toString().toDouble()
+                val amount = amount_edittext.text!!.toString().toDouble()
 
                 if (amount >= 0.000001f)
                 {
@@ -938,7 +770,7 @@ class TransferFormFragment : Fragment()
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_transfer_edittext)
+            if (i == R.id.amount_edittext)
             {
                 putAmountInRed(!hasFocus)
             }
@@ -988,29 +820,15 @@ class TransferFormFragment : Fragment()
 
     private inner class GenericTextWatcher internal constructor(private val v: View) : TextWatcher
     {
-        private var hasTextChanged = true
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-
-            if (!s.isEmpty())
-            {
-                //hasTextChanged = true
-            }
-        }
-
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-
-            if (!s.isEmpty())
-            {
-                //hasTextChanged = true
-            }
-        }
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 
         override fun afterTextChanged(editable: Editable)
         {
             val i = v.id
 
-            if (i == R.id.amount_transfer_edittext)
+            if (i == R.id.amount_edittext)
             {
                 if (!isTransferAmountEquals(editable))
                 {
@@ -1101,7 +919,7 @@ class TransferFormFragment : Fragment()
             color = R.color.tz_accent
         }
 
-        amount_transfer_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
+        amount_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
     private fun setTextPayButton()
@@ -1206,8 +1024,8 @@ class TransferFormFragment : Fragment()
     {
         super.onSaveInstanceState(outState)
 
-        outState.putParcelable(SRC_ACCOUNT_KEY, mSrcAccount?.toBundle())
-        outState.putParcelable(DST_ACCOUNT_KEY, mDstAccount?.toBundle())
+        outState.putString(SRC_ACCOUNT_KEY, mSrcAccount)
+        outState.putString(DST_ACCOUNT_KEY, mDstAccount)
 
         outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)

@@ -25,40 +25,35 @@
 (*****************************************************************************)
 */
 
-package com.tezcore.cortez
+package com.tezcore.ui.activity
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.TabLayout
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
-import android.view.Menu
-import android.view.MenuItem
 import android.view.ViewGroup
-import com.tezcore.cortez.activities.AboutActivity
-import com.tezcore.cortez.activities.SettingsActivity
-import com.tezcore.ui.activity.DelegateActivity
-import com.tezos.android.R
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
+import com.tezos.ui.R
 import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
-import kotlinx.android.synthetic.main.activity_home.*
+import kotlinx.android.synthetic.main.activity_delegate.*
 
-
-class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, DelegationFragment.OnDelegateAddressSelectedListener
+class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener
 {
-
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
             com.tezos.ui.R.color.theme_tezos_primary_dark,
@@ -66,9 +61,37 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
+
+    companion object
+    {
+        private val TAG_DELEGATE = "DelegateTag"
+        private const val TAG_PKH = "PkhTag"
+        private const val POS_KEY = "PosKey"
+
+        var DELEGATE_REQUEST_CODE = 0x2900 // arbitrary int
+
+        private fun getStartIntent(context: Context, pkh: String, position: Int, themeBundle: Bundle): Intent
+        {
+            val starter = Intent(context, DelegateActivity::class.java)
+            starter.putExtra(CustomTheme.TAG, themeBundle)
+            starter.putExtra(TAG_PKH, pkh)
+            starter.putExtra(POS_KEY, position)
+
+            return starter
+        }
+
+        fun start(activity: Activity, pkh:String, position: Int, theme: CustomTheme)
+        {
+            val starter = getStartIntent(activity, pkh, position, theme.toBundle())
+            ActivityCompat.startActivityForResult(activity, starter, DELEGATE_REQUEST_CODE, null)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
+        setContentView(R.layout.activity_delegate)
 
         setSupportActionBar(toolbar)
         initActionBar(mTezosTheme)
@@ -88,7 +111,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
             override fun onPageSelected(position: Int)
             {
-                val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+                val isPasswordSaved = Storage(this@DelegateActivity).isPasswordSaved()
                 when (position)
                 {
                     0 ->
@@ -98,59 +121,36 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                             fabTransfer.show()
                             fabSharing.hide()
                             fabAddAddress.hide()
-                            fabAddDelegate.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabSharing.hide()
                             fabAddAddress.hide()
-                            fabAddDelegate.hide()
                         }
                     }
 
                     1 ->
-                    {
-                        fabTransfer.hide()
-                        fabAddAddress.show()
-                        fabSharing.hide()
-                        fabAddDelegate.hide()
-                    }
-
-                    2 ->
                     {
                         if (isPasswordSaved)
                         {
                             fabTransfer.hide()
                             fabAddAddress.hide()
                             fabSharing.show()
-                            fabAddDelegate.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabAddAddress.hide()
                             fabSharing.hide()
-                            fabAddDelegate.hide()
                         }
                     }
 
-                    3 ->
+                    2 ->
                     {
-                        if (isPasswordSaved)
-                        {
-                            fabTransfer.hide()
-                            fabAddAddress.hide()
-                            fabSharing.hide()
-                            fabAddDelegate.show()
-                        }
-                        else
-                        {
-                            fabTransfer.hide()
-                            fabAddAddress.hide()
-                            fabSharing.hide()
-                            fabAddDelegate.hide()
-                        }
+                        fabTransfer.hide()
+                        fabAddAddress.hide()
+                        fabSharing.hide()
                     }
 
                     else ->
@@ -171,9 +171,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             val isPasswordSaved = Storage(this).isPasswordSaved()
             if (isPasswordSaved)
             {
-                val seed = Storage(baseContext).getMnemonics()
-                //val seedBundle = Storage.toBundle(seed)
-                TransferFormActivity.start(this, seed.pkh, null, mTezosTheme)
+                val pkh = intent.getStringExtra(TAG_PKH)
+                TransferFormActivity.start(this, pkh, null, mTezosTheme)
             }
             else
             {
@@ -188,11 +187,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             val isPasswordSaved = Storage(this).isPasswordSaved()
             if (isPasswordSaved)
             {
-                val seed = Storage(baseContext).getMnemonics()
+                val pkh = intent.getStringExtra(TAG_PKH)
 
                 val sharingIntent = Intent(Intent.ACTION_SEND)
                 sharingIntent.type = "text/plain"
-                sharingIntent.putExtra(Intent.EXTRA_TEXT, seed.pkh)
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, pkh)
                 startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)))
             }
             else
@@ -207,10 +206,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             AddAddressActivity.start(this, mTezosTheme)
         }
 
-        fabAddDelegate.setOnClickListener {
-            AddDelegateActivity.start(this, mTezosTheme)
-        }
-
         initActionBar(mTezosTheme)
     }
 
@@ -220,11 +215,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
      */
     inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm)
     {
-
         override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any)
         {
             super.setPrimaryItem(container, position, `object`)
-            val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+            val isPasswordSaved = Storage(this@DelegateActivity).isPasswordSaved()
 
             when (position)
             {
@@ -235,59 +229,36 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         fabTransfer.show()
                         fabSharing.hide()
                         fabAddAddress.hide()
-                        fabAddDelegate.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabSharing.hide()
                         fabAddAddress.hide()
-                        fabAddDelegate.hide()
                     }
                 }
 
                 1 ->
-                {
-                    fabTransfer.hide()
-                    fabAddAddress.show()
-                    fabSharing.hide()
-                    fabAddDelegate.hide()
-                }
-
-                2 ->
                 {
                     if (isPasswordSaved)
                     {
                         fabTransfer.hide()
                         fabAddAddress.hide()
                         fabSharing.show()
-                        fabAddDelegate.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabAddAddress.hide()
                         fabSharing.hide()
-                        fabAddDelegate.hide()
                     }
                 }
 
-                3 ->
+                2 ->
                 {
-                    if (isPasswordSaved)
-                    {
-                        fabTransfer.hide()
-                        fabAddAddress.hide()
-                        fabSharing.hide()
-                        fabAddDelegate.show()
-                    }
-                    else
-                    {
-                        fabTransfer.hide()
-                        fabAddAddress.hide()
-                        fabSharing.hide()
-                        fabAddDelegate.hide()
-                    }
+                    fabTransfer.hide()
+                    fabAddAddress.hide()
+                    fabSharing.hide()
                 }
 
                 else ->
@@ -303,43 +274,29 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
                 0 ->
                 {
-                    return HomeFragment.newInstance(mTezosTheme)
+                    val pkh = intent.getStringExtra(TAG_PKH)
+                    return HomeDelegateFragment.newInstance(mTezosTheme, pkh)
                 }
                 1 ->
                 {
-                    return AddressBookFragment.newInstance(mTezosTheme, null, null)
+                    val pkh = intent.getStringExtra(TAG_PKH)
+                    return SharingAddressFragment.newInstance(mTezosTheme, pkh)
                 }
+
                 2 ->
                 {
-                    return SharingAddressFragment.newInstance(mTezosTheme, null)
-                }
-
-                3 ->
-                {
-                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
-
-                    return if (isPasswordSaved)
-                    {
-                        val mnemonicsData = Storage(baseContext).getMnemonics()
-                        DelegationFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
-                    }
-                    else
-                    {
-                        DelegationFragment.newInstance(mTezosTheme, null)
-                    }
-                }
-                else ->
-                {
-                    //should not happen
-                    return Fragment()
+                    val pkh = intent.getStringExtra(TAG_PKH)
+                    return DelegateFragment.newInstance(mTezosTheme, pkh)
                 }
             }
+
+            return HomeDelegateFragment.newInstance(mTezosTheme, null)
         }
 
         override fun getCount(): Int
         {
-            // Show 4 total pages.
-            return 4
+            // Show 3 total pages.
+            return 3
         }
     }
 
@@ -380,39 +337,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
             }
 
-            SettingsActivity.SETTINGS_REQUEST_CODE ->
-            {
-                if (resultCode == R.id.logout_succeed)
-                {
-                    showSnackBar(getString(R.string.log_out_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
-                }
-            }
-
             AddAddressActivity.ADD_ADDRESS_REQUEST_CODE ->
             {
                 if (resultCode == R.id.add_address_succeed)
                 {
                     showSnackBar(getString(R.string.address_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
-                }
-            }
-
-            AddDelegateActivity.ADD_DELEGATE_REQUEST_CODE ->
-            {
-                if (resultCode == R.id.add_address_succeed)
-                {
-                    showSnackBar(getString(R.string.address_successfully_delegated), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
-                }
-            }
-
-            DelegateActivity.DELEGATE_REQUEST_CODE ->
-            {
-                if (resultCode == R.id.remove_delegate_succeed)
-                {
-                    showSnackBar(getString(R.string.delegation_successfully_deleted), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
-                }
-                else if (resultCode == R.id.add_delegate_succeed)
-                {
-                    showSnackBar(getString(R.string.delegate_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
             }
 
@@ -444,81 +373,51 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
         toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
 
+        val position = intent.getIntExtra(POS_KEY, 0)
+        toolbar.title = "Delegated Address #$position"
+
         setSupportActionBar(toolbar)
-    }
-
-    override fun onBackPressed()
-    {
-        AlertDialog.Builder(this)
-                .setTitle(R.string.exit)
-                .setMessage(R.string.exit_info)
-                .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes) {
-                    _,
-                    _ ->
-
-                    super.onBackPressed()
-
-                }
-                .show()
-    }
-
-    /*
-    MENU
-     */
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
-
-        if (id == R.id.action_settings)
-        {
-            SettingsActivity.start(this, mTezosTheme)
-            return true
-        }
-        else if (id == R.id.action_about)
-        {
-            AboutActivity.start(this, mTezosTheme)
-            return true
-        }
-
-        return super.onOptionsItemSelected(item)
     }
 
     /*
     Addresses
      */
 
+    /*
     override fun onCardClicked(address: Address?)
     {
-        //AddressDetailsActivity.start(this, mTezosTheme, address!!)
-
         val isPasswordSaved = Storage(this).isPasswordSaved()
         if (isPasswordSaved)
         {
             val seed = Storage(baseContext).getMnemonics()
-            //val seedBundle = Storage.toBundle(seed)
-            TransferFormActivity.start(this, seed.pkh, address, mTezosTheme)
+            val seedBundle = Storage.toBundle(seed)
+            TransferFormActivity.start(this, seedBundle, address, mTezosTheme)
         }
         else
         {
-            //TODO this snackbar should be invisible
-            //Snackbar.make(fabTransfer, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    //.setAction("Action", null).show()
-
             showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
         }
     }
+    */
 
-    override fun onDelegateAddressClicked(address: String, position: Int) {
-        DelegateActivity.start(this, address, position, mTezosTheme)
+    override fun isFingerprintAllowed():Boolean
+    {
+        return storage.isFingerprintAllowed()
+    }
+
+    override fun hasEnrolledFingerprints():Boolean
+    {
+        return systemServices.hasEnrolledFingerprints()
+    }
+
+    override fun saveFingerprintAllowed(useInFuture:Boolean)
+    {
+        storage.saveFingerprintAllowed(useInFuture)
+    }
+
+    override fun finish(res: Int)
+    {
+        setResult(res)
+        finish()
     }
 }

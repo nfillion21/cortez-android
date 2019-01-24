@@ -90,7 +90,7 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
                 Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.payment_products_container);
                 if (fragment != null)
                 {
-                    Snackbar snackbar = Snackbar.make(mAddFab, R.string.address_successfuly_added,
+                    Snackbar snackbar = Snackbar.make(mAddFab, R.string.address_successfully_added,
                             Snackbar.LENGTH_SHORT);
                     View snackBarView = snackbar.getView();
                     snackBarView.setBackgroundColor((ContextCompat.getColor(this,
@@ -180,7 +180,7 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
 
             Intent intent = getIntent();
             String selectionString = intent.getStringExtra(SELECTED_REQUEST_CODE_KEY);
-            fragment = AddressBookFragment.newInstance(customThemeBundle, Selection.fromStringValue(selectionString));
+            fragment = AddressBookFragment.newInstance(CustomTheme.fromBundle(customThemeBundle), null, Selection.fromStringValue(selectionString));
         }
 
         supportFragmentManager.beginTransaction()
