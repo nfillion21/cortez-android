@@ -159,38 +159,34 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         mExitButton = view.findViewById(R.id.exit_button);
         mExitButtonLayout = view.findViewById(R.id.exit_button_layout);
 
-        mExitButtonLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
+        mExitButtonLayout.setOnClickListener(view1 -> {
+            DialogInterface.OnClickListener dialogClickListener = (dialog, which) ->
             {
-                DialogInterface.OnClickListener dialogClickListener = (dialog, which) ->
+                switch (which)
                 {
-                    switch (which)
+                    case DialogInterface.BUTTON_POSITIVE:
                     {
-                        case DialogInterface.BUTTON_POSITIVE:
-                        {
-                            dialog.dismiss();
-                            //TODO don't remove addresses
-                            //AddressesDatabase.getInstance().logOut(getActivity());
+                        dialog.dismiss();
+                        //TODO don't remove addresses
+                        //AddressesDatabase.getInstance().logOut(getActivity());
 
-                            mLogOutCallback.onLogOutClicked();
-                        }
-                        break;
-
-                        case DialogInterface.BUTTON_NEGATIVE:
-                            dialog.dismiss();
-                            break;
+                        mLogOutCallback.onLogOutClicked();
                     }
-                };
+                    break;
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(R.string.alert_exit_account)
-                        .setMessage(R.string.alert_exit_acccount_body)
-                        .setNegativeButton(android.R.string.cancel, dialogClickListener)
-                        .setPositiveButton(android.R.string.yes, dialogClickListener)
-                        .setCancelable(false)
-                        .show();
-            }
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        dialog.dismiss();
+                        break;
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle(R.string.alert_exit_account)
+                    .setMessage(R.string.alert_exit_acccount_body)
+                    .setNegativeButton(android.R.string.cancel, dialogClickListener)
+                    .setPositiveButton(android.R.string.yes, dialogClickListener)
+                    .setCancelable(false)
+                    .show();
         });
 
         boolean isPasswordSaved = new Storage(getActivity()).isPasswordSaved();

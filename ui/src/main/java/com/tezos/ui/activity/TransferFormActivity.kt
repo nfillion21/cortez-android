@@ -59,23 +59,25 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
     {
         var TRANSFER_REQUEST_CODE = 0x2100 // arbitrary int
 
-        private fun getStartIntent(context: Context, seedBundle: Bundle, address: Address?, themeBundle: Bundle): Intent
+        const val DST_ADDRESS_KEY = "dst_address_key"
+
+        private fun getStartIntent(context: Context, srcPkh: String, address: Address?, themeBundle: Bundle): Intent
         {
             val starter = Intent(context, TransferFormActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
-            starter.putExtra(Storage.TAG, seedBundle)
+            starter.putExtra(Address.TAG, srcPkh)
 
             if (address != null)
             {
-                starter.putExtra(Address.TAG, address.toBundle())
+                starter.putExtra(DST_ADDRESS_KEY, address.toBundle())
             }
 
             return starter
         }
 
-        fun start(activity: Activity, seedBundle: Bundle, address: Address?, theme: CustomTheme)
+        fun start(activity: Activity, srcPkh: String, address: Address?, theme: CustomTheme)
         {
-            val starter = getStartIntent(activity, seedBundle, address, theme.toBundle())
+            val starter = getStartIntent(activity, srcPkh, address, theme.toBundle())
             ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_REQUEST_CODE, null)
         }
     }
@@ -88,16 +90,16 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
         val theme = CustomTheme.fromBundle(themeBundle)
 
-        val seedDataBundle = intent.getBundleExtra(Storage.TAG)
+        val srcAddressBundle = intent.getStringExtra(Address.TAG)
 
-        val dstAddressBundle = intent.getBundleExtra(Address.TAG)
+        val dstAddressBundle = intent.getBundleExtra(DST_ADDRESS_KEY)
 
         initToolbar(theme)
 
         if (savedInstanceState == null)
         {
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.form_fragment_container, TransferFormFragment.newInstance(seedDataBundle, dstAddressBundle, themeBundle)).commit()
+                    .replace(R.id.form_fragment_container, TransferFormFragment.newInstance(srcAddressBundle, dstAddressBundle, themeBundle)).commit()
         }
     }
 
@@ -124,7 +126,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
 
         val mCloseButton = findViewById<ImageButton>(R.id.close_button)
         mCloseButton.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        mCloseButton.setOnClickListener { _ ->
+        mCloseButton.setOnClickListener {
             //requests stop in onDestroy.
             finish()
         }

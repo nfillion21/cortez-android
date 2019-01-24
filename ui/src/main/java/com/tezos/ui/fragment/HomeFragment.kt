@@ -114,12 +114,12 @@ open class HomeFragment : Fragment()
 
     companion object
     {
+        const val PKH_KEY = "PKH_KEY"
         @JvmStatic
-        fun newInstance(theme: CustomTheme, address: Address?) =
+        fun newInstance(theme: CustomTheme) =
                 HomeFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
-                        putBundle(Address.TAG, address?.toBundle())
                     }
                 }
     }
@@ -127,6 +127,24 @@ open class HomeFragment : Fragment()
     interface HomeListener
     {
         fun showSnackBar(res:String, color:Int, textColor:Int)
+    }
+
+    fun pkh():String?
+    {
+        var pkh:String? = null
+
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            pkh = arguments!!.getString(PKH_KEY)
+            if (pkh == null)
+            {
+                val seed = Storage(activity!!).getMnemonics()
+                pkh = seed.pkh
+            }
+        }
+
+        return pkh
     }
 
     override fun onAttach(context: Context)
@@ -146,14 +164,10 @@ open class HomeFragment : Fragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        var pkh:Address? = null
+        var pkh:String? = pkh()
         var tzTheme:CustomTheme? = null
+
         arguments?.let {
-            val addressBundle = it.getBundle(Address.TAG)
-            if (addressBundle != null)
-            {
-                pkh = Address.fromBundle(addressBundle)
-            }
 
             val themeBundle = it.getBundle(CustomTheme.TAG)
             tzTheme = CustomTheme.fromBundle(themeBundle)
@@ -245,6 +259,8 @@ open class HomeFragment : Fragment()
             if (mGetBalanceLoading)
             {
                 refreshTextBalance(false)
+
+                mWalletEnabled = true
                 startInitialLoadingBalance()
             }
             else
@@ -273,14 +289,10 @@ open class HomeFragment : Fragment()
             //TODO we will start loading only if we got a pkh
             if (pkh != null)
             {
+                mWalletEnabled = true
                 startInitialLoadingBalance()
             }
         }
-    }
-
-    open fun isHome():Boolean
-    {
-        return true
     }
 
     override fun onResume()
@@ -288,58 +300,50 @@ open class HomeFragment : Fragment()
         super.onResume()
 
         //avoid this call in OperationsFragment
+        //this call is necessary to reload when
 
-        if (isHome())
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
         {
-            val isPasswordSaved = Storage(activity!!).isPasswordSaved()
-            if (isPasswordSaved)
+            if (!mWalletEnabled)
             {
-                if (!mWalletEnabled)
-                {
-                    mWalletEnabled = true
+                mWalletEnabled = true
 
-                    val mnemonicsData = Storage(activity!!).getMnemonics()
+                // put the good layers
+                mBalanceLayout?.visibility = View.VISIBLE
+                mCreateWalletLayout?.visibility = View.GONE
 
-                    var address = Address()
-                    address.description = "main address"
-                    address.pubKeyHash = mnemonicsData.pkh
-
-                    val args = arguments
-                    args?.putBundle(Address.TAG, address.toBundle())
-
-                    // put the good layers
-                    mBalanceLayout?.visibility = View.VISIBLE
-                    mCreateWalletLayout?.visibility = View.GONE
-
-                    startInitialLoadingBalance()
-                }
+                startInitialLoadingBalance()
             }
-            else
+        }
+        else
+        {
+            //cancelRequest(true, true)
+
+            mBalanceItem = -1.0
+            refreshTextBalance(false)
+
+            mSwipeRefreshLayout?.isEnabled = false
+            mSwipeRefreshLayout?.isRefreshing = false
+
+            if (mWalletEnabled)
             {
-                //cancelRequest(true, true)
+                mWalletEnabled = false
+                // put the good layers
+                mBalanceLayout?.visibility = View.GONE
+                mCreateWalletLayout?.visibility = View.VISIBLE
 
-                mSwipeRefreshLayout?.isEnabled = false
-                mSwipeRefreshLayout?.isRefreshing = false
+                val args = arguments
+                args?.putBundle(Address.TAG, null)
 
-                if (mWalletEnabled)
+                if (mRecyclerViewItems != null)
                 {
-                    mWalletEnabled = false
-                    // put the good layers
-                    mBalanceLayout?.visibility = View.GONE
-                    mCreateWalletLayout?.visibility = View.VISIBLE
+                    mRecyclerViewItems?.clear()
+                }
 
-                    val args = arguments
-                    args?.putBundle(Address.TAG, null)
-
-                    if (mRecyclerViewItems != null)
-                    {
-                        mRecyclerViewItems?.clear()
-                    }
-
-                    if (mBalanceItem != null)
-                    {
-                        mBalanceItem = -1.0
-                    }
+                if (mBalanceItem != null)
+                {
+                    mBalanceItem = -1.0
                 }
             }
         }
@@ -443,34 +447,29 @@ open class HomeFragment : Fragment()
 
         mNavProgressBalance?.visibility = View.VISIBLE
 
-        var pkh:Address?
-        arguments?.let {
-            val addressBundle = it.getBundle(Address.TAG)
-            if (addressBundle != null)
-            {
-                pkh = Address.fromBundle(addressBundle)
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.balance_url), pkh)
 
-                val url = String.format(getString(R.string.balance_url), pkh?.pubKeyHash)
+            // Request a string response from the provided URL.
+            val stringRequest = StringRequest(Request.Method.GET, url,
+                    Response.Listener<String> { response ->
+                        val balance = response.replace("[^0-9]".toRegex(), "")
+                        mBalanceItem = balance.toDouble()/1000000
+                        animateBalance(mBalanceItem)
 
-                // Request a string response from the provided URL.
-                val stringRequest = StringRequest(Request.Method.GET, url,
-                        Response.Listener<String> { response ->
-                            val balance = response.replace("[^0-9]".toRegex(), "")
-                            mBalanceItem = balance.toDouble()/1000000
-                            animateBalance(mBalanceItem)
+                        onBalanceLoadComplete(true)
+                        startGetRequestLoadOperations()
+                    },
+                    Response.ErrorListener {
+                        onBalanceLoadComplete(false)
+                        onOperationsLoadHistoryComplete()
+                        showSnackbarError(it)
+                    })
 
-                            onBalanceLoadComplete(true)
-                            startGetRequestLoadOperations()
-                        },
-                        Response.ErrorListener {
-                            onBalanceLoadComplete(false)
-                            onOperationsLoadHistoryComplete()
-                            showSnackbarError(it)
-                        })
-
-                stringRequest.tag = LOAD_BALANCE_TAG
-                VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
-            }
+            stringRequest.tag = LOAD_BALANCE_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
         }
     }
 
@@ -506,34 +505,29 @@ open class HomeFragment : Fragment()
 
         mNavProgressOperations?.visibility = View.VISIBLE
 
-        var pkh:Address?
-        arguments?.let {
-            val addressBundle = it.getBundle(Address.TAG)
+        val pkh = pkh()
 
-            if (addressBundle != null)
-            {
-                pkh = Address.fromBundle(addressBundle)
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.history_url), pkh)
 
-                val url = String.format(getString(R.string.history_url), pkh?.pubKeyHash)
+            val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            { answer ->
 
-                val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
-                { answer ->
+                addOperationItemsFromJSON(answer)
 
-                    addOperationItemsFromJSON(answer)
+                onOperationsLoadHistoryComplete()
 
-                    onOperationsLoadHistoryComplete()
+            }, Response.ErrorListener
+            { volleyError ->
+                onOperationsLoadHistoryComplete()
 
-                }, Response.ErrorListener
-                {
-                    onOperationsLoadHistoryComplete()
+                showSnackbarError(volleyError)
+            })
 
-                    showSnackbarError(it)
-                })
+            jsObjRequest.tag = LOAD_OPERATIONS_TAG
 
-                jsObjRequest.tag = LOAD_OPERATIONS_TAG
-
-                VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-            }
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
         }
     }
 

@@ -52,13 +52,11 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.google.zxing.Result;
 import com.tezos.core.models.Account;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.core.utils.AddressesDatabase;
@@ -67,8 +65,6 @@ import com.tezos.ui.R;
 import com.tezos.ui.fragment.ContactsDialogFragment;
 
 import org.jetbrains.annotations.NotNull;
-
-import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 
 public class AddAddressActivity extends BaseSecureActivity implements ContactsDialogFragment.OnNameSelectedListener
@@ -437,7 +433,7 @@ public class AddAddressActivity extends BaseSecureActivity implements ContactsDi
 
     private void showSnackBar(boolean succeed)
     {
-        int resText = succeed ? R.string.address_successfuly_scanned : R.string.address_scan_failed;
+        int resText = succeed ? R.string.address_successfully_scanned : R.string.address_scan_failed;
         int resColor = succeed ? android.R.color.holo_green_light : android.R.color.holo_red_light;
 
         Snackbar snackbar = Snackbar.make(findViewById(R.id.content), resText, Snackbar.LENGTH_LONG);

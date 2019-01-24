@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/category_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="@drawable/selector_subtle"
+    tools:ignore="UseCompoundDrawables,UselessParent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/shadow_border"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_double"
+            android:background="@drawable/shadow_border"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:text="@string/delegated_address"/>
+            <TextView
+                android:id="@+id/src_payment_account_pub_key_hash"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                android:ellipsize="end"
+                 />
+        </LinearLayout>
+        <TextView
+            android:id="@+id/payment_account_title"
+            android:layout_marginRight="1dp"
+            android:layout_marginLeft="1dp"
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            android:singleLine="true"
+            android:padding="@dimen/spacing_double" />
+
+    </LinearLayout>
+</FrameLayout>

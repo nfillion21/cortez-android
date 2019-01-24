@@ -54,11 +54,16 @@ class SharingAddressFragment : Fragment()
 
     companion object
     {
+        const val TAG = "sharedAddressTag"
+
+        const val PKH_KEY = "PKH_KEY"
+
         @JvmStatic
-        fun newInstance(theme: CustomTheme) =
+        fun newInstance(theme: CustomTheme, sharedAddress: String?) =
                 SharingAddressFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
+                        putString(PKH_KEY, sharedAddress)
                     }
                 }
     }
@@ -79,21 +84,19 @@ class SharingAddressFragment : Fragment()
         mLinearLayout = view.findViewById(R.id.pkh_info_layout)
 
         mPkhTextview = view.findViewById(R.id.pkh_textview)
-
     }
 
     override fun onResume()
     {
         super.onResume()
 
-        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
-        if (isPasswordSaved)
+        //val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        val pkh = pkh()
+
+        if (pkh != null)
         {
             mPkhLayout?.visibility = View.VISIBLE
             mPkhEmptyLayout?.visibility = View.GONE
-
-            val seed = Storage(activity!!).getMnemonics()
-            val pkh = seed.pkh
 
             val dm = resources.displayMetrics
 
@@ -127,6 +130,24 @@ class SharingAddressFragment : Fragment()
             mPkhLayout?.visibility = View.GONE
             mPkhEmptyLayout?.visibility = View.VISIBLE
         }
+    }
+
+    fun pkh():String?
+    {
+        var pkh:String? = null
+
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            pkh = arguments!!.getString(PKH_KEY)
+            if (pkh == null)
+            {
+                val seed = Storage(activity!!).getMnemonics()
+                pkh = seed.pkh
+            }
+        }
+
+        return pkh
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
