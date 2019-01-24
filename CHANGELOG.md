@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.3.0
+-----
+* Add the tez delegation features.
+
 1.2.0
 -----
 * Adapt the transfer screen for minimal fees.
