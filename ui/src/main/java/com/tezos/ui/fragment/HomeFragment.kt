@@ -456,8 +456,11 @@ open class HomeFragment : Fragment()
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
                         val balance = response.replace("[^0-9]".toRegex(), "")
-                        mBalanceItem = balance.toDouble()/1000000
-                        animateBalance(mBalanceItem)
+                        mBalanceItem = balance?.toDouble()/1000000
+                        if (mBalanceItem != null)
+                        {
+                            animateBalance(mBalanceItem)
+                        }
 
                         onBalanceLoadComplete(true)
                         startGetRequestLoadOperations()
