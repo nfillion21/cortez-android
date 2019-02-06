@@ -453,7 +453,7 @@ class DelegateFragment : Fragment()
             {
 
                 //prevents from async crashes
-                if (mContract != null && activity != null)
+                if (activity != null)
                 {
                     addContractInfoFromJSON(it)
                     onContractInfoComplete(true)

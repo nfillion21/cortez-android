@@ -551,11 +551,12 @@ class TransferFormFragment : Fragment()
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, srcAddress)
             }
 
-            val dstAddress = it.getString(DST_ACCOUNT_KEY)
+            val dstAddress = it.getBundle(TransferFormActivity.DST_ADDRESS_KEY)
             if (dstAddress != null)
             {
-                mDstAccount = dstAddress
-                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, dstAddress)
+                val dst = Address.fromBundle(dstAddress)
+                mDstAccount = dst.pubKeyHash
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
         }
 
