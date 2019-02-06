@@ -455,20 +455,27 @@ open class HomeFragment : Fragment()
             // Request a string response from the provided URL.
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
-                        val balance = response.replace("[^0-9]".toRegex(), "")
-                        mBalanceItem = balance?.toDouble()/1000000
-                        if (mBalanceItem != null)
-                        {
-                            animateBalance(mBalanceItem)
-                        }
 
-                        onBalanceLoadComplete(true)
-                        startGetRequestLoadOperations()
+                        if (activity != null)
+                        {
+                            val balance = response.replace("[^0-9]".toRegex(), "")
+                            mBalanceItem = balance?.toDouble()/1000000
+                            if (mBalanceItem != null)
+                            {
+                                animateBalance(mBalanceItem)
+                            }
+
+                            onBalanceLoadComplete(true)
+                            startGetRequestLoadOperations()
+                        }
                     },
                     Response.ErrorListener {
-                        onBalanceLoadComplete(false)
-                        onOperationsLoadHistoryComplete()
-                        showSnackbarError(it)
+                        if (activity != null)
+                        {
+                            onBalanceLoadComplete(false)
+                            onOperationsLoadHistoryComplete()
+                            showSnackbarError(it)
+                        }
                     })
 
             stringRequest.tag = LOAD_BALANCE_TAG
@@ -517,15 +524,19 @@ open class HomeFragment : Fragment()
             val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
             { answer ->
 
-                addOperationItemsFromJSON(answer)
-
-                onOperationsLoadHistoryComplete()
+                if (activity != null)
+                {
+                    addOperationItemsFromJSON(answer)
+                    onOperationsLoadHistoryComplete()
+                }
 
             }, Response.ErrorListener
             { volleyError ->
-                onOperationsLoadHistoryComplete()
-
-                showSnackbarError(volleyError)
+                if (activity != null)
+                {
+                    onOperationsLoadHistoryComplete()
+                    showSnackbarError(volleyError)
+                }
             })
 
             jsObjRequest.tag = LOAD_OPERATIONS_TAG

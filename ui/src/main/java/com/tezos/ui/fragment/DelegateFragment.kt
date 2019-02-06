@@ -622,15 +622,20 @@ class DelegateFragment : Fragment()
 
                 val stringRequest = object : StringRequest(Request.Method.POST, url,
                         Response.Listener<String> { response ->
+                            if (activity != null)
+                            {
+                                //there's no need to do anything because we call finish()
+                                onFinalizeDelegationLoadComplete(null)
 
-                            //there's no need to do anything because we call finish()
-                            onFinalizeDelegationLoadComplete(null)
-
-                            mCallback?.finish(R.id.remove_delegate_succeed)
+                                mCallback?.finish(R.id.remove_delegate_succeed)
+                            }
                         },
                         Response.ErrorListener
                         {
-                            onFinalizeDelegationLoadComplete(it)
+                            if (activity != null)
+                            {
+                                onFinalizeDelegationLoadComplete(it)
+                            }
                         }
                 )
                 {
@@ -719,15 +724,20 @@ class DelegateFragment : Fragment()
 
                 val stringRequest = object : StringRequest(Request.Method.POST, url,
                         Response.Listener<String> { response ->
+                            if (activity != null)
+                            {
+                                //there's no need to do anything because we call finish()
+                                onFinalizeDelegationLoadComplete(null)
 
-                            //there's no need to do anything because we call finish()
-                            onFinalizeDelegationLoadComplete(null)
-
-                            mCallback?.finish(R.id.add_delegate_succeed)
+                                mCallback?.finish(R.id.add_delegate_succeed)
+                            }
                         },
                         Response.ErrorListener
                         {
-                            onFinalizeDelegationLoadComplete(it)
+                            if (activity != null)
+                            {
+                                onFinalizeDelegationLoadComplete(it)
+                            }
                         }
                 )
                 {
@@ -887,48 +897,53 @@ class DelegateFragment : Fragment()
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
-
-            mDelegatePayload = answer.getString("result")
-            mDelegateFees = answer.getLong("total_fee")
-
-            // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != null && activity != null)
+            if (activity != null)
             {
-                onInitDelegateLoadComplete(null)
+                mDelegatePayload = answer.getString("result")
+                mDelegateFees = answer.getLong("total_fee")
 
-                val feeInTez = mDelegateFees?.toDouble()/1000000.0
-                fee_edittext?.setText(feeInTez.toString())
-
-                validateAddButton(isInputDataValid() && isDelegateFeeValid())
-
-                if (isInputDataValid() && isDelegateFeeValid())
+                // we use this call to ask for payload and fees
+                if (mDelegatePayload != null && mDelegateFees != null && activity != null)
                 {
-                    validateAddButton(true)
+                    onInitDelegateLoadComplete(null)
 
-                    //this.setTextPayButton()
+                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
+                    fee_edittext?.setText(feeInTez.toString())
+
+                    validateAddButton(isInputDataValid() && isDelegateFeeValid())
+
+                    if (isInputDataValid() && isDelegateFeeValid())
+                    {
+                        validateAddButton(true)
+
+                        //this.setTextPayButton()
+                    }
+                    else
+                    {
+                        // should no happen
+                        validateAddButton(false)
+                    }
                 }
                 else
                 {
-                    // should no happen
-                    validateAddButton(false)
-                }
-            }
-            else
-            {
-                val volleyError = VolleyError(getString(R.string.generic_error))
-                onInitDelegateLoadComplete(volleyError)
-                mClickCalculate = true
+                    val volleyError = VolleyError(getString(R.string.generic_error))
+                    onInitDelegateLoadComplete(volleyError)
+                    mClickCalculate = true
 
-                //the call failed
+                    //the call failed
+                }
             }
 
         }, Response.ErrorListener
         {
-            onInitDelegateLoadComplete(it)
+            if (activity != null)
+            {
+                onInitDelegateLoadComplete(it)
 
-            mClickCalculate = true
-            //Log.i("mTransferId", ""+mTransferId)
-            //Log.i("mDelegatePayload", ""+mDelegatePayload)
+                mClickCalculate = true
+                //Log.i("mTransferId", ""+mTransferId)
+                //Log.i("mDelegatePayload", ""+mDelegatePayload)
+            }
         })
         {
             @Throws(AuthFailureError::class)
@@ -967,35 +982,41 @@ class DelegateFragment : Fragment()
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
-            mDelegatePayload = answer.getString("result")
-            mDelegateFees = answer.getLong("total_fee")
-
-            // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != null)
+            if (activity != null)
             {
-                onInitRemoveDelegateLoadComplete(null)
+                mDelegatePayload = answer.getString("result")
+                mDelegateFees = answer.getLong("total_fee")
 
-                val feeInTez = mDelegateFees?.toDouble()/1000000.0
-                fee_edittext?.setText(feeInTez?.toString())
+                // we use this call to ask for payload and fees
+                if (mDelegatePayload != null && mDelegateFees != null)
+                {
+                    onInitRemoveDelegateLoadComplete(null)
 
-                validateRemoveDelegateButton(isDelegateFeeValid())
+                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
+                    fee_edittext?.setText(feeInTez?.toString())
+
+                    validateRemoveDelegateButton(isDelegateFeeValid())
+                }
+                else
+                {
+                    val volleyError = VolleyError(getString(R.string.generic_error))
+                    onInitRemoveDelegateLoadComplete(volleyError)
+                    mClickCalculate = true
+
+                    //the call failed
+                }
+
             }
-            else
-            {
-                val volleyError = VolleyError(getString(R.string.generic_error))
-                onInitRemoveDelegateLoadComplete(volleyError)
-                mClickCalculate = true
-
-                //the call failed
-            }
-
         }, Response.ErrorListener
         {
-            onInitRemoveDelegateLoadComplete(it)
+            if (activity != null)
+            {
+                onInitRemoveDelegateLoadComplete(it)
 
-            mClickCalculate = true
-            //Log.i("mTransferId", ""+mTransferId)
-            //Log.i("mDelegatePayload", ""+mDelegatePayload)
+                mClickCalculate = true
+                //Log.i("mTransferId", ""+mTransferId)
+                //Log.i("mDelegatePayload", ""+mDelegatePayload)
+            }
         })
         {
             @Throws(AuthFailureError::class)
