@@ -333,16 +333,22 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
             // Request a string response from the provided URL.
             val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
             {
-                addContractAddressesFromJSON(it, pkh)
+                if (activity != null)
+                {
+                    addContractAddressesFromJSON(it, pkh)
 
-                reloadList()
-                onDelegatedAddressesComplete(true)
+                    reloadList()
+                    onDelegatedAddressesComplete(true)
+                }
             },
                     Response.ErrorListener {
 
-                        onDelegatedAddressesComplete(false)
+                        if (activity != null)
+                        {
+                            onDelegatedAddressesComplete(false)
 
-                        showSnackbarError(it)
+                            showSnackbarError(it)
+                        }
                     })
 
             jsonArrayRequest.tag = LOAD_DELEGATED_ADDRESSES_TAG

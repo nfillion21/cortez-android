@@ -318,58 +318,63 @@ class TransferFormFragment : Fragment()
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
-
-            mTransferPayload = answer.getString("result")
-            mTransferFees = answer.getLong("total_fee")
-
-            // get back the object and
-
-            val dstsArray = postParams["dsts"] as JSONArray
-            val dstObj = dstsArray[0] as JSONObject
-
-            dstObj.put("fee", mTransferFees.toString())
-            dstsArray.put(0, dstObj)
-
-            postParams.put("dsts", dstsArray)
-
-            // we use this call to ask for payload and fees
-            if (mTransferPayload != null && mTransferFees != null)
+            if (activity != null)
             {
-                onInitTransferLoadComplete(null)
+                mTransferPayload = answer.getString("result")
+                mTransferFees = answer.getLong("total_fee")
 
-                val feeInTez = mTransferFees.toDouble()/1000000.0
-                fee_edittext.setText(feeInTez.toString())
+                // get back the object and
 
-                validatePayButton(isInputDataValid() && isTransferFeeValid())
+                val dstsArray = postParams["dsts"] as JSONArray
+                val dstObj = dstsArray[0] as JSONObject
 
-                if (isInputDataValid() && isTransferFeeValid())
+                dstObj.put("fee", mTransferFees.toString())
+                dstsArray.put(0, dstObj)
+
+                postParams.put("dsts", dstsArray)
+
+                // we use this call to ask for payload and fees
+                if (mTransferPayload != null && mTransferFees != null)
                 {
-                    validatePayButton(true)
+                    onInitTransferLoadComplete(null)
 
-                    this.setTextPayButton()
+                    val feeInTez = mTransferFees.toDouble()/1000000.0
+                    fee_edittext.setText(feeInTez.toString())
+
+                    validatePayButton(isInputDataValid() && isTransferFeeValid())
+
+                    if (isInputDataValid() && isTransferFeeValid())
+                    {
+                        validatePayButton(true)
+
+                        this.setTextPayButton()
+                    }
+                    else
+                    {
+                        // should no happen
+                        validatePayButton(false)
+                    }
                 }
                 else
                 {
-                    // should no happen
-                    validatePayButton(false)
+                    val volleyError = VolleyError(getString(R.string.generic_error))
+                    onInitTransferLoadComplete(volleyError)
+                    mClickCalculate = true
+
+                    //the call failed
                 }
-            }
-            else
-            {
-                val volleyError = VolleyError(getString(R.string.generic_error))
-                onInitTransferLoadComplete(volleyError)
-                mClickCalculate = true
 
-                //the call failed
             }
-
         }, Response.ErrorListener
         {
-            onInitTransferLoadComplete(it)
+            if (activity != null)
+            {
+                onInitTransferLoadComplete(it)
 
-            mClickCalculate = true
-            //Log.i("mTransferId", ""+mTransferId)
-            Log.i("mTransferPayload", ""+mTransferPayload)
+                mClickCalculate = true
+                //Log.i("mTransferId", ""+mTransferId)
+                Log.i("mTransferPayload", ""+mTransferPayload)
+            }
         })
         {
             @Throws(AuthFailureError::class)
@@ -454,13 +459,19 @@ class TransferFormFragment : Fragment()
                 val stringRequest = object : StringRequest(Request.Method.POST, url,
                         Response.Listener<String> { response ->
 
-                            onFinalizeTransferLoadComplete(null)
-                            listener?.onTransferSucceed()
+                            if (activity != null)
+                            {
+                                onFinalizeTransferLoadComplete(null)
+                                listener?.onTransferSucceed()
+                            }
                         },
                         Response.ErrorListener
                         {
-                            onFinalizeTransferLoadComplete(it)
-                            listener?.onTransferFailed(it)
+                            if (activity != null)
+                            {
+                                onFinalizeTransferLoadComplete(it)
+                                listener?.onTransferFailed(it)
+                            }
                         }
                 )
                 {
@@ -551,11 +562,12 @@ class TransferFormFragment : Fragment()
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, srcAddress)
             }
 
-            val dstAddress = it.getString(DST_ACCOUNT_KEY)
+            val dstAddress = it.getBundle(TransferFormActivity.DST_ADDRESS_KEY)
             if (dstAddress != null)
             {
-                mDstAccount = dstAddress
-                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, dstAddress)
+                val dst = Address.fromBundle(dstAddress)
+                mDstAccount = dst.pubKeyHash
+                switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
             }
         }
 
