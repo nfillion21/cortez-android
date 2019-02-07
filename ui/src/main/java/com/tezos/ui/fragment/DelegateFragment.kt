@@ -381,7 +381,7 @@ class DelegateFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateAddButton(false)
 
-        swipe_refresh_layout.isEnabled = false
+        swipe_refresh_layout?.isEnabled = false
 
         startGetRequestLoadContractInfo()
     }
@@ -451,16 +451,21 @@ class DelegateFragment : Fragment()
             // Request a string response from the provided URL.
             val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
             {
-                addContractInfoFromJSON(it)
-                onContractInfoComplete(true)
 
-                if (mContract?.delegate != null)
+                //prevents from async crashes
+                if (activity != null)
                 {
-                    startInitRemoveDelegateLoading()
-                }
-                else
-                {
-                    validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                    addContractInfoFromJSON(it)
+                    onContractInfoComplete(true)
+
+                    if (mContract?.delegate != null)
+                    {
+                        startInitRemoveDelegateLoading()
+                    }
+                    else
+                    {
+                        validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                    }
                 }
             },
                     Response.ErrorListener {
@@ -617,15 +622,20 @@ class DelegateFragment : Fragment()
 
                 val stringRequest = object : StringRequest(Request.Method.POST, url,
                         Response.Listener<String> { response ->
+                            if (activity != null)
+                            {
+                                //there's no need to do anything because we call finish()
+                                onFinalizeDelegationLoadComplete(null)
 
-                            //there's no need to do anything because we call finish()
-                            onFinalizeDelegationLoadComplete(null)
-
-                            mCallback?.finish(R.id.remove_delegate_succeed)
+                                mCallback?.finish(R.id.remove_delegate_succeed)
+                            }
                         },
                         Response.ErrorListener
                         {
-                            onFinalizeDelegationLoadComplete(it)
+                            if (activity != null)
+                            {
+                                onFinalizeDelegationLoadComplete(it)
+                            }
                         }
                 )
                 {
@@ -714,15 +724,20 @@ class DelegateFragment : Fragment()
 
                 val stringRequest = object : StringRequest(Request.Method.POST, url,
                         Response.Listener<String> { response ->
+                            if (activity != null)
+                            {
+                                //there's no need to do anything because we call finish()
+                                onFinalizeDelegationLoadComplete(null)
 
-                            //there's no need to do anything because we call finish()
-                            onFinalizeDelegationLoadComplete(null)
-
-                            mCallback?.finish(R.id.add_delegate_succeed)
+                                mCallback?.finish(R.id.add_delegate_succeed)
+                            }
                         },
                         Response.ErrorListener
                         {
-                            onFinalizeDelegationLoadComplete(it)
+                            if (activity != null)
+                            {
+                                onFinalizeDelegationLoadComplete(it)
+                            }
                         }
                 )
                 {
@@ -829,13 +844,13 @@ class DelegateFragment : Fragment()
 
             mDelegatePayload = null
 
-            fee_edittext.isEnabled = true
-            fee_edittext.isFocusable = false
-            fee_edittext.isClickable = false
-            fee_edittext.isLongClickable = false
-            fee_edittext.hint = getString(R.string.click_for_fees)
+            fee_edittext?.isEnabled = true
+            fee_edittext?.isFocusable = false
+            fee_edittext?.isClickable = false
+            fee_edittext?.isLongClickable = false
+            fee_edittext?.hint = getString(R.string.click_for_fees)
 
-            fee_edittext.setOnClickListener {
+            fee_edittext?.setOnClickListener {
                 startInitRemoveDelegateLoading()
             }
 
@@ -882,48 +897,53 @@ class DelegateFragment : Fragment()
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
-
-            mDelegatePayload = answer.getString("result")
-            mDelegateFees = answer.getLong("total_fee")
-
-            // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != null)
+            if (activity != null)
             {
-                onInitDelegateLoadComplete(null)
+                mDelegatePayload = answer.getString("result")
+                mDelegateFees = answer.getLong("total_fee")
 
-                val feeInTez = mDelegateFees.toDouble()/1000000.0
-                fee_edittext.setText(feeInTez.toString())
-
-                validateAddButton(isInputDataValid() && isDelegateFeeValid())
-
-                if (isInputDataValid() && isDelegateFeeValid())
+                // we use this call to ask for payload and fees
+                if (mDelegatePayload != null && mDelegateFees != null && activity != null)
                 {
-                    validateAddButton(true)
+                    onInitDelegateLoadComplete(null)
 
-                    //this.setTextPayButton()
+                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
+                    fee_edittext?.setText(feeInTez.toString())
+
+                    validateAddButton(isInputDataValid() && isDelegateFeeValid())
+
+                    if (isInputDataValid() && isDelegateFeeValid())
+                    {
+                        validateAddButton(true)
+
+                        //this.setTextPayButton()
+                    }
+                    else
+                    {
+                        // should no happen
+                        validateAddButton(false)
+                    }
                 }
                 else
                 {
-                    // should no happen
-                    validateAddButton(false)
-                }
-            }
-            else
-            {
-                val volleyError = VolleyError(getString(R.string.generic_error))
-                onInitDelegateLoadComplete(volleyError)
-                mClickCalculate = true
+                    val volleyError = VolleyError(getString(R.string.generic_error))
+                    onInitDelegateLoadComplete(volleyError)
+                    mClickCalculate = true
 
-                //the call failed
+                    //the call failed
+                }
             }
 
         }, Response.ErrorListener
         {
-            onInitDelegateLoadComplete(it)
+            if (activity != null)
+            {
+                onInitDelegateLoadComplete(it)
 
-            mClickCalculate = true
-            //Log.i("mTransferId", ""+mTransferId)
-            //Log.i("mDelegatePayload", ""+mDelegatePayload)
+                mClickCalculate = true
+                //Log.i("mTransferId", ""+mTransferId)
+                //Log.i("mDelegatePayload", ""+mDelegatePayload)
+            }
         })
         {
             @Throws(AuthFailureError::class)
@@ -962,35 +982,41 @@ class DelegateFragment : Fragment()
         val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
-            mDelegatePayload = answer.getString("result")
-            mDelegateFees = answer.getLong("total_fee")
-
-            // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != null)
+            if (activity != null)
             {
-                onInitRemoveDelegateLoadComplete(null)
+                mDelegatePayload = answer.getString("result")
+                mDelegateFees = answer.getLong("total_fee")
 
-                val feeInTez = mDelegateFees.toDouble()/1000000.0
-                fee_edittext.setText(feeInTez.toString())
+                // we use this call to ask for payload and fees
+                if (mDelegatePayload != null && mDelegateFees != null)
+                {
+                    onInitRemoveDelegateLoadComplete(null)
 
-                validateRemoveDelegateButton(isDelegateFeeValid())
+                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
+                    fee_edittext?.setText(feeInTez?.toString())
+
+                    validateRemoveDelegateButton(isDelegateFeeValid())
+                }
+                else
+                {
+                    val volleyError = VolleyError(getString(R.string.generic_error))
+                    onInitRemoveDelegateLoadComplete(volleyError)
+                    mClickCalculate = true
+
+                    //the call failed
+                }
+
             }
-            else
-            {
-                val volleyError = VolleyError(getString(R.string.generic_error))
-                onInitRemoveDelegateLoadComplete(volleyError)
-                mClickCalculate = true
-
-                //the call failed
-            }
-
         }, Response.ErrorListener
         {
-            onInitRemoveDelegateLoadComplete(it)
+            if (activity != null)
+            {
+                onInitRemoveDelegateLoadComplete(it)
 
-            mClickCalculate = true
-            //Log.i("mTransferId", ""+mTransferId)
-            //Log.i("mDelegatePayload", ""+mDelegatePayload)
+                mClickCalculate = true
+                //Log.i("mTransferId", ""+mTransferId)
+                //Log.i("mDelegatePayload", ""+mDelegatePayload)
+            }
         })
         {
             @Throws(AuthFailureError::class)
@@ -1025,11 +1051,11 @@ class DelegateFragment : Fragment()
 
     private fun putFeesToNegative()
     {
-        fee_edittext.setText("")
+        fee_edittext?.setText("")
 
         mClickCalculate = false
-        fee_edittext.isEnabled = false
-        fee_edittext.hint = getString(R.string.neutral)
+        fee_edittext?.isEnabled = false
+        fee_edittext?.hint = getString(R.string.neutral)
 
         mDelegateFees = -1
 
@@ -1038,7 +1064,7 @@ class DelegateFragment : Fragment()
 
     private fun putPayButtonToNull()
     {
-        add_delegate_button.text = getString(R.string.delegate_format, "")
+        add_delegate_button?.text = getString(R.string.delegate_format, "")
     }
 
     private fun showSnackBar(error:VolleyError?, message:String?)
@@ -1057,30 +1083,40 @@ class DelegateFragment : Fragment()
 
     private fun validateAddButton(validate: Boolean)
     {
-        val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(themeBundle)
-
-        if (validate)
+        if (activity != null)
         {
-            add_delegate_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            add_delegate_button_layout.isEnabled = true
-            add_delegate_button_layout.background = makeSelector(theme)
+            val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
+            val theme = CustomTheme.fromBundle(themeBundle)
 
-            val drawables = add_delegate_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-        }
-        else
-        {
-            add_delegate_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-            add_delegate_button_layout.isEnabled = false
+            if (validate)
+            {
+                add_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                add_delegate_button_layout?.isEnabled = true
+                add_delegate_button_layout?.background = makeSelector(theme)
 
-            val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            add_delegate_button_layout.background = makeSelector(greyTheme)
+                val drawables = add_delegate_button?.compoundDrawables
+                if (drawables != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                }
+            }
+            else
+            {
+                add_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                add_delegate_button_layout?.isEnabled = false
 
-            val drawables = add_delegate_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+                val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+                add_delegate_button_layout?.background = makeSelector(greyTheme)
+
+                val drawables = add_delegate_button?.compoundDrawables
+                if (drawables != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+                }
+            }
+
         }
     }
 
@@ -1090,24 +1126,30 @@ class DelegateFragment : Fragment()
         {
             val theme = CustomTheme(R.color.tz_error, R.color.tz_accent, R.color.tz_light)
 
-            remove_delegate_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            remove_delegate_button_layout.isEnabled = true
-            remove_delegate_button_layout.background = makeSelector(theme)
+            remove_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            remove_delegate_button_layout?.isEnabled = true
+            remove_delegate_button_layout?.background = makeSelector(theme)
 
-            val drawables = remove_delegate_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables[0])
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            val drawables = remove_delegate_button?.compoundDrawables
+            if (activity != null && drawables != null)
+            {
+                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            }
         }
         else
         {
             remove_delegate_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-            remove_delegate_button_layout.isEnabled = false
+            remove_delegate_button_layout?.isEnabled = false
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            remove_delegate_button_layout.background = makeSelector(greyTheme)
+            remove_delegate_button_layout?.background = makeSelector(greyTheme)
 
-            val drawables = remove_delegate_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables[0])
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+            val drawables = remove_delegate_button?.compoundDrawables
+            if (activity != null && drawables != null)
+            {
+                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+            }
         }
     }
 
@@ -1196,7 +1238,7 @@ class DelegateFragment : Fragment()
     {
         val isFeeValid = false
 
-        if (fee_edittext.text != null && !TextUtils.isEmpty(fee_edittext.text))
+        if (fee_edittext?.text != null && !TextUtils.isEmpty(fee_edittext?.text))
         {
             try
             {
@@ -1384,20 +1426,23 @@ class DelegateFragment : Fragment()
 
     private fun cancelRequests(resetBooleans:Boolean)
     {
-        val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
-        requestQueue?.cancelAll(DELEGATE_INIT_TAG)
-        requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
-        requestQueue?.cancelAll(REMOVE_DELEGATE_INIT_TAG)
-        requestQueue?.cancelAll(REMOVE_DELEGATE_FINALIZE_TAG)
-        requestQueue?.cancelAll(CONTRACT_INFO_TAG)
-
-        if (resetBooleans)
+        if (activity != null)
         {
-            mInitDelegateLoading = false
-            mFinalizeDelegateLoading = false
-            mInitRemoveDelegateLoading = false
-            mFinalizeRemoveDelegateLoading = false
-            mContractInfoLoading = false
+            val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
+            requestQueue?.cancelAll(DELEGATE_INIT_TAG)
+            requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
+            requestQueue?.cancelAll(REMOVE_DELEGATE_INIT_TAG)
+            requestQueue?.cancelAll(REMOVE_DELEGATE_FINALIZE_TAG)
+            requestQueue?.cancelAll(CONTRACT_INFO_TAG)
+
+            if (resetBooleans)
+            {
+                mInitDelegateLoading = false
+                mFinalizeDelegateLoading = false
+                mInitRemoveDelegateLoading = false
+                mFinalizeRemoveDelegateLoading = false
+                mContractInfoLoading = false
+            }
         }
     }
 
