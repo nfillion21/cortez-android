@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.3.1
+-----
+* Fixed recipient parameters and async crashed.
+
 1.3.0
 -----
 * Add the tez delegation features.
