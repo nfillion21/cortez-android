@@ -154,11 +154,10 @@ public class OperationRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
                 OperationItemViewHolder operationItemHolder = (OperationItemViewHolder) holder;
                 Operation operationItem = mRecyclerViewItems.get(position);
 
-                operationItemHolder.itemAmount.setText(operationItem.getAmount()/1000000 + "ꜩ");
+                operationItemHolder.itemAmount.setText(String.valueOf(operationItem.getAmount()/1000000.0));
+                operationItemHolder.itemFee.setText(String.valueOf(operationItem.getFee()/1000000.0));
 
-                operationItemHolder.itemFee.setText(operationItem.getFee()/1000000 + "ꜩ");
-
-                Date date = null;
+                Date date;
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     date = Date.from(Instant.parse(operationItem.getTimestamp()));
                     operationItemHolder.itemDate.setText(mDateFormat.format(date));
