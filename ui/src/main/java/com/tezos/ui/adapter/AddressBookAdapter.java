@@ -100,7 +100,7 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new ViewHolder(mLayoutInflater
-                .inflate(R.layout.item_payment_account, parent, false));
+                .inflate(R.layout.item_account_addressbook, parent, false));
     }
 
     @Override
