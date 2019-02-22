@@ -1139,7 +1139,7 @@ class DelegateFragment : Fragment()
         }
         else
         {
-            remove_delegate_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            remove_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
             remove_delegate_button_layout?.isEnabled = false
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
             remove_delegate_button_layout?.background = makeSelector(greyTheme)
@@ -1469,6 +1469,12 @@ class DelegateFragment : Fragment()
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
 
         outState.putBundle(CONTRACT_DATA_KEY, this.toBundle(mContract))
+    }
+
+    override fun onDetach()
+    {
+        super.onDetach()
+        mCallback = null
     }
 
     override fun onDestroy()

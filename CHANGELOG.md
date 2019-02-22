@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.3.2
+-----
+* Browse contact list from Contacts app.
+
 1.3.1
 -----
 * Fixed recipient parameters and async crashed.

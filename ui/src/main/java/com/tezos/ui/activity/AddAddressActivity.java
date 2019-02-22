@@ -32,12 +32,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
@@ -67,12 +69,14 @@ import com.tezos.ui.fragment.ContactsDialogFragment;
 import org.jetbrains.annotations.NotNull;
 
 
-public class AddAddressActivity extends BaseSecureActivity implements ContactsDialogFragment.OnNameSelectedListener
+public class AddAddressActivity extends BaseSecureActivity
 {
     public static int ADD_ADDRESS_REQUEST_CODE = 0x2400; // arbitrary int
 
     public static int SCAN_PERMISSION_REQUEST_CODE = 0x2800; // arbitrary int
     public static int SCAN_REQUEST_CODE = 0x2900; // arbitrary int
+
+    public static int PICK_CONTACT_REQUEST_CODE = 0x3300; // arbitrary int
 
     public static int READ_CONTACTS_PERMISSION_REQUEST_CODE = 0x3000; // arbitrary int
 
@@ -201,6 +205,22 @@ public class AddAddressActivity extends BaseSecureActivity implements ContactsDi
                 // the user the popped the scan activity
             }
         }
+        else if (requestCode == PICK_CONTACT_REQUEST_CODE)
+        {
+            if (resultCode == Activity.RESULT_OK)
+            {
+                Uri contactData = data.getData();
+                Cursor c = getContentResolver().query(contactData, new String[] { ContactsContract.Contacts.DISPLAY_NAME }, null, null, null, null);
+
+                if (c.moveToFirst())
+                {
+                    String name = c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+
+                    mOwner.setText(name);
+                    mTzAddress.requestFocus();
+                }
+            }
+        }
     }
 
     @Override
@@ -284,25 +304,6 @@ public class AddAddressActivity extends BaseSecureActivity implements ContactsDi
         }
 
         this.mTzAddress.setTextColor(ContextCompat.getColor(this, color));
-    }
-
-    @Override
-    public void onNameSelected(@NotNull String word)
-    {
-        mOwner.setText(word);
-        mTzAddress.requestFocus();
-
-        /*
-        if (isInputDataValid())
-        {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mTzAddress.getWindowToken(), 0);
-            imm.hideSoftInputFromWindow(mOwner.getWindowToken(), 0);
-        }
-        else
-        {
-        }
-        */
     }
 
     private class GenericTextWatcher implements TextWatcher
@@ -559,7 +560,10 @@ public class AddAddressActivity extends BaseSecureActivity implements ContactsDi
 
     private void launchBrowseContacts()
     {
-        ContactsDialogFragment contactsDialogFragment = ContactsDialogFragment.newInstance();
-        contactsDialogFragment.show(getSupportFragmentManager(), "contactsDialog");
+        //ContactsDialogFragment contactsDialogFragment = ContactsDialogFragment.newInstance();
+        //contactsDialogFragment.show(getSupportFragmentManager(), "contactsDialog");
+
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(intent, PICK_CONTACT_REQUEST_CODE);
     }
 }
