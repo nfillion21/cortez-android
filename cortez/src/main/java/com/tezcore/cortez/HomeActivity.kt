@@ -98,12 +98,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                             fabTransfer.show()
                             fabSharing.hide()
                             fabAddDelegate.hide()
+                            fabAddLimits.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabSharing.hide()
                             fabAddDelegate.hide()
+                            fabAddLimits.hide()
                         }
                     }
 
@@ -114,12 +116,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                             fabTransfer.hide()
                             fabSharing.show()
                             fabAddDelegate.hide()
+                            fabAddLimits.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabSharing.hide()
                             fabAddDelegate.hide()
+                            fabAddLimits.hide()
                         }
                     }
 
@@ -130,12 +134,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                             fabTransfer.hide()
                             fabSharing.hide()
                             fabAddDelegate.show()
+                            fabAddLimits.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabSharing.hide()
                             fabAddDelegate.hide()
+                            fabAddLimits.hide()
                         }
                     }
 
@@ -145,6 +151,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         fabTransfer.hide()
                         fabSharing.hide()
                         fabAddDelegate.hide()
+                        fabAddLimits.show()
                     }
 
                     else ->
@@ -201,6 +208,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             AddDelegateActivity.start(this, mTezosTheme)
         }
 
+        fabAddLimits.setOnClickListener {
+            AddLimitsActivity.start(this, mTezosTheme)
+        }
+
         initActionBar(mTezosTheme)
     }
 
@@ -225,12 +236,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         fabTransfer.show()
                         fabSharing.hide()
                         fabAddDelegate.hide()
+                        fabAddLimits.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabSharing.hide()
                         fabAddDelegate.hide()
+                        fabAddLimits.hide()
                     }
                 }
 
@@ -241,12 +254,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         fabTransfer.hide()
                         fabSharing.show()
                         fabAddDelegate.hide()
+                        fabAddLimits.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabSharing.hide()
                         fabAddDelegate.hide()
+                        fabAddLimits.hide()
                     }
                 }
 
@@ -257,12 +272,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         fabTransfer.hide()
                         fabSharing.hide()
                         fabAddDelegate.show()
+                        fabAddLimits.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabSharing.hide()
                         fabAddDelegate.hide()
+                        fabAddLimits.hide()
                     }
                 }
 
@@ -271,6 +288,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     fabTransfer.hide()
                     fabSharing.hide()
                     fabAddDelegate.hide()
+                    fabAddLimits.show()
                 }
 
                 else ->
@@ -309,7 +327,20 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
                 3 ->
                 {
-                    return SharingAddressFragment.newInstance(mTezosTheme, null)
+                    /*
+                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+
+                    return if (isPasswordSaved)
+                    {
+                        val mnemonicsData = Storage(baseContext).getMnemonics()
+                        LimitsFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
+                    }
+                    else
+                    {
+                        LimitsFragment.newInstance(mTezosTheme, null)
+                    }
+                    */
+                    return Fragment()
                 }
                 else ->
                 {

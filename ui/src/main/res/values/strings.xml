@@ -38,6 +38,7 @@
     <string name="restore_wallet">Restore Wallet</string>
     <string name="add_address_title">Add an address</string>
     <string name="add_delegate_title">Add a delegate</string>
+    <string name="add_limits_title">Add a contract limit</string>
     <string name="delegation_title">Delegation</string>
     <string name="receive_title">Receive</string>
     <string name="restore_wallet_info">Please fill your 24 english words in the right order to recover your accounts.</string>
