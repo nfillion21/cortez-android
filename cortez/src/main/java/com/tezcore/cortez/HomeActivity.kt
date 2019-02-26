@@ -97,24 +97,30 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         {
                             fabTransfer.show()
                             fabSharing.hide()
-                            fabAddAddress.hide()
                             fabAddDelegate.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabSharing.hide()
-                            fabAddAddress.hide()
                             fabAddDelegate.hide()
                         }
                     }
 
                     1 ->
                     {
-                        fabTransfer.hide()
-                        fabAddAddress.show()
-                        fabSharing.hide()
-                        fabAddDelegate.hide()
+                        if (isPasswordSaved)
+                        {
+                            fabTransfer.hide()
+                            fabSharing.show()
+                            fabAddDelegate.hide()
+                        }
+                        else
+                        {
+                            fabTransfer.hide()
+                            fabSharing.hide()
+                            fabAddDelegate.hide()
+                        }
                     }
 
                     2 ->
@@ -122,14 +128,12 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         if (isPasswordSaved)
                         {
                             fabTransfer.hide()
-                            fabAddAddress.hide()
-                            fabSharing.show()
-                            fabAddDelegate.hide()
+                            fabSharing.hide()
+                            fabAddDelegate.show()
                         }
                         else
                         {
                             fabTransfer.hide()
-                            fabAddAddress.hide()
                             fabSharing.hide()
                             fabAddDelegate.hide()
                         }
@@ -137,20 +141,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                     3 ->
                     {
-                        if (isPasswordSaved)
-                        {
-                            fabTransfer.hide()
-                            fabAddAddress.hide()
-                            fabSharing.hide()
-                            fabAddDelegate.show()
-                        }
-                        else
-                        {
-                            fabTransfer.hide()
-                            fabAddAddress.hide()
-                            fabSharing.hide()
-                            fabAddDelegate.hide()
-                        }
+                        //TODO hide everything for now
+                        fabTransfer.hide()
+                        fabSharing.hide()
+                        fabAddDelegate.hide()
                     }
 
                     else ->
@@ -203,10 +197,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             }
         }
 
-        fabAddAddress.setOnClickListener {
-            AddAddressActivity.start(this, mTezosTheme)
-        }
-
         fabAddDelegate.setOnClickListener {
             AddDelegateActivity.start(this, mTezosTheme)
         }
@@ -234,24 +224,30 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     {
                         fabTransfer.show()
                         fabSharing.hide()
-                        fabAddAddress.hide()
                         fabAddDelegate.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabSharing.hide()
-                        fabAddAddress.hide()
                         fabAddDelegate.hide()
                     }
                 }
 
                 1 ->
                 {
-                    fabTransfer.hide()
-                    fabAddAddress.show()
-                    fabSharing.hide()
-                    fabAddDelegate.hide()
+                    if (isPasswordSaved)
+                    {
+                        fabTransfer.hide()
+                        fabSharing.show()
+                        fabAddDelegate.hide()
+                    }
+                    else
+                    {
+                        fabTransfer.hide()
+                        fabSharing.hide()
+                        fabAddDelegate.hide()
+                    }
                 }
 
                 2 ->
@@ -259,14 +255,12 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     if (isPasswordSaved)
                     {
                         fabTransfer.hide()
-                        fabAddAddress.hide()
-                        fabSharing.show()
-                        fabAddDelegate.hide()
+                        fabSharing.hide()
+                        fabAddDelegate.show()
                     }
                     else
                     {
                         fabTransfer.hide()
-                        fabAddAddress.hide()
                         fabSharing.hide()
                         fabAddDelegate.hide()
                     }
@@ -274,20 +268,9 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                 3 ->
                 {
-                    if (isPasswordSaved)
-                    {
-                        fabTransfer.hide()
-                        fabAddAddress.hide()
-                        fabSharing.hide()
-                        fabAddDelegate.show()
-                    }
-                    else
-                    {
-                        fabTransfer.hide()
-                        fabAddAddress.hide()
-                        fabSharing.hide()
-                        fabAddDelegate.hide()
-                    }
+                    fabTransfer.hide()
+                    fabSharing.hide()
+                    fabAddDelegate.hide()
                 }
 
                 else ->
@@ -307,14 +290,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
                 1 ->
                 {
-                    return AddressBookFragment.newInstance(mTezosTheme, null, null)
-                }
-                2 ->
-                {
                     return SharingAddressFragment.newInstance(mTezosTheme, null)
                 }
 
-                3 ->
+                2 ->
                 {
                     val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
 
@@ -328,6 +307,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         DelegationFragment.newInstance(mTezosTheme, null)
                     }
                 }
+                3 ->
+                {
+                    return SharingAddressFragment.newInstance(mTezosTheme, null)
+                }
                 else ->
                 {
                     //should not happen
@@ -338,7 +321,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
         override fun getCount(): Int
         {
-            // Show 4 total pages.
+            // Show 5 total pages.
             return 4
         }
     }
