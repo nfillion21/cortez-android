@@ -29,6 +29,7 @@
     <string name="public_key_info_empty_title">You have no public key</string>
     <string name="account_info_empty_title">You cannot delegate</string>
     <string name="delegate_title">Delegate</string>
+    <string name="limits_title">Limits</string>
     <string name="address_book_empty_info_title">Please fill in your address book by clicking on the add button</string>
     <string name="delegated_addresses_empty_info_title">Please create a delegated address and delegate your tez by clicking on the add button</string>
     <string name="create_wallet">Create Wallet</string>
@@ -50,6 +51,7 @@
     <string name="copied_your_pkh">Copied your public key hash</string>
     <string name="copied">Copied %1$s</string>
     <string name="delegate_address_info">Please fill the form to delegate your tez. This will create a KT1 address and delegate it to the tz1 delegate address you choose.</string>
+    <string name="contract_limits_info">Informations about this contract.</string>
     <string name="redelegate_address_info">Please fill the form to delegate your tez to your chosen baker\'s address.</string>
     <string name="remove_delegate_info">Your current baker\'s address:\n\n%1$s</string>
     <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string>

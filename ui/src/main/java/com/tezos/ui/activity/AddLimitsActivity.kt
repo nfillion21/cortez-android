@@ -100,7 +100,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
         private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
         {
-            val starter = Intent(context, AddDelegateActivity::class.java)
+            val starter = Intent(context, AddLimitsActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
 
             return starter

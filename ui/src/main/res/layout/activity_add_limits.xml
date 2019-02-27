@@ -104,14 +104,14 @@ tools:ignore="UselessParent,UnusedAttribute">
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
                         android:layout_marginBottom="@dimen/spacing_normal"
-                        android:text="@string/delegate_title"/>
+                        android:text="@string/limits_title"/>
 
                     <TextView
-                        android:id="@+id/redelegate_info_textview"
+                        android:id="@+id/limits_info_textview"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                        android:text="@string/delegate_address_info"
+                        android:text="@string/contract_limits_info"
                         android:textColor="@color/colorAccent"
                         android:layout_marginBottom="@dimen/spacing_double"
                         android:ellipsize="end" />

@@ -516,7 +516,7 @@ class LimitsFragment : Fragment()
         {
             if (mContract!!.delegate != null)
             {
-                redelegate_info_textview?.visibility = View.GONE
+                limits_info_textview?.visibility = View.GONE
                 redelegate_form_card_info?.visibility = View.VISIBLE
 
                 tezos_address_layout?.visibility = View.GONE
@@ -532,7 +532,7 @@ class LimitsFragment : Fragment()
             }
             else
             {
-                redelegate_info_textview?.visibility = View.VISIBLE
+                limits_info_textview?.visibility = View.VISIBLE
                 redelegate_form_card_info?.visibility = View.VISIBLE
 
                 tezos_address_layout?.visibility = View.VISIBLE

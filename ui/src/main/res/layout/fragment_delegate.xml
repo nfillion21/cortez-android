@@ -72,7 +72,7 @@
                             android:ellipsize="end" />
 
                         <TextView
-                            android:id="@+id/redelegate_info_textview"
+                            android:id="@+id/limits_info_textview"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
