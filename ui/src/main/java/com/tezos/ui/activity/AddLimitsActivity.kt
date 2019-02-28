@@ -34,6 +34,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -45,6 +46,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.widget.SeekBar
 import android.widget.TextView
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
@@ -62,6 +64,8 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.activity_add_delegate.*
 import kotlinx.android.synthetic.main.delegate_form_card_info.*
+import kotlinx.android.synthetic.main.item_operation_details.view.*
+import kotlinx.android.synthetic.main.limits_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -129,14 +133,28 @@ class AddLimitsActivity : BaseSecureActivity()
 
         initToolbar(theme)
 
-        amount_edittext.addTextChangedListener(GenericTextWatcher(amount_edittext))
+        limits_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                // Display the current progress of SeekBar
+                limit_edittext.setText("$i")
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                // Do something
+                //Toast.makeText(applicationContext,"start tracking",Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                // Do something
+                //Toast.makeText(applicationContext,"stop tracking",Toast.LENGTH_SHORT).show()
+            }
+        })
+
+        amount_limit_edittext.addTextChangedListener(GenericTextWatcher(amount_limit_edittext))
 
         val focusChangeListener = this.focusChangeListener()
-        amount_edittext.onFocusChangeListener = focusChangeListener
-
-        tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
-
-        tezos_address_edittext.onFocusChangeListener = focusChangeListener
+        amount_limit_edittext.onFocusChangeListener = focusChangeListener
 
         if (savedInstanceState != null)
         {
@@ -160,13 +178,9 @@ class AddLimitsActivity : BaseSecureActivity()
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_edittext)
+            if (i == R.id.amount_limit_edittext)
             {
                 putAmountInRed(!hasFocus)
-            }
-            else if (i == R.id.tezos_address_edittext)
-            {
-                putTzAddressInRed(!hasFocus)
             }
             else
             {
@@ -378,13 +392,13 @@ class AddLimitsActivity : BaseSecureActivity()
 
             //TODO we should give access to the fees button
 
-            fee_edittext.isEnabled = true
-            fee_edittext.isFocusable = false
-            fee_edittext.isClickable = false
-            fee_edittext.isLongClickable = false
-            fee_edittext.hint = getString(R.string.click_for_fees)
+            fee_limit_edittext.isEnabled = true
+            fee_limit_edittext.isFocusable = false
+            fee_limit_edittext.isClickable = false
+            fee_limit_edittext.isLongClickable = false
+            fee_limit_edittext.hint = getString(R.string.click_for_fees)
 
-            fee_edittext.setOnClickListener {
+            fee_limit_edittext.setOnClickListener {
                 startInitDelegationLoading()
             }
 
@@ -466,7 +480,7 @@ class AddLimitsActivity : BaseSecureActivity()
                 onInitDelegateLoadComplete(null)
 
                 val feeInTez = mDelegateFees.toDouble()/1000000.0
-                fee_edittext.setText(feeInTez.toString())
+                fee_limit_edittext.setText(feeInTez.toString())
 
                 validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
@@ -534,11 +548,11 @@ class AddLimitsActivity : BaseSecureActivity()
 
     private fun putFeesToNegative()
     {
-        fee_edittext.setText("")
+        fee_limit_edittext.setText("")
 
         mClickCalculate = false
-        fee_edittext.isEnabled = false
-        fee_edittext.hint = getString(R.string.neutral)
+        fee_limit_edittext.isEnabled = false
+        fee_limit_edittext.hint = getString(R.string.neutral)
 
         mDelegateFees = -1
 
@@ -614,18 +628,11 @@ class AddLimitsActivity : BaseSecureActivity()
         {
             val i = v.id
 
-            if ((i == R.id.amount_edittext && !isDelegateAmountEquals(editable))
-                    ||
-                    (i == R.id.tezos_address_edittext && !isDelegateTezosAddressEquals(editable)))
+            if (i == R.id.amount_limit_edittext && !isDelegateAmountEquals(editable))
             {
-                if (i == R.id.amount_edittext )
+                if (i == R.id.amount_limit_edittext )
                 {
                     putAmountInRed(false)
-                }
-
-                if (i == R.id.tezos_address_edittext)
-                {
-                    putTzAddressInRed(false)
                 }
 
                 //TODO text changed
@@ -650,7 +657,7 @@ class AddLimitsActivity : BaseSecureActivity()
                     putPayButtonToNull()
                 }
             }
-            else if (i != R.id.amount_edittext && i != R.id.tezos_address_edittext)
+            else if (i != R.id.amount_limit_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -694,36 +701,19 @@ class AddLimitsActivity : BaseSecureActivity()
 
     fun isInputDataValid(): Boolean
     {
-        return isDelegateAmountValid() && isTzAddressValid()
+        return isDelegateAmountValid()
     }
-
-    private fun isTzAddressValid(): Boolean
-    {
-        var isTzAddressValid = false
-
-        if (!TextUtils.isEmpty(tezos_address_edittext.text))
-        {
-            if (Utils.isTzAddressValid(tezos_address_edittext.text!!.toString()))
-            {
-                mDelegateTezosAddress = tezos_address_edittext.text.toString()
-                isTzAddressValid = true
-            }
-        }
-
-        return isTzAddressValid
-    }
-
 
     private fun isDelegateFeeValid():Boolean
     {
         val isFeeValid = false
 
-        if (fee_edittext.text != null && !TextUtils.isEmpty(fee_edittext.text))
+        if (fee_limit_edittext.text != null && !TextUtils.isEmpty(fee_limit_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val fee = fee_edittext.text.toString().toDouble()
+                val fee = fee_limit_edittext.text.toString().toDouble()
 
                 if (fee >= 0.000001f)
                 {
@@ -746,12 +736,12 @@ class AddLimitsActivity : BaseSecureActivity()
     {
         val isAmountValid = false
 
-        if (amount_edittext.text != null && !TextUtils.isEmpty(amount_edittext.text))
+        if (amount_limit_edittext.text != null && !TextUtils.isEmpty(amount_limit_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = amount_edittext.text!!.toString().toDouble()
+                val amount = amount_limit_edittext.text!!.toString().toDouble()
 
                 //no need
                 if (amount >= 0.0f)
@@ -805,7 +795,6 @@ class AddLimitsActivity : BaseSecureActivity()
     private fun putEverythingInRed()
     {
         this.putAmountInRed(true)
-        this.putTzAddressInRed(true)
     }
 
     fun isAddButtonValid(): Boolean
@@ -813,24 +802,6 @@ class AddLimitsActivity : BaseSecureActivity()
         return mDelegatePayload != null
                 && isDelegateFeeValid()
                 && isInputDataValid()
-    }
-
-    private fun putTzAddressInRed(red: Boolean)
-    {
-        val color: Int
-
-        val tzAddressValid = isTzAddressValid()
-
-        if (red && !tzAddressValid)
-        {
-            color = R.color.tz_error
-        }
-        else
-        {
-            color = R.color.tz_accent
-        }
-
-        tezos_address_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
 // put everything in RED
@@ -861,14 +832,14 @@ class AddLimitsActivity : BaseSecureActivity()
             }
         }
 
-        amount_edittext.setTextColor(ContextCompat.getColor(this, color))
+        amount_limit_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
     private fun setTextPayButton()
     {
         var amountDouble: Double = mDelegateAmount
 
-        //amountDouble += fee_edittext.text.toString().toLong()/1000000
+        //amountDouble += fee_limit_edittext.text.toString().toLong()/1000000
         amountDouble += mDelegateFees.toDouble()/1000000.0
 
         var amount = amountDouble.toString()

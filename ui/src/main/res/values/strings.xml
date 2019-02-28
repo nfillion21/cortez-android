@@ -12,6 +12,8 @@
     <string name="card_expiration">Expiry date</string>
     <string name="amount_default" translatable="false">0.05</string>
     <string name="amount">Amount</string>
+    <string name="deposit_amount">Deposit amount</string>
+    <string name="limit_1_to_10k">Limit (from 1 to 10 000 ꜩ)</string>
     <string name="gas">Gas (default value)</string>
     <string name="fee_minimum">Fee (calculated minimum value)</string>
     <string name="delegate">Delegate</string>
@@ -51,7 +53,7 @@
     <string name="copied_your_pkh">Copied your public key hash</string>
     <string name="copied">Copied %1$s</string>
     <string name="delegate_address_info">Please fill the form to delegate your tez. This will create a KT1 address and delegate it to the tz1 delegate address you choose.</string>
-    <string name="contract_limits_info">Informations about this contract.</string>
+    <string name="contract_limits_info">Please fill the form to create a smart contract</string>
     <string name="redelegate_address_info">Please fill the form to delegate your tez to your chosen baker\'s address.</string>
     <string name="remove_delegate_info">Your current baker\'s address:\n\n%1$s</string>
     <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string>

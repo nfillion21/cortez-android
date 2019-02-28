@@ -1,0 +1,155 @@
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_double"
+    android:background="@drawable/selector_rect_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/limit_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        android:text="@string/limit_1_to_10k"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+        tools:ignore="UnusedAttribute,NewApi" />
+
+    <SeekBar
+        android:id="@+id/limits_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="10001"
+        android:min="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/gas_transfer"
+            android:elevation="@dimen/elevation_header"
+            android:text="ꜩ"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:clipToPadding="false"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/limit_edittext"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:minWidth="@dimen/spacing_huge"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:hint="@string/neutral"
+            android:enabled="true"
+            android:inputType="numberDecimal"
+            android:text="1"
+            android:textColorHint="@color/tz_placeholder"
+            android:maxLength="5"
+            android:digits="0123456789"
+            android:textSize="@dimen/size_edit_text" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/amount_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_double"
+        android:text="@string/deposit_amount"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+        tools:ignore="UnusedAttribute,NewApi" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/amount_transfer"
+            android:elevation="@dimen/elevation_header"
+            android:text="ꜩ"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:clipToPadding="false"
+            tools:ignore="UnusedAttribute,NewApi" />
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/amount_limit_edittext"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:minWidth="@dimen/spacing_huge"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:hint="@string/amount_default"
+            android:inputType="numberDecimal"
+            android:textColorHint="@color/tz_placeholder"
+            android:maxLength="15"
+            android:digits="0123456789."
+            android:textSize="@dimen/size_edit_text" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/gas_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_double"
+        android:text="@string/fee_minimum"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+        tools:ignore="UnusedAttribute,NewApi" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/gas_transfer"
+            android:elevation="@dimen/elevation_header"
+            android:text="ꜩ"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:clipToPadding="false"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/fee_limit_edittext"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:minWidth="@dimen/spacing_huge"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:hint="@string/neutral"
+            android:enabled="false"
+            android:inputType="numberDecimal"
+            android:textColorHint="@color/tz_placeholder"
+            android:maxLength="15"
+            android:digits="0123456789."
+            android:textSize="@dimen/size_edit_text" />
+
+    </LinearLayout>
+</LinearLayout>
