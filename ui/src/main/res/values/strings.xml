@@ -13,7 +13,7 @@
     <string name="amount_default" translatable="false">0.05</string>
     <string name="amount">Amount</string>
     <string name="deposit_amount">Deposit amount</string>
-    <string name="limit_1_to_10k">Limit (from 1 to 10 000 ꜩ)</string>
+    <string name="limit_1_to_10k">Daily spending limit (from 1 to 10 000 ꜩ)</string>
     <string name="gas">Gas (default value)</string>
     <string name="fee_minimum">Fee (calculated minimum value)</string>
     <string name="delegate">Delegate</string>
@@ -111,6 +111,7 @@
     <string name="loading_delegated_addresses">Loading delegated addresses…</string>
     <string name="loading_contract_info">Loading contract informations…</string>
     <string name="neutral">-</string>
+    <string name="one">1</string>
     <string name="click_for_fees">Click to recaculate</string>
     <string name="empty_list_operations">No operations</string>
     <string name="contact_name">Contact name</string>

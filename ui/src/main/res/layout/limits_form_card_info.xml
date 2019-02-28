@@ -21,8 +21,7 @@
         android:id="@+id/limits_seekbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="10001"
-        android:min="1" />
+        android:max="9999" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -50,7 +49,7 @@
             android:minWidth="@dimen/spacing_huge"
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
-            android:hint="@string/neutral"
+            android:hint="@string/one"
             android:enabled="true"
             android:inputType="numberDecimal"
             android:text="1"

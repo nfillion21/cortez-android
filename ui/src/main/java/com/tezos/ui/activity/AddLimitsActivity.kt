@@ -137,7 +137,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 // Display the current progress of SeekBar
-                limit_edittext.setText("$i")
+                limit_edittext.setText( (i+1).toString())
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
