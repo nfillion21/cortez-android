@@ -86,6 +86,7 @@ class AddLimitsActivity : BaseSecureActivity()
     private var mClickCalculate:Boolean = false
 
     private var mIsTracking:Boolean = false
+    private var mIsTyping:Boolean = false
 
     companion object
     {
@@ -140,19 +141,28 @@ class AddLimitsActivity : BaseSecureActivity()
 
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean)
             {
-                limit_edittext.setText( (i+1).toString())
-                currentValue = i+1
+                if (!mIsTyping)
+                {
+                    limit_edittext.setText( (i+1).toString())
+                    currentValue = i+1
+                }
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar)
             {
-                mIsTracking = true
+                if (!mIsTyping)
+                {
+                    mIsTracking = true
+                }
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar)
             {
-                mIsTracking = false
-                limit_edittext.setText( (currentValue).toString())
+                if (!mIsTyping)
+                {
+                    mIsTracking = false
+                    limit_edittext.setText( (currentValue).toString())
+                }
             }
         })
 
@@ -646,6 +656,26 @@ class AddLimitsActivity : BaseSecureActivity()
                     if (!mIsTracking)
                     {
                         putLimitInRed(false)
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        {
+                            val progress = limits_seekbar.progress
+
+                            val change:Int = if (TextUtils.isEmpty(limit_edittext.text))
+                            {
+                                0
+                            } else
+                            {
+                                limit_edittext.text.toString().toInt() - 1
+                            }
+
+                            if (progress != change)
+                            {
+                                mIsTyping = true
+                                limits_seekbar.setProgress(change-1, true)
+                                mIsTyping = false
+                            }
+                        }
                     }
                 }
 
