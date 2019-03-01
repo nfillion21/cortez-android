@@ -34,6 +34,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -80,9 +81,11 @@ class AddLimitsActivity : BaseSecureActivity()
 
     private var mDelegateAmount:Double = -1.0
 
-    private var mLimitAmount:Long = -1
+    private var mLimitAmount:Long = -1L
 
     private var mClickCalculate:Boolean = false
+
+    private var mIsTracking:Boolean = false
 
     companion object
     {
@@ -133,19 +136,23 @@ class AddLimitsActivity : BaseSecureActivity()
 
         limits_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
 
-            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
-                // Display the current progress of SeekBar
+            private var currentValue:Int = 1
+
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean)
+            {
                 limit_edittext.setText( (i+1).toString())
+                currentValue = i+1
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-                // Do something
-                //Toast.makeText(applicationContext,"start tracking",Toast.LENGTH_SHORT).show()
+            override fun onStartTrackingTouch(seekBar: SeekBar)
+            {
+                mIsTracking = true
             }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                // Do something
-                //Toast.makeText(applicationContext,"stop tracking",Toast.LENGTH_SHORT).show()
+            override fun onStopTrackingTouch(seekBar: SeekBar)
+            {
+                mIsTracking = false
+                limit_edittext.setText( (currentValue).toString())
             }
         })
 
@@ -153,6 +160,9 @@ class AddLimitsActivity : BaseSecureActivity()
 
         val focusChangeListener = this.focusChangeListener()
         amount_limit_edittext.onFocusChangeListener = focusChangeListener
+
+        limit_edittext.addTextChangedListener(GenericTextWatcher(limit_edittext))
+        limit_edittext.onFocusChangeListener = focusChangeListener
 
         if (savedInstanceState != null)
         {
@@ -163,7 +173,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
             mDelegateAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
 
-            mLimitAmount = savedInstanceState.getLong(LIMIT_AMOUNT_KEY, -1)
+            mLimitAmount = savedInstanceState.getLong(LIMIT_AMOUNT_KEY, -1L)
 
             mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
@@ -176,13 +186,13 @@ class AddLimitsActivity : BaseSecureActivity()
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_limit_edittext)
+            when (i)
             {
-                putAmountInRed(!hasFocus)
-            }
-            else
-            {
-                throw UnsupportedOperationException(
+                R.id.amount_limit_edittext -> putAmountInRed(!hasFocus)
+
+                R.id.limit_edittext -> putLimitInRed(!hasFocus)
+
+                else -> throw UnsupportedOperationException(
                         "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
             }
         }
@@ -622,11 +632,21 @@ class AddLimitsActivity : BaseSecureActivity()
         {
             val i = v.id
 
-            if (i == R.id.amount_limit_edittext && !isDelegateAmountEquals(editable))
+            if ((i == R.id.amount_limit_edittext && !isDelegateAmountEquals(editable))
+                    ||
+                    (i == R.id.limit_edittext && !isLimitAmountEquals(editable)))
             {
                 if (i == R.id.amount_limit_edittext )
                 {
                     putAmountInRed(false)
+                }
+
+                if (i == R.id.limit_edittext )
+                {
+                    if (!mIsTracking)
+                    {
+                        putLimitInRed(false)
+                    }
                 }
 
                 //TODO text changed
@@ -636,7 +656,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
                 //TODO check if it's already
 
-                if (isInputDataValid())
+                if (!mIsTracking && isInputDataValid())
                 {
                     startInitDelegationLoading()
                 }
@@ -651,7 +671,7 @@ class AddLimitsActivity : BaseSecureActivity()
                     putPayButtonToNull()
                 }
             }
-            else if (i != R.id.amount_limit_edittext)
+            else if (i != R.id.amount_limit_edittext && i != R.id.limit_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -679,11 +699,34 @@ class AddLimitsActivity : BaseSecureActivity()
             }
             return isAmountEquals
         }
+
+        private fun isLimitAmountEquals(editable: Editable):Boolean
+        {
+            val isLimitAmountEquals = false
+
+            if (editable != null && !TextUtils.isEmpty(editable))
+            {
+                try
+                {
+                    val limit = editable.toString().toLong()
+                    if (limit != -1L && limit == mLimitAmount)
+                    {
+                        return true
+                    }
+                }
+                catch (e: NumberFormatException)
+                {
+                    return false
+                }
+            }
+            return isLimitAmountEquals
+        }
+
     }
 
     fun isInputDataValid(): Boolean
     {
-        return isDelegateAmountValid()
+        return isDelegateAmountValid() && isDailySpendingLimitValid()
     }
 
     private fun isDelegateFeeValid():Boolean
@@ -805,6 +848,7 @@ class AddLimitsActivity : BaseSecureActivity()
     private fun putEverythingInRed()
     {
         this.putAmountInRed(true)
+        this.putLimitInRed(true)
     }
 
     fun isAddButtonValid(): Boolean
@@ -871,7 +915,7 @@ class AddLimitsActivity : BaseSecureActivity()
             }
         }
 
-        amount_limit_edittext.setTextColor(ContextCompat.getColor(this, color))
+        limit_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
 
