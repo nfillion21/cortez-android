@@ -211,7 +211,7 @@ class DelegateFragment : Fragment()
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
         validateRemoveDelegateButton(isDelegateFeeValid())
 
-        add_delegate_button_layout.setOnClickListener {
+        add_limits_button_layout.setOnClickListener {
             onDelegateClick()
         }
 
@@ -521,7 +521,7 @@ class DelegateFragment : Fragment()
 
                 tezos_address_layout?.visibility = View.GONE
 
-                add_delegate_button_layout?.visibility = View.GONE
+                add_limits_button_layout?.visibility = View.GONE
 
                 remove_delegate_button_layout?.visibility = View.VISIBLE
 
@@ -537,7 +537,7 @@ class DelegateFragment : Fragment()
 
                 tezos_address_layout?.visibility = View.VISIBLE
 
-                add_delegate_button_layout?.visibility = View.VISIBLE
+                add_limits_button_layout?.visibility = View.VISIBLE
 
                 remove_delegate_info_textview.visibility = View.GONE
                 remove_delegate_button_layout?.visibility = View.GONE
@@ -1064,7 +1064,7 @@ class DelegateFragment : Fragment()
 
     private fun putPayButtonToNull()
     {
-        add_delegate_button?.text = getString(R.string.delegate_format, "")
+        add_limits_button?.text = getString(R.string.delegate_format, "")
     }
 
     private fun showSnackBar(error:VolleyError?, message:String?)
@@ -1090,11 +1090,11 @@ class DelegateFragment : Fragment()
 
             if (validate)
             {
-                add_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-                add_delegate_button_layout?.isEnabled = true
-                add_delegate_button_layout?.background = makeSelector(theme)
+                add_limits_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                add_limits_button_layout?.isEnabled = true
+                add_limits_button_layout?.background = makeSelector(theme)
 
-                val drawables = add_delegate_button?.compoundDrawables
+                val drawables = add_limits_button?.compoundDrawables
                 if (drawables != null)
                 {
                     val wrapDrawable = DrawableCompat.wrap(drawables!![0])
@@ -1103,13 +1103,13 @@ class DelegateFragment : Fragment()
             }
             else
             {
-                add_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-                add_delegate_button_layout?.isEnabled = false
+                add_limits_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                add_limits_button_layout?.isEnabled = false
 
                 val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-                add_delegate_button_layout?.background = makeSelector(greyTheme)
+                add_limits_button_layout?.background = makeSelector(greyTheme)
 
-                val drawables = add_delegate_button?.compoundDrawables
+                val drawables = add_limits_button?.compoundDrawables
                 if (drawables != null)
                 {
                     val wrapDrawable = DrawableCompat.wrap(drawables!![0])

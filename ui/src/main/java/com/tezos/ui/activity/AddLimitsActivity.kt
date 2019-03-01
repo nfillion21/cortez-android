@@ -34,7 +34,6 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
-import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -57,14 +56,11 @@ import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.activity_add_delegate.*
-import kotlinx.android.synthetic.main.delegate_form_card_info.*
-import kotlinx.android.synthetic.main.item_operation_details.view.*
 import kotlinx.android.synthetic.main.limits_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -83,7 +79,8 @@ class AddLimitsActivity : BaseSecureActivity()
     private var mDelegateFees:Long = -1
 
     private var mDelegateAmount:Double = -1.0
-    private var mDelegateTezosAddress:String? = null
+
+    private var mLimitAmount:Long = -1
 
     private var mClickCalculate:Boolean = false
 
@@ -97,7 +94,8 @@ class AddLimitsActivity : BaseSecureActivity()
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
         private const val DELEGATE_AMOUNT_KEY = "delegate_amount_key"
-        private const val DELEGATE_TEZOS_ADDRESS_KEY = "delegate_tezos_address_key"
+        private const val LIMIT_AMOUNT_KEY = "limit_amount_key"
+
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
@@ -127,7 +125,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
-        add_delegate_button_layout.setOnClickListener {
+        add_limits_button_layout.setOnClickListener {
             onDelegateClick()
         }
 
@@ -165,7 +163,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
             mDelegateAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
 
-            mDelegateTezosAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
+            mLimitAmount = savedInstanceState.getLong(LIMIT_AMOUNT_KEY, -1)
 
             mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
@@ -272,8 +270,6 @@ class AddLimitsActivity : BaseSecureActivity()
             dstObject.put("balance", mutezAmount)
 
             dstObject.put("fee", mDelegateFees)
-
-            dstObject.put("delegate", mDelegateTezosAddress)
 
             dstObjects.put(dstObject)
 
@@ -441,8 +437,6 @@ class AddLimitsActivity : BaseSecureActivity()
         //TODO put the delegate element
         //dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
 
-        dstObject.put("delegate", mDelegateTezosAddress)
-
         //TODO put the right amount
         //dstObject.put("credit", (mTransferAmount*1000000).toLong().toString())
         //dstObject.put("credit", 1000000.toString())
@@ -534,13 +528,13 @@ class AddLimitsActivity : BaseSecureActivity()
     {
         if (loading)
         {
-            add_delegate_button_layout.visibility = View.GONE
+            add_limits_button_layout.visibility = View.GONE
             nav_progress.visibility = View.VISIBLE
             //amount_transfer.isEnabled = false
         }
         else
         {
-            add_delegate_button_layout.visibility = View.VISIBLE
+            add_limits_button_layout.visibility = View.VISIBLE
             nav_progress.visibility = View.INVISIBLE
             //amount_transfer.isEnabled = true
         }
@@ -561,7 +555,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
     private fun putPayButtonToNull()
     {
-        add_delegate_button.text = getString(R.string.pay, "")
+        add_limits_button.text = getString(R.string.pay, "")
     }
 
     private fun showSnackBar(error:VolleyError?)
@@ -588,23 +582,23 @@ class AddLimitsActivity : BaseSecureActivity()
 
         if (validate)
         {
-            add_delegate_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
-            add_delegate_button_layout.isEnabled = true
-            add_delegate_button_layout.background = makeSelector(theme)
+            add_limits_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+            add_limits_button_layout.isEnabled = true
+            add_limits_button_layout.background = makeSelector(theme)
 
-            val drawables = add_delegate_button.compoundDrawables
+            val drawables = add_limits_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
         }
         else
         {
-            add_delegate_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
-            add_delegate_button_layout.isEnabled = false
+            add_limits_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+            add_limits_button_layout.isEnabled = false
 
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            add_delegate_button_layout.background = makeSelector(greyTheme)
+            add_limits_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = add_delegate_button.compoundDrawables
+            val drawables = add_limits_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white))
         }
@@ -687,18 +681,6 @@ class AddLimitsActivity : BaseSecureActivity()
         }
     }
 
-    private fun isDelegateTezosAddressEquals(editable: Editable):Boolean
-    {
-        val isTezosAddressEquals = true
-
-        if (editable != null && !TextUtils.isEmpty(editable))
-        {
-            val tezosAddress = editable.toString()
-            return tezosAddress == mDelegateTezosAddress
-        }
-        return isTezosAddressEquals
-    }
-
     fun isInputDataValid(): Boolean
     {
         return isDelegateAmountValid()
@@ -760,6 +742,34 @@ class AddLimitsActivity : BaseSecureActivity()
         return isAmountValid
     }
 
+    private fun isDailySpendingLimitValid():Boolean
+    {
+        val isLimitValid = false
+
+        if (limit_edittext.text != null && !TextUtils.isEmpty(limit_edittext.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val limit = limit_edittext.text!!.toString().toLong()
+
+                //no need
+                if (limit in 1..10000)
+                {
+                    mLimitAmount = limit
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mLimitAmount = -1
+                return false
+            }
+        }
+
+        return isLimitValid
+    }
+
     override fun onResume()
     {
         super.onResume()
@@ -815,7 +825,7 @@ class AddLimitsActivity : BaseSecureActivity()
         if (red && !amountValid)
         {
             color = R.color.tz_error
-            add_delegate_button.text = getString(R.string.delegate_format, "")
+            add_limits_button.text = getString(R.string.delegate_format, "")
         }
         else
         {
@@ -828,12 +838,42 @@ class AddLimitsActivity : BaseSecureActivity()
             }
             else
             {
-                add_delegate_button.text = getString(R.string.delegate_format, "")
+                add_limits_button.text = getString(R.string.delegate_format, "")
             }
         }
 
         amount_limit_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
+
+    private fun putLimitInRed(red: Boolean)
+    {
+        val color: Int
+
+        val limitValid = isDailySpendingLimitValid()
+
+        if (red && !limitValid)
+        {
+            color = R.color.tz_error
+            add_limits_button.text = getString(R.string.delegate_format, "")
+        }
+        else
+        {
+            color = R.color.tz_accent
+
+            if (limitValid)
+            {
+                //val amount = delegate_transfer_edittext.text.toString()
+                this.setTextPayButton()
+            }
+            else
+            {
+                add_limits_button.text = getString(R.string.delegate_format, "")
+            }
+        }
+
+        amount_limit_edittext.setTextColor(ContextCompat.getColor(this, color))
+    }
+
 
     private fun setTextPayButton()
     {
@@ -878,7 +918,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
         val moneyFormatted2 = "$amount ꜩ"
 //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        add_delegate_button.text = getString(R.string.pay, moneyFormatted2)
+        add_limits_button.text = getString(R.string.pay, moneyFormatted2)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -994,7 +1034,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
         outState.putDouble(DELEGATE_AMOUNT_KEY, mDelegateAmount)
 
-        outState.putString(DELEGATE_TEZOS_ADDRESS_KEY, mDelegateTezosAddress)
+        outState.putLong(LIMIT_AMOUNT_KEY, mLimitAmount)
 
         outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
 
