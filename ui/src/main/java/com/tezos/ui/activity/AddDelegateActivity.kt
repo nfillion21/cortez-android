@@ -64,6 +64,8 @@ import kotlinx.android.synthetic.main.activity_add_delegate.*
 import kotlinx.android.synthetic.main.delegate_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.InputStream
+import java.nio.charset.Charset
 
 /**
  * Created by nfillion on 20/11/18.
@@ -265,7 +267,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
             postParams.put("dsts", dstObjects)
 
-            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (!isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -362,6 +364,10 @@ class AddDelegateActivity : BaseSecureActivity()
         }
     }
 
+    fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String
+    {
+        return this.bufferedReader(charset).use { it.readText() }
+    }
 
     private fun onInitDelegateLoadComplete(error:VolleyError?)
     {
@@ -426,6 +432,50 @@ class AddDelegateActivity : BaseSecureActivity()
 
         //TODO put the delegate element
         //dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
+
+        //val json = JSONObject("hello")
+
+        val inputStreamContract = this.assets.open("contract")
+        val inputAsString = inputStreamContract.readTextAndClose()
+
+        val json = JSONObject(inputAsString)
+        dstObject.put("script", json)
+
+        /*
+        InputStream iss = getActivity().getAssets().open("document.json");
+        int size = iss.available();
+        byte[] buffer = new byte[size];
+        iss.read(buffer);
+        iss.close();
+        String myJson = new String(buffer, "UTF-8");
+        */
+
+        /*
+        val file = File("input"+File.separator+"contents.txt")
+        var ins:InputStream = file.inputStream()
+        var content = ins.readBytes().toString(Charset.defaultCharset())
+        */
+
+        /*
+        {
+            "code":
+            [
+                { "prim": "storage", "args": [ { "prim": "unit" } ] },
+
+                { "prim": "parameter", "args": [ { "prim": "unit" } ] },
+
+                { "prim": "code",
+                    "args":
+                    [
+                        [ { "prim": "CDR" },
+                            { "prim": "NIL",
+                                "args": [ { "prim": "operation" } ] },
+                            { "prim": "PAIR" } ] ] } ],
+
+            "storage": { "prim": "Unit" }
+        }
+
+        */
 
         dstObject.put("delegate", mDelegateTezosAddress)
 
