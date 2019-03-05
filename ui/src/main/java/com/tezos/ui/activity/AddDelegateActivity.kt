@@ -431,14 +431,18 @@ class AddDelegateActivity : BaseSecureActivity()
         dstObject.put("manager", pkhSrc)
 
         //TODO put the delegate element
-        //dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
+        dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
 
         //val json = JSONObject("hello")
 
-        val inputStreamContract = this.assets.open("contract")
-        val inputAsString = inputStreamContract.readTextAndClose()
+        //val inputStreamContract = this.assets.open("new_contract")
+        //val inputAsString = inputStreamContract.readTextAndClose()
 
-        val json = JSONObject(inputAsString)
+        val spendingLimitContract = String.format(getString(R.string.spending_limit), "edpkugKeANEayvMt5NWhFMMXYYwf7on1TGPNiLAMif2vEMERV2V7GR")
+
+        //val spendingLimitContract = getString(R.string.spending_limit)
+
+        val json = JSONObject(spendingLimitContract)
         dstObject.put("script", json)
 
         /*
@@ -477,7 +481,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         */
 
-        dstObject.put("delegate", mDelegateTezosAddress)
+        //dstObject.put("delegate", mDelegateTezosAddress)
 
         //TODO put the right amount
         //dstObject.put("credit", (mTransferAmount*1000000).toLong().toString())
