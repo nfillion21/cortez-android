@@ -189,7 +189,7 @@
     <string name="tab_dashboard">Dashboard</string>
     <string name="tab_address_book">Address book</string>
     <string name="tab_receive">Receive</string>
-    <string name="tab_delegation">Delegation</string>
+    <string name="tab_contracts">Contracts</string>
     <string name="tab_limits">Limits</string>
     <string name="tab_delegate">Delegate</string>
 

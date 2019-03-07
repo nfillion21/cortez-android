@@ -56,7 +56,7 @@ import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
 
-class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, DelegationFragment.OnDelegateAddressSelectedListener
+class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, ContractsFragment.OnDelegateAddressSelectedListener
 {
 
     private val mTezosTheme: CustomTheme = CustomTheme(
@@ -318,11 +318,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     return if (isPasswordSaved)
                     {
                         val mnemonicsData = Storage(baseContext).getMnemonics()
-                        DelegationFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
+                        ContractsFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
                     }
                     else
                     {
-                        DelegationFragment.newInstance(mTezosTheme, null)
+                        ContractsFragment.newInstance(mTezosTheme, null)
                     }
                 }
                 3 ->

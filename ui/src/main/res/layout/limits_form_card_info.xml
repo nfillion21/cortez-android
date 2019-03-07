@@ -40,7 +40,7 @@
             android:layout_weight="1"
             android:minWidth="@dimen/spacing_huge"
             android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
+            android:imeOptions="actionNext"
             android:hint="@string/amount_default"
             android:inputType="numberDecimal"
             android:textColorHint="@color/tz_placeholder"
