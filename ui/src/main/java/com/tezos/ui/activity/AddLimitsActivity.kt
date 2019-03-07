@@ -295,7 +295,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
             postParams.put("dsts", dstObjects)
 
-            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (true/*!isAddDelegatePayloadValid(mDelegatePayload!!, postParams)*/)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -454,15 +454,13 @@ class AddLimitsActivity : BaseSecureActivity()
         var dstObject = JSONObject()
         dstObject.put("manager", pkhSrc)
 
-        //TODO put the delegate element
-        //dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
+        val spendingLimitContract = String.format(getString(R.string.spending_limit), pk, (mLimitAmount*1000000L).toString())
 
-        //TODO put the right amount
-        //dstObject.put("credit", (mTransferAmount*1000000).toLong().toString())
-        //dstObject.put("credit", 1000000.toString())
+        val json = JSONObject(spendingLimitContract)
+        dstObject.put("script", json)
 
         //TODO be careful, do it in mutez.
-        dstObject.put("credit", (mDelegateAmount*1000000).toLong().toString())
+        dstObject.put("credit", (mDelegateAmount*1000000L).toLong().toString())
 
         dstObject.put("delegatable", true)
 

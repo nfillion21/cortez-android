@@ -267,7 +267,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
             postParams.put("dsts", dstObjects)
 
-            if (!isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -430,62 +430,8 @@ class AddDelegateActivity : BaseSecureActivity()
         var dstObject = JSONObject()
         dstObject.put("manager", pkhSrc)
 
-        //TODO put the delegate element
-        dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
 
-        //val json = JSONObject("hello")
-
-        //val inputStreamContract = this.assets.open("new_contract")
-        //val inputAsString = inputStreamContract.readTextAndClose()
-
-        val spendingLimitContract = String.format(getString(R.string.spending_limit), "edpkugKeANEayvMt5NWhFMMXYYwf7on1TGPNiLAMif2vEMERV2V7GR")
-
-        //val spendingLimitContract = getString(R.string.spending_limit)
-
-        val json = JSONObject(spendingLimitContract)
-        dstObject.put("script", json)
-
-        /*
-        InputStream iss = getActivity().getAssets().open("document.json");
-        int size = iss.available();
-        byte[] buffer = new byte[size];
-        iss.read(buffer);
-        iss.close();
-        String myJson = new String(buffer, "UTF-8");
-        */
-
-        /*
-        val file = File("input"+File.separator+"contents.txt")
-        var ins:InputStream = file.inputStream()
-        var content = ins.readBytes().toString(Charset.defaultCharset())
-        */
-
-        /*
-        {
-            "code":
-            [
-                { "prim": "storage", "args": [ { "prim": "unit" } ] },
-
-                { "prim": "parameter", "args": [ { "prim": "unit" } ] },
-
-                { "prim": "code",
-                    "args":
-                    [
-                        [ { "prim": "CDR" },
-                            { "prim": "NIL",
-                                "args": [ { "prim": "operation" } ] },
-                            { "prim": "PAIR" } ] ] } ],
-
-            "storage": { "prim": "Unit" }
-        }
-
-        */
-
-        //dstObject.put("delegate", mDelegateTezosAddress)
-
-        //TODO put the right amount
-        //dstObject.put("credit", (mTransferAmount*1000000).toLong().toString())
-        //dstObject.put("credit", 1000000.toString())
+        dstObject.put("delegate", mDelegateTezosAddress)
 
         //TODO be careful, do it in mutez.
         dstObject.put("credit", (mDelegateAmount*1000000).toLong().toString())
