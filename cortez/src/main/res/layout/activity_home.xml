@@ -96,6 +96,12 @@
         app:tint="@android:color/white"
         app:srcCompat="@drawable/ic_add_black" />
 
+    <!--
+        app:fab_colorNormal="@color/app_primary"
+        app:fab_colorPressed="@color/app_primary_pressed"
+        app:fab_colorRipple="@color/app_ripple"/>
+    -->
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabAddLimits"
         android:layout_width="wrap_content"
