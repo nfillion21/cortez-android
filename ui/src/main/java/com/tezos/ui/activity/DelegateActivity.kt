@@ -295,8 +295,8 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
 
         override fun getCount(): Int
         {
-            // Show 3 total pages.
-            return 3
+            // Show 4 total pages.
+            return 4
         }
     }
 
@@ -378,27 +378,6 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
 
         setSupportActionBar(toolbar)
     }
-
-    /*
-    Addresses
-     */
-
-    /*
-    override fun onCardClicked(address: Address?)
-    {
-        val isPasswordSaved = Storage(this).isPasswordSaved()
-        if (isPasswordSaved)
-        {
-            val seed = Storage(baseContext).getMnemonics()
-            val seedBundle = Storage.toBundle(seed)
-            TransferFormActivity.start(this, seedBundle, address, mTezosTheme)
-        }
-        else
-        {
-            showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
-        }
-    }
-    */
 
     override fun isFingerprintAllowed():Boolean
     {

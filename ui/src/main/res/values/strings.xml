@@ -192,6 +192,7 @@
     <string name="tab_contracts">Contracts</string>
     <string name="tab_limits">Limits</string>
     <string name="tab_delegate">Delegate</string>
+    <string name="tab_script">Script</string>
 
     <string name="spending_limit_contract" translatable="false"><![CDATA[
 { "code":

@@ -48,12 +48,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/tab_contracts" />
 
-            <android.support.design.widget.TabItem
-                android:id="@+id/tabItemLimits"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tab_limits" />
-
         </android.support.design.widget.TabLayout>
     </android.support.design.widget.AppBarLayout>
     <android.support.v4.view.ViewPager
@@ -89,21 +83,6 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabAddDelegate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="@dimen/fab_margin"
-        app:tint="@android:color/white"
-        app:srcCompat="@drawable/ic_add_black" />
-
-    <!--
-        app:fab_colorNormal="@color/app_primary"
-        app:fab_colorPressed="@color/app_primary_pressed"
-        app:fab_colorRipple="@color/app_ripple"/>
-    -->
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabAddLimits"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
