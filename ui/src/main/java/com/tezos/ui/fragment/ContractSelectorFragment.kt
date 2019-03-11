@@ -28,9 +28,7 @@
 package com.tezos.ui.authentication
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AppCompatDialogFragment
 import android.text.Editable
@@ -40,35 +38,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.tezos.ui.R
-import com.tezos.ui.extentions.openSecuritySettings
 import kotlinx.android.synthetic.main.dialog_pwd_container.*
 import kotlinx.android.synthetic.main.dialog_pwd_content.*
 
 class ContractSelectorFragment : AppCompatDialogFragment()
 {
-    private var listener: OnPasswordDialogListener? = null
+    private var listener: OnContractSelectorListener? = null
 
-    interface OnPasswordDialogListener
+    interface OnContractSelectorListener
     {
-        fun isFingerprintHardwareAvailable():Boolean
-        fun hasEnrolledFingerprints():Boolean
-        fun passwordVerified(mnemonics: String, password: String, fingerprint: Boolean)
+        fun onContractClicked(withScript:Boolean)
     }
 
     companion object
     {
         @JvmStatic
-        fun newInstance(mnemonics: String) =
+        fun newInstance() =
                 ContractSelectorFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(MNEMONICS_KEY, mnemonics)
-                    }
+                    arguments = Bundle().apply {}
                 }
 
         private const val MNEMONICS_KEY = "mnemonics_key"
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         isCancelable = true
 
@@ -78,19 +72,19 @@ class ContractSelectorFragment : AppCompatDialogFragment()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.dialog_pwd_container, container, false)
+        return inflater.inflate(R.layout.dialog_contract_selector_container, container, false)
     }
 
     override fun onAttach(context: Context)
     {
         super.onAttach(context)
-        if (context is OnPasswordDialogListener)
+        if (context is OnContractSelectorListener)
         {
             listener = context
         }
         else
         {
-            throw RuntimeException(context.toString() + " must implement HomeListener")
+            throw RuntimeException("$context must implement onContractSelectorListener")
         }
     }
 
@@ -99,54 +93,12 @@ class ContractSelectorFragment : AppCompatDialogFragment()
         super.onViewCreated(view, savedInstanceState)
         dialog.setTitle(getString(R.string.sign_up_create_master_password))
 
-        cancelButtonPasswordView.setOnClickListener { dismiss() }
+        cancelButtonPasswordView.setOnClickListener {
+            listener?.onContractClicked(false)
+            dismiss() }
         secondButtonPasswordView.setOnClickListener {
-            verifyPassword()
-        }
-
-        if (listener!!.isFingerprintHardwareAvailable())
-        {
-            useFingerprintInFutureCheck.visibility = View.VISIBLE
-        }
-
-        useFingerprintInFutureCheck.isChecked = listener!!.hasEnrolledFingerprints()
-
-        useFingerprintInFutureCheck.setOnCheckedChangeListener { _, checked -> onAllowFingerprint(checked) }
-
-        enterPassword.addTextChangedListener(GenericTextWatcher(enterPassword))
-        confirmPassword.addTextChangedListener(GenericTextWatcher(confirmPassword))
-
-        validateOkButton(isInputDataValid())
-    }
-
-    /**
-     * Checks whether the current entered password is correct, and dismisses the the dialog and
-     * let's the activity know about the result.
-     */
-    private fun verifyPassword() {
-        val password = enterPassword.text.toString()
-        val fingerprint = useFingerprintInFutureCheck.isChecked
-        dismiss()
-
-        val listener = listener
-
-        arguments?.let {
-            val mnemonics = it.getString(MNEMONICS_KEY)
-            listener?.passwordVerified(mnemonics, password, fingerprint)
-        }
-    }
-
-    private fun onAllowFingerprint(checked: Boolean)
-    {
-        if (checked && !listener!!.hasEnrolledFingerprints())
-        {
-            useFingerprintInFutureCheck.isChecked = false
-            Snackbar.make(rootView, R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.sign_up_snack_action) {
-                        activity?.openSecuritySettings()
-                    }
-                    .setActionTextColor(Color.YELLOW)
-                    .show()
+            listener?.onContractClicked(false)
+            dismiss()
         }
     }
 
@@ -187,7 +139,8 @@ class ContractSelectorFragment : AppCompatDialogFragment()
         secondButtonPasswordView.isEnabled = validate
     }
 
-    override fun onDetach() {
+    override fun onDetach()
+    {
         super.onDetach()
         listener = null
     }

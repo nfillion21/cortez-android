@@ -52,12 +52,13 @@ import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
+import com.tezos.ui.authentication.ContractSelectorFragment
 import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_home.*
 
 
-class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, ContractsFragment.OnDelegateAddressSelectedListener
+class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, ContractsFragment.OnDelegateAddressSelectedListener, ContractSelectorFragment.OnContractSelectorListener
 {
 
     private val mTezosTheme: CustomTheme = CustomTheme(
@@ -206,7 +207,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
 
         fabAddDelegate.setOnClickListener {
-            AddDelegateActivity.start(this, mTezosTheme)
+            //AddDelegateActivity.start(this, mTezosTheme)
+
+            val dialog = ContractSelectorFragment.newInstance()
+            dialog.show(supportFragmentManager, "Password")
         }
 
         fabAddLimits.setOnClickListener {
@@ -533,7 +537,20 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
     }
 
-    override fun onDelegateAddressClicked(address: String, position: Int) {
+    override fun onDelegateAddressClicked(address: String, position: Int)
+    {
         DelegateActivity.start(this, address, position, mTezosTheme)
+    }
+
+    override fun onContractClicked(withScript: Boolean)
+    {
+        if (withScript)
+        {
+            AddLimitsActivity.start(this, mTezosTheme)
+        }
+        else
+        {
+            AddDelegateActivity.start(this, mTezosTheme)
+        }
     }
 }
