@@ -312,23 +312,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         ContractsFragment.newInstance(mTezosTheme, null)
                     }
                 }
-                3 ->
-                {
-                    /*
-                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
-
-                    return if (isPasswordSaved)
-                    {
-                        val mnemonicsData = Storage(baseContext).getMnemonics()
-                        LimitsFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
-                    }
-                    else
-                    {
-                        LimitsFragment.newInstance(mTezosTheme, null)
-                    }
-                    */
-                    return Fragment()
-                }
                 else ->
                 {
                     //should not happen

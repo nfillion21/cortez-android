@@ -153,6 +153,13 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                         fabSharing.hide()
                     }
 
+                    3 ->
+                    {
+                        fabTransfer.hide()
+                        fabAddAddress.hide()
+                        fabSharing.hide()
+                    }
+
                     else ->
                     {
                         //no-op
@@ -261,6 +268,13 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     fabSharing.hide()
                 }
 
+                3 ->
+                {
+                    fabTransfer.hide()
+                    fabAddAddress.hide()
+                    fabSharing.hide()
+                }
+
                 else ->
                 {
                     //no-op
@@ -287,6 +301,21 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                 {
                     val pkh = intent.getStringExtra(TAG_PKH)
                     return DelegateFragment.newInstance(mTezosTheme, pkh)
+                }
+
+                3 ->
+                {
+                    val isPasswordSaved = Storage(this@DelegateActivity).isPasswordSaved()
+
+                    return if (isPasswordSaved)
+                    {
+                        val pkh = intent.getStringExtra(TAG_PKH)
+                        ScriptFragment.newInstance(mTezosTheme, pkh)
+                    }
+                    else
+                    {
+                        ScriptFragment.newInstance(mTezosTheme, null)
+                    }
                 }
             }
 

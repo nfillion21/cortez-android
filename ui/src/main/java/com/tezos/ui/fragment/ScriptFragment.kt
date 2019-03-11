@@ -62,7 +62,7 @@ import kotlinx.android.synthetic.main.redelegate_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
 
-class LimitsFragment : Fragment()
+class ScriptFragment : Fragment()
 {
     private var mCallback: OnAddedDelegationListener? = null
 
@@ -167,7 +167,7 @@ class LimitsFragment : Fragment()
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
-                LimitsFragment().apply {
+                ScriptFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
                         putString(CONTRACT_KEY, contract)
