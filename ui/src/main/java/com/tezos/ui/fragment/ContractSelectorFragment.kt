@@ -97,7 +97,7 @@ class ContractSelectorFragment : AppCompatDialogFragment()
             listener?.onContractClicked(false)
             dismiss() }
         secondButtonPasswordView.setOnClickListener {
-            listener?.onContractClicked(false)
+            listener?.onContractClicked(true)
             dismiss()
         }
     }

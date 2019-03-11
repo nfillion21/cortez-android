@@ -193,7 +193,7 @@
     <string name="tab_limits">Limits</string>
     <string name="tab_delegate">Delegate</string>
 
-    <string name="spending_limit" translatable="false"><![CDATA[
+    <string name="spending_limit_contract" translatable="false"><![CDATA[
 { "code":
 [ { "prim": "storage",
   "args":
@@ -625,4 +625,10 @@
           ]]>
     </string>
 
+    <string name="default_contract" translatable="false"><![CDATA[
+
+{"script":{"code":[{"prim":"storage","args":[{"prim":"unit"}]},{"prim":"parameter","args":[{"prim":"unit"}]},{"prim":"code","args":[[{"prim":"CDR"},{"prim":"NIL","args":[{"prim":"operation"}]},{"prim":"PAIR"}]]}],"storage":{"prim":"Unit"}}}
+
+          ]]>
+    </string>
 </resources>

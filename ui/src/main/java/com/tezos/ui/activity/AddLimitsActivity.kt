@@ -454,7 +454,7 @@ class AddLimitsActivity : BaseSecureActivity()
         var dstObject = JSONObject()
         dstObject.put("manager", pkhSrc)
 
-        val spendingLimitContract = String.format(getString(R.string.spending_limit), pk, (mLimitAmount*1000000L).toString())
+        val spendingLimitContract = String.format(getString(R.string.spending_limit_contract), pk, (mLimitAmount*1000000L).toString())
 
         val json = JSONObject(spendingLimitContract)
         dstObject.put("script", json)

@@ -38,6 +38,7 @@ import android.support.v4.graphics.drawable.DrawableCompat
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -91,8 +92,8 @@ class DelegateFragment : Fragment()
             val mgr: String,
             val spendable: Boolean,
             val delegatable: Boolean,
-            val delegate: String?
-
+            val delegate: String?,
+            val script: String
     )
 
     internal class ContractSerialization internal constructor(private val contract: Contract)
@@ -106,9 +107,9 @@ class DelegateFragment : Fragment()
             contractBundle.putBoolean("spendable", contract.spendable)
             contractBundle.putBoolean("delegatable", contract.delegatable)
             contractBundle.putString("delegate", contract.delegate)
+            contractBundle.putString("script", contract.script)
 
             return contractBundle
-
         }
     }
 
@@ -121,8 +122,9 @@ class DelegateFragment : Fragment()
             val spendable = this.bundle.getBoolean("spendable", false)
             val delegatable = this.bundle.getBoolean("delegatable", false)
             val delegate = this.bundle.getString("delegate", null)
+            val script = this.bundle.getString("script", null)
 
-            return Contract(blk, mgr, spendable, delegatable, delegate)
+            return Contract(blk, mgr, spendable, delegatable, delegate, script)
         }
     }
 
@@ -492,7 +494,21 @@ class DelegateFragment : Fragment()
             val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
             val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
 
-            mContract = Contract(blk as String, mgr as String, spendable as Boolean, delegatable as Boolean, delegate)
+            val script = DataExtractor.getJSONObjectFromField(contractJSON, "script")
+
+            val resScript = JSONObject(getString(R.string.default_contract))
+            val code = DataExtractor.getJSONObjectFromField(resScript, "script")
+
+            if (script.toString() == code.toString())
+            {
+                Log.i("same", "same")
+            }
+            else
+            {
+                Log.i("same", "not same")
+            }
+
+            mContract = Contract(blk as String, mgr as String, spendable as Boolean, delegatable as Boolean, delegate, resScript.toString())
         }
     }
 
