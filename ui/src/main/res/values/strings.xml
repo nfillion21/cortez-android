@@ -56,6 +56,7 @@
     <string name="contract_limits_info">Please fill the form to create a smart contract</string>
     <string name="redelegate_address_info">Please fill the form to delegate your tez to your chosen baker\'s address.</string>
     <string name="remove_delegate_info">Your current baker\'s address:\n\n%1$s</string>
+    <string name="contract_storage_info">Your current contract\'s storage:\n\n%1$s</string>
     <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string>
     <string name="create_restore_wallet_delegate_info">Please create or restore a wallet to be able to delegate your tez.</string>
     <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez.</string>
@@ -626,10 +627,14 @@
           ]]>
     </string>
 
-    <string name="default_contract" translatable="false"><![CDATA[
-
+    <string name="default_contract" translatable="false">
+        <![CDATA[
 {"script":{"code":[{"prim":"storage","args":[{"prim":"unit"}]},{"prim":"parameter","args":[{"prim":"unit"}]},{"prim":"code","args":[[{"prim":"CDR"},{"prim":"NIL","args":[{"prim":"operation"}]},{"prim":"PAIR"}]]}],"storage":{"prim":"Unit"}}}
-
           ]]>
     </string>
+
+    <string name="default_storage" translatable="false"><![CDATA[
+        {"prim":"Unit"}
+]]></string>
+
 </resources>

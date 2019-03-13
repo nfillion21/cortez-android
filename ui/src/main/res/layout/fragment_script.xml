@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipe_refresh_layout"
+    android:layout_width="match_parent"
+    android:padding="@dimen/spacing_double"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <android.support.v4.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:fillViewport="true"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/pkh_info_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_behavior="com.tezos.ui.utils.FloatingActionButtonBehavior"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/pkh_empty_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/delegate_title_textview"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+                                android:layout_marginBottom="@dimen/spacing_normal"
+                                android:text="@string/delegate_title"/>
+
+                            <ProgressBar
+                                android:id="@+id/nav_progress"
+                                style="?android:attr/progressBarStyleSmall"
+                                android:layout_gravity="center_vertical"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:visibility="gone"
+                                android:layout_weight="0" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/loading_textview"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:text="@string/loading_contract_info"
+                            android:textColor="@color/colorAccent"
+                            android:layout_marginBottom="@dimen/spacing_double"
+                            android:ellipsize="end" />
+
+                        <TextView
+                            android:id="@+id/limits_info_textview"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:text="@string/redelegate_address_info"
+                            android:textColor="@color/colorAccent"
+                            android:layout_marginBottom="@dimen/spacing_double"
+                            android:ellipsize="end" />
+
+                        <TextView
+                            android:id="@+id/remove_delegate_info_textview"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:text="@string/remove_delegate_info"
+                            android:textColor="@color/colorAccent"
+                            android:layout_marginBottom="@dimen/spacing_double"
+                            android:ellipsize="end" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <include
+                        android:id="@+id/redelegate_form_card_info"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        layout="@layout/redelegate_form_card_info"
+                        />
+                </LinearLayout>
+            </android.support.v4.widget.NestedScrollView>
+
+            <RelativeLayout
+                android:layout_weight="0"
+                android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/spacing_double"
+                android:layout_marginBottom="?attr/actionBarSize"
+                android:layout_height="?android:attr/actionBarSize">
+
+                <FrameLayout
+                    android:id="@+id/add_limits_button_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    style="@style/PaymentScreens.Button"
+                    android:enabled="false"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone"
+                    >
+
+                    <Button
+                        android:id="@+id/add_limits_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/delegate"
+
+                        android:drawableStart="@drawable/ic_lock_black"
+                        android:drawableLeft="@drawable/ic_lock_black"
+                        android:drawableTint="@color/tz_light"
+                        android:drawablePadding="@dimen/spacing_normal"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                        android:layout_gravity="center"
+                        android:enabled="false"
+
+                        android:background="@null"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/remove_delegate_button_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    style="@style/PaymentScreens.Button"
+                    android:enabled="false"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone"
+                    >
+
+                    <Button
+                        android:id="@+id/remove_delegate_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/remove_delegate"
+
+                        android:drawableStart="@drawable/ic_lock_black"
+                        android:drawableLeft="@drawable/ic_lock_black"
+                        android:drawableTint="@color/tz_light"
+                        android:drawablePadding="@dimen/spacing_normal"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                        android:layout_gravity="center"
+                        android:enabled="false"
+
+                        android:background="@null"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        />
+
+                </FrameLayout>
+            </RelativeLayout>
+        </LinearLayout>
+    </android.support.design.widget.CoordinatorLayout>
+</android.support.v4.widget.SwipeRefreshLayout>
+

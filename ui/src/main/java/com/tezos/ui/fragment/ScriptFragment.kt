@@ -45,13 +45,11 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
-import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.DataExtractor
 import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
@@ -64,7 +62,7 @@ import org.json.JSONObject
 
 class ScriptFragment : Fragment()
 {
-    private var mCallback: OnAddedDelegationListener? = null
+    private var mCallback: OnUpdateScriptListener? = null
 
     private var mInitDelegateLoading:Boolean = false
     private var mFinalizeDelegateLoading:Boolean = false
@@ -72,7 +70,7 @@ class ScriptFragment : Fragment()
     private var mInitRemoveDelegateLoading:Boolean = false
     private var mFinalizeRemoveDelegateLoading:Boolean = false
 
-    private var mContractInfoLoading:Boolean = false
+    private var mStorageInfoLoading:Boolean = false
 
     private var mDelegatePayload:String? = null
     private var mDelegateFees:Long = -1
@@ -81,7 +79,8 @@ class ScriptFragment : Fragment()
 
     private var mClickCalculate:Boolean = false
 
-    private var mContract:Contract? = null
+    private var mStorage:String? = null
+
 
     private var mWalletEnabled:Boolean = false
 
@@ -91,8 +90,8 @@ class ScriptFragment : Fragment()
             val mgr: String,
             val spendable: Boolean,
             val delegatable: Boolean,
-            val delegate: String?
-
+            val delegate: String?,
+            val script: String?
     )
 
     internal class ContractSerialization internal constructor(private val contract: Contract)
@@ -106,9 +105,9 @@ class ScriptFragment : Fragment()
             contractBundle.putBoolean("spendable", contract.spendable)
             contractBundle.putBoolean("delegatable", contract.delegatable)
             contractBundle.putString("delegate", contract.delegate)
+            contractBundle.putString("script", contract.script)
 
             return contractBundle
-
         }
     }
 
@@ -121,8 +120,9 @@ class ScriptFragment : Fragment()
             val spendable = this.bundle.getBoolean("spendable", false)
             val delegatable = this.bundle.getBoolean("delegatable", false)
             val delegate = this.bundle.getString("delegate", null)
+            val script = this.bundle.getString("script", null)
 
-            return Contract(blk, mgr, spendable, delegatable, delegate)
+            return Contract(blk, mgr, spendable, delegatable, delegate, script)
         }
     }
 
@@ -152,7 +152,7 @@ class ScriptFragment : Fragment()
         private const val REMOVE_DELEGATE_INIT_TAG = "remove_delegate_init"
         private const val REMOVE_DELEGATE_FINALIZE_TAG = "remove_delegate_finalize"
 
-        private const val CONTRACT_INFO_TAG = "contract_info"
+        private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
@@ -163,7 +163,7 @@ class ScriptFragment : Fragment()
 
         private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
-        private const val CONTRACT_DATA_KEY = "contract_data_key"
+        private const val STORAGE_DATA_KEY = "storage_data_key"
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -175,7 +175,7 @@ class ScriptFragment : Fragment()
                 }
     }
 
-    interface OnAddedDelegationListener
+    interface OnUpdateScriptListener
     {
         fun showSnackBar(res:String, color:Int, textColor:Int)
         fun finish(res:Int)
@@ -191,17 +191,17 @@ class ScriptFragment : Fragment()
 
         try
         {
-            mCallback = context as OnAddedDelegationListener?
+            mCallback = context as OnUpdateScriptListener?
         }
         catch (e: ClassCastException)
         {
-            throw ClassCastException(context!!.toString() + " must implement OnAddedDelegationListener")
+            throw ClassCastException(context!!.toString() + " must implement OnUpdateScriptListener")
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
     {
-        return inflater.inflate(R.layout.fragment_delegate, container, false)
+        return inflater.inflate(R.layout.fragment_script, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
@@ -220,7 +220,7 @@ class ScriptFragment : Fragment()
         }
 
         swipe_refresh_layout.setOnRefreshListener {
-            startContractInfoLoading()
+            startStorageInfoLoading()
         }
 
         tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
@@ -237,7 +237,7 @@ class ScriptFragment : Fragment()
             mInitRemoveDelegateLoading = savedInstanceState.getBoolean(REMOVE_DELEGATE_INIT_TAG)
             mFinalizeRemoveDelegateLoading = savedInstanceState.getBoolean(REMOVE_DELEGATE_FINALIZE_TAG)
 
-            mContractInfoLoading = savedInstanceState.getBoolean(CONTRACT_INFO_TAG)
+            mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
 
             mDelegateTezosAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
 
@@ -247,21 +247,17 @@ class ScriptFragment : Fragment()
 
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
 
-            val contractBundle = savedInstanceState.getBundle(CONTRACT_DATA_KEY)
-            if (contractBundle != null)
-            {
-                mContract = this.fromBundle(contractBundle)
-            }
+            mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
-            if (mContractInfoLoading)
+            if (mStorageInfoLoading)
             {
                 refreshTextUnderDelegation(false)
                 mWalletEnabled = true
-                startContractInfoLoading()
+                startStorageInfoLoading()
             }
             else
             {
-                onContractInfoComplete(false)
+                onStorageInfoComplete(false)
 
                 if (mInitRemoveDelegateLoading)
                 {
@@ -304,7 +300,7 @@ class ScriptFragment : Fragment()
         else
         {
             mWalletEnabled = true
-            startContractInfoLoading()
+            startStorageInfoLoading()
         }
     }
 
@@ -328,11 +324,7 @@ class ScriptFragment : Fragment()
         {
             mWalletEnabled = true
 
-            // put the good layers
-            //mBalanceLayout?.visibility = View.VISIBLE
-            //mCreateWalletLayout?.visibility = View.GONE
-
-            startContractInfoLoading()
+            startStorageInfoLoading()
         }
     }
 
@@ -371,7 +363,7 @@ class ScriptFragment : Fragment()
         return pkh
     }
 
-    private fun startContractInfoLoading()
+    private fun startStorageInfoLoading()
     {
         transferLoading(true)
 
@@ -437,7 +429,7 @@ class ScriptFragment : Fragment()
     {
         cancelRequests(true)
 
-        mContractInfoLoading = true
+        mStorageInfoLoading = true
 
         loading_textview.setText(R.string.loading_contract_info)
 
@@ -446,21 +438,26 @@ class ScriptFragment : Fragment()
         val pkh = pkh()
         if (pkh != null)
         {
-            val url = String.format(getString(R.string.contract_info_url), pkh)
+            val url = String.format(getString(R.string.contract_storage_url), pkh)
 
             // Request a string response from the provided URL.
-            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener<JSONObject>
             {
 
                 //prevents from async crashes
                 if (activity != null)
                 {
                     addContractInfoFromJSON(it)
-                    onContractInfoComplete(true)
+                    onStorageInfoComplete(true)
 
-                    if (mContract?.delegate != null)
+                    //TODO clean string before comparison
+
+                    //if (mContract?.delegate != null)
+                    if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
                     {
-                        startInitRemoveDelegateLoading()
+                        //TODO I don't need to forge a transfer for now
+                        //I need the right data inputs before.
+                        //startInitRemoveDelegateLoading()
                     }
                     else
                     {
@@ -470,35 +467,27 @@ class ScriptFragment : Fragment()
             },
                     Response.ErrorListener {
 
-                        onContractInfoComplete(false)
+                        onStorageInfoComplete(false)
 
                         showSnackBar(it, null)
                     })
 
-            jsonArrayRequest.tag = CONTRACT_INFO_TAG
+            jsonArrayRequest.tag = CONTRACT_SCRIPT_INFO_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
     }
 
-    private fun addContractInfoFromJSON(answer: JSONArray)
+    private fun addContractInfoFromJSON(answer: JSONObject)
     {
         if (answer != null && answer.length() > 0)
         {
-            val contractJSON = DataExtractor.getJSONObjectFromField(answer,0)
-
-            val blk = DataExtractor.getStringFromField(contractJSON, "blk")
-            val mgr = DataExtractor.getStringFromField(contractJSON, "mgr")
-            val spendable = DataExtractor.getBooleanFromField(contractJSON, "spendable")
-            val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
-            val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
-
-            mContract = Contract(blk as String, mgr as String, spendable as Boolean, delegatable as Boolean, delegate)
+            mStorage = answer.toString()
         }
     }
 
-    private fun onContractInfoComplete(animating:Boolean)
+    private fun onStorageInfoComplete(animating:Boolean)
     {
-        mContractInfoLoading = false
+        mStorageInfoLoading = false
         nav_progress?.visibility = View.GONE
 
         //TODO handle the swipe refresh
@@ -512,9 +501,10 @@ class ScriptFragment : Fragment()
     {
         //this method handles the data and loading texts
 
-        if (mContract != null)
+        if (mStorage != null)
         {
-            if (mContract!!.delegate != null)
+            //if (mContract!!.delegate != null)
+            if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
             {
                 limits_info_textview?.visibility = View.GONE
                 redelegate_form_card_info?.visibility = View.VISIBLE
@@ -526,12 +516,14 @@ class ScriptFragment : Fragment()
                 remove_delegate_button_layout?.visibility = View.VISIBLE
 
                 remove_delegate_info_textview?.visibility = View.VISIBLE
-                remove_delegate_info_textview?.text = getString(R.string.remove_delegate_info, mContract?.delegate)
+                remove_delegate_info_textview?.text = getString(R.string.remove_delegate_info, mStorage)
 
                 //TODO show everything related to the removing
             }
             else
             {
+                //TODO at this point, just show that there is no script.
+
                 limits_info_textview?.visibility = View.VISIBLE
                 redelegate_form_card_info?.visibility = View.VISIBLE
 
@@ -1433,7 +1425,7 @@ class ScriptFragment : Fragment()
             requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
             requestQueue?.cancelAll(REMOVE_DELEGATE_INIT_TAG)
             requestQueue?.cancelAll(REMOVE_DELEGATE_FINALIZE_TAG)
-            requestQueue?.cancelAll(CONTRACT_INFO_TAG)
+            requestQueue?.cancelAll(CONTRACT_SCRIPT_INFO_TAG)
 
             if (resetBooleans)
             {
@@ -1441,7 +1433,7 @@ class ScriptFragment : Fragment()
                 mFinalizeDelegateLoading = false
                 mInitRemoveDelegateLoading = false
                 mFinalizeRemoveDelegateLoading = false
-                mContractInfoLoading = false
+                mStorageInfoLoading = false
             }
         }
     }
@@ -1456,7 +1448,7 @@ class ScriptFragment : Fragment()
         outState.putBoolean(REMOVE_DELEGATE_INIT_TAG, mInitRemoveDelegateLoading)
         outState.putBoolean(REMOVE_DELEGATE_FINALIZE_TAG, mFinalizeRemoveDelegateLoading)
 
-        outState.putBoolean(CONTRACT_INFO_TAG, mContractInfoLoading)
+        outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
 
         outState.putString(DELEGATE_PAYLOAD_KEY, mDelegatePayload)
 
@@ -1468,7 +1460,7 @@ class ScriptFragment : Fragment()
 
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
 
-        outState.putBundle(CONTRACT_DATA_KEY, this.toBundle(mContract))
+        outState.putString(STORAGE_DATA_KEY, mStorage)
     }
 
     override fun onDetach()
