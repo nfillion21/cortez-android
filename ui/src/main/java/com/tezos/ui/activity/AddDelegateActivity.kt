@@ -125,7 +125,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
-        add_limits_button_layout.setOnClickListener {
+        update_storage_button_layout.setOnClickListener {
             onDelegateClick()
         }
 
@@ -520,13 +520,13 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         if (loading)
         {
-            add_limits_button_layout.visibility = View.GONE
+            update_storage_button_layout.visibility = View.GONE
             nav_progress.visibility = View.VISIBLE
             //amount_transfer.isEnabled = false
         }
         else
         {
-            add_limits_button_layout.visibility = View.VISIBLE
+            update_storage_button_layout.visibility = View.VISIBLE
             nav_progress.visibility = View.INVISIBLE
             //amount_transfer.isEnabled = true
         }
@@ -547,7 +547,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
     private fun putPayButtonToNull()
     {
-        add_limits_button.text = getString(R.string.pay, "")
+        update_storage_button.text = getString(R.string.pay, "")
     }
 
     private fun showSnackBar(error:VolleyError?)
@@ -574,23 +574,23 @@ class AddDelegateActivity : BaseSecureActivity()
 
         if (validate)
         {
-            add_limits_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
-            add_limits_button_layout.isEnabled = true
-            add_limits_button_layout.background = makeSelector(theme)
+            update_storage_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+            update_storage_button_layout.isEnabled = true
+            update_storage_button_layout.background = makeSelector(theme)
 
-            val drawables = add_limits_button.compoundDrawables
+            val drawables = update_storage_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
         }
         else
         {
-            add_limits_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
-            add_limits_button_layout.isEnabled = false
+            update_storage_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+            update_storage_button_layout.isEnabled = false
 
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            add_limits_button_layout.background = makeSelector(greyTheme)
+            update_storage_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = add_limits_button.compoundDrawables
+            val drawables = update_storage_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white))
         }
@@ -844,7 +844,7 @@ class AddDelegateActivity : BaseSecureActivity()
         if (red && !amountValid)
         {
             color = R.color.tz_error
-            add_limits_button.text = getString(R.string.delegate_format, "")
+            update_storage_button.text = getString(R.string.delegate_format, "")
         }
         else
         {
@@ -857,7 +857,7 @@ class AddDelegateActivity : BaseSecureActivity()
             }
             else
             {
-                add_limits_button.text = getString(R.string.delegate_format, "")
+                update_storage_button.text = getString(R.string.delegate_format, "")
             }
         }
 
@@ -907,7 +907,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val moneyFormatted2 = "$amount ꜩ"
 //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        add_limits_button.text = getString(R.string.pay, moneyFormatted2)
+        update_storage_button.text = getString(R.string.pay, moneyFormatted2)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)

@@ -211,7 +211,7 @@ class ScriptFragment : Fragment()
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
         validateRemoveDelegateButton(isDelegateFeeValid())
 
-        add_limits_button_layout.setOnClickListener {
+        update_storage_button_layout.setOnClickListener {
             onDelegateClick()
         }
 
@@ -450,18 +450,18 @@ class ScriptFragment : Fragment()
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete(true)
 
-                    //TODO clean string before comparison
-
                     //if (mContract?.delegate != null)
                     if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
                     {
-                        //TODO I don't need to forge a transfer for now
-                        //I need the right data inputs before.
-                        //startInitRemoveDelegateLoading()
+                        validateAddButton(isInputDataValid() && isDelegateFeeValid())
                     }
                     else
                     {
-                        validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                        //TODO I don't need to forge a transfer for now
+                        //TODO hide the whole thing
+
+                        //I need the right data inputs before.
+                        //startInitRemoveDelegateLoading()
                     }
                 }
             },
@@ -506,35 +506,38 @@ class ScriptFragment : Fragment()
             //if (mContract!!.delegate != null)
             if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
             {
-                limits_info_textview?.visibility = View.GONE
-                redelegate_form_card_info?.visibility = View.VISIBLE
-
-                tezos_address_layout?.visibility = View.GONE
-
-                add_limits_button_layout?.visibility = View.GONE
-
-                remove_delegate_button_layout?.visibility = View.VISIBLE
-
-                remove_delegate_info_textview?.visibility = View.VISIBLE
-                remove_delegate_info_textview?.text = getString(R.string.remove_delegate_info, mStorage)
-
-                //TODO show everything related to the removing
-            }
-            else
-            {
                 //TODO at this point, just show that there is no script.
 
                 limits_info_textview?.visibility = View.VISIBLE
-                redelegate_form_card_info?.visibility = View.VISIBLE
+                update_storage_form_card?.visibility = View.VISIBLE
 
                 tezos_address_layout?.visibility = View.VISIBLE
 
-                add_limits_button_layout?.visibility = View.VISIBLE
+                update_storage_button_layout?.visibility = View.VISIBLE
 
-                remove_delegate_info_textview.visibility = View.GONE
-                remove_delegate_button_layout?.visibility = View.GONE
+                //remove_delegate_info_textview.visibility = View.GONE
+                //remove_delegate_button_layout?.visibility = View.GONE
+
+                storage_info_textview?.visibility = View.VISIBLE
+                storage_info_textview?.text = getString(R.string.remove_delegate_info, mStorage)
 
                 //TODO show everything related to the form
+            }
+            else
+            {
+                limits_info_textview?.visibility = View.GONE
+                update_storage_form_card?.visibility = View.VISIBLE
+
+                tezos_address_layout?.visibility = View.VISIBLE
+
+                update_storage_button_layout?.visibility = View.GONE
+
+                remove_delegate_button_layout?.visibility = View.VISIBLE
+
+                storage_info_textview?.visibility = View.VISIBLE
+                storage_info_textview?.text = getString(R.string.remove_delegate_info, mStorage)
+
+                //TODO show everything related to the removing
             }
 
             if (!animating)
@@ -1056,7 +1059,7 @@ class ScriptFragment : Fragment()
 
     private fun putPayButtonToNull()
     {
-        add_limits_button?.text = getString(R.string.delegate_format, "")
+        update_storage_button?.text = getString(R.string.delegate_format, "")
     }
 
     private fun showSnackBar(error:VolleyError?, message:String?)
@@ -1082,11 +1085,11 @@ class ScriptFragment : Fragment()
 
             if (validate)
             {
-                add_limits_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-                add_limits_button_layout?.isEnabled = true
-                add_limits_button_layout?.background = makeSelector(theme)
+                update_storage_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                update_storage_button_layout?.isEnabled = true
+                update_storage_button_layout?.background = makeSelector(theme)
 
-                val drawables = add_limits_button?.compoundDrawables
+                val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
                     val wrapDrawable = DrawableCompat.wrap(drawables!![0])
@@ -1095,13 +1098,13 @@ class ScriptFragment : Fragment()
             }
             else
             {
-                add_limits_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-                add_limits_button_layout?.isEnabled = false
+                update_storage_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                update_storage_button_layout?.isEnabled = false
 
                 val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-                add_limits_button_layout?.background = makeSelector(greyTheme)
+                update_storage_button_layout?.background = makeSelector(greyTheme)
 
-                val drawables = add_limits_button?.compoundDrawables
+                val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
                     val wrapDrawable = DrawableCompat.wrap(drawables!![0])

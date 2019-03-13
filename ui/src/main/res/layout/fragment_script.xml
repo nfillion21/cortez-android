@@ -66,7 +66,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:text="@string/loading_contract_info"
+                            android:text="@string/loading_storage_info"
                             android:textColor="@color/colorAccent"
                             android:layout_marginBottom="@dimen/spacing_double"
                             android:ellipsize="end" />
@@ -83,12 +83,12 @@
                             android:ellipsize="end" />
 
                         <TextView
-                            android:id="@+id/remove_delegate_info_textview"
+                            android:id="@+id/storage_info_textview"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:text="@string/remove_delegate_info"
+                            android:text="@string/contract_storage_info"
                             android:textColor="@color/colorAccent"
                             android:layout_marginBottom="@dimen/spacing_double"
                             android:ellipsize="end" />
@@ -101,12 +101,12 @@
                         android:layout_weight="1" />
 
                     <include
-                        android:id="@+id/redelegate_form_card_info"
+                        android:id="@+id/update_storage_form_card"
                         android:visibility="gone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0"
-                        layout="@layout/redelegate_form_card_info"
+                        layout="@layout/update_storage_form_card"
                         />
                 </LinearLayout>
             </android.support.v4.widget.NestedScrollView>
@@ -119,7 +119,7 @@
                 android:layout_height="?android:attr/actionBarSize">
 
                 <FrameLayout
-                    android:id="@+id/add_limits_button_layout"
+                    android:id="@+id/update_storage_button_layout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     style="@style/PaymentScreens.Button"
@@ -129,43 +129,10 @@
                     >
 
                     <Button
-                        android:id="@+id/add_limits_button"
+                        android:id="@+id/update_storage_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/delegate"
-
-                        android:drawableStart="@drawable/ic_lock_black"
-                        android:drawableLeft="@drawable/ic_lock_black"
-                        android:drawableTint="@color/tz_light"
-                        android:drawablePadding="@dimen/spacing_normal"
-                        android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
-                        android:layout_gravity="center"
-                        android:enabled="false"
-
-                        android:background="@null"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:minHeight="0dp"
-                        android:minWidth="0dp"
-                        />
-
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/remove_delegate_button_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    style="@style/PaymentScreens.Button"
-                    android:enabled="false"
-                    android:layout_centerInParent="true"
-                    android:visibility="gone"
-                    >
-
-                    <Button
-                        android:id="@+id/remove_delegate_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remove_delegate"
 
                         android:drawableStart="@drawable/ic_lock_black"
                         android:drawableLeft="@drawable/ic_lock_black"

@@ -83,7 +83,7 @@
                             android:ellipsize="end" />
 
                         <TextView
-                            android:id="@+id/remove_delegate_info_textview"
+                            android:id="@+id/storage_info_textview"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -101,7 +101,7 @@
                         android:layout_weight="1" />
 
                     <include
-                        android:id="@+id/redelegate_form_card_info"
+                        android:id="@+id/update_storage_form_card"
                         android:visibility="gone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -119,7 +119,7 @@
                 android:layout_height="?android:attr/actionBarSize">
 
                 <FrameLayout
-                    android:id="@+id/add_limits_button_layout"
+                    android:id="@+id/update_storage_button_layout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     style="@style/PaymentScreens.Button"
@@ -129,7 +129,7 @@
                     >
 
                     <Button
-                        android:id="@+id/add_limits_button"
+                        android:id="@+id/update_storage_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/delegate"

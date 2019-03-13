@@ -111,6 +111,7 @@
     <string name="loading_balance">Loading balance…</string>
     <string name="loading_delegated_addresses">Loading delegated addresses…</string>
     <string name="loading_contract_info">Loading contract informations…</string>
+    <string name="loading_storage_info">Loading storage informations…</string>
     <string name="neutral">-</string>
     <string name="one">1</string>
     <string name="click_for_fees">Click to recaculate</string>
