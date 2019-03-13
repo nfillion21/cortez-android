@@ -67,9 +67,6 @@ class ScriptFragment : Fragment()
     private var mInitDelegateLoading:Boolean = false
     private var mFinalizeDelegateLoading:Boolean = false
 
-    private var mInitRemoveDelegateLoading:Boolean = false
-    private var mFinalizeRemoveDelegateLoading:Boolean = false
-
     private var mStorageInfoLoading:Boolean = false
 
     private var mDelegatePayload:String? = null
@@ -149,9 +146,6 @@ class ScriptFragment : Fragment()
         private const val DELEGATE_INIT_TAG = "delegate_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
 
-        private const val REMOVE_DELEGATE_INIT_TAG = "remove_delegate_init"
-        private const val REMOVE_DELEGATE_FINALIZE_TAG = "remove_delegate_finalize"
-
         private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
@@ -209,14 +203,9 @@ class ScriptFragment : Fragment()
         super.onViewCreated(view, savedInstanceState)
 
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
-        validateRemoveDelegateButton(isDelegateFeeValid())
 
         update_storage_button_layout.setOnClickListener {
             onDelegateClick()
-        }
-
-        remove_delegate_button_layout.setOnClickListener {
-            onRemoveDelegateClick()
         }
 
         swipe_refresh_layout.setOnRefreshListener {
@@ -233,9 +222,6 @@ class ScriptFragment : Fragment()
 
             mInitDelegateLoading = savedInstanceState.getBoolean(DELEGATE_INIT_TAG)
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
-
-            mInitRemoveDelegateLoading = savedInstanceState.getBoolean(REMOVE_DELEGATE_INIT_TAG)
-            mFinalizeRemoveDelegateLoading = savedInstanceState.getBoolean(REMOVE_DELEGATE_FINALIZE_TAG)
 
             mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
 
@@ -259,40 +245,22 @@ class ScriptFragment : Fragment()
             {
                 onStorageInfoComplete(false)
 
-                if (mInitRemoveDelegateLoading)
+                //TODO we got to keep in mind there's an id already.
+                if (mInitDelegateLoading)
                 {
-                    startInitRemoveDelegateLoading()
+                    startInitDelegationLoading()
                 }
                 else
                 {
-                    onInitRemoveDelegateLoadComplete(null)
+                    onInitDelegateLoadComplete(null)
 
-                    if (mFinalizeRemoveDelegateLoading)
+                    if (mFinalizeDelegateLoading)
                     {
-                        startFinalizeRemoveDelegateLoading()
+                        startFinalizeAddDelegateLoading()
                     }
                     else
                     {
                         onFinalizeDelegationLoadComplete(null)
-
-                        //TODO we got to keep in mind there's an id already.
-                        if (mInitDelegateLoading)
-                        {
-                            startInitDelegationLoading()
-                        }
-                        else
-                        {
-                            onInitDelegateLoadComplete(null)
-
-                            if (mFinalizeDelegateLoading)
-                            {
-                                startFinalizeAddDelegateLoading()
-                            }
-                            else
-                            {
-                                onFinalizeDelegationLoadComplete(null)
-                            }
-                        }
                     }
                 }
             }
@@ -312,8 +280,6 @@ class ScriptFragment : Fragment()
 
         if (isDelegateFeeValid())
         {
-            validateRemoveDelegateButton(true)
-
             if (isInputDataValid())
             {
                 validateAddButton(true)
@@ -390,20 +356,6 @@ class ScriptFragment : Fragment()
         validateAddButton(false)
 
         startPostRequestLoadInitAddDelegate()
-    }
-
-    private fun startInitRemoveDelegateLoading()
-    {
-        // we need to inform the UI we are going to call transfer
-        transferLoading(true)
-
-        putFeesToNegative()
-        putPayButtonToNull()
-
-        // validatePay cannot be valid if there is no fees
-        validateRemoveDelegateButton(false)
-
-        startPostRequestLoadInitRemoveDelegate()
     }
 
     private fun startFinalizeAddDelegateLoading()
@@ -515,9 +467,6 @@ class ScriptFragment : Fragment()
 
                 update_storage_button_layout?.visibility = View.VISIBLE
 
-                //remove_delegate_info_textview.visibility = View.GONE
-                //remove_delegate_button_layout?.visibility = View.GONE
-
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.remove_delegate_info, mStorage)
 
@@ -526,13 +475,11 @@ class ScriptFragment : Fragment()
             else
             {
                 limits_info_textview?.visibility = View.GONE
-                update_storage_form_card?.visibility = View.VISIBLE
+                update_storage_form_card?.visibility = View.GONE
 
                 tezos_address_layout?.visibility = View.VISIBLE
 
                 update_storage_button_layout?.visibility = View.GONE
-
-                remove_delegate_button_layout?.visibility = View.VISIBLE
 
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.remove_delegate_info, mStorage)
@@ -827,43 +774,6 @@ class ScriptFragment : Fragment()
         }
     }
 
-    private fun onInitRemoveDelegateLoadComplete(error:VolleyError?)
-    {
-        mInitRemoveDelegateLoading = false
-
-        if (error != null || mClickCalculate)
-        {
-            // stop the moulinette only if an error occurred
-            transferLoading(false)
-            cancelRequests(true)
-
-            mDelegatePayload = null
-
-            fee_edittext?.isEnabled = true
-            fee_edittext?.isFocusable = false
-            fee_edittext?.isClickable = false
-            fee_edittext?.isLongClickable = false
-            fee_edittext?.hint = getString(R.string.click_for_fees)
-
-            fee_edittext?.setOnClickListener {
-                startInitRemoveDelegateLoading()
-            }
-
-            if(error != null)
-            {
-                //TODO handle the show snackbar
-                showSnackBar(error, null)
-            }
-        }
-        else
-        {
-            transferLoading(false)
-            cancelRequests(true)
-            // it's signed, looks like it worked.
-            //transferLoading(true)
-        }
-    }
-
     // volley
     private fun startPostRequestLoadInitAddDelegate()
     {
@@ -957,79 +867,6 @@ class ScriptFragment : Fragment()
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
-    // volley
-    private fun startPostRequestLoadInitRemoveDelegate()
-    {
-        val mnemonicsData = Storage(activity!!).getMnemonics()
-
-        val url = getString(R.string.change_delegate_url)
-
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
-        val pk = CryptoUtils.generatePk(mnemonics, "")
-
-        var postParams = JSONObject()
-        postParams.put("src", pkh())
-        postParams.put("src_pk", pk)
-
-        var dstObjects = JSONArray()
-        postParams.put("dsts", dstObjects)
-
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
-        { answer ->
-
-            if (activity != null)
-            {
-                mDelegatePayload = answer.getString("result")
-                mDelegateFees = answer.getLong("total_fee")
-
-                // we use this call to ask for payload and fees
-                if (mDelegatePayload != null && mDelegateFees != null)
-                {
-                    onInitRemoveDelegateLoadComplete(null)
-
-                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
-                    fee_edittext?.setText(feeInTez?.toString())
-
-                    validateRemoveDelegateButton(isDelegateFeeValid())
-                }
-                else
-                {
-                    val volleyError = VolleyError(getString(R.string.generic_error))
-                    onInitRemoveDelegateLoadComplete(volleyError)
-                    mClickCalculate = true
-
-                    //the call failed
-                }
-
-            }
-        }, Response.ErrorListener
-        {
-            if (activity != null)
-            {
-                onInitRemoveDelegateLoadComplete(it)
-
-                mClickCalculate = true
-                //Log.i("mTransferId", ""+mTransferId)
-                //Log.i("mDelegatePayload", ""+mDelegatePayload)
-            }
-        })
-        {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String>
-            {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
-            }
-        }
-
-        cancelRequests(true)
-
-        jsObjRequest.tag = REMOVE_DELEGATE_INIT_TAG
-        mInitRemoveDelegateLoading = true
-        VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
-    }
-
     private fun transferLoading(loading:Boolean)
     {
         // handle the visibility of bottom buttons
@@ -1112,39 +949,6 @@ class ScriptFragment : Fragment()
                 }
             }
 
-        }
-    }
-
-    private fun validateRemoveDelegateButton(validate: Boolean)
-    {
-        if (validate)
-        {
-            val theme = CustomTheme(R.color.tz_error, R.color.tz_accent, R.color.tz_light)
-
-            remove_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            remove_delegate_button_layout?.isEnabled = true
-            remove_delegate_button_layout?.background = makeSelector(theme)
-
-            val drawables = remove_delegate_button?.compoundDrawables
-            if (activity != null && drawables != null)
-            {
-                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
-                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            }
-        }
-        else
-        {
-            remove_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-            remove_delegate_button_layout?.isEnabled = false
-            val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            remove_delegate_button_layout?.background = makeSelector(greyTheme)
-
-            val drawables = remove_delegate_button?.compoundDrawables
-            if (activity != null && drawables != null)
-            {
-                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
-                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
-            }
         }
     }
 
@@ -1426,16 +1230,12 @@ class ScriptFragment : Fragment()
             val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
             requestQueue?.cancelAll(DELEGATE_INIT_TAG)
             requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
-            requestQueue?.cancelAll(REMOVE_DELEGATE_INIT_TAG)
-            requestQueue?.cancelAll(REMOVE_DELEGATE_FINALIZE_TAG)
             requestQueue?.cancelAll(CONTRACT_SCRIPT_INFO_TAG)
 
             if (resetBooleans)
             {
                 mInitDelegateLoading = false
                 mFinalizeDelegateLoading = false
-                mInitRemoveDelegateLoading = false
-                mFinalizeRemoveDelegateLoading = false
                 mStorageInfoLoading = false
             }
         }
@@ -1447,9 +1247,6 @@ class ScriptFragment : Fragment()
 
         outState.putBoolean(DELEGATE_INIT_TAG, mInitDelegateLoading)
         outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
-
-        outState.putBoolean(REMOVE_DELEGATE_INIT_TAG, mInitRemoveDelegateLoading)
-        outState.putBoolean(REMOVE_DELEGATE_FINALIZE_TAG, mFinalizeRemoveDelegateLoading)
 
         outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
 
