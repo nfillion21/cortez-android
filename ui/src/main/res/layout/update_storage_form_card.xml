@@ -14,7 +14,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/public_address_textview"
+            android:id="@+id/redelegate_address_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/public_address_generated"
@@ -33,13 +33,14 @@
             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             android:maxLength="36"
             android:maxLines="1"
-            android:enabled="false"
+            android:enabled="true"
+            android:focusableInTouchMode="false"
             android:hint="@string/neutral"
             android:singleLine="true"
             android:textColorHint="@color/tz_placeholder"
             android:imeOptions="actionDone"
             android:inputType="textPersonName|textNoSuggestions"
-            android:textSize="@dimen/size_edit_text" />
+            android:textSize="@dimen/standard_item_text_size" />
     </LinearLayout>
 
     <LinearLayout
@@ -107,7 +108,7 @@
             tools:ignore="UnusedAttribute,NewApi" />
 
         <android.support.design.widget.TextInputEditText
-            android:id="@+id/fee_edittext"
+            android:id="@+id/storage_fee_edittext"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:minWidth="@dimen/spacing_huge"

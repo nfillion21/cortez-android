@@ -225,9 +225,9 @@ class DelegateFragment : Fragment()
             startContractInfoLoading()
         }
 
-        public_address_edittext.addTextChangedListener(GenericTextWatcher(public_address_edittext))
+        redelegate_address_edittext.addTextChangedListener(GenericTextWatcher(redelegate_address_edittext))
 
-        public_address_edittext.onFocusChangeListener = focusChangeListener()
+        redelegate_address_edittext.onFocusChangeListener = focusChangeListener()
 
         if (savedInstanceState != null)
         {
@@ -342,7 +342,7 @@ class DelegateFragment : Fragment()
     {
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
-            if (i == R.id.public_address_edittext)
+            if (i == R.id.redelegate_address_edittext)
             {
                 putTzAddressInRed(!hasFocus)
             }
@@ -535,7 +535,7 @@ class DelegateFragment : Fragment()
                 limits_info_textview?.visibility = View.GONE
                 update_storage_form_card?.visibility = View.VISIBLE
 
-                public_address_layout?.visibility = View.GONE
+                redelegate_address_layout?.visibility = View.GONE
 
                 update_storage_button_layout?.visibility = View.GONE
 
@@ -551,7 +551,7 @@ class DelegateFragment : Fragment()
                 limits_info_textview?.visibility = View.VISIBLE
                 update_storage_form_card?.visibility = View.VISIBLE
 
-                public_address_layout?.visibility = View.VISIBLE
+                redelegate_address_layout?.visibility = View.VISIBLE
 
                 update_storage_button_layout?.visibility = View.VISIBLE
 
@@ -1187,7 +1187,7 @@ class DelegateFragment : Fragment()
         {
             val i = v.id
 
-            if (i == R.id.public_address_edittext && !isDelegateTezosAddressEquals(editable))
+            if (i == R.id.redelegate_address_edittext && !isDelegateTezosAddressEquals(editable))
             {
                 putTzAddressInRed(false)
 
@@ -1209,7 +1209,7 @@ class DelegateFragment : Fragment()
                     putPayButtonToNull()
                 }
             }
-            else if (i != R.id.amount_edittext && i != R.id.public_address_edittext)
+            else if (i != R.id.amount_edittext && i != R.id.redelegate_address_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -1238,11 +1238,11 @@ class DelegateFragment : Fragment()
     {
         var isTzAddressValid = false
 
-        if (!TextUtils.isEmpty(public_address_edittext.text))
+        if (!TextUtils.isEmpty(redelegate_address_edittext.text))
         {
-            if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
+            if (Utils.isTzAddressValid(redelegate_address_edittext.text!!.toString()))
             {
-                mDelegateTezosAddress = public_address_edittext.text.toString()
+                mDelegateTezosAddress = redelegate_address_edittext.text.toString()
                 isTzAddressValid = true
             }
         }
@@ -1311,7 +1311,7 @@ class DelegateFragment : Fragment()
             color = R.color.tz_accent
         }
 
-        public_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
+        redelegate_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
     private fun onDelegateClick()

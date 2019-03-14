@@ -50,6 +50,7 @@ import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.utils.DataExtractor
 import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
@@ -57,6 +58,7 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_delegate.*
 import kotlinx.android.synthetic.main.redelegate_form_card_info.*
+import kotlinx.android.synthetic.main.update_storage_form_card.*
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -393,10 +395,24 @@ class ScriptFragment : Fragment()
             {
                 //TODO at this point, just show that there is no script.
 
+                val storageJSONObject = JSONObject(mStorage)
+                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+                val args2 = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
+                val pk = DataExtractor.getStringFromField(args2[1] as JSONObject, "string")
+
+                val args3 = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args")
+                val args4 = DataExtractor.getJSONArrayFromField(args3[0] as JSONObject, "args")
+
+                val dailySpendingLimit = DataExtractor.getStringFromField(args4[0] as JSONObject, "int")
+
+                daily_spending_limit_edittext?.setText(dailySpendingLimit)
+
                 limits_info_textview?.visibility = View.VISIBLE
                 update_storage_form_card?.visibility = View.VISIBLE
 
                 public_address_layout?.visibility = View.VISIBLE
+                public_address_edittext.setText(pk)
 
                 update_storage_button_layout?.visibility = View.VISIBLE
 
@@ -572,13 +588,13 @@ class ScriptFragment : Fragment()
 
             mDelegatePayload = null
 
-            fee_edittext.isEnabled = true
-            fee_edittext.isFocusable = false
-            fee_edittext.isClickable = false
-            fee_edittext.isLongClickable = false
-            fee_edittext.hint = getString(R.string.click_for_fees)
+            storage_fee_edittext.isEnabled = true
+            storage_fee_edittext.isFocusable = false
+            storage_fee_edittext.isClickable = false
+            storage_fee_edittext.isLongClickable = false
+            storage_fee_edittext.hint = getString(R.string.click_for_fees)
 
-            fee_edittext.setOnClickListener {
+            storage_fee_edittext.setOnClickListener {
                 startInitDelegationLoading()
             }
 
@@ -636,7 +652,7 @@ class ScriptFragment : Fragment()
                     onInitDelegateLoadComplete(null)
 
                     val feeInTez = mDelegateFees?.toDouble()/1000000.0
-                    fee_edittext?.setText(feeInTez.toString())
+                    storage_fee_edittext?.setText(feeInTez.toString())
 
                     validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
@@ -706,11 +722,11 @@ class ScriptFragment : Fragment()
 
     private fun putFeesToNegative()
     {
-        fee_edittext?.setText("")
+        storage_fee_edittext?.setText("")
 
         mClickCalculate = false
-        fee_edittext?.isEnabled = false
-        fee_edittext?.hint = getString(R.string.neutral)
+        storage_fee_edittext?.isEnabled = false
+        storage_fee_edittext?.hint = getString(R.string.neutral)
 
         mDelegateFees = -1
 
@@ -860,12 +876,12 @@ class ScriptFragment : Fragment()
     {
         val isFeeValid = false
 
-        if (fee_edittext?.text != null && !TextUtils.isEmpty(fee_edittext?.text))
+        if (storage_fee_edittext?.text != null && !TextUtils.isEmpty(storage_fee_edittext?.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val fee = fee_edittext.text.toString().toDouble()
+                val fee = storage_fee_edittext.text.toString().toDouble()
 
                 if (fee >= 0.000001f)
                 {
