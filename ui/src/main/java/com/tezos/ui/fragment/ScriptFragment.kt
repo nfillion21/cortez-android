@@ -406,18 +406,20 @@ class ScriptFragment : Fragment()
 
                 val dailySpendingLimit = DataExtractor.getStringFromField(args4[0] as JSONObject, "int")
 
-                daily_spending_limit_edittext?.setText(dailySpendingLimit)
+                val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
+                daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
 
                 limits_info_textview?.visibility = View.VISIBLE
                 update_storage_form_card?.visibility = View.VISIBLE
 
                 public_address_layout?.visibility = View.VISIBLE
+
                 public_address_edittext.setText(pk)
 
                 update_storage_button_layout?.visibility = View.VISIBLE
 
                 storage_info_textview?.visibility = View.VISIBLE
-                storage_info_textview?.text = getString(R.string.contract_storage_info, mStorage)
+                storage_info_textview?.text = getString(R.string.contract_storage_info)
 
                 //TODO show everything related to the form
             }
@@ -1049,6 +1051,49 @@ class ScriptFragment : Fragment()
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
+    }
+
+
+    private fun mutezToTez(mutez:String):String
+    {
+        var amountDouble: Double = mutez.toDouble()
+        amountDouble /= 1000000.0
+
+        var amount = amountDouble.toString()
+
+        if (amount.contains("."))
+        {
+            val elements = amount.substring(amount.indexOf("."))
+
+            when
+            {
+                elements.length > 7 ->
+                {
+                    amount = String.format("%.6f", amount.toDouble())
+                    val d = amount.toDouble()
+                    amount = d.toString()
+                }
+
+                elements.length <= 3 ->
+                {
+                    amount = String.format("%.2f", amount.toDouble())
+                }
+                else ->
+                {
+                    //                        int length = elements.length() - 1;
+                    //                        String format = "%." + length + "f";
+                    //                        Float f = Float.parseFloat(amount);
+                    //                        amount = String.format(format, f);
+                }
+            }
+        }
+        else
+        {
+            amount = String.format("%.2f", amount.toDouble())
+//amount = Double.parseDouble(amount).toString();
+        }
+
+        return amount
     }
 
     override fun onDetach()

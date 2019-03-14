@@ -27,8 +27,6 @@
             android:id="@+id/public_address_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableRight="@drawable/account_wallet_24"
-            android:drawableEnd="@drawable/account_wallet_24"
             android:drawablePadding="@dimen/spacing_double"
             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             android:maxLength="36"
@@ -40,7 +38,7 @@
             android:textColorHint="@color/tz_placeholder"
             android:imeOptions="actionDone"
             android:inputType="textPersonName|textNoSuggestions"
-            android:textSize="@dimen/standard_item_text_size" />
+            android:textSize="@dimen/size_edit_text" />
     </LinearLayout>
 
     <LinearLayout
@@ -59,22 +57,41 @@
             android:textColor="@color/colorPrimary"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/daily_spending_limit_edittext"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawablePadding="@dimen/spacing_double"
-            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-            android:maxLength="36"
-            android:maxLines="1"
-            android:enabled="false"
-            android:hint="@string/neutral"
-            android:singleLine="true"
-            android:textColorHint="@color/tz_placeholder"
-            android:imeOptions="actionDone"
-            android:inputType="textPersonName|textNoSuggestions"
-            android:textSize="@dimen/size_edit_text" />
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/gas_transfer"
+                android:elevation="@dimen/elevation_header"
+                android:text="ꜩ"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                android:clipToPadding="false"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/daily_spending_limit_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="@dimen/spacing_double"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+                android:maxLength="36"
+                android:maxLines="1"
+                android:enabled="false"
+                android:hint="@string/neutral"
+                android:singleLine="true"
+                android:textColorHint="@color/tz_placeholder"
+                android:imeOptions="actionDone"
+                android:inputType="textPersonName|textNoSuggestions"
+                android:textSize="@dimen/size_edit_text" />
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -58,7 +58,7 @@
     <string name="redelegate_address_info">Please fill the form to delegate your tez to your chosen baker\'s address.</string>
     <string name="remove_delegate_info">Your current baker\'s address:\n\n%1$s</string>
     <string name="no_script_info">You don\'t have any specific script linked to this address</string>
-    <string name="contract_storage_info">Your current contract\'s storage:\n\n%1$s</string>
+    <string name="contract_storage_info">Your current contract\'s storage informations</string>
     <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string>
     <string name="create_restore_wallet_delegate_info">Please create or restore a wallet to be able to delegate your tez.</string>
     <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez.</string>
