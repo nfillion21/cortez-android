@@ -468,7 +468,7 @@ class ScriptFragment : Fragment()
                 update_storage_button_layout?.visibility = View.VISIBLE
 
                 storage_info_textview?.visibility = View.VISIBLE
-                storage_info_textview?.text = getString(R.string.remove_delegate_info, mStorage)
+                storage_info_textview?.text = getString(R.string.contract_storage_info, mStorage)
 
                 //TODO show everything related to the form
             }
@@ -482,7 +482,7 @@ class ScriptFragment : Fragment()
                 update_storage_button_layout?.visibility = View.GONE
 
                 storage_info_textview?.visibility = View.VISIBLE
-                storage_info_textview?.text = getString(R.string.remove_delegate_info, mStorage)
+                storage_info_textview?.text = getString(R.string.no_script_info)
 
                 //TODO show everything related to the removing
             }
