@@ -57,7 +57,6 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_delegate.*
-import kotlinx.android.synthetic.main.redelegate_form_card_info.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -85,9 +84,9 @@ class ScriptFragment : Fragment()
 
     companion object
     {
-        private const val CONTRACT_KEY = "CONTRACT_KEY"
+        private const val CONTRACT_PUBLIC_KEY = "CONTRACT_PUBLIC_KEY"
 
-        private const val DELEGATE_INIT_TAG = "delegate_init"
+        private const val UPDATE_STORAGE_INIT_TAG = "update_storage_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
 
         private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
@@ -108,7 +107,7 @@ class ScriptFragment : Fragment()
                 ScriptFragment().apply {
                     arguments = Bundle().apply {
                         putBundle(CustomTheme.TAG, theme.toBundle())
-                        putString(CONTRACT_KEY, contract)
+                        putString(CONTRACT_PUBLIC_KEY, contract)
                     }
                 }
     }
@@ -164,7 +163,7 @@ class ScriptFragment : Fragment()
         {
             mDelegatePayload = savedInstanceState.getString(DELEGATE_PAYLOAD_KEY, null)
 
-            mInitDelegateLoading = savedInstanceState.getBoolean(DELEGATE_INIT_TAG)
+            mInitDelegateLoading = savedInstanceState.getBoolean(UPDATE_STORAGE_INIT_TAG)
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
 
             mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
@@ -261,7 +260,7 @@ class ScriptFragment : Fragment()
         val isPasswordSaved = Storage(activity!!).isPasswordSaved()
         if (isPasswordSaved)
         {
-            pkh = arguments!!.getString(CONTRACT_KEY)
+            pkh = arguments!!.getString(CONTRACT_PUBLIC_KEY)
             if (pkh == null)
             {
                 //should not happen
@@ -414,7 +413,7 @@ class ScriptFragment : Fragment()
 
                 public_address_layout?.visibility = View.VISIBLE
 
-                public_address_edittext.setText(pk)
+                public_address_edittext?.setText(pk)
 
                 update_storage_button_layout?.visibility = View.VISIBLE
 
@@ -703,7 +702,7 @@ class ScriptFragment : Fragment()
 
         cancelRequests(true)
 
-        jsObjRequest.tag = DELEGATE_INIT_TAG
+        jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
         mInitDelegateLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
     }
@@ -811,8 +810,10 @@ class ScriptFragment : Fragment()
         {
             val i = v.id
 
-            if (i == R.id.public_address_edittext && !isDelegateTezosAddressEquals(editable))
+            if (i == R.id.public_address_edittext/* && !isDelegateTezosAddressEquals(editable)*/)
             {
+                //TODO check this part for editing mode
+                /*
                 putTzAddressInRed(false)
 
                 //TODO text changed
@@ -832,8 +833,9 @@ class ScriptFragment : Fragment()
                     putFeesToNegative()
                     putPayButtonToNull()
                 }
+                */
             }
-            else if (i != R.id.amount_edittext && i != R.id.public_address_edittext)
+            else if (i != R.id.public_address_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -1018,7 +1020,7 @@ class ScriptFragment : Fragment()
         if (activity != null)
         {
             val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
-            requestQueue?.cancelAll(DELEGATE_INIT_TAG)
+            requestQueue?.cancelAll(UPDATE_STORAGE_INIT_TAG)
             requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
             requestQueue?.cancelAll(CONTRACT_SCRIPT_INFO_TAG)
 
@@ -1035,7 +1037,7 @@ class ScriptFragment : Fragment()
     {
         super.onSaveInstanceState(outState)
 
-        outState.putBoolean(DELEGATE_INIT_TAG, mInitDelegateLoading)
+        outState.putBoolean(UPDATE_STORAGE_INIT_TAG, mInitDelegateLoading)
         outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
 
         outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
