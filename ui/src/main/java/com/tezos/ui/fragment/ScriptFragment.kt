@@ -81,64 +81,6 @@ class ScriptFragment : Fragment()
 
     private var mWalletEnabled:Boolean = false
 
-    data class Contract
-    (
-            val blk: String,
-            val mgr: String,
-            val spendable: Boolean,
-            val delegatable: Boolean,
-            val delegate: String?,
-            val script: String?
-    )
-
-    internal class ContractSerialization internal constructor(private val contract: Contract)
-    {
-        internal fun getSerializedBundle():Bundle
-        {
-            val contractBundle = Bundle()
-
-            contractBundle.putString("blk", contract.blk)
-            contractBundle.putString("mgr", contract.mgr)
-            contractBundle.putBoolean("spendable", contract.spendable)
-            contractBundle.putBoolean("delegatable", contract.delegatable)
-            contractBundle.putString("delegate", contract.delegate)
-            contractBundle.putString("script", contract.script)
-
-            return contractBundle
-        }
-    }
-
-    internal class ContractMapper internal constructor(private val bundle: Bundle)
-    {
-        internal fun mappedObjectFromBundle(): Contract
-        {
-            val blk = this.bundle.getString("blk", null)
-            val mgr = this.bundle.getString("mgr", null)
-            val spendable = this.bundle.getBoolean("spendable", false)
-            val delegatable = this.bundle.getBoolean("delegatable", false)
-            val delegate = this.bundle.getString("delegate", null)
-            val script = this.bundle.getString("script", null)
-
-            return Contract(blk, mgr, spendable, delegatable, delegate, script)
-        }
-    }
-
-    fun toBundle(contract: Contract?): Bundle?
-    {
-        if (contract != null)
-        {
-            val serializer = ContractSerialization(contract)
-            return serializer.getSerializedBundle()
-        }
-        return null
-    }
-
-    fun fromBundle(bundle: Bundle): Contract
-    {
-        val mapper = ContractMapper(bundle)
-        return mapper.mappedObjectFromBundle()
-    }
-
     companion object
     {
         private const val CONTRACT_KEY = "CONTRACT_KEY"
@@ -367,15 +309,6 @@ class ScriptFragment : Fragment()
         startPostRequestLoadFinalizeAddDelegate(mnemonicsData)
     }
 
-    private fun startFinalizeRemoveDelegateLoading()
-    {
-        // we need to inform the UI we are going to call transfer
-        transferLoading(true)
-
-        val mnemonicsData = Storage(activity!!).getMnemonics()
-        startPostRequestLoadFinalizeRemoveDelegate(mnemonicsData)
-    }
-
     // volley
     private fun startGetRequestLoadContractInfo()
     {
@@ -504,116 +437,6 @@ class ScriptFragment : Fragment()
 
             loading_textview?.visibility = View.VISIBLE
             loading_textview?.text = "-"
-        }
-    }
-
-    // volley
-    private fun startPostRequestLoadFinalizeRemoveDelegate(mnemonicsData: Storage.MnemonicsData)
-    {
-        val url = getString(R.string.transfer_injection_operation)
-
-        if (isRemoveButtonValid() && mDelegatePayload != null && mDelegateFees != null)
-        {
-            //val pkhSrc = mnemonicsData.pkh
-            //val pkhDst = mDstAccount?.pubKeyHash
-
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
-            var postParams = JSONObject()
-            postParams.put("src", pkh())
-            postParams.put("src_pk", pk)
-
-            postParams.put("fee", mDelegateFees)
-
-            var dstObjects = JSONArray()
-
-            var dstObject = JSONObject()
-
-            dstObjects.put(dstObject)
-
-            postParams.put("dsts", dstObjects)
-
-            if (isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams))
-            {
-                val zeroThree = "0x03".hexToByteArray()
-
-                val byteArrayThree = mDelegatePayload!!.hexToByteArray()
-
-                val xLen = zeroThree.size
-                val yLen = byteArrayThree.size
-                val result = ByteArray(xLen + yLen)
-
-                System.arraycopy(zeroThree, 0, result, 0, xLen)
-                System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
-
-                val sk = CryptoUtils.generateSk(mnemonics, "")
-                val signature = KeyPair.sign(sk, result)
-
-                //TODO verify signature
-                //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
-
-                val pLen = byteArrayThree.size
-                val sLen = signature.size
-                val newResult = ByteArray(pLen + sLen)
-
-                System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
-                System.arraycopy(signature, 0, newResult, pLen, sLen)
-
-                var payloadsign = newResult.toNoPrefixHexString()
-
-                val stringRequest = object : StringRequest(Request.Method.POST, url,
-                        Response.Listener<String> { response ->
-                            if (activity != null)
-                            {
-                                //there's no need to do anything because we call finish()
-                                onFinalizeDelegationLoadComplete(null)
-
-                                mCallback?.finish(R.id.remove_delegate_succeed)
-                            }
-                        },
-                        Response.ErrorListener
-                        {
-                            if (activity != null)
-                            {
-                                onFinalizeDelegationLoadComplete(it)
-                            }
-                        }
-                )
-                {
-                    @Throws(AuthFailureError::class)
-                    override fun getBody(): ByteArray
-                    {
-                        val pay = "\""+payloadsign+"\""
-                        return pay.toByteArray()
-                    }
-
-                    @Throws(AuthFailureError::class)
-                    override fun getHeaders(): Map<String, String>
-                    {
-                        val headers = HashMap<String, String>()
-                        headers["Content-Type"] = "application/json"
-                        return headers
-                    }
-                }
-
-                cancelRequests(true)
-
-                stringRequest.tag = DELEGATE_FINALIZE_TAG
-
-                mFinalizeDelegateLoading = true
-                VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(stringRequest)
-            }
-            else
-            {
-                val volleyError = VolleyError(getString(R.string.generic_error))
-                onFinalizeDelegationLoadComplete(volleyError)
-            }
-        }
-        else
-        {
-            val volleyError = VolleyError(getString(R.string.generic_error))
-            onFinalizeDelegationLoadComplete(volleyError)
         }
     }
 
@@ -1073,12 +896,6 @@ class ScriptFragment : Fragment()
                 && isInputDataValid()
     }
 
-    fun isRemoveButtonValid(): Boolean
-    {
-        return mDelegatePayload != null
-                && isDelegateFeeValid()
-    }
-
     private fun putTzAddressInRed(red: Boolean)
     {
         val color: Int
@@ -1122,39 +939,6 @@ class ScriptFragment : Fragment()
         }
         dialog.authenticationSuccessListener = {
             startFinalizeAddDelegateLoading()
-        }
-        dialog.passwordVerificationListener =
-                {
-                    validatePassword(it)
-                }
-        dialog.show(activity!!.supportFragmentManager, "Authentication")
-    }
-
-    private fun onRemoveDelegateClick()
-    {
-        val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
-        {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity!!).prepareFingerprintCryptoObject()
-            dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
-            dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthenticationRemoveDelegate(it)
-            }
-            if (dialog.cryptoObjectToAuthenticateWith == null)
-            {
-                dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
-            }
-            else
-            {
-                dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
-            }
-        }
-        else
-        {
-            dialog.stage = AuthenticationDialog.Stage.PASSWORD
-        }
-        dialog.authenticationSuccessListener = {
-            startFinalizeRemoveDelegateLoading()
         }
         dialog.passwordVerificationListener =
                 {
@@ -1208,18 +992,6 @@ class ScriptFragment : Fragment()
         else
         {
             onDelegateClick()
-        }
-    }
-
-    private fun validateKeyAuthenticationRemoveDelegate(cryptoObject: FingerprintManager.CryptoObject)
-    {
-        if (EncryptionServices(activity!!).validateFingerprintAuthentication(cryptoObject))
-        {
-            startFinalizeRemoveDelegateLoading()
-        }
-        else
-        {
-            onRemoveDelegateClick()
         }
     }
 

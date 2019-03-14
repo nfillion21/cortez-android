@@ -673,7 +673,7 @@ class DelegateFragment : Fragment()
 
                 cancelRequests(true)
 
-                stringRequest.tag = DELEGATE_FINALIZE_TAG
+                stringRequest.tag = REMOVE_DELEGATE_FINALIZE_TAG
 
                 mFinalizeDelegateLoading = true
                 VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(stringRequest)
