@@ -48,7 +48,7 @@
                                 android:layout_weight="1"
                                 android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
                                 android:layout_marginBottom="@dimen/spacing_normal"
-                                android:text="@string/delegate_title"/>
+                                android:text="@string/script_title"/>
 
                             <ProgressBar
                                 android:id="@+id/nav_progress"
@@ -67,17 +67,6 @@
                             android:layout_height="wrap_content"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                             android:text="@string/loading_storage_info"
-                            android:textColor="@color/colorAccent"
-                            android:layout_marginBottom="@dimen/spacing_double"
-                            android:ellipsize="end" />
-
-                        <TextView
-                            android:id="@+id/limits_info_textview"
-                            android:visibility="gone"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:text="@string/redelegate_address_info"
                             android:textColor="@color/colorAccent"
                             android:layout_marginBottom="@dimen/spacing_double"
                             android:ellipsize="end" />

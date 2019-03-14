@@ -287,11 +287,6 @@ public class CryptoUtils
 
         System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
 
-
-        String TezosPkString = Base58.encode(prefixedPubKeyWithChecksum);
-
-        // ends eztz b58encode
-
         // Create Tezos SK.
         byte[] prefixedSecKey = new byte[68];
         System.arraycopy(edskPrefix, 0, prefixedSecKey, 0, 4);

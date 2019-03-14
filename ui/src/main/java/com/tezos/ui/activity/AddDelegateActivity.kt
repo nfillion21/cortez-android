@@ -136,9 +136,9 @@ class AddDelegateActivity : BaseSecureActivity()
         val focusChangeListener = this.focusChangeListener()
         amount_edittext.onFocusChangeListener = focusChangeListener
 
-        tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
+        public_address_edittext.addTextChangedListener(GenericTextWatcher(public_address_edittext))
 
-        tezos_address_edittext.onFocusChangeListener = focusChangeListener
+        public_address_edittext.onFocusChangeListener = focusChangeListener
 
         if (savedInstanceState != null)
         {
@@ -166,7 +166,7 @@ class AddDelegateActivity : BaseSecureActivity()
             {
                 putAmountInRed(!hasFocus)
             }
-            else if (i == R.id.tezos_address_edittext)
+            else if (i == R.id.public_address_edittext)
             {
                 putTzAddressInRed(!hasFocus)
             }
@@ -616,14 +616,14 @@ class AddDelegateActivity : BaseSecureActivity()
 
             if ((i == R.id.amount_edittext && !isDelegateAmountEquals(editable))
                             ||
-                 (i == R.id.tezos_address_edittext && !isDelegateTezosAddressEquals(editable)))
+                 (i == R.id.public_address_edittext && !isDelegateTezosAddressEquals(editable)))
             {
                 if (i == R.id.amount_edittext )
                 {
                     putAmountInRed(false)
                 }
 
-                if (i == R.id.tezos_address_edittext)
+                if (i == R.id.public_address_edittext)
                 {
                     putTzAddressInRed(false)
                 }
@@ -650,7 +650,7 @@ class AddDelegateActivity : BaseSecureActivity()
                     putPayButtonToNull()
                 }
             }
-            else if (i != R.id.amount_edittext && i != R.id.tezos_address_edittext)
+            else if (i != R.id.amount_edittext && i != R.id.public_address_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -701,11 +701,11 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         var isTzAddressValid = false
 
-        if (!TextUtils.isEmpty(tezos_address_edittext.text))
+        if (!TextUtils.isEmpty(public_address_edittext.text))
         {
-            if (Utils.isTzAddressValid(tezos_address_edittext.text!!.toString()))
+            if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
             {
-                mDelegateTezosAddress = tezos_address_edittext.text.toString()
+                mDelegateTezosAddress = public_address_edittext.text.toString()
                 isTzAddressValid = true
             }
         }
@@ -830,7 +830,7 @@ class AddDelegateActivity : BaseSecureActivity()
             color = R.color.tz_accent
         }
 
-        tezos_address_edittext.setTextColor(ContextCompat.getColor(this, color))
+        public_address_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
 // put everything in RED

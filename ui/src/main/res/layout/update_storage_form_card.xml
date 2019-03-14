@@ -7,33 +7,68 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
-        android:id="@+id/tezos_address_layout"
+        android:id="@+id/public_address_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/spacing_double"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/address_textview"
+            android:id="@+id/public_address_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/address_delegate"
+            android:text="@string/public_address_generated"
             android:textStyle="bold"
             android:textColor="@color/colorPrimary"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
 
         <android.support.design.widget.TextInputEditText
-            android:id="@+id/tezos_address_edittext"
+            android:id="@+id/public_address_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/address_pkh_placeholder"
             android:drawableRight="@drawable/account_wallet_24"
             android:drawableEnd="@drawable/account_wallet_24"
             android:drawablePadding="@dimen/spacing_double"
             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             android:maxLength="36"
             android:maxLines="1"
+            android:enabled="false"
+            android:hint="@string/neutral"
+            android:singleLine="true"
+            android:textColorHint="@color/tz_placeholder"
+            android:imeOptions="actionDone"
+            android:inputType="textPersonName|textNoSuggestions"
+            android:textSize="@dimen/size_edit_text" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/daily_spending_limit_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/spacing_double"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/daily_spending_limit_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/daily_spending_limit"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/daily_spending_limit_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/spacing_double"
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            android:maxLength="36"
+            android:maxLines="1"
+            android:enabled="false"
+            android:hint="@string/neutral"
             android:singleLine="true"
             android:textColorHint="@color/tz_placeholder"
             android:imeOptions="actionDone"
