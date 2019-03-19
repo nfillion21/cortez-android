@@ -30,7 +30,6 @@ package com.tezcore.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -43,7 +42,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.Toolbar
 import android.view.ViewGroup
-import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
@@ -120,13 +118,13 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                         {
                             fabTransfer.show()
                             fabSharing.hide()
-                            fabAddAddress.hide()
+                            fabEditStorage.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabSharing.hide()
-                            fabAddAddress.hide()
+                            fabEditStorage.hide()
                         }
                     }
 
@@ -135,13 +133,13 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                         if (isPasswordSaved)
                         {
                             fabTransfer.hide()
-                            fabAddAddress.hide()
+                            fabEditStorage.hide()
                             fabSharing.show()
                         }
                         else
                         {
                             fabTransfer.hide()
-                            fabAddAddress.hide()
+                            fabEditStorage.hide()
                             fabSharing.hide()
                         }
                     }
@@ -149,14 +147,14 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     2 ->
                     {
                         fabTransfer.hide()
-                        fabAddAddress.hide()
+                        fabEditStorage.hide()
                         fabSharing.hide()
                     }
 
                     3 ->
                     {
                         fabTransfer.hide()
-                        fabAddAddress.hide()
+                        fabEditStorage.show()
                         fabSharing.hide()
                     }
 
@@ -209,7 +207,7 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
             }
         }
 
-        fabAddAddress.setOnClickListener {
+        fabEditStorage.setOnClickListener {
             AddAddressActivity.start(this, mTezosTheme)
         }
 
@@ -235,13 +233,13 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     {
                         fabTransfer.show()
                         fabSharing.hide()
-                        fabAddAddress.hide()
+                        fabEditStorage.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabSharing.hide()
-                        fabAddAddress.hide()
+                        fabEditStorage.hide()
                     }
                 }
 
@@ -250,13 +248,13 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     if (isPasswordSaved)
                     {
                         fabTransfer.hide()
-                        fabAddAddress.hide()
+                        fabEditStorage.hide()
                         fabSharing.show()
                     }
                     else
                     {
                         fabTransfer.hide()
-                        fabAddAddress.hide()
+                        fabEditStorage.hide()
                         fabSharing.hide()
                     }
                 }
@@ -264,14 +262,14 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                 2 ->
                 {
                     fabTransfer.hide()
-                    fabAddAddress.hide()
+                    fabEditStorage.hide()
                     fabSharing.hide()
                 }
 
                 3 ->
                 {
                     fabTransfer.hide()
-                    fabAddAddress.hide()
+                    fabEditStorage.show()
                     fabSharing.hide()
                 }
 
