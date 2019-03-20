@@ -494,19 +494,7 @@ class DelegateFragment : Fragment()
             val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
             val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
 
-            val script = DataExtractor.getJSONObjectFromField(contractJSON, "script")
-
             val resScript = JSONObject(getString(R.string.default_contract))
-            val code = DataExtractor.getJSONObjectFromField(resScript, "script")
-
-            if (script.toString() == code.toString())
-            {
-                Log.i("same", "same")
-            }
-            else
-            {
-                Log.i("same", "not same")
-            }
 
             mContract = Contract(blk as String, mgr as String, spendable as Boolean, delegatable as Boolean, delegate, resScript.toString())
         }

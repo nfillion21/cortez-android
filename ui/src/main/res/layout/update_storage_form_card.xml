@@ -19,7 +19,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_double"
-            android:background="@color/theme_green_primary"
             android:orientation="vertical">
 
             <TextView
@@ -110,6 +109,7 @@
             android:layout_height="wrap_content"
             android:text="@string/fee_minimum"
             android:textStyle="bold"
+            android:visibility="gone"
             android:textColor="@color/colorPrimary"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -117,6 +117,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="horizontal"
+            android:visibility="gone"
             android:layout_height="wrap_content">
 
             <TextView

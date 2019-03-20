@@ -17,6 +17,7 @@
             android:orientation="vertical" >
 
             <android.support.v4.widget.NestedScrollView
+                android:id="@+id/nested_scroll_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:fillViewport="true"
@@ -84,26 +85,38 @@
 
                     </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1" />
-
                     <include
                         android:id="@+id/update_storage_form_card"
                         android:visibility="gone"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="0"
                         layout="@layout/update_storage_form_card"
                         />
+
+                    <!--
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="700dp">
+                    </LinearLayout>
+                    -->
+
                 </LinearLayout>
             </android.support.v4.widget.NestedScrollView>
 
+            <!--
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+                -->
+
             <RelativeLayout
+                android:id="@+id/"
                 android:layout_weight="0"
                 android:layout_width="match_parent"
                 android:layout_marginTop="@dimen/spacing_double"
+                android:visibility="gone"
                 android:layout_marginBottom="?attr/actionBarSize"
                 android:layout_height="?android:attr/actionBarSize">
 
