@@ -253,7 +253,7 @@ class ScriptFragment : Fragment()
         }
     }
 
-    fun pkh():String?
+    private fun pkh():String?
     {
         var pkh:String? = null
 
@@ -270,6 +270,11 @@ class ScriptFragment : Fragment()
         }
 
         return pkh
+    }
+
+    fun isEditMode():Boolean
+    {
+        return true
     }
 
     private fun startStorageInfoLoading()
@@ -864,7 +869,7 @@ class ScriptFragment : Fragment()
     {
         var isTzAddressValid = false
 
-        if (!TextUtils.isEmpty(public_address_edittext.text))
+        if (!TextUtils.isEmpty(public_address_edittext?.text))
         {
             if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
             {

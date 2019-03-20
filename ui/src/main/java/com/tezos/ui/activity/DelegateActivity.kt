@@ -118,13 +118,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                         {
                             fabTransfer.show()
                             fabSharing.hide()
-                            fabEditStorage.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabSharing.hide()
-                            fabEditStorage.hide()
                         }
                     }
 
@@ -133,13 +131,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                         if (isPasswordSaved)
                         {
                             fabTransfer.hide()
-                            fabEditStorage.hide()
                             fabSharing.show()
                         }
                         else
                         {
                             fabTransfer.hide()
-                            fabEditStorage.hide()
                             fabSharing.hide()
                         }
                     }
@@ -147,14 +143,12 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     2 ->
                     {
                         fabTransfer.hide()
-                        fabEditStorage.hide()
                         fabSharing.hide()
                     }
 
                     3 ->
                     {
                         fabTransfer.hide()
-                        fabEditStorage.show()
                         fabSharing.hide()
                     }
 
@@ -207,10 +201,6 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
             }
         }
 
-        fabEditStorage.setOnClickListener {
-            AddAddressActivity.start(this, mTezosTheme)
-        }
-
         initActionBar(mTezosTheme)
     }
 
@@ -233,13 +223,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     {
                         fabTransfer.show()
                         fabSharing.hide()
-                        fabEditStorage.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabSharing.hide()
-                        fabEditStorage.hide()
                     }
                 }
 
@@ -248,13 +236,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     if (isPasswordSaved)
                     {
                         fabTransfer.hide()
-                        fabEditStorage.hide()
                         fabSharing.show()
                     }
                     else
                     {
                         fabTransfer.hide()
-                        fabEditStorage.hide()
                         fabSharing.hide()
                     }
                 }
@@ -262,14 +248,12 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                 2 ->
                 {
                     fabTransfer.hide()
-                    fabEditStorage.hide()
                     fabSharing.hide()
                 }
 
                 3 ->
                 {
                     fabTransfer.hide()
-                    fabEditStorage.show()
                     fabSharing.hide()
                 }
 
