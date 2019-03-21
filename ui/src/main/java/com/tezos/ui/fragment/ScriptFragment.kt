@@ -56,7 +56,6 @@ import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.DataExtractor
-import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -152,7 +151,7 @@ class ScriptFragment : Fragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        validateAddButton(isInputDataValid() && isDelegateFeeValid())
+        validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
 
         update_storage_button_layout.setOnClickListener {
             onDelegateClick()
@@ -208,7 +207,7 @@ class ScriptFragment : Fragment()
                 //TODO we got to keep in mind there's an id already.
                 if (mInitDelegateLoading)
                 {
-                    startInitDelegationLoading()
+                    startInitUpdateStorageLoading()
                 }
                 else
                 {
@@ -242,7 +241,7 @@ class ScriptFragment : Fragment()
         {
             if (isInputDataValid())
             {
-                validateAddButton(true)
+                validateConfirmEditionButton(true)
             }
         }
 
@@ -373,14 +372,14 @@ class ScriptFragment : Fragment()
         //putPayButtonToNull()
 
         // validatePay cannot be valid if there is no fees
-        validateAddButton(false)
+        validateConfirmEditionButton(false)
 
         swipe_refresh_script_layout?.isEnabled = false
 
         startGetRequestLoadContractInfo()
     }
 
-    private fun startInitDelegationLoading()
+    private fun startInitUpdateStorageLoading()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
@@ -389,9 +388,9 @@ class ScriptFragment : Fragment()
         putPayButtonToNull()
 
         // validatePay cannot be valid if there is no fees
-        validateAddButton(false)
+        validateConfirmEditionButton(false)
 
-        startPostRequestLoadInitAddDelegate()
+        startPostRequestLoadInitUpdateStorage()
     }
 
     private fun startFinalizeAddDelegateLoading()
@@ -432,7 +431,7 @@ class ScriptFragment : Fragment()
                     //if (mContract?.delegate != null)
                     if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
                     {
-                        validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                        validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
                     }
                     else
                     {
@@ -694,7 +693,7 @@ class ScriptFragment : Fragment()
             storage_fee_edittext.hint = getString(R.string.click_for_fees)
 
             storage_fee_edittext.setOnClickListener {
-                startInitDelegationLoading()
+                startInitUpdateStorageLoading()
             }
 
             if(error != null)
@@ -713,7 +712,7 @@ class ScriptFragment : Fragment()
     }
 
     // volley
-    private fun startPostRequestLoadInitAddDelegate()
+    private fun startPostRequestLoadInitUpdateStorage()
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
 
@@ -753,18 +752,18 @@ class ScriptFragment : Fragment()
                     val feeInTez = mDelegateFees?.toDouble()/1000000.0
                     storage_fee_edittext?.setText(feeInTez.toString())
 
-                    validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                    validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
 
                     if (isInputDataValid() && isDelegateFeeValid())
                     {
-                        validateAddButton(true)
+                        validateConfirmEditionButton(true)
 
                         //this.setTextPayButton()
                     }
                     else
                     {
                         // should no happen
-                        validateAddButton(false)
+                        validateConfirmEditionButton(false)
                     }
                 }
                 else
@@ -851,7 +850,7 @@ class ScriptFragment : Fragment()
         }
     }
 
-    private fun validateAddButton(validate: Boolean)
+    private fun validateConfirmEditionButton(validate: Boolean)
     {
         if (activity != null)
         {
@@ -919,7 +918,7 @@ class ScriptFragment : Fragment()
 
                 if (isInputDataValid())
                 {
-                    startInitDelegationLoading()
+                    startInitUpdateStorageLoading()
                 }
                 else
                 {
