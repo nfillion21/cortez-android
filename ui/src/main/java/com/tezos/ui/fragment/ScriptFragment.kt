@@ -159,7 +159,11 @@ class ScriptFragment : Fragment()
         }
 
         fab_edit_storage.setOnClickListener {
-            switchToEditMode(true)
+            animateFabEditMode(true)
+        }
+
+        fab_undo_storage.setOnClickListener {
+            animateFabEditMode(false)
         }
 
         swipe_refresh_script_layout.setOnRefreshListener {
@@ -287,36 +291,74 @@ class ScriptFragment : Fragment()
 
     private fun switchToEditMode(editMode:Boolean)
     {
-        val textViewAnimator = ObjectAnimator.ofFloat(fab_edit_storage, View.SCALE_X, 0f)
-        val textViewAnimator2 = ObjectAnimator.ofFloat(fab_edit_storage, View.SCALE_Y, 0f)
-        val textViewAnimator3 = ObjectAnimator.ofFloat(fab_edit_storage, View.ALPHA, 0f)
-
-        val animatorSet = AnimatorSet()
-        animatorSet.interpolator = FastOutSlowInInterpolator()
-        animatorSet.play(textViewAnimator).with(textViewAnimator2).with(textViewAnimator3)
-        animatorSet.addListener(object : AnimatorListenerAdapter()
+        if (editMode)
         {
-            override fun onAnimationEnd(animation: Animator)
+            update_storage_button_relative_layout.visibility = View.VISIBLE
+
+            gas_textview.visibility = View.VISIBLE
+            gas_layout.visibility = View.VISIBLE
+
+            fab_edit_storage.hide()
+            fab_undo_storage.show()
+        }
+        else
+        {
+            update_storage_button_relative_layout.visibility = View.GONE
+
+            gas_textview.visibility = View.GONE
+            gas_layout.visibility = View.GONE
+
+            fab_undo_storage.hide()
+            fab_edit_storage.show()
+        }
+    }
+
+    private fun animateFabEditMode(editMode:Boolean)
+    {
+        mEditMode = editMode
+        if (editMode)
+        {
+            val textViewAnimator = ObjectAnimator.ofFloat(fab_edit_storage, View.SCALE_X, 0f)
+            val textViewAnimator2 = ObjectAnimator.ofFloat(fab_edit_storage, View.SCALE_Y, 0f)
+            val textViewAnimator3 = ObjectAnimator.ofFloat(fab_edit_storage, View.ALPHA, 0f)
+
+            val animatorSet = AnimatorSet()
+            animatorSet.interpolator = FastOutSlowInInterpolator()
+            animatorSet.play(textViewAnimator).with(textViewAnimator2).with(textViewAnimator3)
+            animatorSet.addListener(object : AnimatorListenerAdapter()
             {
-                super.onAnimationEnd(animation)
+                override fun onAnimationEnd(animation: Animator)
+                {
+                    super.onAnimationEnd(animation)
+                    switchToEditMode(editMode)
+                }
+            })
+            animatorSet.start()
+        }
+        else
+        {
+            val textViewAnimator = ObjectAnimator.ofFloat(fab_undo_storage, View.SCALE_X, 0f)
+            val textViewAnimator2 = ObjectAnimator.ofFloat(fab_undo_storage, View.SCALE_Y, 0f)
+            val textViewAnimator3 = ObjectAnimator.ofFloat(fab_undo_storage, View.ALPHA, 0f)
 
-                update_storage_button_relative_layout.visibility = View.VISIBLE
-
-                gas_textview.visibility = View.VISIBLE
-                gas_layout.visibility = View.VISIBLE
-
-                //mMnemonicsString = CryptoUtils.generateMnemonics()
-                //mMnemonicsTextview?.text = mMnemonicsString
-                // renew the mnemonic
-                //showDoneFab()
-            }
-        })
-        animatorSet.start()
+            val animatorSet = AnimatorSet()
+            animatorSet.interpolator = FastOutSlowInInterpolator()
+            animatorSet.play(textViewAnimator).with(textViewAnimator2).with(textViewAnimator3)
+            animatorSet.addListener(object : AnimatorListenerAdapter()
+            {
+                override fun onAnimationEnd(animation: Animator)
+                {
+                    super.onAnimationEnd(animation)
+                    switchToEditMode(editMode)
+                }
+            })
+            animatorSet.start()
+        }
     }
 
     private fun isEditMode():Boolean
     {
-        return true
+        return mEditMode
     }
 
     private fun startStorageInfoLoading()
@@ -466,7 +508,14 @@ class ScriptFragment : Fragment()
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.contract_storage_info)
 
-                //TODO show everything related to the form
+                if (mEditMode)
+                {
+                    switchToEditMode(true)
+                }
+                else
+                {
+                    switchToEditMode(false)
+                }
             }
             else
             {

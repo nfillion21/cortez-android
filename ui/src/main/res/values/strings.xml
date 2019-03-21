@@ -17,6 +17,7 @@
     <string name="gas">Gas (default value)</string>
     <string name="fee_minimum">Fee (calculated minimum value)</string>
     <string name="delegate">Delegate</string>
+    <string name="edit_storage">Edit storage</string>
     <string name="remove_delegate">Remove delegate</string>
     <string name="fee">Fee</string>
     <string name="fees_default">0.001</string>
