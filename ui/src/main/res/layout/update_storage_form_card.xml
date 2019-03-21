@@ -115,6 +115,7 @@
             tools:ignore="UnusedAttribute,NewApi" />
 
         <LinearLayout
+            android:id="@+id/gas_layout"
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:visibility="gone"
@@ -154,7 +155,8 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabEditStorage"
+        android:id="@+id/fab_edit_storage"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
@@ -162,4 +164,14 @@
         app:layout_anchorGravity="bottom|end"
         app:tint="@android:color/white"
         app:srcCompat="@drawable/ic_edit_24" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_undo_storage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        app:layout_anchor="@id/linear_rect_layout"
+        app:layout_anchorGravity="bottom|end"
+        app:tint="@android:color/white"
+        app:srcCompat="@drawable/ic_undo_24" />
 </android.support.design.widget.CoordinatorLayout>

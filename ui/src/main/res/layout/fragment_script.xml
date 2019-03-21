@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/swipe_refresh_layout"
+    android:id="@+id/swipe_refresh_script_layout"
     android:layout_width="match_parent"
     android:padding="@dimen/spacing_double"
     android:layout_height="match_parent">
@@ -112,7 +112,7 @@
                 -->
 
             <RelativeLayout
-                android:id="@+id/"
+                android:id="@+id/update_storage_button_relative_layout"
                 android:layout_weight="0"
                 android:layout_width="match_parent"
                 android:layout_marginTop="@dimen/spacing_double"

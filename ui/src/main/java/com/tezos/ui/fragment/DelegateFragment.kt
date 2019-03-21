@@ -543,7 +543,7 @@ class DelegateFragment : Fragment()
 
                 update_storage_button_layout?.visibility = View.VISIBLE
 
-                storage_info_textview.visibility = View.GONE
+                storage_info_textview?.visibility = View.GONE
                 remove_delegate_button_layout?.visibility = View.GONE
 
                 //TODO show everything related to the form

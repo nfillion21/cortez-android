@@ -27,6 +27,10 @@
 
 package com.tezos.ui.fragment
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
@@ -35,6 +39,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
+import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -56,7 +61,7 @@ import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
-import kotlinx.android.synthetic.main.fragment_delegate.*
+import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -78,9 +83,9 @@ class ScriptFragment : Fragment()
     private var mClickCalculate:Boolean = false
 
     private var mStorage:String? = null
-
-
     private var mWalletEnabled:Boolean = false
+
+    private var mEditMode:Boolean = false
 
     companion object
     {
@@ -101,6 +106,8 @@ class ScriptFragment : Fragment()
         private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
         private const val STORAGE_DATA_KEY = "storage_data_key"
+
+        private const val EDIT_MODE_KEY = "edit_mode_key"
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -151,7 +158,11 @@ class ScriptFragment : Fragment()
             onDelegateClick()
         }
 
-        swipe_refresh_layout.setOnRefreshListener {
+        fab_edit_storage.setOnClickListener {
+            switchToEditMode(true)
+        }
+
+        swipe_refresh_script_layout.setOnRefreshListener {
             startStorageInfoLoading()
         }
 
@@ -177,6 +188,8 @@ class ScriptFragment : Fragment()
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
+
+            mEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY, false)
 
             if (mStorageInfoLoading)
             {
@@ -272,7 +285,36 @@ class ScriptFragment : Fragment()
         return pkh
     }
 
-    fun isEditMode():Boolean
+    private fun switchToEditMode(editMode:Boolean)
+    {
+        val textViewAnimator = ObjectAnimator.ofFloat(fab_edit_storage, View.SCALE_X, 0f)
+        val textViewAnimator2 = ObjectAnimator.ofFloat(fab_edit_storage, View.SCALE_Y, 0f)
+        val textViewAnimator3 = ObjectAnimator.ofFloat(fab_edit_storage, View.ALPHA, 0f)
+
+        val animatorSet = AnimatorSet()
+        animatorSet.interpolator = FastOutSlowInInterpolator()
+        animatorSet.play(textViewAnimator).with(textViewAnimator2).with(textViewAnimator3)
+        animatorSet.addListener(object : AnimatorListenerAdapter()
+        {
+            override fun onAnimationEnd(animation: Animator)
+            {
+                super.onAnimationEnd(animation)
+
+                update_storage_button_relative_layout.visibility = View.VISIBLE
+
+                gas_textview.visibility = View.VISIBLE
+                gas_layout.visibility = View.VISIBLE
+
+                //mMnemonicsString = CryptoUtils.generateMnemonics()
+                //mMnemonicsTextview?.text = mMnemonicsString
+                // renew the mnemonic
+                //showDoneFab()
+            }
+        })
+        animatorSet.start()
+    }
+
+    private fun isEditMode():Boolean
     {
         return true
     }
@@ -287,7 +329,7 @@ class ScriptFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateAddButton(false)
 
-        swipe_refresh_layout?.isEnabled = false
+        swipe_refresh_script_layout?.isEnabled = false
 
         startGetRequestLoadContractInfo()
     }
@@ -382,8 +424,8 @@ class ScriptFragment : Fragment()
         nav_progress?.visibility = View.GONE
 
         //TODO handle the swipe refresh
-        swipe_refresh_layout?.isEnabled = true
-        swipe_refresh_layout?.isRefreshing = false
+        swipe_refresh_script_layout?.isEnabled = true
+        swipe_refresh_script_layout?.isRefreshing = false
 
         refreshTextUnderDelegation(animating)
     }
@@ -413,7 +455,6 @@ class ScriptFragment : Fragment()
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
                 daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
 
-                limits_info_textview?.visibility = View.VISIBLE
                 update_storage_form_card?.visibility = View.VISIBLE
 
                 public_address_layout?.visibility = View.VISIBLE
@@ -429,7 +470,6 @@ class ScriptFragment : Fragment()
             }
             else
             {
-                limits_info_textview?.visibility = View.GONE
                 update_storage_form_card?.visibility = View.GONE
 
                 public_address_layout?.visibility = View.VISIBLE
@@ -1058,6 +1098,8 @@ class ScriptFragment : Fragment()
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
+
+        outState.putBoolean(EDIT_MODE_KEY, mEditMode)
     }
 
 
