@@ -89,15 +89,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawablePadding="@dimen/spacing_double"
-                    android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-                    android:maxLength="36"
+                    android:maxLength="15"
                     android:maxLines="1"
                     android:enabled="false"
                     android:hint="@string/neutral"
                     android:singleLine="true"
                     android:textColorHint="@color/tz_placeholder"
                     android:imeOptions="actionDone"
-                    android:inputType="textPersonName|textNoSuggestions"
+                    android:inputType="numberDecimal"
+                    android:digits="0123456789."
                     android:textSize="@dimen/size_edit_text" />
             </LinearLayout>
 

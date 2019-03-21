@@ -134,7 +134,7 @@
                         android:id="@+id/update_storage_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/edit_storage"
+                        android:text="@string/confirm_edition"
 
                         android:drawableStart="@drawable/ic_lock_black"
                         android:drawableLeft="@drawable/ic_lock_black"

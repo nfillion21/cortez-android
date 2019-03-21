@@ -298,6 +298,8 @@ class ScriptFragment : Fragment()
             gas_textview.visibility = View.VISIBLE
             gas_layout.visibility = View.VISIBLE
 
+            daily_spending_limit_edittext.isEnabled = true
+
             fab_edit_storage.hide()
             fab_undo_storage.show()
         }
@@ -307,6 +309,8 @@ class ScriptFragment : Fragment()
 
             gas_textview.visibility = View.GONE
             gas_layout.visibility = View.GONE
+
+            daily_spending_limit_edittext.isEnabled = false
 
             fab_undo_storage.hide()
             fab_edit_storage.show()
@@ -951,20 +955,23 @@ class ScriptFragment : Fragment()
 
     fun isInputDataValid(): Boolean
     {
-        return isTzAddressValid()
+        return isP256AddressValid()
     }
 
-    private fun isTzAddressValid(): Boolean
+    private fun isP256AddressValid(): Boolean
     {
         var isTzAddressValid = false
 
         if (!TextUtils.isEmpty(public_address_edittext?.text))
         {
+            /*
             if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
             {
                 mDelegateTezosAddress = public_address_edittext.text.toString()
                 isTzAddressValid = true
             }
+            */
+            isTzAddressValid = true
         }
 
         return isTzAddressValid
@@ -1014,7 +1021,7 @@ class ScriptFragment : Fragment()
     {
         val color: Int
 
-        val tzAddressValid = isTzAddressValid()
+        val tzAddressValid = isP256AddressValid()
 
         if (red && !tzAddressValid)
         {
