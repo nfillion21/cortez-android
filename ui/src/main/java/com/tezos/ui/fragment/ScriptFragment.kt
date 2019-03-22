@@ -758,8 +758,6 @@ class ScriptFragment : Fragment()
                     if (isInputDataValid() && isDelegateFeeValid())
                     {
                         validateConfirmEditionButton(true)
-
-                        //this.setTextPayButton()
                     }
                     else
                     {
@@ -1007,7 +1005,7 @@ class ScriptFragment : Fragment()
 
     private fun putEverythingInRed()
     {
-        this.putTzAddressInRed(true)
+        //this.putTzAddressInRed(true)
         this.putSpendingLimitInRed(true)
     }
 
@@ -1018,6 +1016,7 @@ class ScriptFragment : Fragment()
                 && isInputDataValid()
     }
 
+    /*
     private fun putTzAddressInRed(red: Boolean)
     {
         val color: Int
@@ -1035,6 +1034,7 @@ class ScriptFragment : Fragment()
 
         public_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
+    */
 
     private fun putSpendingLimitInRed(red: Boolean)
     {
@@ -1208,44 +1208,10 @@ class ScriptFragment : Fragment()
 
     private fun mutezToTez(mutez:String):String
     {
-        var amountDouble: Double = mutez.toDouble()
-        amountDouble /= 1000000.0
+        var amountLong: Long = mutez.toLong()
+        amountLong /= 1000000
 
-        var amount = amountDouble.toString()
-
-        if (amount.contains("."))
-        {
-            val elements = amount.substring(amount.indexOf("."))
-
-            when
-            {
-                elements.length > 7 ->
-                {
-                    amount = String.format("%.6f", amount.toDouble())
-                    val d = amount.toDouble()
-                    amount = d.toString()
-                }
-
-                elements.length <= 3 ->
-                {
-                    amount = String.format("%.2f", amount.toDouble())
-                }
-                else ->
-                {
-                    //                        int length = elements.length() - 1;
-                    //                        String format = "%." + length + "f";
-                    //                        Float f = Float.parseFloat(amount);
-                    //                        amount = String.format(format, f);
-                }
-            }
-        }
-        else
-        {
-            amount = String.format("%.2f", amount.toDouble())
-//amount = Double.parseDouble(amount).toString();
-        }
-
-        return amount
+        return amountLong.toString()
     }
 
     override fun onDetach()

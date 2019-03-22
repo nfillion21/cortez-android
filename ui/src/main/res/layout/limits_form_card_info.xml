@@ -55,7 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/spacing_double"
-        android:text="@string/limit_1_to_10k"
+        android:text="@string/limit_1_to_1k"
         android:textStyle="bold"
         android:layout_marginTop="@dimen/spacing_double"
         android:textColor="@color/colorPrimary"
@@ -66,7 +66,7 @@
         android:id="@+id/limits_seekbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="9999" />
+        android:max="999" />
 
     <LinearLayout
         android:layout_width="match_parent"
