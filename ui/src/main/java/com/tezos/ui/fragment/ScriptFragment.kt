@@ -86,6 +86,8 @@ class ScriptFragment : Fragment()
 
     private var mEditMode:Boolean = false
 
+    private var mSpendingLimitAmount:Long = -1L
+
     companion object
     {
         private const val CONTRACT_PUBLIC_KEY = "CONTRACT_PUBLIC_KEY"
@@ -105,6 +107,8 @@ class ScriptFragment : Fragment()
         private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
         private const val STORAGE_DATA_KEY = "storage_data_key"
+
+        private const val SPENDING_AMOUNT_KEY = "spending_amount_key"
 
         private const val EDIT_MODE_KEY = "edit_mode_key"
 
@@ -169,9 +173,8 @@ class ScriptFragment : Fragment()
             startStorageInfoLoading()
         }
 
-        public_address_edittext.addTextChangedListener(GenericTextWatcher(public_address_edittext))
-
-        public_address_edittext.onFocusChangeListener = focusChangeListener()
+        daily_spending_limit_edittext.addTextChangedListener(GenericTextWatcher(daily_spending_limit_edittext))
+        daily_spending_limit_edittext.onFocusChangeListener = focusChangeListener()
 
         if (savedInstanceState != null)
         {
@@ -191,6 +194,8 @@ class ScriptFragment : Fragment()
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
+
+            mSpendingLimitAmount = savedInstanceState.getLong(SPENDING_AMOUNT_KEY, -1L)
 
             mEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY, false)
 
@@ -257,13 +262,10 @@ class ScriptFragment : Fragment()
     {
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
-            if (i == R.id.public_address_edittext)
-            {
-                putTzAddressInRed(!hasFocus)
-            }
-            else
-            {
-                throw UnsupportedOperationException(
+            when (i) {
+                //R.id.public_address_edittext -> putTzAddressInRed(!hasFocus)
+                R.id.daily_spending_limit_edittext -> putSpendingLimitInRed(!hasFocus)
+                else -> throw UnsupportedOperationException(
                         "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
             }
         }
@@ -369,7 +371,7 @@ class ScriptFragment : Fragment()
         transferLoading(true)
 
         //putFeesToNegative()
-        //putPayButtonToNull()
+        //putConfirmEditionButtonToNull()
 
         // validatePay cannot be valid if there is no fees
         validateConfirmEditionButton(false)
@@ -385,7 +387,6 @@ class ScriptFragment : Fragment()
         transferLoading(true)
 
         putFeesToNegative()
-        putPayButtonToNull()
 
         // validatePay cannot be valid if there is no fees
         validateConfirmEditionButton(false)
@@ -831,11 +832,6 @@ class ScriptFragment : Fragment()
         mDelegatePayload = null
     }
 
-    private fun putPayButtonToNull()
-    {
-        update_storage_button?.text = getString(R.string.delegate_format, "")
-    }
-
     private fun showSnackBar(error:VolleyError?, message:String?)
     {
         if (error != null)
@@ -906,12 +902,9 @@ class ScriptFragment : Fragment()
         override fun afterTextChanged(editable: Editable)
         {
             val i = v.id
-
-            if (i == R.id.public_address_edittext/* && !isDelegateTezosAddressEquals(editable)*/)
+            if (i == R.id.daily_spending_limit_edittext && !isSpendingLimitAmountEquals(editable))
             {
-                //TODO check this part for editing mode
-                /*
-                putTzAddressInRed(false)
+                putSpendingLimitInRed(false)
 
                 //TODO text changed
                 //TODO load again but only if we don't have any same forged data.
@@ -922,17 +915,15 @@ class ScriptFragment : Fragment()
                 }
                 else
                 {
-                    validateAddButton(false)
+                    validateConfirmEditionButton(false)
 
                     cancelRequests(false)
                     transferLoading(false)
 
                     putFeesToNegative()
-                    putPayButtonToNull()
                 }
-                */
             }
-            else if (i != R.id.public_address_edittext)
+            else
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -940,21 +931,31 @@ class ScriptFragment : Fragment()
         }
     }
 
-    private fun isDelegateTezosAddressEquals(editable: Editable):Boolean
+    private fun isSpendingLimitAmountEquals(editable: Editable):Boolean
     {
-        val isTezosAddressEquals = true
+        val isSpendingAmountEquals = false
 
         if (editable != null && !TextUtils.isEmpty(editable))
         {
-            val tezosAddress = editable.toString()
-            return tezosAddress == mDelegateTezosAddress
+            try
+            {
+                val amount = editable.toString().toLong()
+                if (amount != -1L && amount == mSpendingLimitAmount)
+                {
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                return false
+            }
         }
-        return isTezosAddressEquals
+        return isSpendingAmountEquals
     }
 
     fun isInputDataValid(): Boolean
     {
-        return isP256AddressValid()
+        return isP256AddressValid() && isSpendingLimitAmountValid()
     }
 
     private fun isP256AddressValid(): Boolean
@@ -1007,6 +1008,7 @@ class ScriptFragment : Fragment()
     private fun putEverythingInRed()
     {
         this.putTzAddressInRed(true)
+        this.putSpendingLimitInRed(true)
     }
 
     fun isAddButtonValid(): Boolean
@@ -1032,6 +1034,50 @@ class ScriptFragment : Fragment()
         }
 
         public_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
+    }
+
+    private fun putSpendingLimitInRed(red: Boolean)
+    {
+        val color: Int
+
+        val amountValid = isSpendingLimitAmountValid()
+
+        color = if (red && !amountValid)
+        {
+            R.color.tz_error
+        }
+        else
+        {
+            R.color.tz_accent
+        }
+
+        daily_spending_limit_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
+    }
+
+    private fun isSpendingLimitAmountValid():Boolean
+    {
+        val isAmountValid = false
+
+        if (daily_spending_limit_edittext?.text != null && !TextUtils.isEmpty(daily_spending_limit_edittext.text))
+        {
+            try
+            {
+                val amount = daily_spending_limit_edittext.text!!.toString().toLong()
+
+                if (amount in 0..1000)
+                {
+                    mSpendingLimitAmount = amount
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mSpendingLimitAmount = -1L
+                return false
+            }
+        }
+
+        return isAmountValid
     }
 
     private fun onDelegateClick()
@@ -1151,6 +1197,8 @@ class ScriptFragment : Fragment()
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
 
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
+
+        outState.putLong(SPENDING_AMOUNT_KEY, mSpendingLimitAmount)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
 

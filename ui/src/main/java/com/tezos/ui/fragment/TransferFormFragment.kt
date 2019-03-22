@@ -138,7 +138,7 @@ class TransferFormFragment : Fragment()
         }
         else
         {
-            throw RuntimeException(context.toString() + " must implement OnTransferListener")
+            throw RuntimeException("$context must implement OnTransferListener")
         }
     }
 
