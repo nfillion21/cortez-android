@@ -921,7 +921,7 @@ class ScriptFragment : Fragment()
                     putFeesToNegative()
                 }
             }
-            else
+            else if (i != R.id.daily_spending_limit_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
