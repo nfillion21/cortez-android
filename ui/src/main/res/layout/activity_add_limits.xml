@@ -136,7 +136,7 @@ tools:ignore="UselessParent,UnusedAttribute">
         android:layout_height="?android:attr/actionBarSize">
 
         <FrameLayout
-            android:id="@+id/update_storage_button_layout"
+            android:id="@+id/create_limit_contract_button_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             style="@style/PaymentScreens.Button"
@@ -146,10 +146,10 @@ tools:ignore="UselessParent,UnusedAttribute">
             >
 
             <Button
-                android:id="@+id/update_storage_button"
+                android:id="@+id/create_limit_contract_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/add_an_address"
+                android:text="@string/create_contract"
 
                 android:drawableLeft="@drawable/ic_lock_black"
                 android:drawableStart="@drawable/ic_lock_black"

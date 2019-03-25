@@ -94,7 +94,7 @@
     <string name="balance_title">Balance</string>
     <string name="operations_title">Operations</string>
     <string name="last_operations_title">Latest operations</string>
-    <string name="add_an_address">Add</string>
+    <string name="create_contract">Create the contract</string>
     <string name="about">About</string>
     <string name="exit">Exit</string>
     <string name="exit_info">Are you sure you want to exit?</string>

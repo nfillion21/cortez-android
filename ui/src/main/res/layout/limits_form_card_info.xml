@@ -99,7 +99,7 @@
             android:inputType="numberDecimal"
             android:text="1"
             android:textColorHint="@color/tz_placeholder"
-            android:maxLength="5"
+            android:maxLength="4"
             android:digits="0123456789"
             android:textSize="@dimen/size_edit_text" />
 

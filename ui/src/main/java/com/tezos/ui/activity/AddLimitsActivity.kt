@@ -61,7 +61,7 @@ import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
-import kotlinx.android.synthetic.main.activity_add_delegate.*
+import kotlinx.android.synthetic.main.activity_add_limits.*
 import kotlinx.android.synthetic.main.limits_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -129,7 +129,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
-        update_storage_button_layout.setOnClickListener {
+        create_limit_contract_button_layout.setOnClickListener {
             onDelegateClick()
         }
 
@@ -247,7 +247,6 @@ class AddLimitsActivity : BaseSecureActivity()
         transferLoading(true)
 
         putFeesToNegative()
-        putPayButtonToNull()
 
         // validatePay cannot be valid if there is no fees
         validateAddButton(false)
@@ -499,8 +498,6 @@ class AddLimitsActivity : BaseSecureActivity()
                 if (isInputDataValid() && isDelegateFeeValid())
                 {
                     validateAddButton(true)
-
-                    this.setTextPayButton()
                 }
                 else
                 {
@@ -546,13 +543,13 @@ class AddLimitsActivity : BaseSecureActivity()
     {
         if (loading)
         {
-            update_storage_button_layout.visibility = View.GONE
+            create_limit_contract_button_layout.visibility = View.GONE
             nav_progress.visibility = View.VISIBLE
             //amount_transfer.isEnabled = false
         }
         else
         {
-            update_storage_button_layout.visibility = View.VISIBLE
+            create_limit_contract_button_layout.visibility = View.VISIBLE
             nav_progress.visibility = View.INVISIBLE
             //amount_transfer.isEnabled = true
         }
@@ -569,11 +566,6 @@ class AddLimitsActivity : BaseSecureActivity()
         mDelegateFees = -1
 
         mDelegatePayload = null
-    }
-
-    private fun putPayButtonToNull()
-    {
-        update_storage_button.text = getString(R.string.pay, "")
     }
 
     private fun showSnackBar(error:VolleyError?)
@@ -600,23 +592,23 @@ class AddLimitsActivity : BaseSecureActivity()
 
         if (validate)
         {
-            update_storage_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
-            update_storage_button_layout.isEnabled = true
-            update_storage_button_layout.background = makeSelector(theme)
+            create_limit_contract_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+            create_limit_contract_button_layout.isEnabled = true
+            create_limit_contract_button_layout.background = makeSelector(theme)
 
-            val drawables = update_storage_button.compoundDrawables
+            val drawables = create_limit_contract_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
         }
         else
         {
-            update_storage_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
-            update_storage_button_layout.isEnabled = false
+            create_limit_contract_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+            create_limit_contract_button_layout.isEnabled = false
 
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            update_storage_button_layout.background = makeSelector(greyTheme)
+            create_limit_contract_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = update_storage_button.compoundDrawables
+            val drawables = create_limit_contract_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white))
         }
@@ -696,7 +688,6 @@ class AddLimitsActivity : BaseSecureActivity()
                     transferLoading(false)
 
                     putFeesToNegative()
-                    putPayButtonToNull()
                 }
             }
             else if (i != R.id.amount_limit_edittext && i != R.id.limit_edittext)
@@ -825,7 +816,7 @@ class AddLimitsActivity : BaseSecureActivity()
                 val limit = limit_edittext.text!!.toString().toLong()
 
                 //no need
-                if (limit in 1..10000)
+                if (limit in 1..1000)
                 {
                     mLimitAmount = limit
                     return true
@@ -850,7 +841,6 @@ class AddLimitsActivity : BaseSecureActivity()
         if (isInputDataValid() && isDelegateFeeValid())
         {
             validateAddButton(true)
-            this.setTextPayButton()
         }
 
         //TODO we got to keep in mind there's an id already.
@@ -897,7 +887,7 @@ class AddLimitsActivity : BaseSecureActivity()
         if (red && !amountValid)
         {
             color = R.color.tz_error
-            update_storage_button.text = getString(R.string.delegate_format, "")
+            //update_storage_button.text = getString(R.string.delegate_format, "")
         }
         else
         {
@@ -906,11 +896,11 @@ class AddLimitsActivity : BaseSecureActivity()
             if (amountValid)
             {
                 //val amount = delegate_transfer_edittext.text.toString()
-                this.setTextPayButton()
+                //this.setTextPayButton()
             }
             else
             {
-                update_storage_button.text = getString(R.string.delegate_format, "")
+                //update_storage_button.text = getString(R.string.delegate_format, "")
             }
         }
 
@@ -926,71 +916,14 @@ class AddLimitsActivity : BaseSecureActivity()
         if (red && !limitValid)
         {
             color = R.color.tz_error
-            update_storage_button.text = getString(R.string.delegate_format, "")
+            create_limit_contract_button.text = getString(R.string.delegate_format, "")
         }
         else
         {
             color = R.color.tz_accent
-
-            if (limitValid)
-            {
-                //val amount = delegate_transfer_edittext.text.toString()
-                this.setTextPayButton()
-            }
-            else
-            {
-                update_storage_button.text = getString(R.string.delegate_format, "")
-            }
         }
 
         limit_edittext.setTextColor(ContextCompat.getColor(this, color))
-    }
-
-
-    private fun setTextPayButton()
-    {
-        var amountDouble: Double = mDelegateAmount
-
-        //amountDouble += fee_limit_edittext.text.toString().toLong()/1000000
-        amountDouble += mDelegateFees.toDouble()/1000000.0
-
-        var amount = amountDouble.toString()
-
-        if (amount.contains("."))
-        {
-            val elements = amount.substring(amount.indexOf("."))
-
-            when
-            {
-                elements.length > 7 ->
-                {
-                    amount = String.format("%.6f", amount.toDouble())
-                    val d = amount.toDouble()
-                    amount = d.toString()
-                }
-
-                elements.length <= 3 ->
-                {
-                    amount = String.format("%.2f", amount.toDouble())
-                }
-                else ->
-                {
-                    //                        int length = elements.length() - 1;
-                    //                        String format = "%." + length + "f";
-                    //                        Float f = Float.parseFloat(amount);
-                    //                        amount = String.format(format, f);
-                }
-            }
-        }
-        else
-        {
-            amount = String.format("%.2f", amount.toDouble())
-//amount = Double.parseDouble(amount).toString();
-        }
-
-        val moneyFormatted2 = "$amount ꜩ"
-//String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        update_storage_button.text = getString(R.string.pay, moneyFormatted2)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
