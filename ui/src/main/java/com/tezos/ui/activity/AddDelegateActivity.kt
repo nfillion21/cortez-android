@@ -78,7 +78,7 @@ class AddDelegateActivity : BaseSecureActivity()
     private var mFinalizeDelegateLoading:Boolean = false
 
     private var mDelegatePayload:String? = null
-    private var mDelegateFees:Long = -1
+    private var mDelegateFees:Long = -1L
 
     private var mDelegateAmount:Double = -1.0
     private var mDelegateTezosAddress:String? = null
@@ -461,7 +461,7 @@ class AddDelegateActivity : BaseSecureActivity()
             postParams.put("dsts", dstsArray)
 
             // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != null)
+            if (mDelegatePayload != null && mDelegateFees != -1L)
             {
                 onInitDelegateLoadComplete(null)
 
@@ -552,16 +552,9 @@ class AddDelegateActivity : BaseSecureActivity()
 
     private fun showSnackBar(error:VolleyError?)
     {
-        var error: String? = if (error != null)
-        {
-            error.toString()
-        }
-        else
-        {
-            getString(R.string.generic_error)
-        }
+        var errorStr: String? = error?.toString() ?: getString(R.string.generic_error)
 
-        val snackbar = Snackbar.make(findViewById(R.id.content), error.toString(), Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(findViewById(R.id.content), errorStr.toString(), Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                 android.R.color.holo_red_light)))
         snackbar.show()
@@ -661,7 +654,7 @@ class AddDelegateActivity : BaseSecureActivity()
         {
             val isAmountEquals = false
 
-            if (editable != null && !TextUtils.isEmpty(editable))
+            if (!TextUtils.isEmpty(editable))
             {
                 try
                 {
@@ -684,7 +677,7 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         val isTezosAddressEquals = true
 
-        if (editable != null && !TextUtils.isEmpty(editable))
+        if (!TextUtils.isEmpty(editable))
         {
             val tezosAddress = editable.toString()
             return tezosAddress == mDelegateTezosAddress
@@ -921,7 +914,7 @@ class AddDelegateActivity : BaseSecureActivity()
     private fun onDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        if (isFingerprintAllowed() && hasEnrolledFingerprints())
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices(this).prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
