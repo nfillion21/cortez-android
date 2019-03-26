@@ -4,7 +4,9 @@
     <string name="pay">Pay %1$s</string>
     <string name="delegate_format">Delegate %1$s</string>
     <string name="select_source">Select source transfer</string>
-    <string name="select_destination">Select recipient</string>
+    <string name="select_recipient">Select recipient</string>
+    <string name="select_daily_spending_limit_contract">Daily spending limit contract</string>
+    <string name="select_default_contract">Default contract</string>
     <string name="select_source_title">Select source</string>
     <string name="select_destination_title">Select destination</string>
     <string name="address_book_title">Address book</string>
@@ -123,6 +125,8 @@
     <string name="empty_list_operations">No operations</string>
     <string name="contact_name">Contact name</string>
     <string name="tez">ꜩ</string>
+
+    <string name="delegate_and_contract_title">Delegate and contract</string>
 
     <string name="scan_address_permission">To scan the address, allow camera permission.</string>
     <string name="read_contacts_permission">To select a name, allow read contacts permission.</string>

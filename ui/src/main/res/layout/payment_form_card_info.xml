@@ -86,7 +86,7 @@
 
         android:drawableLeft="@drawable/redeem_black_24"
         android:drawableStart="@drawable/redeem_black_24"
-        android:text="@string/select_destination"
+        android:text="@string/select_recipient"
 
         android:paddingLeft="@dimen/spacing_double"
         android:paddingRight="40dp"

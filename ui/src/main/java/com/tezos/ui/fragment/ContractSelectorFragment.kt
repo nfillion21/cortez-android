@@ -31,15 +31,11 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AppCompatDialogFragment
-import android.text.Editable
-import android.text.TextUtils
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.tezos.ui.R
-import kotlinx.android.synthetic.main.dialog_pwd_container.*
-import kotlinx.android.synthetic.main.dialog_pwd_content.*
+import kotlinx.android.synthetic.main.dialog_contract_selector_container.*
 
 class ContractSelectorFragment : AppCompatDialogFragment()
 {
@@ -57,8 +53,6 @@ class ContractSelectorFragment : AppCompatDialogFragment()
                 ContractSelectorFragment().apply {
                     arguments = Bundle().apply {}
                 }
-
-        private const val MNEMONICS_KEY = "mnemonics_key"
     }
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -91,52 +85,16 @@ class ContractSelectorFragment : AppCompatDialogFragment()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
     {
         super.onViewCreated(view, savedInstanceState)
-        dialog.setTitle(getString(R.string.sign_up_create_master_password))
+        dialog.setTitle(getString(R.string.delegate_and_contract_title))
 
-        cancelButtonPasswordView.setOnClickListener {
+        default_contract_button.setOnClickListener {
             listener?.onContractClicked(false)
-            dismiss() }
-        secondButtonPasswordView.setOnClickListener {
+            dismiss()
+        }
+        daily_spending_limit_contract_button.setOnClickListener {
             listener?.onContractClicked(true)
             dismiss()
         }
-    }
-
-    private inner class GenericTextWatcher internal constructor(private val v: View) : TextWatcher
-    {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-
-        override fun afterTextChanged(editable: Editable)
-        {
-            val i = v.id
-            if (i != R.id.enterPassword && i != R.id.confirmPassword)
-            {
-                throw UnsupportedOperationException(
-                        "OnClick has not been implemented for " + resources.getResourceName(v.id))
-            }
-
-            validateOkButton(isInputDataValid())
-        }
-    }
-
-    fun isInputDataValid(): Boolean
-    {
-        if (!TextUtils.isEmpty(enterPassword.text) && !TextUtils.isEmpty(confirmPassword.text))
-        {
-            if (enterPassword.text.toString() == confirmPassword.text.toString()
-                    && enterPassword.text.length >= 6 )
-            {
-                return true
-            }
-        }
-        return false
-    }
-
-    private fun validateOkButton(validate: Boolean)
-    {
-        secondButtonPasswordView.isEnabled = validate
     }
 
     override fun onDetach()

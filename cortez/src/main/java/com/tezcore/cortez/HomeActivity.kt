@@ -203,7 +203,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             //AddDelegateActivity.start(this, mTezosTheme)
 
             val dialog = ContractSelectorFragment.newInstance()
-            dialog.show(supportFragmentManager, "Password")
+            dialog.show(supportFragmentManager, "ContractSelector")
         }
 
         initActionBar(mTezosTheme)
@@ -406,9 +406,9 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
     }
 
-    override fun showSnackBar(text:String, color:Int, textColor:Int)
+    override fun showSnackBar(res:String, color:Int, textColor:Int)
     {
-        val snackbar = Snackbar.make(fabTransfer, text, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(fabTransfer, res, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor(color)
         snackbar.setActionTextColor(textColor)
         snackbar.show()
@@ -502,9 +502,9 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
     }
 
-    override fun onDelegateAddressClicked(address: String, position: Int)
+    override fun onDelegateAddressClicked(address: String, pos: Int)
     {
-        DelegateActivity.start(this, address, position, mTezosTheme)
+        DelegateActivity.start(this, address, pos, mTezosTheme)
     }
 
     override fun onContractClicked(withScript: Boolean)
