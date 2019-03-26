@@ -75,9 +75,9 @@ class ScriptFragment : Fragment()
     private var mStorageInfoLoading:Boolean = false
 
     private var mDelegatePayload:String? = null
-    private var mDelegateFees:Long = -1
+    private var mDelegateFees:Long = -1L
 
-    private var mDelegateTezosAddress:String? = null
+    private var mUpdateStorageAddress:String? = null
 
     private var mClickCalculate:Boolean = false
 
@@ -185,7 +185,7 @@ class ScriptFragment : Fragment()
 
             mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
 
-            mDelegateTezosAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
+            mUpdateStorageAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
 
             mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
@@ -560,7 +560,7 @@ class ScriptFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isAddButtonValid() && mDelegatePayload != null && mDelegateTezosAddress != null && mDelegateFees != null)
+        if (isAddButtonValid() && mDelegatePayload != null && mUpdateStorageAddress != null && mDelegateFees != null)
         {
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
@@ -571,7 +571,7 @@ class ScriptFragment : Fragment()
             var postParams = JSONObject()
             postParams.put("src", pkh())
             postParams.put("src_pk", pk)
-            postParams.put("delegate", mDelegateTezosAddress)
+            postParams.put("delegate", mUpdateStorageAddress)
             postParams.put("fee", mDelegateFees)
 
             if (isChangeDelegatePayloadValid(mDelegatePayload!!, postParams))
@@ -717,13 +717,10 @@ class ScriptFragment : Fragment()
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
 
-        val url = getString(R.string.change_delegate_url)
+        val url = getString(R.string.transfer_forge)
 
         val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
         val pk = CryptoUtils.generatePk(mnemonics, "")
-
-        //val pkhSrc = mnemonicsData.pkh
-        //val pkhDst = mDstAccount?.pubKeyHash
 
         var postParams = JSONObject()
         postParams.put("src", pkh())
@@ -731,8 +728,20 @@ class ScriptFragment : Fragment()
 
         var dstObjects = JSONArray()
 
-        dstObjects.put(mDelegateTezosAddress)
-        //dstObjects.put("tz1boot1pK9h2BVGXdyvfQSv8kd1LQM6H889")
+        var dstObject = JSONObject()
+        dstObject.put("dst", pkh())
+        dstObject.put("amount", "0")
+
+        val resScript = JSONObject(getString(R.string.update_parameters_storage))
+
+        //TODO check about generating a new P256 key
+        mUpdateStorageAddress = pk
+        val spendingLimitContract = String.format(resScript.toString(), mUpdateStorageAddress, (mSpendingLimitAmount*1000000L).toString())
+
+        val json = JSONObject(spendingLimitContract)
+        dstObject.put("parameters", json)
+
+        dstObjects.put(dstObject)
 
         postParams.put("dsts", dstObjects)
 
@@ -746,7 +755,7 @@ class ScriptFragment : Fragment()
                 mDelegateFees = answer.getLong("total_fee")
 
                 // we use this call to ask for payload and fees
-                if (mDelegatePayload != null && mDelegateFees != null && activity != null)
+                if (mDelegatePayload != null && mDelegateFees != -1L && activity != null)
                 {
                     onInitDelegateLoadComplete(null)
 
@@ -965,7 +974,7 @@ class ScriptFragment : Fragment()
             /*
             if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
             {
-                mDelegateTezosAddress = public_address_edittext.text.toString()
+                mUpdateStorageAddress = public_address_edittext.text.toString()
                 isTzAddressValid = true
             }
             */
@@ -1190,7 +1199,7 @@ class ScriptFragment : Fragment()
 
         outState.putString(DELEGATE_PAYLOAD_KEY, mDelegatePayload)
 
-        outState.putString(DELEGATE_TEZOS_ADDRESS_KEY, mDelegateTezosAddress)
+        outState.putString(DELEGATE_TEZOS_ADDRESS_KEY, mUpdateStorageAddress)
 
         outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
 
