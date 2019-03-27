@@ -313,6 +313,22 @@ class ScriptFragment : Fragment()
 
             daily_spending_limit_edittext.isEnabled = false
 
+            if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
+            {
+                val storageJSONObject = JSONObject(mStorage)
+                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+                val args2 = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
+                val pk = DataExtractor.getStringFromField(args2[1] as JSONObject, "string")
+                public_address_edittext.setText(pk)
+
+                val args3 = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args")
+                val args4 = DataExtractor.getJSONArrayFromField(args3[0] as JSONObject, "args")
+
+                val dailySpendingLimit = DataExtractor.getStringFromField(args4[0] as JSONObject, "int")
+                daily_spending_limit_edittext.setText(mutezToTez(dailySpendingLimit))
+            }
+
             fab_undo_storage.hide()
             fab_edit_storage.show()
         }
@@ -368,7 +384,7 @@ class ScriptFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateConfirmEditionButton(false)
 
-        swipe_refresh_script_layout?.isEnabled = false
+        //swipe_refresh_script_layout?.isEnabled = false
 
         startGetRequestLoadContractInfo()
     }
@@ -901,32 +917,35 @@ class ScriptFragment : Fragment()
 
         override fun afterTextChanged(editable: Editable)
         {
-            val i = v.id
-            if (i == R.id.daily_spending_limit_edittext && !isSpendingLimitAmountEquals(editable))
+            if (mEditMode)
             {
-                putSpendingLimitInRed(false)
-
-                //TODO text changed
-                //TODO load again but only if we don't have any same forged data.
-
-                if (isInputDataValid())
+                val i = v.id
+                if (i == R.id.daily_spending_limit_edittext && !isSpendingLimitAmountEquals(editable))
                 {
-                    startInitUpdateStorageLoading()
+                    putSpendingLimitInRed(false)
+
+                    //TODO text changed
+                    //TODO load again but only if we don't have any same forged data.
+
+                    if (isInputDataValid())
+                    {
+                        startInitUpdateStorageLoading()
+                    }
+                    else
+                    {
+                        validateConfirmEditionButton(false)
+
+                        cancelRequests(false)
+                        transferLoading(false)
+
+                        putFeesToNegative()
+                    }
                 }
-                else
+                else if (i != R.id.daily_spending_limit_edittext)
                 {
-                    validateConfirmEditionButton(false)
-
-                    cancelRequests(false)
-                    transferLoading(false)
-
-                    putFeesToNegative()
+                    throw UnsupportedOperationException(
+                            "OnClick has not been implemented for " + resources.getResourceName(v.id))
                 }
-            }
-            else if (i != R.id.daily_spending_limit_edittext)
-            {
-                throw UnsupportedOperationException(
-                        "OnClick has not been implemented for " + resources.getResourceName(v.id))
             }
         }
     }
