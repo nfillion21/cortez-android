@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/swipe_refresh_script_layout"
     android:layout_width="match_parent"
     android:padding="@dimen/spacing_double"
@@ -152,6 +153,14 @@
                         />
 
                 </FrameLayout>
+                <ProgressBar
+                    android:id="@+id/empty"
+                    android:layout_width="@dimen/min_height_touch_target"
+                    android:layout_height="@dimen/min_height_touch_target"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone"
+                    tools:ignore="UnusedAttribute" />
+
             </RelativeLayout>
         </LinearLayout>
     </android.support.design.widget.CoordinatorLayout>

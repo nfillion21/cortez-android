@@ -69,13 +69,13 @@ class ScriptFragment : Fragment()
 {
     private var mCallback: OnUpdateScriptListener? = null
 
-    private var mInitDelegateLoading:Boolean = false
+    private var mInitUpdateStorageLoading:Boolean = false
     private var mFinalizeDelegateLoading:Boolean = false
 
     private var mStorageInfoLoading:Boolean = false
 
-    private var mDelegatePayload:String? = null
-    private var mDelegateFees:Long = -1L
+    private var mUpdateStoragePayload:String? = null
+    private var mUpdateStorageFees:Long = -1L
 
     private var mUpdateStorageAddress:String? = null
 
@@ -178,16 +178,16 @@ class ScriptFragment : Fragment()
 
         if (savedInstanceState != null)
         {
-            mDelegatePayload = savedInstanceState.getString(DELEGATE_PAYLOAD_KEY, null)
+            mUpdateStoragePayload = savedInstanceState.getString(DELEGATE_PAYLOAD_KEY, null)
 
-            mInitDelegateLoading = savedInstanceState.getBoolean(UPDATE_STORAGE_INIT_TAG)
+            mInitUpdateStorageLoading = savedInstanceState.getBoolean(UPDATE_STORAGE_INIT_TAG)
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
 
             mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
 
             mUpdateStorageAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
 
-            mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
+            mUpdateStorageFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
@@ -210,7 +210,7 @@ class ScriptFragment : Fragment()
                 onStorageInfoComplete(false)
 
                 //TODO we got to keep in mind there's an id already.
-                if (mInitDelegateLoading)
+                if (mInitUpdateStorageLoading)
                 {
                     startInitUpdateStorageLoading()
                 }
@@ -220,7 +220,7 @@ class ScriptFragment : Fragment()
 
                     if (mFinalizeDelegateLoading)
                     {
-                        startFinalizeAddDelegateLoading()
+                        startFinalizeUpdateStorageLoading()
                     }
                     else
                     {
@@ -361,17 +361,9 @@ class ScriptFragment : Fragment()
         }
     }
 
-    private fun isEditMode():Boolean
-    {
-        return mEditMode
-    }
-
     private fun startStorageInfoLoading()
     {
         transferLoading(true)
-
-        //putFeesToNegative()
-        //putConfirmEditionButtonToNull()
 
         // validatePay cannot be valid if there is no fees
         validateConfirmEditionButton(false)
@@ -394,7 +386,7 @@ class ScriptFragment : Fragment()
         startPostRequestLoadInitUpdateStorage()
     }
 
-    private fun startFinalizeAddDelegateLoading()
+    private fun startFinalizeUpdateStorageLoading()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
@@ -560,11 +552,8 @@ class ScriptFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isAddButtonValid() && mDelegatePayload != null && mUpdateStorageAddress != null && mDelegateFees != null)
+        if (isUpdateButtonValid() && mUpdateStoragePayload != null && mUpdateStorageAddress != null && mUpdateStorageFees != -1L)
         {
-            //val pkhSrc = mnemonicsData.pkh
-            //val pkhDst = mDstAccount?.pubKeyHash
-
             val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
@@ -572,13 +561,13 @@ class ScriptFragment : Fragment()
             postParams.put("src", pkh())
             postParams.put("src_pk", pk)
             postParams.put("delegate", mUpdateStorageAddress)
-            postParams.put("fee", mDelegateFees)
+            postParams.put("fee", mUpdateStorageFees)
 
-            if (isChangeDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (!isChangeDelegatePayloadValid(mUpdateStoragePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
-                val byteArrayThree = mDelegatePayload!!.hexToByteArray()
+                val byteArrayThree = mUpdateStoragePayload!!.hexToByteArray()
 
                 val xLen = zeroThree.size
                 val yLen = byteArrayThree.size
@@ -677,7 +666,7 @@ class ScriptFragment : Fragment()
 
     private fun onInitDelegateLoadComplete(error:VolleyError?)
     {
-        mInitDelegateLoading = false
+        mInitUpdateStorageLoading = false
 
         if (error != null || mClickCalculate)
         {
@@ -685,7 +674,7 @@ class ScriptFragment : Fragment()
             transferLoading(false)
             cancelRequests(true)
 
-            mDelegatePayload = null
+            mUpdateStoragePayload = null
 
             storage_fee_edittext.isEnabled = true
             storage_fee_edittext.isFocusable = false
@@ -751,15 +740,15 @@ class ScriptFragment : Fragment()
             //TODO check if the JSON is fine then launch the 2nd request
             if (activity != null)
             {
-                mDelegatePayload = answer.getString("result")
-                mDelegateFees = answer.getLong("total_fee")
+                mUpdateStoragePayload = answer.getString("result")
+                mUpdateStorageFees = answer.getLong("total_fee")
 
                 // we use this call to ask for payload and fees
-                if (mDelegatePayload != null && mDelegateFees != -1L && activity != null)
+                if (mUpdateStoragePayload != null && mUpdateStorageFees != -1L && activity != null)
                 {
                     onInitDelegateLoadComplete(null)
 
-                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
+                    val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
                     storage_fee_edittext?.setText(feeInTez.toString())
 
                     validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
@@ -792,7 +781,7 @@ class ScriptFragment : Fragment()
 
                 mClickCalculate = true
                 //Log.i("mTransferId", ""+mTransferId)
-                //Log.i("mDelegatePayload", ""+mDelegatePayload)
+                //Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
             }
         })
         {
@@ -808,7 +797,7 @@ class ScriptFragment : Fragment()
         cancelRequests(true)
 
         jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
-        mInitDelegateLoading = true
+        mInitUpdateStorageLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
@@ -818,10 +807,14 @@ class ScriptFragment : Fragment()
 
         if (loading)
         {
+            //update_storage_button_layout.visibility = View.GONE
+            //empty.visibility = View.VISIBLE
             nav_progress?.visibility = View.VISIBLE
         }
         else
         {
+            //update_storage_button_layout.visibility = View.VISIBLE
+            //empty.visibility = View.GONE
             nav_progress?.visibility = View.GONE
         }
     }
@@ -834,9 +827,9 @@ class ScriptFragment : Fragment()
         storage_fee_edittext?.isEnabled = false
         storage_fee_edittext?.hint = getString(R.string.neutral)
 
-        mDelegateFees = -1
+        mUpdateStorageFees = -1
 
-        mDelegatePayload = null
+        mUpdateStoragePayload = null
     }
 
     private fun showSnackBar(error:VolleyError?, message:String?)
@@ -998,13 +991,13 @@ class ScriptFragment : Fragment()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mDelegateFees = longTransferFee.toLong()
+                    mUpdateStorageFees = longTransferFee.toLong()
                     return true
                 }
             }
             catch (e: NumberFormatException)
             {
-                mDelegateFees = -1
+                mUpdateStorageFees = -1
                 return false
             }
         }
@@ -1018,9 +1011,9 @@ class ScriptFragment : Fragment()
         this.putSpendingLimitInRed(true)
     }
 
-    fun isAddButtonValid(): Boolean
+    fun isUpdateButtonValid(): Boolean
     {
-        return mDelegatePayload != null
+        return mUpdateStoragePayload != null
                 && isDelegateFeeValid()
                 && isInputDataValid()
     }
@@ -1113,7 +1106,7 @@ class ScriptFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeAddDelegateLoading()
+            startFinalizeUpdateStorageLoading()
         }
         dialog.passwordVerificationListener =
                 {
@@ -1162,7 +1155,7 @@ class ScriptFragment : Fragment()
     {
         if (EncryptionServices(activity!!).validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeAddDelegateLoading()
+            startFinalizeUpdateStorageLoading()
         }
         else
         {
@@ -1181,7 +1174,7 @@ class ScriptFragment : Fragment()
 
             if (resetBooleans)
             {
-                mInitDelegateLoading = false
+                mInitUpdateStorageLoading = false
                 mFinalizeDelegateLoading = false
                 mStorageInfoLoading = false
             }
@@ -1192,16 +1185,16 @@ class ScriptFragment : Fragment()
     {
         super.onSaveInstanceState(outState)
 
-        outState.putBoolean(UPDATE_STORAGE_INIT_TAG, mInitDelegateLoading)
+        outState.putBoolean(UPDATE_STORAGE_INIT_TAG, mInitUpdateStorageLoading)
         outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
 
         outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
 
-        outState.putString(DELEGATE_PAYLOAD_KEY, mDelegatePayload)
+        outState.putString(DELEGATE_PAYLOAD_KEY, mUpdateStoragePayload)
 
         outState.putString(DELEGATE_TEZOS_ADDRESS_KEY, mUpdateStorageAddress)
 
-        outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
+        outState.putLong(DELEGATE_FEE_KEY, mUpdateStorageFees)
 
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
 
@@ -1213,7 +1206,6 @@ class ScriptFragment : Fragment()
 
         outState.putBoolean(EDIT_MODE_KEY, mEditMode)
     }
-
 
     private fun mutezToTez(mutez:String):String
     {

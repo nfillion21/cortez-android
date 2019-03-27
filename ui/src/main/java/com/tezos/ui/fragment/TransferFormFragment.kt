@@ -294,9 +294,6 @@ class TransferFormFragment : Fragment()
         val mnemonics = EncryptionServices(activity!!).decrypt(seed.mnemonics, "not useful for marshmallow")
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
-        //val pkhSrc = mnemonicsData.pkh
-        //val pkhDst = mDstAccount?.pubKeyHash
-
         var postParams = JSONObject()
         postParams.put("src", mSrcAccount)
         postParams.put("src_pk", pk)
@@ -306,9 +303,6 @@ class TransferFormFragment : Fragment()
         var dstObject = JSONObject()
         dstObject.put("dst", mDstAccount)
         dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
-
-        //we don't need fees to forge
-        //dstObject.put("fee", fee.toLong().toString())
 
         dstObjects.put(dstObject)
 
