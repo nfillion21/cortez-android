@@ -91,7 +91,6 @@
                     android:drawablePadding="@dimen/spacing_double"
                     android:maxLength="4"
                     android:maxLines="1"
-                    android:enabled="false"
                     android:hint="@string/neutral"
                     android:singleLine="true"
                     android:textColorHint="@color/tz_placeholder"

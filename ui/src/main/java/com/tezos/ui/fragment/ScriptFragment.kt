@@ -175,7 +175,7 @@ class ScriptFragment : Fragment()
         }
 
         daily_spending_limit_edittext.addTextChangedListener(GenericTextWatcher(daily_spending_limit_edittext))
-        daily_spending_limit_edittext.onFocusChangeListener = focusChangeListener()
+        //daily_spending_limit_edittext.onFocusChangeListener = focusChangeListener()
 
         if (savedInstanceState != null)
         {
@@ -263,6 +263,7 @@ class ScriptFragment : Fragment()
         }
     }
 
+    /*
     private fun focusChangeListener(): View.OnFocusChangeListener
     {
         return View.OnFocusChangeListener { v, hasFocus ->
@@ -275,6 +276,7 @@ class ScriptFragment : Fragment()
             }
         }
     }
+    */
 
     private fun pkh():String?
     {
@@ -314,8 +316,10 @@ class ScriptFragment : Fragment()
         }
         else
         {
+            validateConfirmEditionButton(false)
             cancelRequests(true)
             transferLoading(false)
+            putFeesToNegative()
 
             update_storage_button_relative_layout.visibility = View.GONE
 
