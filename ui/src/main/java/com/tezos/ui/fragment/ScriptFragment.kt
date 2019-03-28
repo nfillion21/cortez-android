@@ -46,6 +46,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
@@ -240,15 +241,19 @@ class ScriptFragment : Fragment()
     {
         super.onResume()
 
-        putEverythingInRed()
-
-        if (isDelegateFeeValid())
+        if (mEditMode)
         {
-            if (isInputDataValid())
+            putEverythingInRed()
+
+            if (isDelegateFeeValid())
             {
-                validateConfirmEditionButton(true)
+                if (isInputDataValid())
+                {
+                    validateConfirmEditionButton(true)
+                }
             }
         }
+
 
         if (!mWalletEnabled)
         {
@@ -300,12 +305,18 @@ class ScriptFragment : Fragment()
             gas_layout.visibility = View.VISIBLE
 
             daily_spending_limit_edittext.isEnabled = true
+            daily_spending_limit_edittext.setText("")
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(daily_spending_limit_edittext, InputMethodManager.SHOW_IMPLICIT)
 
             fab_edit_storage.hide()
             fab_undo_storage.show()
         }
         else
         {
+            cancelRequests(true)
+            transferLoading(false)
+
             update_storage_button_relative_layout.visibility = View.GONE
 
             gas_textview.visibility = View.GONE
@@ -337,6 +348,7 @@ class ScriptFragment : Fragment()
     private fun animateFabEditMode(editMode:Boolean)
     {
         mEditMode = editMode
+
         if (editMode)
         {
             val textViewAnimator = ObjectAnimator.ofFloat(fab_edit_storage, View.SCALE_X, 0f)
@@ -920,7 +932,7 @@ class ScriptFragment : Fragment()
             if (mEditMode)
             {
                 val i = v.id
-                if (i == R.id.daily_spending_limit_edittext && !isSpendingLimitAmountEquals(editable))
+                if (i == R.id.daily_spending_limit_edittext && isSpendingLimitAmountDifferent(editable))
                 {
                     putSpendingLimitInRed(false)
 
@@ -950,16 +962,16 @@ class ScriptFragment : Fragment()
         }
     }
 
-    private fun isSpendingLimitAmountEquals(editable: Editable):Boolean
+    private fun isSpendingLimitAmountDifferent(editable: Editable):Boolean
     {
-        val isSpendingAmountEquals = false
+        val isSpendingAmountDifferent = false
 
-        if (editable != null && !TextUtils.isEmpty(editable))
+        if (!TextUtils.isEmpty(editable))
         {
             try
             {
                 val amount = editable.toString().toLong()
-                if (amount != -1L && amount == mSpendingLimitAmount)
+                if (amount != -1L && amount != mSpendingLimitAmount)
                 {
                     return true
                 }
@@ -969,7 +981,7 @@ class ScriptFragment : Fragment()
                 return false
             }
         }
-        return isSpendingAmountEquals
+        return isSpendingAmountDifferent
     }
 
     fun isInputDataValid(): Boolean
@@ -1026,7 +1038,7 @@ class ScriptFragment : Fragment()
 
     private fun putEverythingInRed()
     {
-        //this.putTzAddressInRed(true)
+        this.putTzAddressInRed(true)
         this.putSpendingLimitInRed(true)
     }
 
@@ -1037,25 +1049,23 @@ class ScriptFragment : Fragment()
                 && isInputDataValid()
     }
 
-    /*
     private fun putTzAddressInRed(red: Boolean)
     {
         val color: Int
 
         val tzAddressValid = isP256AddressValid()
 
-        if (red && !tzAddressValid)
+        color = if (red && !tzAddressValid)
         {
-            color = R.color.tz_error
+            R.color.tz_error
         }
         else
         {
-            color = R.color.tz_accent
+            R.color.tz_accent
         }
 
         public_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
-    */
 
     private fun putSpendingLimitInRed(red: Boolean)
     {
