@@ -670,4 +670,27 @@
 
         ]]>
     </string>
+    <string name="transfer_args_none" translatable="false">
+        <![CDATA[
+       { "prim": "None"}
+        ]]>
+    </string>
+    <string name="spending_tez" translatable="false">
+        <![CDATA[
+    { "prim": "Some",
+    "args":
+    [ { "prim": "Right",
+    "args":
+    [ { "prim": "Pair",
+    "args":
+    [ [ { "prim": "Pair",
+    "args":
+    [ { "int": "80" },
+    { "string":
+    "tz1gjaF81ZRRvdzjobyfVNsAeSC6PScjfQwN" } ] } ],
+    { "string":
+    "%1$s" } ] } ] } ] }
+    ]]>
+</string>
+
 </resources>

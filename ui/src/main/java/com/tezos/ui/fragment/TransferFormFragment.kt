@@ -304,6 +304,8 @@ class TransferFormFragment : Fragment()
         dstObject.put("dst", mDstAccount)
         dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
 
+        //TODO we need to put a parameter 
+        //dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
         dstObjects.put(dstObject)
 
         postParams.put("dsts", dstObjects)
