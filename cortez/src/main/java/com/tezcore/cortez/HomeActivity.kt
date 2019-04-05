@@ -31,6 +31,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.support.design.widget.Snackbar
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
@@ -42,12 +44,12 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.ViewGroup
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezcore.ui.activity.DelegateActivity
 import com.tezos.android.R
+import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
@@ -55,7 +57,14 @@ import com.tezos.ui.activity.*
 import com.tezos.ui.authentication.ContractSelectorFragment
 import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
+import com.tezos.ui.utils.hexToByteArray
 import kotlinx.android.synthetic.main.activity_home.*
+import java.math.BigInteger
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.Signature
+import java.security.interfaces.ECPublicKey
+import java.security.spec.ECGenParameterSpec
 
 
 class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, ContractsFragment.OnDelegateAddressSelectedListener, ContractSelectorFragment.OnContractSelectorListener
@@ -207,6 +216,137 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
 
         initActionBar(mTezosTheme)
+
+        //CryptoUtils.GeneratePublicKey()
+    }
+
+    private fun p256()
+    {
+        var keyPairGenerator = KeyPairGenerator.getInstance(
+                KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore")
+        keyPairGenerator.initialize(
+                KeyGenParameterSpec.Builder(
+                        "key1",
+                KeyProperties.PURPOSE_SIGN)
+                .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+                .setDigests(KeyProperties.DIGEST_SHA256)
+                        //KeyProperties.DIGEST_SHA384,
+                        //KeyProperties.DIGEST_SHA512)
+                // Only permit the private key to be used if the user authenticated
+                // within the last five minutes.
+                //.setUserAuthenticationRequired(true)
+                //.setUserAuthenticationValidityDurationSeconds(5 * 60)
+                .build())
+        var keyPair = keyPairGenerator.generateKeyPair()
+        var signature = Signature.getInstance("SHA256withECDSA")
+        signature.initSign(keyPair.private)
+
+
+        // The key pair can also be obtained from the Android Keystore any time as follows:
+        var keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null)
+        var privateKey = keyStore.getKey("key1", null)
+        //var privateKey = ((KeyStore.PrivateKeyEntry) entry).getPrivateKey()
+
+        var publicKey = keyStore.getCertificate("key1").publicKey// as ECPublicKey
+        //var publicKey2 = keyStore.getCertificate("key1").publicKey
+
+        var ecKey = publicKey as ECPublicKey
+
+        var x = ecKey.w.affineX.toByteArray()
+        //byte[] array = bigInteger.toByteArray();
+        if (x[0].toInt() == 0)
+        {
+            val tmp = ByteArray(x.size - 1)
+            System.arraycopy(x, 1, tmp, 0, tmp.size)
+            x = tmp
+        }
+
+
+        var y = ecKey.w.affineY
+
+        var yEvenOdd = if (y.rem(BigInteger.valueOf(2L)) == BigInteger.ZERO)
+        {
+            "0x02".hexToByteArray()
+        }
+        else
+        {
+            "0x03".hexToByteArray()
+        }
+
+
+        val xLen = x.size
+
+        val yLen = yEvenOdd.size
+        val result = ByteArray(yLen + xLen)
+
+        System.arraycopy(yEvenOdd, 0, result, 0, yLen)
+        System.arraycopy(x, 0, result, yLen, xLen)
+
+
+        //var ecPointX = ecKey.w.affineX.toByteArray()
+
+        //val publicKeyLength = (extended.size - 1) / 2 * 8
+
+        val tz3 = CryptoUtils.generatePkhTz3(result)
+        val p2pk = CryptoUtils.generateP2Pk(result)
+        val tz34 = CryptoUtils.generatePkhTz3(result)
+
+
+        //val tz3 = CryptoUtils.generatePkh(x)
+        //val tz32 = CryptoUtils.generatePkh(result)
+
+        //var privateKey2 = privateKey.toString()
+        //var publicKey2 = publicKey.toString()
+        //var publicKey3 = publicKey.toString()
+
+    }
+
+    private fun verifySig(data:ByteArray, signature:ByteArray)
+    {
+        /*
+  * Verify a signature previously made by a PrivateKey in our
+  * KeyStore. This uses the X.509 certificate attached to our
+  * private key in the KeyStore to validate a previously
+  * generated signature.
+  */
+        val ks = KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+        }
+        val entry = ks.getEntry("key1", null) as? KeyStore.PrivateKeyEntry
+        if (entry != null)
+        {
+            val valid: Boolean = Signature.getInstance("SHA256withECDSA").run {
+                initVerify(entry.certificate)
+                update(data)
+                verify(signature)
+            }
+
+            val validTest = valid
+            //TODO test valid
+        }
+    }
+
+    private fun signData(data:ByteArray):ByteArray
+    {
+        /*
+        * Use a PrivateKey in the KeyStore to create a signature over
+        * some data.
+        */
+
+        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+        }
+        val entry: KeyStore.Entry = ks.getEntry("key1", null)
+        if (entry is KeyStore.PrivateKeyEntry)
+        {
+            return Signature.getInstance("SHA256withECDSA").run {
+                initSign(entry.privateKey)
+                update(data)
+                sign()
+            }
+        }
+        return ByteArray(0)
     }
 
     /**
@@ -351,6 +491,9 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
                         showSnackBar(getString(R.string.wallet_successfully_restored), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+
+
+                        p256()
                     }
                 }
             }
