@@ -614,9 +614,9 @@ class TransferFormFragment : Fragment()
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
                 val bytes = KeyPair.b2b(result)
-                var signature = EncryptionServices(activity!!).signWithAndroidAsymmetricKey(bytes)
+                var signature = EncryptionServices(activity!!).sign(bytes)
 
-                var compressedSignature:ByteArray = ByteArray(64)
+                var compressedSignature = ByteArray(64)
 
                 if (signature != null)
                 {

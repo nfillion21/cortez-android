@@ -131,7 +131,11 @@ class EncryptionServices(context: Context) {
         keyStoreWrapper.createAndroidKeyStoreAsymmetricKey(SPENDING_KEY)
     }
 
-    fun signWithAndroidAsymmetricKey(data: ByteArray): ByteArray?
+    fun sign(data: ByteArray): ByteArray? {
+        return signWithAndroidAsymmetricKey(data)
+    }
+
+    private fun signWithAndroidAsymmetricKey(data: ByteArray): ByteArray?
     {
         val keyPair = keyStoreWrapper.getAndroidKeyStoreAsymmetricKeyPair(SPENDING_KEY)
         if (keyPair != null)

@@ -330,6 +330,10 @@ class AddLimitsActivity : BaseSecureActivity()
 
                             setResult(R.id.add_address_succeed, null)
                             finish()
+
+                            //TODO create the spending key
+                            //EncryptionServices.createAndroidAsymmetricKey
+
                         },
                         Response.ErrorListener
                         {
