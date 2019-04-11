@@ -252,6 +252,29 @@ public class CryptoUtils
         return p2pkString;
     }
 
+    public static String generateP2Sig(byte[] signature)
+    {
+        // then we got the KeyPair from the seed, thanks to sodium.
+
+        // These are our prefixes
+        byte[] p2pkPrefix = {(byte) 54, (byte) 240, (byte) 44, (byte) 52};
+
+        // Create Tezos PK.
+        byte[] prefixedPubKey = new byte[signature.length + p2pkPrefix.length];
+
+        System.arraycopy(p2pkPrefix, 0, prefixedPubKey, 0, p2pkPrefix.length);
+        System.arraycopy(signature, 0, prefixedPubKey, p2pkPrefix.length, signature.length);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
+        byte[] prefixedPubKeyWithChecksum = new byte[signature.length + p2pkPrefix.length*2];
+
+        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, signature.length + p2pkPrefix.length);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, signature.length + p2pkPrefix.length, p2pkPrefix.length);
+
+        String p2pkString = Base58.encode(prefixedPubKeyWithChecksum);
+        return p2pkString;
+    }
+
     public static String generatePk(String mnemonics, String passphrase)
     {
         byte[] src_seed = generateSeed(mnemonics, passphrase);

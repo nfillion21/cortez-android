@@ -65,6 +65,7 @@ import java.security.KeyStore
 import java.security.Signature
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
+import java.util.*
 
 
 class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, ContractsFragment.OnDelegateAddressSelectedListener, ContractSelectorFragment.OnContractSelectorListener
@@ -216,93 +217,36 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
 
         initActionBar(mTezosTheme)
-
-        //CryptoUtils.GeneratePublicKey()
     }
 
     private fun p256()
     {
-        var keyPairGenerator = KeyPairGenerator.getInstance(
-                KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore")
-        keyPairGenerator.initialize(
-                KeyGenParameterSpec.Builder(
-                        "key1",
-                KeyProperties.PURPOSE_SIGN)
-                .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
-                .setDigests(KeyProperties.DIGEST_SHA256)
-                        //KeyProperties.DIGEST_SHA384,
-                        //KeyProperties.DIGEST_SHA512)
-                // Only permit the private key to be used if the user authenticated
-                // within the last five minutes.
-                //.setUserAuthenticationRequired(true)
-                //.setUserAuthenticationValidityDurationSeconds(5 * 60)
-                .build())
-        var keyPair = keyPairGenerator.generateKeyPair()
-        var signature = Signature.getInstance("SHA256withECDSA")
-        signature.initSign(keyPair.private)
+        /*
+         * Generate a new EC key pair entry in the Android Keystore by
+         * using the KeyPairGenerator API. The private key can only be
+         * used for signing or verification and only with SHA-256 or
+         * SHA-512 as the message digest.
+         */
 
-
-        // The key pair can also be obtained from the Android Keystore any time as follows:
-        var keyStore = KeyStore.getInstance("AndroidKeyStore")
-        keyStore.load(null)
-        var privateKey = keyStore.getKey("key1", null)
-        //var privateKey = ((KeyStore.PrivateKeyEntry) entry).getPrivateKey()
-
-        var publicKey = keyStore.getCertificate("key1").publicKey// as ECPublicKey
-        //var publicKey2 = keyStore.getCertificate("key1").publicKey
-
-        var ecKey = publicKey as ECPublicKey
-
-        var x = ecKey.w.affineX.toByteArray()
-        //byte[] array = bigInteger.toByteArray();
-        if (x[0].toInt() == 0)
-        {
-            val tmp = ByteArray(x.size - 1)
-            System.arraycopy(x, 1, tmp, 0, tmp.size)
-            x = tmp
+        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
+                KeyProperties.KEY_ALGORITHM_EC,
+                "AndroidKeyStore"
+        )
+        val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
+                "key1",
+                KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+        ).run {
+            setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+            setDigests(KeyProperties.DIGEST_NONE)
+            build()
         }
 
-
-        var y = ecKey.w.affineY
-
-        var yEvenOdd = if (y.rem(BigInteger.valueOf(2L)) == BigInteger.ZERO)
-        {
-            "0x02".hexToByteArray()
-        }
-        else
-        {
-            "0x03".hexToByteArray()
-        }
-
-
-        val xLen = x.size
-
-        val yLen = yEvenOdd.size
-        val result = ByteArray(yLen + xLen)
-
-        System.arraycopy(yEvenOdd, 0, result, 0, yLen)
-        System.arraycopy(x, 0, result, yLen, xLen)
-
-
-        //var ecPointX = ecKey.w.affineX.toByteArray()
-
-        //val publicKeyLength = (extended.size - 1) / 2 * 8
-
-        val tz3 = CryptoUtils.generatePkhTz3(result)
-        val p2pk = CryptoUtils.generateP2Pk(result)
-        val tz34 = CryptoUtils.generatePkhTz3(result)
-
-
-        //val tz3 = CryptoUtils.generatePkh(x)
-        //val tz32 = CryptoUtils.generatePkh(result)
-
-        //var privateKey2 = privateKey.toString()
-        //var publicKey2 = publicKey.toString()
-        //var publicKey3 = publicKey.toString()
+        kpg.initialize(parameterSpec)
+        kpg.generateKeyPair()
 
     }
 
-    private fun verifySig(data:ByteArray, signature:ByteArray)
+    private fun verifySig(data:ByteArray, signature:ByteArray):Boolean
     {
         /*
   * Verify a signature previously made by a PrivateKey in our
@@ -316,15 +260,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         val entry = ks.getEntry("key1", null) as? KeyStore.PrivateKeyEntry
         if (entry != null)
         {
-            val valid: Boolean = Signature.getInstance("SHA256withECDSA").run {
+            return  Signature.getInstance("SHA256withECDSA").run {
                 initVerify(entry.certificate)
                 update(data)
                 verify(signature)
             }
-
-            val validTest = valid
-            //TODO test valid
         }
+
+        return false
     }
 
     private fun signData(data:ByteArray):ByteArray
@@ -492,7 +435,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     {
                         showSnackBar(getString(R.string.wallet_successfully_restored), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
 
-
+                        //val tz3 = getP256PublicKey()
+                        //val tz4 = getP256PublicKey()
                         p256()
                     }
                 }
@@ -547,6 +491,59 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
             }
         }
+    }
+
+    private fun getP256PublicKey():String
+    {
+        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+        }
+        //val aliases: Enumeration<String> = ks.aliases()
+
+        var ecKey = ks.getCertificate("key1").publicKey as ECPublicKey
+        //var publicKey2 = keyStore.getCertificate("key1").publicKey
+
+        //var ecKey = publicKey as ECPublicKey
+
+        var x = ecKey.w.affineX.toByteArray()
+        //byte[] array = bigInteger.toByteArray();
+        if (x[0].toInt() == 0)
+        {
+            val tmp = ByteArray(x.size - 1)
+            System.arraycopy(x, 1, tmp, 0, tmp.size)
+            x = tmp
+        }
+
+
+        var y = ecKey.w.affineY
+
+        var yEvenOdd = if (y.rem(BigInteger.valueOf(2L)) == BigInteger.ZERO)
+        {
+            "0x02".hexToByteArray()
+        }
+        else
+        {
+            "0x03".hexToByteArray()
+        }
+
+        val xLen = x.size
+
+        val yLen = yEvenOdd.size
+        val result = ByteArray(yLen + xLen)
+
+        System.arraycopy(yEvenOdd, 0, result, 0, yLen)
+        System.arraycopy(x, 0, result, yLen, xLen)
+
+        return CryptoUtils.generatePkhTz3(result)
+        /*
+        val p2pk = CryptoUtils.generateP2Pk(result)
+        val tz34 = CryptoUtils.generatePkhTz3(result)
+
+        val signedData = signData("0x03".hexToByteArray())
+
+        val verified = verifySig("0x03".hexToByteArray(), signedData)
+        val verified2 = verifySig("0x02".hexToByteArray(), signedData)
+        */
     }
 
     override fun showSnackBar(res:String, color:Int, textColor:Int)

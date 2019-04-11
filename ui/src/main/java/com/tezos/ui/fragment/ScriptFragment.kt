@@ -586,7 +586,7 @@ class ScriptFragment : Fragment()
 
         if (isUpdateButtonValid() && mUpdateStoragePayload != null && mUpdateStorageAddress != null && mUpdateStorageFees != -1L)
         {
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -740,7 +740,7 @@ class ScriptFragment : Fragment()
 
         val url = getString(R.string.transfer_forge)
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         var postParams = JSONObject()
@@ -1181,7 +1181,7 @@ class ScriptFragment : Fragment()
     private fun validatePassword(inputtedPassword: String): Boolean
     {
         val storage = Storage(activity!!)
-        return EncryptionServices(activity!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
+        return EncryptionServices(activity!!).decrypt(storage.getPassword()) == inputtedPassword
     }
 
     private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)

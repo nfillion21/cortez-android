@@ -52,23 +52,11 @@ class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String)
     private val keyStore: KeyStore = createAndroidKeyStore()
 
     private val defaultKeyStoreFile = File(context.filesDir, defaultKeyStoreName)
-    private val defaultKeyStore = createDefaultKeyStore()
 
     /**
      * @return symmetric key from Android Key Store or null if any key with given pkh exists
      */
     fun getAndroidKeyStoreSymmetricKey(alias: String): SecretKey? = keyStore.getKey(alias, null) as SecretKey?
-
-    /**
-     * @return symmetric key from Default Key Store or null if any key with given pkh exists
-     */
-    fun getDefaultKeyStoreSymmetricKey(alias: String, keyPassword: String): SecretKey? {
-        return try {
-            defaultKeyStore.getKey(alias, keyPassword.toCharArray()) as SecretKey
-        } catch (e: UnrecoverableKeyException) {
-            null
-        }
-    }
 
     /**
      * @return asymmetric keypair from Android Key Store or null if any key with given pkh exists
@@ -90,14 +78,6 @@ class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String)
     fun removeAndroidKeyStoreKey(alias: String) = keyStore.deleteEntry(alias)
 
     fun containsAlias(alias: String) = keyStore.containsAlias(alias)
-
-    fun createDefaultKeyStoreSymmetricKey(alias: String, password: String) {
-        val key = generateDefaultSymmetricKey()
-        val keyEntry = KeyStore.SecretKeyEntry(key)
-
-        defaultKeyStore.setEntry(alias, keyEntry, KeyStore.PasswordProtection(password.toCharArray()))
-        defaultKeyStore.store(FileOutputStream(defaultKeyStoreFile), password.toCharArray())
-    }
 
     /**
      * Generates symmetric [KeyProperties.KEY_ALGORITHM_AES] key with default [KeyProperties.BLOCK_MODE_CBC] and
@@ -182,17 +162,5 @@ class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String)
         keyStore.load(null)
         return keyStore
     }
-
-    private fun createDefaultKeyStore(): KeyStore {
-        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-
-        if (!defaultKeyStoreFile.exists()) {
-            keyStore.load(null)
-        } else {
-            keyStore.load(FileInputStream(defaultKeyStoreFile), null)
-        }
-        return keyStore
-    }
-
 }
 

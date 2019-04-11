@@ -685,12 +685,29 @@
     "args":
     [ [ { "prim": "Pair",
     "args":
-    [ { "int": "80" },
+    [ { "int": "1000000" },
     { "string":
-    "tz1gjaF81ZRRvdzjobyfVNsAeSC6PScjfQwN" } ] } ],
+    "tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk" } ] } ],
     { "string":
     "%1$s" } ] } ] } ] }
     ]]>
 </string>
+    <string name="spending_tez_signed" translatable="false">
+        <![CDATA[
+    { "data":
+      [ { "prim": "Pair",
+          "args":
+            [ { "int": "1000000" },
+              { "string": "tz3j9xMbZMmNTmYY87eoWe2nudZ4HhVkY2hB" } ] } ],
+    "type":
+      { "prim": "list",
+        "args":
+          [ { "prim": "pair",
+              "args":
+                [ { "prim": "mutez" },
+                  { "prim": "contract", "args": [ { "prim": "unit" } ] } ] } ] }}
+    ]]>
+</string>
+
 
 </resources>

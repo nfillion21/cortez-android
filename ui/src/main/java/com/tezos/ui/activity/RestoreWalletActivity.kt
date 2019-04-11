@@ -123,16 +123,16 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         dialog.show(supportFragmentManager, "Password")
     }
 
-    private fun createSeedData(mnemonics: String, password: String): Storage.MnemonicsData {
-        val encryptedSecret = EncryptionServices(applicationContext).encrypt(mnemonics, password)
+    private fun createSeedData(mnemonics: String): Storage.MnemonicsData {
+        val encryptedSecret = EncryptionServices(applicationContext).encrypt(mnemonics)
 
         val pkh = CryptoUtils.generatePkh(mnemonics, "")
         return Storage.MnemonicsData(pkh, encryptedSecret)
     }
 
-    private fun createKeys(password: String, isFingerprintAllowed: Boolean) {
+    private fun createKeys(isFingerprintAllowed: Boolean) {
         val encryptionService = EncryptionServices(applicationContext)
-        encryptionService.createMasterKey(password)
+        encryptionService.createMasterKey()
 
         if (SystemServices.hasMarshmallow()) {
             if (isFingerprintAllowed && systemServices.hasEnrolledFingerprints()) {
@@ -160,14 +160,14 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
     override fun passwordVerified(mnemonics: String, password: String, fingerprint: Boolean)
     {
         // the password hello is not used in Marshmallow
-        createKeys(password, fingerprint)
+        createKeys(fingerprint)
         with(Storage(this)) {
-            val encryptedPassword = EncryptionServices(applicationContext).encrypt(password, "hello")
+            val encryptedPassword = EncryptionServices(applicationContext).encrypt(password)
 
             savePassword(encryptedPassword)
             saveFingerprintAllowed(fingerprint)
 
-            val seedData = createSeedData(mnemonics, password)
+            val seedData = createSeedData(mnemonics)
             saveSeed(seedData)
 
             intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))

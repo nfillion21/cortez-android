@@ -64,12 +64,8 @@ class EncryptionServices(context: Context) {
     /**
      * Create and save cryptography key, to protect Secrets with.
      */
-    fun createMasterKey(password: String? = null) {
-        if (SystemServices.hasMarshmallow()) {
-            createAndroidSymmetricKey()
-        } else {
-            createDefaultSymmetricKey(password ?: "")
-        }
+    fun createMasterKey() {
+        createAndroidSymmetricKey()
     }
 
     /**
@@ -82,23 +78,15 @@ class EncryptionServices(context: Context) {
     /**
      * Encrypt user password and Secrets with created master key.
      */
-    fun encrypt(data: String, keyPassword: String? = null): String {
-        return if (SystemServices.hasMarshmallow()) {
-            encryptWithAndroidSymmetricKey(data)
-        } else {
-            encryptWithDefaultSymmetricKey(data, keyPassword ?: "")
-        }
+    fun encrypt(data: String): String {
+        return encryptWithAndroidSymmetricKey(data)
     }
 
     /**
      * Decrypt user password and Secrets with created master key.
      */
-    fun decrypt(data: String, keyPassword: String? = null): String {
-        return if (SystemServices.hasMarshmallow()) {
-            decryptWithAndroidSymmetricKey(data)
-        } else {
-            decryptWithDefaultSymmetricKey(data, keyPassword ?: "")
-        }
+    fun decrypt(data: String): String {
+        return decryptWithAndroidSymmetricKey(data)
     }
 
     private fun createAndroidSymmetricKey() {
@@ -115,21 +103,6 @@ class EncryptionServices(context: Context) {
         return CipherWrapper(CipherWrapper.TRANSFORMATION_SYMMETRIC).decrypt(data, masterKey, true)
     }
 
-    private fun createDefaultSymmetricKey(password: String) {
-        keyStoreWrapper.createDefaultKeyStoreSymmetricKey(MASTER_KEY, password)
-    }
-
-    private fun encryptWithDefaultSymmetricKey(data: String, keyPassword: String): String {
-        val masterKey = keyStoreWrapper.getDefaultKeyStoreSymmetricKey(MASTER_KEY, keyPassword)
-        return CipherWrapper(CipherWrapper.TRANSFORMATION_SYMMETRIC).encrypt(data, masterKey, true)
-    }
-
-    private fun decryptWithDefaultSymmetricKey(data: String, keyPassword: String): String {
-        val masterKey = keyStoreWrapper.getDefaultKeyStoreSymmetricKey(MASTER_KEY, keyPassword)
-        return masterKey?.let { CipherWrapper(CipherWrapper.TRANSFORMATION_SYMMETRIC).decrypt(data, masterKey, true) } ?: ""
-    }
-
-
     /*
      * Fingerprint Stage
      */
@@ -138,21 +111,17 @@ class EncryptionServices(context: Context) {
      * Create and save cryptography key, that will be used for fingerprint authentication.
      */
     fun createFingerprintKey() {
-        if (SystemServices.hasMarshmallow()) {
-            keyStoreWrapper.createAndroidKeyStoreSymmetricKey(FINGERPRINT_KEY,
-                    userAuthenticationRequired = true,
-                    invalidatedByBiometricEnrollment = true,
-                    userAuthenticationValidWhileOnBody = false)
-        }
+        keyStoreWrapper.createAndroidKeyStoreSymmetricKey(FINGERPRINT_KEY,
+                userAuthenticationRequired = true,
+                invalidatedByBiometricEnrollment = true,
+                userAuthenticationValidWhileOnBody = false)
     }
 
     /**
      * Remove fingerprint authentication cryptographic key.
      */
     fun removeFingerprintKey() {
-        if (SystemServices.hasMarshmallow()) {
-            keyStoreWrapper.removeAndroidKeyStoreKey(FINGERPRINT_KEY)
-        }
+        keyStoreWrapper.removeAndroidKeyStoreKey(FINGERPRINT_KEY)
     }
 
     /**
@@ -197,7 +166,6 @@ class EncryptionServices(context: Context) {
         }
     }
 
-
     /*
      * Confirm Credential Stage
      */
@@ -206,12 +174,10 @@ class EncryptionServices(context: Context) {
      * Create and save cryptography key, that will be used for confirm credentials authentication.
      */
     fun createConfirmCredentialsKey() {
-        if (SystemServices.hasMarshmallow()) {
-            keyStoreWrapper.createAndroidKeyStoreSymmetricKey(
-                    CONFIRM_CREDENTIALS_KEY,
-                    userAuthenticationRequired = true,
-                    userAuthenticationValidityDurationSeconds = CONFIRM_CREDENTIALS_VALIDATION_DELAY)
-        }
+        keyStoreWrapper.createAndroidKeyStoreSymmetricKey(
+                CONFIRM_CREDENTIALS_KEY,
+                userAuthenticationRequired = true,
+                userAuthenticationValidityDurationSeconds = CONFIRM_CREDENTIALS_VALIDATION_DELAY)
     }
 
     /**
@@ -228,11 +194,8 @@ class EncryptionServices(context: Context) {
     /**
      * @return true if confirm credential authentication is not required.
      */
-    fun validateConfirmCredentialsAuthentication(): Boolean {
-        if (!SystemServices.hasMarshmallow()) {
-            return true
-        }
-
+    fun validateConfirmCredentialsAuthentication(): Boolean
+    {
         val symmetricKey = keyStoreWrapper.getAndroidKeyStoreSymmetricKey(CONFIRM_CREDENTIALS_KEY)
         val cipherWrapper = CipherWrapper(CipherWrapper.TRANSFORMATION_SYMMETRIC)
 
@@ -254,5 +217,4 @@ class EncryptionServices(context: Context) {
             throw e
         }
     }
-
 }

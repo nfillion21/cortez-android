@@ -273,7 +273,7 @@ class AddLimitsActivity : BaseSecureActivity()
             val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
 
-            val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -438,7 +438,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
         val url = getString(R.string.originate_account_url)
 
-        val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         val pkhSrc = mnemonicsData.pkh
@@ -1000,7 +1000,7 @@ class AddLimitsActivity : BaseSecureActivity()
     private fun validatePassword(inputtedPassword: String): Boolean
     {
         val storage = Storage(this)
-        return EncryptionServices(this).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
+        return EncryptionServices(this).decrypt(storage.getPassword()) == inputtedPassword
     }
 
     private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
