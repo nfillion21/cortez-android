@@ -30,19 +30,12 @@ package com.tezos.ui.encryption
 import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
-import android.security.KeyPairGeneratorSpec
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import com.tezos.ui.authentication.SystemServices
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.math.BigInteger
 import java.security.*
-import java.util.*
+import java.security.spec.ECGenParameterSpec
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import javax.security.auth.x500.X500Principal
 
 /**
  * This class wraps [KeyStore] class apis with some additional possibilities.
@@ -50,8 +43,6 @@ import javax.security.auth.x500.X500Principal
 class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String) {
 
     private val keyStore: KeyStore = createAndroidKeyStore()
-
-    private val defaultKeyStoreFile = File(context.filesDir, defaultKeyStoreName)
 
     /**
      * @return symmetric key from Android Key Store or null if any key with given pkh exists
@@ -61,16 +52,23 @@ class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String)
     /**
      * @return asymmetric keypair from Android Key Store or null if any key with given pkh exists
      */
-    fun getAndroidKeyStoreAsymmetricKeyPair(alias: String): KeyPair? {
+
+    fun getAndroidKeyStoreAsymmetricKeyPair(alias: String): KeyPair?
+    {
         val privateKey = keyStore.getKey(alias, null) as PrivateKey?
         val publicKey = keyStore.getCertificate(alias)?.publicKey
 
-        return if (privateKey != null && publicKey != null) {
+        return if (privateKey != null && publicKey != null)
+        {
             KeyPair(publicKey, privateKey)
-        } else {
+        }
+        else
+        {
             null
         }
     }
+
+    //fun getAndroidKeyStoreAsymmetricPublicKey(alias: String):PublicKey? = keyStore.getCertificate(alias)?.publicKey
 
     /**
      * Remove key with given pkh from Android Key Store
@@ -78,15 +76,6 @@ class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String)
     fun removeAndroidKeyStoreKey(alias: String) = keyStore.deleteEntry(alias)
 
     fun containsAlias(alias: String) = keyStore.containsAlias(alias)
-
-    /**
-     * Generates symmetric [KeyProperties.KEY_ALGORITHM_AES] key with default [KeyProperties.BLOCK_MODE_CBC] and
-     * [KeyProperties.ENCRYPTION_PADDING_PKCS7] using default provider.
-     */
-    fun generateDefaultSymmetricKey(): SecretKey {
-        val keyGenerator = KeyGenerator.getInstance("AES")
-        return keyGenerator.generateKey()
-    }
 
     /**
      * Creates symmetric [KeyProperties.KEY_ALGORITHM_AES] key with default [KeyProperties.BLOCK_MODE_CBC] and
@@ -117,50 +106,27 @@ class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String)
         return keyGenerator.generateKey()
     }
 
-    /**
-     * Creates asymmetric RSA key with default [KeyProperties.BLOCK_MODE_ECB] and
-     * [KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1] and saves it to Android Key Store.
-     */
-    @TargetApi(Build.VERSION_CODES.M)
-    fun createAndroidKeyStoreAsymmetricKey(alias: String): KeyPair {
-        val generator = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore")
-
-        if (SystemServices.hasMarshmallow()) {
-            initGeneratorWithKeyGenParameterSpec(generator, alias)
-        } else {
-            initGeneratorWithKeyPairGeneratorSpec(generator, alias)
-        }
+    fun createAndroidKeyStoreAsymmetricKey(alias: String): KeyPair
+    {
+        val generator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore")
+        initGeneratorWithKeyGenParameterSpec(generator, alias)
 
         return generator.generateKeyPair()
     }
 
-    private fun initGeneratorWithKeyPairGeneratorSpec(generator: KeyPairGenerator, alias: String) {
-        val startDate = Calendar.getInstance()
-        val endDate = Calendar.getInstance()
-        endDate.add(Calendar.YEAR, 20)
-
-        val builder = KeyPairGeneratorSpec.Builder(context)
-                .setAlias(alias)
-                .setSerialNumber(BigInteger.ONE)
-                .setSubject(X500Principal("CN=${alias} CA Certificate"))
-                .setStartDate(startDate.time)
-                .setEndDate(endDate.time)
-
+    private fun initGeneratorWithKeyGenParameterSpec(generator: KeyPairGenerator, alias: String)
+    {
+        val builder = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_SIGN)
+                .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+                .setDigests(KeyProperties.DIGEST_NONE)
         generator.initialize(builder.build())
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    private fun initGeneratorWithKeyGenParameterSpec(generator: KeyPairGenerator, alias: String) {
-        val builder = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-        generator.initialize(builder.build())
-    }
-
-    private fun createAndroidKeyStore(): KeyStore {
-        val keyStore = KeyStore.getInstance("AndroidKeyStore")
-        keyStore.load(null)
-        return keyStore
+    private fun createAndroidKeyStore(): KeyStore
+    {
+        return KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+        }
     }
 }
 

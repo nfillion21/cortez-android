@@ -219,33 +219,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         initActionBar(mTezosTheme)
     }
 
-    private fun p256()
-    {
-        /*
-         * Generate a new EC key pair entry in the Android Keystore by
-         * using the KeyPairGenerator API. The private key can only be
-         * used for signing or verification and only with SHA-256 or
-         * SHA-512 as the message digest.
-         */
-
-        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
-                KeyProperties.KEY_ALGORITHM_EC,
-                "AndroidKeyStore"
-        )
-        val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
-                "key1",
-                KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
-        ).run {
-            setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
-            setDigests(KeyProperties.DIGEST_NONE)
-            build()
-        }
-
-        kpg.initialize(parameterSpec)
-        kpg.generateKeyPair()
-
-    }
-
     private fun verifySig(data:ByteArray, signature:ByteArray):Boolean
     {
         /*
@@ -434,10 +407,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
                     {
                         showSnackBar(getString(R.string.wallet_successfully_restored), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
-
-                        //val tz3 = getP256PublicKey()
-                        //val tz4 = getP256PublicKey()
-                        p256()
                     }
                 }
             }

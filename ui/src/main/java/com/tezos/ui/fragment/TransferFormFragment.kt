@@ -533,9 +533,6 @@ class TransferFormFragment : Fragment()
         //val aliases: Enumeration<String> = ks.aliases()
 
         var ecKey = ks.getCertificate("key1").publicKey as ECPublicKey
-        //var publicKey2 = keyStore.getCertificate("key1").publicKey
-
-        //var ecKey = publicKey as ECPublicKey
 
         var x = ecKey.w.affineX.toByteArray()
         //byte[] array = bigInteger.toByteArray();
@@ -567,17 +564,7 @@ class TransferFormFragment : Fragment()
         System.arraycopy(x, 0, result, yLen, xLen)
 
         return CryptoUtils.generatePkhTz3(result)
-        /*
-        val p2pk = CryptoUtils.generateP2Pk(result)
-        val tz34 = CryptoUtils.generatePkhTz3(result)
-
-        val signedData = signData("0x03".hexToByteArray())
-
-        val verified = verifySig("0x03".hexToByteArray(), signedData)
-        val verified2 = verifySig("0x02".hexToByteArray(), signedData)
-        */
     }
-
 
     // volley
     private fun startPostRequestLoadFinalizeTransfer()
@@ -626,21 +613,15 @@ class TransferFormFragment : Fragment()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
-                /*
-                val sk = CryptoUtils.generateSk(mnemonics, "")
-                val signature = KeyPair.sign(sk, result)
-                */
+                val bytes = KeyPair.b2b(result)
+                var signature = EncryptionServices(activity!!).signWithAndroidAsymmetricKey(bytes)
 
-                //*
-                //val signature = signData(result)
+                var compressedSignature:ByteArray = ByteArray(64)
 
-                val signature = signData(result)
-                //val signature = signData()
-
-                //val signVerified = verifySig("0x03".hexToByteArray(), signature)
-
-
-                val compressedSignature = compressFormat(signature)
+                if (signature != null)
+                {
+                    compressedSignature = compressFormat(signature)
+                }
 
                 //val signVerified2 = verifySig("0x03".hexToByteArray(), compressedSignature)
 
@@ -651,18 +632,6 @@ class TransferFormFragment : Fragment()
                     val bytePos = Utils.byteToUnsignedInt(compressedSignature[i])
                     array.add(bytePos)
                 }
-
-                /*
-                for (b in compressedSignature)
-                {
-                    val bytePos = Utils.byteToUnsignedInt(compressedSignature[b])
-                    array.add(bytePos)
-                }
-                */
-
-                //*/
-
-                //TODO verify signature
 
                 val pLen = byteArrayThree.size
                 val sLen = compressedSignature.size
