@@ -47,7 +47,7 @@ open class BaseSecureActivity : AppCompatActivity() {
         val archLifecycleApp = application as ArchLifecycleApp
         val isStarted = archLifecycleApp.isStarted
 
-        val encryptionServices = EncryptionServices(applicationContext)
+        val encryptionServices = EncryptionServices()
         if (isStarted) {
             if (!isAuthenticating && encryptionServices.containsConfirmCredentialsKey() && !encryptionServices.validateConfirmCredentialsAuthentication()) {
                 isAuthenticating = true

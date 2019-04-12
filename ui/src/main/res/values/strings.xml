@@ -685,11 +685,11 @@
     "args":
     [ [ { "prim": "Pair",
     "args":
-    [ { "int": "1000000" },
+    [ { "int": "%1$s" },
     { "string":
-    "tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk" } ] } ],
+    "%2$s" } ] } ],
     { "string":
-    "%1$s" } ] } ] } ] }
+    "%3$s" } ] } ] } ] }
     ]]>
 </string>
     <string name="spending_tez_signed" translatable="false">

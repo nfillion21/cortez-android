@@ -152,7 +152,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), settingsList);
         mList.setAdapter(adapter);
 
-        mList.setItemChecked(0, new EncryptionServices(getActivity()).containsConfirmCredentialsKey());
+        mList.setItemChecked(0, new EncryptionServices().containsConfirmCredentialsKey());
 
         mList.setItemChecked(1, mSystemInformationsCallback.isFingerprintAllowed());
 
@@ -307,7 +307,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         {
             case 0:
             {
-                EncryptionServices encryptionServices = new EncryptionServices(getActivity());
+                EncryptionServices encryptionServices = new EncryptionServices();
                 if (checkedTextView.isChecked())
                 {
                     encryptionServices.createConfirmCredentialsKey();

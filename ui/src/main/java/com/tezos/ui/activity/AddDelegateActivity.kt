@@ -244,7 +244,7 @@ class AddDelegateActivity : BaseSecureActivity()
             val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
 
-            val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics)
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -415,7 +415,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val url = getString(R.string.originate_account_url)
 
-        val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics)
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         val pkhSrc = mnemonicsData.pkh
@@ -916,7 +916,7 @@ class AddDelegateActivity : BaseSecureActivity()
         val dialog = AuthenticationDialog()
         if (isFingerprintAllowed() && hasEnrolledFingerprints())
         {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(this).prepareFingerprintCryptoObject()
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
                 validateKeyAuthentication(it)
@@ -967,7 +967,7 @@ class AddDelegateActivity : BaseSecureActivity()
         saveFingerprintAllowed(useInFuture)
         if (useInFuture)
         {
-            EncryptionServices(this).createFingerprintKey()
+            EncryptionServices().createFingerprintKey()
         }
     }
 
@@ -977,12 +977,12 @@ class AddDelegateActivity : BaseSecureActivity()
     private fun validatePassword(inputtedPassword: String): Boolean
     {
         val storage = Storage(this)
-        return EncryptionServices(this).decrypt(storage.getPassword()) == inputtedPassword
+        return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
     }
 
     private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
     {
-        if (EncryptionServices(this).validateFingerprintAuthentication(cryptoObject))
+        if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
             startFinalizeDelegationLoading()
         }

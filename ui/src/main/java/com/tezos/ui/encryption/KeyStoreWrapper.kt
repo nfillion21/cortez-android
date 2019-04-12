@@ -40,7 +40,7 @@ import javax.crypto.SecretKey
 /**
  * This class wraps [KeyStore] class apis with some additional possibilities.
  */
-class KeyStoreWrapper(private val context: Context, defaultKeyStoreName: String) {
+class KeyStoreWrapper {
 
     private val keyStore: KeyStore = createAndroidKeyStore()
 

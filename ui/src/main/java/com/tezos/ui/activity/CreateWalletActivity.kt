@@ -179,7 +179,7 @@ class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreate
     }
 
     private fun createSeedData(mnemonics: String): Storage.MnemonicsData {
-        val encryptedSecret = EncryptionServices(applicationContext).encrypt(mnemonics)
+        val encryptedSecret = EncryptionServices().encrypt(mnemonics)
         //logi("Original mnemonics is: $mnemonics")
         //logi("Saved mnemonics is: $encryptedSecret")
         val pkh = CryptoUtils.generatePkh(mnemonics, "")
@@ -187,7 +187,7 @@ class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreate
     }
 
     private fun createKeys(isFingerprintAllowed: Boolean) {
-        val encryptionService = EncryptionServices(applicationContext)
+        val encryptionService = EncryptionServices()
         encryptionService.createMasterKey()
 
         if (SystemServices.hasMarshmallow()) {
@@ -210,7 +210,7 @@ class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreate
         // the password hello is not used in Marshmallow
         createKeys(fingerprint)
         with(Storage(this)) {
-            val encryptedPassword = EncryptionServices(applicationContext).encrypt(password)
+            val encryptedPassword = EncryptionServices().encrypt(password)
 
             savePassword(encryptedPassword)
             saveFingerprintAllowed(fingerprint)

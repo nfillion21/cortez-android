@@ -4,6 +4,8 @@ import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.utils.Utils
 import org.json.JSONArray
 import org.json.JSONObject
+import java.math.BigInteger
+import java.security.interfaces.ECPublicKey
 
 /*
 (*****************************************************************************)
@@ -705,5 +707,91 @@ private fun addBytesLittleEndian(bytes:ArrayList<Int>):Long
     }
 
     return accum
+}
+
+fun ecKeyFormat(ecKey:ECPublicKey):ByteArray
+{
+    var x = ecKey.w.affineX.toByteArray()
+    if (x[0].toInt() == 0)
+    {
+        val tmp = ByteArray(x.size - 1)
+        System.arraycopy(x, 1, tmp, 0, tmp.size)
+        x = tmp
+    }
+
+    var y = ecKey.w.affineY
+
+    var yEvenOdd = if (y.rem(BigInteger.valueOf(2L)) == BigInteger.ZERO)
+    {
+        "0x02".hexToByteArray()
+    }
+    else
+    {
+        "0x03".hexToByteArray()
+    }
+
+    val xLen = x.size
+
+    val yLen = yEvenOdd.size
+    val result = ByteArray(yLen + xLen)
+
+    System.arraycopy(yEvenOdd, 0, result, 0, yLen)
+    System.arraycopy(x, 0, result, yLen, xLen)
+
+    return result
+}
+
+fun compressFormat(data: ByteArray):ByteArray
+{
+    /*
+
+    When encoded in DER, this (signature) becomes the following sequence of bytes:
+
+0x30 b1 0x02 b2 (vr) 0x02 b3 (vs)
+
+where:
+
+b1 is a single byte value, equal to the length, in bytes, of the remaining list of bytes (from the first 0x02 to the end of the encoding);
+b2 is a single byte value, equal to the length, in bytes, of (vr);
+b3 is a single byte value, equal to the length, in bytes, of (vs);
+(vr) is the signed big-endian encoding of the value "r", of minimal length;
+(vs) is the signed big-endian encoding of the value "s", of minimal length.
+
+     */
+
+    val thirty = "0x30".hexToByteArray()
+
+    val two = "0x02".hexToByteArray()
+
+    // I take the fourth byte to take the next vr.
+
+    val vLengthData = data[3]
+
+    val rest = data.slice(4 until data.size).toByteArray()
+    //val rest2 = data.slice(4 until data.size).toByteArray()
+
+    val rLength = Utils.byteToUnsignedInt(vLengthData)
+
+    var v = rest.slice(0 until rLength).toByteArray()
+    if (v[0].toInt() == 0)
+    {
+        val tmp = ByteArray(v.size - 1)
+        System.arraycopy(v, 1, tmp, 0, tmp.size)
+        v = tmp
+    }
+
+    //after that, there is a 0x02.
+
+    val restR = rest.slice(rLength until rest.size).toByteArray()
+
+    var r = restR.slice(2 until restR.size).toByteArray()
+    if (r[0].toInt() == 0)
+    {
+        val tmp = ByteArray(r.size - 1)
+        System.arraycopy(r, 1, tmp, 0, tmp.size)
+        r = tmp
+    }
+
+    return v + r
 }
 

@@ -49,18 +49,17 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
@@ -300,7 +299,7 @@ class TransferFormFragment : Fragment()
 
         val seed = Storage(activity!!).getMnemonics()
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(seed.mnemonics)
+        val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         /*
@@ -315,6 +314,7 @@ class TransferFormFragment : Fragment()
         dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
         */
 
+
         var postParams = JSONObject()
         postParams.put("src_pk", getP2PK())
         postParams.put("src", getTz3())
@@ -323,66 +323,25 @@ class TransferFormFragment : Fragment()
 
         var dstObject = JSONObject()
 
-        dstObject.put("dst", "KT1LPQ3qMHn6EFCsS1xdFe8zr65okrVRHhuu")
+        dstObject.put("dst", arguments!!.getString(Address.TAG))
         dstObject.put("amount", "0")
-
-        val resScript = JSONObject(getString(R.string.spending_tez))
 
         //TODO sign data
         //val signedData = "signedData"
-        val signedData0 = "05020000002107070080897a0a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
-        val signedData1 = "050001".hexToByteArray()
+        val signedData0 = "05020000001f070700010a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
+        val signedData1 = "050002".hexToByteArray()
         val signedData = signedData0 + signedData1
 
-        val signature = signData(signedData)
+        val signature = EncryptionServices().sign(signedData)
         val compressedSignature = compressFormat(signature)
 
-
-        //KeyPair key = new KeyPair(seed);
-        //byte[] sodiumPublicKey = key.getPublicKey().toBytes();
-
-        // then we got the KeyPair from the seed, thanks to sodium.
-
-        // These are our prefixes
-        //byte[] edpkPrefix = {(byte) 13, (byte) 15, (byte) 37, (byte) 217};
-
-        //byte[] edpkPrefix = {(byte) 13, (byte) 15, (byte) 37, (byte) 217};
-
-        //val p2sigPrefix:ByteArray = byteArrayOf(54.toByte(), 240.toByte(), 44.toByte(), 52.toByte())
-        // begins eztz b58encode
-
-        // Create Tezos PK.
-        //byte[] prefixedPubKey = new byte[36];
-
-        //val prefixedPubKey = ByteArray(70)
-
-        //System.arraycopy(p2sigPrefix, 0, prefixedPubKey, 0, 4)
-        //System.arraycopy(compressedSignature, 0, prefixedPubKey, 4, 64)
-
-        //byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
-        //byte[] prefixedPubKeyWithChecksum = new byte[40];
-
-        //System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
-        //System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
-
         val prefixed = CryptoUtils.generateP2Sig(compressedSignature)
-        //return tezosPkString;
 
-
-
-
-
-
-        //val signature = signData()
-
-        //val signVerified = verifySig("0x03".hexToByteArray(), signature)
-
-        val spendingLimitContract = String.format(resScript.toString(), prefixed)
-
-        /*
-        dstObject.put("dst", mDstAccount)
-        dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
-        */
+        val resScript = JSONObject(getString(R.string.spending_tez))
+        val spendingLimitContract = String.format(resScript.toString(),
+                (mTransferAmount*1000000).toLong().toString(),
+                mDstAccount,
+                prefixed)
 
         //TODO we need to put a parameter 
         //dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
@@ -579,7 +538,7 @@ class TransferFormFragment : Fragment()
             //val pkhSrc = seed.pkh
             val pkhDst = mDstAccount
 
-            val mnemonics = EncryptionServices(activity!!).decrypt(seed.mnemonics)
+            val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -614,23 +573,13 @@ class TransferFormFragment : Fragment()
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
                 val bytes = KeyPair.b2b(result)
-                var signature = EncryptionServices(activity!!).sign(bytes)
+                var signature = EncryptionServices().sign(bytes)
 
                 var compressedSignature = ByteArray(64)
 
                 if (signature != null)
                 {
                     compressedSignature = compressFormat(signature)
-                }
-
-                //val signVerified2 = verifySig("0x03".hexToByteArray(), compressedSignature)
-
-                var array:ArrayList<Int> = ArrayList()
-
-                for(i in 0 until compressedSignature.size)
-                {
-                    val bytePos = Utils.byteToUnsignedInt(compressedSignature[i])
-                    array.add(bytePos)
                 }
 
                 val pLen = byteArrayThree.size
@@ -697,6 +646,7 @@ class TransferFormFragment : Fragment()
         }
     }
 
+    /*
     private fun verifySig(data:ByteArray, signature:ByteArray):Boolean
     {
         /*
@@ -720,116 +670,23 @@ class TransferFormFragment : Fragment()
 
         return false
     }
+    */
 
-    private fun compressFormat(data: ByteArray):ByteArray
+    private fun getP256PublicKey():String?
     {
-        /*
-
-        When encoded in DER, this (signature) becomes the following sequence of bytes:
-
-0x30 b1 0x02 b2 (vr) 0x02 b3 (vs)
-
-where:
-
-b1 is a single byte value, equal to the length, in bytes, of the remaining list of bytes (from the first 0x02 to the end of the encoding);
-b2 is a single byte value, equal to the length, in bytes, of (vr);
-b3 is a single byte value, equal to the length, in bytes, of (vs);
-(vr) is the signed big-endian encoding of the value "r", of minimal length;
-(vs) is the signed big-endian encoding of the value "s", of minimal length.
-
-         */
-
-        val thirty = "0x30".hexToByteArray()
-
-        val two = "0x02".hexToByteArray()
-
-        // I take the fourth byte to take the next vr.
-
-        val vLengthData = data[3]
-
-        val rest = data.slice(4 until data.size).toByteArray()
-        //val rest2 = data.slice(4 until data.size).toByteArray()
-
-        val rLength = Utils.byteToUnsignedInt(vLengthData)
-
-        var v = rest.slice(0 until rLength).toByteArray()
-        if (v[0].toInt() == 0)
+        val keypair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keypair != null)
         {
-            val tmp = ByteArray(v.size - 1)
-            System.arraycopy(v, 1, tmp, 0, tmp.size)
-            v = tmp
+            val ecKey = keypair.public as ECPublicKey
+            val result = ecKeyFormat(ecKey)
+
+            return CryptoUtils.generatePkhTz3(result)
         }
 
-        //after that, there is a 0x02.
-
-        val restR = rest.slice(rLength until rest.size).toByteArray()
-
-        var r = restR.slice(2 until restR.size).toByteArray()
-        if (r[0].toInt() == 0)
-        {
-            val tmp = ByteArray(r.size - 1)
-            System.arraycopy(r, 1, tmp, 0, tmp.size)
-            r = tmp
-        }
-
-        val vr = v + r
-        return vr
+        return null
     }
 
-
-    private fun getP256PublicKey():String
-    {
-        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        //val aliases: Enumeration<String> = ks.aliases()
-
-        var ecKey = ks.getCertificate("key1").publicKey as ECPublicKey
-        //var publicKey2 = keyStore.getCertificate("key1").publicKey
-
-        //var ecKey = publicKey as ECPublicKey
-
-        var x = ecKey.w.affineX.toByteArray()
-        //byte[] array = bigInteger.toByteArray();
-        if (x[0].toInt() == 0)
-        {
-            val tmp = ByteArray(x.size - 1)
-            System.arraycopy(x, 1, tmp, 0, tmp.size)
-            x = tmp
-        }
-
-
-        var y = ecKey.w.affineY
-
-        var yEvenOdd = if (y.rem(BigInteger.valueOf(2L)) == BigInteger.ZERO)
-        {
-            "0x02".hexToByteArray()
-        }
-        else
-        {
-            "0x03".hexToByteArray()
-        }
-
-        val xLen = x.size
-
-        val yLen = yEvenOdd.size
-        val result = ByteArray(yLen + xLen)
-
-        System.arraycopy(yEvenOdd, 0, result, 0, yLen)
-        System.arraycopy(x, 0, result, yLen, xLen)
-
-        return CryptoUtils.generatePkhTz3(result)
-        /*
-        val p2pk = CryptoUtils.generateP2Pk(result)
-        val tz34 = CryptoUtils.generatePkhTz3(result)
-
-        val signedData = signData("0x03".hexToByteArray())
-
-        val verified = verifySig("0x03".hexToByteArray(), signedData)
-        val verified2 = verifySig("0x02".hexToByteArray(), signedData)
-        */
-    }
-
+    /*
     private fun signData(data:ByteArray):ByteArray
     {
         //TODO generic hash 32 bytes
@@ -855,6 +712,7 @@ b3 is a single byte value, equal to the length, in bytes, of (vs);
         }
         return ByteArray(0)
     }
+    */
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
@@ -949,7 +807,7 @@ b3 is a single byte value, equal to the length, in bytes, of (vs);
         val dialog = AuthenticationDialog()
         if (listener?.isFingerprintAllowed()!! && listener?.hasEnrolledFingerprints()!!)
         {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
                 validateKeyAuthentication(it)
@@ -1333,7 +1191,7 @@ b3 is a single byte value, equal to the length, in bytes, of (vs);
         listener?.saveFingerprintAllowed(useInFuture)
         if (useInFuture)
         {
-            EncryptionServices(activity?.applicationContext!!).createFingerprintKey()
+            EncryptionServices().createFingerprintKey()
         }
     }
 
@@ -1343,12 +1201,12 @@ b3 is a single byte value, equal to the length, in bytes, of (vs);
     private fun validatePassword(inputtedPassword: String): Boolean
     {
         val storage = Storage(activity!!)
-        return EncryptionServices(activity?.applicationContext!!).decrypt(storage.getPassword()) == inputtedPassword
+        return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
     }
 
     private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
     {
-        if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
+        if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
             startFinalizeTransferLoading()
         }

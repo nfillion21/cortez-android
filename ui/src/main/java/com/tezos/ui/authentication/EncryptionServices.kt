@@ -28,30 +28,23 @@
 package com.tezos.ui.authentication
 
 import android.annotation.TargetApi
-import android.content.Context
 import android.hardware.fingerprint.FingerprintManager
 import android.security.keystore.KeyPermanentlyInvalidatedException
-import android.security.keystore.KeyProperties
 import android.security.keystore.UserNotAuthenticatedException
-import android.support.v4.hardware.fingerprint.FingerprintManagerCompat
 import com.tezos.ui.encryption.CipherWrapper
 import com.tezos.ui.encryption.KeyStoreWrapper
 import java.security.InvalidKeyException
-import java.security.KeyPair
-import java.security.KeyStore
 import java.security.Signature
 import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 
-class EncryptionServices(context: Context) {
+class EncryptionServices() {
 
     /**
      * The place to keep all constants.
      */
     companion object
     {
-        const val DEFAULT_KEY_STORE_NAME = "default_keystore"
-
         const val MASTER_KEY = "MASTER_KEY"
         const val FINGERPRINT_KEY = "FINGERPRINT_KEY"
         const val CONFIRM_CREDENTIALS_KEY = "CONFIRM_CREDENTIALS_KEY"
@@ -62,7 +55,7 @@ class EncryptionServices(context: Context) {
         const val CONFIRM_CREDENTIALS_VALIDATION_DELAY = 5 // Seconds
     }
 
-    private val keyStoreWrapper = KeyStoreWrapper(context, DEFAULT_KEY_STORE_NAME)
+    private val keyStoreWrapper = KeyStoreWrapper()
 
     /*
      * Encryption Stage
@@ -131,11 +124,11 @@ class EncryptionServices(context: Context) {
         keyStoreWrapper.createAndroidKeyStoreAsymmetricKey(SPENDING_KEY)
     }
 
-    fun sign(data: ByteArray): ByteArray? {
+    fun sign(data: ByteArray): ByteArray {
         return signWithAndroidAsymmetricKey(data)
     }
 
-    private fun signWithAndroidAsymmetricKey(data: ByteArray): ByteArray?
+    private fun signWithAndroidAsymmetricKey(data: ByteArray): ByteArray
     {
         val keyPair = keyStoreWrapper.getAndroidKeyStoreAsymmetricKeyPair(SPENDING_KEY)
         if (keyPair != null)
@@ -146,7 +139,7 @@ class EncryptionServices(context: Context) {
                 sign()
             }
         }
-        return null
+        return ByteArray(0)
     }
 
     /*

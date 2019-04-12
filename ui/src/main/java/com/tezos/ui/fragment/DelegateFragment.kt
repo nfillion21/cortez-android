@@ -579,7 +579,7 @@ class DelegateFragment : Fragment()
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
 
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics)
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -689,7 +689,7 @@ class DelegateFragment : Fragment()
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
 
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics)
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -880,7 +880,7 @@ class DelegateFragment : Fragment()
 
         val url = getString(R.string.change_delegate_url)
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics)
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         //val pkhSrc = mnemonicsData.pkh
@@ -973,7 +973,7 @@ class DelegateFragment : Fragment()
 
         val url = getString(R.string.change_delegate_url)
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics)
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         var postParams = JSONObject()
@@ -1307,7 +1307,7 @@ class DelegateFragment : Fragment()
         val dialog = AuthenticationDialog()
         if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
         {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity!!).prepareFingerprintCryptoObject()
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
                 validateKeyAuthentication(it)
@@ -1340,7 +1340,7 @@ class DelegateFragment : Fragment()
         val dialog = AuthenticationDialog()
         if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
         {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity!!).prepareFingerprintCryptoObject()
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
                 validateKeyAuthenticationRemoveDelegate(it)
@@ -1391,7 +1391,7 @@ class DelegateFragment : Fragment()
         saveFingerprintAllowed(useInFuture)
         if (useInFuture)
         {
-            EncryptionServices(activity!!).createFingerprintKey()
+            EncryptionServices().createFingerprintKey()
         }
     }
 
@@ -1401,12 +1401,12 @@ class DelegateFragment : Fragment()
     private fun validatePassword(inputtedPassword: String): Boolean
     {
         val storage = Storage(activity!!)
-        return EncryptionServices(activity!!).decrypt(storage.getPassword()) == inputtedPassword
+        return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
     }
 
     private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
     {
-        if (EncryptionServices(activity!!).validateFingerprintAuthentication(cryptoObject))
+        if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
             startFinalizeAddDelegateLoading()
         }
@@ -1418,7 +1418,7 @@ class DelegateFragment : Fragment()
 
     private fun validateKeyAuthenticationRemoveDelegate(cryptoObject: FingerprintManager.CryptoObject)
     {
-        if (EncryptionServices(activity!!).validateFingerprintAuthentication(cryptoObject))
+        if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
             startFinalizeRemoveDelegateLoading()
         }
