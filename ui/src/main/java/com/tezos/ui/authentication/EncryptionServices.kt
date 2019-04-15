@@ -38,7 +38,7 @@ import java.security.Signature
 import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 
-class EncryptionServices() {
+class EncryptionServices {
 
     /**
      * The place to keep all constants.

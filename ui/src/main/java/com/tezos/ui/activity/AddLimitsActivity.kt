@@ -60,11 +60,13 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.activity_add_limits.*
 import kotlinx.android.synthetic.main.limits_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.interfaces.ECPublicKey
 
 /**
  * Created by nfillion on 26/02/19.
@@ -457,7 +459,9 @@ class AddLimitsActivity : BaseSecureActivity()
         var dstObject = JSONObject()
         dstObject.put("manager", pkhSrc)
 
-        val spendingLimitContract = String.format(getString(R.string.spending_limit_contract), pk, (mLimitAmount*1000000L).toString())
+        val ecKeys = retrieveECKeys()
+        val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+        val spendingLimitContract = String.format(getString(R.string.spending_limit_contract), p2pk, (mLimitAmount*1000000L).toString())
 
         val json = JSONObject(spendingLimitContract)
         dstObject.put("script", json)
@@ -471,7 +475,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
         postParams.put("dsts", dstObjects)
 
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
@@ -541,6 +545,19 @@ class AddLimitsActivity : BaseSecureActivity()
         jsObjRequest.tag = DELEGATE_INIT_TAG
         mInitDelegateLoading = true
         VolleySingleton.getInstance(applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    private fun retrieveECKeys():ByteArray
+    {
+        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keyPair == null)
+        {
+            EncryptionServices().createSpendingKey()
+            keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        }
+
+        val ecKey = keyPair!!.public as ECPublicKey
+        return ecKeyFormat(ecKey)
     }
 
     private fun transferLoading(loading:Boolean)

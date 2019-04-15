@@ -87,8 +87,8 @@ class KeyStoreWrapper {
             userAuthenticationRequired: Boolean = false,
             invalidatedByBiometricEnrollment: Boolean = true,
             userAuthenticationValidityDurationSeconds: Int = -1,
-            userAuthenticationValidWhileOnBody: Boolean = true): SecretKey {
-
+            userAuthenticationValidWhileOnBody: Boolean = true): SecretKey
+    {
         val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
         val builder = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
@@ -98,7 +98,8 @@ class KeyStoreWrapper {
                 .setUserAuthenticationValidityDurationSeconds(userAuthenticationValidityDurationSeconds)
         // Not working on api 23, try higher ?
         //.setRandomizedEncryptionRequired(false)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
             builder.setInvalidatedByBiometricEnrollment(invalidatedByBiometricEnrollment)
             builder.setUserAuthenticationValidWhileOnBody(userAuthenticationValidWhileOnBody)
         }

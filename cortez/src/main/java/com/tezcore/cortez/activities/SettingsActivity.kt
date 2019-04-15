@@ -158,6 +158,7 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
         encryptionServices.removeMasterKey()
         encryptionServices.removeFingerprintKey()
         encryptionServices.removeConfirmCredentialsKey()
+        encryptionServices.removeSpendingKey()
 
         Storage(baseContext).clear()
 

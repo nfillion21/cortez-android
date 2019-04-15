@@ -65,11 +65,7 @@ import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
-import java.math.BigInteger
-import java.security.KeyStore
-import java.security.Signature
 import java.security.interfaces.ECPublicKey
-import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
@@ -180,8 +176,6 @@ class TransferFormFragment : Fragment()
 
             transferLoading(isLoading())
         }
-
-        //getP256PublicKey()
     }
 
     override fun onResume()
@@ -297,12 +291,12 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_forge)
 
+        /*
         val seed = Storage(activity!!).getMnemonics()
 
         val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
-        /*
         var postParams = JSONObject()
         postParams.put("src", mSrcAccount)
         postParams.put("src_pk", pk)
@@ -314,10 +308,13 @@ class TransferFormFragment : Fragment()
         dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
         */
 
-
         var postParams = JSONObject()
-        postParams.put("src_pk", getP2PK())
-        postParams.put("src", getTz3())
+
+        val ecKeys = retrieveECKeys()
+        val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+        postParams.put("src_pk", p2pk)
+        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+        postParams.put("src", tz3)
 
         var dstObjects = JSONArray()
 
@@ -328,9 +325,9 @@ class TransferFormFragment : Fragment()
 
         //TODO sign data
         //val signedData = "signedData"
-        val signedData0 = "05020000001f070700010a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
-        val signedData1 = "050002".hexToByteArray()
-        val signedData = signedData0 + signedData1
+        val signedData0 = "05020000001f070700020a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
+        val signedData1 = "050000".hexToByteArray()
+        val signedData = KeyPair.b2b(signedData0 + signedData1)
 
         val signature = EncryptionServices().sign(signedData)
         val compressedSignature = compressFormat(signature)
@@ -352,7 +349,7 @@ class TransferFormFragment : Fragment()
 
         postParams.put("dsts", dstObjects)
 
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
@@ -431,98 +428,17 @@ class TransferFormFragment : Fragment()
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
-    private fun getP2PK():String
+    private fun retrieveECKeys():ByteArray
     {
-        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        val aliases: Enumeration<String> = ks.aliases()
-
-        var ecKey = ks.getCertificate("key1").publicKey as ECPublicKey
-        //var publicKey2 = keyStore.getCertificate("key1").publicKey
-
-        //var ecKey = publicKey as ECPublicKey
-
-        var x = ecKey.w.affineX.toByteArray()
-        //byte[] array = bigInteger.toByteArray();
-        if (x[0].toInt() == 0)
+        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keyPair == null)
         {
-            val tmp = ByteArray(x.size - 1)
-            System.arraycopy(x, 1, tmp, 0, tmp.size)
-            x = tmp
+            EncryptionServices().createSpendingKey()
+            keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
         }
 
-
-        var y = ecKey.w.affineY
-
-        var yEvenOdd = if (y.rem(BigInteger.valueOf(2L)) == BigInteger.ZERO)
-        {
-            "0x02".hexToByteArray()
-        }
-        else
-        {
-            "0x03".hexToByteArray()
-        }
-
-        val xLen = x.size
-
-        val yLen = yEvenOdd.size
-        val result = ByteArray(yLen + xLen)
-
-        System.arraycopy(yEvenOdd, 0, result, 0, yLen)
-        System.arraycopy(x, 0, result, yLen, xLen)
-
-        return CryptoUtils.generateP2Pk(result)
-        /*
-        val p2pk = CryptoUtils.generateP2Pk(result)
-        val tz34 = CryptoUtils.generatePkhTz3(result)
-
-        val signedData = signData("0x03".hexToByteArray())
-
-        val verified = verifySig("0x03".hexToByteArray(), signedData)
-        val verified2 = verifySig("0x02".hexToByteArray(), signedData)
-        */
-    }
-
-    private fun getTz3():String
-    {
-        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        //val aliases: Enumeration<String> = ks.aliases()
-
-        var ecKey = ks.getCertificate("key1").publicKey as ECPublicKey
-
-        var x = ecKey.w.affineX.toByteArray()
-        //byte[] array = bigInteger.toByteArray();
-        if (x[0].toInt() == 0)
-        {
-            val tmp = ByteArray(x.size - 1)
-            System.arraycopy(x, 1, tmp, 0, tmp.size)
-            x = tmp
-        }
-
-
-        var y = ecKey.w.affineY
-
-        var yEvenOdd = if (y.rem(BigInteger.valueOf(2L)) == BigInteger.ZERO)
-        {
-            "0x02".hexToByteArray()
-        }
-        else
-        {
-            "0x03".hexToByteArray()
-        }
-
-        val xLen = x.size
-
-        val yLen = yEvenOdd.size
-        val result = ByteArray(yLen + xLen)
-
-        System.arraycopy(yEvenOdd, 0, result, 0, yLen)
-        System.arraycopy(x, 0, result, yLen, xLen)
-
-        return CryptoUtils.generatePkhTz3(result)
+        val ecKey = keyPair!!.public as ECPublicKey
+        return ecKeyFormat(ecKey)
     }
 
     // volley
@@ -672,7 +588,7 @@ class TransferFormFragment : Fragment()
     }
     */
 
-    private fun getP256PublicKey():String?
+    private fun getTz3():String?
     {
         val keypair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
         if (keypair != null)

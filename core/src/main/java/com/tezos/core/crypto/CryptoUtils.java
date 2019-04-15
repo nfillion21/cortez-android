@@ -51,6 +51,8 @@ import io.github.novacrypto.bip39.Validation.WordNotFoundException;
 import io.github.novacrypto.bip39.Words;
 import io.github.novacrypto.bip39.wordlists.English;
 
+import static org.libsodium.jni.NaCl.sodium;
+
 public class CryptoUtils
 {
     public static String generateMnemonics()
@@ -208,16 +210,23 @@ public class CryptoUtils
         byte[] tz3Prefix = {(byte) 6, (byte) 161, (byte) 164};
 
         //create tezos PKHash
+        /*
         byte[] genericHash = new byte[20];
         try {
             genericHash = CryptoGenericHash.cryptoGenericHash(publicKey, genericHash.length);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        */
+
+
+        byte[] payload_hash = new byte[20];
+        sodium().crypto_generichash(payload_hash, payload_hash.length, publicKey, publicKey.length, new byte[]{0}, 0);
+
 
         byte[] prefixedGenericHash = new byte[23];
         System.arraycopy(tz3Prefix, 0, prefixedGenericHash, 0, 3);
-        System.arraycopy(genericHash, 0, prefixedGenericHash, 3, 20);
+        System.arraycopy(payload_hash, 0, prefixedGenericHash, 3, 20);
 
         byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedGenericHash);
         byte[] prefixedPKhashWithChecksum = new byte[27];
