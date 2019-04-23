@@ -160,7 +160,6 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
 
     override fun passwordVerified(mnemonics: String, password: String, fingerprint: Boolean)
     {
-        // the password hello is not used in Marshmallow
         createKeys(fingerprint)
         with(Storage(this)) {
             val encryptedPassword = EncryptionServices().encrypt(password)

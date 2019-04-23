@@ -30,14 +30,14 @@
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
     <string name="public_key_info_title">Here is your Address</string>
     <string name="address_book_empty_title">Your address book is empty</string>
-    <string name="delegated_addresses_empty_title">You don\'t have any delegated addresses</string>
+    <string name="contracts_empty_title">You don\'t have any contract</string>
     <string name="public_key_info_empty_title">You have no public key</string>
     <string name="account_info_empty_title">You cannot delegate</string>
     <string name="delegate_title">Delegate</string>
     <string name="script_title">Script</string>
     <string name="limits_title">Limits</string>
     <string name="address_book_empty_info_title">Please fill in your address book by clicking on the add button</string>
-    <string name="delegated_addresses_empty_info_title">Please create a delegated address and delegate your tez by clicking on the add button</string>
+    <string name="contracts_empty_info_title">Please create a contract and delegate your tez by clicking on the add button</string>
     <string name="create_wallet">Create Wallet</string>
     <string name="create_wallet_title_1">Create Wallet 1/2</string>
     <string name="create_wallet_title_2">Create Wallet 2/2</string>
@@ -116,7 +116,7 @@
     <string name="fee_default">Default</string>
     <string name="loading_list_operations">Loading operations…</string>
     <string name="loading_balance">Loading balance…</string>
-    <string name="loading_delegated_addresses">Loading delegated addresses…</string>
+    <string name="loading_contracts">Loading contracts…</string>
     <string name="loading_contract_info">Loading contract informations…</string>
     <string name="loading_storage_info">Loading storage informations…</string>
     <string name="neutral">-</string>
@@ -125,6 +125,9 @@
     <string name="empty_list_operations">No operations</string>
     <string name="contact_name">Contact name</string>
     <string name="tez">ꜩ</string>
+    <string name="warning_change_p2pk">Bump and hold your contactless payment card to the back of your phone</string>
+    <string name="warning_change_p2pk">The contract storage indicates a spending key that doesn\'t seem </string>
+    <string name="warning_change_p2pk"></string>
 
     <string name="delegate_and_contract_title">Delegate and contract</string>
 

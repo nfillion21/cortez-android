@@ -321,7 +321,7 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
 
         mGetDelegatedAddressesLoading = true
 
-        empty_loading_textview.setText(R.string.loading_delegated_addresses)
+        empty_loading_textview.setText(R.string.loading_contracts)
 
         nav_progress.visibility = View.VISIBLE
 

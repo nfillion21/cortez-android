@@ -385,7 +385,7 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
         toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
 
         val position = intent.getIntExtra(POS_KEY, 0)
-        toolbar.title = "Delegated Address #$position"
+        toolbar.title = "Contract #$position"
 
         setSupportActionBar(toolbar)
     }

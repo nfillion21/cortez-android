@@ -148,14 +148,14 @@
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
                                     android:layout_marginBottom="@dimen/spacing_normal"
                                     android:textColor="@color/colorAccent"
-                                    android:text="@string/delegated_addresses_empty_title"/>
+                                    android:text="@string/contracts_empty_title"/>
 
                                 <TextView
                                     android:id="@+id/delegated_addresses_empty_info_textview"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                                    android:text="@string/delegated_addresses_empty_info_title"/>
+                                    android:text="@string/contracts_empty_info_title"/>
 
                             </LinearLayout>
 
@@ -185,7 +185,7 @@
                     android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:text="@string/loading_delegated_addresses"
+                    android:text="@string/loading_contracts"
                     android:clickable="false" />
                 <!--
                 End loading messages
