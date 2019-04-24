@@ -43,6 +43,8 @@ import io.github.novacrypto.bip39.Validation.WordNotFoundException;
 import io.github.novacrypto.bip39.Words;
 import io.github.novacrypto.bip39.wordlists.English;
 
+import static org.libsodium.jni.NaCl.sodium;
+
 public class CryptoUtils
 {
     public static String generateMnemonics()
@@ -220,6 +222,44 @@ public class CryptoUtils
 
         byte[] prefixedGenericHash = new byte[23];
         System.arraycopy(tz1Prefix, 0, prefixedGenericHash, 0, 3);
+        System.arraycopy(genericHash, 0, prefixedGenericHash, 3, 20);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedGenericHash);
+        byte[] prefixedPKhashWithChecksum = new byte[27];
+        System.arraycopy(prefixedGenericHash, 0, prefixedPKhashWithChecksum, 0, 23);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPKhashWithChecksum, 23, 4);
+
+        String pkHash = Base58.encode(prefixedPKhashWithChecksum);
+
+        return pkHash;
+    }
+
+    public static String genericHashToPkhTz3(byte[] genericHash)
+    {
+        // These are our prefixes
+        byte[] tz3Prefix = {(byte) 6, (byte) 161, (byte) 164};
+
+        byte[] prefixedGenericHash = new byte[23];
+        System.arraycopy(tz3Prefix, 0, prefixedGenericHash, 0, 3);
+        System.arraycopy(genericHash, 0, prefixedGenericHash, 3, 20);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedGenericHash);
+        byte[] prefixedPKhashWithChecksum = new byte[27];
+        System.arraycopy(prefixedGenericHash, 0, prefixedPKhashWithChecksum, 0, 23);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPKhashWithChecksum, 23, 4);
+
+        String pkHash = Base58.encode(prefixedPKhashWithChecksum);
+
+        return pkHash;
+    }
+
+    public static String genericHashToPkhTz2(byte[] genericHash)
+    {
+        // These are our prefixes
+        byte[] tz3Prefix = {(byte) 6, (byte) 161, (byte) 161};
+
+        byte[] prefixedGenericHash = new byte[23];
+        System.arraycopy(tz3Prefix, 0, prefixedGenericHash, 0, 3);
         System.arraycopy(genericHash, 0, prefixedGenericHash, 3, 20);
 
         byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedGenericHash);

@@ -165,9 +165,20 @@ fun isChangeDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 
             val delegate = delegatableField.slice(i until delegatableField.size).toByteArray()
             val delegateParse = delegate.slice(1 .. 20).toByteArray()
-            val delegatePkh = params["delegate"]
+            val delegatePkh = params["delegate"] as String
 
-            val cryptoDelegate = CryptoUtils.genericHashToPkh(delegateParse)
+            //val cryptoDelegate = CryptoUtils.genericHashToPkh(delegateParse)
+
+            val beginsWith = delegatePkh.slice(0 until 3)
+
+            val cryptoDelegate = when (beginsWith.toLowerCase())
+            {
+                "tz1" -> CryptoUtils.genericHashToPkh(delegateParse)
+                "tz2" -> CryptoUtils.genericHashToPkhTz2(delegateParse)
+                "tz3" -> CryptoUtils.genericHashToPkhTz3(delegateParse)
+                else -> null
+            }
+
             val isDelegateValid = delegatePkh == cryptoDelegate
 
             if (!isDelegateValid)
@@ -397,14 +408,17 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         val dst = amount.slice(i+(if (dstParam.startsWith("KT1", true)) 1 else 2) until amount.size).toByteArray()
         //TODO handle the first two bytes
 
-        val isDstValid = if (dstParam.startsWith("KT1", true))
+        val beginsWith = dstParam.slice(0 until 3)
+
+        val begins = when (beginsWith.toLowerCase())
         {
-            dstParam == CryptoUtils.genericHashToKT(dst)
+            "kt1" -> CryptoUtils.genericHashToKT(dst)
+            "tz1" -> CryptoUtils.genericHashToPkh(dst)
+            "tz2" -> CryptoUtils.genericHashToPkhTz2(dst)
+            "tz3" -> CryptoUtils.genericHashToPkhTz3(dst)
+            else -> null
         }
-        else
-        {
-            dstParam == CryptoUtils.genericHashToPkh(dst)
-        }
+        val isDstValid = dstParam == begins
 
         if (!isDstValid)
         {
@@ -614,7 +628,16 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
         val delegate = delegatableField.slice(i until delegatableField.size).toByteArray()
         val delegateParse = delegate.slice(1 .. 20).toByteArray()
 
-        val cryptoDelegate = CryptoUtils.genericHashToPkh(delegateParse)
+        val beginsWith = delegateParam.slice(0 until 3)
+
+        val cryptoDelegate = when (beginsWith.toLowerCase())
+        {
+            "tz1" -> CryptoUtils.genericHashToPkh(delegateParse)
+            "tz2" -> CryptoUtils.genericHashToPkhTz2(delegateParse)
+            "tz3" -> CryptoUtils.genericHashToPkhTz3(delegateParse)
+            else -> null
+        }
+
         val isDelegateValid = delegateParam == cryptoDelegate
 
         if (!isDelegateValid)
