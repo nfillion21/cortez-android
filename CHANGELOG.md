@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.3.3
+-----
+* Handle transactions and delegation with different curves.
+
 1.3.2
 -----
 * Browse contact list from Contacts app.
