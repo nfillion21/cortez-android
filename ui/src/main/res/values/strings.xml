@@ -125,9 +125,7 @@
     <string name="empty_list_operations">No operations</string>
     <string name="contact_name">Contact name</string>
     <string name="tez">ꜩ</string>
-    <string name="warning_change_p2pk">Bump and hold your contactless payment card to the back of your phone</string>
-    <string name="warning_change_p2pk">The contract storage indicates a spending key that doesn\'t seem </string>
-    <string name="warning_change_p2pk"></string>
+    <string name="warning_change_p2pk">The contract storage indicates you cannot transfer any tez unless you edit it with the form below.</string>
 
     <string name="delegate_and_contract_title">Delegate and contract</string>
 
