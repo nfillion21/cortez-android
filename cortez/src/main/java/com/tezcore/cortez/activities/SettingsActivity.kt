@@ -147,17 +147,18 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
             Storage(baseContext).saveFingerprintAllowed(isOptionChecked)
             if (!isOptionChecked)
             {
-                EncryptionServices(this).removeFingerprintKey()
+                EncryptionServices().removeFingerprintKey()
             }
         }
     }
 
     override fun onLogOutClicked()
     {
-        val encryptionServices = EncryptionServices(applicationContext)
+        val encryptionServices = EncryptionServices()
         encryptionServices.removeMasterKey()
         encryptionServices.removeFingerprintKey()
         encryptionServices.removeConfirmCredentialsKey()
+        encryptionServices.removeSpendingKey()
 
         Storage(baseContext).clear()
 

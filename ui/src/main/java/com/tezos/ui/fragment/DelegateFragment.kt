@@ -38,6 +38,7 @@ import android.support.v4.graphics.drawable.DrawableCompat
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -91,8 +92,8 @@ class DelegateFragment : Fragment()
             val mgr: String,
             val spendable: Boolean,
             val delegatable: Boolean,
-            val delegate: String?
-
+            val delegate: String?,
+            val script: String
     )
 
     internal class ContractSerialization internal constructor(private val contract: Contract)
@@ -106,9 +107,9 @@ class DelegateFragment : Fragment()
             contractBundle.putBoolean("spendable", contract.spendable)
             contractBundle.putBoolean("delegatable", contract.delegatable)
             contractBundle.putString("delegate", contract.delegate)
+            contractBundle.putString("script", contract.script)
 
             return contractBundle
-
         }
     }
 
@@ -121,8 +122,9 @@ class DelegateFragment : Fragment()
             val spendable = this.bundle.getBoolean("spendable", false)
             val delegatable = this.bundle.getBoolean("delegatable", false)
             val delegate = this.bundle.getString("delegate", null)
+            val script = this.bundle.getString("script", null)
 
-            return Contract(blk, mgr, spendable, delegatable, delegate)
+            return Contract(blk, mgr, spendable, delegatable, delegate, script)
         }
     }
 
@@ -211,7 +213,7 @@ class DelegateFragment : Fragment()
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
         validateRemoveDelegateButton(isDelegateFeeValid())
 
-        add_delegate_button_layout.setOnClickListener {
+        update_storage_button_layout.setOnClickListener {
             onDelegateClick()
         }
 
@@ -223,9 +225,9 @@ class DelegateFragment : Fragment()
             startContractInfoLoading()
         }
 
-        tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
+        redelegate_address_edittext.addTextChangedListener(GenericTextWatcher(redelegate_address_edittext))
 
-        tezos_address_edittext.onFocusChangeListener = focusChangeListener()
+        redelegate_address_edittext.onFocusChangeListener = focusChangeListener()
 
         if (savedInstanceState != null)
         {
@@ -340,7 +342,7 @@ class DelegateFragment : Fragment()
     {
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
-            if (i == R.id.tezos_address_edittext)
+            if (i == R.id.redelegate_address_edittext)
             {
                 putTzAddressInRed(!hasFocus)
             }
@@ -492,7 +494,9 @@ class DelegateFragment : Fragment()
             val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
             val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
 
-            mContract = Contract(blk as String, mgr as String, spendable as Boolean, delegatable as Boolean, delegate)
+            val resScript = JSONObject(getString(R.string.default_contract))
+
+            mContract = Contract(blk as String, mgr as String, spendable as Boolean, delegatable as Boolean, delegate, resScript.toString())
         }
     }
 
@@ -516,30 +520,30 @@ class DelegateFragment : Fragment()
         {
             if (mContract!!.delegate != null)
             {
-                redelegate_info_textview?.visibility = View.GONE
-                redelegate_form_card_info?.visibility = View.VISIBLE
+                limits_info_textview?.visibility = View.GONE
+                update_storage_form_card?.visibility = View.VISIBLE
 
-                tezos_address_layout?.visibility = View.GONE
+                redelegate_address_layout?.visibility = View.GONE
 
-                add_delegate_button_layout?.visibility = View.GONE
+                update_storage_button_layout?.visibility = View.GONE
 
                 remove_delegate_button_layout?.visibility = View.VISIBLE
 
-                remove_delegate_info_textview?.visibility = View.VISIBLE
-                remove_delegate_info_textview?.text = getString(R.string.remove_delegate_info, mContract?.delegate)
+                storage_info_textview?.visibility = View.VISIBLE
+                storage_info_textview?.text = getString(R.string.remove_delegate_info, mContract?.delegate)
 
                 //TODO show everything related to the removing
             }
             else
             {
-                redelegate_info_textview?.visibility = View.VISIBLE
-                redelegate_form_card_info?.visibility = View.VISIBLE
+                limits_info_textview?.visibility = View.VISIBLE
+                update_storage_form_card?.visibility = View.VISIBLE
 
-                tezos_address_layout?.visibility = View.VISIBLE
+                redelegate_address_layout?.visibility = View.VISIBLE
 
-                add_delegate_button_layout?.visibility = View.VISIBLE
+                update_storage_button_layout?.visibility = View.VISIBLE
 
-                remove_delegate_info_textview.visibility = View.GONE
+                storage_info_textview?.visibility = View.GONE
                 remove_delegate_button_layout?.visibility = View.GONE
 
                 //TODO show everything related to the form
@@ -575,7 +579,7 @@ class DelegateFragment : Fragment()
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
 
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -657,7 +661,7 @@ class DelegateFragment : Fragment()
 
                 cancelRequests(true)
 
-                stringRequest.tag = DELEGATE_FINALIZE_TAG
+                stringRequest.tag = REMOVE_DELEGATE_FINALIZE_TAG
 
                 mFinalizeDelegateLoading = true
                 VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(stringRequest)
@@ -685,7 +689,7 @@ class DelegateFragment : Fragment()
             //val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
 
-            val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -876,7 +880,7 @@ class DelegateFragment : Fragment()
 
         val url = getString(R.string.change_delegate_url)
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         //val pkhSrc = mnemonicsData.pkh
@@ -969,7 +973,7 @@ class DelegateFragment : Fragment()
 
         val url = getString(R.string.change_delegate_url)
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         var postParams = JSONObject()
@@ -1064,7 +1068,7 @@ class DelegateFragment : Fragment()
 
     private fun putPayButtonToNull()
     {
-        add_delegate_button?.text = getString(R.string.delegate_format, "")
+        update_storage_button?.text = getString(R.string.delegate_format, "")
     }
 
     private fun showSnackBar(error:VolleyError?, message:String?)
@@ -1090,11 +1094,11 @@ class DelegateFragment : Fragment()
 
             if (validate)
             {
-                add_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-                add_delegate_button_layout?.isEnabled = true
-                add_delegate_button_layout?.background = makeSelector(theme)
+                update_storage_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                update_storage_button_layout?.isEnabled = true
+                update_storage_button_layout?.background = makeSelector(theme)
 
-                val drawables = add_delegate_button?.compoundDrawables
+                val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
                     val wrapDrawable = DrawableCompat.wrap(drawables!![0])
@@ -1103,13 +1107,13 @@ class DelegateFragment : Fragment()
             }
             else
             {
-                add_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-                add_delegate_button_layout?.isEnabled = false
+                update_storage_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                update_storage_button_layout?.isEnabled = false
 
                 val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-                add_delegate_button_layout?.background = makeSelector(greyTheme)
+                update_storage_button_layout?.background = makeSelector(greyTheme)
 
-                val drawables = add_delegate_button?.compoundDrawables
+                val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
                     val wrapDrawable = DrawableCompat.wrap(drawables!![0])
@@ -1171,7 +1175,7 @@ class DelegateFragment : Fragment()
         {
             val i = v.id
 
-            if (i == R.id.tezos_address_edittext && !isDelegateTezosAddressEquals(editable))
+            if (i == R.id.redelegate_address_edittext && !isDelegateTezosAddressEquals(editable))
             {
                 putTzAddressInRed(false)
 
@@ -1193,7 +1197,7 @@ class DelegateFragment : Fragment()
                     putPayButtonToNull()
                 }
             }
-            else if (i != R.id.amount_edittext && i != R.id.tezos_address_edittext)
+            else if (i != R.id.amount_edittext && i != R.id.redelegate_address_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -1222,11 +1226,11 @@ class DelegateFragment : Fragment()
     {
         var isTzAddressValid = false
 
-        if (!TextUtils.isEmpty(tezos_address_edittext.text))
+        if (!TextUtils.isEmpty(redelegate_address_edittext.text))
         {
-            if (Utils.isTzAddressValid(tezos_address_edittext.text!!.toString()))
+            if (Utils.isTzAddressValid(redelegate_address_edittext.text!!.toString()))
             {
-                mDelegateTezosAddress = tezos_address_edittext.text.toString()
+                mDelegateTezosAddress = redelegate_address_edittext.text.toString()
                 isTzAddressValid = true
             }
         }
@@ -1295,7 +1299,7 @@ class DelegateFragment : Fragment()
             color = R.color.tz_accent
         }
 
-        tezos_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
+        redelegate_address_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
     private fun onDelegateClick()
@@ -1303,7 +1307,7 @@ class DelegateFragment : Fragment()
         val dialog = AuthenticationDialog()
         if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
         {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity!!).prepareFingerprintCryptoObject()
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
                 validateKeyAuthentication(it)
@@ -1336,7 +1340,7 @@ class DelegateFragment : Fragment()
         val dialog = AuthenticationDialog()
         if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
         {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity!!).prepareFingerprintCryptoObject()
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
                 validateKeyAuthenticationRemoveDelegate(it)
@@ -1387,7 +1391,7 @@ class DelegateFragment : Fragment()
         saveFingerprintAllowed(useInFuture)
         if (useInFuture)
         {
-            EncryptionServices(activity!!).createFingerprintKey()
+            EncryptionServices().createFingerprintKey()
         }
     }
 
@@ -1397,12 +1401,12 @@ class DelegateFragment : Fragment()
     private fun validatePassword(inputtedPassword: String): Boolean
     {
         val storage = Storage(activity!!)
-        return EncryptionServices(activity!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
+        return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
     }
 
     private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
     {
-        if (EncryptionServices(activity!!).validateFingerprintAuthentication(cryptoObject))
+        if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
             startFinalizeAddDelegateLoading()
         }
@@ -1414,7 +1418,7 @@ class DelegateFragment : Fragment()
 
     private fun validateKeyAuthenticationRemoveDelegate(cryptoObject: FingerprintManager.CryptoObject)
     {
-        if (EncryptionServices(activity!!).validateFingerprintAuthentication(cryptoObject))
+        if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
             startFinalizeRemoveDelegateLoading()
         }

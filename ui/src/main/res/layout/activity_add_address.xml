@@ -212,7 +212,7 @@
                         android:id="@+id/add_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/add_an_address"
+                        android:text="@string/add_address_title"
 
                         android:drawableLeft="@drawable/add_circle_24"
                         android:drawableStart="@drawable/add_circle_24"

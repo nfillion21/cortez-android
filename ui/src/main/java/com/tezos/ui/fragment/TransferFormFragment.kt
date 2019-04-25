@@ -59,11 +59,13 @@ import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.interfaces.ECPublicKey
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
@@ -138,7 +140,7 @@ class TransferFormFragment : Fragment()
         }
         else
         {
-            throw RuntimeException(context.toString() + " must implement OnTransferListener")
+            throw RuntimeException("$context must implement OnTransferListener")
         }
     }
 
@@ -289,13 +291,11 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_forge)
 
+        /*
         val seed = Storage(activity!!).getMnemonics()
 
-        val mnemonics = EncryptionServices(activity!!).decrypt(seed.mnemonics, "not useful for marshmallow")
+        val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
-
-        //val pkhSrc = mnemonicsData.pkh
-        //val pkhDst = mDstAccount?.pubKeyHash
 
         var postParams = JSONObject()
         postParams.put("src", mSrcAccount)
@@ -306,15 +306,50 @@ class TransferFormFragment : Fragment()
         var dstObject = JSONObject()
         dstObject.put("dst", mDstAccount)
         dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+        */
 
-        //we don't need fees to forge
-        //dstObject.put("fee", fee.toLong().toString())
+        var postParams = JSONObject()
+
+        val ecKeys = retrieveECKeys()
+        val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+        postParams.put("src_pk", p2pk)
+        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+        postParams.put("src", tz3)
+
+        var dstObjects = JSONArray()
+
+        var dstObject = JSONObject()
+
+        dstObject.put("dst", arguments!!.getString(Address.TAG))
+        dstObject.put("amount", "0")
+
+        //TODO sign data
+        //val signedData = "signedData"
+        val signedData0 = "05020000001f070700020a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
+        val signedData1 = "050000".hexToByteArray()
+        val signedData = KeyPair.b2b(signedData0 + signedData1)
+
+        val signature = EncryptionServices().sign(signedData)
+        val compressedSignature = compressFormat(signature)
+
+        val prefixed = CryptoUtils.generateP2Sig(compressedSignature)
+
+        val resScript = JSONObject(getString(R.string.spending_tez))
+        val spendingLimitContract = String.format(resScript.toString(),
+                (mTransferAmount*1000000).toLong().toString(),
+                mDstAccount,
+                prefixed)
+
+        //TODO we need to put a parameter 
+        //dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
+        val json = JSONObject(spendingLimitContract)
+        dstObject.put("parameters", json)
 
         dstObjects.put(dstObject)
 
         postParams.put("dsts", dstObjects)
 
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
@@ -393,6 +428,18 @@ class TransferFormFragment : Fragment()
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
+    private fun retrieveECKeys():ByteArray
+    {
+        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keyPair == null)
+        {
+            EncryptionServices().createSpendingKey()
+            keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        }
+
+        val ecKey = keyPair!!.public as ECPublicKey
+        return ecKeyFormat(ecKey)
+    }
 
     // volley
     private fun startPostRequestLoadFinalizeTransfer()
@@ -407,7 +454,7 @@ class TransferFormFragment : Fragment()
             //val pkhSrc = seed.pkh
             val pkhDst = mDstAccount
 
-            val mnemonics = EncryptionServices(activity!!).decrypt(seed.mnemonics, "not useful for marshmallow")
+            val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -428,7 +475,7 @@ class TransferFormFragment : Fragment()
 
             postParams.put("dsts", dstObjects)
 
-            if (isTransferPayloadValid(mTransferPayload!!, postParams))
+            if (!isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -441,18 +488,22 @@ class TransferFormFragment : Fragment()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
-                val sk = CryptoUtils.generateSk(mnemonics, "")
-                val signature = KeyPair.sign(sk, result)
+                val bytes = KeyPair.b2b(result)
+                var signature = EncryptionServices().sign(bytes)
 
-                //TODO verify signature
-                //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+                var compressedSignature = ByteArray(64)
+
+                if (signature != null)
+                {
+                    compressedSignature = compressFormat(signature)
+                }
 
                 val pLen = byteArrayThree.size
-                val sLen = signature.size
+                val sLen = compressedSignature.size
                 val newResult = ByteArray(pLen + sLen)
 
                 System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
-                System.arraycopy(signature, 0, newResult, pLen, sLen)
+                System.arraycopy(compressedSignature, 0, newResult, pLen, sLen)
 
                 var payloadsign = newResult.toNoPrefixHexString()
 
@@ -510,6 +561,74 @@ class TransferFormFragment : Fragment()
             onFinalizeTransferLoadComplete(volleyError)
         }
     }
+
+    /*
+    private fun verifySig(data:ByteArray, signature:ByteArray):Boolean
+    {
+        /*
+  * Verify a signature previously made by a PrivateKey in our
+  * KeyStore. This uses the X.509 certificate attached to our
+  * private key in the KeyStore to validate a previously
+  * generated signature.
+  */
+        val ks = KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+        }
+        val entry = ks.getEntry("key1", null) as? KeyStore.PrivateKeyEntry
+        if (entry != null)
+        {
+            return  Signature.getInstance("SHA256withECDSA").run {
+                initVerify(entry.certificate)
+                update(data)
+                verify(signature)
+            }
+        }
+
+        return false
+    }
+    */
+
+    private fun getTz3():String?
+    {
+        val keypair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keypair != null)
+        {
+            val ecKey = keypair.public as ECPublicKey
+            val result = ecKeyFormat(ecKey)
+
+            return CryptoUtils.generatePkhTz3(result)
+        }
+
+        return null
+    }
+
+    /*
+    private fun signData(data:ByteArray):ByteArray
+    {
+        //TODO generic hash 32 bytes
+
+        val bytes = KeyPair.b2b(data)
+
+        /*
+        * Use a PrivateKey in the KeyStore to create a signature over
+        * some data.
+        */
+
+        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+        }
+        val entry: KeyStore.Entry = ks.getEntry("key1", null)
+        if (entry is KeyStore.PrivateKeyEntry)
+        {
+            return Signature.getInstance("NONEwithECDSA").run {
+                initSign(entry.privateKey)
+                update(bytes)
+                sign()
+            }
+        }
+        return ByteArray(0)
+    }
+    */
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
@@ -604,7 +723,7 @@ class TransferFormFragment : Fragment()
         val dialog = AuthenticationDialog()
         if (listener?.isFingerprintAllowed()!! && listener?.hasEnrolledFingerprints()!!)
         {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(activity?.applicationContext!!).prepareFingerprintCryptoObject()
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
                 validateKeyAuthentication(it)
@@ -988,7 +1107,7 @@ class TransferFormFragment : Fragment()
         listener?.saveFingerprintAllowed(useInFuture)
         if (useInFuture)
         {
-            EncryptionServices(activity?.applicationContext!!).createFingerprintKey()
+            EncryptionServices().createFingerprintKey()
         }
     }
 
@@ -998,12 +1117,12 @@ class TransferFormFragment : Fragment()
     private fun validatePassword(inputtedPassword: String): Boolean
     {
         val storage = Storage(activity!!)
-        return EncryptionServices(activity?.applicationContext!!).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
+        return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
     }
 
     private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
     {
-        if (EncryptionServices(activity?.applicationContext!!).validateFingerprintAuthentication(cryptoObject))
+        if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
             startFinalizeTransferLoading()
         }

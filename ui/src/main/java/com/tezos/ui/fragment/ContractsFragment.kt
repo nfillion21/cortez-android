@@ -53,7 +53,7 @@ import org.json.JSONArray
  * Created by nfillion on 03/12/18.
  */
 
-class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListener
+class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListener
 {
     private var mCallback: OnDelegateAddressSelectedListener? = null
 
@@ -76,9 +76,9 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
         private const val DELEGATED_ADDRESSES_ARRAYLIST_KEY = "delegated_addresses_arraylist_key"
 
-        fun newInstance(customTheme: CustomTheme, pkh: String?): DelegationFragment
+        fun newInstance(customTheme: CustomTheme, pkh: String?): ContractsFragment
         {
-            val fragment = DelegationFragment()
+            val fragment = ContractsFragment()
 
             val bundle = Bundle()
             bundle.putBundle(CustomTheme.TAG, customTheme.toBundle())
@@ -321,7 +321,7 @@ class DelegationFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListe
 
         mGetDelegatedAddressesLoading = true
 
-        empty_loading_textview.setText(R.string.loading_delegated_addresses)
+        empty_loading_textview.setText(R.string.loading_contracts)
 
         nav_progress.visibility = View.VISIBLE
 

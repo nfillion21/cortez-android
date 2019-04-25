@@ -34,6 +34,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -45,6 +46,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.widget.SeekBar
 import android.widget.TextView
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
@@ -55,22 +57,21 @@ import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.Utils
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
-import kotlinx.android.synthetic.main.activity_add_delegate.*
-import kotlinx.android.synthetic.main.delegate_form_card_info.*
+import kotlinx.android.synthetic.main.activity_add_limits.*
+import kotlinx.android.synthetic.main.limits_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.InputStream
-import java.nio.charset.Charset
+import java.security.interfaces.ECPublicKey
 
 /**
- * Created by nfillion on 20/11/18.
+ * Created by nfillion on 26/02/19.
  */
-class AddDelegateActivity : BaseSecureActivity()
+class AddLimitsActivity : BaseSecureActivity()
 {
     private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
@@ -78,12 +79,16 @@ class AddDelegateActivity : BaseSecureActivity()
     private var mFinalizeDelegateLoading:Boolean = false
 
     private var mDelegatePayload:String? = null
-    private var mDelegateFees:Long = -1L
+    private var mDelegateFees:Long = -1
 
     private var mDelegateAmount:Double = -1.0
-    private var mDelegateTezosAddress:String? = null
+
+    private var mLimitAmount:Long = -1L
 
     private var mClickCalculate:Boolean = false
+
+    private var mIsTracking:Boolean = false
+    private var mIsTyping:Boolean = false
 
     companion object
     {
@@ -95,14 +100,15 @@ class AddDelegateActivity : BaseSecureActivity()
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
         private const val DELEGATE_AMOUNT_KEY = "delegate_amount_key"
-        private const val DELEGATE_TEZOS_ADDRESS_KEY = "delegate_tezos_address_key"
+        private const val LIMIT_AMOUNT_KEY = "limit_amount_key"
+
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
 
         private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
         {
-            val starter = Intent(context, AddDelegateActivity::class.java)
+            val starter = Intent(context, AddLimitsActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
 
             return starter
@@ -118,27 +124,57 @@ class AddDelegateActivity : BaseSecureActivity()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_delegate)
+        setContentView(R.layout.activity_add_limits)
 
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
         val theme = CustomTheme.fromBundle(themeBundle)
 
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
-        update_storage_button_layout.setOnClickListener {
+        create_limit_contract_button_layout.setOnClickListener {
             onDelegateClick()
         }
 
         initToolbar(theme)
 
-        amount_edittext.addTextChangedListener(GenericTextWatcher(amount_edittext))
+        limits_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            private var currentValue:Int = 1
+
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean)
+            {
+                if (!mIsTyping)
+                {
+                    limit_edittext.setText( (i+1).toString())
+                    currentValue = i+1
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar)
+            {
+                if (!mIsTyping)
+                {
+                    mIsTracking = true
+                }
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar)
+            {
+                if (!mIsTyping)
+                {
+                    mIsTracking = false
+                    limit_edittext.setText( (currentValue).toString())
+                }
+            }
+        })
+
+        amount_limit_edittext.addTextChangedListener(GenericTextWatcher(amount_limit_edittext))
 
         val focusChangeListener = this.focusChangeListener()
-        amount_edittext.onFocusChangeListener = focusChangeListener
+        amount_limit_edittext.onFocusChangeListener = focusChangeListener
 
-        public_address_edittext.addTextChangedListener(GenericTextWatcher(public_address_edittext))
-
-        public_address_edittext.onFocusChangeListener = focusChangeListener
+        limit_edittext.addTextChangedListener(GenericTextWatcher(limit_edittext))
+        limit_edittext.onFocusChangeListener = focusChangeListener
 
         if (savedInstanceState != null)
         {
@@ -149,7 +185,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
             mDelegateAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
 
-            mDelegateTezosAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
+            mLimitAmount = savedInstanceState.getLong(LIMIT_AMOUNT_KEY, -1L)
 
             mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
@@ -162,17 +198,13 @@ class AddDelegateActivity : BaseSecureActivity()
         return View.OnFocusChangeListener { v, hasFocus ->
             val i = v.id
 
-            if (i == R.id.amount_edittext)
+            when (i)
             {
-                putAmountInRed(!hasFocus)
-            }
-            else if (i == R.id.public_address_edittext)
-            {
-                putTzAddressInRed(!hasFocus)
-            }
-            else
-            {
-                throw UnsupportedOperationException(
+                R.id.amount_limit_edittext -> putAmountInRed(!hasFocus)
+
+                R.id.limit_edittext -> putLimitInRed(!hasFocus)
+
+                else -> throw UnsupportedOperationException(
                         "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
             }
         }
@@ -217,7 +249,6 @@ class AddDelegateActivity : BaseSecureActivity()
         transferLoading(true)
 
         putFeesToNegative()
-        putPayButtonToNull()
 
         // validatePay cannot be valid if there is no fees
         validateAddButton(false)
@@ -261,13 +292,11 @@ class AddDelegateActivity : BaseSecureActivity()
 
             dstObject.put("fee", mDelegateFees)
 
-            dstObject.put("delegate", mDelegateTezosAddress)
-
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
 
-            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (true/*!isAddDelegatePayloadValid(mDelegatePayload!!, postParams)*/)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -303,6 +332,10 @@ class AddDelegateActivity : BaseSecureActivity()
 
                             setResult(R.id.add_address_succeed, null)
                             finish()
+
+                            //TODO create the spending key
+                            //EncryptionServices.createAndroidAsymmetricKey
+
                         },
                         Response.ErrorListener
                         {
@@ -364,10 +397,6 @@ class AddDelegateActivity : BaseSecureActivity()
         }
     }
 
-    fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String
-    {
-        return this.bufferedReader(charset).use { it.readText() }
-    }
 
     private fun onInitDelegateLoadComplete(error:VolleyError?)
     {
@@ -384,13 +413,13 @@ class AddDelegateActivity : BaseSecureActivity()
 
             //TODO we should give access to the fees button
 
-            fee_edittext.isEnabled = true
-            fee_edittext.isFocusable = false
-            fee_edittext.isClickable = false
-            fee_edittext.isLongClickable = false
-            fee_edittext.hint = getString(R.string.click_for_fees)
+            fee_limit_edittext.isEnabled = true
+            fee_limit_edittext.isFocusable = false
+            fee_limit_edittext.isClickable = false
+            fee_limit_edittext.isLongClickable = false
+            fee_limit_edittext.hint = getString(R.string.click_for_fees)
 
-            fee_edittext.setOnClickListener {
+            fee_limit_edittext.setOnClickListener {
                 startInitDelegationLoading()
             }
 
@@ -430,11 +459,15 @@ class AddDelegateActivity : BaseSecureActivity()
         var dstObject = JSONObject()
         dstObject.put("manager", pkhSrc)
 
+        val ecKeys = retrieveECKeys()
+        val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+        val spendingLimitContract = String.format(getString(R.string.spending_limit_contract), p2pk, (mLimitAmount*1000000L).toString())
 
-        dstObject.put("delegate", mDelegateTezosAddress)
+        val json = JSONObject(spendingLimitContract)
+        dstObject.put("script", json)
 
         //TODO be careful, do it in mutez.
-        dstObject.put("credit", (mDelegateAmount*1000000).toLong().toString())
+        dstObject.put("credit", (mDelegateAmount*1000000L).toLong().toString())
 
         dstObject.put("delegatable", true)
 
@@ -442,7 +475,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         postParams.put("dsts", dstObjects)
 
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
@@ -461,20 +494,18 @@ class AddDelegateActivity : BaseSecureActivity()
             postParams.put("dsts", dstsArray)
 
             // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != -1L)
+            if (mDelegatePayload != null && mDelegateFees != null)
             {
                 onInitDelegateLoadComplete(null)
 
                 val feeInTez = mDelegateFees.toDouble()/1000000.0
-                fee_edittext.setText(feeInTez.toString())
+                fee_limit_edittext.setText(feeInTez.toString())
 
                 validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
                 if (isInputDataValid() && isDelegateFeeValid())
                 {
                     validateAddButton(true)
-
-                    this.setTextPayButton()
                 }
                 else
                 {
@@ -516,17 +547,30 @@ class AddDelegateActivity : BaseSecureActivity()
         VolleySingleton.getInstance(applicationContext).addToRequestQueue(jsObjRequest)
     }
 
+    private fun retrieveECKeys():ByteArray
+    {
+        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keyPair == null)
+        {
+            EncryptionServices().createSpendingKey()
+            keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        }
+
+        val ecKey = keyPair!!.public as ECPublicKey
+        return ecKeyFormat(ecKey)
+    }
+
     private fun transferLoading(loading:Boolean)
     {
         if (loading)
         {
-            update_storage_button_layout.visibility = View.GONE
+            create_limit_contract_button_layout.visibility = View.GONE
             nav_progress.visibility = View.VISIBLE
             //amount_transfer.isEnabled = false
         }
         else
         {
-            update_storage_button_layout.visibility = View.VISIBLE
+            create_limit_contract_button_layout.visibility = View.VISIBLE
             nav_progress.visibility = View.INVISIBLE
             //amount_transfer.isEnabled = true
         }
@@ -534,27 +578,29 @@ class AddDelegateActivity : BaseSecureActivity()
 
     private fun putFeesToNegative()
     {
-        fee_edittext.setText("")
+        fee_limit_edittext.setText("")
 
         mClickCalculate = false
-        fee_edittext.isEnabled = false
-        fee_edittext.hint = getString(R.string.neutral)
+        fee_limit_edittext.isEnabled = false
+        fee_limit_edittext.hint = getString(R.string.neutral)
 
         mDelegateFees = -1
 
         mDelegatePayload = null
     }
 
-    private fun putPayButtonToNull()
-    {
-        update_storage_button.text = getString(R.string.pay, "")
-    }
-
     private fun showSnackBar(error:VolleyError?)
     {
-        var errorStr: String? = error?.toString() ?: getString(R.string.generic_error)
+        var error: String? = if (error != null)
+        {
+            error.toString()
+        }
+        else
+        {
+            getString(R.string.generic_error)
+        }
 
-        val snackbar = Snackbar.make(findViewById(R.id.content), errorStr.toString(), Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(findViewById(R.id.content), error.toString(), Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                 android.R.color.holo_red_light)))
         snackbar.show()
@@ -567,23 +613,23 @@ class AddDelegateActivity : BaseSecureActivity()
 
         if (validate)
         {
-            update_storage_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
-            update_storage_button_layout.isEnabled = true
-            update_storage_button_layout.background = makeSelector(theme)
+            create_limit_contract_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+            create_limit_contract_button_layout.isEnabled = true
+            create_limit_contract_button_layout.background = makeSelector(theme)
 
-            val drawables = update_storage_button.compoundDrawables
+            val drawables = create_limit_contract_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
         }
         else
         {
-            update_storage_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
-            update_storage_button_layout.isEnabled = false
+            create_limit_contract_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+            create_limit_contract_button_layout.isEnabled = false
 
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            update_storage_button_layout.background = makeSelector(greyTheme)
+            create_limit_contract_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = update_storage_button.compoundDrawables
+            val drawables = create_limit_contract_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white))
         }
@@ -607,18 +653,41 @@ class AddDelegateActivity : BaseSecureActivity()
         {
             val i = v.id
 
-            if ((i == R.id.amount_edittext && !isDelegateAmountEquals(editable))
-                            ||
-                 (i == R.id.public_address_edittext && !isDelegateTezosAddressEquals(editable)))
+            if ((i == R.id.amount_limit_edittext && !isDelegateAmountEquals(editable))
+                    ||
+                    (i == R.id.limit_edittext && !isLimitAmountEquals(editable)))
             {
-                if (i == R.id.amount_edittext )
+                if (i == R.id.amount_limit_edittext )
                 {
                     putAmountInRed(false)
                 }
 
-                if (i == R.id.public_address_edittext)
+                if (i == R.id.limit_edittext )
                 {
-                    putTzAddressInRed(false)
+                    if (!mIsTracking)
+                    {
+                        putLimitInRed(false)
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        {
+                            val progress = limits_seekbar.progress
+
+                            val change:Int = if (TextUtils.isEmpty(limit_edittext.text))
+                            {
+                                0
+                            } else
+                            {
+                                limit_edittext.text.toString().toInt() - 1
+                            }
+
+                            if (progress != change)
+                            {
+                                mIsTyping = true
+                                limits_seekbar.setProgress(change-1, true)
+                                mIsTyping = false
+                            }
+                        }
+                    }
                 }
 
                 //TODO text changed
@@ -628,7 +697,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
                 //TODO check if it's already
 
-                if (isInputDataValid())
+                if (!mIsTracking && isInputDataValid())
                 {
                     startInitDelegationLoading()
                 }
@@ -640,10 +709,9 @@ class AddDelegateActivity : BaseSecureActivity()
                     transferLoading(false)
 
                     putFeesToNegative()
-                    putPayButtonToNull()
                 }
             }
-            else if (i != R.id.amount_edittext && i != R.id.public_address_edittext)
+            else if (i != R.id.amount_limit_edittext && i != R.id.limit_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -654,7 +722,7 @@ class AddDelegateActivity : BaseSecureActivity()
         {
             val isAmountEquals = false
 
-            if (!TextUtils.isEmpty(editable))
+            if (editable != null && !TextUtils.isEmpty(editable))
             {
                 try
                 {
@@ -671,52 +739,46 @@ class AddDelegateActivity : BaseSecureActivity()
             }
             return isAmountEquals
         }
-    }
 
-    private fun isDelegateTezosAddressEquals(editable: Editable):Boolean
-    {
-        val isTezosAddressEquals = true
-
-        if (!TextUtils.isEmpty(editable))
+        private fun isLimitAmountEquals(editable: Editable):Boolean
         {
-            val tezosAddress = editable.toString()
-            return tezosAddress == mDelegateTezosAddress
+            val isLimitAmountEquals = false
+
+            if (editable != null && !TextUtils.isEmpty(editable))
+            {
+                try
+                {
+                    val limit = editable.toString().toLong()
+                    if (limit != -1L && limit == mLimitAmount)
+                    {
+                        return true
+                    }
+                }
+                catch (e: NumberFormatException)
+                {
+                    return false
+                }
+            }
+            return isLimitAmountEquals
         }
-        return isTezosAddressEquals
+
     }
 
     fun isInputDataValid(): Boolean
     {
-        return isDelegateAmountValid() && isTzAddressValid()
+        return isDelegateAmountValid() && isDailySpendingLimitValid()
     }
-
-    private fun isTzAddressValid(): Boolean
-    {
-        var isTzAddressValid = false
-
-        if (!TextUtils.isEmpty(public_address_edittext.text))
-        {
-            if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
-            {
-                mDelegateTezosAddress = public_address_edittext.text.toString()
-                isTzAddressValid = true
-            }
-        }
-
-        return isTzAddressValid
-    }
-
 
     private fun isDelegateFeeValid():Boolean
     {
         val isFeeValid = false
 
-        if (fee_edittext.text != null && !TextUtils.isEmpty(fee_edittext.text))
+        if (fee_limit_edittext.text != null && !TextUtils.isEmpty(fee_limit_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val fee = fee_edittext.text.toString().toDouble()
+                val fee = fee_limit_edittext.text.toString().toDouble()
 
                 if (fee >= 0.000001f)
                 {
@@ -739,12 +801,12 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         val isAmountValid = false
 
-        if (amount_edittext.text != null && !TextUtils.isEmpty(amount_edittext.text))
+        if (amount_limit_edittext.text != null && !TextUtils.isEmpty(amount_limit_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val amount = amount_edittext.text!!.toString().toDouble()
+                val amount = amount_limit_edittext.text!!.toString().toDouble()
 
                 //no need
                 if (amount >= 0.0f)
@@ -763,6 +825,34 @@ class AddDelegateActivity : BaseSecureActivity()
         return isAmountValid
     }
 
+    private fun isDailySpendingLimitValid():Boolean
+    {
+        val isLimitValid = false
+
+        if (limit_edittext.text != null && !TextUtils.isEmpty(limit_edittext.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val limit = limit_edittext.text!!.toString().toLong()
+
+                //no need
+                if (limit in 1..1000)
+                {
+                    mLimitAmount = limit
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mLimitAmount = -1
+                return false
+            }
+        }
+
+        return isLimitValid
+    }
+
     override fun onResume()
     {
         super.onResume()
@@ -772,7 +862,6 @@ class AddDelegateActivity : BaseSecureActivity()
         if (isInputDataValid() && isDelegateFeeValid())
         {
             validateAddButton(true)
-            this.setTextPayButton()
         }
 
         //TODO we got to keep in mind there's an id already.
@@ -798,7 +887,7 @@ class AddDelegateActivity : BaseSecureActivity()
     private fun putEverythingInRed()
     {
         this.putAmountInRed(true)
-        this.putTzAddressInRed(true)
+        this.putLimitInRed(true)
     }
 
     fun isAddButtonValid(): Boolean
@@ -806,24 +895,6 @@ class AddDelegateActivity : BaseSecureActivity()
         return mDelegatePayload != null
                 && isDelegateFeeValid()
                 && isInputDataValid()
-    }
-
-    private fun putTzAddressInRed(red: Boolean)
-    {
-        val color: Int
-
-        val tzAddressValid = isTzAddressValid()
-
-        if (red && !tzAddressValid)
-        {
-            color = R.color.tz_error
-        }
-        else
-        {
-            color = R.color.tz_accent
-        }
-
-        public_address_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
 // put everything in RED
@@ -837,7 +908,7 @@ class AddDelegateActivity : BaseSecureActivity()
         if (red && !amountValid)
         {
             color = R.color.tz_error
-            update_storage_button.text = getString(R.string.delegate_format, "")
+            //update_storage_button.text = getString(R.string.delegate_format, "")
         }
         else
         {
@@ -846,61 +917,34 @@ class AddDelegateActivity : BaseSecureActivity()
             if (amountValid)
             {
                 //val amount = delegate_transfer_edittext.text.toString()
-                this.setTextPayButton()
+                //this.setTextPayButton()
             }
             else
             {
-                update_storage_button.text = getString(R.string.delegate_format, "")
+                //update_storage_button.text = getString(R.string.delegate_format, "")
             }
         }
 
-        amount_edittext.setTextColor(ContextCompat.getColor(this, color))
+        amount_limit_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
-    private fun setTextPayButton()
+    private fun putLimitInRed(red: Boolean)
     {
-        var amountDouble: Double = mDelegateAmount
+        val color: Int
 
-        //amountDouble += fee_edittext.text.toString().toLong()/1000000
-        amountDouble += mDelegateFees.toDouble()/1000000.0
+        val limitValid = isDailySpendingLimitValid()
 
-        var amount = amountDouble.toString()
-
-        if (amount.contains("."))
+        if (red && !limitValid)
         {
-            val elements = amount.substring(amount.indexOf("."))
-
-            when
-            {
-                elements.length > 7 ->
-                {
-                    amount = String.format("%.6f", amount.toDouble())
-                    val d = amount.toDouble()
-                    amount = d.toString()
-                }
-
-                elements.length <= 3 ->
-                {
-                    amount = String.format("%.2f", amount.toDouble())
-                }
-                else ->
-                {
-                    //                        int length = elements.length() - 1;
-                    //                        String format = "%." + length + "f";
-                    //                        Float f = Float.parseFloat(amount);
-                    //                        amount = String.format(format, f);
-                }
-            }
+            color = R.color.tz_error
+            create_limit_contract_button.text = getString(R.string.delegate_format, "")
         }
         else
         {
-            amount = String.format("%.2f", amount.toDouble())
-//amount = Double.parseDouble(amount).toString();
+            color = R.color.tz_accent
         }
 
-        val moneyFormatted2 = "$amount ꜩ"
-//String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        update_storage_button.text = getString(R.string.pay, moneyFormatted2)
+        limit_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -914,7 +958,7 @@ class AddDelegateActivity : BaseSecureActivity()
     private fun onDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed() && hasEnrolledFingerprints())
+        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
@@ -1016,7 +1060,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         outState.putDouble(DELEGATE_AMOUNT_KEY, mDelegateAmount)
 
-        outState.putString(DELEGATE_TEZOS_ADDRESS_KEY, mDelegateTezosAddress)
+        outState.putLong(LIMIT_AMOUNT_KEY, mLimitAmount)
 
         outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
 

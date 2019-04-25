@@ -28,7 +28,7 @@ tools:ignore="UselessParent,UnusedAttribute">
             tools:targetApi="lollipop">
 
             <TextView android:id="@+id/barTitle"
-                android:text="@string/add_delegate_title"
+                android:text="@string/add_limits_title"
 
                 android:paddingStart="@dimen/spacing_normal"
                 android:paddingLeft="@dimen/spacing_normal"
@@ -104,14 +104,14 @@ tools:ignore="UselessParent,UnusedAttribute">
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
                         android:layout_marginBottom="@dimen/spacing_normal"
-                        android:text="@string/delegate_title"/>
+                        android:text="@string/limits_title"/>
 
                     <TextView
                         android:id="@+id/limits_info_textview"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                        android:text="@string/delegate_address_info"
+                        android:text="@string/contract_limits_info"
                         android:textColor="@color/colorAccent"
                         android:layout_marginBottom="@dimen/spacing_double"
                         android:ellipsize="end" />
@@ -121,7 +121,7 @@ tools:ignore="UselessParent,UnusedAttribute">
                 <include
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    layout="@layout/delegate_form_card_info"
+                    layout="@layout/limits_form_card_info"
                     />
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>
@@ -136,7 +136,7 @@ tools:ignore="UselessParent,UnusedAttribute">
         android:layout_height="?android:attr/actionBarSize">
 
         <FrameLayout
-            android:id="@+id/update_storage_button_layout"
+            android:id="@+id/create_limit_contract_button_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             style="@style/PaymentScreens.Button"
@@ -146,10 +146,10 @@ tools:ignore="UselessParent,UnusedAttribute">
             >
 
             <Button
-                android:id="@+id/update_storage_button"
+                android:id="@+id/create_limit_contract_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/delegate"
+                android:text="@string/create_contract"
 
                 android:drawableLeft="@drawable/ic_lock_black"
                 android:drawableStart="@drawable/ic_lock_black"
