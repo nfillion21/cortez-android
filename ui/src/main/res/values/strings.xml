@@ -122,6 +122,7 @@
     <string name="neutral">-</string>
     <string name="one">1</string>
     <string name="click_for_fees">Click to recaculate</string>
+    <string name="click_for_p2pk">Click to assign this phone</string>
     <string name="empty_list_operations">No operations</string>
     <string name="contact_name">Contact name</string>
     <string name="tez">ꜩ</string>

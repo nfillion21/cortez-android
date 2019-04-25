@@ -60,11 +60,13 @@ import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.interfaces.ECPublicKey
 
 class ScriptFragment : Fragment()
 {
@@ -217,7 +219,7 @@ class ScriptFragment : Fragment()
                 }
                 else
                 {
-                    onInitDelegateLoadComplete(null)
+                    onInitEditLoadComplete(null)
 
                     if (mFinalizeDelegateLoading)
                     {
@@ -301,6 +303,34 @@ class ScriptFragment : Fragment()
     {
         if (editMode)
         {
+            //TODO generate a new p2pk to let the user edit the form
+
+            if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
+            {
+                val storageJSONObject = JSONObject(mStorage)
+                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+                val args2 = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
+                val pk = DataExtractor.getStringFromField(args2[1] as JSONObject, "string")
+
+                val p2pk = retrieveP2PK()
+                if (p2pk == null || p2pk != pk)
+                {
+                    public_address_edittext.setText("")
+                    public_address_edittext.isEnabled = true
+                    public_address_edittext.isFocusable = false
+                    public_address_edittext.isClickable = false
+                    public_address_edittext.isLongClickable = false
+                    public_address_edittext.hint = getString(R.string.click_for_p2pk)
+
+                    public_address_edittext.setOnClickListener {
+                        val ecKeys = retrieveECKeys()
+                        val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                        public_address_edittext.setText(p2pk)
+                    }
+                }
+            }
+
             update_storage_button_relative_layout.visibility = View.VISIBLE
 
             gas_textview.visibility = View.VISIBLE
@@ -342,6 +372,8 @@ class ScriptFragment : Fragment()
 
                 val dailySpendingLimit = DataExtractor.getStringFromField(args4[0] as JSONObject, "int")
                 daily_spending_limit_edittext.setText(mutezToTez(dailySpendingLimit))
+
+                putSpendingLimitInRed(false)
             }
 
             fab_undo_storage.hide()
@@ -536,6 +568,26 @@ class ScriptFragment : Fragment()
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.contract_storage_info)
 
+                //TODO handle there the right stuff
+                // try to get the secure key
+                // if there is a key and it's the same as in storage, no problem
+
+                //EncryptionServices().removeSpendingKey()
+                //EncryptionServices().createSpendingKey()
+
+                val p2pk = retrieveP2PK()
+                if (p2pk == null || p2pk != pk)
+                {
+                    warning_p2pk_info?.visibility = View.VISIBLE
+                }
+                else
+                {
+                    warning_p2pk_info?.visibility = View.GONE
+                }
+
+                // if there is no key or it's not the same as in storage, put the information.
+
+
                 if (mEditMode)
                 {
                     switchToEditMode(true)
@@ -696,7 +748,7 @@ class ScriptFragment : Fragment()
         }
     }
 
-    private fun onInitDelegateLoadComplete(error:VolleyError?)
+    private fun onInitEditLoadComplete(error:VolleyError?)
     {
         mInitUpdateStorageLoading = false
 
@@ -766,7 +818,7 @@ class ScriptFragment : Fragment()
 
         postParams.put("dsts", dstObjects)
 
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
@@ -778,7 +830,7 @@ class ScriptFragment : Fragment()
                 // we use this call to ask for payload and fees
                 if (mUpdateStoragePayload != null && mUpdateStorageFees != -1L && activity != null)
                 {
-                    onInitDelegateLoadComplete(null)
+                    onInitEditLoadComplete(null)
 
                     val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
                     storage_fee_edittext?.setText(feeInTez.toString())
@@ -798,7 +850,7 @@ class ScriptFragment : Fragment()
                 else
                 {
                     val volleyError = VolleyError(getString(R.string.generic_error))
-                    onInitDelegateLoadComplete(volleyError)
+                    onInitEditLoadComplete(volleyError)
                     mClickCalculate = true
 
                     //the call failed
@@ -809,7 +861,7 @@ class ScriptFragment : Fragment()
         {
             if (activity != null)
             {
-                onInitDelegateLoadComplete(it)
+                onInitEditLoadComplete(it)
 
                 mClickCalculate = true
                 //Log.i("mTransferId", ""+mTransferId)
@@ -1246,6 +1298,31 @@ class ScriptFragment : Fragment()
         amountLong /= 1000000
 
         return amountLong.toString()
+    }
+
+    private fun retrieveP2PK():String?
+    {
+        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keyPair != null)
+        {
+            val ecKey = keyPair!!.public as ECPublicKey
+            return CryptoUtils.generateP2Pk(ecKeyFormat(ecKey))
+        }
+
+        return null
+    }
+
+    private fun retrieveECKeys():ByteArray
+    {
+        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keyPair == null)
+        {
+            EncryptionServices().createSpendingKey()
+            keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        }
+
+        val ecKey = keyPair!!.public as ECPublicKey
+        return ecKeyFormat(ecKey)
     }
 
     override fun onDetach()
