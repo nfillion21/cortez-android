@@ -460,8 +460,29 @@ class AddLimitsActivity : BaseSecureActivity()
         dstObject.put("manager", pkhSrc)
 
         val ecKeys = retrieveECKeys()
-        val p2pk = CryptoUtils.generateP2Pk(ecKeys)
-        val spendingLimitContract = String.format(getString(R.string.spending_limit_contract), p2pk, (mLimitAmount*1000000L).toString())
+        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+
+        // first: tz3
+        // second: mLimitAmount
+        // third: masterkey tz1?
+
+        val contract = getString(R.string.spending_limit_contract_evo)
+        val jsonContract = JSONObject(contract)
+        val jsonContractString = jsonContract.toString()
+
+        var spendingLimitContract:String? = null
+        try {
+            // some code
+            spendingLimitContract = String.format(jsonContractString, tz3, (mLimitAmount*1000000L).toString(), pkhSrc)
+        }
+        catch (e: Exception) {
+            // handler
+            val k = 2
+            val k1 = 2+2
+        }
+        finally {
+            // optional finally block
+        }
 
         val json = JSONObject(spendingLimitContract)
         dstObject.put("script", json)
