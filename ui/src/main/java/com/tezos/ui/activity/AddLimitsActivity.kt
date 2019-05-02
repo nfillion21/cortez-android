@@ -466,23 +466,8 @@ class AddLimitsActivity : BaseSecureActivity()
         // second: mLimitAmount
         // third: masterkey tz1?
 
-        val contract = getString(R.string.spending_limit_contract_evo)
-        val jsonContract = JSONObject(contract)
-        val jsonContractString = jsonContract.toString()
-
-        var spendingLimitContract:String? = null
-        try {
-            // some code
-            spendingLimitContract = String.format(jsonContractString, tz3, (mLimitAmount*1000000L).toString(), pkhSrc)
-        }
-        catch (e: Exception) {
-            // handler
-            val k = 2
-            val k1 = 2+2
-        }
-        finally {
-            // optional finally block
-        }
+        val jsonContractString = JSONObject(getString(R.string.spending_limit_contract_evo)).toString()
+        val spendingLimitContract = String.format(jsonContractString, tz3, (mLimitAmount*1000000L).toString(), pkhSrc)
 
         val json = JSONObject(spendingLimitContract)
         dstObject.put("script", json)

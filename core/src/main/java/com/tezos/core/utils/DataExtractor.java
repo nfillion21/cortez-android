@@ -136,6 +136,14 @@ public class DataExtractor {
         return null;
     }
 
+    public static String getStringFromField(JSONArray jsonArray, int i) {
+
+        if (checkParams(jsonArray, i)) {
+            return jsonArray.optString(i, null);
+        }
+        return null;
+    }
+
     public static Date getDateFromField(JSONObject jsonObject, String field) {
 
         //not used in fields, converted to string

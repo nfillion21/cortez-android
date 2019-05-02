@@ -308,13 +308,20 @@ class ScriptFragment : Fragment()
             if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
             {
                 val storageJSONObject = JSONObject(mStorage)
+
                 val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-                val args2 = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
-                val pk = DataExtractor.getStringFromField(args2[1] as JSONObject, "string")
+                // get securekey hash
 
-                val p2pk = retrieveP2PK()
-                if (p2pk == null || p2pk != pk)
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
+                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+
+                val tz3 = retrieveTz3()
+                if (tz3 == null || tz3 != secureKeyHash)
                 {
                     public_address_edittext.setText("")
                     public_address_edittext.isEnabled = true
@@ -361,16 +368,24 @@ class ScriptFragment : Fragment()
             if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
             {
                 val storageJSONObject = JSONObject(mStorage)
+
                 val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-                val args2 = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
-                val pk = DataExtractor.getStringFromField(args2[1] as JSONObject, "string")
-                public_address_edittext.setText(pk)
+                // get securekey hash
 
-                val args3 = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args")
-                val args4 = DataExtractor.getJSONArrayFromField(args3[0] as JSONObject, "args")
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
 
-                val dailySpendingLimit = DataExtractor.getStringFromField(args4[0] as JSONObject, "int")
+                // get daily spending limit
+
+                val dailySpendingLimitJSONObject = argsSecureKey[1] as JSONObject
+                val dailySpendingLimitJSONArray = DataExtractor.getJSONArrayFromField(dailySpendingLimitJSONObject, "args")
+
+                val dailySpendingLimitHashField = DataExtractor.getJSONObjectFromField(dailySpendingLimitJSONArray, 0)
+                val dailySpendingLimitHashField2 = DataExtractor.getJSONArrayFromField(dailySpendingLimitHashField, "args") as JSONArray
+
+                val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
+                val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
+
                 daily_spending_limit_edittext.setText(mutezToTez(dailySpendingLimit))
 
                 putSpendingLimitInRed(false)
@@ -544,15 +559,36 @@ class ScriptFragment : Fragment()
                 //TODO at this point, just show that there is no script.
 
                 val storageJSONObject = JSONObject(mStorage)
+
                 val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-                val args2 = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
-                val pk = DataExtractor.getStringFromField(args2[1] as JSONObject, "string")
+                // get masterkey hash
 
-                val args3 = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args")
-                val args4 = DataExtractor.getJSONArrayFromField(args3[0] as JSONObject, "args")
+                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                val masterKeyJSONObject = argsMasterKey[0] as JSONObject
+                val masterKeyHash = DataExtractor.getStringFromField(masterKeyJSONObject, "string")
 
-                val dailySpendingLimit = DataExtractor.getStringFromField(args4[0] as JSONObject, "int")
+                // get securekey hash
+
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
+                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+
+
+                // get daily spending limit
+
+                val dailySpendingLimitJSONObject = argsSecureKey[1] as JSONObject
+                val dailySpendingLimitJSONArray = DataExtractor.getJSONArrayFromField(dailySpendingLimitJSONObject, "args")
+
+                val dailySpendingLimitHashField = DataExtractor.getJSONObjectFromField(dailySpendingLimitJSONArray, 0)
+                val dailySpendingLimitHashField2 = DataExtractor.getJSONArrayFromField(dailySpendingLimitHashField, "args") as JSONArray
+
+                val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
+                val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
+
 
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
                 daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
@@ -561,7 +597,7 @@ class ScriptFragment : Fragment()
 
                 public_address_layout?.visibility = View.VISIBLE
 
-                public_address_edittext?.setText(pk)
+                public_address_edittext?.setText(secureKeyHash)
 
                 update_storage_button_layout?.visibility = View.VISIBLE
 
@@ -575,8 +611,8 @@ class ScriptFragment : Fragment()
                 //EncryptionServices().removeSpendingKey()
                 //EncryptionServices().createSpendingKey()
 
-                val p2pk = retrieveP2PK()
-                if (p2pk == null || p2pk != pk)
+                val tz3 = retrieveTz3()
+                if (tz3 == null || tz3 != secureKeyHash)
                 {
                     warning_p2pk_info?.visibility = View.VISIBLE
                 }
@@ -1300,13 +1336,13 @@ class ScriptFragment : Fragment()
         return amountLong.toString()
     }
 
-    private fun retrieveP2PK():String?
+    private fun retrieveTz3():String?
     {
         var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
         if (keyPair != null)
         {
             val ecKey = keyPair!!.public as ECPublicKey
-            return CryptoUtils.generateP2Pk(ecKeyFormat(ecKey))
+            return CryptoUtils.generatePkhTz3(ecKeyFormat(ecKey))
         }
 
         return null
