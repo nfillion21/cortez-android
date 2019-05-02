@@ -711,7 +711,7 @@ class ScriptFragment : Fragment()
 
                 var payloadsign = newResult.toNoPrefixHexString()
 
-                val stringRequest = object : StringRequest(Request.Method.POST, url,
+                val stringRequest = object : StringRequest(Method.POST, url,
                         Response.Listener<String> { response ->
                             if (activity != null)
                             {
@@ -841,11 +841,23 @@ class ScriptFragment : Fragment()
         dstObject.put("dst", pkh())
         dstObject.put("amount", "0")
 
-        val resScript = JSONObject(getString(R.string.update_parameters_storage))
+        //val resScript = JSONObject(getString(R.string.update_parameters_storage))
+        val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_update_storage))
 
-        //TODO check about generating a new P256 key
         mUpdateStorageAddress = pk
-        val spendingLimitContract = String.format(resScript.toString(), mUpdateStorageAddress, (mSpendingLimitAmount*1000000L).toString())
+        //val spendingLimitContract = String.format(resScript.toString(), mUpdateStorageAddress, (mSpendingLimitAmount*1000000L).toString())
+
+        //TODO I need to insert a signature into parameters
+
+        val sk = CryptoUtils.generateSk(mnemonics, "")
+
+        val signedData0 = "05020000001f070700020a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
+        val signedData1 = "050000".hexToByteArray()
+        val signature = KeyPair.sign(sk, signedData0 + signedData1)
+
+        val prefixed = CryptoUtils.generateEDSig(signature)
+
+        val spendingLimitContract = String.format(resScript.toString(), pk, prefixed, retrieveTz3(), pkh())
 
         val json = JSONObject(spendingLimitContract)
         dstObject.put("parameters", json)

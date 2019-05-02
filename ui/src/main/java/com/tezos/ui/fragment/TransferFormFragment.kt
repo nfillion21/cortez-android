@@ -488,6 +488,7 @@ class TransferFormFragment : Fragment()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
+
                 val bytes = KeyPair.b2b(result)
                 var signature = EncryptionServices().sign(bytes)
 
