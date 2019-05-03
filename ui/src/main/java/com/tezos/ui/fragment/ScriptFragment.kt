@@ -831,8 +831,10 @@ class ScriptFragment : Fragment()
         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
+        val tz1 = CryptoUtils.generatePkh(mnemonics, "")
+
         var postParams = JSONObject()
-        postParams.put("src", pkh())
+        postParams.put("src", tz1)
         postParams.put("src_pk", pk)
 
         var dstObjects = JSONArray()
@@ -841,23 +843,22 @@ class ScriptFragment : Fragment()
         dstObject.put("dst", pkh())
         dstObject.put("amount", "0")
 
-        //val resScript = JSONObject(getString(R.string.update_parameters_storage))
-        val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_update_storage))
-
         mUpdateStorageAddress = pk
-        //val spendingLimitContract = String.format(resScript.toString(), mUpdateStorageAddress, (mSpendingLimitAmount*1000000L).toString())
 
         //TODO I need to insert a signature into parameters
 
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
-        val signedData0 = "05020000001f070700020a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
-        val signedData1 = "050000".hexToByteArray()
+        val signedData0 = "0507070707070700000a00000015023a74e47ea7b7446faa1a90b6a636d8337f07471c07070707008092f40100b8010707020000000002000000000a00000015001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
+        val signedData1 = "050001".hexToByteArray()
         val signature = KeyPair.sign(sk, signedData0 + signedData1)
 
-        val prefixed = CryptoUtils.generateEDSig(signature)
+        val edsig = CryptoUtils.generateEDSig(signature)
 
-        val spendingLimitContract = String.format(resScript.toString(), pk, prefixed, retrieveTz3(), pkh())
+        val tz3 = retrieveTz3()
+
+        val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_update_storage))
+        val spendingLimitContract = String.format(resScript.toString(), pk, edsig, tz3, (mSpendingLimitAmount*1000000L).toString(), tz1)
 
         val json = JSONObject(spendingLimitContract)
         dstObject.put("parameters", json)
