@@ -850,7 +850,7 @@ class ScriptFragment : Fragment()
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
         val signedData0 = "0507070707070700000a00000015023a74e47ea7b7446faa1a90b6a636d8337f07471c07070707008092f40100b8010707020000000002000000000a00000015001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
-        val signedData1 = "050001".hexToByteArray()
+        val signedData1 = "050002".hexToByteArray()
         val signature = KeyPair.sign(sk, signedData0 + signedData1)
 
         val edsig = CryptoUtils.generateEDSig(signature)
@@ -858,7 +858,12 @@ class ScriptFragment : Fragment()
         val tz3 = retrieveTz3()
 
         val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_update_storage))
-        val spendingLimitContract = String.format(resScript.toString(), pk, edsig, tz3, (mSpendingLimitAmount*1000000L).toString(), tz1)
+        val spendingLimitContract = String.format(resScript.toString(),
+                pk, //
+                edsig, //signature
+                tz3, //signataire
+                (mSpendingLimitAmount*1000000L).toString(), //amount
+                tz1) //remasterkey
 
         val json = JSONObject(spendingLimitContract)
         dstObject.put("parameters", json)

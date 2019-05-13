@@ -1523,9 +1523,58 @@
        ]]>
 </string>
 
+    <string name="spending_limit_contract_evo_spending" translatable="false">
+        <![CDATA[
 
+              { "prim": "Some",
+              "args":
+                [ { "prim": "Right",
+                    "args":
+                      [ { "prim": "Pair",
+                          "args":
+                            [ { "prim": "Pair",
+                                "args":
+                                  [ [ { "prim": "Pair",
+                                        "args":
+                                          [ { "int": "%1$s" },
+                                            { "string":
+                                                "%2$s" } ] } ],
+                                    { "string":
+                                        "%3$s" } ] },
+                              { "prim": "Pair",
+                                "args":
+                                  [ { "string":
+                                        "%4$s" },
+                                    { "string":
+                                        "%5$s" } ] } ] } ] } ] }
 
+       ]]>
+    </string>
 
+    <string name="spending_limit_contract_evo_spending_sign" translatable="false">
+        <![CDATA[
 
+              { "data":
+      { "prim": "Pair",
+        "args":
+          [ [ { "prim": "Pair",
+                "args":
+                  [ { "int": "1000000" },
+                    { "string": "tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk" } ] } ],
+            { "string": "tz3Rf8qdEiEfJ8zEp8op2B9fP8vx27m5HczE" } ] },
+    "type":
+      { "prim": "pair",
+        "args":
+          [ { "prim": "list",
+              "args":
+                [ { "prim": "pair",
+                    "args":
+                      [ { "prim": "mutez" },
+                        { "prim": "contract",
+                          "args": [ { "prim": "unit" } ] } ] } ] },
+            { "prim": "key_hash" } ] }}
+
+       ]]>
+    </string>
 
 </resources>
