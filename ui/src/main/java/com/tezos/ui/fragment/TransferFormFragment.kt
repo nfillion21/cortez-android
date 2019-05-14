@@ -54,6 +54,7 @@ import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
 import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.activity.TransferFormActivity
@@ -91,6 +92,8 @@ class TransferFormFragment : Fragment()
 
     private var mStorageInfoLoading:Boolean = false
 
+    private var mStorage:String? = null
+
     companion object
     {
         @JvmStatic
@@ -121,6 +124,8 @@ class TransferFormFragment : Fragment()
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
 
         private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
+
+        private const val STORAGE_DATA_KEY = "storage_data_key"
     }
 
     interface OnTransferListener
@@ -180,6 +185,8 @@ class TransferFormFragment : Fragment()
 
             mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
 
+            mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
+
             transferLoading(isLoading())
 
 
@@ -187,6 +194,10 @@ class TransferFormFragment : Fragment()
             //TODO as long as the storage is loading, there is no possible action.
 
 
+        }
+        else
+        {
+            startGetRequestLoadContractInfo()
         }
     }
 
@@ -200,31 +211,33 @@ class TransferFormFragment : Fragment()
             this.setTextPayButton()
         }
 
+        //TODO priority with mInitStorageLoading, but only if it's a KT1.
 
-        //priority with mInitStorageLoading, but only if it's a KT1.
-
-
-
-
-        startStorageInfoLoading()
-
-
-        //TODO we got to keep in mind there's an id already.
-        if (mInitTransferLoading)
+        if (mStorageInfoLoading)
         {
-            startInitTransferLoading()
+            startStorageInfoLoading()
         }
         else
         {
-            onInitTransferLoadComplete(null)
+            onStorageInfoComplete()
 
-            if (mFinalizeTransferLoading)
+            //TODO we got to keep in mind there's an id already.
+            if (mInitTransferLoading)
             {
-                startFinalizeTransferLoading()
+                startInitTransferLoading()
             }
             else
             {
-                onFinalizeTransferLoadComplete(null)
+                onInitTransferLoadComplete(null)
+
+                if (mFinalizeTransferLoading)
+                {
+                    startFinalizeTransferLoading()
+                }
+                else
+                {
+                    onFinalizeTransferLoadComplete(null)
+                }
             }
         }
     }
@@ -282,6 +295,81 @@ class TransferFormFragment : Fragment()
         else
         {
             // the finish call is made already
+        }
+    }
+
+    private fun startStorageInfoLoading()
+    {
+        transferLoading(true)
+
+        // validatePay cannot be valid if there is no fees
+        //validateConfirmEditionButton(false)
+
+        //swipe_refresh_script_layout?.isEnabled = false
+
+        startGetRequestLoadContractInfo()
+    }
+
+    // volley
+    private fun startGetRequestLoadContractInfo()
+    {
+        cancelRequests(true)
+
+        mStorageInfoLoading = true
+
+        /*
+        loading_textview.setText(R.string.loading_contract_info)
+
+        nav_progress.visibility = View.VISIBLE
+        */
+
+        val pkh = arguments!!.getString(Address.TAG)
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.contract_storage_url), pkh)
+
+            // Request a string response from the provided URL.
+            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener<JSONObject>
+            {
+
+                //prevents from async crashes
+                if (activity != null)
+                {
+                    addContractInfoFromJSON(it)
+                    onStorageInfoComplete()
+
+                    if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
+                    {
+                        //validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
+                    }
+
+                    else
+                    {
+                        //TODO I don't need to forge a transfer for now
+                        //TODO hide the whole thing
+
+                        //I need the right data inputs before.
+                        //startInitRemoveDelegateLoading()
+                    }
+                }
+            },
+                    Response.ErrorListener {
+
+                        onStorageInfoComplete()
+
+                        //showSnackBar(it, null)
+                    })
+
+            jsonArrayRequest.tag = CONTRACT_SCRIPT_INFO_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
+    private fun addContractInfoFromJSON(answer: JSONObject)
+    {
+        if (answer != null && answer.length() > 0)
+        {
+            mStorage = answer.toString()
         }
     }
 
@@ -622,6 +710,77 @@ class TransferFormFragment : Fragment()
         return false
     }
     */
+
+    private fun onStorageInfoComplete()
+    {
+        mStorageInfoLoading = false
+        empty?.visibility = View.GONE
+
+        listener?.onTransferLoading(false)
+        //TODO handle the swipe refresh
+        //swipe_refresh_script_layout?.isEnabled = true
+        //swipe_refresh_script_layout?.isRefreshing = false
+
+        refreshTextUnderDelegation()
+    }
+
+    private fun refreshTextUnderDelegation()
+    {
+        //this method handles the data and loading texts
+
+        if (mStorage != null)
+        {
+            //if (mContract!!.delegate != null)
+            if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
+            {
+                //TODO at this point, just show that there is no script.
+
+                val storageJSONObject = JSONObject(mStorage)
+
+                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+                // get securekey hash
+
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
+                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+
+                val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
+                val saltSpending = DataExtractor.getStringFromField(saltSpendingField, "int")
+                val saltSpending2 = DataExtractor.getStringFromField(secureKeyHashField, "int")
+
+            }
+            else
+            {
+                /*
+                update_storage_form_card?.visibility = View.GONE
+
+                public_address_layout?.visibility = View.VISIBLE
+
+                update_storage_button_layout?.visibility = View.GONE
+
+                storage_info_textview?.visibility = View.VISIBLE
+                storage_info_textview?.text = getString(R.string.no_script_info)
+                */
+
+                //TODO show everything related to the removing
+            }
+
+            //loading_textview?.visibility = View.GONE
+            //loading_textview?.text = null
+        }
+        else
+        {
+            // mContract is null then just show "-"
+            //loading_textview will be hidden behind other textview
+
+            //loading_textview?.visibility = View.VISIBLE
+            //loading_textview?.text = "-"
+        }
+    }
 
     private fun getTz3():String?
     {
@@ -1207,6 +1366,8 @@ class TransferFormFragment : Fragment()
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
 
         outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
+
+        outState.putString(STORAGE_DATA_KEY, mStorage)
     }
 
     override fun onDetach()
