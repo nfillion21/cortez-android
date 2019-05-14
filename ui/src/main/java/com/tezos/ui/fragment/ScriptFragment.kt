@@ -358,7 +358,10 @@ class ScriptFragment : Fragment()
             transferLoading(false)
             putFeesToNegative()
 
-            update_storage_button_relative_layout.visibility = View.GONE
+            //TODO looks like it's crashing when async
+            //TODO it's called
+
+            update_storage_button_relative_layout?.visibility = View.GONE
 
             gas_textview.visibility = View.GONE
             gas_layout.visibility = View.GONE

@@ -89,6 +89,8 @@ class TransferFormFragment : Fragment()
 
     private var mClickCalculate:Boolean = false
 
+    private var mStorageInfoLoading:Boolean = false
+
     companion object
     {
         @JvmStatic
@@ -117,6 +119,8 @@ class TransferFormFragment : Fragment()
         private const val TRANSFER_FEE_KEY = "transfer_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
+
+        private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
     }
 
     interface OnTransferListener
@@ -174,7 +178,15 @@ class TransferFormFragment : Fragment()
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
+            mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
+
             transferLoading(isLoading())
+
+
+            //TODO somewhere around here, I need to load the storage.
+            //TODO as long as the storage is loading, there is no possible action.
+
+
         }
     }
 
@@ -187,6 +199,15 @@ class TransferFormFragment : Fragment()
             validatePayButton(true)
             this.setTextPayButton()
         }
+
+
+        //priority with mInitStorageLoading, but only if it's a KT1.
+
+
+
+
+        startStorageInfoLoading()
+
 
         //TODO we got to keep in mind there's an id already.
         if (mInitTransferLoading)
@@ -307,6 +328,9 @@ class TransferFormFragment : Fragment()
         dstObject.put("dst", mDstAccount)
         dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
         */
+
+        //TODO handle here the difference with the tz1 signing.
+
 
         var postParams = JSONObject()
 
@@ -1148,11 +1172,13 @@ class TransferFormFragment : Fragment()
         val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
         requestQueue?.cancelAll(TRANSFER_INIT_TAG)
         requestQueue?.cancelAll(TRANSFER_FINALIZE_TAG)
+        requestQueue?.cancelAll(CONTRACT_SCRIPT_INFO_TAG)
 
         if (resetBooleans)
         {
             mInitTransferLoading = false
             mFinalizeTransferLoading = false
+            mStorageInfoLoading = false
         }
     }
 
@@ -1179,6 +1205,8 @@ class TransferFormFragment : Fragment()
         outState.putLong(TRANSFER_FEE_KEY, mTransferFees)
 
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
+
+        outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
     }
 
     override fun onDetach()

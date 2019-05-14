@@ -78,7 +78,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
         fun start(activity: Activity, srcPkh: String, address: Address?, theme: CustomTheme)
         {
             val starter = getStartIntent(activity, srcPkh, address, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_REQUEST_CODE, null)
+            ActivityCompat.startActivityForResult(activity, starter, TRANSFER_REQUEST_CODE, null)
         }
     }
 
