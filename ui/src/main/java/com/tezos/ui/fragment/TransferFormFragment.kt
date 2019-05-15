@@ -94,6 +94,8 @@ class TransferFormFragment : Fragment()
 
     private var mStorage:String? = null
 
+    private var mKT1withCode:Boolean = false
+
     companion object
     {
         @JvmStatic
@@ -126,6 +128,8 @@ class TransferFormFragment : Fragment()
         private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
 
         private const val STORAGE_DATA_KEY = "storage_data_key"
+
+        private const val TZ_OR_KT1_KEY = "tz_or_kt1_key"
     }
 
     interface OnTransferListener
@@ -186,6 +190,8 @@ class TransferFormFragment : Fragment()
             mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
+
+            mKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_KEY, false)
 
             transferLoading(isLoading())
 
@@ -338,18 +344,27 @@ class TransferFormFragment : Fragment()
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete()
 
-                    if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
-                    {
-                        //validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
-                    }
+                    //TODO check if our tz3 is the same as the contract tz3
 
-                    else
+                    val salt = getSalt()
+                    if (salt != null && salt >= 0)
                     {
-                        //TODO I don't need to forge a transfer for now
-                        //TODO hide the whole thing
+                        mKT1withCode = true
 
-                        //I need the right data inputs before.
-                        //startInitRemoveDelegateLoading()
+                        // with this information, handle the code to sign data
+
+                        val tz3 = getTz3()
+                        val contractTz3 = getContractTz3()
+
+                        if (tz3 == null || tz3 != contractTz3)
+                        {
+                            //TODO ERROR, there is no way you can spend money without the right tz3
+                            //TODO please update your contract storage in contract tab.
+                        }
+                        else
+                        {
+                            //TODO it's ok, this phone has the keys.
+                        }
                     }
                 }
             },
@@ -369,6 +384,8 @@ class TransferFormFragment : Fragment()
                         else
                         {
                             //it means this KT1 had no code
+                            //false by default anyway
+                            mKT1withCode = false
                         }
                     })
 
@@ -732,7 +749,7 @@ class TransferFormFragment : Fragment()
 
         listener?.onTransferLoading(false)
 
-        refreshTextUnderDelegation()
+        //refreshTextUnderDelegation()
     }
 
     private fun refreshTextUnderDelegation()
@@ -1423,6 +1440,8 @@ class TransferFormFragment : Fragment()
         outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
+
+        outState.putBoolean(TZ_OR_KT1_KEY, mKT1withCode)
     }
 
     override fun onDetach()
