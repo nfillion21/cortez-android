@@ -428,79 +428,85 @@ class TransferFormFragment : Fragment()
     private fun startPostRequestLoadInitTransfer()
     {
         val url = getString(R.string.transfer_forge)
-
-        /*
-        val seed = Storage(activity!!).getMnemonics()
-
-        val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
-        val pk = CryptoUtils.generatePk(mnemonics, "")
-
-        var postParams = JSONObject()
-        postParams.put("src", mSrcAccount)
-        postParams.put("src_pk", pk)
-
-        var dstObjects = JSONArray()
-
-        var dstObject = JSONObject()
-        dstObject.put("dst", mDstAccount)
-        dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
-        */
-
-        //TODO handle here the difference with the tz1 signing.
-
-
         var postParams = JSONObject()
 
-        val ecKeys = retrieveECKeys()
-        val p2pk = CryptoUtils.generateP2Pk(ecKeys)
-        postParams.put("src_pk", p2pk)
-        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-        postParams.put("src", tz3)
+        if (mKT1withCode)
+        {
+            val ecKeys = retrieveECKeys()
+            val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+            postParams.put("src_pk", p2pk)
+            val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+            postParams.put("src", tz3)
 
-        var dstObjects = JSONArray()
+            var dstObjects = JSONArray()
 
-        var dstObject = JSONObject()
+            var dstObject = JSONObject()
 
-        dstObject.put("dst", arguments!!.getString(Address.TAG))
-        dstObject.put("amount", "0")
+            dstObject.put("dst", arguments!!.getString(Address.TAG))
+            dstObject.put("amount", "0")
 
-        //TODO sign data
-        //val signedData = "signedData"
-        val signedData0 = "050707020000002107070080897a0a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c00a00000015023a74e47ea7b7446faa1a90b6a636d8337f07471c".hexToByteArray()
+            //TODO sign data
+            //val signedData = "signedData"
+            val signedData0 = "050707020000002107070080897a0a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c00a00000015023a74e47ea7b7446faa1a90b6a636d8337f07471c".hexToByteArray()
+            // sending 1 tz to tzNF
 
-        //TODO we got the salt now
+            //TODO we got the salt now
 
-        val signedData1 = "050002".hexToByteArray()
-        val signedData = KeyPair.b2b(signedData0 + signedData1)
+            val salt = getSalt()
 
-        val signature = EncryptionServices().sign(signedData)
-        val compressedSignature = compressFormat(signature)
+            val signedData1 = "050002".hexToByteArray()
+            val signedData = KeyPair.b2b(signedData0 + signedData1)
 
-        val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
+            val signature = EncryptionServices().sign(signedData)
+            val compressedSignature = compressFormat(signature)
 
-        val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_spending))
+            val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
 
-        //montant(mutez)
-        //destinataire (tz/KT)
-        //signataire (tz3)
-        //edpk (p2pk)
-        //edsig (p2sig)
+            val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_spending))
 
-        val spendingLimitContract = String.format(resScript.toString(),
-                (mTransferAmount*1000000).toLong().toString(),
-                mDstAccount,
-                tz3,
-                p2pk,
-                p2sig)
+            //montant(mutez)
+            //destinataire (tz/KT)
+            //signataire (tz3)
+            //edpk (p2pk)
+            //edsig (p2sig)
 
-        //TODO we need to put a parameter 
-        //dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
-        val json = JSONObject(spendingLimitContract)
-        dstObject.put("parameters", json)
+            val spendingLimitContract = String.format(resScript.toString(),
+                    (mTransferAmount*1000000).toLong().toString(),
+                    mDstAccount,
+                    tz3,
+                    p2pk,
+                    p2sig)
 
-        dstObjects.put(dstObject)
+            //TODO we need to put a parameter
+            //dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
+            val json = JSONObject(spendingLimitContract)
+            dstObject.put("parameters", json)
 
-        postParams.put("dsts", dstObjects)
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+        }
+        else
+        {
+            val seed = Storage(activity!!).getMnemonics()
+
+            val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
+            val pk = CryptoUtils.generatePk(mnemonics, "")
+
+            postParams.put("src", mSrcAccount)
+            postParams.put("src_pk", pk)
+
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+            dstObject.put("dst", mDstAccount)
+            dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+
+        }
 
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
@@ -513,6 +519,7 @@ class TransferFormFragment : Fragment()
 
                 // get back the object and
 
+                /*
                 val dstsArray = postParams["dsts"] as JSONArray
                 val dstObj = dstsArray[0] as JSONObject
 
@@ -520,6 +527,7 @@ class TransferFormFragment : Fragment()
                 dstsArray.put(0, dstObj)
 
                 postParams.put("dsts", dstsArray)
+                */
 
                 // we use this call to ask for payload and fees
                 if (mTransferPayload != null && mTransferFees != null)
@@ -612,6 +620,8 @@ class TransferFormFragment : Fragment()
 
             var postParams = JSONObject()
             postParams.put("src", mSrcAccount)
+
+            //TODO it won't be pk with contract transfer
             postParams.put("src_pk", pk)
 
             var dstObjects = JSONArray()
@@ -628,7 +638,8 @@ class TransferFormFragment : Fragment()
 
             postParams.put("dsts", dstObjects)
 
-            if (!isTransferPayloadValid(mTransferPayload!!, postParams))
+            //TODO verify the payloads
+            if (/*!isTransferPayloadValid(mTransferPayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -641,15 +652,21 @@ class TransferFormFragment : Fragment()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
-
-                val bytes = KeyPair.b2b(result)
-                var signature = EncryptionServices().sign(bytes)
-
                 var compressedSignature = ByteArray(64)
-
-                if (signature != null)
+                if (mKT1withCode)
                 {
-                    compressedSignature = compressFormat(signature)
+                    val bytes = KeyPair.b2b(result)
+                    var signature = EncryptionServices().sign(bytes)
+
+                    if (signature != null)
+                    {
+                        compressedSignature = compressFormat(signature)
+                    }
+                }
+                else
+                {
+                    val sk = CryptoUtils.generateSk(mnemonics, "")
+                    compressedSignature = KeyPair.sign(sk, result)
                 }
 
                 val pLen = byteArrayThree.size
