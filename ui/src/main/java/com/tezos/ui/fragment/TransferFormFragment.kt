@@ -357,7 +357,19 @@ class TransferFormFragment : Fragment()
 
                         onStorageInfoComplete()
 
-                        //showSnackBar(it, null)
+                        val response = it.networkResponse?.statusCode
+                        if (response != 404)
+                        {
+                            // 404 happens when there is no storage in this KT1
+
+                            listener?.onTransferFailed(it)
+
+                            //TODO user needs to retry storage call
+                        }
+                        else
+                        {
+                            //it means this KT1 had no code
+                        }
                     })
 
             jsonArrayRequest.tag = CONTRACT_SCRIPT_INFO_TAG
@@ -438,6 +450,9 @@ class TransferFormFragment : Fragment()
         //TODO sign data
         //val signedData = "signedData"
         val signedData0 = "050707020000002107070080897a0a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c00a00000015023a74e47ea7b7446faa1a90b6a636d8337f07471c".hexToByteArray()
+
+        //TODO we got the salt now
+
         val signedData1 = "050002".hexToByteArray()
         val signedData = KeyPair.b2b(signedData0 + signedData1)
 
@@ -448,7 +463,6 @@ class TransferFormFragment : Fragment()
 
         val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_spending))
 
-        //TODO three elements:
         //montant(mutez)
         //destinataire (tz/KT)
         //signataire (tz3)
@@ -717,15 +731,14 @@ class TransferFormFragment : Fragment()
         empty?.visibility = View.GONE
 
         listener?.onTransferLoading(false)
-        //TODO handle the swipe refresh
-        //swipe_refresh_script_layout?.isEnabled = true
-        //swipe_refresh_script_layout?.isRefreshing = false
 
         refreshTextUnderDelegation()
     }
 
     private fun refreshTextUnderDelegation()
     {
+        //TODO for paiements, there is nothing to handle right now, except building a pull to refresh screen
+
         //this method handles the data and loading texts
 
         if (mStorage != null)
@@ -780,6 +793,48 @@ class TransferFormFragment : Fragment()
             //loading_textview?.visibility = View.VISIBLE
             //loading_textview?.text = "-"
         }
+    }
+
+    private fun getContractTz3():String?
+    {
+        //TODO check if the storage follows our pattern
+
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+            val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
+            return DataExtractor.getStringFromField(secureKeyHashField, "string")
+        }
+
+        return null
+    }
+
+    private fun getSalt():Int?
+    {
+        //TODO check if the storage follows our pattern
+
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+            val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
+            return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+        }
+
+        return null
     }
 
     private fun getTz3():String?

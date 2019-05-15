@@ -50,7 +50,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:text="TZ1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr"
                 android:maxLines="2"
                 android:ellipsize="end"
                 />
