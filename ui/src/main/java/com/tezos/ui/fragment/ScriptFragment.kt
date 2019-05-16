@@ -363,10 +363,10 @@ class ScriptFragment : Fragment()
 
             update_storage_button_relative_layout?.visibility = View.GONE
 
-            gas_textview.visibility = View.GONE
-            gas_layout.visibility = View.GONE
+            gas_textview?.visibility = View.GONE
+            gas_layout?.visibility = View.GONE
 
-            daily_spending_limit_edittext.isEnabled = false
+            daily_spending_limit_edittext?.isEnabled = false
 
             if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
             {
@@ -389,7 +389,7 @@ class ScriptFragment : Fragment()
                 val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
                 val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
 
-                daily_spending_limit_edittext.setText(mutezToTez(dailySpendingLimit))
+                daily_spending_limit_edittext?.setText(mutezToTez(dailySpendingLimit))
 
                 putSpendingLimitInRed(false)
             }

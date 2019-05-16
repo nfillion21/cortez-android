@@ -90,11 +90,15 @@ class TransferFormFragment : Fragment()
 
     private var mClickCalculate:Boolean = false
 
-    private var mStorageInfoLoading:Boolean = false
+    private var mSourceStorageInfoLoading:Boolean = false
+
+    private var mRecipientStorageInfoLoading:Boolean = false
 
     private var mStorage:String? = null
 
-    private var mKT1withCode:Boolean = false
+    private var mSourceKT1withCode:Boolean = false
+
+    private var mRecipientKT1withCode:Boolean = false
 
     companion object
     {
@@ -125,11 +129,15 @@ class TransferFormFragment : Fragment()
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
 
-        private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
+        private const val CONTRACT_SCRIPT_SOURCE_INFO_TAG = "contract_script_source_info"
+
+        private const val CONTRACT_SCRIPT_RECIPIENT_INFO_TAG = "contract_script_recipient_info"
 
         private const val STORAGE_DATA_KEY = "storage_data_key"
 
-        private const val TZ_OR_KT1_KEY = "tz_or_kt1_key"
+        private const val TZ_OR_KT1_SOURCE_KEY = "tz_or_kt1_source_key"
+
+        private const val TZ_OR_KT1_RECIPIENT_KEY = "tz_or_kt1_recipient_key"
     }
 
     interface OnTransferListener
@@ -160,7 +168,7 @@ class TransferFormFragment : Fragment()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
     {
         super.onViewCreated(view, savedInstanceState)
-        initContentViews(view, savedInstanceState)
+        initContentViews()
 
         if (savedInstanceState != null)
         {
@@ -187,11 +195,15 @@ class TransferFormFragment : Fragment()
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
-            mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
+            mSourceStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_SOURCE_INFO_TAG)
+
+            mRecipientStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_RECIPIENT_INFO_TAG)
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
-            mKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_KEY, false)
+            mSourceKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_SOURCE_KEY, false)
+
+            mRecipientKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_RECIPIENT_KEY, false)
 
             transferLoading(isLoading())
 
@@ -203,7 +215,7 @@ class TransferFormFragment : Fragment()
         }
         else
         {
-            startGetRequestLoadContractInfo()
+            startGetRequestLoadContractInfo(false)
         }
     }
 
@@ -219,9 +231,9 @@ class TransferFormFragment : Fragment()
 
         //TODO priority with mInitStorageLoading, but only if it's a KT1.
 
-        if (mStorageInfoLoading)
+        if (mSourceStorageInfoLoading)
         {
-            startStorageInfoLoading()
+            startStorageInfoLoading(false)
         }
         else
         {
@@ -304,7 +316,7 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    private fun startStorageInfoLoading()
+    private fun startStorageInfoLoading(isRecipient: Boolean)
     {
         transferLoading(true)
 
@@ -313,15 +325,15 @@ class TransferFormFragment : Fragment()
 
         //swipe_refresh_script_layout?.isEnabled = false
 
-        startGetRequestLoadContractInfo()
+        startGetRequestLoadContractInfo(isRecipient)
     }
 
     // volley
-    private fun startGetRequestLoadContractInfo()
+    private fun startGetRequestLoadContractInfo(isRecipient:Boolean)
     {
         cancelRequests(true)
 
-        mStorageInfoLoading = true
+        mSourceStorageInfoLoading = true
 
         /*
         loading_textview.setText(R.string.loading_contract_info)
@@ -329,7 +341,18 @@ class TransferFormFragment : Fragment()
         nav_progress.visibility = View.VISIBLE
         */
 
-        val pkh = arguments!!.getString(Address.TAG)
+
+
+        var pkh :String? = if (isRecipient)
+        {
+            mDstAccount
+        }
+        else
+        {
+            arguments!!.getString(Address.TAG)
+        }
+
+
         if (pkh != null)
         {
             val url = String.format(getString(R.string.contract_storage_url), pkh)
@@ -349,7 +372,14 @@ class TransferFormFragment : Fragment()
                     val salt = getSalt()
                     if (salt != null && salt >= 0)
                     {
-                        mKT1withCode = true
+                        if (isRecipient)
+                        {
+                            mRecipientKT1withCode = true
+                        }
+                        else
+                        {
+                            mSourceKT1withCode = true
+                        }
 
                         // with this information, handle the code to sign data
 
@@ -385,11 +415,20 @@ class TransferFormFragment : Fragment()
                         {
                             //it means this KT1 had no code
                             //false by default anyway
-                            mKT1withCode = false
+
+                            if (isRecipient)
+                            {
+                                mRecipientKT1withCode = false
+                            }
+                            else
+                            {
+                                mSourceKT1withCode = false
+                            }
                         }
                     })
 
-            jsonArrayRequest.tag = CONTRACT_SCRIPT_INFO_TAG
+            jsonArrayRequest.tag = if (isRecipient) CONTRACT_SCRIPT_RECIPIENT_INFO_TAG else CONTRACT_SCRIPT_SOURCE_INFO_TAG
+
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
     }
@@ -430,7 +469,7 @@ class TransferFormFragment : Fragment()
         val url = getString(R.string.transfer_forge)
         var postParams = JSONObject()
 
-        if (mKT1withCode)
+        if (mSourceKT1withCode)
         {
             val ecKeys = retrieveECKeys()
             val p2pk = CryptoUtils.generateP2Pk(ecKeys)
@@ -478,7 +517,6 @@ class TransferFormFragment : Fragment()
                     p2sig)
 
             //TODO we need to put a parameter
-            //dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
             val json = JSONObject(spendingLimitContract)
             dstObject.put("parameters", json)
 
@@ -501,6 +539,10 @@ class TransferFormFragment : Fragment()
             var dstObject = JSONObject()
             dstObject.put("dst", mDstAccount)
             dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+
+
+            //TODO handle that, we need to load storage from recipient
+            //dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
 
             dstObjects.put(dstObject)
 
@@ -653,7 +695,7 @@ class TransferFormFragment : Fragment()
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
                 var compressedSignature = ByteArray(64)
-                if (mKT1withCode)
+                if (mSourceKT1withCode)
                 {
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
@@ -761,7 +803,7 @@ class TransferFormFragment : Fragment()
 
     private fun onStorageInfoComplete()
     {
-        mStorageInfoLoading = false
+        mSourceStorageInfoLoading = false
         empty?.visibility = View.GONE
 
         listener?.onTransferLoading(false)
@@ -919,7 +961,7 @@ class TransferFormFragment : Fragment()
         return inflater.inflate(R.layout.fragment_payment_form, container, false)
     }
 
-    private fun initContentViews(view: View, savedInstanceState: Bundle?)
+    private fun initContentViews()
     {
         val args = arguments
         val themeBundle = args!!.getBundle(CustomTheme.TAG)
@@ -1052,8 +1094,12 @@ class TransferFormFragment : Fragment()
                 }
                 else if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
+                    //TODO verify this address is a KT1 and check its storage.
+
                     mDstAccount = account.pubKeyHash
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
+
+                    startStorageInfoLoading(true)
                 }
             }
 
@@ -1420,13 +1466,15 @@ class TransferFormFragment : Fragment()
         val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
         requestQueue?.cancelAll(TRANSFER_INIT_TAG)
         requestQueue?.cancelAll(TRANSFER_FINALIZE_TAG)
-        requestQueue?.cancelAll(CONTRACT_SCRIPT_INFO_TAG)
+        requestQueue?.cancelAll(CONTRACT_SCRIPT_SOURCE_INFO_TAG)
+        requestQueue?.cancelAll(CONTRACT_SCRIPT_RECIPIENT_INFO_TAG)
 
         if (resetBooleans)
         {
             mInitTransferLoading = false
             mFinalizeTransferLoading = false
-            mStorageInfoLoading = false
+            mSourceStorageInfoLoading = false
+            mRecipientStorageInfoLoading = false
         }
     }
 
@@ -1454,11 +1502,15 @@ class TransferFormFragment : Fragment()
 
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
 
-        outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
+        outState.putBoolean(CONTRACT_SCRIPT_SOURCE_INFO_TAG, mSourceStorageInfoLoading)
+
+        outState.putBoolean(CONTRACT_SCRIPT_RECIPIENT_INFO_TAG, mRecipientStorageInfoLoading)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
 
-        outState.putBoolean(TZ_OR_KT1_KEY, mKT1withCode)
+        outState.putBoolean(TZ_OR_KT1_SOURCE_KEY, mSourceKT1withCode)
+
+        outState.putBoolean(TZ_OR_KT1_RECIPIENT_KEY, mRecipientKT1withCode)
     }
 
     override fun onDetach()
