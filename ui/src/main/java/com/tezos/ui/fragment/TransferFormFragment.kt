@@ -176,6 +176,7 @@ class TransferFormFragment : Fragment()
             if (mSrcAccount != null)
             {
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, mSrcAccount!!)
+                startGetRequestLoadContractInfo(false)
             }
 
             mDstAccount = savedInstanceState.getString(DST_ACCOUNT_KEY)
@@ -211,11 +212,10 @@ class TransferFormFragment : Fragment()
             //TODO somewhere around here, I need to load the storage.
             //TODO as long as the storage is loading, there is no possible action.
 
-
         }
         else
         {
-            startGetRequestLoadContractInfo(false)
+            startStorageInfoLoading(false)
         }
     }
 
@@ -239,22 +239,29 @@ class TransferFormFragment : Fragment()
         {
             onStorageInfoComplete()
 
-            //TODO we got to keep in mind there's an id already.
-            if (mInitTransferLoading)
+            if (mRecipientStorageInfoLoading)
             {
-                startInitTransferLoading()
+                startStorageInfoLoading(true)
             }
             else
             {
-                onInitTransferLoadComplete(null)
-
-                if (mFinalizeTransferLoading)
+                //TODO we got to keep in mind there's an id already.
+                if (mInitTransferLoading)
                 {
-                    startFinalizeTransferLoading()
+                    startInitTransferLoading()
                 }
                 else
                 {
-                    onFinalizeTransferLoadComplete(null)
+                    onInitTransferLoadComplete(null)
+
+                    if (mFinalizeTransferLoading)
+                    {
+                        startFinalizeTransferLoading()
+                    }
+                    else
+                    {
+                        onFinalizeTransferLoadComplete(null)
+                    }
                 }
             }
         }
@@ -333,7 +340,14 @@ class TransferFormFragment : Fragment()
     {
         cancelRequests(true)
 
-        mSourceStorageInfoLoading = true
+        if (isRecipient)
+        {
+            mRecipientStorageInfoLoading = true
+        }
+        else
+        {
+            mSourceStorageInfoLoading = true
+        }
 
         /*
         loading_textview.setText(R.string.loading_contract_info)
@@ -542,7 +556,10 @@ class TransferFormFragment : Fragment()
 
 
             //TODO handle that, we need to load storage from recipient
-            //dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
+            if (mRecipientKT1withCode)
+            {
+                dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
+            }
 
             dstObjects.put(dstObject)
 
@@ -1087,12 +1104,15 @@ class TransferFormFragment : Fragment()
                 val accountBundle = data.getBundleExtra(Account.TAG)
                 val account = Address.fromBundle(accountBundle)
 
+                /*
                 if (resultCode == R.id.transfer_src_selection_succeed)
                 {
                     mSrcAccount = account.pubKeyHash
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, mSrcAccount!!)
                 }
-                else if (resultCode == R.id.transfer_dst_selection_succeed)
+                else
+                    */
+                if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
                     //TODO verify this address is a KT1 and check its storage.
 
@@ -1102,6 +1122,9 @@ class TransferFormFragment : Fragment()
                     startStorageInfoLoading(true)
                 }
             }
+
+            //TODO no loading transfer anymore after we chose the recipient
+            /*
 
             if (isInputDataValid())
             {
@@ -1117,6 +1140,8 @@ class TransferFormFragment : Fragment()
                 putFeesToNegative()
                 putPayButtonToNull()
             }
+
+            */
         }
     }
 
