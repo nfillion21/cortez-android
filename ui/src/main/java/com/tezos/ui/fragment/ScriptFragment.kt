@@ -332,8 +332,8 @@ class ScriptFragment : Fragment()
 
                     public_address_edittext.setOnClickListener {
                         val ecKeys = retrieveECKeys()
-                        val p2pk = CryptoUtils.generateP2Pk(ecKeys)
-                        public_address_edittext.setText(p2pk)
+                        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                        public_address_edittext.setText(tz3)
                     }
                 }
             }
@@ -852,8 +852,8 @@ class ScriptFragment : Fragment()
 
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
-        val signedData0 = "0507070707070700000a00000015023a74e47ea7b7446faa1a90b6a636d8337f07471c07070707008092f40100b8010707020000000002000000000a00000015001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
-        val signedData1 = "050002".hexToByteArray()
+        val signedData0 = "0507070707070700000a0000001502c1d46fad69ff8d01b2186aa11d2eb54c04f517f707070707008092f40100b8010707020000000002000000000a00000015001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
+        val signedData1 = "050004".hexToByteArray()
         val signature = KeyPair.sign(sk, signedData0 + signedData1)
 
         val edsig = CryptoUtils.generateEDSig(signature)

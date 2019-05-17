@@ -500,14 +500,14 @@ class TransferFormFragment : Fragment()
 
             //TODO sign data
             //val signedData = "signedData"
-            val signedData0 = "050707020000002107070080897a0a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c00a00000015023a74e47ea7b7446faa1a90b6a636d8337f07471c".hexToByteArray()
+            val signedData0 = "050707020000002107070080897a0a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c00a0000001502c1d46fad69ff8d01b2186aa11d2eb54c04f517f7".hexToByteArray()
             // sending 1 tz to tzNF
 
             //TODO we got the salt now
 
             val salt = getSalt()
 
-            val signedData1 = "050002".hexToByteArray()
+            val signedData1 = "050000".hexToByteArray()
             val signedData = KeyPair.b2b(signedData0 + signedData1)
 
             val signature = EncryptionServices().sign(signedData)
