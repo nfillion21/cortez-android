@@ -217,10 +217,22 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
 
         fabAddDelegate.setOnClickListener {
-            //AddDelegateActivity.start(this, mTezosTheme)
 
-            val dialog = ContractSelectorFragment.newInstance()
-            dialog.show(supportFragmentManager, "ContractSelector")
+            val hasMnemonics = Storage(this).hasMnemonics()
+            if (hasMnemonics)
+            {
+                val seed = Storage(baseContext).getMnemonics()
+
+                if (seed.mnemonics.isNotEmpty())
+                {
+                    val dialog = ContractSelectorFragment.newInstance()
+                    dialog.show(supportFragmentManager, "ContractSelector")
+                }
+                else
+                {
+                    showSnackBar(getString(R.string.no_mnemonics_contracts), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
+                }
+            }
         }
 
         initActionBar(mTezosTheme)

@@ -133,8 +133,8 @@ open class HomeFragment : Fragment()
     {
         var pkh:String? = null
 
-        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
-        if (isPasswordSaved)
+        val hasMnemonics = Storage(activity!!).hasMnemonics()
+        if (hasMnemonics)
         {
             pkh = arguments!!.getString(PKH_KEY)
             if (pkh == null)

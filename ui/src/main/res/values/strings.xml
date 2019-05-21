@@ -66,6 +66,7 @@
     <string name="create_restore_wallet_delegate_info">Please create or restore a wallet to be able to delegate your tez.</string>
     <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez.</string>
     <string name="no_mnemonics_found">Please restore your 24 words in settings to transfer tez from your tz1 account.</string>
+    <string name="no_mnemonics_contracts">Please restore your 24 words in settings to create contracts.</string>
     <string name="tap_to_copy_info">Tap to copy your address or share it with the sender via email or text.</string>
     <string name="share">Share</string>
     <string name="contact_us">Contact us</string>
