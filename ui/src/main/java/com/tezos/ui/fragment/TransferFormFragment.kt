@@ -507,7 +507,7 @@ class TransferFormFragment : Fragment()
 
             val salt = getSalt()
 
-            val signedData1 = "050000".hexToByteArray()
+            val signedData1 = "050001".hexToByteArray()
             val signedData = KeyPair.b2b(signedData0 + signedData1)
 
             val signature = EncryptionServices().sign(signedData)
@@ -674,6 +674,7 @@ class TransferFormFragment : Fragment()
             //val pkhSrc = seed.pkh
             val pkhDst = mDstAccount
 
+            /*
             val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
@@ -696,6 +697,7 @@ class TransferFormFragment : Fragment()
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
+            */
 
             //TODO verify the payloads
             if (/*!isTransferPayloadValid(mTransferPayload!!, postParams)*/true)
@@ -724,6 +726,7 @@ class TransferFormFragment : Fragment()
                 }
                 else
                 {
+                    val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
                     val sk = CryptoUtils.generateSk(mnemonics, "")
                     compressedSignature = KeyPair.sign(sk, result)
                 }

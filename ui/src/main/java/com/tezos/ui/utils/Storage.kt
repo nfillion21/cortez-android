@@ -50,7 +50,6 @@ class Storage constructor(context: Context) {
 
     companion object {
         private const val STORAGE_SETTINGS: String = "settings"
-        private const val STORAGE_ENCRYPTION_KEY: String = "encryption_key"
         private const val STORAGE_PASSWORD: String = "password"
         private const val STORAGE_MNEMONICS: String = "mnemonics"
         private const val STORAGE_FINGERPRINT: String = "fingerprint_allowed"
@@ -69,15 +68,9 @@ class Storage constructor(context: Context) {
     }
 
     init {
-        settings = context.getSharedPreferences(STORAGE_SETTINGS, android.content.Context.MODE_PRIVATE)
-        mnemonics = context.getSharedPreferences(STORAGE_MNEMONICS, android.content.Context.MODE_PRIVATE)
+        settings = context.getSharedPreferences(STORAGE_SETTINGS, Context.MODE_PRIVATE)
+        mnemonics = context.getSharedPreferences(STORAGE_MNEMONICS, Context.MODE_PRIVATE)
     }
-
-    fun saveEncryptionKey(key: String) {
-        settings.edit().putString(STORAGE_ENCRYPTION_KEY, key).apply()
-    }
-
-    fun getEncryptionKey(): String = settings.getString(STORAGE_ENCRYPTION_KEY, "")
 
     fun isPasswordSaved(): Boolean {
         return settings.contains(STORAGE_PASSWORD)
@@ -97,16 +90,33 @@ class Storage constructor(context: Context) {
         return settings.getBoolean(STORAGE_FINGERPRINT, false)
     }
 
-    fun hasSeed(alias: String): Boolean {
+    fun hasSeed(alias: String): Boolean
+    {
         return mnemonics.contains(alias)
     }
 
-    fun saveSeed(mnemonics: MnemonicsData) {
+    fun hasMnemonics(): Boolean
+    {
+        return mnemonics.all.isNotEmpty()
+    }
+
+    fun saveSeed(mnemonics: MnemonicsData)
+    {
         this.mnemonics.edit().putString(mnemonics.pkh, gson.toJson(mnemonics)).apply()
     }
 
     fun removeSeed(alias: String) {
         mnemonics.edit().remove(alias).apply()
+    }
+
+    fun removeSeed()
+    {
+        if (hasMnemonics())
+        {
+            var mnemonicsDataOld = getMnemonics()
+            val mnemonicsData = MnemonicsData(mnemonicsDataOld.pkh, "")
+            this.mnemonics.edit().putString(mnemonicsDataOld.pkh, gson.toJson(mnemonicsData)).apply()
+        }
     }
 
     fun getMnemonicsList(): List<MnemonicsData> {

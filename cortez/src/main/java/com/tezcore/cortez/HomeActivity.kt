@@ -174,18 +174,25 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
         fabTransfer.setOnClickListener { view ->
 
-            val isPasswordSaved = Storage(this).isPasswordSaved()
-            if (isPasswordSaved)
+            val hasMnemonics = Storage(this).hasMnemonics()
+            if (hasMnemonics)
             {
                 val seed = Storage(baseContext).getMnemonics()
-                //val seedBundle = Storage.toBundle(seed)
-                TransferFormActivity.start(this, seed.pkh, null, mTezosTheme)
+
+                if (seed.mnemonics.isNotEmpty())
+                {
+                    TransferFormActivity.start(this, seed.pkh, null, mTezosTheme)
+                }
+                else
+                {
+                    showSnackBar(getString(R.string.no_mnemonics_found), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
+                }
             }
             else
             {
-                //TODO this snackbar should be invisible
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
+                //the fab is invisible
+                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        //.setAction("Action", null).show()
             }
         }
 
@@ -356,9 +363,9 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                 2 ->
                 {
-                    val isPasswordSaved = Storage(this@HomeActivity).isPasswordSaved()
+                    val hasMnemonics = Storage(this@HomeActivity).hasMnemonics()
 
-                    return if (isPasswordSaved)
+                    return if (hasMnemonics)
                     {
                         val mnemonicsData = Storage(baseContext).getMnemonics()
                         ContractsFragment.newInstance(mTezosTheme, mnemonicsData.pkh)
@@ -594,8 +601,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
     {
         //AddressDetailsActivity.start(this, mTezosTheme, address!!)
 
-        val isPasswordSaved = Storage(this).isPasswordSaved()
-        if (isPasswordSaved)
+        val hasMnemonics = Storage(this).hasMnemonics()
+        if (hasMnemonics)
         {
             val seed = Storage(baseContext).getMnemonics()
             //val seedBundle = Storage.toBundle(seed)

@@ -88,6 +88,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
     public interface OnLogOutClickedListener
     {
         void onLogOutClicked();
+        void onHalfLogOutClicked();
     }
 
     public interface OnSystemInformationsCallback
@@ -155,6 +156,14 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         mList.setItemChecked(0, new EncryptionServices().containsConfirmCredentialsKey());
 
         mList.setItemChecked(1, mSystemInformationsCallback.isFingerprintAllowed());
+
+
+        //TODO test the spending key deletion
+        Button halfExitButton = view.findViewById(R.id.half_exit_button);
+        halfExitButton.setOnClickListener(view12 -> {
+
+            mLogOutCallback.onHalfLogOutClicked();
+        });
 
         mExitButton = view.findViewById(R.id.exit_button);
         mExitButtonLayout = view.findViewById(R.id.exit_button_layout);

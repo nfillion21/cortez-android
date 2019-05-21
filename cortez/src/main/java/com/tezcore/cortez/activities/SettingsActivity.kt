@@ -138,7 +138,7 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
             // TODO put the checkbox to false
 
             Snackbar.make(findViewById(android.R.id.content), R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.sign_up_snack_action, { openSecuritySettings() })
+                    .setAction(R.string.sign_up_snack_action) { openSecuritySettings() }
                     .setActionTextColor(Color.YELLOW)
                     .show()
         }
@@ -150,6 +150,19 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
                 EncryptionServices().removeFingerprintKey()
             }
         }
+    }
+
+    override fun onHalfLogOutClicked()
+    {
+        //Storage(baseContext).hasSeed()
+        //Storage(baseContext).removeSeed()
+        //val encryptionServices = EncryptionServices()
+        //encryptionServices.removeMasterKey()
+
+        Storage(baseContext).removeSeed()
+
+        setResult(R.id.logout_succeed, null)
+        finish()
     }
 
     override fun onLogOutClicked()

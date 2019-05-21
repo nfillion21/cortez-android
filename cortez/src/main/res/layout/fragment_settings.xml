@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/payment_products_textview"
+        android:id="@+id/settings_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -22,8 +22,23 @@
         android:clipToPadding="false"
         tools:ignore="UnusedAttribute,NewApi" />
 
+    <Button
+        android:id="@+id/half_exit_button"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete spending key"
+        android:drawableLeft="@drawable/exit_to_app_24"
+        android:drawableStart="@drawable/exit_to_app_24"
+        android:drawableTint="@color/tz_light"
+        android:drawablePadding="@dimen/spacing_normal"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+        android:layout_gravity="center"
+        />
+
     <LinearLayout
-        android:layout_below="@+id/payment_products_textview"
+        android:layout_below="@+id/settings_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
