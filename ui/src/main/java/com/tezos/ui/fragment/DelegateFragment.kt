@@ -667,7 +667,7 @@ class DelegateFragment : Fragment()
 
                 val stringRequest = object : StringRequest(Request.Method.POST, url,
                         Response.Listener<String> { response ->
-                            if (activity != null)
+                            if (R.id.content != null)
                             {
                                 //there's no need to do anything because we call finish()
                                 onFinalizeDelegationLoadComplete(null)
@@ -677,7 +677,7 @@ class DelegateFragment : Fragment()
                         },
                         Response.ErrorListener
                         {
-                            if (activity != null)
+                            if (R.id.content != null)
                             {
                                 onFinalizeDelegationLoadComplete(it)
                             }

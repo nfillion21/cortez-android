@@ -165,7 +165,21 @@ class ScriptFragment : Fragment()
         }
 
         fab_edit_storage.setOnClickListener {
-            animateFabEditMode(true)
+
+            val hasMnemonics = Storage(activity!!).hasMnemonics()
+            if (hasMnemonics)
+            {
+                val seed = Storage(activity!!).getMnemonics()
+
+                if (seed.mnemonics.isEmpty())
+                {
+                    mCallback?.showSnackBar(getString(R.string.no_mnemonics_script), ContextCompat.getColor(activity!!, R.color.tz_accent), ContextCompat.getColor(context!!, R.color.tz_light))
+                }
+                else
+                {
+                    animateFabEditMode(true)
+                }
+            }
         }
 
         fab_undo_storage.setOnClickListener {
@@ -522,7 +536,9 @@ class ScriptFragment : Fragment()
 
                         onStorageInfoComplete(false)
 
-                        showSnackBar(it, null)
+                        showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+
+                        //mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
                     })
 
             jsonArrayRequest.tag = CONTRACT_SCRIPT_INFO_TAG
@@ -778,7 +794,7 @@ class ScriptFragment : Fragment()
         {
             transferLoading(false)
 
-            showSnackBar(error, null)
+            showSnackBar(error, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
         }
         else
         {
@@ -812,7 +828,7 @@ class ScriptFragment : Fragment()
             if(error != null)
             {
                 //TODO handle the show snackbar
-                showSnackBar(error, null)
+                showSnackBar(error, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
             }
         }
         else
@@ -973,17 +989,19 @@ class ScriptFragment : Fragment()
         mUpdateStoragePayload = null
     }
 
-    private fun showSnackBar(error:VolleyError?, message:String?)
+    private fun showSnackBar(error:VolleyError?, message:String?, color:Int, textColor: Int)
     {
         if (error != null)
         {
-            mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            //mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            mCallback?.showSnackBar(error.toString(), color, textColor)
 
             loading_textview?.text = getString(R.string.generic_error)
         }
         else if (message != null)
         {
-            mCallback?.showSnackBar(message, ContextCompat.getColor(context!!, android.R.color.holo_green_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            //mCallback?.showSnackBar(message, ContextCompat.getColor(context!!, android.R.color.holo_green_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            mCallback?.showSnackBar(message, color, textColor)
         }
     }
 

@@ -70,6 +70,7 @@
     <string name="no_mnemonics_found">Please restore your 24 words in settings to transfer tez from your tz1 account.</string>
     <string name="no_mnemonics_contracts">Please restore your 24 words in settings to create contracts.</string>
     <string name="no_mnemonics_delegate">Please restore your 24 words in settings to be able to remove or change your current baker.</string>
+    <string name="no_mnemonics_script">Please restore your 24 words in settings to update your contract\'s storage informations.</string>
     <string name="tap_to_copy_info">Tap to copy your address or share it with the sender via email or text.</string>
     <string name="share">Share</string>
     <string name="contact_us">Contact us</string>

@@ -456,7 +456,7 @@ open class HomeFragment : Fragment()
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
 
-                        if (activity != null)
+                        if (R.id.content != null)
                         {
                             val balance = response.replace("[^0-9]".toRegex(), "")
                             mBalanceItem = balance?.toDouble()/1000000
@@ -470,7 +470,7 @@ open class HomeFragment : Fragment()
                         }
                     },
                     Response.ErrorListener {
-                        if (activity != null)
+                        if (R.id.content != null)
                         {
                             onBalanceLoadComplete(false)
                             onOperationsLoadHistoryComplete()
