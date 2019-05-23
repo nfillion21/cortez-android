@@ -375,7 +375,7 @@ class TransferFormFragment : Fragment()
             {
 
                 //prevents from async crashes
-                if (activity != null)
+                if (R.id.content != null)
                 {
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete()
@@ -413,47 +413,50 @@ class TransferFormFragment : Fragment()
             },
                     Response.ErrorListener {
 
-                        onStorageInfoComplete()
-
-                        val response = it.networkResponse?.statusCode
-                        if (response != 404)
+                        if (R.id.content != null)
                         {
-                            // 404 happens when there is no storage in this KT1
+                            onStorageInfoComplete()
 
-                            listener?.onTransferFailed(it)
-
-                            //TODO user needs to retry storage call
-                        }
-                        else
-                        {
-                            //it means this KT1 had no code
-                            //false by default anyway
-
-                            if (isRecipient)
+                            val response = it.networkResponse?.statusCode
+                            if (response != 404)
                             {
-                                mRecipientKT1withCode = false
+                                // 404 happens when there is no storage in this KT1
+
+                                listener?.onTransferFailed(it)
+
+                                //TODO user needs to retry storage call
                             }
                             else
                             {
-                                mSourceKT1withCode = false
+                                //it means this KT1 had no code
+                                //false by default anyway
 
-                                val hasMnemonics = Storage(activity!!).hasMnemonics()
-                                if (hasMnemonics)
+                                if (isRecipient)
                                 {
-                                    val seed = Storage(activity!!).getMnemonics()
+                                    mRecipientKT1withCode = false
+                                }
+                                else
+                                {
+                                    mSourceKT1withCode = false
 
-                                    if (seed.mnemonics.isEmpty())
+                                    val hasMnemonics = Storage(activity!!).hasMnemonics()
+                                    if (hasMnemonics)
                                     {
-                                        listener?.noMnemonicsAvailable()
-                                    }
-                                    else
-                                    {
-                                        //TODO we can display the screen
+                                        val seed = Storage(activity!!).getMnemonics()
+
+                                        if (seed.mnemonics.isEmpty())
+                                        {
+                                            listener?.noMnemonicsAvailable()
+                                        }
+                                        else
+                                        {
+                                            //TODO we can display the screen
+                                        }
                                     }
                                 }
-                            }
 
-                            //TODO we can display the elements, or say we don't have the mnemonics
+                                //TODO we can display the elements, or say we don't have the mnemonics
+                            }
                         }
                     })
 

@@ -534,11 +534,18 @@ class ScriptFragment : Fragment()
             },
                     Response.ErrorListener {
 
+                        val response = it.networkResponse?.statusCode
+                        if (response == 404)
+                        {
+                            mStorage = JSONObject(getString(R.string.default_storage)).toString()
+                        }
+                        else
+                        {
+                            // 404 happens when there is no storage in this KT1
+                            showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                        }
+
                         onStorageInfoComplete(false)
-
-                        showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
-
-                        //mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
                     })
 
             jsonArrayRequest.tag = CONTRACT_SCRIPT_INFO_TAG
