@@ -167,17 +167,17 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
 
         fabTransfer.setOnClickListener { view ->
 
-            val isPasswordSaved = Storage(this).isPasswordSaved()
-            if (isPasswordSaved)
+            val hasMnemonics = Storage(this).hasMnemonics()
+            if (hasMnemonics)
             {
                 val pkh = intent.getStringExtra(TAG_PKH)
                 TransferFormActivity.start(this, pkh, null, mTezosTheme)
             }
             else
             {
-                //TODO this snackbar should be invisible
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
+                //the fab is invisible
+                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        //.setAction("Action", null).show()
             }
         }
 

@@ -61,6 +61,44 @@
 
                         </LinearLayout>
 
+                        <LinearLayout
+                            android:id="@+id/no_mnemonics"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="?attr/actionBarSize"
+                            android:orientation="horizontal"
+                            android:background="@drawable/selector_warning_layout"
+                            android:layout_marginBottom="@dimen/spacing_double">
+
+                            <ImageView
+                                android:layout_weight="0"
+                                android:layout_gravity="center_vertical"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_double"
+                                android:layout_marginLeft="@dimen/spacing_double"
+                                android:src="@drawable/ic_warning_24"
+                                android:contentDescription="@string/content_description"
+                                />
+
+                            <TextView
+                                android:layout_weight="1"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginStart="@dimen/spacing_double"
+                                android:layout_marginLeft="@dimen/spacing_double"
+                                android:layout_marginRight="@dimen/spacing_normal"
+                                android:layout_marginEnd="@dimen/spacing_normal"
+                                android:layout_marginTop="@dimen/spacing_normal"
+                                android:layout_marginBottom="@dimen/spacing_normal"
+                                android:gravity="center_vertical"
+                                android:text="@string/no_mnemonics_delegate"
+                                />
+
+                        </LinearLayout>
+
                         <TextView
                             android:id="@+id/loading_textview"
                             android:layout_width="match_parent"
@@ -85,13 +123,32 @@
                         <TextView
                             android:id="@+id/storage_info_textview"
                             android:visibility="gone"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                             android:text="@string/remove_delegate_info"
                             android:textColor="@color/colorAccent"
                             android:layout_marginBottom="@dimen/spacing_double"
                             android:ellipsize="end" />
+
+                        <TextView
+                            android:id="@+id/storage_info_address_textview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            android:layout_gravity="center"
+                            android:background="@drawable/selector_rect_layout"
+                            android:paddingTop="@dimen/spacing_micro"
+                            android:paddingBottom="@dimen/spacing_micro"
+                            android:paddingLeft="@dimen/spacing_normal"
+                            android:paddingRight="@dimen/spacing_normal"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:text="@string/remove_delegate_info_address"
+                            android:textColor="@color/colorAccent"
+                            android:autoSizeMinTextSize="12sp"
+                            android:autoSizeMaxTextSize="14sp"
+                            android:autoSizeStepGranularity="2sp"
+                            android:autoSizeTextType="uniform" />
 
                     </LinearLayout>
 

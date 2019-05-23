@@ -413,7 +413,7 @@ class DelegateFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateRemoveDelegateButton(false)
 
-        startPostRequestLoadInitRemoveDelegate()
+        //startPostRequestLoadInitRemoveDelegate()
     }
 
     private fun startFinalizeAddDelegateLoading()
@@ -460,13 +460,22 @@ class DelegateFragment : Fragment()
                     addContractInfoFromJSON(it)
                     onContractInfoComplete(true)
 
-                    if (mContract?.delegate != null)
+                    val hasMnemonics = Storage(activity!!).hasMnemonics()
+                    if (hasMnemonics)
                     {
-                        startInitRemoveDelegateLoading()
-                    }
-                    else
-                    {
-                        validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                        val seed = Storage(activity!!).getMnemonics()
+
+                        if (seed.mnemonics.isNotEmpty())
+                        {
+                            if (mContract?.delegate != null)
+                            {
+                                startInitRemoveDelegateLoading()
+                            }
+                            else
+                            {
+                                validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                            }
+                        }
                     }
                 }
             },
@@ -516,6 +525,8 @@ class DelegateFragment : Fragment()
     {
         //this method handles the data and loading texts
 
+        //TODO refreshing text with mnemonics or not.
+
         if (mContract != null)
         {
             if (mContract!!.delegate != null)
@@ -530,13 +541,30 @@ class DelegateFragment : Fragment()
                 remove_delegate_button_layout?.visibility = View.VISIBLE
 
                 storage_info_textview?.visibility = View.VISIBLE
-                storage_info_textview?.text = getString(R.string.remove_delegate_info, mContract?.delegate)
 
-                //TODO show everything related to the removing
+                storage_info_address_textview?.visibility = View.VISIBLE
+                storage_info_address_textview?.text = String.format(getString(R.string.remove_delegate_info_address, mContract?.delegate))
+
+
+                val hasMnemonics = Storage(activity!!).hasMnemonics()
+                if (hasMnemonics)
+                {
+                    val seed = Storage(activity!!).getMnemonics()
+
+                    if (seed.mnemonics.isEmpty())
+                    {
+                        //remove_delegate_button_layout?.visibility = View.GONE
+                        update_storage_form_card?.visibility = View.GONE
+
+                        no_mnemonics?.visibility = View.VISIBLE
+                    }
+                }
             }
             else
             {
                 limits_info_textview?.visibility = View.VISIBLE
+                limits_info_textview?.text = getString(R.string.redelegate_address_info)
+
                 update_storage_form_card?.visibility = View.VISIBLE
 
                 redelegate_address_layout?.visibility = View.VISIBLE
@@ -544,9 +572,22 @@ class DelegateFragment : Fragment()
                 update_storage_button_layout?.visibility = View.VISIBLE
 
                 storage_info_textview?.visibility = View.GONE
+                storage_info_address_textview?.visibility = View.GONE
                 remove_delegate_button_layout?.visibility = View.GONE
 
-                //TODO show everything related to the form
+                val hasMnemonics = Storage(activity!!).hasMnemonics()
+                if (hasMnemonics)
+                {
+                    val seed = Storage(activity!!).getMnemonics()
+
+                    if (seed.mnemonics.isEmpty())
+                    {
+                        limits_info_textview?.text = getString(R.string.no_baker_at_the_moment)
+                        update_storage_form_card?.visibility = View.GONE
+
+                        no_mnemonics?.visibility = View.VISIBLE
+                    }
+                }
             }
 
             if (!animating)

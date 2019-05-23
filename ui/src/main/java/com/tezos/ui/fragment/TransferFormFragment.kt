@@ -146,6 +146,8 @@ class TransferFormFragment : Fragment()
         fun onTransferLoading(loading: Boolean)
         fun onTransferFailed(error: VolleyError?)
 
+        fun noMnemonicsAvailable()
+
         fun isFingerprintAllowed():Boolean
         fun hasEnrolledFingerprints():Boolean
 
@@ -355,8 +357,6 @@ class TransferFormFragment : Fragment()
         nav_progress.visibility = View.VISIBLE
         */
 
-
-
         var pkh :String? = if (isRecipient)
         {
             mDstAccount
@@ -365,7 +365,6 @@ class TransferFormFragment : Fragment()
         {
             arguments!!.getString(Address.TAG)
         }
-
 
         if (pkh != null)
         {
@@ -437,7 +436,24 @@ class TransferFormFragment : Fragment()
                             else
                             {
                                 mSourceKT1withCode = false
+
+                                val hasMnemonics = Storage(activity!!).hasMnemonics()
+                                if (hasMnemonics)
+                                {
+                                    val seed = Storage(activity!!).getMnemonics()
+
+                                    if (seed.mnemonics.isEmpty())
+                                    {
+                                        listener?.noMnemonicsAvailable()
+                                    }
+                                    else
+                                    {
+                                        //TODO we can display the screen
+                                    }
+                                }
                             }
+
+                            //TODO we can display the elements, or say we don't have the mnemonics
                         }
                     })
 
