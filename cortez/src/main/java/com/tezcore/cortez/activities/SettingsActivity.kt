@@ -39,7 +39,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.widget.ImageButton
-import com.tezcore.cortez.fragments.SettingsFragment
+import com.tezos.ui.fragment.SettingsFragment
 import com.tezos.android.R
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.activity.BaseSecureActivity

@@ -74,6 +74,10 @@
             android:theme="@style/PaymentScreens.AddLimitsActivity"
             android:windowSoftInputMode="adjustPan" />
 
+        <activity
+            android:name="com.tezos.ui.activity.KeyManagementActivity"
+            android:theme="@style/PaymentScreens.KeyManagementActivity"/>
+
     </application>
 
 </manifest>

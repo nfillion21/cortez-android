@@ -585,24 +585,31 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean
+    {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
 
-        if (id == R.id.action_settings)
+        return when (item.itemId)
         {
-            SettingsActivity.start(this, mTezosTheme)
-            return true
+            R.id.action_settings ->
+            {
+                SettingsActivity.start(this, mTezosTheme)
+                true
+            }
+            R.id.action_about ->
+            {
+                AboutActivity.start(this, mTezosTheme)
+                true
+            }
+            R.id.action_key_management ->
+            {
+                KeyManagementActivity.start(this, mTezosTheme)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        else if (id == R.id.action_about)
-        {
-            AboutActivity.start(this, mTezosTheme)
-            return true
-        }
-
-        return super.onOptionsItemSelected(item)
     }
 
     /*

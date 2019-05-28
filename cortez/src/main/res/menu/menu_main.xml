@@ -7,9 +7,16 @@
         android:orderInCategory="1"
         android:title="@string/settings"
         app:showAsAction="never" />
+
     <item
         android:id="@+id/action_about"
         android:title="@string/about"
         android:orderInCategory="2"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_key_management"
+        android:title="@string/key_management"
+        android:orderInCategory="3"
         app:showAsAction="never" />
 </menu>

@@ -26,7 +26,7 @@
 */
 
 
-package com.tezcore.cortez.fragments;
+package com.tezos.ui.fragment;
 
 import android.app.Activity;
 import android.content.Context;
@@ -54,8 +54,8 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.ui.R;
 import com.tezos.ui.authentication.EncryptionServices;
 import com.tezos.ui.utils.Storage;
 

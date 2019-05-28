@@ -104,6 +104,7 @@
     <string name="last_operations_title">Latest operations</string>
     <string name="create_contract">Create the contract</string>
     <string name="about">About</string>
+    <string name="key_management">Key management</string>
     <string name="exit">Exit</string>
     <string name="exit_info">Are you sure you want to exit?</string>
     <string name="alert_deleting_address">Deleting address</string>
@@ -134,6 +135,8 @@
     <string name="contact_name">Contact name</string>
     <string name="tez">ꜩ</string>
     <string name="warning_change_p2pk">The contract storage indicates you cannot transfer any tez unless you edit it with the form below.</string>
+    <string name="ask_for_credentials">Ask for confirm credentials when the app goes to background</string>
+    <string name="use_fingerprint">Use fingerprint option to confirm transfers</string>
 
     <string name="delegate_and_contract_title">Delegate and contract</string>
 

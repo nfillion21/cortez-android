@@ -51,4 +51,8 @@
         <item name="android:windowBackground">@color/tz_background</item>
     </style>
 
+    <style name="PaymentScreens.KeyManagementActivity" parent="PaymentScreens.NoActionBar">
+        <item name="android:windowBackground">@color/tz_background</item>
+    </style>
+
 </resources>
