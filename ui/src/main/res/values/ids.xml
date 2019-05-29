@@ -17,6 +17,7 @@
     <item name="passcode_succeed" type="id" />
     <item name="passcode_failed" type="id" />
     <item name="logout_succeed" type="id" />
+    <item name="master_key_removed" type="id" />
     <item name="logout_failed" type="id" />
     <item name="scan_succeed" type="id" />
     <item name="scan_failed" type="id" />

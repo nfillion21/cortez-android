@@ -439,11 +439,15 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
             }
 
-            SettingsActivity.SETTINGS_REQUEST_CODE ->
+            KeyManagementActivity.KEY_MANAGEMENT_CODE ->
             {
                 if (resultCode == R.id.logout_succeed)
                 {
                     showSnackBar(getString(R.string.log_out_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
+                else if (resultCode == R.id.master_key_removed)
+                {
+                    showSnackBar(getString(R.string.master_key_removed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
             }
 

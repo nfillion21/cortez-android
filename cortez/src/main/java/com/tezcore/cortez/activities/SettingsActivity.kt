@@ -57,7 +57,7 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
 
     companion object
     {
-        private val TAG_SETTINGS = "SettingsTag"
+        private const val TAG_SETTINGS = "SettingsTag"
 
         var SETTINGS_REQUEST_CODE = 0x2500 // arbitrary int
 

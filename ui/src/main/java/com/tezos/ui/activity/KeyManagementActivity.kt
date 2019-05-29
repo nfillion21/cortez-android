@@ -30,6 +30,7 @@ package com.tezos.ui.activity
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
@@ -39,6 +40,7 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import android.view.View
 import android.widget.ImageButton
@@ -46,8 +48,11 @@ import android.widget.TextView
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
+import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_key_management.*
+import kotlinx.android.synthetic.main.activity_key_management.exit_button
+import kotlinx.android.synthetic.main.activity_key_management.exit_button_layout
 
 
 class KeyManagementActivity : BaseSecureActivity()
@@ -56,12 +61,12 @@ class KeyManagementActivity : BaseSecureActivity()
     {
         private val KEY_MANAGEMENT_TAG = "KeyManagementTag"
 
-        var KEY_MANAGEMENT_TAG_CODE = 0x3300 // arbitrary int
+        var KEY_MANAGEMENT_CODE = 0x3300 // arbitrary int
 
         fun start(activity: Activity, theme: CustomTheme)
         {
             var starter = getStartIntent(activity, theme)
-            ActivityCompat.startActivityForResult(activity, starter, -1, null)
+            ActivityCompat.startActivityForResult(activity, starter, KEY_MANAGEMENT_CODE, null)
         }
 
         private fun getStartIntent(context: Context, theme:CustomTheme): Intent
@@ -72,6 +77,29 @@ class KeyManagementActivity : BaseSecureActivity()
             return starter
         }
     }
+
+    /*
+    companion object
+    {
+        private val TAG_SETTINGS = "SettingsTag"
+
+        var SETTINGS_REQUEST_CODE = 0x2500 // arbitrary int
+
+        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
+        {
+            val starter = Intent(context, SettingsActivity::class.java)
+            starter.putExtra(CustomTheme.TAG, themeBundle)
+
+            return starter
+        }
+
+        fun start(activity: Activity, theme: CustomTheme)
+        {
+            val starter = getStartIntent(activity, theme.toBundle())
+            ActivityCompat.startActivityForResult(activity, starter, SETTINGS_REQUEST_CODE, null)
+        }
+    }
+    */
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -85,10 +113,51 @@ class KeyManagementActivity : BaseSecureActivity()
 
         initActionBar(tezosTheme)
 
+        exit_button_layout.setOnClickListener {
+
+            val dialogClickListener = { dialog:DialogInterface, which:Int ->
+                when (which) {
+                    DialogInterface.BUTTON_POSITIVE -> {
+                        dialog.dismiss()
+
+                        onLogOutClicked()
+                    }
+
+                    DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+                }
+            }
+
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle(R.string.alert_exit_account)
+                    .setMessage(R.string.alert_exit_acccount_body)
+                    .setNegativeButton(android.R.string.cancel, dialogClickListener)
+                    .setPositiveButton(android.R.string.yes, dialogClickListener)
+                    .setCancelable(false)
+                    .show()
+        }
+
         remove_24_words_button.setOnClickListener {
 
-            //TODO
-            //sendMail()
+            val dialogClickListener = { dialog:DialogInterface, which:Int ->
+                when (which) {
+                    DialogInterface.BUTTON_POSITIVE -> {
+                        dialog.dismiss()
+
+                        onMasterKeyRemovedSeed()
+                    }
+
+                    DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+                }
+            }
+
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle(R.string.alert_exit_account)
+                    .setMessage(R.string.alert_exit_acccount_body)
+                    .setNegativeButton(android.R.string.cancel, dialogClickListener)
+                    .setPositiveButton(android.R.string.yes, dialogClickListener)
+                    .setCancelable(false)
+                    .show()
+
         }
     }
 
@@ -99,9 +168,44 @@ class KeyManagementActivity : BaseSecureActivity()
         val hasMnemonics = Storage(this).hasMnemonics()
         validateExitButton(hasMnemonics)
 
-        val hasMasterkey = Storage(this).getMnemonics().mnemonics.isNotEmpty()
-        with_mnemonics_layout.visibility = if (hasMasterkey) View.VISIBLE else View.GONE
-        without_mnemonics_layout.visibility = if (hasMasterkey) View.GONE else View.VISIBLE
+        if (hasMnemonics)
+        {
+            val hasMasterkey = Storage(this).getMnemonics().mnemonics.isNotEmpty()
+            with_mnemonics_layout.visibility = if (hasMasterkey) View.VISIBLE else View.GONE
+            without_mnemonics_layout.visibility = if (hasMasterkey) View.GONE else View.VISIBLE
+        }
+        else
+        {
+            with_mnemonics_layout.visibility = View.GONE
+            without_mnemonics_layout.visibility = View.GONE
+        }
+    }
+
+    fun onLogOutClicked()
+    {
+        val encryptionServices = EncryptionServices()
+        encryptionServices.removeMasterKey()
+        encryptionServices.removeFingerprintKey()
+        encryptionServices.removeConfirmCredentialsKey()
+        encryptionServices.removeSpendingKey()
+
+        Storage(baseContext).clear()
+
+        setResult(R.id.logout_succeed, null)
+        finish()
+    }
+
+    fun onMasterKeyRemovedSeed()
+    {
+        //Storage(baseContext).hasSeed()
+        //Storage(baseContext).removeSeed()
+        //val encryptionServices = EncryptionServices()
+        //encryptionServices.removeMasterKey()
+
+        Storage(baseContext).removeSeed()
+
+        setResult(R.id.master_key_removed, null)
+        finish()
     }
 
     private fun validateExitButton(validate: Boolean)
