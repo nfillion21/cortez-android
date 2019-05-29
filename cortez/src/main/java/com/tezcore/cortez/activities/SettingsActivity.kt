@@ -51,7 +51,7 @@ import com.tezos.ui.utils.Storage
  * Created by nfillion on 3/6/18.
  */
 
-class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOptionSelectedListener, SettingsFragment.OnLogOutClickedListener, SettingsFragment.OnSystemInformationsCallback
+class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOptionSelectedListener, SettingsFragment.OnSystemInformationsCallback
 {
     private var deviceSecurityAlert: AlertDialog? = null
 
@@ -150,33 +150,6 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
                 EncryptionServices().removeFingerprintKey()
             }
         }
-    }
-
-    override fun onHalfLogOutClicked()
-    {
-        //Storage(baseContext).hasSeed()
-        //Storage(baseContext).removeSeed()
-        //val encryptionServices = EncryptionServices()
-        //encryptionServices.removeMasterKey()
-
-        Storage(baseContext).removeSeed()
-
-        setResult(R.id.logout_succeed, null)
-        finish()
-    }
-
-    override fun onLogOutClicked()
-    {
-        val encryptionServices = EncryptionServices()
-        encryptionServices.removeMasterKey()
-        encryptionServices.removeFingerprintKey()
-        encryptionServices.removeConfirmCredentialsKey()
-        encryptionServices.removeSpendingKey()
-
-        Storage(baseContext).clear()
-
-        setResult(R.id.logout_succeed, null)
-        finish()
     }
 
     override fun isFingerprintHardwareAvailable(): Boolean
