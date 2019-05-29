@@ -71,7 +71,8 @@
     <string name="no_mnemonics_contracts">Please restore your 24 words in settings to create contracts.</string>
     <string name="no_mnemonics_delegate">Please restore your 24 words in settings to be able to remove or change your current baker.</string>
     <string name="no_mnemonics_script">Please restore your 24 words in settings to update your contract\'s storage informations.</string>
-    <string name="restore_your_24_words_info">Restore your 24 words to be able to transfer from your main tz1 account and standard KT1 contracts, create new contracts and remove or change your bakers.\n\n\However you can still transfer tez from your Daily Spending Limit contracts if this device is linked to them.</string>
+    <string name="restore_your_24_words_info">Restore your 24 words to be able to transfer tez from your main tz1 account and standard KT1 contracts, create new contracts and remove or change your bakers.\n\n\However you can still transfer tez from your Daily Spending Limit contracts if this device is linked to them.\n\nThe Log Out button removes all of your data from this device.</string>
+    <string name="remove_your_24_words_info">You can remove your Master Key from this device as a safety mesure. Please keep your 24 words in a safe place to recover it.\n\nBy doing this, you won\'t be able to transfer tez from your main tz1 account or standard KT1 contracts, you won\'t be able to create new contracts or remove/change your bakers.\n\nHowever you can still transfer tez from your Daily Spending Limit contracts if this device is linked to them.\n\nThe Log Out button removes all of your data from this device.</string>
     <string name="tap_to_copy_info">Tap to copy your address or share it with the sender via email or text.</string>
     <string name="share">Share</string>
     <string name="contact_us">Contact us</string>
@@ -115,7 +116,9 @@
     <string name="alert_deleting_address">Deleting address</string>
     <string name="alert_deleting_address_body">Are you sure that you want to delete this address?</string>
     <string name="alert_exit_account">Log Out</string>
+    <string name="alert_remove_master_key">Remove Master Key</string>
     <string name="alert_exit_acccount_body">Please make sure you still have your 24 words list on a piece of paper or your data will be lost forever.</string>
+    <string name="alert_remove_master_key_body">Your Master Key will be removed. Please make sure you still have your 24 words list on a piece of paper or your data will be lost forever.</string>
     <string name="address_successfully_added">Address successfully added!</string>
     <string name="address_successfully_delegated">KT1 address successfully added and delegated!</string>
     <string name="address_successfully_scanned">Address successfully scanned!</string>

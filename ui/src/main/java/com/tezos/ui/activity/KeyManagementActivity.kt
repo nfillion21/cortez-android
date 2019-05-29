@@ -151,8 +151,8 @@ class KeyManagementActivity : BaseSecureActivity()
             }
 
             val builder = AlertDialog.Builder(this)
-            builder.setTitle(R.string.alert_exit_account)
-                    .setMessage(R.string.alert_exit_acccount_body)
+            builder.setTitle(R.string.alert_remove_master_key)
+                    .setMessage(R.string.alert_remove_master_key_body)
                     .setNegativeButton(android.R.string.cancel, dialogClickListener)
                     .setPositiveButton(android.R.string.yes, dialogClickListener)
                     .setCancelable(false)

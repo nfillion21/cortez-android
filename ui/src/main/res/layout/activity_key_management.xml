@@ -138,7 +138,7 @@
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                         android:textColor="@color/colorAccent"
                         android:gravity="center_vertical"
-                        android:text="@string/no_mnemonics_delegate"
+                        android:text="@string/remove_your_24_words_info"
                         />
 
                     <Space
