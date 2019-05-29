@@ -40,7 +40,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.widget.Toolbar
-import android.widget.Button
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import com.tezos.core.models.CustomTheme
@@ -52,11 +52,9 @@ import kotlinx.android.synthetic.main.activity_key_management.*
 
 class KeyManagementActivity : BaseSecureActivity()
 {
-    private var mMailButton: Button? = null
-
     companion object
     {
-        private val ABOUT_TAG = "KeyManagementTag"
+        private val KEY_MANAGEMENT_TAG = "KeyManagementTag"
 
         var KEY_MANAGEMENT_TAG_CODE = 0x3300 // arbitrary int
 
@@ -87,7 +85,7 @@ class KeyManagementActivity : BaseSecureActivity()
 
         initActionBar(tezosTheme)
 
-        half_logout_button.setOnClickListener {
+        remove_24_words_button.setOnClickListener {
 
             //TODO
             //sendMail()
@@ -100,6 +98,10 @@ class KeyManagementActivity : BaseSecureActivity()
 
         val hasMnemonics = Storage(this).hasMnemonics()
         validateExitButton(hasMnemonics)
+
+        val hasMasterkey = Storage(this).getMnemonics().mnemonics.isNotEmpty()
+        with_mnemonics_layout.visibility = if (hasMasterkey) View.VISIBLE else View.GONE
+        without_mnemonics_layout.visibility = if (hasMasterkey) View.GONE else View.VISIBLE
     }
 
     private fun validateExitButton(validate: Boolean)

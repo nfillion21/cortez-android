@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_double"
             android:layout_marginLeft="@dimen/spacing_double"
-            android:src="@drawable/vpn_key_black"
+            android:src="@drawable/ic_key_24"
             android:contentDescription="@string/content_description"
             />
 
@@ -61,8 +61,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/PaymentScreens.SourceButton"
-        android:drawableLeft="@drawable/vpn_key_black"
-        android:drawableStart="@drawable/vpn_key_black"
+        android:drawableLeft="@drawable/ic_key_24"
+        android:drawableStart="@drawable/ic_key_24"
         android:paddingLeft="@dimen/spacing_double"
         android:paddingRight="40dp"
         android:text="@string/select_source"

@@ -16,7 +16,7 @@
             android:background="?attr/colorPrimary">
 
             <TextView android:id="@+id/barTitle"
-                android:text="@string/about_title"
+                android:text="@string/key_management_title"
 
                 android:paddingStart="@dimen/spacing_normal"
                 android:paddingLeft="@dimen/spacing_normal"
@@ -55,9 +55,9 @@
         android:orientation="vertical">
 
         <ScrollView
-            android:layout_gravity="top"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -73,62 +73,95 @@
                     android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
                     android:elevation="@dimen/elevation_header"
                     android:gravity="center_vertical"
-                    android:text="@string/cortez_for_android"
+                    android:text="@string/key_management_title"
                     android:clipToPadding="false"
                     tools:ignore="UnusedAttribute,NewApi" />
 
-                <!--
-                <TextView
-                    android:id="@+id/versionText"
+                <LinearLayout
+                    android:id="@+id/without_mnemonics_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/spacing_double"
-                    android:layout_marginRight="@dimen/spacing_double"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:textColor="@color/colorAccent"
-                    android:text="@string/cortez_for_android"
-                    tools:ignore="UnusedAttribute,NewApi" />
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <TextView android:id="@id/text"
+                    <TextView
+                        android:background="@drawable/selector_rect_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="@dimen/spacing_double"
+                        android:padding="@dimen/spacing_double"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                        android:textColor="@color/colorAccent"
+                        android:gravity="center_vertical"
+                        android:text="@string/restore_your_24_words_info"
+                        />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        />
+
+                    <Button
+                        android:id="@+id/restore_24_words_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/PaymentScreens.RoundedButton"
+                        android:text="@string/restore_your_24_words"
+                        android:visibility="visible"
+                        android:paddingLeft="@dimen/spacing_double"
+                        android:paddingRight="@dimen/spacing_double"
+                        android:layout_marginRight="@dimen/spacing_double"
+                        android:layout_marginLeft="@dimen/spacing_double"
+                        android:drawableLeft="@drawable/ic_key_24"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/with_mnemonics_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/selector_rect_layout"
-                    android:textColor="@color/colorAccent"
-                    android:layout_margin="@dimen/spacing_double"
-                    android:padding="@dimen/spacing_double"
-                    android:autoLink="web"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:layout_marginBottom="@dimen/spacing_micro"
-                    android:text="@string/about_info" />
-                -->
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="@dimen/spacing_double"
+                        android:padding="@dimen/spacing_double"
+                        android:background="@drawable/selector_warning_layout"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                        android:textColor="@color/colorAccent"
+                        android:gravity="center_vertical"
+                        android:text="@string/no_mnemonics_delegate"
+                        />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        />
+                    <Button
+                        android:id="@+id/remove_24_words_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/PaymentScreens.RoundedButton"
+                        android:text="@string/remove_your_24_words"
+                        android:visibility="visible"
+                        android:drawableLeft="@drawable/ic_delete_24"
+                        android:paddingLeft="@dimen/spacing_double"
+                        android:paddingRight="@dimen/spacing_double"
+                        android:layout_marginRight="@dimen/spacing_double"
+                        android:layout_marginLeft="@dimen/spacing_double"
+                        />
+                </LinearLayout>
             </LinearLayout>
 
         </ScrollView>
     </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_weight="0"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
-
-        <Button
-            android:id="@+id/half_logout_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/PaymentScreens.RoundedButton"
-            android:text="@string/contact_us"
-            android:visibility="visible"
-            android:layout_marginTop="@dimen/spacing_normal"
-            android:layout_marginRight="@dimen/spacing_double"
-            android:layout_marginLeft="@dimen/spacing_double"
-            android:layout_marginBottom="@dimen/spacing_double"
-            />
-
-    </LinearLayout>
-
 
     <FrameLayout
         android:id="@+id/exit_button_layout"

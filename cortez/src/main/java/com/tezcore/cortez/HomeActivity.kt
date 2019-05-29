@@ -172,7 +172,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
-        fabTransfer.setOnClickListener { view ->
+        fabTransfer.setOnClickListener {
 
             val hasMnemonics = Storage(this).hasMnemonics()
             if (hasMnemonics)
