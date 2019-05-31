@@ -441,13 +441,22 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
             KeyManagementActivity.KEY_MANAGEMENT_CODE ->
             {
-                if (resultCode == R.id.logout_succeed)
+                when (resultCode)
                 {
-                    showSnackBar(getString(R.string.log_out_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
-                }
-                else if (resultCode == R.id.master_key_removed)
-                {
-                    showSnackBar(getString(R.string.master_key_removed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    R.id.logout_succeed ->
+                    {
+                        showSnackBar(getString(R.string.log_out_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    }
+
+                    R.id.master_key_removed ->
+                    {
+                        showSnackBar(getString(R.string.master_key_removed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    }
+
+                    R.id.restore_wallet_succeed ->
+                    {
+                        showSnackBar(getString(R.string.wallet_successfully_restored), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    }
                 }
             }
 

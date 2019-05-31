@@ -512,7 +512,7 @@ class ScriptFragment : Fragment()
             {
 
                 //prevents from async crashes
-                if (R.id.content != null)
+                if (swipe_refresh_script_layout != null)
                 {
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete(true)
@@ -534,7 +534,7 @@ class ScriptFragment : Fragment()
             },
                     Response.ErrorListener {
 
-                        if (R.id.content != null)
+                        if (swipe_refresh_script_layout != null)
                         {
                             val response = it.networkResponse?.statusCode
                             if (response == 404)

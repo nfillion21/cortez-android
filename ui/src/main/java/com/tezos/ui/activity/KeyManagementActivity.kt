@@ -49,6 +49,7 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_key_management.*
 import kotlinx.android.synthetic.main.activity_key_management.exit_button
@@ -157,7 +158,35 @@ class KeyManagementActivity : BaseSecureActivity()
                     .setPositiveButton(android.R.string.yes, dialogClickListener)
                     .setCancelable(false)
                     .show()
+        }
 
+        restore_24_words_button.setOnClickListener {
+            val theme = CustomTheme(
+                    R.color.theme_tezos_primary,
+                    R.color.theme_tezos_primary_dark,
+                    R.color.theme_tezos_text)
+            RestoreWalletActivity.start(this, theme)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode)
+        {
+            RestoreWalletActivity.RESTORE_WALLET_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.restore_wallet_succeed)
+                {
+                    if (data != null && data.hasExtra(RestoreWalletActivity.SEED_DATA_KEY))
+                    {
+                        setResult(R.id.restore_wallet_succeed, intent)
+                        finish()
+                        //showSnackBar(getString(R.string.wallet_successfully_restored), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    }
+                }
+            }
         }
     }
 

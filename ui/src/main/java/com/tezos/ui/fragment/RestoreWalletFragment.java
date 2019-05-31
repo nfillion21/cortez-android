@@ -36,6 +36,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -81,6 +82,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     {
         void onWordCardNumberClicked(int position);
         void mnemonicsVerified(String mnemonics);
+        boolean wordsFilled(String mnemonics);
     }
 
     public static RestoreWalletFragment newInstance(Bundle customTheme)
@@ -161,7 +163,25 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             {
                 mAdapter.updateWords(words, null);
             }
-            validateMnemonicsButton(CryptoUtils.validateMnemonics(words));
+
+            boolean isValid = CryptoUtils.validateMnemonics(mAdapter.getWords());
+            if (isValid)
+            {
+                String mnemonics = mnemonicsListToString(mAdapter.getWords());
+                boolean isRightWords = mCallback.wordsFilled(mnemonics);
+                if (isRightWords)
+                {
+                    validateMnemonicsButton(CryptoUtils.validateMnemonics(words));
+                }
+                else
+                {
+                    validateMnemonicsButton(false);
+                }
+            }
+            else
+            {
+                validateMnemonicsButton(false);
+            }
         }
         else
         {
@@ -304,8 +324,33 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             mAdapter.updateWords(link, null);
         }
 
-        validateMnemonicsButton(CryptoUtils.validateMnemonics(mAdapter.getWords()));
+        boolean isValid = CryptoUtils.validateMnemonics(mAdapter.getWords());
+        if (isValid)
+        {
+            //TODO verify if it does always work
+            String mnemonics = mnemonicsListToString(mAdapter.getWords());
+            boolean isRightWords = mCallback.wordsFilled(mnemonics);
+
+            validateMnemonicsButton(isRightWords);
+        }
+        else
+        {
+            validateMnemonicsButton(false);
+        }
     }
+
+    /*
+    private void showSnackBar(boolean succeed)
+    {
+        int resText = succeed ? R.string.address_successfully_scanned : R.string.address_scan_failed;
+        int resColor = succeed ? android.R.color.holo_green_light : android.R.color.holo_red_light;
+
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.content), resText, Snackbar.LENGTH_LONG);
+        snackbar.getView().setBackgroundColor((ContextCompat.getColor(getActivity(),
+                resColor)));
+        snackbar.show();
+    }
+    */
 
     @Override
     public void onResume()

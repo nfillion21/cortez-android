@@ -30,7 +30,9 @@ package com.tezos.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -47,6 +49,7 @@ import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.RestoreWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.utils.Storage
+import kotlinx.android.synthetic.main.activity_restore_wallet.*
 
 class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener, PasswordDialog.OnPasswordDialogListener {
 
@@ -174,5 +177,29 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
             setResult(R.id.restore_wallet_succeed, intent)
             finish()
         }
+    }
+
+    override fun wordsFilled(words: String?):Boolean
+    {
+        with(Storage(this))
+        {
+            val hasMnemonics = hasMnemonics()
+            if (hasMnemonics)
+            {
+                val pkh = getMnemonics().pkh
+                if (pkh != CryptoUtils.generatePkh(words, ""))
+                {
+                    //showSnackBar(getString(R.string.no_mnemonics_contracts), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
+
+                    val snackbar = Snackbar.make(restorewallet_container, getString(R.string.no_mnemonics_contracts), Snackbar.LENGTH_LONG)
+                    snackbar.view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.tz_accent))
+                    snackbar.setActionTextColor(Color.YELLOW)
+                    snackbar.show()
+                    return false
+                }
+            }
+        }
+
+        return true
     }
 }
