@@ -92,7 +92,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
         if (context is OnVerifyWalletCreationListener) {
             listener = context
         } else {
-            throw RuntimeException(context.toString() + " must implement OnVerifyWalletCreationListener")
+            throw RuntimeException("$context must implement OnVerifyWalletCreationListener")
         }
     }
 

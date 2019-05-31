@@ -88,7 +88,7 @@ class CreateWalletFragment : Fragment()
         }
         else
         {
-            throw RuntimeException(context.toString() + " must implement OnCreateWalletListener")
+            throw RuntimeException("$context must implement OnCreateWalletListener")
         }
     }
 
