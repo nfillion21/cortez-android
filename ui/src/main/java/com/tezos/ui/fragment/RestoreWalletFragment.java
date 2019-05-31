@@ -29,14 +29,13 @@ package com.tezos.ui.fragment;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -58,13 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import io.github.novacrypto.bip39.MnemonicValidator;
-import io.github.novacrypto.bip39.Validation.InvalidChecksumException;
-import io.github.novacrypto.bip39.Validation.InvalidWordCountException;
-import io.github.novacrypto.bip39.Validation.UnexpectedWhiteSpaceException;
-import io.github.novacrypto.bip39.Validation.WordNotFoundException;
-import io.github.novacrypto.bip39.wordlists.English;
-
 public class RestoreWalletFragment extends Fragment implements MnemonicWordsViewAdapter.OnItemClickListener
 {
     private static final String WORDS_KEY = "words_key";
@@ -83,6 +75,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
         void onWordCardNumberClicked(int position);
         void mnemonicsVerified(String mnemonics);
         boolean wordsFilled(String mnemonics);
+        void showSnackBar(String res, int color, int textColor);
     }
 
     public static RestoreWalletFragment newInstance(Bundle customTheme)
@@ -330,6 +323,10 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             //TODO verify if it does always work
             String mnemonics = mnemonicsListToString(mAdapter.getWords());
             boolean isRightWords = mCallback.wordsFilled(mnemonics);
+            if (!isRightWords)
+            {
+                mCallback.showSnackBar(getString(R.string.not_mnemonics_expected), ContextCompat.getColor(getActivity(), android.R.color.holo_red_light), ContextCompat.getColor(getActivity(), R.color.tz_light));
+            }
 
             validateMnemonicsButton(isRightWords);
         }
@@ -338,19 +335,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             validateMnemonicsButton(false);
         }
     }
-
-    /*
-    private void showSnackBar(boolean succeed)
-    {
-        int resText = succeed ? R.string.address_successfully_scanned : R.string.address_scan_failed;
-        int resColor = succeed ? android.R.color.holo_green_light : android.R.color.holo_red_light;
-
-        Snackbar snackbar = Snackbar.make(findViewById(R.id.content), resText, Snackbar.LENGTH_LONG);
-        snackbar.getView().setBackgroundColor((ContextCompat.getColor(getActivity(),
-                resColor)));
-        snackbar.show();
-    }
-    */
 
     @Override
     public void onResume()

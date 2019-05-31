@@ -189,17 +189,19 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
                 val pkh = getMnemonics().pkh
                 if (pkh != CryptoUtils.generatePkh(words, ""))
                 {
-                    //showSnackBar(getString(R.string.no_mnemonics_contracts), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
-
-                    val snackbar = Snackbar.make(restorewallet_container, getString(R.string.no_mnemonics_contracts), Snackbar.LENGTH_LONG)
-                    snackbar.view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.tz_accent))
-                    snackbar.setActionTextColor(Color.YELLOW)
-                    snackbar.show()
                     return false
                 }
             }
         }
 
         return true
+    }
+
+    override fun showSnackBar(res:String, color:Int, textColor:Int)
+    {
+        val snackbar = Snackbar.make(content, res, Snackbar.LENGTH_LONG)
+        snackbar.view.setBackgroundColor(color)
+        snackbar.setActionTextColor(textColor)
+        snackbar.show()
     }
 }
