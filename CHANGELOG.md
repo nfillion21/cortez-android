@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.3.4
+-----
+* Resolves forging errors by switching to a new node.
+
 1.3.3
 -----
 * Handle transactions and delegation with different curves.
