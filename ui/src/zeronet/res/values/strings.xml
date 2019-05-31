@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="history_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/history?ks=%1$s</string>
-    <string name="balance_url" translatable="false">https://aleph.luminar.eu.org/tezos/zeronet/chains/main/blocks/head/context/contracts/%1$s/balance</string>
+    <string name="history_url" translatable="false">https://mezos.lamini.ca/mezos/zeronet/history?ks=%1$s</string>
+    <string name="balance_url" translatable="false">https://mezos.lamini.ca/tezos/zeronet/chains/main/blocks/head/context/contracts/%1$s/balance</string>
 
-    <string name="transfer_forge" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/forge_transfer</string>
-    <string name="transfer_injection_operation" translatable="false">https://aleph.luminar.eu.org/tezos/zeronet/injection/operation</string>
+    <string name="transfer_forge" translatable="false">https://mezos.lamini.ca/mezos/zeronet/forge_transfer</string>
+    <string name="transfer_injection_operation" translatable="false">https://mezos.lamini.ca/tezos/zeronet/injection/operation</string>
 
-    <string name="contracts_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/contracts?mgrs=%1$s</string>
-    <string name="originate_account_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/originate_account</string>
-    <string name="change_delegate_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/change_delegate</string>
-    <string name="contract_info_url" translatable="false">https://aleph.luminar.eu.org/mezos/zeronet/contract_info?ks=%1$s</string>
-
-    <string name="contract_storage_url" translatable="false">https://aleph.luminar.eu.org/tezos/zeronet/chains/main/blocks/head/context/contracts/%1$s/storage</string>
+    <string name="contracts_url" translatable="false">https://mezos.lamini.ca/mezos/zeronet/contracts?mgrs=%1$s</string>
+    <string name="originate_account_url" translatable="false">https://mezos.lamini.ca/mezos/zeronet/originate_account</string>
+    <string name="change_delegate_url" translatable="false">https://mezos.lamini.ca/mezos/zeronet/change_delegate</string>
+    <string name="contract_info_url" translatable="false">https://mezos.lamini.ca/mezos/zeronet/contract_info?ks=%1$s</string>
 </resources>
+

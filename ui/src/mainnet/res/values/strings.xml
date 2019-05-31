@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="history_url" translatable="false">https://beth.luminar.eu.org/mezos/mainnet/history?ks=%1$s</string>
-    <string name="balance_url" translatable="false">https://beth.luminar.eu.org/tezos/mainnet/chains/main/blocks/head/context/contracts/%1$s/balance</string>
+    <string name="history_url" translatable="false">https://mezos.lamini.ca/mezos/mainnet/history?ks=%1$s</string>
+    <string name="balance_url" translatable="false">https://mezos.lamini.ca/tezos/mainnet/chains/main/blocks/head/context/contracts/%1$s/balance</string>
 
-    <string name="transfer_forge" translatable="false">https://beth.luminar.eu.org/mezos/mainnet/forge_transfer</string>
-    <string name="transfer_injection_operation" translatable="false">https://beth.luminar.eu.org/tezos/mainnet/injection/operation</string>
+    <string name="transfer_forge" translatable="false">https://mezos.lamini.ca/mezos/mainnet/forge_transfer</string>
+    <string name="transfer_injection_operation" translatable="false">https://mezos.lamini.ca/tezos/mainnet/injection/operation</string>
 
     <string name="contracts_url" translatable="false">https://beth.luminar.eu.org/mezos/mainnet/contracts?mgrs=%1$s</string>
     <string name="originate_account_url" translatable="false">https://beth.luminar.eu.org/mezos/mainnet/originate_account</string>
