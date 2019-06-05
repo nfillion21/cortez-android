@@ -75,6 +75,8 @@ class ScriptFragment : Fragment()
     private var mInitUpdateStorageLoading:Boolean = false
     private var mFinalizeDelegateLoading:Boolean = false
 
+    private var mSecureHashBalanceLoading:Boolean = false
+
     private var mStorageInfoLoading:Boolean = false
 
     private var mUpdateStoragePayload:String? = null
@@ -91,9 +93,11 @@ class ScriptFragment : Fragment()
 
     private var mSpendingLimitAmount:Long = -1L
 
+    private var mBalanceItem:Long = -1L
+
     companion object
     {
-        private const val CONTRACT_PUBLIC_KEY = "CONTRACT_PUBLIC_KEY"
+        private const val CONTRACT_PUBLIC_KEY = "contract_public_key"
 
         private const val UPDATE_STORAGE_INIT_TAG = "update_storage_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
@@ -116,6 +120,8 @@ class ScriptFragment : Fragment()
         private const val SPENDING_AMOUNT_KEY = "spending_amount_key"
 
         private const val EDIT_MODE_KEY = "edit_mode_key"
+
+        private val BALANCE_LONG_KEY = "balance_long_key"
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -202,6 +208,8 @@ class ScriptFragment : Fragment()
             mInitUpdateStorageLoading = savedInstanceState.getBoolean(UPDATE_STORAGE_INIT_TAG)
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
 
+            mSecureHashBalanceLoading = savedInstanceState.getBoolean(LOAD_SECURE_HASH_BALANCE_TAG)
+
             mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
 
             mUpdateStorageAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
@@ -217,6 +225,8 @@ class ScriptFragment : Fragment()
             mSpendingLimitAmount = savedInstanceState.getLong(SPENDING_AMOUNT_KEY, -1L)
 
             mEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY, false)
+
+            mBalanceItem = savedInstanceState.getLong(BALANCE_LONG_KEY, -1)
 
             if (mStorageInfoLoading)
             {
@@ -539,58 +549,7 @@ class ScriptFragment : Fragment()
 
                         if (isSecureKeyHashIdentical())
                         {
-                            //it's the same key, we can check for the tz3 balance
-
-                            cancelRequests(true)
-
-                            //mGetHistoryLoading = true
-
-                            /*
-                            mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
-                            mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
-
-                            mNavProgressBalance?.visibility = View.VISIBLE
-                            */
-
-                            val url = String.format(getString(R.string.balance_url), retrieveTz3())
-
-                            // Request a string response from the provided URL.
-                            val stringRequest = StringRequest(Request.Method.GET, url,
-                                    Response.Listener<String> { response ->
-
-                                        if (swipe_refresh_script_layout != null)
-                                        {
-                                            val balance = response.replace("[^0-9]".toRegex(), "")
-                                            val balance2 = response.replace("[^0-9]".toRegex(), "")
-
-                                            fsdfskj
-                                            /*
-                                            mBalanceItem = balance?.toDouble()/1000000
-                                            if (mBalanceItem != null)
-                                            {
-                                                animateBalance(mBalanceItem)
-                                            }
-
-                                            onBalanceLoadComplete(true)
-                                            startGetRequestLoadOperations()
-                                            */
-                                        }
-                                    },
-                                    Response.ErrorListener
-                                    {
-                                        if (swipe_refresh_script_layout != null)
-                                        {
-                                            /*
-                                            onBalanceLoadComplete(false)
-                                            onOperationsLoadHistoryComplete()
-                                            showSnackbarError(it)
-                                            */
-                                        }
-                                    })
-
-                            stringRequest.tag = LOAD_SECURE_HASH_BALANCE_TAG
-                            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
-
+                            startGetRequestBalance()
                         }
                         else
                         {
@@ -628,6 +587,74 @@ class ScriptFragment : Fragment()
             jsonArrayRequest.tag = CONTRACT_SCRIPT_INFO_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
+    }
+
+    private fun startGetRequestBalance()
+    {
+        //it's the same key, we can check for the tz3 balance
+
+        cancelRequests(true)
+
+        mSecureHashBalanceLoading = true
+
+        /*
+        mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
+        mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
+
+        mNavProgressBalance?.visibility = View.VISIBLE
+        */
+
+        val url = String.format(getString(R.string.balance_url), retrieveTz3())
+
+        // Request a string response from the provided URL.
+        val stringRequest = StringRequest(Request.Method.GET, url,
+                Response.Listener<String> { response ->
+
+                    if (swipe_refresh_script_layout != null)
+                    {
+                        val balance = response.replace("[^0-9]".toRegex(), "")
+
+                        mBalanceItem = balance?.toLong()
+
+                        // refresh UI
+
+                        onBalanceLoadComplete()
+
+                        /*
+                        mBalanceItem = balance?.toDouble()/1000000
+                        if (mBalanceItem != null)
+                        {
+                            animateBalance(mBalanceItem)
+                        }
+
+                        onBalanceLoadComplete(true)
+                        startGetRequestLoadOperations()
+                        */
+                    }
+                },
+                Response.ErrorListener
+                {
+                    if (swipe_refresh_script_layout != null)
+                    {
+                        /*
+                        onBalanceLoadComplete(false)
+                        onOperationsLoadHistoryComplete()
+                        showSnackbarError(it)
+                        */
+                    }
+                })
+
+        stringRequest.tag = LOAD_SECURE_HASH_BALANCE_TAG
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+
+    }
+
+    private fun onBalanceLoadComplete()
+    {
+        mSecureHashBalanceLoading = false
+        //mNavProgressBalance?.visibility = View.GONE
+
+        //refreshTextBalance(animating)
     }
 
     private fun addContractInfoFromJSON(answer: JSONObject)
@@ -1447,6 +1474,7 @@ class ScriptFragment : Fragment()
             val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
             requestQueue?.cancelAll(UPDATE_STORAGE_INIT_TAG)
             requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
+            requestQueue?.cancelAll(LOAD_SECURE_HASH_BALANCE_TAG)
             requestQueue?.cancelAll(CONTRACT_SCRIPT_INFO_TAG)
 
             if (resetBooleans)
@@ -1454,6 +1482,7 @@ class ScriptFragment : Fragment()
                 mInitUpdateStorageLoading = false
                 mFinalizeDelegateLoading = false
                 mStorageInfoLoading = false
+                mSecureHashBalanceLoading = false
             }
         }
     }
@@ -1464,6 +1493,8 @@ class ScriptFragment : Fragment()
 
         outState.putBoolean(UPDATE_STORAGE_INIT_TAG, mInitUpdateStorageLoading)
         outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
+
+        outState.putBoolean(LOAD_SECURE_HASH_BALANCE_TAG, mSecureHashBalanceLoading)
 
         outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
 
@@ -1482,6 +1513,8 @@ class ScriptFragment : Fragment()
         outState.putString(STORAGE_DATA_KEY, mStorage)
 
         outState.putBoolean(EDIT_MODE_KEY, mEditMode)
+
+        outState.putLong(BALANCE_LONG_KEY, mBalanceItem)
     }
 
     private fun mutezToTez(mutez:String):String
