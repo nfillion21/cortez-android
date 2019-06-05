@@ -597,6 +597,7 @@ class ScriptFragment : Fragment()
 
         mSecureHashBalanceLoading = true
 
+        //TODO handle loading
         /*
         mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
         mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
@@ -604,7 +605,9 @@ class ScriptFragment : Fragment()
         mNavProgressBalance?.visibility = View.VISIBLE
         */
 
-        val url = String.format(getString(R.string.balance_url), retrieveTz3())
+        secure_hash_progress.visibility = View.VISIBLE
+
+        val url = String.format(getString(R.string.balance_url), getStorageSecureKeyHash())
 
         // Request a string response from the provided URL.
         val stringRequest = StringRequest(Request.Method.GET, url,
@@ -614,7 +617,7 @@ class ScriptFragment : Fragment()
                     {
                         val balance = response.replace("[^0-9]".toRegex(), "")
 
-                        mBalanceItem = balance?.toLong()
+                        mBalanceItem = balance.toLong()
 
                         // refresh UI
 
@@ -636,11 +639,8 @@ class ScriptFragment : Fragment()
                 {
                     if (swipe_refresh_script_layout != null)
                     {
-                        /*
-                        onBalanceLoadComplete(false)
-                        onOperationsLoadHistoryComplete()
-                        showSnackbarError(it)
-                        */
+                        onBalanceLoadComplete()
+                        showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
                     }
                 })
 
@@ -652,9 +652,8 @@ class ScriptFragment : Fragment()
     private fun onBalanceLoadComplete()
     {
         mSecureHashBalanceLoading = false
-        //mNavProgressBalance?.visibility = View.GONE
-
-        //refreshTextBalance(animating)
+        secure_hash_progress.visibility = View.GONE
+        secure_hash_balance_textview.text = mBalanceItem.toString()
     }
 
     private fun addContractInfoFromJSON(answer: JSONObject)
@@ -1262,6 +1261,31 @@ class ScriptFragment : Fragment()
         }
 
         return false
+    }
+
+    private fun getStorageSecureKeyHash(): String?
+    {
+        if (mStorage != null && mStorage != JSONObject(getString(R.string.default_storage)).toString())
+        {
+            //TODO at this point, just show that there is no script.
+
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            // get securekey hash
+
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+            val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
+            val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+
+            return secureKeyHash
+        }
+
+        return null
     }
 
     private fun isP256AddressValid(): Boolean

@@ -49,6 +49,19 @@
                 android:textSize="@dimen/size_edit_text" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/secure_hash_balance_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ProgressBar
+            android:id="@+id/secure_hash_progress"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
         <LinearLayout
             android:id="@+id/daily_spending_limit_layout"
             android:layout_width="match_parent"
