@@ -100,6 +100,8 @@ class ScriptFragment : Fragment()
 
         private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
 
+        private const val LOAD_SECURE_HASH_BALANCE_TAG = "load_secure_hash_balance"
+
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
         private const val DELEGATE_TEZOS_ADDRESS_KEY = "delegate_tezos_address_key"
@@ -531,10 +533,68 @@ class ScriptFragment : Fragment()
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete(true)
 
-                    //if (mContract?.delegate != null)
-                    if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
+                    if (mStorage != null && mStorage != JSONObject(getString(R.string.default_storage)).toString())
                     {
                         validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
+
+                        if (isSecureKeyHashIdentical())
+                        {
+                            //it's the same key, we can check for the tz3 balance
+
+                            cancelRequests(true)
+
+                            //mGetHistoryLoading = true
+
+                            /*
+                            mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
+                            mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
+
+                            mNavProgressBalance?.visibility = View.VISIBLE
+                            */
+
+                            val url = String.format(getString(R.string.balance_url), retrieveTz3())
+
+                            // Request a string response from the provided URL.
+                            val stringRequest = StringRequest(Request.Method.GET, url,
+                                    Response.Listener<String> { response ->
+
+                                        if (swipe_refresh_script_layout != null)
+                                        {
+                                            val balance = response.replace("[^0-9]".toRegex(), "")
+                                            val balance2 = response.replace("[^0-9]".toRegex(), "")
+
+                                            fsdfskj
+                                            /*
+                                            mBalanceItem = balance?.toDouble()/1000000
+                                            if (mBalanceItem != null)
+                                            {
+                                                animateBalance(mBalanceItem)
+                                            }
+
+                                            onBalanceLoadComplete(true)
+                                            startGetRequestLoadOperations()
+                                            */
+                                        }
+                                    },
+                                    Response.ErrorListener
+                                    {
+                                        if (swipe_refresh_script_layout != null)
+                                        {
+                                            /*
+                                            onBalanceLoadComplete(false)
+                                            onOperationsLoadHistoryComplete()
+                                            showSnackbarError(it)
+                                            */
+                                        }
+                                    })
+
+                            stringRequest.tag = LOAD_SECURE_HASH_BALANCE_TAG
+                            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
+
+                        }
+                        else
+                        {
+                        }
                     }
                     else
                     {
@@ -662,6 +722,10 @@ class ScriptFragment : Fragment()
                 else
                 {
                     warning_p2pk_info?.visibility = View.GONE
+
+                    //TODO at this point, the secure enclave key is the good one. better check if there is enough fees to make a transfer.
+
+
                 }
 
                 // if there is no key or it's not the same as in storage, put the information.
@@ -1139,9 +1203,38 @@ class ScriptFragment : Fragment()
         return isSpendingAmountDifferent
     }
 
-    fun isInputDataValid(): Boolean
+    private fun isInputDataValid(): Boolean
     {
         return isP256AddressValid() && isSpendingLimitAmountValid()
+    }
+
+    private fun isSecureKeyHashIdentical(): Boolean
+    {
+        if (mStorage != null && mStorage != JSONObject(getString(R.string.default_storage)).toString())
+        {
+            //TODO at this point, just show that there is no script.
+
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            // get securekey hash
+
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+            val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
+            val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+
+            val tz3 = retrieveTz3()
+            if (tz3 != null || tz3 == secureKeyHash)
+            {
+                return true
+            }
+        }
+
+        return false
     }
 
     private fun isP256AddressValid(): Boolean
