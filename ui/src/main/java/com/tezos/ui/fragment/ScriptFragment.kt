@@ -93,7 +93,7 @@ class ScriptFragment : Fragment()
 
     private var mSpendingLimitAmount:Long = -1L
 
-    private var mBalanceItem:Long = -1L
+    private var mSecureHashBalance:Long = -1L
 
     companion object
     {
@@ -226,7 +226,7 @@ class ScriptFragment : Fragment()
 
             mEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY, false)
 
-            mBalanceItem = savedInstanceState.getLong(BALANCE_LONG_KEY, -1)
+            mSecureHashBalance = savedInstanceState.getLong(BALANCE_LONG_KEY, -1)
 
             if (mStorageInfoLoading)
             {
@@ -238,22 +238,31 @@ class ScriptFragment : Fragment()
             {
                 onStorageInfoComplete(false)
 
-                //TODO we got to keep in mind there's an id already.
-                if (mInitUpdateStorageLoading)
+                if (mSecureHashBalanceLoading)
                 {
-                    startInitUpdateStorageLoading()
+                    startGetRequestBalance()
                 }
                 else
                 {
-                    onInitEditLoadComplete(null)
+                    onBalanceLoadComplete()
 
-                    if (mFinalizeDelegateLoading)
+                    //TODO we got to keep in mind there's an id already.
+                    if (mInitUpdateStorageLoading)
                     {
-                        startFinalizeUpdateStorageLoading()
+                        startInitUpdateStorageLoading()
                     }
                     else
                     {
-                        onFinalizeDelegationLoadComplete(null)
+                        onInitEditLoadComplete(null)
+
+                        if (mFinalizeDelegateLoading)
+                        {
+                            startFinalizeUpdateStorageLoading()
+                        }
+                        else
+                        {
+                            onFinalizeDelegationLoadComplete(null)
+                        }
                     }
                 }
             }
@@ -617,17 +626,17 @@ class ScriptFragment : Fragment()
                     {
                         val balance = response.replace("[^0-9]".toRegex(), "")
 
-                        mBalanceItem = balance.toLong()
+                        mSecureHashBalance = balance.toLong()
 
                         // refresh UI
 
                         onBalanceLoadComplete()
 
                         /*
-                        mBalanceItem = balance?.toDouble()/1000000
-                        if (mBalanceItem != null)
+                        mSecureHashBalance = balance?.toDouble()/1000000
+                        if (mSecureHashBalance != null)
                         {
-                            animateBalance(mBalanceItem)
+                            animateBalance(mSecureHashBalance)
                         }
 
                         onBalanceLoadComplete(true)
@@ -653,7 +662,17 @@ class ScriptFragment : Fragment()
     {
         mSecureHashBalanceLoading = false
         secure_hash_progress.visibility = View.GONE
-        secure_hash_balance_textview.text = mBalanceItem.toString()
+        secure_hash_balance_textview.text =
+
+                if (mSecureHashBalance != -1L)
+                {
+                    mutezToTez(mSecureHashBalance) + " " + getString(R.string.tez) + " as account balance."
+                    //"\nThere is enough tez to make transfers from this contract."
+                }
+                else
+                {
+                    getString(R.string.neutral)
+                }
     }
 
     private fun addContractInfoFromJSON(answer: JSONObject)
@@ -782,10 +801,13 @@ class ScriptFragment : Fragment()
 
             if (!animating)
             {
-                //no_delegates_text_layout.text = mBalanceItem.toString()
+                //no_delegates_text_layout.text = mSecureHashBalance.toString()
 
                 //reloadList()
             }
+
+            mSecureHashBalance
+
 
             loading_textview?.visibility = View.GONE
             loading_textview?.text = null
@@ -1538,7 +1560,7 @@ class ScriptFragment : Fragment()
 
         outState.putBoolean(EDIT_MODE_KEY, mEditMode)
 
-        outState.putLong(BALANCE_LONG_KEY, mBalanceItem)
+        outState.putLong(BALANCE_LONG_KEY, mSecureHashBalance)
     }
 
     private fun mutezToTez(mutez:String):String
@@ -1547,6 +1569,14 @@ class ScriptFragment : Fragment()
         amountLong /= 1000000
 
         return amountLong.toString()
+    }
+
+    private fun mutezToTez(mutez:Long):String
+    {
+        var amountDouble: Double = mutez.toDouble()
+        amountDouble /= 1000000
+
+        return amountDouble.toString()
     }
 
     private fun retrieveTz3():String?
