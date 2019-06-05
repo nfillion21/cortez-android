@@ -391,6 +391,20 @@ class ScriptFragment : Fragment()
                 // get securekey hash
 
                 val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
+                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+
+                public_address_edittext.setText(secureKeyHash)
+                public_address_edittext.isFocusableInTouchMode = false
+                public_address_edittext.hint = null
+                public_address_edittext.isClickable = false
+                public_address_edittext.isLongClickable = false
+                public_address_edittext.isClickable = false
+                public_address_edittext.isEnabled = true
+                public_address_edittext.isFocusable = false
 
                 // get daily spending limit
 
@@ -878,8 +892,8 @@ class ScriptFragment : Fragment()
 
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
-        val signedData0 = "0507070707070700000a0000001502c1d46fad69ff8d01b2186aa11d2eb54c04f517f707070707008092f40100b8010707020000000002000000000a00000015001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
-        val signedData1 = "050004".hexToByteArray()
+        val signedData0 = "0507070707070700000a0000001502ac680ca961b9ffa56c1029ac4f868b6b42dba94807070707008092f40100b8010707020000000002000000000a00000015001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
+        val signedData1 = "050005".hexToByteArray()
         val signature = KeyPair.sign(sk, signedData0 + signedData1)
 
         val edsig = CryptoUtils.generateEDSig(signature)
