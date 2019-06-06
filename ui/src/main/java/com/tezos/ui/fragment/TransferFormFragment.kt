@@ -518,11 +518,6 @@ class TransferFormFragment : Fragment()
             dstObject.put("dst", arguments!!.getString(Address.TAG))
             dstObject.put("amount", "0")
 
-            //TODO sign data
-            //val signedData = "signedData"
-            //val signedData0 = "050707020000001f070700020a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c00a0000001502ac680ca961b9ffa56c1029ac4f868b6b42dba948".hexToByteArray()
-            // sending 1 tz to tzNF
-
             val packSpending = Pack.prim(
                     Pack.pair(
                             Pack.listOf(

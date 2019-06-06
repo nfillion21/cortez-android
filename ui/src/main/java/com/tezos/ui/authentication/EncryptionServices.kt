@@ -111,6 +111,11 @@ class EncryptionServices {
         createAndroidAsymmetricKey()
     }
 
+    fun isSpendingKeyCreated():Boolean
+    {
+        return keyStoreWrapper.containsAlias(SPENDING_KEY)
+    }
+
     /**
      * Remove master cryptography key. May be used for re sign up functionality.
      */

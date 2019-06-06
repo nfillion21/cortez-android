@@ -1005,9 +1005,6 @@ class ScriptFragment : Fragment()
 
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
-        //val signedData0 = "0507070707070700000a0000001502ac680ca961b9ffa56c1029ac4f868b6b42dba94807070707008092f40100b8010707020000000002000000000a00000015001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
-
-
         val tz3 = retrieveTz3()
 
         val packSpending = Pack.prim(
