@@ -53,6 +53,7 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.tezos.core.*
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
@@ -1004,13 +1005,46 @@ class ScriptFragment : Fragment()
 
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
-        val signedData0 = "0507070707070700000a0000001502ac680ca961b9ffa56c1029ac4f868b6b42dba94807070707008092f40100b8010707020000000002000000000a00000015001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
-        val signedData1 = "050005".hexToByteArray()
-        val signature = KeyPair.sign(sk, signedData0 + signedData1)
+        //val signedData0 = "0507070707070700000a0000001502ac680ca961b9ffa56c1029ac4f868b6b42dba94807070707008092f40100b8010707020000000002000000000a00000015001c92e58081a9d236c82e3e9d382c64e5642467c0".hexToByteArray()
+
+
+        val tz3 = retrieveTz3()
+
+        val packSpending = Pack.prim(
+                Pack.pair(
+                        Pack.pair(
+                                Pack.pair(
+                                        Pack.int(0),
+                                        Pack.keyHash(tz3!!)
+                                ),
+                                Pack.pair(
+                                        Pack.pair(
+                                                Pack.mutez(mSpendingLimitAmount*1000000L),
+                                                Pack.int(120)
+                                        ),
+                                        Pack.pair(
+                                                Pack.listOf(),
+                                                Pack.listOf()
+                                        )
+                                )
+                        ),
+                        Pack.keyHash(tz1)
+                )
+        )
+
+        val packSpendingByteArray = packSpending.data.toNoPrefixHexString().hexToByteArray()
+
+        val salt = getSalt()
+        val packSalt = Pack.prim(Pack.int(salt!!))
+        val packSaltByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
+
+
+        //val signedData1 = "050005".hexToByteArray()
+
+        val signature = KeyPair.sign(sk, packSpendingByteArray + packSaltByteArray)
 
         val edsig = CryptoUtils.generateEDSig(signature)
 
-        val tz3 = retrieveTz3()
 
         val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_update_storage))
         val spendingLimitContract = String.format(resScript.toString(),
@@ -1092,6 +1126,26 @@ class ScriptFragment : Fragment()
         jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
         mInitUpdateStorageLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    private fun getSalt():Int?
+    {
+        //TODO check if the storage follows our pattern
+
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            // get masterkey hash
+
+            val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+            val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
+            return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
+        }
+
+        return null
     }
 
     private fun transferLoading(loading:Boolean)

@@ -49,15 +49,19 @@ import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezcore.ui.activity.DelegateActivity
 import com.tezos.android.R
+import com.tezos.core.Pack
 import com.tezos.core.crypto.CryptoUtils
+import com.tezos.core.int
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.prim
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.authentication.ContractSelectorFragment
 import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.hexToByteArray
+import com.tezos.ui.utils.toNoPrefixHexString
 import kotlinx.android.synthetic.main.activity_home.*
 import java.math.BigInteger
 import java.security.KeyPairGenerator
@@ -81,6 +85,54 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+
+
+
+
+
+        /*
+        val pack = Pack.prim(
+                Pack.pair(
+                        Pack.listOf(
+                                Pack.pair(
+                                        Pack.int(2),
+                                        Pack.contract("tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk")
+                                )
+                        ),
+                        Pack.keyHash("tz3c3eV95jMhPjk7CXAGuG2tjbawZCDNJsLE")
+                )
+        )
+        */
+
+
+        /*
+        val pack = Pack.prim(
+                Pack.pair(
+                        Pack.pair(
+                                Pack.pair(
+                                        Pack.int(0),
+                                        Pack.keyHash("tz3c3eV95jMhPjk7CXAGuG2tjbawZCDNJsLE")
+                                ),
+                                Pack.pair(
+                                        Pack.pair(
+                                                Pack.mutez(2000000),
+                                                Pack.int(120)
+                                        ),
+                                        Pack.pair(
+                                                Pack.listOf(),
+                                                Pack.listOf()
+                                        )
+                                )
+                        ),
+                        Pack.keyHash("tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk")
+                )
+        )
+        */
+
+
+
+
 
         setSupportActionBar(toolbar)
         initActionBar(mTezosTheme)

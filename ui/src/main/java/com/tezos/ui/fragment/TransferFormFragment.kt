@@ -49,6 +49,7 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.tezos.core.*
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
@@ -519,13 +520,31 @@ class TransferFormFragment : Fragment()
 
             //TODO sign data
             //val signedData = "signedData"
-            val signedData0 = "050707020000001f070700020a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c00a0000001502ac680ca961b9ffa56c1029ac4f868b6b42dba948".hexToByteArray()
+            //val signedData0 = "050707020000001f070700020a0000001600001c92e58081a9d236c82e3e9d382c64e5642467c00a0000001502ac680ca961b9ffa56c1029ac4f868b6b42dba948".hexToByteArray()
             // sending 1 tz to tzNF
 
-            //TODO we got the salt now
+            val packSpending = Pack.prim(
+                    Pack.pair(
+                            Pack.listOf(
+                                    Pack.pair(
+                                            Pack.mutez((mTransferAmount*1000000).toLong()),
+                                            Pack.contract(mDstAccount!!)
+                                    )
+                            ),
+                            Pack.keyHash(getTz3() as String)
+                    )
+            )
 
-            val signedData1 = "050000".hexToByteArray()
-            val signedData = KeyPair.b2b(signedData0 + signedData1)
+            val packSpendingByteArray = packSpending.data.toNoPrefixHexString().hexToByteArray()
+
+            //TODO we got the salt now
+            //TODO block the UI to be sure we got the salt
+
+            val salt = getSalt()
+            val packSalt = Pack.prim(Pack.int(salt!!))
+            val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
+
+            val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
 
             val signature = EncryptionServices().sign(signedData)
             val compressedSignature = compressFormat(signature)
