@@ -88,12 +88,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         setContentView(R.layout.activity_home)
 
 
+        /*
         val date = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             Date.from(Instant.parse("2019-06-08T10:22:59Z"))
         } else {
             TODO("VERSION.SDK_INT < O")
         }
+        */
 
 
 

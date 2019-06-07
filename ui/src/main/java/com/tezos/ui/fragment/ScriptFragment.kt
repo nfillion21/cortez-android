@@ -173,6 +173,12 @@ class ScriptFragment : Fragment()
             onDelegateClick()
         }
 
+        send_cents_button.setOnClickListener {
+
+            val sendCentsFragment = SendCentsFragment.newInstance("str1", "str2")
+            sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsFragment.TAG)
+        }
+
         fab_edit_storage.setOnClickListener {
 
             val hasMnemonics = Storage(activity!!).hasMnemonics()

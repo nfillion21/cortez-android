@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/rootView"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/default_contract_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/PaymentScreens.SourceButton"
+                    android:text="@string/select_default_contract"
+                    android:padding="@dimen/spacing_double"
+                    android:layout_marginTop="@dimen/spacing_double"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    android:layout_marginRight="@dimen/spacing_double" />
+
+                <Button
+                    android:id="@+id/daily_spending_limit_contract_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/PaymentScreens.SourceButton"
+                    android:padding="@dimen/spacing_double"
+                    android:text="@string/select_daily_spending_limit_contract"
+                    android:layout_margin="@dimen/spacing_double" />
+
+            </LinearLayout>
+
+        </ScrollView>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/send_cents_button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        style="@style/PaymentScreens.Button"
+        android:enabled="false"
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/spacing_double"
+        >
+
+        <Button
+            android:id="@+id/send_cents_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/send"
+
+            android:drawableStart="@drawable/ic_lock_black"
+            android:drawableLeft="@drawable/ic_lock_black"
+            android:drawableTint="@color/tz_light"
+            android:drawablePadding="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+            android:layout_gravity="center"
+            android:enabled="false"
+
+            android:background="@null"
+            android:clickable="false"
+            android:focusable="false"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            />
+
+    </FrameLayout>
+
+</LinearLayout>
