@@ -69,6 +69,7 @@ import java.security.KeyStore
 import java.security.Signature
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
+import java.time.Instant
 import java.util.*
 
 
@@ -87,49 +88,12 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         setContentView(R.layout.activity_home)
 
 
-
-
-
-
-        /*
-        val pack = Pack.prim(
-                Pack.pair(
-                        Pack.listOf(
-                                Pack.pair(
-                                        Pack.int(2),
-                                        Pack.contract("tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk")
-                                )
-                        ),
-                        Pack.keyHash("tz3c3eV95jMhPjk7CXAGuG2tjbawZCDNJsLE")
-                )
-        )
-        */
-
-
-        /*
-        val pack = Pack.prim(
-                Pack.pair(
-                        Pack.pair(
-                                Pack.pair(
-                                        Pack.int(0),
-                                        Pack.keyHash("tz3c3eV95jMhPjk7CXAGuG2tjbawZCDNJsLE")
-                                ),
-                                Pack.pair(
-                                        Pack.pair(
-                                                Pack.mutez(2000000),
-                                                Pack.int(120)
-                                        ),
-                                        Pack.pair(
-                                                Pack.listOf(),
-                                                Pack.listOf()
-                                        )
-                                )
-                        ),
-                        Pack.keyHash("tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk")
-                )
-        )
-        */
-
+        val date = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            Date.from(Instant.parse("2019-06-08T10:22:59Z"))
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
 
 
 

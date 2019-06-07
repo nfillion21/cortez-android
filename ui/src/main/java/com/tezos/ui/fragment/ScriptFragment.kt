@@ -379,6 +379,8 @@ class ScriptFragment : Fragment()
             gas_textview.visibility = View.VISIBLE
             gas_layout.visibility = View.VISIBLE
 
+            redelegate_address_textview.setText(R.string.secure_enclave_generated)
+
             daily_spending_limit_edittext.isEnabled = true
             daily_spending_limit_edittext.setText("")
             val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -403,6 +405,8 @@ class ScriptFragment : Fragment()
             gas_layout?.visibility = View.GONE
 
             daily_spending_limit_edittext?.isEnabled = false
+
+            redelegate_address_textview.setText(R.string.secure_enclave)
 
             if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
             {
@@ -667,7 +671,7 @@ class ScriptFragment : Fragment()
 
                 if (mSecureHashBalance != -1L)
                 {
-                    mutezToTez(mSecureHashBalance) + " " + getString(R.string.tez) + " as account balance."
+                    "Balance : " + mutezToTez(mSecureHashBalance) + " " + getString(R.string.tez) + "." + "\nMaintain this balance between about 0.1 and 0.5 ꜩ."
                     //"\nThere is enough tez to make transfers from this contract."
                 }
                 else
@@ -806,9 +810,6 @@ class ScriptFragment : Fragment()
 
                 //reloadList()
             }
-
-            mSecureHashBalance
-
 
             loading_textview?.visibility = View.GONE
             loading_textview?.text = null
@@ -1017,7 +1018,7 @@ class ScriptFragment : Fragment()
                                 Pack.pair(
                                         Pack.pair(
                                                 Pack.mutez(mSpendingLimitAmount*1000000L),
-                                                Pack.int(120)
+                                                Pack.int(86400)
                                         ),
                                         Pack.pair(
                                                 Pack.listOf(),
@@ -1616,10 +1617,10 @@ class ScriptFragment : Fragment()
 
     private fun mutezToTez(mutez:String):String
     {
-        var amountLong: Long = mutez.toLong()
-        amountLong /= 1000000
+        var amountDouble: Double = mutez.toDouble()
+        amountDouble /= 1000000
 
-        return amountLong.toString()
+        return amountDouble.toString()
     }
 
     private fun mutezToTez(mutez:Long):String
