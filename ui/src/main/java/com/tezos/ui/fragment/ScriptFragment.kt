@@ -98,7 +98,7 @@ class ScriptFragment : Fragment()
 
     companion object
     {
-        private const val CONTRACT_PUBLIC_KEY = "contract_public_key"
+        const val CONTRACT_PUBLIC_KEY = "contract_public_key"
 
         private const val UPDATE_STORAGE_INIT_TAG = "update_storage_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
@@ -175,11 +175,14 @@ class ScriptFragment : Fragment()
 
         send_cents_button.setOnClickListener {
 
-            val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
-            val theme = CustomTheme.fromBundle(themeBundle)
+            arguments?.let {
 
-            val sendCentsFragment = SendCentsFragment.newInstance(theme)
-            sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsFragment.TAG)
+                val themeBundle = it.getBundle(CustomTheme.TAG)
+                val theme = CustomTheme.fromBundle(themeBundle)
+
+                val sendCentsFragment = SendCentsFragment.newInstance(pkh()!!, theme)
+                sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsFragment.TAG)
+            }
         }
 
         fab_edit_storage.setOnClickListener {

@@ -1,10 +1,12 @@
 package com.tezos.ui.fragment
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -13,10 +15,17 @@ import android.support.v7.app.AppCompatDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 
 import com.tezos.ui.R
+import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.encryption.KeyStoreWrapper
+import com.tezos.ui.fragment.ScriptFragment.Companion.CONTRACT_PUBLIC_KEY
+import com.tezos.ui.utils.Storage
+import com.tezos.ui.utils.ecKeyFormat
 import kotlinx.android.synthetic.main.dialog_sent_cents.*
+import java.security.interfaces.ECPublicKey
 
 class SendCentsFragment : AppCompatDialogFragment()
 {
@@ -33,12 +42,13 @@ class SendCentsFragment : AppCompatDialogFragment()
         const val TAG = "send_cents_fragment"
 
         @JvmStatic
-        fun newInstance(theme: CustomTheme) =
+        fun newInstance(contractPkh:String, theme: CustomTheme) =
                 SendCentsFragment().apply {
                     arguments = Bundle().apply {
 
                         val bundleTheme = theme.toBundle()
                         putBundle(CustomTheme.TAG, bundleTheme)
+                        putString(CONTRACT_PUBLIC_KEY, contractPkh)
                     }
                 }
     }
@@ -67,6 +77,43 @@ class SendCentsFragment : AppCompatDialogFragment()
             dismiss()
         }
         */
+
+        from_radio_group.setOnCheckedChangeListener { _, i ->
+
+            when (i)
+            {
+                R.id.from_contract_button ->
+                {
+                    val i = i
+                    val ki = i
+                }
+
+                R.id.from_tz1_button ->
+                {
+                    val seed = Storage(context!!).getMnemonics()
+                    if (seed.mnemonics.isEmpty())
+                    {
+                        showSnackBar(getString(R.string.no_mnemonics_refill_tz3), ContextCompat.getColor(activity!!, R.color.tz_accent), Color.RED)
+                        from_contract_button.isChecked = true
+                    }
+                }
+            }
+        }
+
+        val tz3 = retrieveTz3()
+        tz3_address_textview.text = tz3
+
+        arguments?.let {
+            from_contract_button.text = it.getString(CONTRACT_PUBLIC_KEY)
+        }
+
+        val seed = Storage(context!!).getMnemonics()
+        from_tz1_button.text = seed.pkh
+        if (seed.mnemonics.isEmpty())
+        {
+            //showSnackBar(getString(R.string.no_mnemonics_refill_tz3), ContextCompat.getColor(activity!!, R.color.tz_accent), Color.RED)
+            from_tz1_button.isEnabled = false
+        }
     }
 
     override fun onResume()
@@ -136,6 +183,26 @@ class SendCentsFragment : AppCompatDialogFragment()
         res.addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryDarkId)))
         res.addState(intArrayOf(), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryId)))
         return res
+    }
+
+    private fun retrieveTz3():String?
+    {
+        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keyPair != null)
+        {
+            val ecKey = keyPair!!.public as ECPublicKey
+            return CryptoUtils.generatePkhTz3(ecKeyFormat(ecKey))
+        }
+
+        return null
+    }
+
+    fun showSnackBar(res:String, color:Int, textColor:Int)
+    {
+        val snackbar = Snackbar.make(rootView, res, Snackbar.LENGTH_LONG)
+        snackbar.view.setBackgroundColor(color)
+        snackbar.setActionTextColor(textColor)
+        snackbar.show()
     }
 
     override fun onDetach()

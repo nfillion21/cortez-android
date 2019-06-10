@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:layout_marginTop="@dimen/spacing_normal"
         android:orientation="vertical">
 
         <ScrollView
@@ -36,18 +37,21 @@
 
                     <RadioButton
                         android:id="@+id/from_contract_button"
+                        android:layout_marginBottom="@dimen/spacing_normal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        style="@style/TextAppearance.AppCompat.Subhead"
-                        android:text="KT1sjdfkhfdsfsdhsdfjkhfd" />
+                        style="@style/TextAppearance.AppCompat.Small"
+                        android:textColor="@color/colorAccent"
+                        android:checked="true"
+                        android:text="@string/neutral" />
 
                     <RadioButton
                         android:id="@+id/from_tz1_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:enabled="false"
-                        style="@style/TextAppearance.AppCompat.Subhead"
-                        android:text="tz1fsdjkldfkjlsdjklkldsfjkfsdljkfldsj" />
+                        android:textColor="@color/colorAccent"
+                        style="@style/TextAppearance.AppCompat.Small"
+                        android:text="@string/neutral" />
 
                 </RadioGroup>
 
@@ -59,13 +63,16 @@
                     />
 
                 <TextView
+                    android:id="@+id/tz3_address_textview"
+                    android:background="@drawable/selector_rect_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="@dimen/spacing_double"
+                    android:padding="@dimen/spacing_normal"
                     style="@style/TextAppearance.AppCompat.Subhead"
                     android:textColor="@color/colorAccent"
-                    android:text="tz3esfjhkfsdjfdshkdhjfjhdfsk"
+                    android:text="@string/neutral"
                     />
 
             </LinearLayout>
