@@ -413,7 +413,7 @@ class DelegateFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateRemoveDelegateButton(false)
 
-        //startPostRequestLoadInitRemoveDelegate()
+        startPostRequestLoadInitRemoveDelegate()
     }
 
     private fun startFinalizeAddDelegateLoading()
@@ -442,6 +442,7 @@ class DelegateFragment : Fragment()
         mContractInfoLoading = true
 
         loading_textview.setText(R.string.loading_contract_info)
+
 
         nav_progress.visibility = View.VISIBLE
 
@@ -667,7 +668,7 @@ class DelegateFragment : Fragment()
 
                 val stringRequest = object : StringRequest(Request.Method.POST, url,
                         Response.Listener<String> { response ->
-                            if (R.id.content != null)
+                            if (swipe_refresh_layout != null)
                             {
                                 //there's no need to do anything because we call finish()
                                 onFinalizeDelegationLoadComplete(null)
@@ -677,7 +678,7 @@ class DelegateFragment : Fragment()
                         },
                         Response.ErrorListener
                         {
-                            if (R.id.content != null)
+                            if (swipe_refresh_layout != null)
                             {
                                 onFinalizeDelegationLoadComplete(it)
                             }
