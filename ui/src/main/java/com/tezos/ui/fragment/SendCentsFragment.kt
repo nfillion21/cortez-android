@@ -8,10 +8,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.DialogFragment
-import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.app.AppCompatDialogFragment
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,6 +31,8 @@ class SendCentsFragment : AppCompatDialogFragment()
 {
     private var listener: OnSendCentsInteractionListener? = null
 
+    private var mTransferFees:Long = -1
+
     interface OnSendCentsInteractionListener
     {
         // TODO: Update argument type and name
@@ -40,6 +42,8 @@ class SendCentsFragment : AppCompatDialogFragment()
     companion object
     {
         const val TAG = "send_cents_fragment"
+
+        private const val TRANSFER_FEE_KEY = "transfer_fee_key"
 
         @JvmStatic
         fun newInstance(contractPkh:String, theme: CustomTheme) =
@@ -65,18 +69,9 @@ class SendCentsFragment : AppCompatDialogFragment()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
     {
         super.onViewCreated(view, savedInstanceState)
-        dialog.setTitle(getString(R.string.delegate_and_contract_title))
+        //dialog.setTitle(getString(R.string.delegate_and_contract_title))
 
-        /*
-        default_contract_button.setOnClickListener {
-            listener?.onContractClicked(false)
-            dismiss()
-        }
-        daily_spending_limit_contract_button.setOnClickListener {
-            listener?.onContractClicked(true)
-            dismiss()
-        }
-        */
+        validateSendCentsButton(isTransferFeeValid())
 
         from_radio_group.setOnCheckedChangeListener { _, i ->
 
@@ -114,13 +109,20 @@ class SendCentsFragment : AppCompatDialogFragment()
             //showSnackBar(getString(R.string.no_mnemonics_refill_tz3), ContextCompat.getColor(activity!!, R.color.tz_accent), Color.RED)
             from_tz1_button.isEnabled = false
         }
+
+        if (savedInstanceState != null)
+        {
+            mTransferFees = savedInstanceState.getLong(TRANSFER_FEE_KEY, -1)
+        }
+        else
+        {
+            startInitTransferLoading()
+        }
     }
 
     override fun onResume()
     {
         super.onResume()
-
-        validateSendCentsButton(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -130,22 +132,74 @@ class SendCentsFragment : AppCompatDialogFragment()
         return inflater.inflate(R.layout.dialog_sent_cents, container, false)
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    fun onButtonPressed(uri: Uri) {
-        listener?.onFragmentInteraction(uri)
+    private fun startInitTransferLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        /*
+        putFeesToNegative()
+        putPayButtonToNull()
+
+        // validatePay cannot be valid if there is no fees
+        validateRemoveDelegateButton(false)
+
+        startPostRequestLoadInitRemoveDelegate()
+        */
     }
 
-    override fun onAttach(context: Context)
+    private fun transferLoading(loading:Boolean)
     {
-        super.onAttach(context)
-        if (context is OnSendCentsInteractionListener)
+        // handle the visibility of bottom buttons
+
+        if (loading)
         {
-            listener = context
+            fee_progress?.visibility = View.VISIBLE
         }
         else
         {
-            //throw RuntimeException("$context must implement OnFragmentInteractionListener")
+            fee_progress?.visibility = View.GONE
         }
+    }
+
+    private fun putFeesToNegative()
+    {
+        fee_edittext?.setText("")
+
+        mClickCalculate = false
+        fee_edittext?.isEnabled = false
+        fee_edittext?.hint = getString(R.string.neutral)
+
+        mDelegateFees = -1
+
+        mDelegatePayload = null
+    }
+    private fun isTransferFeeValid():Boolean
+    {
+        val isFeeValid = false
+
+        if (fee_edittext?.text != null && !TextUtils.isEmpty(fee_edittext?.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val fee = fee_edittext.text.toString().toDouble()
+
+                if (fee >= 0.000001f)
+                {
+                    val longTransferFee = fee*1000000
+                    mTransferFees = longTransferFee.toLong()
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mTransferFees = -1
+                return false
+            }
+        }
+
+        return isFeeValid
     }
 
     private fun validateSendCentsButton(validate: Boolean)
@@ -155,23 +209,23 @@ class SendCentsFragment : AppCompatDialogFragment()
 
         if (validate)
         {
-            send_cents_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            send_cents_button_layout.isEnabled = true
-            send_cents_button_layout.background = makeSelector(theme)
+            send_cents_from_KT1_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            send_cents_from_KT1_button_layout.isEnabled = true
+            send_cents_from_KT1_button_layout.background = makeSelector(theme)
 
-            val drawables = send_cents_button.compoundDrawables
+            val drawables = send_cents_from_KT1_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
         }
         else
         {
-            send_cents_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-            send_cents_button_layout.isEnabled = false
+            send_cents_from_KT1_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            send_cents_from_KT1_button_layout.isEnabled = false
 
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            send_cents_button_layout.background = makeSelector(greyTheme)
+            send_cents_from_KT1_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = send_cents_button.compoundDrawables
+            val drawables = send_cents_from_KT1_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
@@ -203,6 +257,31 @@ class SendCentsFragment : AppCompatDialogFragment()
         snackbar.view.setBackgroundColor(color)
         snackbar.setActionTextColor(textColor)
         snackbar.show()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        super.onSaveInstanceState(outState)
+
+        outState.putLong(TRANSFER_FEE_KEY, mTransferFees)
+    }
+
+    // TODO: Rename method, update argument and hook method into UI event
+    fun onButtonPressed(uri: Uri) {
+        listener?.onFragmentInteraction(uri)
+    }
+
+    override fun onAttach(context: Context)
+    {
+        super.onAttach(context)
+        if (context is OnSendCentsInteractionListener)
+        {
+            listener = context
+        }
+        else
+        {
+            //throw RuntimeException("$context must implement OnFragmentInteractionListener")
+        }
     }
 
     override fun onDetach()

@@ -75,7 +75,7 @@
         </LinearLayout>
 
         <android.support.v7.widget.AppCompatButton
-            android:id="@+id/send_cents_button"
+            android:id="@+id/send_cents_from_KT1_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/PaymentScreens.RoundedButton"

@@ -173,7 +173,7 @@ class ScriptFragment : Fragment()
             onDelegateClick()
         }
 
-        send_cents_button.setOnClickListener {
+        send_cents_from_KT1_button.setOnClickListener {
 
             arguments?.let {
 
