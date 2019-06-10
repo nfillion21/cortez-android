@@ -1,58 +1,44 @@
 package com.tezos.ui.fragment
 
 import android.content.Context
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.StateListDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
+import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.app.AppCompatDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.tezos.core.models.CustomTheme
 
 import com.tezos.ui.R
 import kotlinx.android.synthetic.main.dialog_sent_cents.*
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [SendCentsFragment.OnFragmentInteractionListener] interface
- * to handle interaction events.
- * Use the [SendCentsFragment.newInstance] factory method to
- * create an instance of this fragment.
- *
- */
 class SendCentsFragment : AppCompatDialogFragment()
 {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-    private var listener: OnFragmentInteractionListener? = null
+    private var listener: OnSendCentsInteractionListener? = null
 
+    interface OnSendCentsInteractionListener
+    {
+        // TODO: Update argument type and name
+        fun onFragmentInteraction(uri: Uri)
+    }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment SendCentsFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-
-        val TAG = "send_cents_fragment"
+    companion object
+    {
+        const val TAG = "send_cents_fragment"
 
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(theme: CustomTheme) =
                 SendCentsFragment().apply {
                     arguments = Bundle().apply {
-                        putString(ARG_PARAM1, param1)
-                        putString(ARG_PARAM2, param2)
+
+                        val bundleTheme = theme.toBundle()
+                        putBundle(CustomTheme.TAG, bundleTheme)
                     }
                 }
     }
@@ -60,9 +46,9 @@ class SendCentsFragment : AppCompatDialogFragment()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+        setStyle(DialogFragment.STYLE_NORMAL, 0)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            val bundleTheme = it.getBundle(CustomTheme.TAG)
         }
     }
 
@@ -83,6 +69,13 @@ class SendCentsFragment : AppCompatDialogFragment()
         */
     }
 
+    override fun onResume()
+    {
+        super.onResume()
+
+        validateSendCentsButton(true)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
     {
@@ -95,33 +88,59 @@ class SendCentsFragment : AppCompatDialogFragment()
         listener?.onFragmentInteraction(uri)
     }
 
-    override fun onAttach(context: Context) {
+    override fun onAttach(context: Context)
+    {
         super.onAttach(context)
-        if (context is OnFragmentInteractionListener) {
+        if (context is OnSendCentsInteractionListener)
+        {
             listener = context
-        } else {
+        }
+        else
+        {
             //throw RuntimeException("$context must implement OnFragmentInteractionListener")
         }
     }
 
-    override fun onDetach() {
-        super.onDetach()
-        listener = null
+    private fun validateSendCentsButton(validate: Boolean)
+    {
+        val bundleTheme = arguments!!.getBundle(CustomTheme.TAG)
+        val theme = CustomTheme.fromBundle(bundleTheme)
+
+        if (validate)
+        {
+            send_cents_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            send_cents_button_layout.isEnabled = true
+            send_cents_button_layout.background = makeSelector(theme)
+
+            val drawables = send_cents_button.compoundDrawables
+            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+        }
+        else
+        {
+            send_cents_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            send_cents_button_layout.isEnabled = false
+
+            val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+            send_cents_button_layout.background = makeSelector(greyTheme)
+
+            val drawables = send_cents_button.compoundDrawables
+            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+        }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     *
-     *
-     * See the Android Training lesson [Communicating with Other Fragments]
-     * (http://developer.android.com/training/basics/fragments/communicating.html)
-     * for more information.
-     */
-    interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        fun onFragmentInteraction(uri: Uri)
+    private fun makeSelector(theme: CustomTheme): StateListDrawable
+    {
+        val res = StateListDrawable()
+        res.addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryDarkId)))
+        res.addState(intArrayOf(), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryId)))
+        return res
+    }
+
+    override fun onDetach()
+    {
+        super.onDetach()
+        listener = null
     }
 }

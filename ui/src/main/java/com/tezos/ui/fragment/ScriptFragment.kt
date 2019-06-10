@@ -175,7 +175,10 @@ class ScriptFragment : Fragment()
 
         send_cents_button.setOnClickListener {
 
-            val sendCentsFragment = SendCentsFragment.newInstance("str1", "str2")
+            val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
+            val theme = CustomTheme.fromBundle(themeBundle)
+
+            val sendCentsFragment = SendCentsFragment.newInstance(theme)
             sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsFragment.TAG)
         }
 

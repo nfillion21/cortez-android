@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/rootView"
+    android:padding="@dimen/spacing_double"
     android:orientation="vertical">
 
     <LinearLayout
@@ -20,25 +21,52 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/default_contract_button"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/PaymentScreens.SourceButton"
-                    android:text="@string/select_default_contract"
-                    android:padding="@dimen/spacing_double"
-                    android:layout_marginTop="@dimen/spacing_double"
-                    android:layout_marginLeft="@dimen/spacing_double"
-                    android:layout_marginRight="@dimen/spacing_double" />
+                    android:text="From :"
+                    />
 
-                <Button
-                    android:id="@+id/daily_spending_limit_contract_button"
-                    android:layout_width="match_parent"
+                <RadioGroup
+                    android:id="@+id/from_radio_group"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/from_contract_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/TextAppearance.AppCompat.Subhead"
+                        android:text="KT1sjdfkhfdsfsdhsdfjkhfd" />
+
+                    <RadioButton
+                        android:id="@+id/from_tz1_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        style="@style/TextAppearance.AppCompat.Subhead"
+                        android:text="tz1fsdjkldfkjlsdjklkldsfjkfsdljkfldsj" />
+
+                </RadioGroup>
+
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/PaymentScreens.SourceButton"
-                    android:padding="@dimen/spacing_double"
-                    android:text="@string/select_daily_spending_limit_contract"
-                    android:layout_margin="@dimen/spacing_double" />
+                    android:layout_marginBottom="@dimen/spacing_normal"
+                    android:text="To :"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    style="@style/TextAppearance.AppCompat.Subhead"
+                    android:textColor="@color/colorAccent"
+                    android:text="tz3esfjhkfsdjfdshkdhjfjhdfsk"
+                    />
 
             </LinearLayout>
 
@@ -54,7 +82,7 @@
         android:enabled="false"
         android:visibility="visible"
         android:orientation="vertical"
-        android:layout_margin="@dimen/spacing_double"
+        android:layout_marginTop="@dimen/spacing_double"
         >
 
         <Button
