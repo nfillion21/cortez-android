@@ -784,20 +784,6 @@ class ScriptFragment : Fragment()
                 //EncryptionServices().removeSpendingKey()
                 //EncryptionServices().createSpendingKey()
 
-                val tz3 = retrieveTz3()
-                if (tz3 == null || tz3 != secureKeyHash)
-                {
-                    warning_p2pk_info?.visibility = View.VISIBLE
-                }
-                else
-                {
-                    warning_p2pk_info?.visibility = View.GONE
-
-                    //TODO at this point, the secure enclave key is the good one. better check if there is enough fees to make a transfer.
-
-
-                }
-
                 // if there is no key or it's not the same as in storage, put the information.
 
 
@@ -808,6 +794,22 @@ class ScriptFragment : Fragment()
                 else
                 {
                     switchToEditMode(false)
+                }
+
+
+                val tz3 = retrieveTz3()
+                if (tz3 == null || tz3 != secureKeyHash)
+                {
+                    warning_p2pk_info?.visibility = View.VISIBLE
+
+                    send_cents_button.visibility = View.GONE
+                }
+                else
+                {
+                    warning_p2pk_info?.visibility = View.GONE
+
+                    //TODO at this point, the secure enclave key is the good one. better check if there is enough fees to make a transfer.
+
                 }
             }
             else
