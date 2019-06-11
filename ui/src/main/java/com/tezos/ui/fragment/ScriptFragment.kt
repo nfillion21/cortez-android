@@ -173,7 +173,7 @@ class ScriptFragment : Fragment()
             onDelegateClick()
         }
 
-        send_cents_from_KT1_button.setOnClickListener {
+        send_cents_button.setOnClickListener {
 
             arguments?.let {
 
@@ -398,6 +398,8 @@ class ScriptFragment : Fragment()
             val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(daily_spending_limit_edittext, InputMethodManager.SHOW_IMPLICIT)
 
+            send_cents_button.visibility = View.GONE
+
             fab_edit_storage.hide()
             fab_undo_storage.show()
         }
@@ -419,6 +421,8 @@ class ScriptFragment : Fragment()
             daily_spending_limit_edittext?.isEnabled = false
 
             redelegate_address_textview.setText(R.string.secure_enclave)
+
+            send_cents_button.visibility = View.VISIBLE
 
             if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
             {
@@ -685,11 +689,15 @@ class ScriptFragment : Fragment()
                 {
                     "Balance : " + mutezToTez(mSecureHashBalance) + " " + getString(R.string.tez) + "." + "\nMaintain this balance between about 0.1 and 0.5 ꜩ."
                     //"\nThere is enough tez to make transfers from this contract."
+
                 }
                 else
                 {
                     getString(R.string.neutral)
                 }
+
+        warning_empty_secure_key_info.visibility =
+                if (mSecureHashBalance <= 0) View.VISIBLE else View.GONE
     }
 
     private fun addContractInfoFromJSON(answer: JSONObject)

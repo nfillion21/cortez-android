@@ -50,12 +50,13 @@ import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_delegate.*
 
-class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener, ScriptFragment.OnUpdateScriptListener
+class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener, ScriptFragment.OnUpdateScriptListener, SendCentsFragment.OnSendCentsInteractionListener
 {
+
     private val mTezosTheme: CustomTheme = CustomTheme(
-            com.tezos.ui.R.color.theme_tezos_primary,
-            com.tezos.ui.R.color.theme_tezos_primary_dark,
-            com.tezos.ui.R.color.theme_tezos_text)
+            R.color.theme_tezos_primary,
+            R.color.theme_tezos_primary_dark,
+            R.color.theme_tezos_text)
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
@@ -403,6 +404,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
     override fun saveFingerprintAllowed(useInFuture:Boolean)
     {
         storage.saveFingerprintAllowed(useInFuture)
+    }
+
+    override fun onTransferSucceed()
+    {
+        showSnackBar(getString(R.string.transfer_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
     }
 
     override fun finish(res: Int)

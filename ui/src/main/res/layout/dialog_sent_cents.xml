@@ -4,15 +4,36 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootView"
-    android:padding="@dimen/spacing_double"
     android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="@dimen/min_height_touch_target"
+            android:layout_height="@dimen/min_height_touch_target"
+            android:layout_weight="0"
+            android:layout_gravity="end"
+            android:background="@null"
+            android:src="@drawable/close_black_24"
+            />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="@dimen/spacing_normal"
-        android:layout_marginBottom="@dimen/spacing_double"
+        android:paddingLeft="@dimen/spacing_double"
+        android:paddingRight="@dimen/spacing_double"
         android:orientation="vertical">
 
         <ScrollView
@@ -34,7 +55,7 @@
                     android:id="@+id/from_radio_group"
                     android:layout_width="wrap_content"
                     android:layout_marginTop="@dimen/spacing_normal"
-                    android:layout_marginBottom="@dimen/spacing_double"
+                    android:layout_marginBottom="@dimen/spacing_normal"
                     android:layout_height="wrap_content">
 
                     <RadioButton
@@ -72,7 +93,7 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="@dimen/spacing_double"
                     android:padding="@dimen/spacing_normal"
-                    style="@style/TextAppearance.AppCompat.Subhead"
+                    style="@style/TextAppearance.AppCompat.Small"
                     android:textColor="@color/colorAccent"
                     android:text="@string/neutral"
                     />
@@ -85,6 +106,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/spacing_double"
+        android:layout_marginRight="@dimen/spacing_double"
         android:orientation="vertical">
 
 
@@ -153,7 +176,7 @@
     From KT1 button
     -->
     <FrameLayout
-        android:id="@+id/send_cents_from_KT1_button_layout"
+        android:id="@+id/send_cents_button_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
@@ -161,11 +184,13 @@
         android:enabled="false"
         android:visibility="visible"
         android:orientation="vertical"
-        android:layout_marginTop="@dimen/spacing_micro"
+        android:layout_marginRight="@dimen/spacing_double"
+        android:layout_marginLeft="@dimen/spacing_double"
+        android:layout_marginBottom="@dimen/spacing_double"
         >
 
         <Button
-            android:id="@+id/send_cents_from_KT1_button"
+            android:id="@+id/send_cents_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/send"

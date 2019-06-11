@@ -124,7 +124,7 @@
 
                         <LinearLayout
                             android:id="@+id/warning_empty_secure_key_info"
-                            android:visibility="visible"
+                            android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:minHeight="?attr/actionBarSize"
