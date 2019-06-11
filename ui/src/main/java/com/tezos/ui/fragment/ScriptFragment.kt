@@ -422,7 +422,9 @@ class ScriptFragment : Fragment()
 
             redelegate_address_textview.setText(R.string.secure_enclave)
 
-            send_cents_button.visibility = View.VISIBLE
+            //send_cents_button.visibility = View.VISIBLE
+            //TODO show only depending on the situations
+
 
             if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
             {
@@ -696,8 +698,26 @@ class ScriptFragment : Fragment()
                     getString(R.string.neutral)
                 }
 
-        warning_empty_secure_key_info.visibility =
-                if (mSecureHashBalance <= 0) View.VISIBLE else View.GONE
+        // 100 000 mutez == 0.1 tez
+        if (mSecureHashBalance < 100000)
+        {
+            warning_empty_secure_key_info.visibility = View.VISIBLE
+
+            val tz3 = retrieveTz3()
+            if (tz3 != null || tz3 == getStorageSecureKeyHash())
+            {
+                send_cents_button.visibility = View.VISIBLE
+            }
+            else
+            {
+                send_cents_button.visibility = View.GONE
+            }
+        }
+        else
+        {
+            warning_empty_secure_key_info.visibility = View.GONE
+            send_cents_button.visibility = View.GONE
+        }
     }
 
     private fun addContractInfoFromJSON(answer: JSONObject)
@@ -801,8 +821,6 @@ class ScriptFragment : Fragment()
                 if (tz3 == null || tz3 != secureKeyHash)
                 {
                     warning_p2pk_info?.visibility = View.VISIBLE
-
-                    send_cents_button.visibility = View.GONE
                 }
                 else
                 {
