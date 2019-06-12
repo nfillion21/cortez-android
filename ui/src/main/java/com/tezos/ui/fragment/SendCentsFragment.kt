@@ -74,8 +74,10 @@ class SendCentsFragment : AppCompatDialogFragment()
 
         private const val IS_FROM_CONTRACT_KEY = "is_from_contract_key"
 
+        private const val IS_CONTRACT_AVAILABLE_KEY = "is_contract_available_key"
+
         @JvmStatic
-        fun newInstance(contractPkh:String, storage:String, theme: CustomTheme) =
+        fun newInstance(contractPkh:String, contractAvailable:Boolean, storage:String, theme: CustomTheme) =
                 SendCentsFragment().apply {
                     arguments = Bundle().apply {
 
@@ -83,6 +85,7 @@ class SendCentsFragment : AppCompatDialogFragment()
                         putBundle(CustomTheme.TAG, bundleTheme)
                         putString(CONTRACT_PUBLIC_KEY, contractPkh)
                         putString(STORAGE_DATA_KEY, storage)
+                        putBoolean(IS_CONTRACT_AVAILABLE_KEY, contractAvailable)
                     }
                 }
     }
@@ -93,6 +96,12 @@ class SendCentsFragment : AppCompatDialogFragment()
         setStyle(DialogFragment.STYLE_NORMAL, 0)
         arguments?.let {
             mStorage = it.getString(STORAGE_DATA_KEY)
+
+            val isContractAvailable = it.getBoolean(IS_CONTRACT_AVAILABLE_KEY)
+            if (!isContractAvailable)
+            {
+                mIsFromContract = false
+            }
         }
         //isCancelable = false
     }
@@ -151,17 +160,18 @@ class SendCentsFragment : AppCompatDialogFragment()
         val tz3 = retrieveTz3()
         tz3_address_textview.text = tz3
 
+        //startInitTransferLoading(mIsFromContract)
+        //from_tz1_button.isChecked = !from_contract_button.isChecked
+
         arguments?.let {
             from_contract_button.text = it.getString(CONTRACT_PUBLIC_KEY)
+            from_contract_button.isEnabled = it.getBoolean(IS_CONTRACT_AVAILABLE_KEY)
         }
 
         val seed = Storage(context!!).getMnemonics()
         from_tz1_button.text = seed.pkh
-        if (seed.mnemonics.isEmpty())
-        {
-            //showSnackBar(getString(R.string.no_mnemonics_refill_tz3), ContextCompat.getColor(activity!!, R.color.tz_accent), Color.RED)
-            from_tz1_button.isEnabled = false
-        }
+        from_tz1_button.isEnabled = seed.mnemonics.isNotEmpty()
+
 
         if (savedInstanceState != null)
         {
@@ -196,7 +206,10 @@ class SendCentsFragment : AppCompatDialogFragment()
         }
         else
         {
-            startInitTransferLoading(true)
+            arguments?.let {
+                from_contract_button.isChecked = it.getBoolean(IS_CONTRACT_AVAILABLE_KEY)
+                from_tz1_button.isChecked = !from_contract_button.isChecked && seed.mnemonics.isNotEmpty()
+            }
         }
 
         validateSendCentsButton(isTransferFeeValid())
@@ -622,7 +635,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             fee_edittext?.hint = getString(R.string.click_for_fees)
 
             fee_edittext?.setOnClickListener {
-                startInitTransferLoading(true)
+                startInitTransferLoading(mIsFromContract)
             }
 
             if(error != null)

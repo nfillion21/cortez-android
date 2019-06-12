@@ -175,12 +175,14 @@ class ScriptFragment : Fragment()
 
         send_cents_button.setOnClickListener {
 
+            //TODO handle buttons
+
             arguments?.let {
 
                 val themeBundle = it.getBundle(CustomTheme.TAG)
                 val theme = CustomTheme.fromBundle(themeBundle)
 
-                val sendCentsFragment = SendCentsFragment.newInstance(pkh()!!, mStorage!!, theme)
+                val sendCentsFragment = SendCentsFragment.newInstance(pkh()!!, mSecureHashBalance > 0, mStorage!!, theme)
                 sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsFragment.TAG)
             }
         }
@@ -464,8 +466,7 @@ class ScriptFragment : Fragment()
                 // 100 000 mutez == 0.1 tez
                 if (mSecureHashBalance != -1L && mSecureHashBalance < 100000)
                 {
-                    val tz3 = retrieveTz3()
-                    if (tz3 != null || tz3 == secureKeyHash)
+                    if (isSecureKeyHashIdentical())
                     {
                         send_cents_button.visibility = View.VISIBLE
                     }
@@ -719,8 +720,7 @@ class ScriptFragment : Fragment()
         {
             warning_empty_secure_key_info.visibility = View.VISIBLE
 
-            val tz3 = retrieveTz3()
-            if (tz3 != null || tz3 == getStorageSecureKeyHash())
+            if (isSecureKeyHashIdentical())
             {
                 send_cents_button.visibility = View.VISIBLE
             }
@@ -1384,7 +1384,7 @@ class ScriptFragment : Fragment()
             val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
 
             val tz3 = retrieveTz3()
-            if (tz3 != null || tz3 == secureKeyHash)
+            if (tz3 != null && tz3 == secureKeyHash)
             {
                 return true
             }
