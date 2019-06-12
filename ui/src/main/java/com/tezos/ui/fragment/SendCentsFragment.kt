@@ -1,7 +1,6 @@
 package com.tezos.ui.fragment
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
@@ -49,6 +48,8 @@ class SendCentsFragment : AppCompatDialogFragment()
 
     private var mStorage:String? = null
 
+    private var mIsFromContract:Boolean = true
+
     interface OnSendCentsInteractionListener
     {
         fun isFingerprintAllowed():Boolean
@@ -70,6 +71,8 @@ class SendCentsFragment : AppCompatDialogFragment()
         private const val TRANSFER_FINALIZE_TAG = "transfer_finalize"
 
         private const val STORAGE_DATA_KEY = "storage_data_key"
+
+        private const val IS_FROM_CONTRACT_KEY = "is_from_contract_key"
 
         @JvmStatic
         fun newInstance(contractPkh:String, storage:String, theme: CustomTheme) =
@@ -125,18 +128,22 @@ class SendCentsFragment : AppCompatDialogFragment()
             {
                 R.id.from_contract_button ->
                 {
-                    val i = i
-                    val ki = i
+                    mIsFromContract = true
+                    startInitTransferLoading(true)
                 }
 
                 R.id.from_tz1_button ->
                 {
+                    mIsFromContract = false
+                    startInitTransferLoading(false)
+                    /*
                     val seed = Storage(context!!).getMnemonics()
                     if (seed.mnemonics.isEmpty())
                     {
                         showSnackBar(getString(R.string.no_mnemonics_refill_tz3), ContextCompat.getColor(activity!!, R.color.tz_accent), Color.RED)
                         from_contract_button.isChecked = true
                     }
+                    */
                 }
             }
         }
@@ -168,16 +175,18 @@ class SendCentsFragment : AppCompatDialogFragment()
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
+            mIsFromContract = savedInstanceState.getBoolean(IS_FROM_CONTRACT_KEY)
+
             if (mInitTransferLoading)
             {
-                startPostRequestLoadInitTransfer(true)
+                startInitTransferLoading(mIsFromContract)
             }
             else
             {
                 onInitTransferLoadComplete(null)
                 if (mFinalizeTransferLoading)
                 {
-                    startFinalizeTransferLoading(true)
+                    startFinalizeTransferLoading(mIsFromContract)
                 }
                 else
                 {
@@ -221,7 +230,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeTransferLoading(true)
+            startFinalizeTransferLoading(mIsFromContract)
         }
         dialog.passwordVerificationListener =
                 {
@@ -292,22 +301,22 @@ class SendCentsFragment : AppCompatDialogFragment()
 
         validateSendCentsButton(false)
 
-        startPostRequestLoadInitTransfer(true)
+        startPostRequestLoadInitTransfer(fromContract)
     }
 
 
-    private fun startFinalizeTransferLoading(fromContract: Boolean)
+    private fun startFinalizeTransferLoading(isFromContract: Boolean)
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
 
-        startPostRequestLoadFinalizeTransfer(true)
+        startPostRequestLoadFinalizeTransfer(isFromContract)
     }
 
     // REQUESTS
 
     // volley
-    private fun startPostRequestLoadFinalizeTransfer(fromContract: Boolean)
+    private fun startPostRequestLoadFinalizeTransfer(mIsFromContract: Boolean)
     {
         val url = getString(R.string.transfer_injection_operation)
 
@@ -359,7 +368,7 @@ class SendCentsFragment : AppCompatDialogFragment()
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
                 var compressedSignature = ByteArray(64)
-                if (fromContract)
+                if (mIsFromContract)
                 {
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
@@ -780,7 +789,7 @@ class SendCentsFragment : AppCompatDialogFragment()
 
     private fun retrieveTz3():String?
     {
-        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        val keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
         if (keyPair != null)
         {
             val ecKey = keyPair!!.public as ECPublicKey
@@ -821,6 +830,7 @@ class SendCentsFragment : AppCompatDialogFragment()
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
+        outState.putBoolean(IS_FROM_CONTRACT_KEY, mIsFromContract)
     }
 
     /**
@@ -848,7 +858,7 @@ class SendCentsFragment : AppCompatDialogFragment()
     {
         if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeTransferLoading(true)
+            startFinalizeTransferLoading(mIsFromContract)
         }
         else
         {
