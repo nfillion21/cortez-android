@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
-import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.DialogFragment
@@ -16,7 +15,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.android.volley.AuthFailureError
-import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
@@ -24,7 +22,6 @@ import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -85,9 +82,6 @@ class SendCentsFragment : AppCompatDialogFragment()
         super.onCreate(savedInstanceState)
         setStyle(DialogFragment.STYLE_NORMAL, 0)
         //isCancelable = false
-        arguments?.let {
-            val bundleTheme = it.getBundle(CustomTheme.TAG)
-        }
     }
 
     override fun onAttach(context: Context)
@@ -164,12 +158,19 @@ class SendCentsFragment : AppCompatDialogFragment()
 
             if (mInitTransferLoading)
             {
-                refreshTextUnderDelegation(false)
                 startPostRequestLoadInitTransfer()
             }
             else
             {
                 onInitTransferLoadComplete(null)
+                if (mFinalizeTransferLoading)
+                {
+                    startFinalizeTransferLoading()
+                }
+                else
+                {
+                    onFinalizeTransferLoadComplete(null)
+                }
             }
         }
         else
@@ -579,98 +580,6 @@ class SendCentsFragment : AppCompatDialogFragment()
         {
             // the finish call is made already
         }
-    }
-
-    private fun refreshTextUnderDelegation(animating:Boolean)
-    {
-        //this method handles the data and loading texts
-
-        /*
-        //TODO refreshing text with mnemonics or not.
-
-        if (mContract != null)
-        {
-            if (mContract!!.delegate != null)
-            {
-                limits_info_textview?.visibility = View.GONE
-                update_storage_form_card?.visibility = View.VISIBLE
-
-                redelegate_address_layout?.visibility = View.GONE
-
-                update_storage_button_layout?.visibility = View.GONE
-
-                remove_delegate_button_layout?.visibility = View.VISIBLE
-
-                storage_info_textview?.visibility = View.VISIBLE
-
-                storage_info_address_textview?.visibility = View.VISIBLE
-                storage_info_address_textview?.text = String.format(getString(R.string.remove_delegate_info_address, mContract?.delegate))
-
-
-                val hasMnemonics = Storage(activity!!).hasMnemonics()
-                if (hasMnemonics)
-                {
-                    val seed = Storage(activity!!).getMnemonics()
-
-                    if (seed.mnemonics.isEmpty())
-                    {
-                        //remove_delegate_button_layout?.visibility = View.GONE
-                        update_storage_form_card?.visibility = View.GONE
-
-                        no_mnemonics?.visibility = View.VISIBLE
-                    }
-                }
-            }
-            else
-            {
-                limits_info_textview?.visibility = View.VISIBLE
-                limits_info_textview?.text = getString(R.string.redelegate_address_info)
-
-                update_storage_form_card?.visibility = View.VISIBLE
-
-                redelegate_address_layout?.visibility = View.VISIBLE
-
-                update_storage_button_layout?.visibility = View.VISIBLE
-
-                storage_info_textview?.visibility = View.GONE
-                storage_info_address_textview?.visibility = View.GONE
-                remove_delegate_button_layout?.visibility = View.GONE
-
-                val hasMnemonics = Storage(activity!!).hasMnemonics()
-                if (hasMnemonics)
-                {
-                    val seed = Storage(activity!!).getMnemonics()
-
-                    if (seed.mnemonics.isEmpty())
-                    {
-                        limits_info_textview?.text = getString(R.string.no_baker_at_the_moment)
-                        update_storage_form_card?.visibility = View.GONE
-
-                        no_mnemonics?.visibility = View.VISIBLE
-                    }
-                }
-            }
-
-            if (!animating)
-            {
-                //no_delegates_text_layout.text = mBalanceItem.toString()
-
-                //reloadList()
-            }
-
-            loading_textview?.visibility = View.GONE
-            loading_textview?.text = null
-        }
-        else
-        {
-            // mContract is null then just show "-"
-            //loading_textview will be hidden behind other textview
-
-            loading_textview?.visibility = View.VISIBLE
-            loading_textview?.text = "-"
-        }
-
-        */
     }
 
     fun showSnackBar(res:String, color:Int, textColor:Int)
