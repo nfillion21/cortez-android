@@ -402,6 +402,8 @@ class ScriptFragment : Fragment()
 
             send_cents_button.visibility = View.GONE
 
+            secure_hash_balance_layout.visibility = View.GONE
+
             fab_edit_storage.hide()
             fab_undo_storage.show()
         }
@@ -482,6 +484,8 @@ class ScriptFragment : Fragment()
 
                 putSpendingLimitInRed(false)
             }
+
+            secure_hash_balance_layout.visibility = View.VISIBLE
 
             fab_undo_storage.hide()
             fab_edit_storage.show()
@@ -596,13 +600,15 @@ class ScriptFragment : Fragment()
                     {
                         validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
 
+                        startGetRequestBalance()
+                        /*
                         if (isSecureKeyHashIdentical())
                         {
-                            startGetRequestBalance()
                         }
                         else
                         {
                         }
+                        */
                     }
                     else
                     {
@@ -706,7 +712,14 @@ class ScriptFragment : Fragment()
 
                 if (mSecureHashBalance != -1L)
                 {
-                    "Balance : " + mutezToTez(mSecureHashBalance) + " " + getString(R.string.tez) + "." + "\nMaintain this balance between about 0.1 and 0.5 ꜩ."
+                    if (isSecureKeyHashIdentical())
+                    {
+                        "Balance : " + mutezToTez(mSecureHashBalance) + " " + getString(R.string.tez) + "." + "\nMaintain this balance between about 0.1 and 0.5 ꜩ."
+                    }
+                    else
+                    {
+                        "Balance : " + mutezToTez(mSecureHashBalance) + " " + getString(R.string.tez) + "."
+                    }
                     //"\nThere is enough tez to make transfers from this contract."
 
                 }
@@ -718,15 +731,15 @@ class ScriptFragment : Fragment()
         // 100 000 mutez == 0.1 tez
         if (mSecureHashBalance < 100000)
         {
-            warning_empty_secure_key_info.visibility = View.VISIBLE
-
             if (isSecureKeyHashIdentical())
             {
+                warning_empty_secure_key_info.visibility = View.VISIBLE
                 send_cents_button.visibility = View.VISIBLE
             }
             else
             {
                 send_cents_button.visibility = View.GONE
+                warning_empty_secure_key_info.visibility = View.GONE
             }
         }
         else
