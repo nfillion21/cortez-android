@@ -422,9 +422,6 @@ class ScriptFragment : Fragment()
 
             redelegate_address_textview.setText(R.string.secure_enclave)
 
-            //send_cents_button.visibility = View.VISIBLE
-            //TODO show only depending on the situations
-
 
             if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
             {
@@ -462,6 +459,25 @@ class ScriptFragment : Fragment()
                 val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
 
                 daily_spending_limit_edittext?.setText(mutezToTez(dailySpendingLimit))
+
+
+                // 100 000 mutez == 0.1 tez
+                if (mSecureHashBalance != -1L && mSecureHashBalance < 100000)
+                {
+                    val tz3 = retrieveTz3()
+                    if (tz3 != null || tz3 == secureKeyHash)
+                    {
+                        send_cents_button.visibility = View.VISIBLE
+                    }
+                    else
+                    {
+                        send_cents_button.visibility = View.GONE
+                    }
+                }
+                else
+                {
+                    send_cents_button.visibility = View.GONE
+                }
 
                 putSpendingLimitInRed(false)
             }

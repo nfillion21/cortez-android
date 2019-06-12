@@ -82,7 +82,7 @@
             android:layout_marginLeft="@dimen/spacing_normal"
             android:layout_marginRight="@dimen/spacing_normal"
             android:layout_marginTop="@dimen/spacing_normal"
-            android:text="@string/send_50_cents"
+            android:text="@string/send_10_cents"
             />
 
         <LinearLayout

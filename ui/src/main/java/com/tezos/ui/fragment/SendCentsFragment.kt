@@ -219,7 +219,7 @@ class SendCentsFragment : AppCompatDialogFragment()
 
     private fun setTextPayButton()
     {
-        var amountDouble: Double = (mTransferFees.toDouble() + 500000)/1000000.0
+        var amountDouble: Double = (mTransferFees.toDouble() + 100000)/1000000.0
 
         var amount = amountDouble.toString()
 
@@ -459,8 +459,8 @@ class SendCentsFragment : AppCompatDialogFragment()
         var dstObject = JSONObject()
         dstObject.put("dst", retrieveTz3())
 
-        //0.5 tez == 500 000 mutez
-        dstObject.put("amount", (500000).toLong().toString())
+        //0.1 tez == 100 000 mutez
+        dstObject.put("amount", (100000).toLong().toString())
 
         var dstObjects = JSONArray()
         dstObjects.put(dstObject)
