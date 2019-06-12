@@ -180,7 +180,7 @@ class ScriptFragment : Fragment()
                 val themeBundle = it.getBundle(CustomTheme.TAG)
                 val theme = CustomTheme.fromBundle(themeBundle)
 
-                val sendCentsFragment = SendCentsFragment.newInstance(pkh()!!, theme)
+                val sendCentsFragment = SendCentsFragment.newInstance(pkh()!!, mStorage!!, theme)
                 sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsFragment.TAG)
             }
         }

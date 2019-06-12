@@ -19,9 +19,11 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.tezos.core.*
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -45,6 +47,8 @@ class SendCentsFragment : AppCompatDialogFragment()
 
     private var mFinalizeTransferLoading:Boolean = false
 
+    private var mStorage:String? = null
+
     interface OnSendCentsInteractionListener
     {
         fun isFingerprintAllowed():Boolean
@@ -65,14 +69,17 @@ class SendCentsFragment : AppCompatDialogFragment()
         private const val TRANSFER_INIT_TAG = "transfer_init"
         private const val TRANSFER_FINALIZE_TAG = "transfer_finalize"
 
+        private const val STORAGE_DATA_KEY = "storage_data_key"
+
         @JvmStatic
-        fun newInstance(contractPkh:String, theme: CustomTheme) =
+        fun newInstance(contractPkh:String, storage:String, theme: CustomTheme) =
                 SendCentsFragment().apply {
                     arguments = Bundle().apply {
 
                         val bundleTheme = theme.toBundle()
                         putBundle(CustomTheme.TAG, bundleTheme)
                         putString(CONTRACT_PUBLIC_KEY, contractPkh)
+                        putString(STORAGE_DATA_KEY, storage)
                     }
                 }
     }
@@ -81,6 +88,9 @@ class SendCentsFragment : AppCompatDialogFragment()
     {
         super.onCreate(savedInstanceState)
         setStyle(DialogFragment.STYLE_NORMAL, 0)
+        arguments?.let {
+            mStorage = it.getString(STORAGE_DATA_KEY)
+        }
         //isCancelable = false
     }
 
@@ -156,16 +166,18 @@ class SendCentsFragment : AppCompatDialogFragment()
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
+            mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
+
             if (mInitTransferLoading)
             {
-                startPostRequestLoadInitTransfer()
+                startPostRequestLoadInitTransfer(true)
             }
             else
             {
                 onInitTransferLoadComplete(null)
                 if (mFinalizeTransferLoading)
                 {
-                    startFinalizeTransferLoading()
+                    startFinalizeTransferLoading(true)
                 }
                 else
                 {
@@ -175,7 +187,7 @@ class SendCentsFragment : AppCompatDialogFragment()
         }
         else
         {
-            startInitTransferLoading()
+            startInitTransferLoading(true)
         }
 
         validateSendCentsButton(isTransferFeeValid())
@@ -209,7 +221,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            //startFinalizeTransferLoading()
+            startFinalizeTransferLoading(true)
         }
         dialog.passwordVerificationListener =
                 {
@@ -261,11 +273,6 @@ class SendCentsFragment : AppCompatDialogFragment()
         send_cents_button.text = getString(R.string.pay, moneyFormatted2)
     }
 
-    override fun onResume()
-    {
-        super.onResume()
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
     {
@@ -273,7 +280,7 @@ class SendCentsFragment : AppCompatDialogFragment()
         return inflater.inflate(R.layout.dialog_sent_cents, container, false)
     }
 
-    private fun startInitTransferLoading()
+    private fun startInitTransferLoading(fromContract:Boolean)
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
@@ -283,25 +290,24 @@ class SendCentsFragment : AppCompatDialogFragment()
         putFeesToNegative()
         putPayButtonToNull()
 
-        // validatePay cannot be valid if there is no fees
         validateSendCentsButton(false)
 
-        startPostRequestLoadInitTransfer()
+        startPostRequestLoadInitTransfer(true)
     }
 
 
-    private fun startFinalizeTransferLoading()
+    private fun startFinalizeTransferLoading(fromContract: Boolean)
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
 
-        startPostRequestLoadFinalizeTransfer()
+        startPostRequestLoadFinalizeTransfer(true)
     }
 
     // REQUESTS
 
     // volley
-    private fun startPostRequestLoadFinalizeTransfer()
+    private fun startPostRequestLoadFinalizeTransfer(fromContract: Boolean)
     {
         val url = getString(R.string.transfer_injection_operation)
 
@@ -353,8 +359,7 @@ class SendCentsFragment : AppCompatDialogFragment()
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
                 var compressedSignature = ByteArray(64)
-                /*
-                if (mSourceKT1withCode)
+                if (fromContract)
                 {
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
@@ -370,10 +375,6 @@ class SendCentsFragment : AppCompatDialogFragment()
                     val sk = CryptoUtils.generateSk(mnemonics, "")
                     compressedSignature = KeyPair.sign(sk, result)
                 }
-                */
-                val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
-                val sk = CryptoUtils.generateSk(mnemonics, "")
-                compressedSignature = KeyPair.sign(sk, result)
 
 
                 val pLen = byteArrayThree.size
@@ -444,28 +445,98 @@ class SendCentsFragment : AppCompatDialogFragment()
 
 
 
-    private fun startPostRequestLoadInitTransfer()
+    private fun startPostRequestLoadInitTransfer(fromContract: Boolean)
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
 
         val url = getString(R.string.transfer_forge)
 
-        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-        val pk = CryptoUtils.generatePk(mnemonics, "")
-
         var postParams = JSONObject()
-        postParams.put("src", mnemonicsData.pkh)
-        postParams.put("src_pk", pk)
+        if (fromContract)
+        {
+            val ecKeys = retrieveECKeys()
+            val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+            postParams.put("src_pk", p2pk)
+            val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+            postParams.put("src", tz3)
 
-        var dstObject = JSONObject()
-        dstObject.put("dst", retrieveTz3())
+            var dstObjects = JSONArray()
 
-        //0.1 tez == 100 000 mutez
-        dstObject.put("amount", (100000).toLong().toString())
+            var dstObject = JSONObject()
 
-        var dstObjects = JSONArray()
-        dstObjects.put(dstObject)
-        postParams.put("dsts", dstObjects)
+            dstObject.put("dst", arguments!!.getString(CONTRACT_PUBLIC_KEY))
+            dstObject.put("amount", "0")
+
+            val packSpending = Pack.prim(
+                    Pack.pair(
+                            Pack.listOf(
+                                    Pack.pair(
+                                            Pack.mutez((100000).toLong()),
+                                            Pack.contract(tz3)
+                                    )
+                            ),
+                            Pack.keyHash(retrieveTz3() as String)
+                    )
+            )
+
+            val packSpendingByteArray = packSpending.data.toNoPrefixHexString().hexToByteArray()
+
+            //TODO we got the salt now
+            //TODO block the UI to be sure we got the salt
+
+            val salt = getSalt()
+            val packSalt = Pack.prim(Pack.int(salt!!))
+            val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
+
+            val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
+
+            val signature = EncryptionServices().sign(signedData)
+            val compressedSignature = compressFormat(signature)
+
+            val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
+
+            val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_spending))
+
+            //montant(mutez)
+            //destinataire (tz/KT)
+            //signataire (tz3)
+            //edpk (p2pk)
+            //edsig (p2sig)
+
+            val spendingLimitContract = String.format(resScript.toString(),
+                    (100000).toLong().toString(),
+                    retrieveTz3(),
+                    tz3,
+                    p2pk,
+                    p2sig)
+
+            //TODO we need to put a parameter
+            val json = JSONObject(spendingLimitContract)
+            dstObject.put("parameters", json)
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+        }
+        else
+        {
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            val pk = CryptoUtils.generatePk(mnemonics, "")
+
+            postParams.put("src", mnemonicsData.pkh)
+            postParams.put("src_pk", pk)
+
+            var dstObject = JSONObject()
+            dstObject.put("dst", retrieveTz3())
+
+            //0.1 tez == 100 000 mutez
+            dstObject.put("amount", (100000).toLong().toString())
+
+            var dstObjects = JSONArray()
+            dstObjects.put(dstObject)
+            postParams.put("dsts", dstObjects)
+        }
+
 
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
@@ -542,7 +613,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             fee_edittext?.hint = getString(R.string.click_for_fees)
 
             fee_edittext?.setOnClickListener {
-                startInitTransferLoading()
+                startInitTransferLoading(true)
             }
 
             if(error != null)
@@ -580,6 +651,19 @@ class SendCentsFragment : AppCompatDialogFragment()
         {
             // the finish call is made already
         }
+    }
+
+    private fun retrieveECKeys():ByteArray
+    {
+        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        if (keyPair == null)
+        {
+            EncryptionServices().createSpendingKey()
+            keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+        }
+
+        val ecKey = keyPair!!.public as ECPublicKey
+        return ecKeyFormat(ecKey)
     }
 
     fun showSnackBar(res:String, color:Int, textColor:Int)
@@ -706,6 +790,25 @@ class SendCentsFragment : AppCompatDialogFragment()
         return null
     }
 
+    private fun getSalt():Int?
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+            val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
+            return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+        }
+
+        return null
+    }
+
     override fun onSaveInstanceState(outState: Bundle)
     {
         super.onSaveInstanceState(outState)
@@ -716,6 +819,8 @@ class SendCentsFragment : AppCompatDialogFragment()
 
         outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
+
+        outState.putString(STORAGE_DATA_KEY, mStorage)
     }
 
     /**
@@ -743,7 +848,7 @@ class SendCentsFragment : AppCompatDialogFragment()
     {
         if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeTransferLoading()
+            startFinalizeTransferLoading(true)
         }
         else
         {
