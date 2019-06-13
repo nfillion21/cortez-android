@@ -63,8 +63,11 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
+import kotlinx.android.synthetic.main.dialog_sent_cents.*
 import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
+import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
+import kotlinx.android.synthetic.main.update_storage_form_card.send_cents_button
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
@@ -939,7 +942,7 @@ class ScriptFragment : Fragment()
 
                 val stringRequest = object : StringRequest(Method.POST, url,
                         Response.Listener<String> { response ->
-                            if (activity != null)
+                            if (swipe_refresh_script_layout != null)
                             {
                                 //there's no need to do anything because we call finish()
                                 onFinalizeDelegationLoadComplete(null)
@@ -949,7 +952,7 @@ class ScriptFragment : Fragment()
                         },
                         Response.ErrorListener
                         {
-                            if (activity != null)
+                            if (swipe_refresh_script_layout != null)
                             {
                                 onFinalizeDelegationLoadComplete(it)
                             }
@@ -1125,6 +1128,16 @@ class ScriptFragment : Fragment()
         dstObject.put("parameters", json)
 
         dstObjects.put(dstObject)
+
+        //send 0.1 tz to recover your contract
+        if (!isSecureKeyHashIdentical())
+        {
+            val dstCentsObject = JSONObject()
+            dstCentsObject.put("dst", tz3)
+            dstCentsObject.put("amount", (100000).toLong().toString())
+
+            dstObjects.put(dstCentsObject)
+        }
 
         postParams.put("dsts", dstObjects)
 
