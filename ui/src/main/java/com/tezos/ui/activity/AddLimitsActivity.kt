@@ -243,7 +243,7 @@ class AddLimitsActivity : BaseSecureActivity()
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
 
-    private fun startInitDelegationLoading()
+    private fun startInitOriginateContractLoading()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
@@ -253,10 +253,10 @@ class AddLimitsActivity : BaseSecureActivity()
         // validatePay cannot be valid if there is no fees
         validateAddButton(false)
 
-        startPostRequestLoadInitDelegation()
+        startPostRequestLoadInitOriginateContract()
     }
 
-    private fun startFinalizeDelegationLoading()
+    private fun startFinalizeLoadingOriginateContract()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
@@ -324,7 +324,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
                 var payloadsign = newResult.toNoPrefixHexString()
 
-                val stringRequest = object : StringRequest(Request.Method.POST, url,
+                val stringRequest = object : StringRequest(Method.POST, url,
                         Response.Listener<String> { response ->
 
                             //there's no need to do anything because we call finish()
@@ -420,7 +420,7 @@ class AddLimitsActivity : BaseSecureActivity()
             fee_limit_edittext.hint = getString(R.string.click_for_fees)
 
             fee_limit_edittext.setOnClickListener {
-                startInitDelegationLoading()
+                startInitOriginateContractLoading()
             }
 
             if(error != null)
@@ -438,7 +438,7 @@ class AddLimitsActivity : BaseSecureActivity()
     }
 
     // volley
-    private fun startPostRequestLoadInitDelegation()
+    private fun startPostRequestLoadInitOriginateContract()
     {
         val mnemonicsData = Storage(baseContext).getMnemonics()
 
@@ -705,7 +705,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
                 if (!mIsTracking && isInputDataValid())
                 {
-                    startInitDelegationLoading()
+                    startInitOriginateContractLoading()
                 }
                 else
                 {
@@ -873,7 +873,7 @@ class AddLimitsActivity : BaseSecureActivity()
         //TODO we got to keep in mind there's an id already.
         if (mInitDelegateLoading)
         {
-            startInitDelegationLoading()
+            startInitOriginateContractLoading()
         }
         else
         {
@@ -881,7 +881,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
             if (mFinalizeDelegateLoading)
             {
-                startFinalizeDelegationLoading()
+                startFinalizeLoadingOriginateContract()
             }
             else
             {
@@ -985,7 +985,7 @@ class AddLimitsActivity : BaseSecureActivity()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeDelegationLoading()
+            startFinalizeLoadingOriginateContract()
         }
         dialog.passwordVerificationListener =
                 {
@@ -1034,7 +1034,7 @@ class AddLimitsActivity : BaseSecureActivity()
     {
         if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeDelegationLoading()
+            startFinalizeLoadingOriginateContract()
         }
         else
         {

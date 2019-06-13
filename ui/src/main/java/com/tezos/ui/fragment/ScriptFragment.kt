@@ -178,15 +178,21 @@ class ScriptFragment : Fragment()
 
         send_cents_button.setOnClickListener {
 
-            //TODO handle buttons
+            val seed = Storage(context!!).getMnemonics()
+            if (mSecureHashBalance <= 0 && seed.mnemonics.isEmpty())
+            {
+                mCallback?.showSnackBar(getString(R.string.no_mnemonics_send_cents), ContextCompat.getColor(activity!!, R.color.tz_accent), ContextCompat.getColor(context!!, R.color.tz_light))
+            }
+            else
+            {
+                arguments?.let {
 
-            arguments?.let {
+                    val themeBundle = it.getBundle(CustomTheme.TAG)
+                    val theme = CustomTheme.fromBundle(themeBundle)
 
-                val themeBundle = it.getBundle(CustomTheme.TAG)
-                val theme = CustomTheme.fromBundle(themeBundle)
-
-                val sendCentsFragment = SendCentsFragment.newInstance(pkh()!!, mSecureHashBalance > 0, mStorage!!, theme)
-                sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsFragment.TAG)
+                    val sendCentsFragment = SendCentsFragment.newInstance(pkh()!!, mSecureHashBalance > 0, mStorage!!, theme)
+                    sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsFragment.TAG)
+                }
             }
         }
 
