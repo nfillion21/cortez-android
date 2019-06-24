@@ -36,6 +36,9 @@ android {
         mainnet {
             dimension "version"
         }
+        publicMainnet {
+            dimension "version"
+        }
     }
 }
 

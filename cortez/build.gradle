@@ -4,17 +4,26 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+def publicKeyPropertiesFile = rootProject.file("cortez/public_deployment/cortez_key.properties")
 def zeronetPropertiesFile = rootProject.file("cortez/deployment/zeronet.properties")
 def mainnetPropertiesFile = rootProject.file("cortez/deployment/mainnet.properties")
 
+def publicKeystoreMainnetProperties = new Properties()
 def keystoreMainnetProperties = new Properties()
 def keystoreZeronetProperties = new Properties()
 
+publicKeystoreMainnetProperties.load(new FileInputStream(publicKeyPropertiesFile))
 keystoreMainnetProperties.load(new FileInputStream(mainnetPropertiesFile))
 keystoreZeronetProperties.load(new FileInputStream(zeronetPropertiesFile))
 
 android {
     signingConfigs {
+        publicConfig {
+            keyAlias publicKeystoreMainnetProperties['keyAlias']
+            keyPassword publicKeystoreMainnetProperties['keyPassword']
+            storeFile file(publicKeystoreMainnetProperties['storeFile'])
+            storePassword publicKeystoreMainnetProperties['storePassword']
+        }
         mainnetConfig {
             keyAlias keystoreMainnetProperties['keyAlias']
             keyPassword keystoreMainnetProperties['keyPassword']
@@ -50,6 +59,10 @@ android {
     }
     flavorDimensions "version"
     productFlavors {
+        publicMainnet {
+            dimension "version"
+            signingConfig signingConfigs.publicConfig
+        }
         zeronet {
             applicationIdSuffix ".zeronet"
             versionNameSuffix "-zeronet"
