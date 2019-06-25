@@ -211,14 +211,20 @@ class TransferFormFragment : Fragment()
 
             transferLoading(isLoading())
 
-
             //TODO somewhere around here, I need to load the storage.
             //TODO as long as the storage is loading, there is no possible action.
 
         }
         else
         {
-            startStorageInfoLoading(false)
+            arguments?.let {
+
+                val srcAddress = it.getString(Address.TAG)
+                if (!srcAddress.isNullOrEmpty() && srcAddress.startsWith("KT1", true))
+                {
+                    startStorageInfoLoading(false)
+                }
+            }
         }
     }
 

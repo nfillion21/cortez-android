@@ -44,7 +44,7 @@
                 android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
                 android:textStyle="bold"
                 android:maxLines="1"
-                android:text="@string/public_key_hash"/>
+                android:text="@string/item_address"/>
             <TextView
                 android:id="@+id/src_payment_account_pub_key_hash"
                 android:layout_width="match_parent"
@@ -56,6 +56,8 @@
         </LinearLayout>
 
     </LinearLayout>
+
+
     <Button
         android:id="@+id/transfer_src_button"
         android:layout_width="match_parent"
@@ -69,173 +71,207 @@
         android:visibility="visible"
         />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/arrow_drop_down_black"
-        android:layout_gravity="center_horizontal"
-        />
-
-    <Button
-        android:id="@+id/transfer_dst_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        style="@style/PaymentScreens.SourceButton"
-
-        android:drawableLeft="@drawable/redeem_black_24"
-        android:drawableStart="@drawable/redeem_black_24"
-        android:text="@string/select_recipient"
-
-        android:paddingLeft="@dimen/spacing_double"
-        android:paddingRight="40dp"
-
-        android:layout_marginBottom="@dimen/spacing_double" />
-
     <LinearLayout
-        android:id="@+id/transfer_destination_filled"
+        android:id="@+id/loading_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:orientation="horizontal"
         android:visibility="gone"
-        android:layout_marginBottom="@dimen/spacing_double"
-        android:background="@drawable/selector_rect_layout">
+        android:orientation="vertical">
 
         <ImageView
-            android:layout_weight="0"
-            android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_double"
-            android:layout_marginLeft="@dimen/spacing_double"
-            android:src="@drawable/redeem_black_24"
-            android:contentDescription="@string/content_description"
+            android:src="@drawable/arrow_drop_down_black"
+            android:layout_gravity="center_horizontal"
             />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <Button
+            android:id="@+id/transfer_dst_button"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/spacing_double"
-            android:orientation="vertical">
-            <TextView
-                android:id="@+id/dst_payment_account_pub_key_hash_title"
-                android:layout_width="match_parent"
+
+            style="@style/PaymentScreens.SourceButton"
+
+            android:drawableLeft="@drawable/redeem_black_24"
+            android:drawableStart="@drawable/redeem_black_24"
+            android:text="@string/select_recipient"
+
+            android:paddingLeft="@dimen/spacing_double"
+            android:paddingRight="40dp"
+
+            android:layout_marginBottom="@dimen/spacing_double" />
+
+        <LinearLayout
+            android:id="@+id/transfer_destination_filled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_double"
+            android:background="@drawable/selector_rect_layout">
+
+            <ImageView
+                android:layout_weight="0"
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
-                android:textStyle="bold"
-                android:maxLines="1"
-                android:text="@string/public_key_hash"/>
-            <TextView
-                android:id="@+id/dst_payment_account_pub_key_hash"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:text="TZ1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr"
-                android:maxLines="2"
-                android:ellipsize="end"
+                android:layout_marginStart="@dimen/spacing_double"
+                android:layout_marginLeft="@dimen/spacing_double"
+                android:src="@drawable/redeem_black_24"
+                android:contentDescription="@string/content_description"
                 />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/spacing_double"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/dst_payment_account_pub_key_hash_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:text="@string/item_address"/>
+                <TextView
+                    android:id="@+id/dst_payment_account_pub_key_hash"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_double"
+            android:background="@drawable/selector_rect_layout">
+
+            <TextView
+                android:id="@+id/amount_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/amount"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_weight="0"
+                    android:layout_height="wrap_content"
+                    android:elevation="@dimen/elevation_header"
+                    android:text="ꜩ"
+                    android:layout_marginRight="@dimen/spacing_normal"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimary"
+                    android:clipToPadding="false"
+                    tools:ignore="UnusedAttribute,NewApi" />
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/amount_edittext"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:minWidth="@dimen/spacing_huge"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:hint="@string/amount_default"
+                    android:inputType="numberDecimal"
+                    android:textColorHint="@color/tz_placeholder"
+                    android:maxLength="15"
+                    android:digits="0123456789."
+                    android:textSize="@dimen/size_edit_text" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/gas_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_double"
+                android:text="@string/fee_minimum"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_weight="0"
+                    android:layout_height="wrap_content"
+                    android:elevation="@dimen/elevation_header"
+                    android:text="ꜩ"
+                    android:layout_marginEnd="@dimen/spacing_normal"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimary"
+                    android:clipToPadding="false"
+                    tools:ignore="UnusedAttribute,NewApi" />
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/fee_edittext"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:minWidth="@dimen/spacing_huge"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:hint="@string/neutral"
+                    android:enabled="false"
+                    android:inputType="numberDecimal"
+                    android:textColorHint="@color/tz_placeholder"
+                    android:maxLength="15"
+                    android:digits="0123456789."
+                    android:textSize="@dimen/size_edit_text" />
+
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
 
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/spacing_double"
-        android:background="@drawable/selector_rect_layout">
+        android:layout_margin="@dimen/spacing_double"
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/amount_textview"
+        <Space
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent" />
+
+        <ProgressBar
+            android:id="@+id/contract_progress_bar"
+            style="?android:attr/progressBarPadding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/amount"
-            android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-            tools:ignore="UnusedAttribute,NewApi" />
+            android:layout_weight="0"
+            android:layout_gravity="center_horizontal"
+            tools:ignore="UnusedAttribute" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content">
+        <Space
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_weight="0"
-                android:layout_height="wrap_content"
-                android:elevation="@dimen/elevation_header"
-                android:text="ꜩ"
-                android:layout_marginRight="@dimen/spacing_normal"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-                android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
-                android:clipToPadding="false"
-                tools:ignore="UnusedAttribute,NewApi" />
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/amount_edittext"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:minWidth="@dimen/spacing_huge"
-                android:layout_height="wrap_content"
-                android:imeOptions="actionDone"
-                android:hint="@string/amount_default"
-                android:inputType="numberDecimal"
-                android:textColorHint="@color/tz_placeholder"
-                android:maxLength="15"
-                android:digits="0123456789."
-                android:textSize="@dimen/size_edit_text" />
-
-        </LinearLayout>
-
-    <TextView
-        android:id="@+id/gas_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_double"
-        android:text="@string/fee_minimum"
-        android:textStyle="bold"
-        android:textColor="@color/colorPrimary"
-        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-        tools:ignore="UnusedAttribute,NewApi" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_weight="0"
-                android:layout_height="wrap_content"
-                android:elevation="@dimen/elevation_header"
-                android:text="ꜩ"
-                android:layout_marginEnd="@dimen/spacing_normal"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-                android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
-                android:clipToPadding="false"
-                tools:ignore="UnusedAttribute,NewApi" />
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/fee_edittext"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:minWidth="@dimen/spacing_huge"
-                android:layout_height="wrap_content"
-                android:imeOptions="actionDone"
-                android:hint="@string/neutral"
-                android:enabled="false"
-                android:inputType="numberDecimal"
-                android:textColorHint="@color/tz_placeholder"
-                android:maxLength="15"
-                android:digits="0123456789."
-                android:textSize="@dimen/size_edit_text" />
-
-        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
