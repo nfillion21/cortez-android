@@ -396,7 +396,7 @@ class TransferFormFragment : Fragment()
             {
 
                 //prevents from async crashes
-                if (R.id.content != null)
+                if (content != null)
                 {
                     addContractInfoFromJSON(it, isRecipient)
                     onStorageInfoComplete(null, isRecipient)
@@ -404,7 +404,7 @@ class TransferFormFragment : Fragment()
             },
                     Response.ErrorListener {
 
-                        if (R.id.content != null)
+                        if (content != null)
                         {
                             onStorageInfoComplete(it, isRecipient)
                         }
@@ -866,6 +866,15 @@ class TransferFormFragment : Fragment()
             }
             else
             {
+                if (isRecipient)
+                {
+                    mRecipientKT1withCode = false
+                }
+                else
+                {
+                    mSourceKT1withCode = false
+                }
+
                 arguments?.let {
 
                     val srcAddress = it.getString(Address.TAG)
@@ -878,6 +887,8 @@ class TransferFormFragment : Fragment()
                     else
                     {
                         //it looks like it's a KT1 with no code in it.
+                        loading_progress.visibility = View.GONE
+                        loading_area.visibility = View.VISIBLE
                     }
                 }
             }
@@ -1463,9 +1474,12 @@ class TransferFormFragment : Fragment()
 
                     //TODO check if it's already
 
-                    if (isInputDataValid()) {
+                    if (isInputDataValid())
+                    {
                         startInitTransferLoading()
-                    } else {
+                    }
+                    else
+                    {
                         validatePayButton(false)
 
                         cancelRequests(true)

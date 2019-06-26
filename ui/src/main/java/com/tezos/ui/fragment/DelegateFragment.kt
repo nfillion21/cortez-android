@@ -456,7 +456,7 @@ class DelegateFragment : Fragment()
             {
 
                 //prevents from async crashes
-                if (activity != null)
+                if (R.id.content != null)
                 {
                     addContractInfoFromJSON(it)
                     onContractInfoComplete(true)
