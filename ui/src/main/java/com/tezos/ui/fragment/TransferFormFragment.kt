@@ -95,7 +95,8 @@ class TransferFormFragment : Fragment()
 
     private var mRecipientStorageInfoLoading:Boolean = false
 
-    private var mStorage:String? = null
+    private var mStorageSource:String? = null
+    private var mStorageRecipient:String? = null
 
     private var mSourceKT1withCode:Boolean = false
 
@@ -134,7 +135,8 @@ class TransferFormFragment : Fragment()
 
         private const val CONTRACT_SCRIPT_RECIPIENT_INFO_TAG = "contract_script_recipient_info"
 
-        private const val STORAGE_DATA_KEY = "storage_data_key"
+        private const val STORAGE_DATA_SOURCE_KEY = "storage_data_source_key"
+        private const val STORAGE_DATA_RECIPIENT_KEY = "storage_data_recipient_key"
 
         private const val TZ_OR_KT1_SOURCE_KEY = "tz_or_kt1_source_key"
 
@@ -203,7 +205,8 @@ class TransferFormFragment : Fragment()
 
             mRecipientStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_RECIPIENT_INFO_TAG)
 
-            mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
+            mStorageSource = savedInstanceState.getString(STORAGE_DATA_SOURCE_KEY, null)
+            mStorageRecipient = savedInstanceState.getString(STORAGE_DATA_RECIPIENT_KEY, null)
 
             mSourceKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_SOURCE_KEY, false)
 
@@ -223,6 +226,12 @@ class TransferFormFragment : Fragment()
                 if (!srcAddress.isNullOrEmpty() && srcAddress.startsWith("KT1", true))
                 {
                     startStorageInfoLoading(false)
+                }
+                else
+                {
+                    //no need to hide it anymore
+                    loading_progress.visibility = View.GONE
+                    loading_area.visibility = View.VISIBLE
                 }
             }
         }
@@ -246,7 +255,7 @@ class TransferFormFragment : Fragment()
         }
         else
         {
-            onStorageInfoComplete()
+            onStorageInfoComplete(null, false)
 
             if (mRecipientStorageInfoLoading)
             {
@@ -254,6 +263,8 @@ class TransferFormFragment : Fragment()
             }
             else
             {
+                onStorageInfoComplete(null, true)
+
                 //TODO we got to keep in mind there's an id already.
                 if (mInitTransferLoading)
                 {
@@ -334,7 +345,10 @@ class TransferFormFragment : Fragment()
 
     private fun startStorageInfoLoading(isRecipient: Boolean)
     {
-        transferLoading(true)
+        //transferLoading(true)
+
+        loading_progress.visibility = View.VISIBLE
+        loading_area.visibility = View.GONE
 
         // validatePay cannot be valid if there is no fees
         //validateConfirmEditionButton(false)
@@ -384,100 +398,45 @@ class TransferFormFragment : Fragment()
                 //prevents from async crashes
                 if (R.id.content != null)
                 {
-                    addContractInfoFromJSON(it)
-                    onStorageInfoComplete()
-
-                    //TODO check if our tz3 is the same as the contract tz3
-
-                    val salt = getSalt()
-                    if (salt != null && salt >= 0)
-                    {
-                        if (isRecipient)
-                        {
-                            mRecipientKT1withCode = true
-                        }
-                        else
-                        {
-                            mSourceKT1withCode = true
-                        }
-
-                        // with this information, handle the code to sign data
-
-                        val tz3 = getTz3()
-                        val contractTz3 = getContractTz3()
-
-                        if (tz3 == null || tz3 != contractTz3)
-                        {
-                            //TODO ERROR, there is no way you can spend money without the right tz3
-                            //TODO please update your contract storage in contract tab.
-                        }
-                        else
-                        {
-                            //TODO it's ok, this phone has the keys.
-                        }
-                    }
+                    addContractInfoFromJSON(it, isRecipient)
+                    onStorageInfoComplete(null, isRecipient)
                 }
             },
                     Response.ErrorListener {
 
                         if (R.id.content != null)
                         {
-                            onStorageInfoComplete()
-
-                            val response = it.networkResponse?.statusCode
-                            if (response != 404)
-                            {
-                                // 404 happens when there is no storage in this KT1
-
-                                listener?.onTransferFailed(it)
-
-                                //TODO user needs to retry storage call
-                            }
-                            else
-                            {
-                                //it means this KT1 had no code
-                                //false by default anyway
-
-                                if (isRecipient)
-                                {
-                                    mRecipientKT1withCode = false
-                                }
-                                else
-                                {
-                                    mSourceKT1withCode = false
-
-                                    val hasMnemonics = Storage(activity!!).hasMnemonics()
-                                    if (hasMnemonics)
-                                    {
-                                        val seed = Storage(activity!!).getMnemonics()
-
-                                        if (seed.mnemonics.isEmpty())
-                                        {
-                                            listener?.noMnemonicsAvailable()
-                                        }
-                                        else
-                                        {
-                                            //TODO we can display the screen
-                                        }
-                                    }
-                                }
-
-                                //TODO we can display the elements, or say we don't have the mnemonics
-                            }
+                            onStorageInfoComplete(it, isRecipient)
                         }
                     })
 
-            jsonArrayRequest.tag = if (isRecipient) CONTRACT_SCRIPT_RECIPIENT_INFO_TAG else CONTRACT_SCRIPT_SOURCE_INFO_TAG
+            jsonArrayRequest.tag =
+
+                    if (isRecipient)
+                    {
+                        CONTRACT_SCRIPT_RECIPIENT_INFO_TAG
+                    }
+                    else
+                    {
+                        CONTRACT_SCRIPT_SOURCE_INFO_TAG
+                    }
 
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
     }
 
-    private fun addContractInfoFromJSON(answer: JSONObject)
+    private fun addContractInfoFromJSON(answer: JSONObject, isRecipient: Boolean)
     {
         if (answer != null && answer.length() > 0)
         {
-            mStorage = answer.toString()
+            if (isRecipient)
+            {
+                mStorageRecipient = answer.toString()
+            }
+            else
+            {
+                mStorageSource = answer.toString()
+            }
         }
     }
 
@@ -541,7 +500,7 @@ class TransferFormFragment : Fragment()
             //TODO we got the salt now
             //TODO block the UI to be sure we got the salt
 
-            val salt = getSalt()
+            val salt = getSalt(isRecipient = false)
             val packSalt = Pack.prim(Pack.int(salt!!))
             val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
 
@@ -858,21 +817,132 @@ class TransferFormFragment : Fragment()
     }
     */
 
-    private fun onStorageInfoComplete()
+    private fun onStorageInfoComplete(error: VolleyError?, isRecipient: Boolean)
     {
-        mSourceStorageInfoLoading = false
-        empty?.visibility = View.GONE
+        if (isRecipient)
+        {
+            mRecipientStorageInfoLoading = false
+        }
+        else
+        {
+            mSourceStorageInfoLoading = false
+        }
 
-        listener?.onTransferLoading(false)
+        if (error == null)
+        {
+            //TODO check if our tz3 is the same as the contract tz3
 
-        //refreshTextUnderDelegation()
+            val salt = getSalt(isRecipient)
+            if (salt != null && salt >= 0)
+            {
+                if (isRecipient)
+                {
+                    mRecipientKT1withCode = true
+                }
+                else
+                {
+                    mSourceKT1withCode = true
+
+                    loading_progress.visibility = View.GONE
+                    loading_area.visibility = View.VISIBLE
+                }
+
+                // with this information, handle the code to sign data
+
+                /*
+                val tz3 = getTz3()
+                val contractTz3 = getContractTz3(isRecipient)
+
+                if (tz3 == null || tz3 != contractTz3)
+                {
+                    //TODO ERROR, there is no way you can spend money without the right tz3
+                    //TODO please update your contract storage in contract tab.
+                }
+                else
+                {
+                    //TODO it's ok, this phone has the keys.
+                }
+                */
+            }
+            else
+            {
+                arguments?.let {
+
+                    val srcAddress = it.getString(Address.TAG)
+                    if (!srcAddress.isNullOrEmpty() && !srcAddress.startsWith("KT1", true))
+                    {
+                        //no need to hide it anymore
+                        loading_progress.visibility = View.GONE
+                        loading_area.visibility = View.VISIBLE
+                    }
+                    else
+                    {
+                        //it looks like it's a KT1 with no code in it.
+                    }
+                }
+            }
+        }
+        else
+        {
+            val response = error.networkResponse?.statusCode
+            if (response != 404)
+            {
+                // 404 happens when there is no storage in this KT1
+
+                listener?.onTransferFailed(error)
+
+                //TODO user needs to retry storage call
+            }
+            else
+            {
+                //it means this KT1 had no code
+                //false by default anyway
+
+                if (isRecipient)
+                {
+                    mRecipientKT1withCode = false
+                }
+                else
+                {
+                    mSourceKT1withCode = false
+
+                    val hasMnemonics = Storage(activity!!).hasMnemonics()
+                    if (hasMnemonics)
+                    {
+                        val seed = Storage(activity!!).getMnemonics()
+
+                        if (seed.mnemonics.isEmpty())
+                        {
+                            listener?.noMnemonicsAvailable()
+
+                            // TODO write a text to say we cannot transfer anything.
+                            loading_progress.visibility = View.GONE
+                            loading_area.visibility = View.GONE
+                        }
+                        else
+                        {
+                            loading_progress.visibility = View.GONE
+                            loading_area.visibility = View.VISIBLE
+                        }
+                    }
+                }
+
+                //TODO we can display the elements, or say we don't have the mnemonics
+            }
+        }
+
+        //refreshLoadingArea()
     }
 
-    private fun refreshTextUnderDelegation()
+    private fun refreshLoadingArea()
     {
         //TODO for paiements, there is nothing to handle right now, except building a pull to refresh screen
 
+        //TODO depending of the storage info result, display
+
+
         //this method handles the data and loading texts
+        /*
 
         if (mStorage != null)
         {
@@ -926,15 +996,30 @@ class TransferFormFragment : Fragment()
             //loading_textview?.visibility = View.VISIBLE
             //loading_textview?.text = "-"
         }
+        */
     }
 
-    private fun getContractTz3():String?
+    private fun getContractTz3(isRecipient: Boolean):String?
     {
         //TODO check if the storage follows our pattern
 
-        if (mStorage != null)
+        if (isRecipient && mStorageRecipient != null)
         {
-            val storageJSONObject = JSONObject(mStorage)
+            val storageJSONObject = JSONObject(mStorageRecipient)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+            val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
+            return DataExtractor.getStringFromField(secureKeyHashField, "string")
+        }
+
+        else if (!isRecipient && mStorageSource != null)
+        {
+            val storageJSONObject = JSONObject(mStorageSource)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
@@ -949,13 +1034,25 @@ class TransferFormFragment : Fragment()
         return null
     }
 
-    private fun getSalt():Int?
+    private fun getSalt(isRecipient: Boolean):Int?
     {
         //TODO check if the storage follows our pattern
-
-        if (mStorage != null)
+        if (isRecipient && mStorageRecipient != null)
         {
-            val storageJSONObject = JSONObject(mStorage)
+            val storageJSONObject = JSONObject(mStorageRecipient)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+
+            val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
+            return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+        }
+        else if (!isRecipient && mStorageSource != null)
+        {
+            val storageJSONObject = JSONObject(mStorageSource)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
@@ -1571,7 +1668,8 @@ class TransferFormFragment : Fragment()
 
         outState.putBoolean(CONTRACT_SCRIPT_RECIPIENT_INFO_TAG, mRecipientStorageInfoLoading)
 
-        outState.putString(STORAGE_DATA_KEY, mStorage)
+        outState.putString(STORAGE_DATA_SOURCE_KEY, mStorageSource)
+        outState.putString(STORAGE_DATA_RECIPIENT_KEY, mStorageRecipient)
 
         outState.putBoolean(TZ_OR_KT1_SOURCE_KEY, mSourceKT1withCode)
 
