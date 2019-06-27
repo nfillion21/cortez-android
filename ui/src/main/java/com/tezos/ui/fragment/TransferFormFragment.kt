@@ -887,8 +887,27 @@ class TransferFormFragment : Fragment()
                     else
                     {
                         //it looks like it's a KT1 with no code in it.
-                        loading_progress.visibility = View.GONE
-                        loading_area.visibility = View.VISIBLE
+
+                        // we got to handle if we have the mnemonics.
+                        val hasMnemonics = Storage(activity!!).hasMnemonics()
+                        if (hasMnemonics)
+                        {
+                            val seed = Storage(activity!!).getMnemonics()
+
+                            if (seed.mnemonics.isEmpty())
+                            {
+                                // TODO write a text to say we cannot transfer anything.
+                                loading_progress.visibility = View.GONE
+                                loading_area.visibility = View.GONE
+                                no_mnemonics.visibility = View.VISIBLE
+                            }
+                            else
+                            {
+                                loading_progress.visibility = View.GONE
+                                loading_area.visibility = View.VISIBLE
+                            }
+                        }
+
                     }
                 }
             }
@@ -924,11 +943,10 @@ class TransferFormFragment : Fragment()
 
                         if (seed.mnemonics.isEmpty())
                         {
-                            listener?.noMnemonicsAvailable()
-
                             // TODO write a text to say we cannot transfer anything.
                             loading_progress.visibility = View.GONE
                             loading_area.visibility = View.GONE
+                            no_mnemonics.visibility = View.VISIBLE
                         }
                         else
                         {
@@ -937,8 +955,6 @@ class TransferFormFragment : Fragment()
                         }
                     }
                 }
-
-                //TODO we can display the elements, or say we don't have the mnemonics
             }
         }
 
@@ -1262,11 +1278,14 @@ class TransferFormFragment : Fragment()
                     */
                 if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
-                    //TODO verify this address is a KT1 and check its storage.
 
                     mDstAccount = account.pubKeyHash
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
 
+                    //TODO verify this address is a KT1 and check its storage.
+                    /*
+                    if (isKT1)
+                    */
                     startStorageInfoLoading(true)
                 }
             }
@@ -1482,7 +1501,7 @@ class TransferFormFragment : Fragment()
                     {
                         validatePayButton(false)
 
-                        cancelRequests(true)
+                        cancelRequests(false)
                         transferLoading(false)
 
                         putFeesToNegative()

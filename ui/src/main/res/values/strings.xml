@@ -71,6 +71,7 @@
     <string name="no_mnemonics_contracts">Please restore your 24 words in key management to create contracts.</string>
     <string name="no_mnemonics_refill_tz3">Please restore your 24 words in keys management to send tez from your tz1 account.</string>
     <string name="no_mnemonics_delegate">Please restore your 24 words in key management to be able to remove or change your current baker.</string>
+    <string name="no_mnemonics_transfers">Please restore your 24 words in key management to be able to make transfers from this address.</string>
     <string name="no_mnemonics_script">Please restore your 24 words in key management to update your contract\'s storage informations.</string>
     <string name="no_mnemonics_send_cents">Please restore your 24 words in key management to send a few cents to your secure enclave key.</string>
     <string name="restore_your_24_words_info">Restore your 24 words to be able to transfer tez from your main tz1 account and standard KT1 contracts, create new contracts and remove or change your bakers.\n\n\However you can still transfer tez from your Daily Spending Limit contracts if this device is linked to them.\n\nThe Log Out button removes all of your data from this device.</string>
