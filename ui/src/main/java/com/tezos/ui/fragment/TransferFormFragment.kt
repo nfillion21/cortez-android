@@ -232,6 +232,7 @@ class TransferFormFragment : Fragment()
                     //no need to hide it anymore
                     loading_progress.visibility = View.GONE
                     loading_area.visibility = View.VISIBLE
+                    amount_layout.visibility = View.GONE
                 }
             }
         }
@@ -249,21 +250,21 @@ class TransferFormFragment : Fragment()
 
         //TODO priority with mInitStorageLoading, but only if it's a KT1.
 
-        if (mSourceStorageInfoLoading)
+        if (mRecipientStorageInfoLoading)
         {
-            startStorageInfoLoading(false)
+            startStorageInfoLoading(true)
         }
         else
         {
-            onStorageInfoComplete(null, false)
+            onStorageInfoComplete(null, mDstAccount != null)
 
-            if (mRecipientStorageInfoLoading)
+            if (mSourceStorageInfoLoading)
             {
-                startStorageInfoLoading(true)
+                startStorageInfoLoading(false)
             }
             else
             {
-                onStorageInfoComplete(null, true)
+                //onStorageInfoComplete(null, false)
 
                 //TODO we got to keep in mind there's an id already.
                 if (mInitTransferLoading)
@@ -345,15 +346,18 @@ class TransferFormFragment : Fragment()
 
     private fun startStorageInfoLoading(isRecipient: Boolean)
     {
-        //transferLoading(true)
+        if (isRecipient)
+        {
+            loading_area.visibility = View.VISIBLE
+            amount_layout.visibility = View.GONE
+        }
+        else
+        {
+            loading_area.visibility = View.GONE
+            amount_layout.visibility = View.GONE
+        }
 
         loading_progress.visibility = View.VISIBLE
-        loading_area.visibility = View.GONE
-
-        // validatePay cannot be valid if there is no fees
-        //validateConfirmEditionButton(false)
-
-        //swipe_refresh_script_layout?.isEnabled = false
 
         startGetRequestLoadContractInfo(isRecipient)
     }
@@ -835,17 +839,26 @@ class TransferFormFragment : Fragment()
             val salt = getSalt(isRecipient)
             if (salt != null && salt >= 0)
             {
+
                 if (isRecipient)
                 {
+                    // the recipient is a KT1 with code
                     mRecipientKT1withCode = true
+
+                    loading_area.visibility = View.VISIBLE
+                    amount_layout.visibility = View.VISIBLE
                 }
                 else
                 {
+                    // the source is a KT1 with code
+
                     mSourceKT1withCode = true
 
-                    loading_progress.visibility = View.GONE
                     loading_area.visibility = View.VISIBLE
+                    amount_layout.visibility = View.GONE
                 }
+
+                loading_progress.visibility = View.GONE
 
                 // with this information, handle the code to sign data
 
@@ -869,45 +882,69 @@ class TransferFormFragment : Fragment()
                 if (isRecipient)
                 {
                     mRecipientKT1withCode = false
+
+                    //this is a standard source tz1/2/3
+
+                    if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith("KT1", true))
+                    {
+                        //this is a standard source tz1/2/3
+
+                        loading_progress.visibility = View.GONE
+                        loading_area.visibility = View.VISIBLE
+                        amount_layout.visibility = View.VISIBLE
+                    }
+                    else
+                    {
+                        //this is a KT1 with no code in it
+
+                        loading_progress.visibility = View.GONE
+                        loading_area.visibility = View.VISIBLE
+                        amount_layout.visibility = View.VISIBLE
+                    }
                 }
                 else
                 {
                     mSourceKT1withCode = false
-                }
 
-                arguments?.let {
+                    arguments?.let {
 
-                    val srcAddress = it.getString(Address.TAG)
-                    if (!srcAddress.isNullOrEmpty() && !srcAddress.startsWith("KT1", true))
-                    {
-                        //no need to hide it anymore
-                        loading_progress.visibility = View.GONE
-                        loading_area.visibility = View.VISIBLE
-                    }
-                    else
-                    {
-                        //it looks like it's a KT1 with no code in it.
-
-                        // we got to handle if we have the mnemonics.
-                        val hasMnemonics = Storage(activity!!).hasMnemonics()
-                        if (hasMnemonics)
+                        val srcAddress = it.getString(Address.TAG)
+                        if (!srcAddress.isNullOrEmpty() && !srcAddress.startsWith("KT1", true))
                         {
-                            val seed = Storage(activity!!).getMnemonics()
+                            //this is a standard source tz1/2/3
 
-                            if (seed.mnemonics.isEmpty())
-                            {
-                                // TODO write a text to say we cannot transfer anything.
-                                loading_progress.visibility = View.GONE
-                                loading_area.visibility = View.GONE
-                                no_mnemonics.visibility = View.VISIBLE
-                            }
-                            else
-                            {
-                                loading_progress.visibility = View.GONE
-                                loading_area.visibility = View.VISIBLE
-                            }
+
+                            //no need to hide it anymore
+                            loading_progress.visibility = View.GONE
+                            loading_area.visibility = View.VISIBLE
+                            amount_layout.visibility = View.GONE
                         }
+                        else
+                        {
+                            //it looks like it's a KT1 with no code in it.
 
+                            // we got to handle if we have the mnemonics.
+                            val hasMnemonics = Storage(activity!!).hasMnemonics()
+                            if (hasMnemonics)
+                            {
+                                val seed = Storage(activity!!).getMnemonics()
+
+                                if (seed.mnemonics.isEmpty())
+                                {
+                                    // TODO write a text to say we cannot transfer anything.
+                                    loading_area.visibility = View.GONE
+                                    no_mnemonics.visibility = View.VISIBLE
+                                }
+                                else
+                                {
+                                    loading_area.visibility = View.VISIBLE
+                                }
+
+                                loading_progress.visibility = View.GONE
+                                amount_layout.visibility = View.GONE
+                            }
+
+                        }
                     }
                 }
             }
@@ -922,6 +959,7 @@ class TransferFormFragment : Fragment()
                 listener?.onTransferFailed(error)
 
                 //TODO user needs to retry storage call
+                //TODO I will display elements depending on the situation
             }
             else
             {
@@ -931,6 +969,10 @@ class TransferFormFragment : Fragment()
                 if (isRecipient)
                 {
                     mRecipientKT1withCode = false
+
+                    loading_progress.visibility = View.GONE
+                    loading_area.visibility = View.VISIBLE
+                    amount_layout.visibility = View.VISIBLE
                 }
                 else
                 {
@@ -946,12 +988,14 @@ class TransferFormFragment : Fragment()
                             // TODO write a text to say we cannot transfer anything.
                             loading_progress.visibility = View.GONE
                             loading_area.visibility = View.GONE
+                            amount_layout.visibility = View.GONE
                             no_mnemonics.visibility = View.VISIBLE
                         }
                         else
                         {
                             loading_progress.visibility = View.GONE
                             loading_area.visibility = View.VISIBLE
+                            amount_layout.visibility = View.GONE
                         }
                     }
                 }
@@ -1283,10 +1327,18 @@ class TransferFormFragment : Fragment()
                     switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
 
                     //TODO verify this address is a KT1 and check its storage.
-                    /*
-                    if (isKT1)
-                    */
-                    startStorageInfoLoading(true)
+                    //TODO if it's not a KT1, there's no need to
+                    if (!mDstAccount.isNullOrEmpty() && mDstAccount!!.startsWith("KT1", true))
+                    {
+                        startStorageInfoLoading(true)
+                    }
+                    else
+                    {
+                        //no need to hide it anymore
+                        loading_progress.visibility = View.GONE
+                        loading_area.visibility = View.VISIBLE
+                        amount_layout.visibility = View.VISIBLE
+                    }
                 }
             }
 
