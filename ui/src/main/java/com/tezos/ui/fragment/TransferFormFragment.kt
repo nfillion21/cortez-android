@@ -1246,6 +1246,11 @@ class TransferFormFragment : Fragment()
         //TODO fragment recreated
         //TODO load again but only if we don't have any same forged data.
         validatePayButton(isInputDataValid() && isTransferFeeValid())
+
+
+        fee_edittext_new.setOnClickListener {
+            startInitTransferLoading()
+        }
     }
 
     private fun isLoading():Boolean

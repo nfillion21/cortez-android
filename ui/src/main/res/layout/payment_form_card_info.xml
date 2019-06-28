@@ -313,4 +313,41 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/refresh_KT1_source_layout"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/selector_rect_layout"
+        android:padding="@dimen/spacing_micro"
+        android:layout_height="wrap_content">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/fee_edittext_new"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:minHeight="@dimen/min_height_touch_target"
+            android:imeOptions="actionDone"
+            android:hint="@string/click_for_refresh_contract"
+            android:focusable="false"
+            android:clickable="false"
+            android:longClickable="false"
+            android:enabled="true"
+            android:inputType="numberDecimal"
+            android:textColorHint="@color/tz_placeholder"
+            android:maxLength="15"
+            android:digits="0123456789."
+            android:textSize="@dimen/standard_item_text_size" />
+
+    </LinearLayout>
+    <!--
+
+        fee_edittext.isEnabled = true
+        fee_edittext.isFocusable = false
+        fee_edittext.isClickable = false
+        fee_edittext.isLongClickable = false
+        fee_edittext.hint = getString(R.string.click_for_fees)
+
+    -->
+
 </LinearLayout>
