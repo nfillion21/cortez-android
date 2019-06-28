@@ -315,11 +315,13 @@
 
     <LinearLayout
         android:id="@+id/refresh_KT1_source_layout"
+        android:visibility="gone"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/selector_rect_layout"
         android:padding="@dimen/spacing_micro"
-        android:layout_height="wrap_content">
+        android:layout_marginTop="@dimen/spacing_double">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/fee_edittext_new"

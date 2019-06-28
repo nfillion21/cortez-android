@@ -91,6 +91,8 @@ class TransferFormFragment : Fragment()
 
     private var mClickCalculate:Boolean = false
 
+    private var mClickSourceKT1:Boolean = false
+
     private var mSourceStorageInfoLoading:Boolean = false
 
     private var mRecipientStorageInfoLoading:Boolean = false
@@ -130,6 +132,8 @@ class TransferFormFragment : Fragment()
         private const val TRANSFER_FEE_KEY = "transfer_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
+
+        private const val CLICK_SOURCE_KT1_KEY = "click_source_kt1_key"
 
         private const val CONTRACT_SCRIPT_SOURCE_INFO_TAG = "contract_script_source_info"
 
@@ -200,6 +204,8 @@ class TransferFormFragment : Fragment()
             mTransferFees = savedInstanceState.getLong(TRANSFER_FEE_KEY, -1)
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
+
+            mClickSourceKT1 = savedInstanceState.getBoolean(CLICK_SOURCE_KT1_KEY, false)
 
             mSourceStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_SOURCE_INFO_TAG)
 
@@ -361,6 +367,8 @@ class TransferFormFragment : Fragment()
         }
 
         loading_progress.visibility = View.VISIBLE
+        refresh_KT1_source_layout.visibility = View.GONE
+        mClickSourceKT1 = false
 
         startGetRequestLoadContractInfo(isRecipient)
     }
@@ -414,6 +422,7 @@ class TransferFormFragment : Fragment()
                         if (content != null)
                         {
                             onStorageInfoComplete(it, isRecipient)
+                            mClickSourceKT1 = true
                         }
                     })
 
@@ -835,7 +844,88 @@ class TransferFormFragment : Fragment()
             mSourceStorageInfoLoading = false
         }
 
-        if (error == null)
+        if (mClickSourceKT1)
+        {
+            if (isRecipient)
+            {
+                //TODO handle the click KT1 recipient properly
+            }
+            else
+            {
+                // handle the KT1 source first.
+                loading_progress.visibility = View.GONE
+                loading_area.visibility = View.GONE
+                refresh_KT1_source_layout.visibility = View.VISIBLE
+            }
+        }
+
+        else if (error != null)
+        {
+            val response = error.networkResponse?.statusCode
+            if (response != 404)
+            {
+                // 404 happens when there is no storage in this KT1
+
+                //sdfkjsfkdlzfkljds
+
+                listener?.onTransferFailed(error)
+
+                if (isRecipient)
+                {
+                    //TODO handle the click KT1 recipient properly
+                }
+                else
+                {
+                    // handle the KT1 source first.
+                    loading_progress.visibility = View.GONE
+                    loading_area.visibility = View.GONE
+                    refresh_KT1_source_layout.visibility = View.VISIBLE
+                }
+
+                //TODO user needs to retry storage call
+                //TODO I will display elements depending on the situation
+            }
+            else
+            {
+                //it means this KT1 had no code
+                //false by default anyway
+
+                if (isRecipient)
+                {
+                    mRecipientKT1withCode = false
+
+                    loading_progress.visibility = View.GONE
+                    loading_area.visibility = View.VISIBLE
+                    amount_layout.visibility = View.VISIBLE
+                }
+                else
+                {
+                    mSourceKT1withCode = false
+
+                    val hasMnemonics = Storage(activity!!).hasMnemonics()
+                    if (hasMnemonics)
+                    {
+                        val seed = Storage(activity!!).getMnemonics()
+
+                        if (seed.mnemonics.isEmpty())
+                        {
+                            // TODO write a text to say we cannot transfer anything.
+                            loading_progress.visibility = View.GONE
+                            loading_area.visibility = View.GONE
+                            amount_layout.visibility = View.GONE
+                            no_mnemonics.visibility = View.VISIBLE
+                        }
+                        else
+                        {
+                            loading_progress.visibility = View.GONE
+                            loading_area.visibility = View.VISIBLE
+                            amount_layout.visibility = View.GONE
+                        }
+                    }
+                }
+            }
+        }
+        else
         {
             //TODO check if our tz3 is the same as the contract tz3
 
@@ -947,58 +1037,6 @@ class TransferFormFragment : Fragment()
                                 amount_layout.visibility = View.GONE
                             }
 
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-            val response = error.networkResponse?.statusCode
-            if (response != 404)
-            {
-                // 404 happens when there is no storage in this KT1
-
-                listener?.onTransferFailed(error)
-
-                //TODO user needs to retry storage call
-                //TODO I will display elements depending on the situation
-            }
-            else
-            {
-                //it means this KT1 had no code
-                //false by default anyway
-
-                if (isRecipient)
-                {
-                    mRecipientKT1withCode = false
-
-                    loading_progress.visibility = View.GONE
-                    loading_area.visibility = View.VISIBLE
-                    amount_layout.visibility = View.VISIBLE
-                }
-                else
-                {
-                    mSourceKT1withCode = false
-
-                    val hasMnemonics = Storage(activity!!).hasMnemonics()
-                    if (hasMnemonics)
-                    {
-                        val seed = Storage(activity!!).getMnemonics()
-
-                        if (seed.mnemonics.isEmpty())
-                        {
-                            // TODO write a text to say we cannot transfer anything.
-                            loading_progress.visibility = View.GONE
-                            loading_area.visibility = View.GONE
-                            amount_layout.visibility = View.GONE
-                            no_mnemonics.visibility = View.VISIBLE
-                        }
-                        else
-                        {
-                            loading_progress.visibility = View.GONE
-                            loading_area.visibility = View.VISIBLE
-                            amount_layout.visibility = View.GONE
                         }
                     }
                 }
@@ -1247,9 +1285,8 @@ class TransferFormFragment : Fragment()
         //TODO load again but only if we don't have any same forged data.
         validatePayButton(isInputDataValid() && isTransferFeeValid())
 
-
         fee_edittext_new.setOnClickListener {
-            startInitTransferLoading()
+            startStorageInfoLoading(isRecipient = false)
         }
     }
 
@@ -1756,6 +1793,8 @@ class TransferFormFragment : Fragment()
         outState.putLong(TRANSFER_FEE_KEY, mTransferFees)
 
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
+
+        outState.putBoolean(CLICK_SOURCE_KT1_KEY, mClickSourceKT1)
 
         outState.putBoolean(CONTRACT_SCRIPT_SOURCE_INFO_TAG, mSourceStorageInfoLoading)
 
