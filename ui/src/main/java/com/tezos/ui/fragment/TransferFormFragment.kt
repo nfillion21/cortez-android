@@ -250,21 +250,24 @@ class TransferFormFragment : Fragment()
 
         //TODO priority with mInitStorageLoading, but only if it's a KT1.
 
-        if (mRecipientStorageInfoLoading)
+        if (mSourceStorageInfoLoading)
         {
-            startStorageInfoLoading(true)
+            startStorageInfoLoading(false)
         }
         else
         {
-            onStorageInfoComplete(null, mDstAccount != null)
+            onStorageInfoComplete(null, false)
 
-            if (mSourceStorageInfoLoading)
+            if (mRecipientStorageInfoLoading)
             {
-                startStorageInfoLoading(false)
+                startStorageInfoLoading(true)
             }
             else
             {
-                //onStorageInfoComplete(null, false)
+                if (mDstAccount != null)
+                {
+                    onStorageInfoComplete(null, true)
+                }
 
                 //TODO we got to keep in mind there's an id already.
                 if (mInitTransferLoading)
@@ -571,7 +574,7 @@ class TransferFormFragment : Fragment()
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
-            if (activity != null)
+            if (content != null)
             {
                 mTransferPayload = answer.getString("result")
                 mTransferFees = answer.getLong("total_fee")
@@ -622,7 +625,7 @@ class TransferFormFragment : Fragment()
             }
         }, Response.ErrorListener
         {
-            if (activity != null)
+            if (content != null)
             {
                 onInitTransferLoadComplete(it)
 
