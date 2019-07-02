@@ -93,6 +93,7 @@ class TransferFormFragment : Fragment()
     private var mClickCalculate:Boolean = false
 
     private var mClickSourceKT1:Boolean = false
+    private var mClickRecipientKT1:Boolean = false
 
     private var mSourceStorageInfoLoading:Boolean = false
 
@@ -135,6 +136,7 @@ class TransferFormFragment : Fragment()
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
 
         private const val CLICK_SOURCE_KT1_KEY = "click_source_kt1_key"
+        private const val CLICK_RECIPIENT_KT1_KEY = "click_recipient_kt1_key"
 
         private const val CONTRACT_SCRIPT_SOURCE_INFO_TAG = "contract_script_source_info"
 
@@ -186,7 +188,7 @@ class TransferFormFragment : Fragment()
             if (mSrcAccount != null)
             {
                 switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccounts, mSrcAccount!!)
-                startGetRequestLoadContractInfo(false)
+                //startGetRequestLoadContractInfo(false)
             }
 
             mDstAccount = savedInstanceState.getString(DST_ACCOUNT_KEY)
@@ -207,6 +209,7 @@ class TransferFormFragment : Fragment()
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
             mClickSourceKT1 = savedInstanceState.getBoolean(CLICK_SOURCE_KT1_KEY, false)
+            mClickRecipientKT1 = savedInstanceState.getBoolean(CLICK_RECIPIENT_KT1_KEY, false)
 
             mSourceStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_SOURCE_INFO_TAG)
 
@@ -238,7 +241,7 @@ class TransferFormFragment : Fragment()
                 {
                     //no need to hide it anymore
                     loading_progress.visibility = View.GONE
-                    loading_area.visibility = View.VISIBLE
+                    recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.GONE
                 }
             }
@@ -358,18 +361,21 @@ class TransferFormFragment : Fragment()
     {
         if (isRecipient)
         {
-            loading_area.visibility = View.VISIBLE
+            recipient_area.visibility = View.VISIBLE
             amount_layout.visibility = View.GONE
         }
         else
         {
-            loading_area.visibility = View.GONE
+            recipient_area.visibility = View.GONE
             amount_layout.visibility = View.GONE
         }
 
         loading_progress.visibility = View.VISIBLE
         refresh_KT1_source_layout.visibility = View.GONE
         mClickSourceKT1 = false
+
+        refresh_KT1_recipient_layout.visibility = View.GONE
+        mClickRecipientKT1 = false
 
         startGetRequestLoadContractInfo(isRecipient)
     }
@@ -423,7 +429,14 @@ class TransferFormFragment : Fragment()
                         if (content != null)
                         {
                             onStorageInfoComplete(it, isRecipient)
-                            mClickSourceKT1 = true
+                            if (isRecipient)
+                            {
+                                mClickRecipientKT1 = true
+                            }
+                            else
+                            {
+                                mClickSourceKT1 = true
+                            }
                         }
                     })
 
@@ -819,19 +832,22 @@ class TransferFormFragment : Fragment()
             mSourceStorageInfoLoading = false
         }
 
-        if (mClickSourceKT1)
+        if (mClickRecipientKT1)
         {
-            if (isRecipient)
-            {
-                //TODO handle the click KT1 recipient properly
-            }
-            else
-            {
-                // handle the KT1 source first.
-                loading_progress.visibility = View.GONE
-                loading_area.visibility = View.GONE
-                refresh_KT1_source_layout.visibility = View.VISIBLE
-            }
+            loading_progress.visibility = View.GONE
+            recipient_area.visibility = View.VISIBLE
+            refresh_KT1_source_layout.visibility = View.GONE
+            refresh_KT1_recipient_layout.visibility = View.VISIBLE
+            amount_layout.visibility = View.GONE
+        }
+        else if (mClickSourceKT1)
+        {
+            // handle the KT1 source first.
+            loading_progress.visibility = View.GONE
+            recipient_area.visibility = View.GONE
+            refresh_KT1_source_layout.visibility = View.VISIBLE
+            refresh_KT1_recipient_layout.visibility = View.GONE
+            amount_layout.visibility = View.GONE
         }
 
         else if (error != null)
@@ -839,20 +855,28 @@ class TransferFormFragment : Fragment()
             val response = error.networkResponse?.statusCode
             if (response != 404)
             {
-                // 404 happens when there is no storage in this KT1
-
                 listener?.onTransferFailed(error)
 
                 if (isRecipient)
                 {
                     //TODO handle the click KT1 recipient properly
+                    //mClickRecipientKT1 = false
+                    mClickRecipientKT1 = true
+
+                    loading_progress.visibility = View.GONE
+                    recipient_area.visibility = View.VISIBLE
+                    refresh_KT1_recipient_layout.visibility = View.VISIBLE
                 }
                 else
                 {
                     // handle the KT1 source first.
+                    // KT1 with code or tz1
+
                     loading_progress.visibility = View.GONE
-                    loading_area.visibility = View.GONE
+                    recipient_area.visibility = View.GONE
                     refresh_KT1_source_layout.visibility = View.VISIBLE
+
+                    mClickSourceKT1 = true
                 }
 
                 //TODO user needs to retry storage call
@@ -860,20 +884,23 @@ class TransferFormFragment : Fragment()
             }
             else
             {
+                // 404 happens when there is no storage in this KT1
                 //it means this KT1 had no code
-                //false by default anyway
 
                 if (isRecipient)
                 {
                     mRecipientKT1withCode = false
 
                     loading_progress.visibility = View.GONE
-                    loading_area.visibility = View.VISIBLE
+                    recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.VISIBLE
+
+                    mClickRecipientKT1 = false
                 }
                 else
                 {
                     mSourceKT1withCode = false
+                    mClickSourceKT1 = false
 
                     val hasMnemonics = Storage(activity!!).hasMnemonics()
                     if (hasMnemonics)
@@ -884,14 +911,14 @@ class TransferFormFragment : Fragment()
                         {
                             // TODO write a text to say we cannot transfer anything.
                             loading_progress.visibility = View.GONE
-                            loading_area.visibility = View.GONE
+                            recipient_area.visibility = View.GONE
                             amount_layout.visibility = View.GONE
                             no_mnemonics.visibility = View.VISIBLE
                         }
                         else
                         {
                             loading_progress.visibility = View.GONE
-                            loading_area.visibility = View.VISIBLE
+                            recipient_area.visibility = View.VISIBLE
                             amount_layout.visibility = View.GONE
                         }
                     }
@@ -911,7 +938,7 @@ class TransferFormFragment : Fragment()
                     // the recipient is a KT1 with code
                     mRecipientKT1withCode = true
 
-                    loading_area.visibility = View.VISIBLE
+                    recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.VISIBLE
                 }
                 else
@@ -920,7 +947,7 @@ class TransferFormFragment : Fragment()
 
                     mSourceKT1withCode = true
 
-                    loading_area.visibility = View.VISIBLE
+                    recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.GONE
                 }
 
@@ -956,7 +983,7 @@ class TransferFormFragment : Fragment()
                         //this is a standard source tz1/2/3
 
                         loading_progress.visibility = View.GONE
-                        loading_area.visibility = View.VISIBLE
+                        recipient_area.visibility = View.VISIBLE
                         amount_layout.visibility = View.VISIBLE
                     }
                     else
@@ -964,7 +991,7 @@ class TransferFormFragment : Fragment()
                         //this is a KT1 with no code in it
 
                         loading_progress.visibility = View.GONE
-                        loading_area.visibility = View.VISIBLE
+                        recipient_area.visibility = View.VISIBLE
                         amount_layout.visibility = View.VISIBLE
                     }
                 }
@@ -982,7 +1009,7 @@ class TransferFormFragment : Fragment()
 
                             //no need to hide it anymore
                             loading_progress.visibility = View.GONE
-                            loading_area.visibility = View.VISIBLE
+                            recipient_area.visibility = View.VISIBLE
                             amount_layout.visibility = View.GONE
                         }
                         else
@@ -998,12 +1025,12 @@ class TransferFormFragment : Fragment()
                                 if (seed.mnemonics.isEmpty())
                                 {
                                     // TODO write a text to say we cannot transfer anything.
-                                    loading_area.visibility = View.GONE
+                                    recipient_area.visibility = View.GONE
                                     no_mnemonics.visibility = View.VISIBLE
                                 }
                                 else
                                 {
-                                    loading_area.visibility = View.VISIBLE
+                                    recipient_area.visibility = View.VISIBLE
                                 }
 
                                 loading_progress.visibility = View.GONE
@@ -1261,6 +1288,10 @@ class TransferFormFragment : Fragment()
         fee_edittext_new.setOnClickListener {
             startStorageInfoLoading(isRecipient = false)
         }
+
+        fee_edittext_recipient.setOnClickListener {
+            startStorageInfoLoading(isRecipient = true)
+        }
     }
 
     private fun isLoading():Boolean
@@ -1363,7 +1394,7 @@ class TransferFormFragment : Fragment()
                     {
                         //no need to hide it anymore
                         loading_progress.visibility = View.GONE
-                        loading_area.visibility = View.VISIBLE
+                        recipient_area.visibility = View.VISIBLE
                         amount_layout.visibility = View.VISIBLE
 
                     }
@@ -1780,6 +1811,7 @@ class TransferFormFragment : Fragment()
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
 
         outState.putBoolean(CLICK_SOURCE_KT1_KEY, mClickSourceKT1)
+        outState.putBoolean(CLICK_RECIPIENT_KT1_KEY, mClickRecipientKT1)
 
         outState.putBoolean(CONTRACT_SCRIPT_SOURCE_INFO_TAG, mSourceStorageInfoLoading)
 
