@@ -157,7 +157,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
     }
     */
 
-    private fun showSnackBar(res:String, color:Int, textColor:Int?)
+    override fun showSnackBar(res:String, color:Int, textColor:Int?)
     {
         val snackbar = Snackbar.make(findViewById(R.id.content), res, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor(color)
@@ -189,11 +189,6 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
 
         showSnackBar(error, ContextCompat.getColor(this,
                 android.R.color.holo_red_light), null)
-    }
-
-    override fun noMnemonicsAvailable()
-    {
-        showSnackBar("no mnemonics available", ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
     }
 
     override fun isFingerprintAllowed():Boolean

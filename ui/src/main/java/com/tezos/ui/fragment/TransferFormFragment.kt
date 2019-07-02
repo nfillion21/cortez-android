@@ -29,6 +29,7 @@ package com.tezos.ui.fragment
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
@@ -153,12 +154,12 @@ class TransferFormFragment : Fragment()
         fun onTransferLoading(loading: Boolean)
         fun onTransferFailed(error: VolleyError?)
 
-        fun noMnemonicsAvailable()
-
         fun isFingerprintAllowed():Boolean
         fun hasEnrolledFingerprints():Boolean
 
         fun saveFingerprintAllowed(useInFuture: Boolean)
+
+        fun showSnackBar(res:String, color:Int, textColor:Int?)
     }
 
     override fun onAttach(context: Context)
@@ -807,32 +808,6 @@ class TransferFormFragment : Fragment()
         }
     }
 
-    /*
-    private fun verifySig(data:ByteArray, signature:ByteArray):Boolean
-    {
-        /*
-  * Verify a signature previously made by a PrivateKey in our
-  * KeyStore. This uses the X.509 certificate attached to our
-  * private key in the KeyStore to validate a previously
-  * generated signature.
-  */
-        val ks = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        val entry = ks.getEntry("key1", null) as? KeyStore.PrivateKeyEntry
-        if (entry != null)
-        {
-            return  Signature.getInstance("SHA256withECDSA").run {
-                initVerify(entry.certificate)
-                update(data)
-                verify(signature)
-            }
-        }
-
-        return false
-    }
-    */
-
     private fun onStorageInfoComplete(error: VolleyError?, isRecipient: Boolean)
     {
         if (isRecipient)
@@ -865,8 +840,6 @@ class TransferFormFragment : Fragment()
             if (response != 404)
             {
                 // 404 happens when there is no storage in this KT1
-
-                //sdfkjsfkdlzfkljds
 
                 listener?.onTransferFailed(error)
 
@@ -1367,15 +1340,24 @@ class TransferFormFragment : Fragment()
                     */
                 if (resultCode == R.id.transfer_dst_selection_succeed)
                 {
-
                     mDstAccount = account.pubKeyHash
-                    switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
 
                     //TODO verify this address is a KT1 and check its storage.
                     //TODO if it's not a KT1, there's no need to
                     if (!mDstAccount.isNullOrEmpty() && mDstAccount!!.startsWith("KT1", true))
                     {
-                        startStorageInfoLoading(true)
+                        if (!mSourceKT1withCode)
+                        {
+                            startStorageInfoLoading(true)
+                        }
+                        else
+                        {
+                            listener?.showSnackBar("From a Daily Spending Limit contract, you can't select a KT1 as a recipient", ContextCompat.getColor(activity!!, R.color.tz_accent), Color.YELLOW)
+
+                            //listener?.onTransferFailed(volleyError)
+                            mDstAccount = null
+                            return
+                        }
                     }
                     else
                     {
@@ -1383,7 +1365,10 @@ class TransferFormFragment : Fragment()
                         loading_progress.visibility = View.GONE
                         loading_area.visibility = View.VISIBLE
                         amount_layout.visibility = View.VISIBLE
+
                     }
+
+                    switchButtonAndLayout(AddressBookActivity.Selection.SelectionAccountsAndAddresses, mDstAccount!!)
                 }
             }
 
