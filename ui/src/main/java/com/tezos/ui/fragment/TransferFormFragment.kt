@@ -429,6 +429,7 @@ class TransferFormFragment : Fragment()
                         if (content != null)
                         {
                             onStorageInfoComplete(it, isRecipient)
+                            /*
                             if (isRecipient)
                             {
                                 mClickRecipientKT1 = true
@@ -437,6 +438,7 @@ class TransferFormFragment : Fragment()
                             {
                                 mClickSourceKT1 = true
                             }
+                            */
                         }
                     })
 
