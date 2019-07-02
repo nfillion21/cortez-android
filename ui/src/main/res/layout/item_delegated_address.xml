@@ -25,7 +25,7 @@
                 android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
                 android:textStyle="bold"
                 android:maxLines="1"
-                android:text="@string/delegated_address"/>
+                android:text="@string/contract_address"/>
             <TextView
                 android:id="@+id/src_payment_account_pub_key_hash"
                 android:layout_width="match_parent"

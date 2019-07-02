@@ -62,12 +62,21 @@
         <activity
             android:name="com.tezcore.ui.activity.DelegateActivity"
             android:theme="@style/PaymentScreens.DelegateActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan|stateHidden" />
 
         <activity
             android:name="com.tezos.ui.activity.AddDelegateActivity"
             android:theme="@style/PaymentScreens.AddDelegateActivity"
+            android:windowSoftInputMode="adjustPan"/>
+
+        <activity
+            android:name="com.tezos.ui.activity.AddLimitsActivity"
+            android:theme="@style/PaymentScreens.AddLimitsActivity"
             android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name="com.tezos.ui.activity.KeyManagementActivity"
+            android:theme="@style/PaymentScreens.KeyManagementActivity"/>
 
     </application>
 

@@ -30,7 +30,9 @@ package com.tezos.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -47,27 +49,32 @@ import com.tezos.ui.authentication.SystemServices
 import com.tezos.ui.fragment.RestoreWalletFragment
 import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.utils.Storage
+import kotlinx.android.synthetic.main.activity_restore_wallet.*
 
-class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener, PasswordDialog.OnPasswordDialogListener {
-
-    companion object {
+class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWordSelectedListener, SearchWordDialogFragment.OnWordSelectedListener, PasswordDialog.OnPasswordDialogListener
+{
+    companion object
+    {
         var RESTORE_WALLET_REQUEST_CODE = 0x2700 // arbitrary int
         const val SEED_DATA_KEY = "seed_data_key"
 
-        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent {
+        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
+        {
             val starter = Intent(context, RestoreWalletActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
 
             return starter
         }
 
-        fun start(activity: Activity, theme: CustomTheme) {
+        fun start(activity: Activity, theme: CustomTheme)
+        {
             val starter = getStartIntent(activity, theme.toBundle())
             ActivityCompat.startActivityForResult(activity, starter, RESTORE_WALLET_REQUEST_CODE, null)
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_restore_wallet)
@@ -76,7 +83,8 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         val theme = CustomTheme.fromBundle(themeBundle)
         initToolbar(theme)
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null)
+        {
             val restoreWalletFragment = RestoreWalletFragment.newInstance(themeBundle)
             supportFragmentManager.beginTransaction()
                     .add(R.id.restorewallet_container, restoreWalletFragment)
@@ -84,7 +92,8 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         }
     }
 
-    private fun initToolbar(theme: CustomTheme) {
+    private fun initToolbar(theme: CustomTheme)
+    {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -94,16 +103,19 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         val window = window
         window.statusBarColor = ContextCompat.getColor(this,
                 theme.colorPrimaryDarkId)
-        try {
+        try
+        {
             supportActionBar!!.setDisplayHomeAsUpEnabled(false)
             supportActionBar!!.setDisplayShowTitleEnabled(false)
-        } catch (e: Exception) {
+        }
+        catch (e: Exception)
+        {
             Log.getStackTraceString(e)
         }
 
         val mCloseButton = findViewById<ImageButton>(R.id.close_button)
         mCloseButton.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        mCloseButton.setOnClickListener { _ ->
+        mCloseButton.setOnClickListener {
             //requests stop in onDestroy.
             finish()
         }
@@ -123,16 +135,20 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         dialog.show(supportFragmentManager, "Password")
     }
 
-    private fun createSeedData(mnemonics: String, password: String): Storage.MnemonicsData {
-        val encryptedSecret = EncryptionServices(applicationContext).encrypt(mnemonics, password)
+    private fun createSeedData(mnemonics: String): Storage.MnemonicsData {
+        val encryptedSecret = EncryptionServices().encrypt(mnemonics)
 
         val pkh = CryptoUtils.generatePkh(mnemonics, "")
         return Storage.MnemonicsData(pkh, encryptedSecret)
     }
 
-    private fun createKeys(password: String, isFingerprintAllowed: Boolean) {
-        val encryptionService = EncryptionServices(applicationContext)
-        encryptionService.createMasterKey(password)
+    private fun createKeys(isFingerprintAllowed: Boolean) {
+        val encryptionService = EncryptionServices()
+        encryptionService.createMasterKey()
+        if (!encryptionService.isSpendingKeyCreated())
+        {
+            encryptionService.createSpendingKey()
+        }
 
         if (SystemServices.hasMarshmallow()) {
             if (isFingerprintAllowed && systemServices.hasEnrolledFingerprints()) {
@@ -159,20 +175,45 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
 
     override fun passwordVerified(mnemonics: String, password: String, fingerprint: Boolean)
     {
-        // the password hello is not used in Marshmallow
-        createKeys(password, fingerprint)
+        createKeys(fingerprint)
         with(Storage(this)) {
-            val encryptedPassword = EncryptionServices(applicationContext).encrypt(password, "hello")
+            val encryptedPassword = EncryptionServices().encrypt(password)
 
             savePassword(encryptedPassword)
             saveFingerprintAllowed(fingerprint)
 
-            val seedData = createSeedData(mnemonics, password)
+            val seedData = createSeedData(mnemonics)
             saveSeed(seedData)
 
             intent.putExtra(SEED_DATA_KEY, Storage.toBundle(seedData))
             setResult(R.id.restore_wallet_succeed, intent)
             finish()
         }
+    }
+
+    override fun wordsFilled(words: String?):Boolean
+    {
+        with(Storage(this))
+        {
+            val hasMnemonics = hasMnemonics()
+            if (hasMnemonics)
+            {
+                val pkh = getMnemonics().pkh
+                if (pkh != CryptoUtils.generatePkh(words, ""))
+                {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+
+    override fun showSnackBar(res:String, color:Int, textColor:Int)
+    {
+        val snackbar = Snackbar.make(content, res, Snackbar.LENGTH_LONG)
+        snackbar.view.setBackgroundColor(color)
+        snackbar.setActionTextColor(textColor)
+        snackbar.show()
     }
 }

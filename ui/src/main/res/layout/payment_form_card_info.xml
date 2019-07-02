@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_double"
             android:layout_marginLeft="@dimen/spacing_double"
-            android:src="@drawable/vpn_key_black"
+            android:src="@drawable/ic_key_24"
             android:contentDescription="@string/content_description"
             />
 
@@ -44,108 +44,116 @@
                 android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
                 android:textStyle="bold"
                 android:maxLines="1"
-                android:text="@string/public_key_hash"/>
+                android:text="@string/item_address"/>
             <TextView
                 android:id="@+id/src_payment_account_pub_key_hash"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:text="TZ1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr"
                 android:maxLines="2"
                 android:ellipsize="end"
                 />
         </LinearLayout>
 
     </LinearLayout>
+
+
     <Button
         android:id="@+id/transfer_src_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/PaymentScreens.SourceButton"
-        android:drawableLeft="@drawable/vpn_key_black"
-        android:drawableStart="@drawable/vpn_key_black"
+        android:drawableLeft="@drawable/ic_key_24"
+        android:drawableStart="@drawable/ic_key_24"
         android:paddingLeft="@dimen/spacing_double"
         android:paddingRight="40dp"
         android:text="@string/select_source"
         android:visibility="visible"
         />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/arrow_drop_down_black"
-        android:layout_gravity="center_horizontal"
-        />
-
-    <Button
-        android:id="@+id/transfer_dst_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        style="@style/PaymentScreens.SourceButton"
-
-        android:drawableLeft="@drawable/redeem_black_24"
-        android:drawableStart="@drawable/redeem_black_24"
-        android:text="@string/select_destination"
-
-        android:paddingLeft="@dimen/spacing_double"
-        android:paddingRight="40dp"
-
-        android:layout_marginBottom="@dimen/spacing_double" />
-
     <LinearLayout
-        android:id="@+id/transfer_destination_filled"
+        android:id="@+id/recipient_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:orientation="horizontal"
         android:visibility="gone"
-        android:layout_marginBottom="@dimen/spacing_double"
-        android:background="@drawable/selector_rect_layout">
+        android:orientation="vertical">
 
         <ImageView
-            android:layout_weight="0"
-            android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_double"
-            android:layout_marginLeft="@dimen/spacing_double"
-            android:src="@drawable/redeem_black_24"
-            android:contentDescription="@string/content_description"
+            android:src="@drawable/arrow_drop_down_black"
+            android:layout_gravity="center_horizontal"
             />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <Button
+            android:id="@+id/transfer_dst_button"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/spacing_double"
-            android:orientation="vertical">
-            <TextView
-                android:id="@+id/dst_payment_account_pub_key_hash_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
-                android:textStyle="bold"
-                android:maxLines="1"
-                android:text="@string/public_key_hash"/>
-            <TextView
-                android:id="@+id/dst_payment_account_pub_key_hash"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:text="TZ1RPBr6yaJK94JpLDA6Xt31Ju4JJhXFw1sr"
-                android:maxLines="2"
-                android:ellipsize="end"
-                />
-        </LinearLayout>
 
+            style="@style/PaymentScreens.SourceButton"
+
+            android:drawableLeft="@drawable/redeem_black_24"
+            android:drawableStart="@drawable/redeem_black_24"
+            android:text="@string/select_recipient"
+
+            android:paddingLeft="@dimen/spacing_double"
+            android:paddingRight="40dp"
+
+            android:layout_marginBottom="@dimen/spacing_double" />
+
+        <LinearLayout
+            android:id="@+id/transfer_destination_filled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_double"
+            android:background="@drawable/selector_rect_layout">
+
+            <ImageView
+                android:layout_weight="0"
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_double"
+                android:layout_marginLeft="@dimen/spacing_double"
+                android:src="@drawable/redeem_black_24"
+                android:contentDescription="@string/content_description"
+                />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/spacing_double"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/dst_payment_account_pub_key_hash_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:text="@string/item_address"/>
+                <TextView
+                    android:id="@+id/dst_payment_account_pub_key_hash"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
     </LinearLayout>
 
-
-
     <LinearLayout
+        android:id="@+id/amount_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:orientation="vertical"
         android:padding="@dimen/spacing_double"
         android:background="@drawable/selector_rect_layout">
@@ -193,16 +201,16 @@
 
         </LinearLayout>
 
-    <TextView
-        android:id="@+id/gas_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_double"
-        android:text="@string/fee_minimum"
-        android:textStyle="bold"
-        android:textColor="@color/colorPrimary"
-        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-        tools:ignore="UnusedAttribute,NewApi" />
+        <TextView
+            android:id="@+id/gas_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_double"
+            android:text="@string/fee_minimum"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -238,5 +246,139 @@
 
         </LinearLayout>
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/loading_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_double"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent" />
+
+        <ProgressBar
+            android:id="@+id/contract_progress_bar"
+            style="?android:attr/progressBarPadding"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:layout_gravity="center_horizontal"
+            tools:ignore="UnusedAttribute" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/no_mnemonics"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:orientation="horizontal"
+        android:background="@drawable/selector_warning_layout"
+        android:layout_marginTop="@dimen/spacing_double">
+
+        <ImageView
+            android:layout_weight="0"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_double"
+            android:layout_marginLeft="@dimen/spacing_double"
+            android:src="@drawable/ic_warning_24"
+            android:contentDescription="@string/content_description"
+            />
+
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/spacing_double"
+            android:layout_marginLeft="@dimen/spacing_double"
+            android:layout_marginRight="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:gravity="center_vertical"
+            android:text="@string/no_mnemonics_transfers"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/refresh_KT1_source_layout"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/selector_rect_layout"
+        android:padding="@dimen/spacing_micro"
+        android:layout_marginTop="@dimen/spacing_double">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/fee_edittext_new"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:minHeight="@dimen/min_height_touch_target"
+            android:imeOptions="actionDone"
+            android:hint="@string/click_for_refresh_contract"
+            android:focusable="false"
+            android:clickable="false"
+            android:longClickable="false"
+            android:enabled="true"
+            android:inputType="numberDecimal"
+            android:textColorHint="@color/tz_placeholder"
+            android:maxLength="15"
+            android:digits="0123456789."
+            android:textSize="@dimen/standard_item_text_size" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/refresh_KT1_recipient_layout"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/selector_rect_layout"
+        android:padding="@dimen/spacing_micro">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/fee_edittext_recipient"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:minHeight="@dimen/min_height_touch_target"
+            android:imeOptions="actionDone"
+            android:hint="@string/click_for_refresh_contract"
+            android:focusable="false"
+            android:clickable="false"
+            android:longClickable="false"
+            android:enabled="true"
+            android:inputType="numberDecimal"
+            android:textColorHint="@color/tz_placeholder"
+            android:maxLength="15"
+            android:digits="0123456789."
+            android:textSize="@dimen/standard_item_text_size" />
+
+    </LinearLayout>
+    <!--
+
+        fee_edittext.isEnabled = true
+        fee_edittext.isFocusable = false
+        fee_edittext.isClickable = false
+        fee_edittext.isLongClickable = false
+        fee_edittext.hint = getString(R.string.click_for_fees)
+
+    -->
 
 </LinearLayout>

@@ -26,7 +26,7 @@
 */
 
 
-package com.tezcore.cortez.fragments;
+package com.tezos.ui.fragment;
 
 import android.app.Activity;
 import android.content.Context;
@@ -54,8 +54,8 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.tezos.android.R;
 import com.tezos.core.models.CustomTheme;
+import com.tezos.ui.R;
 import com.tezos.ui.authentication.EncryptionServices;
 import com.tezos.ui.utils.Storage;
 
@@ -69,25 +69,16 @@ import java.util.List;
 public class SettingsFragment extends Fragment implements AdapterView.OnItemClickListener
 {
     private OnFingerprintOptionSelectedListener mFingerprintOptionCallback;
-    private OnLogOutClickedListener mLogOutCallback;
     private OnSystemInformationsCallback mSystemInformationsCallback;
 
     // The user view type.
     private static final int CONFIRM_CREDENTIALS_ITEM_VIEW_TYPE = 0;
-
-    private Button mExitButton;
-    private FrameLayout mExitButtonLayout;
 
     private ListView mList;
 
     public interface OnFingerprintOptionSelectedListener
     {
         void onFingerprintOptionClicked(boolean isOptionChecked);
-    }
-
-    public interface OnLogOutClickedListener
-    {
-        void onLogOutClicked();
     }
 
     public interface OnSystemInformationsCallback
@@ -116,7 +107,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         try
         {
             mFingerprintOptionCallback = (OnFingerprintOptionSelectedListener) context;
-            mLogOutCallback = (OnLogOutClickedListener) context;
             mSystemInformationsCallback = (OnSystemInformationsCallback) context;
         }
         catch (ClassCastException e)
@@ -152,79 +142,9 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         ArrayAdapter adapter = new SettingsArrayAdapter(getActivity(), settingsList);
         mList.setAdapter(adapter);
 
-        mList.setItemChecked(0, new EncryptionServices(getActivity()).containsConfirmCredentialsKey());
+        mList.setItemChecked(0, new EncryptionServices().containsConfirmCredentialsKey());
 
         mList.setItemChecked(1, mSystemInformationsCallback.isFingerprintAllowed());
-
-        mExitButton = view.findViewById(R.id.exit_button);
-        mExitButtonLayout = view.findViewById(R.id.exit_button_layout);
-
-        mExitButtonLayout.setOnClickListener(view1 -> {
-            DialogInterface.OnClickListener dialogClickListener = (dialog, which) ->
-            {
-                switch (which)
-                {
-                    case DialogInterface.BUTTON_POSITIVE:
-                    {
-                        dialog.dismiss();
-                        //TODO don't remove addresses
-                        //AddressesDatabase.getInstance().logOut(getActivity());
-
-                        mLogOutCallback.onLogOutClicked();
-                    }
-                    break;
-
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        dialog.dismiss();
-                        break;
-                }
-            };
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle(R.string.alert_exit_account)
-                    .setMessage(R.string.alert_exit_acccount_body)
-                    .setNegativeButton(android.R.string.cancel, dialogClickListener)
-                    .setPositiveButton(android.R.string.yes, dialogClickListener)
-                    .setCancelable(false)
-                    .show();
-        });
-
-        boolean isPasswordSaved = new Storage(getActivity()).isPasswordSaved();
-        validateExitButton(isPasswordSaved);
-    }
-
-    protected void validateExitButton(boolean validate) {
-
-        if (validate) {
-
-            CustomTheme theme = new CustomTheme(R.color.tz_error, R.color.tz_accent, R.color.tz_light);
-
-            mExitButton.setTextColor(ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
-            mExitButtonLayout.setEnabled(true);
-            mExitButtonLayout.setBackground(makeSelector(theme));
-
-            Drawable[] drawables = mExitButton.getCompoundDrawables();
-            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
-
-        } else {
-
-            mExitButton.setTextColor(ContextCompat.getColor(getActivity(), android.R.color.white));
-            mExitButtonLayout.setEnabled(false);
-            CustomTheme greyTheme = new CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey);
-            mExitButtonLayout.setBackground(makeSelector(greyTheme));
-
-            Drawable[] drawables = mExitButton.getCompoundDrawables();
-            Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), android.R.color.white));
-        }
-    }
-
-    private StateListDrawable makeSelector(CustomTheme theme) {
-        StateListDrawable res = new StateListDrawable();
-        res.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(ContextCompat.getColor(getActivity(), theme.getColorPrimaryDarkId())));
-        res.addState(new int[]{}, new ColorDrawable(ContextCompat.getColor(getActivity(), theme.getColorPrimaryId())));
-        return res;
     }
 
     private class SettingsArrayAdapter extends ArrayAdapter<String>
@@ -307,7 +227,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
         {
             case 0:
             {
-                EncryptionServices encryptionServices = new EncryptionServices(getActivity());
+                EncryptionServices encryptionServices = new EncryptionServices();
                 if (checkedTextView.isChecked())
                 {
                     encryptionServices.createConfirmCredentialsKey();
@@ -337,6 +257,5 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
 
         mSystemInformationsCallback = null;
         mFingerprintOptionCallback = null;
-        mLogOutCallback = null;
     }
 }

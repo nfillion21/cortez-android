@@ -39,7 +39,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.widget.ImageButton
-import com.tezcore.cortez.fragments.SettingsFragment
+import com.tezos.ui.fragment.SettingsFragment
 import com.tezos.android.R
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.activity.BaseSecureActivity
@@ -51,13 +51,13 @@ import com.tezos.ui.utils.Storage
  * Created by nfillion on 3/6/18.
  */
 
-class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOptionSelectedListener, SettingsFragment.OnLogOutClickedListener, SettingsFragment.OnSystemInformationsCallback
+class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOptionSelectedListener, SettingsFragment.OnSystemInformationsCallback
 {
     private var deviceSecurityAlert: AlertDialog? = null
 
     companion object
     {
-        private val TAG_SETTINGS = "SettingsTag"
+        private const val TAG_SETTINGS = "SettingsTag"
 
         var SETTINGS_REQUEST_CODE = 0x2500 // arbitrary int
 
@@ -138,7 +138,7 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
             // TODO put the checkbox to false
 
             Snackbar.make(findViewById(android.R.id.content), R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.sign_up_snack_action, { openSecuritySettings() })
+                    .setAction(R.string.sign_up_snack_action) { openSecuritySettings() }
                     .setActionTextColor(Color.YELLOW)
                     .show()
         }
@@ -147,22 +147,9 @@ class SettingsActivity : BaseSecureActivity(), SettingsFragment.OnFingerprintOpt
             Storage(baseContext).saveFingerprintAllowed(isOptionChecked)
             if (!isOptionChecked)
             {
-                EncryptionServices(this).removeFingerprintKey()
+                EncryptionServices().removeFingerprintKey()
             }
         }
-    }
-
-    override fun onLogOutClicked()
-    {
-        val encryptionServices = EncryptionServices(applicationContext)
-        encryptionServices.removeMasterKey()
-        encryptionServices.removeFingerprintKey()
-        encryptionServices.removeConfirmCredentialsKey()
-
-        Storage(baseContext).clear()
-
-        setResult(R.id.logout_succeed, null)
-        finish()
     }
 
     override fun isFingerprintHardwareAvailable(): Boolean

@@ -56,7 +56,7 @@ import com.tezos.ui.fragment.AddressBookFragment;
  */
 public class AddressBookActivity extends BaseSecureActivity implements AddressBookFragment.OnCardSelectedListener
 {
-    public static int TRANSFER_SELECT_REQUEST_CODE = 0x2100; // arbitrary int
+    public static int TRANSFER_SELECT_REQUEST_CODE = 0x2300; // arbitrary int
 
     public static String SELECTED_REQUEST_CODE_KEY = "selectedRequestCodeKey";
 

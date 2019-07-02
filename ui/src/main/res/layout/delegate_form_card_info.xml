@@ -7,7 +7,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
-        android:id="@+id/address_textview"
+        android:id="@+id/public_address_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/address_delegate"
@@ -17,7 +17,7 @@
         tools:ignore="UnusedAttribute,NewApi" />
 
     <android.support.design.widget.TextInputEditText
-        android:id="@+id/tezos_address_edittext"
+        android:id="@+id/public_address_edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/address_pkh_placeholder"

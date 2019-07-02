@@ -48,6 +48,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/tab_delegate" />
 
+            <android.support.design.widget.TabItem
+                android:id="@+id/tabItemScript"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tab_script" />
+
         </android.support.design.widget.TabLayout>
     </android.support.design.widget.AppBarLayout>
     <android.support.v4.view.ViewPager
@@ -71,15 +77,6 @@
         android:layout_margin="@dimen/fab_margin"
         app:tint="@android:color/white"
         app:srcCompat="@drawable/ic_menu_share" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabAddAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="@dimen/fab_margin"
-        app:tint="@android:color/white"
-        app:srcCompat="@drawable/ic_add_black" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabTransfer"

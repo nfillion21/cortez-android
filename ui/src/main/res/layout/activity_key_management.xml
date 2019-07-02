@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary">
+
+            <TextView android:id="@+id/barTitle"
+                android:text="@string/key_management_title"
+
+                android:paddingStart="@dimen/spacing_normal"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingTop="@dimen/spacing_micro"
+                android:paddingBottom="@dimen/spacing_micro"
+                android:layout_width="wrap_content"
+                android:singleLine="true"
+
+                android:maxLines="1"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical|center_horizontal"
+                tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
+
+            <ImageButton android:id="@+id/close_button"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+
+                android:contentDescription="@string/content_description"
+                android:padding="@dimen/spacing_double"
+                android:gravity="end"
+                android:src="@drawable/close_black_24"
+                android:background="@drawable/selector_subtle"
+                android:layout_gravity="end|center_vertical"
+                />
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <LinearLayout
+        android:id="@+id/mnemonics_scroll_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_double"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    android:layout_marginRight="@dimen/spacing_double"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
+                    android:elevation="@dimen/elevation_header"
+                    android:gravity="center_vertical"
+                    android:text="@string/key_management_title"
+                    android:clipToPadding="false"
+                    tools:ignore="UnusedAttribute,NewApi" />
+
+                <LinearLayout
+                    android:id="@+id/without_mnemonics_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:background="@drawable/selector_rect_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="@dimen/spacing_double"
+                        android:padding="@dimen/spacing_double"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                        android:textColor="@color/colorAccent"
+                        android:gravity="center_vertical"
+                        android:text="@string/restore_your_24_words_info"
+                        />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        />
+
+                    <Button
+                        android:id="@+id/restore_24_words_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/PaymentScreens.RoundedButton"
+                        android:text="@string/restore_your_24_words"
+                        android:visibility="visible"
+                        android:paddingLeft="@dimen/spacing_double"
+                        android:paddingRight="@dimen/spacing_double"
+                        android:layout_marginRight="@dimen/spacing_double"
+                        android:layout_marginLeft="@dimen/spacing_double"
+                        android:drawableLeft="@drawable/ic_key_24"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/with_mnemonics_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="@dimen/spacing_double"
+                        android:padding="@dimen/spacing_double"
+                        android:background="@drawable/selector_warning_layout"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                        android:textColor="@color/colorAccent"
+                        android:gravity="center_vertical"
+                        android:text="@string/remove_your_24_words_info"
+                        />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        />
+                    <Button
+                        android:id="@+id/remove_24_words_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/PaymentScreens.RoundedButton"
+                        android:text="@string/remove_your_24_words"
+                        android:visibility="visible"
+                        android:drawableLeft="@drawable/ic_delete_24"
+                        android:paddingLeft="@dimen/spacing_double"
+                        android:paddingRight="@dimen/spacing_double"
+                        android:layout_marginRight="@dimen/spacing_double"
+                        android:layout_marginLeft="@dimen/spacing_double"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+
+        </ScrollView>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/exit_button_layout"
+        android:layout_width="match_parent"
+        style="@style/PaymentScreens.Button"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/spacing_double"
+        android:visibility="visible"
+        android:layout_height="?android:attr/actionBarSize">
+
+        <Button
+            android:id="@+id/exit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/exit_button"
+            android:drawableLeft="@drawable/exit_to_app_24"
+            android:drawableStart="@drawable/exit_to_app_24"
+            android:drawableTint="@color/tz_light"
+            android:drawablePadding="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+            android:layout_gravity="center"
+            android:enabled="false"
+
+            android:background="@null"
+            android:clickable="false"
+            android:focusable="false"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            />
+
+    </FrameLayout>
+
+</LinearLayout>

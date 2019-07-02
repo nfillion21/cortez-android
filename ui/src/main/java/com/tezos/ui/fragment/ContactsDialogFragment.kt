@@ -137,7 +137,7 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
         mList = dialogView.findViewById(R.id.list)
         mList!!.adapter = mCursorAdapter
 
-        mList!!.setOnItemClickListener { adapterView, view, i, l ->
+        mList!!.setOnItemClickListener { _, _, i, _ ->
             val cursor = mCursorAdapter!!.cursor
             cursor.moveToPosition(i)
             val item = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Contactables.DISPLAY_NAME))

@@ -30,6 +30,7 @@ package com.tezos.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -78,7 +79,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
         fun start(activity: Activity, srcPkh: String, address: Address?, theme: CustomTheme)
         {
             val starter = getStartIntent(activity, srcPkh, address, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, TransferFormActivity.TRANSFER_REQUEST_CODE, null)
+            ActivityCompat.startActivityForResult(activity, starter, TRANSFER_REQUEST_CODE, null)
         }
     }
 
@@ -137,6 +138,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
 
+    /*
     private fun showSnackBar(error:VolleyError?)
     {
         var error: String? = if (error != null)
@@ -151,6 +153,18 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
         val snackbar = Snackbar.make(findViewById(R.id.content), error.toString(), Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                 android.R.color.holo_red_light)))
+        snackbar.show()
+    }
+    */
+
+    override fun showSnackBar(res:String, color:Int, textColor:Int?)
+    {
+        val snackbar = Snackbar.make(findViewById(R.id.content), res, Snackbar.LENGTH_LONG)
+        snackbar.view.setBackgroundColor(color)
+        if (textColor != null)
+        {
+            snackbar.setActionTextColor(textColor)
+        }
         snackbar.show()
     }
 
@@ -171,7 +185,10 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
 
     override fun onTransferFailed(error: VolleyError?)
     {
-        showSnackBar(error)
+        var error: String = error?.toString() ?: getString(R.string.generic_error)
+
+        showSnackBar(error, ContextCompat.getColor(this,
+                android.R.color.holo_red_light), null)
     }
 
     override fun isFingerprintAllowed():Boolean

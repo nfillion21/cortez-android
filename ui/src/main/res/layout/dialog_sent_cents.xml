@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootView"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="@dimen/min_height_touch_target"
+            android:layout_height="@dimen/min_height_touch_target"
+            android:layout_weight="0"
+            android:layout_gravity="end"
+            android:background="@null"
+            android:src="@drawable/close_black_24"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingLeft="@dimen/spacing_double"
+        android:paddingRight="@dimen/spacing_double"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="From :"
+                    />
+
+                <RadioGroup
+                    android:id="@+id/from_radio_group"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:layout_marginBottom="@dimen/spacing_normal"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/from_contract_button"
+                        android:layout_marginBottom="@dimen/spacing_normal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/TextAppearance.AppCompat.Small"
+                        android:textColor="@color/colorAccent"
+                        android:text="@string/neutral" />
+
+                    <RadioButton
+                        android:id="@+id/from_tz1_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorAccent"
+                        style="@style/TextAppearance.AppCompat.Small"
+                        android:text="@string/neutral" />
+
+                </RadioGroup>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_normal"
+                    android:text="To :"
+                    />
+
+                <TextView
+                    android:id="@+id/tz3_address_textview"
+                    android:background="@drawable/selector_rect_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    android:padding="@dimen/spacing_normal"
+                    style="@style/TextAppearance.AppCompat.Small"
+                    android:textColor="@color/colorAccent"
+                    android:text="@string/neutral"
+                    />
+
+            </LinearLayout>
+
+        </ScrollView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/spacing_double"
+        android:layout_marginRight="@dimen/spacing_double"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/gas_textview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/fee_minimum"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+            <ProgressBar
+                android:id="@+id/fee_progress"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                android:text="@string/tez"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                tools:ignore="UnusedAttribute,NewApi" />
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/fee_edittext"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:imeOptions="actionDone"
+                android:hint="@string/neutral"
+                android:enabled="false"
+                android:inputType="numberDecimal"
+                android:textColorHint="@color/tz_placeholder"
+                android:maxLength="15"
+                android:digits="0123456789."
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!--
+    From KT1 button
+    -->
+    <FrameLayout
+        android:id="@+id/send_cents_button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        style="@style/PaymentScreens.Button"
+        android:enabled="false"
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:layout_marginRight="@dimen/spacing_double"
+        android:layout_marginLeft="@dimen/spacing_double"
+        android:layout_marginBottom="@dimen/spacing_double"
+        >
+
+        <Button
+            android:id="@+id/send_cents_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/send"
+
+            android:drawableStart="@drawable/ic_lock_black"
+            android:drawableLeft="@drawable/ic_lock_black"
+            android:drawableTint="@color/tz_light"
+            android:drawablePadding="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+            android:layout_gravity="center"
+            android:enabled="false"
+
+            android:background="@null"
+            android:clickable="false"
+            android:focusable="false"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            />
+
+    </FrameLayout>
+
+    <!--
+    From tz1 button
+    <FrameLayout
+        android:id="@+id/send_cents_from_tz1_button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        style="@style/PaymentScreens.Button"
+        android:enabled="false"
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        >
+
+        <Button
+            android:id="@+id/send_cents_from_tz1_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/send"
+
+            android:drawableStart="@drawable/ic_lock_black"
+            android:drawableLeft="@drawable/ic_lock_black"
+            android:drawableTint="@color/tz_light"
+            android:drawablePadding="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+            android:layout_gravity="center"
+            android:enabled="false"
+
+            android:background="@null"
+            android:clickable="false"
+            android:focusable="false"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            />
+
+    </FrameLayout>
+    -->
+
+</LinearLayout>

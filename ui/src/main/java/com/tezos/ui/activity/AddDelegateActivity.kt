@@ -64,6 +64,8 @@ import kotlinx.android.synthetic.main.activity_add_delegate.*
 import kotlinx.android.synthetic.main.delegate_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.InputStream
+import java.nio.charset.Charset
 
 /**
  * Created by nfillion on 20/11/18.
@@ -76,7 +78,7 @@ class AddDelegateActivity : BaseSecureActivity()
     private var mFinalizeDelegateLoading:Boolean = false
 
     private var mDelegatePayload:String? = null
-    private var mDelegateFees:Long = -1
+    private var mDelegateFees:Long = -1L
 
     private var mDelegateAmount:Double = -1.0
     private var mDelegateTezosAddress:String? = null
@@ -123,7 +125,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
-        add_delegate_button_layout.setOnClickListener {
+        update_storage_button_layout.setOnClickListener {
             onDelegateClick()
         }
 
@@ -134,9 +136,9 @@ class AddDelegateActivity : BaseSecureActivity()
         val focusChangeListener = this.focusChangeListener()
         amount_edittext.onFocusChangeListener = focusChangeListener
 
-        tezos_address_edittext.addTextChangedListener(GenericTextWatcher(tezos_address_edittext))
+        public_address_edittext.addTextChangedListener(GenericTextWatcher(public_address_edittext))
 
-        tezos_address_edittext.onFocusChangeListener = focusChangeListener
+        public_address_edittext.onFocusChangeListener = focusChangeListener
 
         if (savedInstanceState != null)
         {
@@ -164,7 +166,7 @@ class AddDelegateActivity : BaseSecureActivity()
             {
                 putAmountInRed(!hasFocus)
             }
-            else if (i == R.id.tezos_address_edittext)
+            else if (i == R.id.public_address_edittext)
             {
                 putTzAddressInRed(!hasFocus)
             }
@@ -242,7 +244,7 @@ class AddDelegateActivity : BaseSecureActivity()
             val pkhSrc = mnemonicsData.pkh
             //val pkhDst = mDstAccount?.pubKeyHash
 
-            val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
@@ -362,6 +364,10 @@ class AddDelegateActivity : BaseSecureActivity()
         }
     }
 
+    fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String
+    {
+        return this.bufferedReader(charset).use { it.readText() }
+    }
 
     private fun onInitDelegateLoadComplete(error:VolleyError?)
     {
@@ -409,7 +415,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val url = getString(R.string.originate_account_url)
 
-        val mnemonics = EncryptionServices(this).decrypt(mnemonicsData.mnemonics, "not useful for marshmallow")
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         val pkhSrc = mnemonicsData.pkh
@@ -424,14 +430,8 @@ class AddDelegateActivity : BaseSecureActivity()
         var dstObject = JSONObject()
         dstObject.put("manager", pkhSrc)
 
-        //TODO put the delegate element
-        //dstObject.put("delegate", "tz1SkbPvfcqUXbs3ywBkAKFDLGvjQawLXEKZ")
 
         dstObject.put("delegate", mDelegateTezosAddress)
-
-        //TODO put the right amount
-        //dstObject.put("credit", (mTransferAmount*1000000).toLong().toString())
-        //dstObject.put("credit", 1000000.toString())
 
         //TODO be careful, do it in mutez.
         dstObject.put("credit", (mDelegateAmount*1000000).toLong().toString())
@@ -461,7 +461,7 @@ class AddDelegateActivity : BaseSecureActivity()
             postParams.put("dsts", dstsArray)
 
             // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != null)
+            if (mDelegatePayload != null && mDelegateFees != -1L)
             {
                 onInitDelegateLoadComplete(null)
 
@@ -520,13 +520,13 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         if (loading)
         {
-            add_delegate_button_layout.visibility = View.GONE
+            update_storage_button_layout.visibility = View.GONE
             nav_progress.visibility = View.VISIBLE
             //amount_transfer.isEnabled = false
         }
         else
         {
-            add_delegate_button_layout.visibility = View.VISIBLE
+            update_storage_button_layout.visibility = View.VISIBLE
             nav_progress.visibility = View.INVISIBLE
             //amount_transfer.isEnabled = true
         }
@@ -547,21 +547,14 @@ class AddDelegateActivity : BaseSecureActivity()
 
     private fun putPayButtonToNull()
     {
-        add_delegate_button.text = getString(R.string.pay, "")
+        update_storage_button.text = getString(R.string.pay, "")
     }
 
     private fun showSnackBar(error:VolleyError?)
     {
-        var error: String? = if (error != null)
-        {
-            error.toString()
-        }
-        else
-        {
-            getString(R.string.generic_error)
-        }
+        var errorStr: String? = error?.toString() ?: getString(R.string.generic_error)
 
-        val snackbar = Snackbar.make(findViewById(R.id.content), error.toString(), Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(findViewById(R.id.content), errorStr.toString(), Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                 android.R.color.holo_red_light)))
         snackbar.show()
@@ -574,23 +567,23 @@ class AddDelegateActivity : BaseSecureActivity()
 
         if (validate)
         {
-            add_delegate_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
-            add_delegate_button_layout.isEnabled = true
-            add_delegate_button_layout.background = makeSelector(theme)
+            update_storage_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+            update_storage_button_layout.isEnabled = true
+            update_storage_button_layout.background = makeSelector(theme)
 
-            val drawables = add_delegate_button.compoundDrawables
+            val drawables = update_storage_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
         }
         else
         {
-            add_delegate_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
-            add_delegate_button_layout.isEnabled = false
+            update_storage_button.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+            update_storage_button_layout.isEnabled = false
 
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            add_delegate_button_layout.background = makeSelector(greyTheme)
+            update_storage_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = add_delegate_button.compoundDrawables
+            val drawables = update_storage_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white))
         }
@@ -616,14 +609,14 @@ class AddDelegateActivity : BaseSecureActivity()
 
             if ((i == R.id.amount_edittext && !isDelegateAmountEquals(editable))
                             ||
-                 (i == R.id.tezos_address_edittext && !isDelegateTezosAddressEquals(editable)))
+                 (i == R.id.public_address_edittext && !isDelegateTezosAddressEquals(editable)))
             {
                 if (i == R.id.amount_edittext )
                 {
                     putAmountInRed(false)
                 }
 
-                if (i == R.id.tezos_address_edittext)
+                if (i == R.id.public_address_edittext)
                 {
                     putTzAddressInRed(false)
                 }
@@ -650,7 +643,7 @@ class AddDelegateActivity : BaseSecureActivity()
                     putPayButtonToNull()
                 }
             }
-            else if (i != R.id.amount_edittext && i != R.id.tezos_address_edittext)
+            else if (i != R.id.amount_edittext && i != R.id.public_address_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -661,7 +654,7 @@ class AddDelegateActivity : BaseSecureActivity()
         {
             val isAmountEquals = false
 
-            if (editable != null && !TextUtils.isEmpty(editable))
+            if (!TextUtils.isEmpty(editable))
             {
                 try
                 {
@@ -684,7 +677,7 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         val isTezosAddressEquals = true
 
-        if (editable != null && !TextUtils.isEmpty(editable))
+        if (!TextUtils.isEmpty(editable))
         {
             val tezosAddress = editable.toString()
             return tezosAddress == mDelegateTezosAddress
@@ -701,11 +694,11 @@ class AddDelegateActivity : BaseSecureActivity()
     {
         var isTzAddressValid = false
 
-        if (!TextUtils.isEmpty(tezos_address_edittext.text))
+        if (!TextUtils.isEmpty(public_address_edittext.text))
         {
-            if (Utils.isTzAddressValid(tezos_address_edittext.text!!.toString()))
+            if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
             {
-                mDelegateTezosAddress = tezos_address_edittext.text.toString()
+                mDelegateTezosAddress = public_address_edittext.text.toString()
                 isTzAddressValid = true
             }
         }
@@ -830,7 +823,7 @@ class AddDelegateActivity : BaseSecureActivity()
             color = R.color.tz_accent
         }
 
-        tezos_address_edittext.setTextColor(ContextCompat.getColor(this, color))
+        public_address_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
 // put everything in RED
@@ -844,7 +837,7 @@ class AddDelegateActivity : BaseSecureActivity()
         if (red && !amountValid)
         {
             color = R.color.tz_error
-            add_delegate_button.text = getString(R.string.delegate_format, "")
+            update_storage_button.text = getString(R.string.delegate_format, "")
         }
         else
         {
@@ -857,7 +850,7 @@ class AddDelegateActivity : BaseSecureActivity()
             }
             else
             {
-                add_delegate_button.text = getString(R.string.delegate_format, "")
+                update_storage_button.text = getString(R.string.delegate_format, "")
             }
         }
 
@@ -907,7 +900,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val moneyFormatted2 = "$amount ꜩ"
 //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        add_delegate_button.text = getString(R.string.pay, moneyFormatted2)
+        update_storage_button.text = getString(R.string.pay, moneyFormatted2)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -921,9 +914,9 @@ class AddDelegateActivity : BaseSecureActivity()
     private fun onDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        if (isFingerprintAllowed() && hasEnrolledFingerprints())
         {
-            dialog.cryptoObjectToAuthenticateWith = EncryptionServices(this).prepareFingerprintCryptoObject()
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
                 validateKeyAuthentication(it)
@@ -974,7 +967,7 @@ class AddDelegateActivity : BaseSecureActivity()
         saveFingerprintAllowed(useInFuture)
         if (useInFuture)
         {
-            EncryptionServices(this).createFingerprintKey()
+            EncryptionServices().createFingerprintKey()
         }
     }
 
@@ -984,12 +977,12 @@ class AddDelegateActivity : BaseSecureActivity()
     private fun validatePassword(inputtedPassword: String): Boolean
     {
         val storage = Storage(this)
-        return EncryptionServices(this).decrypt(storage.getPassword(), inputtedPassword) == inputtedPassword
+        return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
     }
 
     private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
     {
-        if (EncryptionServices(this).validateFingerprintAuthentication(cryptoObject))
+        if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
             startFinalizeDelegationLoading()
         }

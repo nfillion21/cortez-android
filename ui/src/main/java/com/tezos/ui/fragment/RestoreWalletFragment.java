@@ -29,7 +29,7 @@ package com.tezos.ui.fragment;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
@@ -57,13 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import io.github.novacrypto.bip39.MnemonicValidator;
-import io.github.novacrypto.bip39.Validation.InvalidChecksumException;
-import io.github.novacrypto.bip39.Validation.InvalidWordCountException;
-import io.github.novacrypto.bip39.Validation.UnexpectedWhiteSpaceException;
-import io.github.novacrypto.bip39.Validation.WordNotFoundException;
-import io.github.novacrypto.bip39.wordlists.English;
-
 public class RestoreWalletFragment extends Fragment implements MnemonicWordsViewAdapter.OnItemClickListener
 {
     private static final String WORDS_KEY = "words_key";
@@ -81,6 +74,8 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     {
         void onWordCardNumberClicked(int position);
         void mnemonicsVerified(String mnemonics);
+        boolean wordsFilled(String mnemonics);
+        void showSnackBar(String res, int color, int textColor);
     }
 
     public static RestoreWalletFragment newInstance(Bundle customTheme)
@@ -161,7 +156,25 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             {
                 mAdapter.updateWords(words, null);
             }
-            validateMnemonicsButton(CryptoUtils.validateMnemonics(words));
+
+            boolean isValid = CryptoUtils.validateMnemonics(mAdapter.getWords());
+            if (isValid)
+            {
+                String mnemonics = mnemonicsListToString(mAdapter.getWords());
+                boolean isRightWords = mCallback.wordsFilled(mnemonics);
+                if (isRightWords)
+                {
+                    validateMnemonicsButton(CryptoUtils.validateMnemonics(words));
+                }
+                else
+                {
+                    validateMnemonicsButton(false);
+                }
+            }
+            else
+            {
+                validateMnemonicsButton(false);
+            }
         }
         else
         {
@@ -272,8 +285,88 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
             mAdapter.updateWords(zebras, null);
         }
+        /*
+        else if (position == 0 && word.equalsIgnoreCase("link"))
+        {
 
-        validateMnemonicsButton(CryptoUtils.validateMnemonics(mAdapter.getWords()));
+            List<String> link = Arrays.asList(
+                    "link",
+                    "warm",
+                    "visual",
+                    "pony",
+                    "bike",
+                    "person",
+                    "truck",
+                    "pupil",
+                    "moral",
+                    "gift",
+                    "shoulder",
+                    "eye",
+                    "kit",
+                    "human",
+                    "jacket",
+                    "rich",
+                    "sand",
+                    "cupboard",
+                    "position",
+                    "friend",
+                    "fox",
+                    "calm",
+                    "bring",
+                    "kick" );
+
+            mAdapter.updateWords(link, null);
+        }
+
+        else if (position == 0 && word.equalsIgnoreCase("green"))
+        {
+            List<String> link = Arrays.asList(
+                    "green",
+                    "kind",
+                    "inquiry",
+                    "alarm",
+                    "razor",
+                    "zone",
+                    "benefit",
+                    "again",
+                    "ski",
+                    "erase",
+                    "another",
+                    "wide",
+                    "liberty",
+                    "multiply",
+                    "pen",
+                    "risk",
+                    "love",
+                    "corn",
+                    "monster",
+                    "honey",
+                    "level",
+                    "poem",
+                    "position",
+                    "spell" );
+
+            mAdapter.updateWords(link, null);
+        }
+        */
+
+        boolean isValid = CryptoUtils.validateMnemonics(mAdapter.getWords());
+        if (isValid)
+        {
+            //TODO verify if it does always work
+            String mnemonics = mnemonicsListToString(mAdapter.getWords());
+            boolean isRightWords = mCallback.wordsFilled(mnemonics);
+            if (!isRightWords)
+            {
+                mCallback.showSnackBar(getString(R.string.not_mnemonics_expected), ContextCompat.getColor(getActivity(), android.R.color.holo_red_light), ContextCompat.getColor(getActivity(), R.color.tz_light));
+            }
+
+            validateMnemonicsButton(isRightWords);
+        }
+        else
+        {
+            validateMnemonicsButton(false);
+        }
     }
 
     @Override

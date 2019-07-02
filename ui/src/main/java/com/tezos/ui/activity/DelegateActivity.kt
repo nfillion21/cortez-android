@@ -30,7 +30,6 @@ package com.tezcore.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -43,7 +42,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.Toolbar
 import android.view.ViewGroup
-import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
@@ -52,12 +50,13 @@ import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_delegate.*
 
-class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener
+class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener, ScriptFragment.OnUpdateScriptListener, SendCentsFragment.OnSendCentsInteractionListener
 {
+
     private val mTezosTheme: CustomTheme = CustomTheme(
-            com.tezos.ui.R.color.theme_tezos_primary,
-            com.tezos.ui.R.color.theme_tezos_primary_dark,
-            com.tezos.ui.R.color.theme_tezos_text)
+            R.color.theme_tezos_primary,
+            R.color.theme_tezos_primary_dark,
+            R.color.theme_tezos_text)
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
@@ -120,13 +119,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                         {
                             fabTransfer.show()
                             fabSharing.hide()
-                            fabAddAddress.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
                             fabSharing.hide()
-                            fabAddAddress.hide()
                         }
                     }
 
@@ -135,13 +132,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                         if (isPasswordSaved)
                         {
                             fabTransfer.hide()
-                            fabAddAddress.hide()
                             fabSharing.show()
                         }
                         else
                         {
                             fabTransfer.hide()
-                            fabAddAddress.hide()
                             fabSharing.hide()
                         }
                     }
@@ -149,7 +144,12 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     2 ->
                     {
                         fabTransfer.hide()
-                        fabAddAddress.hide()
+                        fabSharing.hide()
+                    }
+
+                    3 ->
+                    {
+                        fabTransfer.hide()
                         fabSharing.hide()
                     }
 
@@ -168,17 +168,17 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
 
         fabTransfer.setOnClickListener { view ->
 
-            val isPasswordSaved = Storage(this).isPasswordSaved()
-            if (isPasswordSaved)
+            val hasMnemonics = Storage(this).hasMnemonics()
+            if (hasMnemonics)
             {
                 val pkh = intent.getStringExtra(TAG_PKH)
                 TransferFormActivity.start(this, pkh, null, mTezosTheme)
             }
             else
             {
-                //TODO this snackbar should be invisible
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
+                //the fab is invisible
+                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        //.setAction("Action", null).show()
             }
         }
 
@@ -200,10 +200,6 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show()
             }
-        }
-
-        fabAddAddress.setOnClickListener {
-            AddAddressActivity.start(this, mTezosTheme)
         }
 
         initActionBar(mTezosTheme)
@@ -228,13 +224,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     {
                         fabTransfer.show()
                         fabSharing.hide()
-                        fabAddAddress.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
                         fabSharing.hide()
-                        fabAddAddress.hide()
                     }
                 }
 
@@ -243,13 +237,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     if (isPasswordSaved)
                     {
                         fabTransfer.hide()
-                        fabAddAddress.hide()
                         fabSharing.show()
                     }
                     else
                     {
                         fabTransfer.hide()
-                        fabAddAddress.hide()
                         fabSharing.hide()
                     }
                 }
@@ -257,7 +249,12 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                 2 ->
                 {
                     fabTransfer.hide()
-                    fabAddAddress.hide()
+                    fabSharing.hide()
+                }
+
+                3 ->
+                {
+                    fabTransfer.hide()
                     fabSharing.hide()
                 }
 
@@ -288,6 +285,21 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
                     val pkh = intent.getStringExtra(TAG_PKH)
                     return DelegateFragment.newInstance(mTezosTheme, pkh)
                 }
+
+                3 ->
+                {
+                    val isPasswordSaved = Storage(this@DelegateActivity).isPasswordSaved()
+
+                    return if (isPasswordSaved)
+                    {
+                        val pkh = intent.getStringExtra(TAG_PKH)
+                        ScriptFragment.newInstance(mTezosTheme, pkh)
+                    }
+                    else
+                    {
+                        ScriptFragment.newInstance(mTezosTheme, null)
+                    }
+                }
             }
 
             return HomeDelegateFragment.newInstance(mTezosTheme, null)
@@ -295,8 +307,8 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
 
         override fun getCount(): Int
         {
-            // Show 3 total pages.
-            return 3
+            // Show 4 total pages.
+            return 4
         }
     }
 
@@ -374,31 +386,10 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
         toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
 
         val position = intent.getIntExtra(POS_KEY, 0)
-        toolbar.title = "Delegated Address #$position"
+        toolbar.title = "Contract #$position"
 
         setSupportActionBar(toolbar)
     }
-
-    /*
-    Addresses
-     */
-
-    /*
-    override fun onCardClicked(address: Address?)
-    {
-        val isPasswordSaved = Storage(this).isPasswordSaved()
-        if (isPasswordSaved)
-        {
-            val seed = Storage(baseContext).getMnemonics()
-            val seedBundle = Storage.toBundle(seed)
-            TransferFormActivity.start(this, seedBundle, address, mTezosTheme)
-        }
-        else
-        {
-            showSnackBar(getString(R.string.create_restore_wallet_transfer_info), ContextCompat.getColor(this, R.color.tz_accent), Color.YELLOW)
-        }
-    }
-    */
 
     override fun isFingerprintAllowed():Boolean
     {
@@ -413,6 +404,11 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
     override fun saveFingerprintAllowed(useInFuture:Boolean)
     {
         storage.saveFingerprintAllowed(useInFuture)
+    }
+
+    override fun onTransferSucceed()
+    {
+        showSnackBar(getString(R.string.transfer_succeed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
     }
 
     override fun finish(res: Int)

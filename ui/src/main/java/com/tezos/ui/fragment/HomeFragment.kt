@@ -133,8 +133,8 @@ open class HomeFragment : Fragment()
     {
         var pkh:String? = null
 
-        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
-        if (isPasswordSaved)
+        val hasMnemonics = Storage(activity!!).hasMnemonics()
+        if (hasMnemonics)
         {
             pkh = arguments!!.getString(PKH_KEY)
             if (pkh == null)
@@ -156,7 +156,7 @@ open class HomeFragment : Fragment()
         }
         else
         {
-            throw RuntimeException(context.toString() + " must implement HomeListener")
+            throw RuntimeException("$context must implement HomeListener")
         }
     }
 
@@ -182,9 +182,9 @@ open class HomeFragment : Fragment()
                 //Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
 
                 val mTezosTheme = CustomTheme(
-                        com.tezos.ui.R.color.theme_tezos_primary,
-                        com.tezos.ui.R.color.theme_tezos_primary_dark,
-                        com.tezos.ui.R.color.theme_tezos_text)
+                        R.color.theme_tezos_primary,
+                        R.color.theme_tezos_primary_dark,
+                        R.color.theme_tezos_text)
 
                 val bundles = itemsToBundles(mRecyclerViewItems)
                 OperationsActivity.start(activity!!, bundles!!, mTezosTheme)
@@ -456,7 +456,7 @@ open class HomeFragment : Fragment()
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
 
-                        if (activity != null)
+                        if (R.id.content != null)
                         {
                             val balance = response.replace("[^0-9]".toRegex(), "")
                             mBalanceItem = balance?.toDouble()/1000000
@@ -470,7 +470,7 @@ open class HomeFragment : Fragment()
                         }
                     },
                     Response.ErrorListener {
-                        if (activity != null)
+                        if (R.id.content != null)
                         {
                             onBalanceLoadComplete(false)
                             onOperationsLoadHistoryComplete()
@@ -642,7 +642,7 @@ open class HomeFragment : Fragment()
         if (bundles != null)
         {
             var items = ArrayList<Operation>(bundles.size)
-            if (!bundles.isEmpty())
+            if (bundles.isNotEmpty())
             {
                 bundles.forEach {
                     val op = Operation.fromBundle(it)

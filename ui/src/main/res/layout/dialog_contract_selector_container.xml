@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/rootView"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/default_contract_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/PaymentScreens.SourceButton"
+                    android:text="@string/select_default_contract"
+                    android:padding="@dimen/spacing_double"
+                    android:layout_marginTop="@dimen/spacing_double"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    android:layout_marginRight="@dimen/spacing_double" />
+
+                <Button
+                    android:id="@+id/daily_spending_limit_contract_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/PaymentScreens.SourceButton"
+                    android:padding="@dimen/spacing_double"
+                    android:text="@string/select_daily_spending_limit_contract"
+                    android:layout_margin="@dimen/spacing_double" />
+
+            </LinearLayout>
+
+        </ScrollView>
+    </LinearLayout>
+
+</LinearLayout>

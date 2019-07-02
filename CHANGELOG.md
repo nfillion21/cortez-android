@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.4.0
+-----
+* Add the first version of the Daily Spending Limit contract.
+
 1.3.4
 -----
 * Resolves forging errors by switching to a new node.

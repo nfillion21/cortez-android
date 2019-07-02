@@ -107,7 +107,7 @@ tools:ignore="UselessParent,UnusedAttribute">
                         android:text="@string/delegate_title"/>
 
                     <TextView
-                        android:id="@+id/redelegate_info_textview"
+                        android:id="@+id/limits_info_textview"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
@@ -136,7 +136,7 @@ tools:ignore="UselessParent,UnusedAttribute">
         android:layout_height="?android:attr/actionBarSize">
 
         <FrameLayout
-            android:id="@+id/add_delegate_button_layout"
+            android:id="@+id/update_storage_button_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             style="@style/PaymentScreens.Button"
@@ -146,10 +146,10 @@ tools:ignore="UselessParent,UnusedAttribute">
             >
 
             <Button
-                android:id="@+id/add_delegate_button"
+                android:id="@+id/update_storage_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/add_an_address"
+                android:text="@string/delegate"
 
                 android:drawableLeft="@drawable/ic_lock_black"
                 android:drawableStart="@drawable/ic_lock_black"

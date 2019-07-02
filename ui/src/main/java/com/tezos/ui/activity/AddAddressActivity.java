@@ -219,6 +219,7 @@ public class AddAddressActivity extends BaseSecureActivity
                     mOwner.setText(name);
                     mTzAddress.requestFocus();
                 }
+                c.close();
             }
         }
     }

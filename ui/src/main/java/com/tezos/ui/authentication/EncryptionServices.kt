@@ -28,34 +28,34 @@
 package com.tezos.ui.authentication
 
 import android.annotation.TargetApi
-import android.content.Context
 import android.hardware.fingerprint.FingerprintManager
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.UserNotAuthenticatedException
-import android.support.v4.hardware.fingerprint.FingerprintManagerCompat
 import com.tezos.ui.encryption.CipherWrapper
 import com.tezos.ui.encryption.KeyStoreWrapper
 import java.security.InvalidKeyException
+import java.security.Signature
 import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 
-class EncryptionServices(context: Context) {
+class EncryptionServices {
 
     /**
      * The place to keep all constants.
      */
-    companion object {
-        const val DEFAULT_KEY_STORE_NAME = "default_keystore"
-
+    companion object
+    {
         const val MASTER_KEY = "MASTER_KEY"
         const val FINGERPRINT_KEY = "FINGERPRINT_KEY"
         const val CONFIRM_CREDENTIALS_KEY = "CONFIRM_CREDENTIALS_KEY"
+
+        const val SPENDING_KEY = "SPENDING_KEY"
 
         val KEY_VALIDATION_DATA = byteArrayOf(0, 1, 0, 1)
         const val CONFIRM_CREDENTIALS_VALIDATION_DELAY = 5 // Seconds
     }
 
-    private val keyStoreWrapper = KeyStoreWrapper(context, DEFAULT_KEY_STORE_NAME)
+    private val keyStoreWrapper = KeyStoreWrapper()
 
     /*
      * Encryption Stage
@@ -64,12 +64,8 @@ class EncryptionServices(context: Context) {
     /**
      * Create and save cryptography key, to protect Secrets with.
      */
-    fun createMasterKey(password: String? = null) {
-        if (SystemServices.hasMarshmallow()) {
-            createAndroidSymmetricKey()
-        } else {
-            createDefaultSymmetricKey(password ?: "")
-        }
+    fun createMasterKey() {
+        createAndroidSymmetricKey()
     }
 
     /**
@@ -82,23 +78,15 @@ class EncryptionServices(context: Context) {
     /**
      * Encrypt user password and Secrets with created master key.
      */
-    fun encrypt(data: String, keyPassword: String? = null): String {
-        return if (SystemServices.hasMarshmallow()) {
-            encryptWithAndroidSymmetricKey(data)
-        } else {
-            encryptWithDefaultSymmetricKey(data, keyPassword ?: "")
-        }
+    fun encrypt(data: String): String {
+        return encryptWithAndroidSymmetricKey(data)
     }
 
     /**
      * Decrypt user password and Secrets with created master key.
      */
-    fun decrypt(data: String, keyPassword: String? = null): String {
-        return if (SystemServices.hasMarshmallow()) {
-            decryptWithAndroidSymmetricKey(data)
-        } else {
-            decryptWithDefaultSymmetricKey(data, keyPassword ?: "")
-        }
+    fun decrypt(data: String): String {
+        return decryptWithAndroidSymmetricKey(data)
     }
 
     private fun createAndroidSymmetricKey() {
@@ -115,20 +103,49 @@ class EncryptionServices(context: Context) {
         return CipherWrapper(CipherWrapper.TRANSFORMATION_SYMMETRIC).decrypt(data, masterKey, true)
     }
 
-    private fun createDefaultSymmetricKey(password: String) {
-        keyStoreWrapper.createDefaultKeyStoreSymmetricKey(MASTER_KEY, password)
+    /**
+     * Create and save cryptography key, to protect Secrets with.
+     */
+    fun createSpendingKey()
+    {
+        createAndroidAsymmetricKey()
     }
 
-    private fun encryptWithDefaultSymmetricKey(data: String, keyPassword: String): String {
-        val masterKey = keyStoreWrapper.getDefaultKeyStoreSymmetricKey(MASTER_KEY, keyPassword)
-        return CipherWrapper(CipherWrapper.TRANSFORMATION_SYMMETRIC).encrypt(data, masterKey, true)
+    fun isSpendingKeyCreated():Boolean
+    {
+        return keyStoreWrapper.containsAlias(SPENDING_KEY)
     }
 
-    private fun decryptWithDefaultSymmetricKey(data: String, keyPassword: String): String {
-        val masterKey = keyStoreWrapper.getDefaultKeyStoreSymmetricKey(MASTER_KEY, keyPassword)
-        return masterKey?.let { CipherWrapper(CipherWrapper.TRANSFORMATION_SYMMETRIC).decrypt(data, masterKey, true) } ?: ""
+    /**
+     * Remove master cryptography key. May be used for re sign up functionality.
+     */
+    fun removeSpendingKey()
+    {
+        keyStoreWrapper.removeAndroidKeyStoreKey(SPENDING_KEY)
     }
 
+    private fun createAndroidAsymmetricKey()
+    {
+        keyStoreWrapper.createAndroidKeyStoreAsymmetricKey(SPENDING_KEY)
+    }
+
+    fun sign(data: ByteArray): ByteArray {
+        return signWithAndroidAsymmetricKey(data)
+    }
+
+    private fun signWithAndroidAsymmetricKey(data: ByteArray): ByteArray
+    {
+        val keyPair = keyStoreWrapper.getAndroidKeyStoreAsymmetricKeyPair(SPENDING_KEY)
+        if (keyPair != null)
+        {
+            return Signature.getInstance("NONEwithECDSA").run {
+                initSign(keyPair.private)
+                update(data)
+                sign()
+            }
+        }
+        return ByteArray(0)
+    }
 
     /*
      * Fingerprint Stage
@@ -137,66 +154,77 @@ class EncryptionServices(context: Context) {
     /**
      * Create and save cryptography key, that will be used for fingerprint authentication.
      */
-    fun createFingerprintKey() {
-        if (SystemServices.hasMarshmallow()) {
-            keyStoreWrapper.createAndroidKeyStoreSymmetricKey(FINGERPRINT_KEY,
-                    userAuthenticationRequired = true,
-                    invalidatedByBiometricEnrollment = true,
-                    userAuthenticationValidWhileOnBody = false)
-        }
+    fun createFingerprintKey()
+    {
+        keyStoreWrapper.createAndroidKeyStoreSymmetricKey(FINGERPRINT_KEY,
+                userAuthenticationRequired = true,
+                invalidatedByBiometricEnrollment = true,
+                userAuthenticationValidWhileOnBody = false)
     }
 
     /**
      * Remove fingerprint authentication cryptographic key.
      */
-    fun removeFingerprintKey() {
-        if (SystemServices.hasMarshmallow()) {
-            keyStoreWrapper.removeAndroidKeyStoreKey(FINGERPRINT_KEY)
-        }
+    fun removeFingerprintKey()
+    {
+        keyStoreWrapper.removeAndroidKeyStoreKey(FINGERPRINT_KEY)
     }
 
     /**
      * @return initialized crypto object or null if fingerprint key was invalidated or not created yet.
      */
-    fun prepareFingerprintCryptoObject(): FingerprintManager.CryptoObject? {
-        return if (SystemServices.hasMarshmallow()) {
-            try {
+    fun prepareFingerprintCryptoObject(): FingerprintManager.CryptoObject?
+    {
+        return if (SystemServices.hasMarshmallow())
+        {
+            try
+            {
                 val symmetricKey = keyStoreWrapper.getAndroidKeyStoreSymmetricKey(FINGERPRINT_KEY)
                 val cipher = CipherWrapper(CipherWrapper.TRANSFORMATION_SYMMETRIC).cipher
                 cipher.init(Cipher.ENCRYPT_MODE, symmetricKey)
                 FingerprintManager.CryptoObject(cipher)
-            } catch (e: Throwable) {
+            }
+            catch (e: Throwable)
+            {
                 // VerifyError will be thrown on API lower then 23 if we will use unedited
                 // class reference directly in catch block
-                if (e is KeyPermanentlyInvalidatedException || e is IllegalBlockSizeException) {
+                if (e is KeyPermanentlyInvalidatedException || e is IllegalBlockSizeException)
+                {
                     return null
-                } else if (e is InvalidKeyException) {
+                }
+                else if (e is InvalidKeyException)
+                {
                     // Fingerprint key was not generated
                     return null
                 }
                 throw e
             }
-        } else null
+        }
+        else null
     }
 
     /**
      * @return true if cryptoObject was initialized successfully and key was not invalidated during authentication.
      */
     @TargetApi(23)
-    fun validateFingerprintAuthentication(cryptoObject: FingerprintManager.CryptoObject): Boolean {
-        try {
+    fun validateFingerprintAuthentication(cryptoObject: FingerprintManager.CryptoObject): Boolean
+    {
+        try
+        {
             cryptoObject.cipher.doFinal(KEY_VALIDATION_DATA)
             return true
-        } catch (e: Throwable) {
+        }
+        catch (e: Throwable)
+        {
             // VerifyError is will be thrown on API lower then 23 if we will use unedited
             // class reference directly in catch block
-            if (e is KeyPermanentlyInvalidatedException || e is IllegalBlockSizeException) {
+            if (e is KeyPermanentlyInvalidatedException || e is IllegalBlockSizeException)
+            {
                 return false
             }
             throw e
         }
     }
-
 
     /*
      * Confirm Credential Stage
@@ -205,43 +233,46 @@ class EncryptionServices(context: Context) {
     /**
      * Create and save cryptography key, that will be used for confirm credentials authentication.
      */
-    fun createConfirmCredentialsKey() {
-        if (SystemServices.hasMarshmallow()) {
-            keyStoreWrapper.createAndroidKeyStoreSymmetricKey(
-                    CONFIRM_CREDENTIALS_KEY,
-                    userAuthenticationRequired = true,
-                    userAuthenticationValidityDurationSeconds = CONFIRM_CREDENTIALS_VALIDATION_DELAY)
-        }
+    fun createConfirmCredentialsKey()
+    {
+        keyStoreWrapper.createAndroidKeyStoreSymmetricKey(
+                CONFIRM_CREDENTIALS_KEY,
+                userAuthenticationRequired = true,
+                userAuthenticationValidityDurationSeconds = CONFIRM_CREDENTIALS_VALIDATION_DELAY)
     }
 
     /**
      * Remove confirm credentials authentication cryptographic key.
      */
-    fun removeConfirmCredentialsKey() {
+    fun removeConfirmCredentialsKey()
+    {
         keyStoreWrapper.removeAndroidKeyStoreKey(CONFIRM_CREDENTIALS_KEY)
     }
 
-    fun containsConfirmCredentialsKey(): Boolean {
+    fun containsConfirmCredentialsKey(): Boolean
+    {
         return keyStoreWrapper.containsAlias(CONFIRM_CREDENTIALS_KEY)
     }
 
     /**
      * @return true if confirm credential authentication is not required.
      */
-    fun validateConfirmCredentialsAuthentication(): Boolean {
-        if (!SystemServices.hasMarshmallow()) {
-            return true
-        }
-
+    fun validateConfirmCredentialsAuthentication(): Boolean
+    {
         val symmetricKey = keyStoreWrapper.getAndroidKeyStoreSymmetricKey(CONFIRM_CREDENTIALS_KEY)
         val cipherWrapper = CipherWrapper(CipherWrapper.TRANSFORMATION_SYMMETRIC)
 
-        try {
-            return if (symmetricKey != null) {
+        try
+        {
+            return if (symmetricKey != null)
+            {
                 cipherWrapper.encrypt(KEY_VALIDATION_DATA.toString(), symmetricKey)
                 true
-            } else false
-        } catch (e: Throwable) {
+            }
+            else false
+        }
+        catch (e: Throwable)
+        {
             // VerifyError is will be thrown on API lower then 23 if we will use unedited
             // class reference directly in catch block
             if (e is UserNotAuthenticatedException || e is KeyPermanentlyInvalidatedException) {
@@ -254,5 +285,4 @@ class EncryptionServices(context: Context) {
             throw e
         }
     }
-
 }
