@@ -11,6 +11,7 @@
     <item name="create_wallet_failed" type="id" />
     <item name="restore_wallet_failed" type="id" />
     <item name="add_address_succeed" type="id" />
+    <item name="add_dsl_succeed" type="id" />
     <item name="remove_delegate_succeed" type="id" />
     <item name="add_delegate_succeed" type="id" />
     <item name="add_address_failed" type="id" />

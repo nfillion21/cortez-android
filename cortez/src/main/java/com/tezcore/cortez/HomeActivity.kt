@@ -506,6 +506,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
             }
 
+            AddLimitsActivity.ADD_DSL_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.add_dsl_succeed)
+                {
+                    showSnackBar(getString(R.string.dsl_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
+            }
+
             else ->
             {
             }

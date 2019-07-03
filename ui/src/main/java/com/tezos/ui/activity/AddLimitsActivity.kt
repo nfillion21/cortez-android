@@ -92,7 +92,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
     companion object
     {
-        var ADD_DELEGATE_REQUEST_CODE = 0x3100 // arbitrary int
+        var ADD_DSL_REQUEST_CODE = 0x3500 // arbitrary int
 
         private const val DELEGATE_INIT_TAG = "delegate_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
@@ -117,7 +117,7 @@ class AddLimitsActivity : BaseSecureActivity()
         fun start(activity: Activity, theme: CustomTheme)
         {
             val starter = getStartIntent(activity, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, ADD_DELEGATE_REQUEST_CODE, null)
+            ActivityCompat.startActivityForResult(activity, starter, ADD_DSL_REQUEST_CODE, null)
         }
     }
 
@@ -330,7 +330,7 @@ class AddLimitsActivity : BaseSecureActivity()
                             //there's no need to do anything because we call finish()
                             //onFinalizeDelegationLoadComplete(null)
 
-                            setResult(R.id.add_address_succeed, null)
+                            setResult(R.id.add_dsl_succeed, null)
                             finish()
 
                             //TODO create the spending key

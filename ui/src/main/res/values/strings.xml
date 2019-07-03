@@ -127,6 +127,7 @@
     <string name="alert_exit_acccount_body">Please make sure you still have your 24 words list on a piece of paper or your data will be lost forever.</string>
     <string name="alert_remove_master_key_body">Your Master Key will be removed. Please make sure you still have your 24 words list on a piece of paper or your data will be lost forever.</string>
     <string name="address_successfully_added">Address successfully added!</string>
+    <string name="dsl_successfully_added">Daily Spending Limit successfully created!</string>
     <string name="address_successfully_delegated">KT1 address successfully added and delegated!</string>
     <string name="address_successfully_scanned">Address successfully scanned!</string>
     <string name="address_scan_failed">Please check the validity of the tezos address</string>
