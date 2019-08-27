@@ -475,7 +475,7 @@ class AddLimitsActivity : BaseSecureActivity()
         //TODO be careful, do it in mutez.
         dstObject.put("credit", (mDelegateAmount*1000000L).toLong().toString())
 
-        dstObject.put("delegatable", true)
+        //dstObject.put("delegatable", true)
 
         dstObjects.put(dstObject)
 

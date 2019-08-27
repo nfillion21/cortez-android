@@ -7,14 +7,17 @@ apply plugin: 'kotlin-android-extensions'
 def publicKeyPropertiesFile = rootProject.file("cortez/public_deployment/cortez_key.properties")
 def zeronetPropertiesFile = rootProject.file("cortez/deployment/zeronet.properties")
 def mainnetPropertiesFile = rootProject.file("cortez/deployment/mainnet.properties")
+def alphanetPropertiesFile = rootProject.file("cortez/deployment/alphanet.properties")
 
 def publicKeystoreMainnetProperties = new Properties()
 def keystoreMainnetProperties = new Properties()
 def keystoreZeronetProperties = new Properties()
+def keystoreAlphanetProperties = new Properties()
 
 publicKeystoreMainnetProperties.load(new FileInputStream(publicKeyPropertiesFile))
 keystoreMainnetProperties.load(new FileInputStream(mainnetPropertiesFile))
 keystoreZeronetProperties.load(new FileInputStream(zeronetPropertiesFile))
+keystoreAlphanetProperties.load(new FileInputStream(alphanetPropertiesFile))
 
 android {
     signingConfigs {
@@ -35,6 +38,12 @@ android {
             keyPassword keystoreZeronetProperties['keyPassword']
             storeFile file(keystoreZeronetProperties['storeFile'])
             storePassword keystoreZeronetProperties['storePassword']
+        }
+        alphanetConfig {
+            keyAlias keystoreAlphanetProperties['keyAlias']
+            keyPassword keystoreAlphanetProperties['keyPassword']
+            storeFile file(keystoreAlphanetProperties['storeFile'])
+            storePassword keystoreAlphanetProperties['storePassword']
         }
     }
     compileSdkVersion 28
@@ -68,6 +77,12 @@ android {
             versionNameSuffix "-zeronet"
             dimension "version"
             signingConfig signingConfigs.zeronetConfig
+        }
+        alphanet {
+            applicationIdSuffix ".alphanet"
+            versionNameSuffix "-alphanet"
+            dimension "version"
+            signingConfig signingConfigs.alphanetConfig
         }
         mainnet {
             dimension "version"
