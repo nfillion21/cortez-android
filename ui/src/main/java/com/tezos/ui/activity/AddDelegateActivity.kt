@@ -425,10 +425,8 @@ class AddDelegateActivity : BaseSecureActivity()
         postParams.put("src", pkhSrc)
         postParams.put("src_pk", pk)
 
-        var dstObjects = JSONArray()
-
         var dstObject = JSONObject()
-        dstObject.put("manager", pkhSrc)
+        //dstObject.put("manager", pkhSrc)
 
 
         dstObject.put("delegate", mDelegateTezosAddress)
@@ -436,7 +434,14 @@ class AddDelegateActivity : BaseSecureActivity()
         //TODO be careful, do it in mutez.
         dstObject.put("credit", (mDelegateAmount*1000000).toLong().toString())
 
-        dstObject.put("delegatable", true)
+        //dstObject.put("delegatable", true)
+
+        var dstObjects = JSONArray()
+
+        val originationContract = String.format(getString(R.string.origination_contract), pkhSrc)
+
+        val json = JSONObject(originationContract)
+        dstObject.put("script", json)
 
         dstObjects.put(dstObject)
 

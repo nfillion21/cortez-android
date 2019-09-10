@@ -507,7 +507,7 @@ open class HomeFragment : Fragment()
     // volley
     private fun startGetRequestLoadOperations()
     {
-        cancelRequest(true, true)
+        cancelRequest(operations = true, balance = true)
 
         mGetHistoryLoading = true
 

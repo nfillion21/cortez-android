@@ -89,7 +89,6 @@ class DelegateFragment : Fragment()
     data class Contract
     (
             val blk: String,
-            val mgr: String,
             val spendable: Boolean,
             val delegatable: Boolean,
             val delegate: String?,
@@ -103,7 +102,6 @@ class DelegateFragment : Fragment()
             val contractBundle = Bundle()
 
             contractBundle.putString("blk", contract.blk)
-            contractBundle.putString("mgr", contract.mgr)
             contractBundle.putBoolean("spendable", contract.spendable)
             contractBundle.putBoolean("delegatable", contract.delegatable)
             contractBundle.putString("delegate", contract.delegate)
@@ -118,13 +116,12 @@ class DelegateFragment : Fragment()
         internal fun mappedObjectFromBundle(): Contract
         {
             val blk = this.bundle.getString("blk", null)
-            val mgr = this.bundle.getString("mgr", null)
             val spendable = this.bundle.getBoolean("spendable", false)
             val delegatable = this.bundle.getBoolean("delegatable", false)
             val delegate = this.bundle.getString("delegate", null)
             val script = this.bundle.getString("script", null)
 
-            return Contract(blk, mgr, spendable, delegatable, delegate, script)
+            return Contract(blk, spendable, delegatable, delegate)
         }
     }
 
@@ -499,14 +496,11 @@ class DelegateFragment : Fragment()
             val contractJSON = DataExtractor.getJSONObjectFromField(answer,0)
 
             val blk = DataExtractor.getStringFromField(contractJSON, "blk")
-            val mgr = DataExtractor.getStringFromField(contractJSON, "mgr")
             val spendable = DataExtractor.getBooleanFromField(contractJSON, "spendable")
             val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
             val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
 
-            val resScript = JSONObject(getString(R.string.default_contract))
-
-            mContract = Contract(blk as String, mgr as String, spendable as Boolean, delegatable as Boolean, delegate, resScript.toString())
+            mContract = Contract(blk as String, spendable as Boolean, delegatable as Boolean, delegate)
         }
     }
 
@@ -638,7 +632,7 @@ class DelegateFragment : Fragment()
 
             postParams.put("dsts", dstObjects)
 
-            if (isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (/*isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -740,7 +734,7 @@ class DelegateFragment : Fragment()
             postParams.put("delegate", mDelegateTezosAddress)
             postParams.put("fee", mDelegateFees)
 
-            if (isChangeDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (/*isChangeDelegatePayloadValid(mDelegatePayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -920,22 +914,31 @@ class DelegateFragment : Fragment()
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
 
-        val url = getString(R.string.change_delegate_url)
+        val url = getString(R.string.transfer_forge)
 
         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
-        //val pkhSrc = mnemonicsData.pkh
-        //val pkhDst = mDstAccount?.pubKeyHash
-
         var postParams = JSONObject()
-        postParams.put("src", pkh())
+        postParams.put("src", mnemonicsData.pkh)
         postParams.put("src_pk", pk)
 
         var dstObjects = JSONArray()
 
-        dstObjects.put(mDelegateTezosAddress)
-        //dstObjects.put("tz1boot1pK9h2BVGXdyvfQSv8kd1LQM6H889")
+        var dstObject = JSONObject()
+        //dstObject.put("dst", mDstAccount)
+
+        dstObject.put("dst", pkh())
+
+        //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+        dstObject.put("amount", (0).toLong().toString())
+
+        dstObject.put("entrypoint", "do")
+
+        val json = JSONArray(String.format(getString(R.string.set_delegate_contract), mDelegateTezosAddress))
+        dstObject.put("parameters", json)
+
+        dstObjects.put(dstObject)
 
         postParams.put("dsts", dstObjects)
 
@@ -1013,16 +1016,32 @@ class DelegateFragment : Fragment()
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
 
-        val url = getString(R.string.change_delegate_url)
+        val url = getString(R.string.transfer_forge)
 
         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = CryptoUtils.generatePk(mnemonics, "")
 
         var postParams = JSONObject()
-        postParams.put("src", pkh())
+        postParams.put("src", mnemonicsData.pkh)
         postParams.put("src_pk", pk)
 
         var dstObjects = JSONArray()
+
+        var dstObject = JSONObject()
+        //dstObject.put("dst", mDstAccount)
+
+        dstObject.put("dst", pkh())
+
+        //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+        dstObject.put("amount", (0).toLong().toString())
+
+        dstObject.put("entrypoint", "do")
+
+        val json = JSONArray(getString(R.string.remove_delegate_contract))
+        dstObject.put("parameters", json)
+
+        dstObjects.put(dstObject)
+
         postParams.put("dsts", dstObjects)
 
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>

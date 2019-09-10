@@ -6,6 +6,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigInteger
 import java.security.interfaces.ECPublicKey
+import java.nio.ByteBuffer
+import java.util.*
+import kotlin.collections.ArrayList
 
 /*
 (*****************************************************************************)
@@ -241,12 +244,12 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
 
     //Reveal Tag 7
     val firstTag = payload[i++]
-    if (firstTag.compareTo(7) == 0)
+    if (firstTag.compareTo(107) == 0)
     {
         val contract = payload.slice(i until payload.size).toByteArray()
 
-        i = 22
-        val contractParse = contract.slice((if (src.startsWith("KT1", true)) 1 else 2) until i).toByteArray()
+        i = 21
+        val contractParse = contract.slice(1 until i).toByteArray()
 
         val hash = if (src.startsWith("KT1", true))
         {
@@ -306,7 +309,9 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
         } while (bytePos >= 128)
 
         // we don't read the first byte (0)
-        val publicKey = storageLimit.slice(i+1 until storageLimit.size).toByteArray()
+        var publicKey = storageLimit.slice(i until storageLimit.size).toByteArray()
+        publicKey = publicKey.dropWhile { it == "0".toByte() }.toByteArray()
+
         val publicKeyParse = publicKey.slice(0 .. 31).toByteArray()
 
         val binaryToPk = CryptoUtils.genericHashToPk(publicKeyParse)
@@ -333,10 +338,11 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
     var i = 0
 
     val firstTag = payload[i++]
-    if (firstTag.compareTo(8) == 0)
+    if (firstTag.compareTo(108) == 0)
     {
 
-        val src = payload.slice((i+(if (srcParam.startsWith("KT1", true)) 1 else 2))..(i+(if (srcParam.startsWith("KT1", true)) 1 else 2)+19)).toByteArray()
+        var src = payload.slice((i)..(21)).toByteArray()
+        src = src.dropWhile { it == "0".toByte() }.toByteArray()
 
         val isSrcValid = srcParam == if (srcParam.startsWith("KT1", true)) CryptoUtils.genericHashToKT(src) else CryptoUtils.genericHashToPkh(src)
 
@@ -345,8 +351,10 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             return -1L
         }
 
+        i = 22
+
         val size = payload.size
-        val fee = payload.slice((i+2+19+1) until size).toByteArray()
+        val fee = payload.slice((i) until size).toByteArray()
 
         val feeList = ArrayList<Int>()
         i = 0
@@ -407,8 +415,8 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             return -1L
         }
 
-        val dst = amount.slice(i+(if (dstParam.startsWith("KT1", true)) 1 else 2) until amount.size).toByteArray()
-        //TODO handle the first two bytes
+        var dst = amount.slice(i+1 until amount.size).toByteArray()
+        dst = dst.dropWhile { it == "0".toByte() }.toByteArray()
 
         val beginsWith = dstParam.slice(0 until 3)
 
@@ -440,11 +448,11 @@ private fun isDelegationTagCorrect(payload: ByteArray, src:String):Long
     var i = 0
 
     val firstTag = payload[i++]
-    if (firstTag.compareTo(10) == 0)
+    if (firstTag.compareTo(110) == 0)
     {
         val contract = payload.slice(i until payload.size).toByteArray()
 
-        i = 22
+        i = 21
         val contractParse = contract.slice(1 until i).toByteArray()
 
         val isContractValid = src == CryptoUtils.genericHashToKT(contractParse)
@@ -515,19 +523,21 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
 
     val isOriginationTag = data[i++]
 
-    if (isOriginationTag.compareTo(9) == 0)
+    if (isOriginationTag.compareTo(109) == 0)
     {
-        val src = data.slice((i+2)..(i+2+19)).toByteArray()
+        var contract= data.slice(i until i+21).toByteArray()
+        contract = contract.dropWhile { it == "0".toByte() }.toByteArray()
 
-        val isSrcValid = srcParam == CryptoUtils.genericHashToPkh(src)
-
-        if (!isSrcValid)
+        val isContractValid = srcParam == CryptoUtils.genericHashToPkh(contract)
+        if (!isContractValid)
         {
             return -1L
         }
 
+        i+=21
+
         val size = data.size
-        val fee = data.slice((i+2+19+1) until size).toByteArray()
+        val fee = data.slice((i) until size).toByteArray()
 
         val feeList = ArrayList<Int>()
         i = 0
@@ -572,19 +582,7 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
 
         } while (bytePos >= 128)
 
-        //TODO on recupere les 21 prochains bytes
-
-        val mngrPubKey = storageLimit.slice(i+1 .. i+1+20).toByteArray()
-        //TODO handle the first byte associated to tz1 (ed255-19)
-
-        val isMngrPubKeyValid = srcParam == CryptoUtils.genericHashToPkh(mngrPubKey)
-
-        if (!isMngrPubKeyValid)
-        {
-            return -1L
-        }
-
-        val balance = storageLimit.slice(i+1+20 until storageLimit.size).toByteArray()
+        val balance = storageLimit.slice(i until storageLimit.size).toByteArray()
 
         val balanceList = ArrayList<Int>()
         i = 0
@@ -603,23 +601,7 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
             return -1L
         }
 
-        val spendable = balance.slice(i until balance.size).toByteArray()
-        i = 0
-        val isSpendable = Utils.byteToUnsignedInt(spendable[i++]).compareTo(255) == 0
-        if (!isSpendable)
-        {
-            return -1L
-        }
-
-        val delegatable = spendable.slice(i until spendable.size).toByteArray()
-        i = 0
-        val isDelegatable = Utils.byteToUnsignedInt(delegatable[i++]).compareTo(255) == 0
-        if (!isDelegatable)
-        {
-            return -1L
-        }
-
-        val delegatableField = delegatable.slice(i until delegatable.size).toByteArray()
+        val delegatableField = balance.slice(i until balance.size).toByteArray()
         i = 0
         val isDelegatableFieldValid = Utils.byteToUnsignedInt(delegatableField[i++]).compareTo(255) == 0
         if (!isDelegatableFieldValid)
@@ -628,7 +610,8 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
         }
 
         val delegate = delegatableField.slice(i until delegatableField.size).toByteArray()
-        val delegateParse = delegate.slice(1 .. 20).toByteArray()
+        var delegateParse = delegate.slice(0 until 21).toByteArray()
+        delegateParse = delegateParse.dropWhile { it == "0".toByte() }.toByteArray()
 
         val beginsWith = delegateParam.slice(0 until 3)
 
@@ -649,16 +632,66 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
 
         val script = delegate.slice(21 until delegate.size).toByteArray()
 
-        val isScriptNull = (script[0]).compareTo(0) == 0
-        if (!isScriptNull)
+        //TODO verify the script
+        val scriptSize = script.slice(0 until 4).toByteArray()
+        val scriptSizeInt = ByteBuffer.wrap(scriptSize,0,4).int
+
+        val scriptCodeField = script.slice(4 until script.size).toByteArray()
+
+        val scriptCode = scriptCodeField.slice(0 until scriptSizeInt).toByteArray()
+
+        val binary = byteArrayOfInts(2, 0, 0, 0, 193, 5, 0, 7, 100, 8, 94, 3, 108, 5, 95, 3, 109, 0, 0, 0, 3, 37, 100, 111, 4, 108, 0, 0, 0, 8, 37, 100, 101,
+                102, 97, 117, 108, 116, 5, 1, 3, 93, 5, 2, 2, 0, 0, 0, 149, 2, 0, 0, 0, 18, 2, 0, 0, 0, 13, 3, 33, 3, 22, 5, 31, 2,
+                0, 0, 0, 2, 3, 23, 7, 46, 2, 0, 0, 0, 106, 7, 67, 3, 106, 0, 0, 3, 19, 2, 0, 0, 0, 30, 2, 0, 0, 0, 4, 3, 25,
+                3, 37, 7, 44, 2, 0, 0, 0, 0, 2, 0, 0, 0, 9, 2, 0, 0, 0, 4, 3, 79, 3, 39, 2, 0, 0, 0, 11, 5, 31, 2, 0, 0,
+                0, 2, 3, 33, 3, 76, 3, 30, 3, 84, 3, 72, 2, 0, 0, 0, 30, 2, 0, 0, 0, 4, 3, 25, 3, 37, 7, 44, 2, 0, 0, 0, 0,
+                2, 0, 0, 0, 9, 2, 0, 0, 0, 4, 3, 79, 3, 39, 3, 79, 3, 38, 3, 66, 2, 0, 0, 0, 8, 3, 32, 5, 61, 3, 109, 3, 66)
+
+        if (!scriptCode.contentEquals(binary))
         {
             return -1L
         }
+
+        val storageField = scriptCodeField.slice(scriptSizeInt until scriptCodeField.size).toByteArray()
+
+        val storageSize = storageField.slice(0 until 4).toByteArray()
+        val storageSizeInt = ByteBuffer.wrap(storageSize, 0, 4).int
+
+        val storageBinary = storageField.slice(4 until storageField.size).toByteArray()
+
+        if (storageBinary.size != storageSizeInt)
+        {
+            return -1L
+        }
+
+        if (storageBinary[0].toInt() != 1)
+        {
+            return -1L
+        }
+
+        val hashSize = storageBinary.slice(1 until 5).toByteArray()
+        val hashSizeInt = ByteBuffer.wrap(hashSize, 0, 4).int
+
+        var hashField = storageBinary.slice(5 until storageBinary.size).toByteArray()
+
+        if (hashField.size != hashSizeInt)
+        {
+            return -1L
+        }
+
+        if (String(hashField) != srcParam)
+        {
+            return -1L
+        }
+
         return  retFee
     }
 
     return -1L
 }
+
+fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
+
 
 fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 {

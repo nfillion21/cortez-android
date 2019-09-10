@@ -255,7 +255,8 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
         //konami code
 
-        if (position == 23 && word.equalsIgnoreCase("zebra")){
+        if (position == 23 && word.equalsIgnoreCase("zebra"))
+        {
 
             List<String> zebras = Arrays.asList(
                     "zebra",

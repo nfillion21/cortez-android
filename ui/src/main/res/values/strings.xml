@@ -895,4 +895,115 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-</resources>
+    <string name="origination_contract" translatable="false">
+        <![CDATA[
+
+{"code":[{"prim":"parameter","args":[{"prim":"or","args":[{"prim":"lambda","args":[{"prim":"unit"},
+	{"prim":"list","args":[{"prim":"operation"}]}],"annots":["%%do"]},{"prim":"unit","annots":["%%default"]}]}]},
+	{"prim":"storage","args":[{"prim":"key_hash"}]},{"prim":"code","args":[[[[{"prim":"DUP"},{"prim":"CAR"},
+	{"prim":"DIP","args":[[{"prim":"CDR"}]]}]],{"prim":"IF_LEFT","args":[[{"prim":"PUSH","args":[{"prim":"mutez"},
+	{"int":\"0\"}]},{"prim":"AMOUNT"},[[{"prim":"COMPARE"},{"prim":"EQ"}],{"prim":"IF","args":[[],[[{"prim":"UNIT"},
+	{"prim":"FAILWITH"}]]]}],[{"prim":"DIP","args":[[{"prim":"DUP"}]]},{"prim":"SWAP"}],{"prim":"IMPLICIT_ACCOUNT"},
+	{"prim":"ADDRESS"},{"prim":"SENDER"},[[{"prim":"COMPARE"},{"prim":"EQ"}],{"prim":"IF","args":[[],[[{"prim":"UNIT"},
+	{"prim":"FAILWITH"}]]]}],{"prim":"UNIT"},{"prim":"EXEC"},{"prim":"PAIR"}],[{"prim":"DROP"},
+	{"prim":"NIL","args":[{"prim":"operation"}]},{"prim":"PAIR"}]]}]]}],"storage":{"string":"%1$s"}}
+
+]]>
+</string>
+
+    <string name="send_from_KT1_to_KT1" translatable="false">
+    <![CDATA[
+
+[
+                {"prim": "DROP"},
+                {"prim": "NIL", "args": [{"prim": "operation"}]},
+                {
+                    "prim": "PUSH",
+                    "args":[
+                        {"prim": "address"},
+                        {"string": "%1$s"}
+                    ]
+                },
+                {"prim": "CONTRACT", "args": [{"prim": "unit"}]},
+                [
+                    {
+                        "prim": "IF_NONE",
+                        "args": [[[{"prim": "UNIT"}, {"prim": "FAILWITH"}]], []]
+                    }
+                ],
+                {
+                    "prim": "PUSH",
+                    "args": [{"prim": "mutez"}, {"int": \"%2$s\"}]
+                },
+                {"prim": "UNIT"},
+                {"prim": "TRANSFER_TOKENS"},
+                {"prim": "CONS"}
+            ]
+]]>
+</string>
+
+    <string name="send_from_KT1_to_tz1" translatable="false">
+    <![CDATA[
+
+    [
+    {"prim": "DROP"},
+    {"prim": "NIL", "args": [{"prim": "operation"}]},
+    {
+    "prim": "PUSH",
+    "args":[
+    {"prim": "key_hash"},
+    {"string": "%1$s"}
+    ]
+    },
+    {"prim": "IMPLICIT_ACCOUNT"},
+    {
+    "prim": "PUSH",
+    "args": [{"prim": "mutez"}, {"int": \"%2$s\"}]
+    },
+    {"prim": "UNIT"},
+    {"prim": "TRANSFER_TOKENS"},
+    {"prim": "CONS"}
+    ]
+
+]]>
+</string>
+
+    <string name="set_delegate_contract" translatable="false">
+    <![CDATA[
+
+    [
+                {"prim": "DROP"},
+                {"prim": "NIL", "args": [{"prim": "operation"}]},
+                {
+                    "prim": "PUSH",
+                    "args":[
+                        {"prim": "key_hash"},
+                        {"string": "%1$s"}
+                    ]
+                },
+                {"prim": "SOME"},
+                {"prim": "SET_DELEGATE"},
+                {"prim": "CONS"}
+            ]
+]]>
+</string>
+
+    <string name="remove_delegate_contract" translatable="false">
+    <![CDATA[
+
+[
+                {"prim": "DROP"},
+                {"prim": "NIL", "args": [{"prim": "operation"}]},
+                {
+                    "prim": "NONE",
+                    "args":[
+                        {"prim": "key_hash"}
+                    ]
+                },
+                {"prim": "SET_DELEGATE"},
+                {"prim": "CONS"}
+            ]
+]]>
+</string>
+
+    </resources>
