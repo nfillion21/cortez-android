@@ -121,7 +121,7 @@ class DelegateFragment : Fragment()
             val delegate = this.bundle.getString("delegate", null)
             val script = this.bundle.getString("script", null)
 
-            return Contract(blk, spendable, delegatable, delegate)
+            return Contract(blk, spendable, delegatable, delegate, script)
         }
     }
 
@@ -500,7 +500,8 @@ class DelegateFragment : Fragment()
             val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
             val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
 
-            mContract = Contract(blk as String, spendable as Boolean, delegatable as Boolean, delegate)
+            val resScript = JSONObject(getString(R.string.default_contract))
+            mContract = Contract(blk as String, spendable as Boolean, delegatable as Boolean, delegate, resScript.toString())
         }
     }
 
