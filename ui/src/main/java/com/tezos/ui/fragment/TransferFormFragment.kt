@@ -573,25 +573,60 @@ class TransferFormFragment : Fragment()
             val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
-            postParams.put("src", mSrcAccount)
-            postParams.put("src_pk", pk)
-
-            var dstObjects = JSONArray()
-
-            var dstObject = JSONObject()
-            dstObject.put("dst", mDstAccount)
-            dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
-
-
-            //TODO handle that, we need to load storage from recipient
-            if (mRecipientKT1withCode)
+            val beginsWith = mSrcAccount?.slice(0 until 3)
+            if (beginsWith?.toLowerCase() == "kt1")
             {
-                dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
+                postParams.put("src", seed.pkh)
+                postParams.put("src_pk", pk)
+
+                var dstObjects = JSONArray()
+
+                var dstObject = JSONObject()
+                dstObject.put("dst", mSrcAccount)
+                dstObject.put("amount", (0).toLong().toString())
+
+                dstObject.put("entrypoint", "do")
+
+                val destBeginsWith = mSrcAccount?.slice(0 until 3)
+                val sendTzContract = if (destBeginsWith?.toLowerCase() == "kt1")
+                {
+                    String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).toLong().toString())
+                }
+                else
+                {
+                    String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).toLong().toString())
+                }
+
+                val json = JSONArray(sendTzContract)
+                dstObject.put("parameters", json)
+
+                //TODO handle that, we need to load storage from recipient
+                if (mRecipientKT1withCode)
+                {
+                    dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
+                }
+
+                dstObjects.put(dstObject)
+
+                postParams.put("dsts", dstObjects)
+            }
+            else
+            {
+                postParams.put("src", mSrcAccount)
+                postParams.put("src_pk", pk)
+
+                var dstObjects = JSONArray()
+
+                var dstObject = JSONObject()
+                dstObject.put("dst", mDstAccount)
+
+                dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+
+                dstObjects.put(dstObject)
+
+                postParams.put("dsts", dstObjects)
             }
 
-            dstObjects.put(dstObject)
-
-            postParams.put("dsts", dstObjects)
 
         }
 
@@ -1169,13 +1204,15 @@ class TransferFormFragment : Fragment()
             val storageJSONObject = JSONObject(mStorageSource)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
 
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-            val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
-            return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+                val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
+                return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+            }
         }
 
         return null

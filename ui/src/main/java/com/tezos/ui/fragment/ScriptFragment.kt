@@ -125,7 +125,7 @@ class ScriptFragment : Fragment()
 
         private const val EDIT_MODE_KEY = "edit_mode_key"
 
-        private val BALANCE_LONG_KEY = "balance_long_key"
+        private const val BALANCE_LONG_KEY = "balance_long_key"
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -554,7 +554,8 @@ class ScriptFragment : Fragment()
 
         //swipe_refresh_script_layout?.isEnabled = false
 
-        startGetRequestLoadContractInfo()
+        //TODO uncomment it
+        //startGetRequestLoadContractInfo()
     }
 
     private fun startInitUpdateStorageLoading()
