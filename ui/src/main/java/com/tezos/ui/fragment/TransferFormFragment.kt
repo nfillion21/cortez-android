@@ -1191,13 +1191,15 @@ class TransferFormFragment : Fragment()
             val storageJSONObject = JSONObject(mStorageRecipient)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
 
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-            val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
-            return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+                val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
+                return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+            }
         }
         else if (!isRecipient && mStorageSource != null)
         {
