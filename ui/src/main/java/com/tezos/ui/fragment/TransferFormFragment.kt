@@ -919,52 +919,64 @@ class TransferFormFragment : Fragment()
                 //TODO user needs to retry storage call
                 //TODO I will display elements depending on the situation
             }
+
+            /*
+        else
+        {
+            //TODO the best way to handle that is to parse the manager string
+
+            // 404 happens when there is no storage in this KT1
+            //it means this KT1 had no code
+
+            //TODO this case shouldn't happen anymore
+
+            if (isRecipient)
+            {
+                mRecipientKT1withCode = false
+
+                loading_progress.visibility = View.GONE
+                recipient_area.visibility = View.VISIBLE
+                amount_layout.visibility = View.VISIBLE
+
+                mClickRecipientKT1 = false
+            }
             else
             {
-                // 404 happens when there is no storage in this KT1
-                //it means this KT1 had no code
+                mSourceKT1withCode = false
+                mClickSourceKT1 = false
 
-                if (isRecipient)
+                val hasMnemonics = Storage(activity!!).hasMnemonics()
+                if (hasMnemonics)
                 {
-                    mRecipientKT1withCode = false
+                    val seed = Storage(activity!!).getMnemonics()
 
-                    loading_progress.visibility = View.GONE
-                    recipient_area.visibility = View.VISIBLE
-                    amount_layout.visibility = View.VISIBLE
-
-                    mClickRecipientKT1 = false
-                }
-                else
-                {
-                    mSourceKT1withCode = false
-                    mClickSourceKT1 = false
-
-                    val hasMnemonics = Storage(activity!!).hasMnemonics()
-                    if (hasMnemonics)
+                    if (seed.mnemonics.isEmpty())
                     {
-                        val seed = Storage(activity!!).getMnemonics()
-
-                        if (seed.mnemonics.isEmpty())
-                        {
-                            // TODO write a text to say we cannot transfer anything.
-                            loading_progress.visibility = View.GONE
-                            recipient_area.visibility = View.GONE
-                            amount_layout.visibility = View.GONE
-                            no_mnemonics.visibility = View.VISIBLE
-                        }
-                        else
-                        {
-                            loading_progress.visibility = View.GONE
-                            recipient_area.visibility = View.VISIBLE
-                            amount_layout.visibility = View.GONE
-                        }
+                        // TODO write a text to say we cannot transfer anything.
+                        loading_progress.visibility = View.GONE
+                        recipient_area.visibility = View.GONE
+                        amount_layout.visibility = View.GONE
+                        no_mnemonics.visibility = View.VISIBLE
+                    }
+                    else
+                    {
+                        loading_progress.visibility = View.GONE
+                        recipient_area.visibility = View.VISIBLE
+                        amount_layout.visibility = View.GONE
                     }
                 }
             }
+            }
+            */
         }
         else
         {
+
+            //TODO this is a KT1, default one or with code.
+
             //TODO check if our tz3 is the same as the contract tz3
+
+            //TODO if there is salt, this is a spending limit contract
 
             val salt = getSalt(isRecipient)
             if (salt != null && salt >= 0)
@@ -1013,8 +1025,6 @@ class TransferFormFragment : Fragment()
                 {
                     mRecipientKT1withCode = false
 
-                    //this is a standard source tz1/2/3
-
                     if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith("KT1", true))
                     {
                         //this is a standard source tz1/2/3
@@ -1030,6 +1040,8 @@ class TransferFormFragment : Fragment()
                         loading_progress.visibility = View.GONE
                         recipient_area.visibility = View.VISIBLE
                         amount_layout.visibility = View.VISIBLE
+
+                        mClickRecipientKT1 = false
                     }
                 }
                 else
@@ -1043,7 +1055,6 @@ class TransferFormFragment : Fragment()
                         {
                             //this is a standard source tz1/2/3
 
-
                             //no need to hide it anymore
                             loading_progress.visibility = View.GONE
                             recipient_area.visibility = View.VISIBLE
@@ -1052,6 +1063,8 @@ class TransferFormFragment : Fragment()
                         else
                         {
                             //it looks like it's a KT1 with no code in it.
+
+                            mClickSourceKT1 = false
 
                             // we got to handle if we have the mnemonics.
                             val hasMnemonics = Storage(activity!!).hasMnemonics()
