@@ -49,12 +49,9 @@ import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezcore.ui.activity.DelegateActivity
 import com.tezos.android.R
-import com.tezos.core.Pack
 import com.tezos.core.crypto.CryptoUtils
-import com.tezos.core.int
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.prim
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
 import com.tezos.ui.authentication.ContractSelectorFragment

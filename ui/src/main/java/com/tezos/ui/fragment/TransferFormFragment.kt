@@ -71,6 +71,7 @@ import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
 import kotlin.collections.HashMap
 import kotlin.collections.set
+import kotlin.math.roundToLong
 
 /**
  * Created by nfillion on 20/04/16.
@@ -737,36 +738,67 @@ class TransferFormFragment : Fragment()
         //TODO we got to verify at this very moment.
         if (isPayButtonValid() && mTransferPayload != null)
         {
-            //val pkhSrc = seed.pkh
-            val pkhDst = mDstAccount
 
-            /*
             val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
-            postParams.put("src", mSrcAccount)
 
-            //TODO it won't be pk with contract transfer
-            postParams.put("src_pk", pk)
+            val beginsWith = mSrcAccount?.slice(0 until 3)
+            if (beginsWith?.toLowerCase() == "kt1")
+            {
+                postParams.put("src", seed.pkh)
+                postParams.put("src_pk", pk)
 
-            var dstObjects = JSONArray()
+                var dstObjects = JSONArray()
 
-            var dstObject = JSONObject()
-            dstObject.put("dst", pkhDst)
+                var dstObject = JSONObject()
+                dstObject.put("dst", mSrcAccount)
+                dstObject.put("amount", 0.toLong())
 
-            val mutezAmount = (mTransferAmount*1000000.0).toLong()
-            dstObject.put("amount", mutezAmount)
+                val destBeginsWith = mSrcAccount?.slice(0 until 3)
+                val sendTzContract = if (destBeginsWith?.toLowerCase() == "kt1")
+                {
+                    String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).toLong().toString())
+                }
+                else
+                {
+                    String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).toLong().toString())
+                }
 
-            dstObject.put("fee", mTransferFees)
+                val json = JSONArray(sendTzContract)
+                dstObject.put("parameters", json)
 
-            dstObjects.put(dstObject)
+                dstObject.put("fee", mTransferFees)
+                dstObjects.put(dstObject)
 
-            postParams.put("dsts", dstObjects)
-            */
+                postParams.put("dsts", dstObjects)
+            }
+            else
+            {
+                postParams.put("src", mSrcAccount)
+
+                //TODO it won't be pk with contract transfer
+                postParams.put("src_pk", pk)
+
+                var dstObjects = JSONArray()
+
+                var dstObject = JSONObject()
+                dstObject.put("dst", mDstAccount)
+
+                val mutezAmount = (mTransferAmount*1000000.0).toLong()
+                dstObject.put("amount", mutezAmount)
+
+                dstObject.put("fee", mTransferFees)
+
+                dstObjects.put(dstObject)
+
+                postParams.put("dsts", dstObjects)
+            }
+
 
             //TODO verify the payloads
-            if (/*!isTransferPayloadValid(mTransferPayload!!, postParams)*/true)
+            if (isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -1573,7 +1605,7 @@ class TransferFormFragment : Fragment()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mTransferFees = longTransferFee.toLong()
+                    mTransferFees = longTransferFee.roundToLong()
                     return true
                 }
             }

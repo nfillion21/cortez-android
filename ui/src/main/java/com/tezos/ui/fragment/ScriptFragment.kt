@@ -1087,6 +1087,8 @@ class ScriptFragment : Fragment()
 
         val tz3 = retrieveTz3()
 
+        /*
+
         val packSpending = Pack.prim(
                 Pack.pair(
                         Pack.pair(
@@ -1114,11 +1116,13 @@ class ScriptFragment : Fragment()
         val salt = getSalt()
         val packSalt = Pack.prim(Pack.int(salt!!))
         val packSaltByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
+        */
 
 
         //val signedData1 = "050005".hexToByteArray()
 
-        val signature = KeyPair.sign(sk, packSpendingByteArray + packSaltByteArray)
+        //val signature = KeyPair.sign(sk, packSpendingByteArray + packSaltByteArray)
+        val signature = KeyPair.sign(sk, ByteArray(0))
 
         val edsig = CryptoUtils.generateEDSig(signature)
 

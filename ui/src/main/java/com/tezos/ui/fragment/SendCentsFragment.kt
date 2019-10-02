@@ -489,6 +489,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             dstObject.put("dst", arguments!!.getString(CONTRACT_PUBLIC_KEY))
             dstObject.put("amount", "0")
 
+            /*
             val packSpending = Pack.prim(
                     Pack.pair(
                             Pack.listOf(
@@ -509,8 +510,10 @@ class SendCentsFragment : AppCompatDialogFragment()
             val salt = getSalt()
             val packSalt = Pack.prim(Pack.int(salt!!))
             val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
+            */
 
-            val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
+            //val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
+            val signedData = KeyPair.b2b(ByteArray(0))
 
             val signature = EncryptionServices().sign(signedData)
             val compressedSignature = compressFormat(signature)
