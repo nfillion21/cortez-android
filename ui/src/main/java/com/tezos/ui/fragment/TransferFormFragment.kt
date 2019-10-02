@@ -515,6 +515,7 @@ class TransferFormFragment : Fragment()
             dstObject.put("dst", arguments!!.getString(Address.TAG))
             dstObject.put("amount", "0")
 
+            /*
             val packSpending = Pack.prim(
                     Pack.pair(
                             Pack.listOf(
@@ -535,8 +536,10 @@ class TransferFormFragment : Fragment()
             val salt = getSalt(isRecipient = false)
             val packSalt = Pack.prim(Pack.int(salt!!))
             val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
+            */
 
-            val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
+            //val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
+            val signedData = KeyPair.b2b("hello".toByteArray())
 
             val signature = EncryptionServices().sign(signedData)
             val compressedSignature = compressFormat(signature)
