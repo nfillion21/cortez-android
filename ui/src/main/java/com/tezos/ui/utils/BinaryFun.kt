@@ -4,6 +4,7 @@ import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.utils.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.interfaces.ECPublicKey
 import java.nio.ByteBuffer
@@ -57,7 +58,10 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
             val srcParam = params["src"] as String
             val dstParam = dstObj["dst"] as String
 
-            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long)
+            val dstAccount = dstObj["dst_account"] as String?
+            val amountTransfer = dstObj["transfer_amount"] as Long?
+
+            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount)
             if (transactionFees != -1L)
             {
                 val totalFees = revealFees.first + transactionFees
@@ -69,7 +73,10 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
         }
         else
         {
-            val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long)
+            val dstAccount = dstObj["dst_account"] as String?
+            val amountTransfer = dstObj["transfer_amount"] as Long?
+
+            val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount)
             if (transactionFees != -1L)
             {
                 if (transactionFees == dstObj["fee"])
@@ -331,7 +338,7 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
     return Pair(-1L, null)
 }
 
-private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstParam:String, amountParam:Long):Long
+private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstParam:String, amountParam:Long, amountDstParam:Long?, dstAccountParam:String?):Long
 {
     //TODO handle if delegation is correct, return the fees, or do something to add the fees with reveal.
 
@@ -455,7 +462,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                         Primitive.Name.PUSH,
                         arrayOf(
                                 Primitive(Primitive.Name.key_hash),
-                                Visitable.string("tz1LbSsDSmekew3prdDGx1nS22ie6jjBN6B3")
+                                Visitable.string(dstAccountParam!!)
                         )
                 ),
                 Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
@@ -463,7 +470,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                         Primitive.Name.PUSH,
                         arrayOf(
                                 Primitive(Primitive.Name.mutez),
-                                Visitable.integer(1)
+                                Visitable.integer(amountDstParam!!)
                         )
                 ),
                 Primitive(Primitive.Name.UNIT),
@@ -471,9 +478,9 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                 Primitive(Primitive.Name.CONS)
         )
 
-
-
-
+        val packer = Packer(ByteArrayOutputStream())
+        parameters.accept(packer)
+        val binary = (packer.output as ByteArrayOutputStream).toByteArray()
 
         return retFee
     }
