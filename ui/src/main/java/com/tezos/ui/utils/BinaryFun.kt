@@ -455,30 +455,103 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         val parametersDataField = parametersField.slice(i until parametersField.size).toByteArray()
 
-        val parameters: Visitable =
+        val sendToBegins = dstAccountParam!!.slice(0 until 3)
+        val parameters = when (sendToBegins.toLowerCase())
+        {
+            "kt1" ->
+            {
+
                 Visitable.sequenceOf(
+                        Visitable.sequenceOf(
+                                Primitive(Primitive.Name.DROP),
+                                Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                Primitive(
+                                        Primitive.Name.PUSH,
+                                        arrayOf(
+                                                Primitive(Primitive.Name.address),
+                                                Visitable.string(dstAccountParam!!)
+                                        )
+                                ),
+
+                                Primitive(Primitive.Name.CONTRACT, arrayOf(Primitive(Primitive.Name.unit))),
+                                Visitable.sequenceOf(
+                                        Primitive(
+                                                Primitive.Name.IF_NONE,
+                                                arrayOf(
+
+                                                        Visitable.sequenceOf(
+
+                                                                Visitable.sequenceOf(
+
+                                                                        Primitive(Primitive.Name.UNIT),
+                                                                        Primitive(Primitive.Name.FAILWITH)
+                                                                )
+                                                        ),
+                                                        Visitable.sequenceOf()
+
+                                                )
+                                        )
+                                ),
+
+                                /*
+                        {"prim": "CONTRACT", "args": [{"prim": "unit"}]},
+
+                        [{ "prim": "IF_NONE",
+                            "args": [
+
+                            [
+                                [
+                                    {"prim": "UNIT"},
+                                    {"prim": "FAILWITH"}
+                                ]
+                            ],
+                            []
+                            ]
+                        }
+                        ],
+                                */
+
+
+                                Primitive(
+                                        Primitive.Name.PUSH,
+                                        arrayOf(
+                                                Primitive(Primitive.Name.mutez),
+                                                Visitable.integer(amountDstParam!!)
+                                        )
+                                ),
+                                Primitive(Primitive.Name.UNIT),
+                                Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                Primitive(Primitive.Name.CONS)
+                        ))
+
+            }
+            else ->
+            {
                 Visitable.sequenceOf(
-                Primitive(Primitive.Name.DROP),
-                Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
-                Primitive(
-                        Primitive.Name.PUSH,
-                        arrayOf(
-                                Primitive(Primitive.Name.key_hash),
-                                Visitable.string(dstAccountParam!!)
-                        )
-                ),
-                Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
-                Primitive(
-                        Primitive.Name.PUSH,
-                        arrayOf(
-                                Primitive(Primitive.Name.mutez),
-                                Visitable.integer(amountDstParam!!)
-                        )
-                ),
-                Primitive(Primitive.Name.UNIT),
-                Primitive(Primitive.Name.TRANSFER_TOKENS),
-                Primitive(Primitive.Name.CONS)
-        ))
+                        Visitable.sequenceOf(
+                                Primitive(Primitive.Name.DROP),
+                                Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                Primitive(
+                                        Primitive.Name.PUSH,
+                                        arrayOf(
+                                                Primitive(Primitive.Name.key_hash),
+                                                Visitable.string(dstAccountParam!!)
+                                        )
+                                ),
+                                Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
+                                Primitive(
+                                        Primitive.Name.PUSH,
+                                        arrayOf(
+                                                Primitive(Primitive.Name.mutez),
+                                                Visitable.integer(amountDstParam!!)
+                                        )
+                                ),
+                                Primitive(Primitive.Name.UNIT),
+                                Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                Primitive(Primitive.Name.CONS)
+                        ))
+            }
+        }
 
         val packer = Packer(ByteArrayOutputStream())
         parameters.accept(packer)
