@@ -924,13 +924,23 @@
                         {"string": "%1$s"}
                     ]
                 },
+
                 {"prim": "CONTRACT", "args": [{"prim": "unit"}]},
-                [
-                    {
-                        "prim": "IF_NONE",
-                        "args": [[[{"prim": "UNIT"}, {"prim": "FAILWITH"}]], []]
+
+                [{ "prim": "IF_NONE",
+                        "args": [
+
+                            [
+                                [
+                                    {"prim": "UNIT"},
+                                    {"prim": "FAILWITH"}
+                                ]
+                            ],
+                            []
+                        ]
                     }
                 ],
+
                 {
                     "prim": "PUSH",
                     "args": [{"prim": "mutez"}, {"int": \"%2$s\"}]
@@ -946,24 +956,28 @@
     <![CDATA[
 
     [
-    {"prim": "DROP"},
-    {"prim": "NIL", "args": [{"prim": "operation"}]},
-    {
-    "prim": "PUSH",
-    "args":[
-    {"prim": "key_hash"},
-    {"string": "%1$s"}
-    ]
-    },
-    {"prim": "IMPLICIT_ACCOUNT"},
-    {
-    "prim": "PUSH",
-    "args": [{"prim": "mutez"}, {"int": \"%2$s\"}]
-    },
-    {"prim": "UNIT"},
-    {"prim": "TRANSFER_TOKENS"},
-    {"prim": "CONS"}
-    ]
+   {"prim":"DROP"},
+   {"prim":"NIL", "args":[{"prim":"operation"}]},
+   {
+      "prim":"PUSH",
+      "args":[
+         {"prim":"key_hash"},
+         {"string":"%1$s"}
+      ]
+   },
+
+   {"prim":"IMPLICIT_ACCOUNT"},
+
+   {"prim":"PUSH",
+      "args":[
+         {"prim":"mutez"},
+         {"int":\"%2$s\"}
+      ]
+   },
+   {"prim":"UNIT"},
+   {"prim":"TRANSFER_TOKENS"},
+   {"prim":"CONS"}
+]
 
 ]]>
 </string>

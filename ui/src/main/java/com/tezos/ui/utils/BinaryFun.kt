@@ -455,7 +455,9 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         val parametersDataField = parametersField.slice(i until parametersField.size).toByteArray()
 
-        val parameters: Visitable = Visitable.sequenceOf(
+        val parameters: Visitable =
+                Visitable.sequenceOf(
+                Visitable.sequenceOf(
                 Primitive(Primitive.Name.DROP),
                 Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
                 Primitive(
@@ -476,11 +478,17 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                 Primitive(Primitive.Name.UNIT),
                 Primitive(Primitive.Name.TRANSFER_TOKENS),
                 Primitive(Primitive.Name.CONS)
-        )
+        ))
 
         val packer = Packer(ByteArrayOutputStream())
         parameters.accept(packer)
+
         val binary = (packer.output as ByteArrayOutputStream).toByteArray()
+
+        if (!parametersDataField.contentEquals(binary))
+        {
+            return -1L
+        }
 
         return retFee
     }
