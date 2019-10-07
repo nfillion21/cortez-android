@@ -483,7 +483,7 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
 
         // we don't read the first byte (0)
         var publicKey = storageLimit.slice(i+1 until storageLimit.size).toByteArray()
-        //publicKey = publicKey.dropWhile { it == "0".toByte() }.toByteArray()
+        publicKey = publicKey.dropWhile { it == "0".toByte() }.toByteArray()
 
         val publicKeyParse = publicKey.slice(0 .. 31).toByteArray()
 
@@ -515,7 +515,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
     {
 
         var src = payload.slice((i+1)..(21)).toByteArray()
-        //src = src.dropWhile { it == "0".toByte() }.toByteArray()
+        src = src.dropWhile { it == "0".toByte() }.toByteArray()
 
         val isSrcValid = srcParam == if (srcParam.startsWith("KT1", true)) CryptoUtils.genericHashToKT(src) else CryptoUtils.genericHashToPkh(src)
 
@@ -538,7 +538,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             feeList.add(bytePos)
             i++
 
-        } while (bytePos > 128)
+        } while (bytePos >= 128)
 
         val retFee = addBytesLittleEndian(feeList)
 
@@ -581,6 +581,8 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             i++
 
         } while (bytePos >= 128)
+
+        val k = addBytesLittleEndian(amountList)
 
         val isAmountValid = addBytesLittleEndian(amountList) == amountParam
         if (!isAmountValid)

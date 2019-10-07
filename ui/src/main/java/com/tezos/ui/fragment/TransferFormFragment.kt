@@ -842,10 +842,10 @@ class TransferFormFragment : Fragment()
 
                 var payloadsign = newResult.toNoPrefixHexString()
 
-                val stringRequest = object : StringRequest(Request.Method.POST, url,
-                        Response.Listener<String> { response ->
+                val stringRequest = object : StringRequest(Method.POST, url,
+                        Response.Listener<String> {
 
-                            if (activity != null)
+                            if (content != null)
                             {
                                 onFinalizeTransferLoadComplete(null)
                                 listener?.onTransferSucceed()
@@ -853,7 +853,7 @@ class TransferFormFragment : Fragment()
                         },
                         Response.ErrorListener
                         {
-                            if (activity != null)
+                            if (content != null)
                             {
                                 onFinalizeTransferLoadComplete(it)
                                 listener?.onTransferFailed(it)
