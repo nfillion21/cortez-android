@@ -62,6 +62,7 @@ import kotlinx.android.synthetic.main.fragment_delegate.*
 import kotlinx.android.synthetic.main.redelegate_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.math.roundToLong
 
 class DelegateFragment : Fragment()
 {
@@ -968,7 +969,7 @@ class DelegateFragment : Fragment()
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
-            if (activity != null)
+            if (swipe_refresh_layout != null)
             {
                 mDelegatePayload = answer.getString("result")
                 mDelegateFees = answer.getLong("total_fee")
@@ -1007,7 +1008,7 @@ class DelegateFragment : Fragment()
 
         }, Response.ErrorListener
         {
-            if (activity != null)
+            if (swipe_refresh_layout != null)
             {
                 onInitDelegateLoadComplete(it)
 
@@ -1335,7 +1336,7 @@ class DelegateFragment : Fragment()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mDelegateFees = longTransferFee.toLong()
+                    mDelegateFees = longTransferFee.roundToLong()
                     return true
                 }
             }

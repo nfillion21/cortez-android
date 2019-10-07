@@ -556,7 +556,7 @@ class TransferFormFragment : Fragment()
             //edsig (p2sig)
 
             val spendingLimitContract = String.format(resScript.toString(),
-                    (mTransferAmount*1000000).toLong().toString(),
+                    (mTransferAmount*1000000).roundToLong().toString(),
                     mDstAccount,
                     tz3,
                     p2pk,
@@ -624,7 +624,7 @@ class TransferFormFragment : Fragment()
                 var dstObject = JSONObject()
                 dstObject.put("dst", mDstAccount)
 
-                dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+                dstObject.put("amount", (mTransferAmount*1000000).roundToLong().toString())
 
                 dstObjects.put(dstObject)
 
@@ -763,11 +763,11 @@ class TransferFormFragment : Fragment()
                 val destBeginsWith = mSrcAccount?.slice(0 until 3)
                 val sendTzContract = if (destBeginsWith?.toLowerCase() == "kt1")
                 {
-                    String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).toLong().toString())
+                    String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
                 }
                 else
                 {
-                    String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).toLong().toString())
+                    String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
                 }
 
                 val json = JSONArray(sendTzContract)
@@ -790,7 +790,7 @@ class TransferFormFragment : Fragment()
                 var dstObject = JSONObject()
                 dstObject.put("dst", mDstAccount)
 
-                val mutezAmount = (mTransferAmount*1000000.0).toLong()
+                val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
                 dstObject.put("amount", mutezAmount)
 
                 dstObject.put("fee", mTransferFees)

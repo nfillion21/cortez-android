@@ -66,6 +66,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.InputStream
 import java.nio.charset.Charset
+import kotlin.math.roundToLong
 
 /**
  * Created by nfillion on 20/11/18.
@@ -256,7 +257,7 @@ class AddDelegateActivity : BaseSecureActivity()
             var dstObject = JSONObject()
             //dstObject.put("dst", pkhDst)
 
-            val mutezAmount = (mDelegateAmount*1000000.0).toLong()
+            val mutezAmount = (mDelegateAmount*1000000.0).roundToLong()
             dstObject.put("balance", mutezAmount)
 
             dstObject.put("fee", mDelegateFees)
@@ -432,7 +433,7 @@ class AddDelegateActivity : BaseSecureActivity()
         dstObject.put("delegate", mDelegateTezosAddress)
 
         //TODO be careful, do it in mutez.
-        dstObject.put("credit", (mDelegateAmount*1000000).toLong().toString())
+        dstObject.put("credit", (mDelegateAmount*1000000).roundToLong().toString())
 
         //dstObject.put("delegatable", true)
 
@@ -726,7 +727,7 @@ class AddDelegateActivity : BaseSecureActivity()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mDelegateFees = longTransferFee.toLong()
+                    mDelegateFees = longTransferFee.roundToLong()
                     return true
                 }
             }

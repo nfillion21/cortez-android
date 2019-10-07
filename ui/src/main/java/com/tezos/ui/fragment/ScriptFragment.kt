@@ -71,6 +71,7 @@ import kotlinx.android.synthetic.main.update_storage_form_card.send_cents_button
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
+import kotlin.math.roundToLong
 
 class ScriptFragment : Fragment()
 {
@@ -1488,7 +1489,7 @@ class ScriptFragment : Fragment()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mUpdateStorageFees = longTransferFee.toLong()
+                    mUpdateStorageFees = longTransferFee.roundToLong()
                     return true
                 }
             }

@@ -67,6 +67,7 @@ import kotlinx.android.synthetic.main.limits_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
+import kotlin.math.roundToLong
 
 /**
  * Created by nfillion on 26/02/19.
@@ -287,7 +288,7 @@ class AddLimitsActivity : BaseSecureActivity()
             var dstObject = JSONObject()
             //dstObject.put("dst", pkhDst)
 
-            val mutezAmount = (mDelegateAmount*1000000.0).toLong()
+            val mutezAmount = (mDelegateAmount*1000000.0).roundToLong()
             dstObject.put("balance", mutezAmount)
 
             dstObject.put("fee", mDelegateFees)
@@ -473,7 +474,7 @@ class AddLimitsActivity : BaseSecureActivity()
         dstObject.put("script", json)
 
         //TODO be careful, do it in mutez.
-        dstObject.put("credit", (mDelegateAmount*1000000L).toLong().toString())
+        dstObject.put("credit", (mDelegateAmount*1000000L).roundToLong().toString())
 
         //dstObject.put("delegatable", true)
 
@@ -789,7 +790,7 @@ class AddLimitsActivity : BaseSecureActivity()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mDelegateFees = longTransferFee.toLong()
+                    mDelegateFees = longTransferFee.roundToLong()
                     return true
                 }
             }
