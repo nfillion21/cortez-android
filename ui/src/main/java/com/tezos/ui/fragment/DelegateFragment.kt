@@ -620,20 +620,29 @@ class DelegateFragment : Fragment()
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
-            postParams.put("src", pkh())
+            postParams.put("src", mnemonicsData.pkh)
             postParams.put("src_pk", pk)
 
-            postParams.put("fee", mDelegateFees)
 
             var dstObjects = JSONArray()
 
             var dstObject = JSONObject()
+            //dstObject.put("dst", mDstAccount)
+
+            dstObject.put("dst", pkh())
+            dstObject.put("contract_type", "remove_delegate")
+
+            //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+            dstObject.put("amount", (0).toLong())
+
+            dstObject.put("fee", mDelegateFees)
 
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
 
-            if (/*isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams)*/true)
+
+            if (isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -661,8 +670,8 @@ class DelegateFragment : Fragment()
 
                 var payloadsign = newResult.toNoPrefixHexString()
 
-                val stringRequest = object : StringRequest(Request.Method.POST, url,
-                        Response.Listener<String> { response ->
+                val stringRequest = object : StringRequest(Method.POST, url,
+                        Response.Listener<String> {
                             if (swipe_refresh_layout != null)
                             {
                                 //there's no need to do anything because we call finish()
@@ -764,8 +773,8 @@ class DelegateFragment : Fragment()
                 var payloadsign = newResult.toNoPrefixHexString()
 
                 val stringRequest = object : StringRequest(Request.Method.POST, url,
-                        Response.Listener<String> { response ->
-                            if (activity != null)
+                        Response.Listener<String> {
+                            if (swipe_refresh_layout != null)
                             {
                                 //there's no need to do anything because we call finish()
                                 onFinalizeDelegationLoadComplete(null)
@@ -775,7 +784,7 @@ class DelegateFragment : Fragment()
                         },
                         Response.ErrorListener
                         {
-                            if (activity != null)
+                            if (swipe_refresh_layout != null)
                             {
                                 onFinalizeDelegationLoadComplete(it)
                             }
@@ -943,7 +952,7 @@ class DelegateFragment : Fragment()
 
         postParams.put("dsts", dstObjects)
 
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
@@ -1048,7 +1057,7 @@ class DelegateFragment : Fragment()
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
-            if (activity != null)
+            if (swipe_refresh_layout != null)
             {
                 mDelegatePayload = answer.getString("result")
                 mDelegateFees = answer.getLong("total_fee")
@@ -1075,7 +1084,7 @@ class DelegateFragment : Fragment()
             }
         }, Response.ErrorListener
         {
-            if (activity != null)
+            if (swipe_refresh_layout != null)
             {
                 onInitRemoveDelegateLoadComplete(it)
 
@@ -1333,14 +1342,14 @@ class DelegateFragment : Fragment()
         this.putTzAddressInRed(true)
     }
 
-    fun isAddButtonValid(): Boolean
+    private fun isAddButtonValid(): Boolean
     {
         return mDelegatePayload != null
                 && isDelegateFeeValid()
                 && isInputDataValid()
     }
 
-    fun isRemoveButtonValid(): Boolean
+    private fun isRemoveButtonValid(): Boolean
     {
         return mDelegatePayload != null
                 && isDelegateFeeValid()

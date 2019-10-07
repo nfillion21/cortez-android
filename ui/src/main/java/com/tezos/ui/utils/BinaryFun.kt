@@ -58,10 +58,37 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
             val srcParam = params["src"] as String
             val dstParam = dstObj["dst"] as String
 
-            val dstAccount = dstObj["dst_account"] as String?
-            val amountTransfer = dstObj["transfer_amount"] as Long?
+            val dstAccount =
+                    if (dstObj.has("dst_account"))
+                    {
+                        dstObj["dst_account"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
 
-            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount)
+            val amountTransfer =
+                    if (dstObj.has("transfer_amount"))
+                    {
+                        dstObj["transfer_amount"] as Long?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val contractType =
+                    if (dstObj.has("contract_type"))
+                    {
+                        dstObj["contract_type"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType)
             if (transactionFees != -1L)
             {
                 val totalFees = revealFees.first + transactionFees
@@ -73,10 +100,37 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
         }
         else
         {
-            val dstAccount = dstObj["dst_account"] as String?
-            val amountTransfer = dstObj["transfer_amount"] as Long?
+            val dstAccount =
+                    if (dstObj.has("dst_account"))
+                    {
+                        dstObj["dst_account"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
 
-            val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount)
+            val amountTransfer =
+                    if (dstObj.has("transfer_amount"))
+                    {
+                        dstObj["transfer_amount"] as Long?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val contractType =
+                    if (dstObj.has("contract_type"))
+                    {
+                        dstObj["contract_type"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType)
             if (transactionFees != -1L)
             {
                 if (transactionFees == dstObj["fee"])
@@ -204,6 +258,7 @@ fun isChangeDelegatePayloadValid(payload:String, params: JSONObject):Boolean
     return isValid
 }
 
+/*
 fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 {
     if (payload != null && params != null)
@@ -244,6 +299,115 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
     }
     return false
 }
+*/
+
+fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
+{
+    var isValid = false
+    if (payload != null && params != null)
+    {
+        val data = payload.hexToByteArray()
+
+        val obj = params["dsts"] as JSONArray
+        val dstObj = obj[0] as JSONObject
+
+        val dataField = data.slice(32 until data.size).toByteArray()
+
+        val revealFees = isRevealTagCorrect(dataField, params["src"] as String, params["src_pk"] as String)
+        if (revealFees.first != -1L)
+        {
+            val transactionByteArray = revealFees.second
+
+            val srcParam = params["src"] as String
+            val dstParam = dstObj["dst"] as String
+
+            val dstAccount =
+                    if (dstObj.has("dst_account"))
+                    {
+                        dstObj["dst_account"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val amountTransfer =
+                    if (dstObj.has("transfer_amount"))
+                    {
+                        dstObj["transfer_amount"] as Long?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val contractType =
+                    if (dstObj.has("contract_type"))
+                    {
+                        dstObj["contract_type"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType)
+            if (transactionFees != -1L)
+            {
+                val totalFees = revealFees.first + transactionFees
+                if (totalFees == dstObj["fee"])
+                {
+                    return true
+                }
+            }
+        }
+        else
+        {
+            val dstAccount =
+                    if (dstObj.has("dst_account"))
+                    {
+                        dstObj["dst_account"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val amountTransfer =
+                    if (dstObj.has("transfer_amount"))
+                    {
+                        dstObj["transfer_amount"] as Long?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val contractType =
+                    if (dstObj.has("contract_type"))
+                    {
+                        dstObj["contract_type"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType)
+            if (transactionFees != -1L)
+            {
+                if (transactionFees == dstObj["fee"])
+                {
+                    return true
+                }
+            }
+        }
+    }
+    return isValid
+}
+
+
+
 
 private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pair<Long, ByteArray?>
 {
@@ -338,7 +502,7 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
     return Pair(-1L, null)
 }
 
-private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstParam:String, amountParam:Long, amountDstParam:Long?, dstAccountParam:String?):Long
+private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstParam:String, amountParam:Long, amountDstParam:Long?, dstAccountParam:String?, contractType:String?):Long
 {
     //TODO handle if delegation is correct, return the fees, or do something to add the fees with reveal.
 
@@ -454,103 +618,145 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         }
 
         val parametersDataField = parametersField.slice(i until parametersField.size).toByteArray()
+        var parameters:Visitable
 
-        val sendToBegins = dstAccountParam!!.slice(0 until 3)
-        val parameters = when (sendToBegins.toLowerCase())
+        if (contractType == "remove_delegate")
         {
-            "kt1" ->
+            parameters =
+
+                    Visitable.sequenceOf(
+                            Visitable.sequenceOf(
+
+                            Primitive(Primitive.Name.DROP),
+                            Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                            Primitive(
+                                    Primitive.Name.NONE,
+                                    arrayOf(Primitive(Primitive.Name.key_hash))
+
+                            ),
+                            Primitive(Primitive.Name.SET_DELEGATE),
+                            Primitive(Primitive.Name.CONS)
+                            )
+                    )
+            /*
+
+[
+{"prim": "DROP"},
+{"prim": "NIL", "args": [{"prim": "operation"}]},
+{
+    "prim": "NONE",
+    "args":[
+    {"prim": "key_hash"}
+    ]
+},
+{"prim": "SET_DELEGATE"},
+{"prim": "CONS"}
+]
+            */
+
+
+        }
+        //TODO add some more contract types
+        else
+        {
+            val sendToBegins = dstAccountParam!!.slice(0 until 3)
+            parameters = when (sendToBegins.toLowerCase())
             {
+                "kt1" ->
+                {
 
-                Visitable.sequenceOf(
-                        Visitable.sequenceOf(
-                                Primitive(Primitive.Name.DROP),
-                                Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
-                                Primitive(
-                                        Primitive.Name.PUSH,
-                                        arrayOf(
-                                                Primitive(Primitive.Name.address),
-                                                Visitable.string(dstAccountParam!!)
-                                        )
-                                ),
+                    Visitable.sequenceOf(
+                            Visitable.sequenceOf(
+                                    Primitive(Primitive.Name.DROP),
+                                    Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                    Primitive(
+                                            Primitive.Name.PUSH,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.address),
+                                                    Visitable.string(dstAccountParam!!)
+                                            )
+                                    ),
 
-                                Primitive(Primitive.Name.CONTRACT, arrayOf(Primitive(Primitive.Name.unit))),
-                                Visitable.sequenceOf(
-                                        Primitive(
-                                                Primitive.Name.IF_NONE,
-                                                arrayOf(
+                                    Primitive(Primitive.Name.CONTRACT, arrayOf(Primitive(Primitive.Name.unit))),
+                                    Visitable.sequenceOf(
+                                            Primitive(
+                                                    Primitive.Name.IF_NONE,
+                                                    arrayOf(
 
-                                                        Visitable.sequenceOf(
+                                                            Visitable.sequenceOf(
 
-                                                                Visitable.sequenceOf(
+                                                                    Visitable.sequenceOf(
 
-                                                                        Primitive(Primitive.Name.UNIT),
-                                                                        Primitive(Primitive.Name.FAILWITH)
-                                                                )
-                                                        ),
-                                                        Visitable.sequenceOf()
+                                                                            Primitive(Primitive.Name.UNIT),
+                                                                            Primitive(Primitive.Name.FAILWITH)
+                                                                    )
+                                                            ),
+                                                            Visitable.sequenceOf()
 
-                                                )
-                                        )
-                                ),
+                                                    )
+                                            )
+                                    ),
 
-                                /*
-                        {"prim": "CONTRACT", "args": [{"prim": "unit"}]},
+                                    /*
+                            {"prim": "CONTRACT", "args": [{"prim": "unit"}]},
 
-                        [{ "prim": "IF_NONE",
-                            "args": [
+                            [{ "prim": "IF_NONE",
+                                "args": [
 
-                            [
                                 [
-                                    {"prim": "UNIT"},
-                                    {"prim": "FAILWITH"}
+                                    [
+                                        {"prim": "UNIT"},
+                                        {"prim": "FAILWITH"}
+                                    ]
+                                ],
+                                []
                                 ]
+                            }
                             ],
-                            []
-                            ]
-                        }
-                        ],
-                                */
+                                    */
 
 
-                                Primitive(
-                                        Primitive.Name.PUSH,
-                                        arrayOf(
-                                                Primitive(Primitive.Name.mutez),
-                                                Visitable.integer(amountDstParam!!)
-                                        )
-                                ),
-                                Primitive(Primitive.Name.UNIT),
-                                Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                Primitive(Primitive.Name.CONS)
-                        ))
+                                    Primitive(
+                                            Primitive.Name.PUSH,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.mutez),
+                                                    Visitable.integer(amountDstParam!!)
+                                            )
+                                    ),
+                                    Primitive(Primitive.Name.UNIT),
+                                    Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                    Primitive(Primitive.Name.CONS)
+                            ))
 
+                }
+                else ->
+                {
+                    Visitable.sequenceOf(
+                            Visitable.sequenceOf(
+                                    Primitive(Primitive.Name.DROP),
+                                    Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                    Primitive(
+                                            Primitive.Name.PUSH,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.key_hash),
+                                                    Visitable.string(dstAccountParam!!)
+                                            )
+                                    ),
+                                    Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
+                                    Primitive(
+                                            Primitive.Name.PUSH,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.mutez),
+                                                    Visitable.integer(amountDstParam!!)
+                                            )
+                                    ),
+                                    Primitive(Primitive.Name.UNIT),
+                                    Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                    Primitive(Primitive.Name.CONS)
+                            ))
+                }
             }
-            else ->
-            {
-                Visitable.sequenceOf(
-                        Visitable.sequenceOf(
-                                Primitive(Primitive.Name.DROP),
-                                Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
-                                Primitive(
-                                        Primitive.Name.PUSH,
-                                        arrayOf(
-                                                Primitive(Primitive.Name.key_hash),
-                                                Visitable.string(dstAccountParam!!)
-                                        )
-                                ),
-                                Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
-                                Primitive(
-                                        Primitive.Name.PUSH,
-                                        arrayOf(
-                                                Primitive(Primitive.Name.mutez),
-                                                Visitable.integer(amountDstParam!!)
-                                        )
-                                ),
-                                Primitive(Primitive.Name.UNIT),
-                                Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                Primitive(Primitive.Name.CONS)
-                        ))
-            }
+
         }
 
         val packer = Packer(ByteArrayOutputStream())
