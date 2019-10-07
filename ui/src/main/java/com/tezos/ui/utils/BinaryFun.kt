@@ -143,6 +143,7 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
     return isValid
 }
 
+/*
 fun isChangeDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 {
     var isValid = false
@@ -257,6 +258,7 @@ fun isChangeDelegatePayloadValid(payload:String, params: JSONObject):Boolean
     }
     return isValid
 }
+*/
 
 /*
 fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
@@ -653,8 +655,43 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 {"prim": "CONS"}
 ]
             */
+        }
+        else if (contractType == "add_delegate")
+        {
+            parameters =
 
+                    Visitable.sequenceOf(
+                            Visitable.sequenceOf(
 
+                                    Primitive(Primitive.Name.DROP),
+                                    Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                    Primitive(
+                                            Primitive.Name.PUSH,
+                                            arrayOf(Primitive(Primitive.Name.key_hash),
+                                                    Visitable.string(dstAccountParam!!))
+                                    ),
+                                    Primitive(Primitive.Name.SOME),
+                                    Primitive(Primitive.Name.SET_DELEGATE),
+                                    Primitive(Primitive.Name.CONS)
+                            )
+                    )
+            /*
+
+    [
+                {"prim": "DROP"},
+                {"prim": "NIL", "args": [{"prim": "operation"}]},
+                {
+                    "prim": "PUSH",
+                    "args":[
+                        {"prim": "key_hash"},
+                        {"string": "%1$s"}
+                    ]
+                },
+                {"prim": "SOME"},
+                {"prim": "SET_DELEGATE"},
+                {"prim": "CONS"}
+            ]
+            */
         }
         //TODO add some more contract types
         else
@@ -1029,6 +1066,7 @@ fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].
 
 fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 {
+    var isValid = false
     if (payload != null && params != null)
     {
         val data = payload.hexToByteArray()
@@ -1041,12 +1079,45 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         val revealFees = isRevealTagCorrect(dataField, params["src"] as String, params["src_pk"] as String)
         if (revealFees.first != -1L)
         {
-            val delegationByteArray = revealFees.second
+            val transactionByteArray = revealFees.second
 
-            val originationFees = isOriginationTagCorrect(delegationByteArray!!, params["src"] as String, dstObj["balance"] as Long, dstObj["delegate"] as String)
-            if (originationFees != -1L)
+            val srcParam = params["src"] as String
+            val dstParam = dstObj["dst"] as String
+
+            val dstAccount =
+                    if (dstObj.has("dst_account"))
+                    {
+                        dstObj["dst_account"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val amountTransfer =
+                    if (dstObj.has("transfer_amount"))
+                    {
+                        dstObj["transfer_amount"] as Long?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val contractType =
+                    if (dstObj.has("contract_type"))
+                    {
+                        dstObj["contract_type"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType)
+            if (transactionFees != -1L)
             {
-                val totalFees = revealFees.first + originationFees
+                val totalFees = revealFees.first + transactionFees
                 if (totalFees == dstObj["fee"])
                 {
                     return true
@@ -1055,17 +1126,47 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         }
         else
         {
-            val originationFees = isOriginationTagCorrect(dataField, params["src"] as String, dstObj["balance"] as Long, dstObj["delegate"] as String)
-            if (originationFees != -1L)
+            val dstAccount =
+                    if (dstObj.has("dst_account"))
+                    {
+                        dstObj["dst_account"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val amountTransfer =
+                    if (dstObj.has("transfer_amount"))
+                    {
+                        dstObj["transfer_amount"] as Long?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val contractType =
+                    if (dstObj.has("contract_type"))
+                    {
+                        dstObj["contract_type"] as String?
+                    }
+                    else
+                    {
+                        null
+                    }
+
+            val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType)
+            if (transactionFees != -1L)
             {
-                if (originationFees == dstObj["fee"])
+                if (transactionFees == dstObj["fee"])
                 {
                     return true
                 }
             }
         }
     }
-    return false
+    return isValid
 }
 
 private fun addBytesLittleEndian(bytes:ArrayList<Int>):Long

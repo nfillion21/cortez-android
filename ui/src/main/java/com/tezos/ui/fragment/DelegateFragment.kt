@@ -732,19 +732,31 @@ class DelegateFragment : Fragment()
 
         if (isAddButtonValid() && mDelegatePayload != null && mDelegateTezosAddress != null && mDelegateFees != null)
         {
-            //val pkhSrc = mnemonicsData.pkh
-            //val pkhDst = mDstAccount?.pubKeyHash
-
             val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
             var postParams = JSONObject()
-            postParams.put("src", pkh())
+            postParams.put("src", mnemonicsData.pkh)
             postParams.put("src_pk", pk)
-            postParams.put("delegate", mDelegateTezosAddress)
-            postParams.put("fee", mDelegateFees)
 
-            if (/*isChangeDelegatePayloadValid(mDelegatePayload!!, postParams)*/true)
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+            //dstObject.put("dst", mDstAccount)
+
+            dstObject.put("dst", pkh())
+            dstObject.put("contract_type", "add_delegate")
+            dstObject.put("dst_account", mDelegateTezosAddress)
+
+            dstObject.put("amount", (0).toLong())
+
+            dstObject.put("fee", mDelegateFees)
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+
+            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
