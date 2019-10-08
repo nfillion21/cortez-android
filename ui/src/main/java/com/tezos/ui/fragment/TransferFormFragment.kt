@@ -572,15 +572,22 @@ class TransferFormFragment : Fragment()
         }
         else
         {
-            val seed = Storage(activity!!).getMnemonics()
+            val mnemonicsData = Storage(activity!!).getMnemonics()
 
-            val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
+            val pk = if (mnemonicsData.pk.isNullOrEmpty())
+            {
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                CryptoUtils.generatePk(mnemonics, "")
+            }
+            else
+            {
+                mnemonicsData.pk
+            }
 
             val beginsWith = mSrcAccount?.slice(0 until 3)
             if (beginsWith?.toLowerCase() == "kt1")
             {
-                postParams.put("src", seed.pkh)
+                postParams.put("src", mnemonicsData.pkh)
                 postParams.put("src_pk", pk)
 
                 var dstObjects = JSONArray()
@@ -733,21 +740,28 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        val seed = Storage(activity!!).getMnemonics()
+        val mnemonicsData = Storage(activity!!).getMnemonics()
 
         //TODO we got to verify at this very moment.
         if (isPayButtonValid() && mTransferPayload != null)
         {
 
-            val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
+            val pk = if (mnemonicsData.pk.isNullOrEmpty())
+            {
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                CryptoUtils.generatePk(mnemonics, "")
+            }
+            else
+            {
+                mnemonicsData.pk
+            }
 
             var postParams = JSONObject()
 
             val beginsWith = mSrcAccount?.slice(0 until 3)
             if (beginsWith?.toLowerCase() == "kt1")
             {
-                postParams.put("src", seed.pkh)
+                postParams.put("src", mnemonicsData.pkh)
                 postParams.put("src_pk", pk)
 
                 var dstObjects = JSONArray()
@@ -828,7 +842,7 @@ class TransferFormFragment : Fragment()
                 }
                 else
                 {
-                    val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
+                    val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
                     val sk = CryptoUtils.generateSk(mnemonics, "")
                     compressedSignature = KeyPair.sign(sk, result)
                 }

@@ -545,8 +545,15 @@ class SendCentsFragment : AppCompatDialogFragment()
         }
         else
         {
-            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
+            val pk = if (mnemonicsData.pk.isNullOrEmpty())
+            {
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                CryptoUtils.generatePk(mnemonics, "")
+            }
+            else
+            {
+                mnemonicsData.pk
+            }
 
             postParams.put("src", mnemonicsData.pkh)
             postParams.put("src_pk", pk)

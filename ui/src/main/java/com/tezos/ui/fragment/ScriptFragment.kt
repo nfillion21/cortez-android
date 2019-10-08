@@ -911,8 +911,15 @@ class ScriptFragment : Fragment()
 
         if (isUpdateButtonValid() && mUpdateStoragePayload != null && mUpdateStorageAddress != null && mUpdateStorageFees != -1L)
         {
-            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
+            val pk = if (mnemonicsData.pk.isNullOrEmpty())
+            {
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                CryptoUtils.generatePk(mnemonics, "")
+            }
+            else
+            {
+                mnemonicsData.pk
+            }
 
             var postParams = JSONObject()
             postParams.put("src", pkh())
@@ -933,6 +940,7 @@ class ScriptFragment : Fragment()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
                 val sk = CryptoUtils.generateSk(mnemonics, "")
                 val signature = KeyPair.sign(sk, result)
 
@@ -1066,9 +1074,17 @@ class ScriptFragment : Fragment()
         val url = getString(R.string.transfer_forge)
 
         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-        val pk = CryptoUtils.generatePk(mnemonics, "")
+        val pk = if (mnemonicsData.pk.isNullOrEmpty())
+        {
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            CryptoUtils.generatePk(mnemonics, "")
+        }
+        else
+        {
+            mnemonicsData.pk
+        }
 
-        val tz1 = CryptoUtils.generatePkh(mnemonics, "")
+        val tz1 = mnemonicsData.pkh
 
         var postParams = JSONObject()
         postParams.put("src", tz1)
