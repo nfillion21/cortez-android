@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!--
     <color name="colorPrimary">#3E7EEF</color>
     <color name="colorPrimaryDark">#1D2733</color>
-    <!--
-    <color name="colorPrimaryDark">#000000</color>
-    -->
     <color name="colorAccent">#1D2733</color>
+    -->
+
+    <!--
+    <color name="colorPrimary">#ff87af</color>
+    -->
+    <color name="colorPrimary">#ff375f</color>
+    <color name="colorPrimaryDark">#ff375f</color>
+    <color name="colorAccent">@color/tz_light</color>
 
     <!-- theme colors -->
     <color name="theme_blue_primary">#03a9f4</color>
@@ -29,6 +35,10 @@
     <color name="theme_yellow_text">@color/tz_text</color>
     <color name="theme_yellow_primary_dark">#e6d335</color>
 
+    <color name="theme_buu_primary_dark">#ff375f</color>
+    <color name="theme_buu_text">@color/tz_light</color>
+    <color name="theme_buu_primary">#ff87af</color>
+
     <color name="theme_tezos_primary">#3E7EEF</color>
     <color name="theme_tezos_text">@color/tz_light</color>
     <color name="theme_tezos_primary_dark">@color/colorAccent</color>
@@ -45,7 +55,7 @@
 
     <color name="tz_light">@android:color/white</color>
     <color name="tz_text">#606060</color>
-    <color name="tz_blank">@color/colorAccent</color>
+    <color name="tz_dark">#1d2733</color>
     <color name="tz_background">#F5F5FF</color>
     <color name="tz_background_dark">#8F9EC4</color>
 
