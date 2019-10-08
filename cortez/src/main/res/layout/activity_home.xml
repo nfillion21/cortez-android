@@ -17,7 +17,6 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_weight="1"
-            android:background="?attr/colorPrimaryDark"
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/TezosTheme.PopupOverlay"
@@ -69,7 +68,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
-        app:tint="@android:color/white"
+        app:tint="?attr/colorPrimaryDark"
         app:srcCompat="@drawable/ic_transfers_24" />
 
     <android.support.design.widget.FloatingActionButton
@@ -78,7 +77,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
-        app:tint="@android:color/white"
+        app:tint="?attr/colorPrimaryDark"
         app:srcCompat="@drawable/ic_menu_share" />
 
     <android.support.design.widget.FloatingActionButton
@@ -87,7 +86,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
-        app:tint="@android:color/white"
+        app:tint="?attr/colorPrimaryDark"
         app:srcCompat="@drawable/ic_add_black" />
 
 </android.support.design.widget.CoordinatorLayout>

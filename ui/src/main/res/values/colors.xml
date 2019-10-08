@@ -10,9 +10,10 @@
     <!--
     <color name="colorPrimary">#ff87af</color>
     -->
-    <color name="colorPrimary">#ff375f</color>
-    <color name="colorPrimaryDark">#ff375f</color>
+    <color name="colorPrimary">@color/theme_boo_primary_dark</color>
+    <color name="colorPrimaryDark">@color/theme_boo_primary_dark</color>
     <color name="colorAccent">@color/tz_light</color>
+    <color name="colorPrimaryText">@color/theme_boo_text</color>
 
     <!-- theme colors -->
     <color name="theme_blue_primary">#03a9f4</color>
@@ -35,9 +36,9 @@
     <color name="theme_yellow_text">@color/tz_text</color>
     <color name="theme_yellow_primary_dark">#e6d335</color>
 
-    <color name="theme_buu_primary_dark">#ff375f</color>
-    <color name="theme_buu_text">@color/tz_light</color>
-    <color name="theme_buu_primary">#ff87af</color>
+    <color name="theme_boo_primary_dark">#ff375f</color>
+    <color name="theme_boo_text">@color/tz_light</color>
+    <color name="theme_boo_primary">#ff87af</color>
 
     <color name="theme_tezos_primary">#3E7EEF</color>
     <color name="theme_tezos_text">@color/tz_light</color>

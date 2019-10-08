@@ -51,7 +51,7 @@
     </style>
 
     <style name="PaymentScreens.TextAppearance.Title" parent="TextAppearance.AppCompat.Title">
-        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorPrimaryText</item>
     </style>
 
     <style name="PaymentScreens.TextAppearance.WordItem" parent="TextAppearance.AppCompat.Medium">

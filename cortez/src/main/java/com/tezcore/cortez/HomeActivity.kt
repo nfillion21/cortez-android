@@ -77,9 +77,9 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
     */
 
     private val mTezosTheme: CustomTheme = CustomTheme(
-            com.tezos.ui.R.color.theme_buu_primary,
-            com.tezos.ui.R.color.theme_buu_primary_dark,
-            com.tezos.ui.R.color.theme_buu_text)
+            com.tezos.ui.R.color.theme_boo_primary,
+            com.tezos.ui.R.color.theme_boo_primary_dark,
+            com.tezos.ui.R.color.theme_boo_text)
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
