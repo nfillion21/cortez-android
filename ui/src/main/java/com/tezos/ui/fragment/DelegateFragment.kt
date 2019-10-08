@@ -55,6 +55,7 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.DataExtractor
 import com.tezos.core.utils.Utils
 import com.tezos.ui.R
+import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
@@ -614,9 +615,6 @@ class DelegateFragment : Fragment()
 
         if (isRemoveButtonValid() && mDelegatePayload != null && mDelegateFees != null)
         {
-            //val pkhSrc = mnemonicsData.pkh
-            //val pkhDst = mDstAccount?.pubKeyHash
-
             val pk = if (mnemonicsData.pk.isNullOrEmpty())
             {
                 val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
@@ -1057,6 +1055,14 @@ class DelegateFragment : Fragment()
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(activity!!)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
+    }
+
     // volley
     private fun startPostRequestLoadInitRemoveDelegate()
     {
@@ -1067,7 +1073,7 @@ class DelegateFragment : Fragment()
         val pk = if (mnemonicsData.pk.isNullOrEmpty())
         {
             val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            CryptoUtils.generatePk(mnemonics, "")
+            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
         }
         else
         {
