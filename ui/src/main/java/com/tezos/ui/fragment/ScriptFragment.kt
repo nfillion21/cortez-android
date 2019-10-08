@@ -911,19 +911,9 @@ class ScriptFragment : Fragment()
 
         if (isUpdateButtonValid() && mUpdateStoragePayload != null && mUpdateStorageAddress != null && mUpdateStorageFees != -1L)
         {
-            val pk = if (mnemonicsData.pk.isNullOrEmpty())
-            {
-                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                CryptoUtils.generatePk(mnemonics, "")
-            }
-            else
-            {
-                mnemonicsData.pk
-            }
-
             var postParams = JSONObject()
             postParams.put("src", pkh())
-            postParams.put("src_pk", pk)
+            postParams.put("src_pk", mnemonicsData.pk)
             postParams.put("delegate", mUpdateStorageAddress)
             postParams.put("fee", mUpdateStorageFees)
 
@@ -1066,6 +1056,14 @@ class ScriptFragment : Fragment()
         }
     }
 
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(activity!!)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
+    }
+
     // volley
     private fun startPostRequestLoadInitUpdateStorage()
     {
@@ -1077,7 +1075,7 @@ class ScriptFragment : Fragment()
         val pk = if (mnemonicsData.pk.isNullOrEmpty())
         {
             val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            CryptoUtils.generatePk(mnemonics, "")
+            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
         }
         else
         {

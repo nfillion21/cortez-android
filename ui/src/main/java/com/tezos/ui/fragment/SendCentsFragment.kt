@@ -548,7 +548,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             val pk = if (mnemonicsData.pk.isNullOrEmpty())
             {
                 val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                CryptoUtils.generatePk(mnemonics, "")
+                updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
             }
             else
             {
@@ -624,6 +624,14 @@ class SendCentsFragment : AppCompatDialogFragment()
         jsObjRequest.tag = TRANSFER_INIT_TAG
         mInitTransferLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(activity!!)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
     }
 
     private fun onInitTransferLoadComplete(error: VolleyError?)

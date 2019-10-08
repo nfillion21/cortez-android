@@ -577,7 +577,7 @@ class TransferFormFragment : Fragment()
             val pk = if (mnemonicsData.pk.isNullOrEmpty())
             {
                 val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                CryptoUtils.generatePk(mnemonics, "")
+                updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
             }
             else
             {
@@ -735,6 +735,14 @@ class TransferFormFragment : Fragment()
         return ecKeyFormat(ecKey)
     }
 
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(activity!!)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
+    }
+
     // volley
     private fun startPostRequestLoadFinalizeTransfer()
     {
@@ -745,24 +753,13 @@ class TransferFormFragment : Fragment()
         //TODO we got to verify at this very moment.
         if (isPayButtonValid() && mTransferPayload != null)
         {
-
-            val pk = if (mnemonicsData.pk.isNullOrEmpty())
-            {
-                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                CryptoUtils.generatePk(mnemonics, "")
-            }
-            else
-            {
-                mnemonicsData.pk
-            }
-
             var postParams = JSONObject()
 
             val beginsWith = mSrcAccount?.slice(0 until 3)
             if (beginsWith?.toLowerCase() == "kt1")
             {
                 postParams.put("src", mnemonicsData.pkh)
-                postParams.put("src_pk", pk)
+                postParams.put("src_pk", mnemonicsData.pk)
 
                 var dstObjects = JSONArray()
 
@@ -797,7 +794,7 @@ class TransferFormFragment : Fragment()
                 postParams.put("src", mSrcAccount)
 
                 //TODO it won't be pk with contract transfer
-                postParams.put("src_pk", pk)
+                postParams.put("src_pk", mnemonicsData.pk)
 
                 var dstObjects = JSONArray()
 

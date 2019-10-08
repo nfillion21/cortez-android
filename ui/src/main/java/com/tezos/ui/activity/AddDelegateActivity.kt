@@ -235,6 +235,14 @@ class AddDelegateActivity : BaseSecureActivity()
         startPostRequestLoadFinalizeDelegate(mnemonicsData)
     }
 
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(this)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
+    }
+
     // volley
     private fun startPostRequestLoadFinalizeDelegate(mnemonicsData: Storage.MnemonicsData)
     {
@@ -242,21 +250,9 @@ class AddDelegateActivity : BaseSecureActivity()
 
         if (isAddButtonValid() && mDelegatePayload != null)
         {
-            val pkhSrc = mnemonicsData.pkh
-
-            val pk = if (mnemonicsData.pk.isNullOrEmpty())
-            {
-                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                CryptoUtils.generatePk(mnemonics, "")
-            }
-            else
-            {
-                mnemonicsData.pk
-            }
-
             var postParams = JSONObject()
-            postParams.put("src", pkhSrc)
-            postParams.put("src_pk", pk)
+            postParams.put("src", mnemonicsData.pkh)
+            postParams.put("src_pk", mnemonicsData.pk)
 
             var dstObjects = JSONArray()
 
@@ -426,7 +422,7 @@ class AddDelegateActivity : BaseSecureActivity()
         val pk = if (mnemonicsData.pk.isNullOrEmpty())
         {
             val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            CryptoUtils.generatePk(mnemonics, "")
+            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
         }
         else
         {

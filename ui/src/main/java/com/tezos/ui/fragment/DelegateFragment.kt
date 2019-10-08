@@ -615,20 +615,10 @@ class DelegateFragment : Fragment()
 
         if (isRemoveButtonValid() && mDelegatePayload != null && mDelegateFees != null)
         {
-            val pk = if (mnemonicsData.pk.isNullOrEmpty())
-            {
-                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                CryptoUtils.generatePk(mnemonics, "")
-            }
-            else
-            {
-                mnemonicsData.pk
-            }
 
             var postParams = JSONObject()
             postParams.put("src", mnemonicsData.pkh)
-            postParams.put("src_pk", pk)
-
+            postParams.put("src_pk", mnemonicsData.pk)
 
             var dstObjects = JSONArray()
 
@@ -739,19 +729,9 @@ class DelegateFragment : Fragment()
 
         if (isAddButtonValid() && mDelegatePayload != null && mDelegateTezosAddress != null && mDelegateFees != null)
         {
-            val pk = if (mnemonicsData.pk.isNullOrEmpty())
-            {
-                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                CryptoUtils.generatePk(mnemonics, "")
-            }
-            else
-            {
-                mnemonicsData.pk
-            }
-
             var postParams = JSONObject()
             postParams.put("src", mnemonicsData.pkh)
-            postParams.put("src_pk", pk)
+            postParams.put("src_pk", mnemonicsData.pk)
 
             var dstObjects = JSONArray()
 
@@ -956,7 +936,7 @@ class DelegateFragment : Fragment()
         val pk = if (mnemonicsData.pk.isNullOrEmpty())
         {
             val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            CryptoUtils.generatePk(mnemonics, "")
+            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
         }
         else
         {
