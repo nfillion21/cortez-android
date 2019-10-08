@@ -139,7 +139,8 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         val encryptedSecret = EncryptionServices().encrypt(mnemonics)
 
         val pkh = CryptoUtils.generatePkh(mnemonics, "")
-        return Storage.MnemonicsData(pkh, encryptedSecret)
+        val pk = CryptoUtils.generatePk(mnemonics, "")
+        return Storage.MnemonicsData(pkh, pk, encryptedSecret)
     }
 
     private fun createKeys(isFingerprintAllowed: Boolean) {

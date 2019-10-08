@@ -243,10 +243,16 @@ class AddDelegateActivity : BaseSecureActivity()
         if (isAddButtonValid() && mDelegatePayload != null)
         {
             val pkhSrc = mnemonicsData.pkh
-            //val pkhDst = mDstAccount?.pubKeyHash
 
-            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
+            val pk = if (mnemonicsData.pk.isNullOrEmpty())
+            {
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                CryptoUtils.generatePk(mnemonics, "")
+            }
+            else
+            {
+                mnemonicsData.pk
+            }
 
             var postParams = JSONObject()
             postParams.put("src", pkhSrc)
@@ -281,6 +287,7 @@ class AddDelegateActivity : BaseSecureActivity()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
                 val sk = CryptoUtils.generateSk(mnemonics, "")
                 val signature = KeyPair.sign(sk, result)
 
@@ -416,8 +423,15 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val url = getString(R.string.originate_account_url)
 
-        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-        val pk = CryptoUtils.generatePk(mnemonics, "")
+        val pk = if (mnemonicsData.pk.isNullOrEmpty())
+        {
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            CryptoUtils.generatePk(mnemonics, "")
+        }
+        else
+        {
+            mnemonicsData.pk
+        }
 
         val pkhSrc = mnemonicsData.pkh
         //val pkhDst = mDstAccount?.pubKeyHash

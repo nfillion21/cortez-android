@@ -46,6 +46,7 @@ class Storage constructor(context: Context) {
 
     data class MnemonicsData(
             val pkh: String,
+            val pk:String,
             val mnemonics: String) : Serializable
 
     companion object {
@@ -114,7 +115,7 @@ class Storage constructor(context: Context) {
         if (hasMnemonics())
         {
             var mnemonicsDataOld = getMnemonics()
-            val mnemonicsData = MnemonicsData(mnemonicsDataOld.pkh, "")
+            val mnemonicsData = MnemonicsData(mnemonicsDataOld.pkh, mnemonicsDataOld.pk,"")
             this.mnemonics.edit().putString(mnemonicsDataOld.pkh, gson.toJson(mnemonicsData)).apply()
         }
     }
@@ -162,10 +163,11 @@ class Storage constructor(context: Context) {
     {
         internal fun mappedObjectFromBundle(): MnemonicsData
         {
-            val alias = this.bundle.getString("pkh", null)
+            val pkh = this.bundle.getString("pkh", null)
+            val pk = this.bundle.getString("pk", null)
             val seed = this.bundle.getString("mnemonics", null)
 
-            return MnemonicsData(alias, seed)
+            return MnemonicsData(pkh, pk, seed)
         }
     }
 }
