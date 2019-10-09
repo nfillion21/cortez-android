@@ -1,58 +1,58 @@
 <resources>
     <style name="PaymentScreens.PaymentAccountsActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.AddAddressActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.CreateWalletActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.RestoreWalletActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.PaymentFormActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.PublicKeyActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.PasscodeActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.AddressDetailsActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.SimpleScannerActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.OperationsActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.DelegateActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.AddDelegateActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.AddLimitsActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
     <style name="PaymentScreens.KeyManagementActivity" parent="PaymentScreens.NoActionBar">
-        <item name="android:windowBackground">@color/tz_background</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
 </resources>

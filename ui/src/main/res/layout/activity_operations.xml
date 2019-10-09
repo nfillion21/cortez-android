@@ -16,7 +16,7 @@ android:layout_height="match_parent">
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
 
-        app:popupTheme="@style/PaymentScreens.PopupOverlay"
+        app:popupTheme="@style/PaymentScreens.AppBarOverlay"
         tools:targetApi="lollipop">
 
         <TextView android:id="@+id/barTitle"

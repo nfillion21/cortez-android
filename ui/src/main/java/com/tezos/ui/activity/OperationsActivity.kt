@@ -71,15 +71,12 @@ class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.On
 
     private fun bundlesToItems( bundles:ArrayList<Bundle>?): ArrayList<Operation>?
     {
-        if (bundles != null)
+        if (!bundles.isNullOrEmpty())
         {
             var items = ArrayList<Operation>(bundles.size)
-            if (!bundles.isEmpty())
-            {
-                bundles.forEach {
-                    val op = Operation.fromBundle(it)
-                    items.add(op)
-                }
+            bundles.forEach {
+                val op = Operation.fromBundle(it)
+                items.add(op)
             }
             return items
         }
