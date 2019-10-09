@@ -13,7 +13,7 @@
     <TextView android:id="@id/text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/colorAccentText"
         android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
         android:layout_marginBottom="@dimen/spacing_micro"
         android:textStyle="bold"
@@ -23,6 +23,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/spacing_normal"
-        android:textAppearance="?attr/textAppearanceListItemSecondary" />
+        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem" />
+    <!--
+    android:textAppearance="?attr/textAppearanceListItemSecondary" />
+    -->
 
 </LinearLayout>

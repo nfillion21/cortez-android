@@ -21,16 +21,6 @@
     card_view:cardCornerRadius="@dimen/spacing_nano"
     card_view:cardElevation="@dimen/spacing_micro">
 
-    <!--
-    <TextView
-        android:id="@+id/empty_loading_operations_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/colorAccent"
-        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-        tools:ignore="UnusedAttribute,NewApi" />
-    -->
-
     <RelativeLayout
         android:id="@+id/last_operation_layout"
         android:layout_width="match_parent"
@@ -42,7 +32,6 @@
             android:id="@+id/operation_item_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorAccent"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
 
@@ -53,7 +42,7 @@
             android:layout_below="@+id/operation_item_date"
             android:text="@string/amount"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/colorAccentText"
             android:layout_marginTop="@dimen/spacing_double"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -71,7 +60,7 @@
                 android:text="@string/tez"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorAccentText"
                 tools:ignore="UnusedAttribute,NewApi" />
 
             <Space
@@ -84,7 +73,6 @@
                 android:layout_height="wrap_content"
                 android:elevation="@dimen/elevation_header"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:textColor="@color/colorAccent"
                 android:clipToPadding="false"
                 android:visibility="visible"
                 tools:ignore="UnusedAttribute,NewApi" />
@@ -101,7 +89,7 @@
             android:layout_marginTop="@dimen/spacing_double"
             android:text="@string/fee"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/colorAccentText"
             android:clipToPadding="false"
             tools:ignore="UnusedAttribute,NewApi" />
 
@@ -119,7 +107,7 @@
                 android:text="@string/tez"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorAccentText"
                 tools:ignore="UnusedAttribute,NewApi" />
 
             <Space
@@ -132,7 +120,6 @@
                 android:layout_height="wrap_content"
                 android:elevation="@dimen/elevation_header"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:textColor="@color/colorAccent"
                 android:clipToPadding="false"
                 android:visibility="visible"
                 tools:ignore="UnusedAttribute,NewApi" />
