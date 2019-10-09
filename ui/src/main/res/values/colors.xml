@@ -13,7 +13,9 @@
     <color name="colorPrimary">@color/theme_boo_primary_dark</color>
     <color name="colorPrimaryDark">@color/theme_boo_primary_dark</color>
     <color name="colorAccent">@color/tz_light</color>
-    <color name="colorPrimaryText">@color/theme_boo_text</color>
+    <color name="colorTitleText">@color/theme_boo_text</color>
+    <color name="colorAccentText">@color/theme_boo_primary_dark</color>
+    <color name="colorStandardText">@color/theme_boo_text_secondary</color>
 
     <!-- theme colors -->
     <color name="theme_blue_primary">#03a9f4</color>
@@ -38,6 +40,7 @@
 
     <color name="theme_boo_primary_dark">#ff375f</color>
     <color name="theme_boo_text">@color/tz_light</color>
+    <color name="theme_boo_text_secondary">@color/tz_dark</color>
     <color name="theme_boo_primary">#ff87af</color>
 
     <color name="theme_tezos_primary">#3E7EEF</color>
