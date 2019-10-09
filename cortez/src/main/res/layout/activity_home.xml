@@ -26,6 +26,7 @@
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
+            app:tabIndicatorColor="@color/colorTitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -69,6 +70,7 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         app:tint="@color/colorStandardText"
+        app:backgroundTint="@color/colorAccentSecondary"
         app:srcCompat="@drawable/ic_transfers_24" />
 
     <android.support.design.widget.FloatingActionButton
@@ -78,6 +80,7 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         app:tint="@color/colorStandardText"
+        app:backgroundTint="@color/colorAccentSecondary"
         app:srcCompat="@drawable/ic_menu_share" />
 
     <android.support.design.widget.FloatingActionButton
@@ -87,6 +90,7 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         app:tint="@color/colorStandardText"
+        app:backgroundTint="@color/colorAccentSecondary"
         app:srcCompat="@drawable/ic_add_black" />
 
 </android.support.design.widget.CoordinatorLayout>

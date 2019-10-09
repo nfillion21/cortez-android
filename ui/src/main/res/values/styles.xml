@@ -84,4 +84,4 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowFixedWidthMinor">90%</item>
     </style>
-</resources>
+    </resources>
