@@ -131,7 +131,7 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryDarkId()));
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
         Window window = getWindow();
