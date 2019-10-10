@@ -58,7 +58,7 @@
                     android:drawableLeft="@drawable/ic_lock_black"
                     android:drawableStart="@drawable/ic_lock_black"
                     android:drawablePadding="@dimen/spacing_normal"
-                    android:drawableTint="@color/colorAccent"
+                    android:drawableTint="@color/colorTitleText"
                     android:layout_gravity="center"
                     android:enabled="false"
                     android:textStyle="bold"

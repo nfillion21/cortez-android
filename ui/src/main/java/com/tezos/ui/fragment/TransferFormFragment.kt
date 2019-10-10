@@ -1659,7 +1659,7 @@ class TransferFormFragment : Fragment()
             val customThemeBundle = arguments!!.getBundle(CustomTheme.TAG)
             val theme = CustomTheme.fromBundle(customThemeBundle)
             */
-            val theme = CustomTheme(R.color.colorSecondary, R.color.colorAccentSecondary, R.color.colorTitleText)
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             pay_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
             pay_button_layout.isEnabled = true

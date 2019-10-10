@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:paddingBottom="@dimen/spacing_double"
     android:paddingLeft="@dimen/spacing_double"
@@ -200,9 +199,6 @@
                 android:imeOptions="actionDone"
                 android:hint="@string/amount_default"
                 android:inputType="numberDecimal"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="@color/colorStandardText"
-                app:hintTextAppearance="@color/colorPrimaryDark"
                 android:maxLength="15"
                 android:digits="0123456789."
                 android:textSize="@dimen/size_edit_text" />
@@ -247,7 +243,6 @@
                 android:hint="@string/neutral"
                 android:enabled="false"
                 android:inputType="numberDecimal"
-                android:textColorHint="@color/tz_placeholder"
                 android:maxLength="15"
                 android:digits="0123456789."
                 android:textSize="@dimen/size_edit_text" />
@@ -344,7 +339,6 @@
             android:longClickable="false"
             android:enabled="true"
             android:inputType="numberDecimal"
-            android:textColorHint="@color/tz_placeholder"
             android:maxLength="15"
             android:digits="0123456789."
             android:textSize="@dimen/standard_item_text_size" />
@@ -373,7 +367,6 @@
             android:longClickable="false"
             android:enabled="true"
             android:inputType="numberDecimal"
-            android:textColorHint="@color/tz_placeholder"
             android:maxLength="15"
             android:digits="0123456789."
             android:textSize="@dimen/standard_item_text_size" />

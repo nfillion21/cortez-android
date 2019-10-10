@@ -19,7 +19,8 @@
     <color name="colorTitleText">@color/theme_boo_text</color>
     <color name="colorAccentText">@color/theme_boo_primary_dark</color>
     <color name="colorStandardText">@color/theme_boo_text_secondary</color>
-    <color name="colorAccentSecondary">@color/theme_yellow_primary_dark</color>
+    <color name="colorAccentSecondary">@color/theme_yellow_primary</color>
+    <color name="colorAccentSecondaryDark">@color/theme_yellow_primary_dark</color>
 
     <!-- theme colors -->
     <color name="theme_blue_primary">#03a9f4</color>
