@@ -368,8 +368,11 @@ public class AddAddressActivity extends BaseSecureActivity
     {
         if (validate)
         {
-            Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
-            CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+            //Bundle themeBundle = getIntent().getBundleExtra(CustomTheme.TAG);
+            //CustomTheme theme = CustomTheme.fromBundle(themeBundle);
+
+            CustomTheme theme = new CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText);
+            //val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             mAddButton.setTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
             mAddButtonLayout.setEnabled(true);
@@ -406,8 +409,7 @@ public class AddAddressActivity extends BaseSecureActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryId()));
-        //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.getColorPrimaryDarkId()));
 
         Window window = getWindow();
         window.setStatusBarColor(ContextCompat.getColor(this,

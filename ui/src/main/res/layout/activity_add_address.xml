@@ -36,6 +36,7 @@
                         android:paddingBottom="@dimen/spacing_micro"
                         android:layout_width="wrap_content"
                         android:singleLine="true"
+                        android:textColor="@color/colorTitleText"
 
                         android:maxLines="1"
                         style="@style/TextAppearance.AppCompat.Title"
@@ -81,7 +82,7 @@
                             android:layout_height="wrap_content"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                             android:text="@string/add_address_info"
-                            android:textColor="@color/colorAccent"
+                            android:textColor="@color/colorTitleText"
                             android:ellipsize="end" />
 
                         <Button
