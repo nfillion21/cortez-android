@@ -204,8 +204,9 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
         if (validate) {
 
-            final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
-            CustomTheme theme = CustomTheme.fromBundle(customThemeBundle);
+            //final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
+            //CustomTheme theme = CustomTheme.fromBundle(customThemeBundle);
+            CustomTheme theme = new CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText);
 
             mValidateMnemonicsButton.setTextColor(ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
             mValidateMnemonicsButtonLayout.setEnabled(true);
@@ -213,7 +214,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
             Drawable[] drawables = mValidateMnemonicsButton.getCompoundDrawables();
             Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getContext(),R.color.tz_dark));
 
         } else {
 

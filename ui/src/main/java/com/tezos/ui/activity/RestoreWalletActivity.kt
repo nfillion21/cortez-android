@@ -97,7 +97,7 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryDarkId))
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
         val window = window
