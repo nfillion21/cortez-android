@@ -121,7 +121,7 @@ class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreate
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryDarkId))
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
         val window = window
@@ -136,7 +136,7 @@ class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreate
 
         val mCloseButton = findViewById<ImageButton>(R.id.close_button)
         mCloseButton.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        mCloseButton.setOnClickListener { _ ->
+        mCloseButton.setOnClickListener {
             //requests stop in onDestroy.
             finish()
         }

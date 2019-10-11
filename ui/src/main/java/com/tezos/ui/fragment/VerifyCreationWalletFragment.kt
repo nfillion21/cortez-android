@@ -222,8 +222,10 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
         if (validate) {
 
-            val customThemeBundle = arguments!!.getBundle(CustomTheme.TAG)
-            val theme = CustomTheme.fromBundle(customThemeBundle)
+            //val customThemeBundle = arguments!!.getBundle(CustomTheme.TAG)
+            //val theme = CustomTheme.fromBundle(customThemeBundle)
+
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             mValidateWalletButton?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
             mValidateWalletButtonLayout?.isEnabled = true

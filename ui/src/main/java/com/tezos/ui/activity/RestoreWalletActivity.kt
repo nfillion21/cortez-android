@@ -80,7 +80,10 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         setContentView(R.layout.activity_restore_wallet)
 
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(themeBundle)
+        //val theme = CustomTheme.fromBundle(themeBundle)
+
+        val theme = CustomTheme(R.color.colorPrimaryDark, R.color.colorPrimary, R.color.colorTitleText)
+
         initToolbar(theme)
 
         if (savedInstanceState == null)
