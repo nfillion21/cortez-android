@@ -40,6 +40,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:indeterminateTint="@color/colorTitleText"
                     android:visibility="gone"
                     android:layout_weight="0" />
 
@@ -182,7 +183,7 @@
                     android:layout_margin="@dimen/spacing_double"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/colorTitleText"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
                     android:focusable="false"
                     android:focusableInTouchMode="false"

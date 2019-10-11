@@ -88,7 +88,7 @@
                     android:layout_marginLeft="@dimen/spacing_double"
                     android:layout_marginRight="@dimen/spacing_double"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/colorTitleText"
                     android:text="@string/cortez_for_android"
                     tools:ignore="UnusedAttribute,NewApi" />
 

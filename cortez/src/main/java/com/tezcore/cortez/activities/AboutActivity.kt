@@ -79,16 +79,16 @@ class AboutActivity : BaseSecureActivity()
         setContentView(R.layout.activity_about)
 
         val tezosTheme = CustomTheme(
-                com.tezos.ui.R.color.theme_tezos_primary,
-                com.tezos.ui.R.color.theme_tezos_primary_dark,
-                com.tezos.ui.R.color.theme_tezos_text)
+                R.color.colorPrimary,
+                R.color.colorPrimaryDark,
+                R.color.colorTitleText)
 
         initActionBar(tezosTheme)
 
         versionText.text = String.format(getString(R.string.about_version), BuildConfig.VERSION_NAME)
 
         mMailButton = findViewById(R.id.mailButton)
-        mMailButton?.setOnClickListener { _ ->
+        mMailButton?.setOnClickListener {
 
             sendMail()
         }
@@ -129,7 +129,7 @@ class AboutActivity : BaseSecureActivity()
     private fun sendMail()
     {
         val emailIntent = Intent(Intent.ACTION_SENDTO)
-        emailIntent.data = Uri.parse("mailto:cortez@tezcore.com")
+        emailIntent.data = Uri.parse("mailto:cortez@nomadic-labs.com")
 
         try {
             startActivity(emailIntent)
