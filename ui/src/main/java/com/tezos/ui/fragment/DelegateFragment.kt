@@ -1189,8 +1189,10 @@ class DelegateFragment : Fragment()
     {
         if (activity != null)
         {
-            val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
-            val theme = CustomTheme.fromBundle(themeBundle)
+            //val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
+            //val theme = CustomTheme.fromBundle(themeBundle)
+
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             if (validate)
             {
@@ -1228,7 +1230,8 @@ class DelegateFragment : Fragment()
     {
         if (validate)
         {
-            val theme = CustomTheme(R.color.tz_error, R.color.tz_accent, R.color.tz_light)
+            //val theme = CustomTheme(R.color.tz_error, R.color.tz_accent, R.color.tz_light)
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             remove_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
             remove_delegate_button_layout?.isEnabled = true
