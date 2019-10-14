@@ -184,7 +184,7 @@ class AddDelegateActivity : BaseSecureActivity()
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryDarkId))
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
         val window = window
@@ -578,8 +578,9 @@ class AddDelegateActivity : BaseSecureActivity()
 
     private fun validateAddButton(validate: Boolean)
     {
-        val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(themeBundle)
+        //val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
+        //val theme = CustomTheme.fromBundle(themeBundle)
+        val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
         if (validate)
         {
