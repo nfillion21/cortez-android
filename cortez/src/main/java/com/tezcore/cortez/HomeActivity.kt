@@ -253,6 +253,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             }
         }
 
+        fabAddAddress.setOnClickListener {
+            AddAddressActivity.start(this, mTezosTheme)
+        }
+
         initActionBar(mTezosTheme)
     }
 
