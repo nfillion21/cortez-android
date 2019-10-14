@@ -77,6 +77,16 @@
                     android:clipToPadding="false"
                     tools:ignore="UnusedAttribute,NewApi" />
 
+                <TextView
+                    android:id="@+id/mnemonics_info_textview"
+                    android:layout_margin="@dimen/spacing_double"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:text="@string/key_management_info"
+                    android:textColor="@color/colorTitleText"
+                    android:ellipsize="end" />
+
                 <LinearLayout
                     android:id="@+id/without_mnemonics_layout"
                     android:layout_width="match_parent"

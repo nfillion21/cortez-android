@@ -202,11 +202,15 @@ class KeyManagementActivity : BaseSecureActivity()
             val hasMasterkey = Storage(this).getMnemonics().mnemonics.isNotEmpty()
             with_mnemonics_layout.visibility = if (hasMasterkey) View.VISIBLE else View.GONE
             without_mnemonics_layout.visibility = if (hasMasterkey) View.GONE else View.VISIBLE
+
+            mnemonics_info_textview.visibility = View.GONE
         }
         else
         {
             with_mnemonics_layout.visibility = View.GONE
             without_mnemonics_layout.visibility = View.GONE
+
+            mnemonics_info_textview.visibility = View.VISIBLE
         }
     }
 
