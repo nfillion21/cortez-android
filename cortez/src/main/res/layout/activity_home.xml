@@ -90,6 +90,16 @@
         app:srcCompat="@drawable/ic_menu_share" />
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabAddAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/fab_margin"
+        app:tint="@color/colorStandardText"
+        app:backgroundTint="@color/colorAccentSecondary"
+        app:srcCompat="@drawable/ic_add_black" />
+
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabAddDelegate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
