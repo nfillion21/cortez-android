@@ -43,6 +43,12 @@
                 android:text="@string/tab_receive" />
 
             <android.support.design.widget.TabItem
+                android:id="@+id/tabItemAddressBook"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tab_address_book" />
+
+            <android.support.design.widget.TabItem
                 android:id="@+id/tabItemDelegate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

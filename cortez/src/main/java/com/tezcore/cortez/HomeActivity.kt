@@ -393,6 +393,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                 2 ->
                 {
+                    return AddressBookFragment.newInstance(mTezosTheme, null, AddressBookActivity.Selection.SelectionAccountsAndAddresses)
+                }
+
+                3 ->
+                {
                     val hasMnemonics = Storage(this@HomeActivity).hasMnemonics()
 
                     return if (hasMnemonics)
@@ -415,8 +420,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
         override fun getCount(): Int
         {
-            // Show 5 total pages.
-            return 3
+            // Show 4 total pages.
+            return 4
         }
     }
 
