@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.tezcore.ui.activity.DelegateActivity">
+    tools:context=".activity.DelegateActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -28,7 +28,8 @@
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:tabIndicatorColor="@color/colorTitleText">
 
             <android.support.design.widget.TabItem
                 android:id="@+id/tabItemDashboard"
@@ -75,8 +76,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
-        app:tint="@android:color/white"
-        app:srcCompat="@drawable/ic_menu_share" />
+        app:backgroundTint="@color/colorAccentSecondary"
+        app:srcCompat="@drawable/ic_menu_share"
+        app:tint="@color/colorStandardText" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabTransfer"
@@ -84,8 +86,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
-        app:tint="@android:color/white"
-        app:srcCompat="@drawable/ic_transfers_24" />
+        app:backgroundTint="@color/colorAccentSecondary"
+        app:srcCompat="@drawable/ic_transfers_24"
+        app:tint="@color/colorStandardText" />
 
 </android.support.design.widget.CoordinatorLayout>
 

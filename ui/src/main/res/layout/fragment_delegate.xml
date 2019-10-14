@@ -122,14 +122,14 @@
 
                         <TextView
                             android:id="@+id/storage_info_textview"
-                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:text="@string/remove_delegate_info"
-                            android:textColor="@color/colorAccent"
                             android:layout_marginBottom="@dimen/spacing_double"
-                            android:ellipsize="end" />
+                            android:ellipsize="end"
+                            android:text="@string/remove_delegate_info"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:textColor="@color/colorTitleText"
+                            android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/storage_info_address_textview"
