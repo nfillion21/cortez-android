@@ -27,6 +27,7 @@
 
 package com.tezos.ui.fragment
 
+
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
@@ -556,7 +557,7 @@ class ScriptFragment : Fragment()
         //swipe_refresh_script_layout?.isEnabled = false
 
         //TODO uncomment it
-        //startGetRequestLoadContractInfo()
+        startGetRequestLoadContractInfo()
     }
 
     private fun startInitUpdateStorageLoading()
@@ -607,20 +608,17 @@ class ScriptFragment : Fragment()
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete(true)
 
-                    if (mStorage != null && mStorage != JSONObject(getString(R.string.default_storage)).toString())
+                    val mnemonicsData = Storage(activity!!).getMnemonics()
+                    val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
+                    val isDefaultContract = mStorage.toString() == defaultContract.toString()
+
+                    if (mStorage != null && !isDefaultContract)
                     {
                         validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
 
                         startGetRequestBalance()
-                        /*
-                        if (isSecureKeyHashIdentical())
-                        {
-                        }
-                        else
-                        {
-                        }
-                        */
                     }
+
                     else
                     {
                         //TODO I don't need to forge a transfer for now
@@ -740,7 +738,7 @@ class ScriptFragment : Fragment()
                 }
 
         // 100 000 mutez == 0.1 tez
-        if (mSecureHashBalance < 100000)
+        if (mSecureHashBalance != -1L && mSecureHashBalance < 100000)
         {
             if (isSecureKeyHashIdentical())
             {
@@ -786,8 +784,12 @@ class ScriptFragment : Fragment()
 
         if (mStorage != null)
         {
-            //if (mContract!!.delegate != null)
-            if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
+            //check the JSON storage
+            val mnemonicsData = Storage(activity!!).getMnemonics()
+            val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
+            val isDefaultContract = mStorage.toString() == defaultContract.toString()
+
+            if (!isDefaultContract)
             {
                 //TODO at this point, just show that there is no script.
 
