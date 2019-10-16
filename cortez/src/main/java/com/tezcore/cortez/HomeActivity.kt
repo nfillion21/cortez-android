@@ -52,7 +52,7 @@ import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
-import com.tezos.ui.authentication.ContractSelectorFragment
+import com.tezos.ui.fragment.ContractSelectorFragment
 import com.tezos.ui.fragment.AddressBookFragment
 import com.tezos.ui.fragment.ContractsFragment
 import com.tezos.ui.fragment.HomeFragment
