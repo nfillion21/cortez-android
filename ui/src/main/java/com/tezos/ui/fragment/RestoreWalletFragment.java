@@ -350,6 +350,37 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             mAdapter.updateWords(link, null);
         }
 
+        else if (position == 0 && word.equalsIgnoreCase("guitar"))
+        {
+            List<String> link = Arrays.asList(
+                    "guitar",
+                    "ritual",
+                    "clump",
+                    "romance",
+                    "thumb",
+                    "renew",
+                    "faith",
+                    "census",
+                    "regret",
+                    "young",
+                    "illness",
+                    "chronic",
+                    "often",
+                    "rude",
+                    "maximum",
+                    "circle",
+                    "good",
+                    "rude",
+                    "cheap",
+                    "real",
+                    "shy",
+                    "object",
+                    "slim",
+                    "tired" );
+
+            mAdapter.updateWords(link, null);
+        }
+
         boolean isValid = CryptoUtils.validateMnemonics(mAdapter.getWords());
         if (isValid)
         {

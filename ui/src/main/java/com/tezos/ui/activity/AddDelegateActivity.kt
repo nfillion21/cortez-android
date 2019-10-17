@@ -243,7 +243,6 @@ class AddDelegateActivity : BaseSecureActivity()
         return pk
     }
 
-    // volley
     private fun startPostRequestLoadFinalizeDelegate(mnemonicsData: Storage.MnemonicsData)
     {
         val url = getString(R.string.transfer_injection_operation)
@@ -270,7 +269,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
             postParams.put("dsts", dstObjects)
 
-            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (isOriginatePayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -449,6 +448,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
         var dstObjects = JSONArray()
 
+        
         val originationContract = String.format(getString(R.string.origination_contract), pkhSrc)
 
         val json = JSONObject(originationContract)

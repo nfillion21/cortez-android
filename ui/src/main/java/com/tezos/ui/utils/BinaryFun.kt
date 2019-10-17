@@ -882,6 +882,7 @@ private fun isDelegationTagCorrect(payload: ByteArray, src:String):Long
     return -1L
 }
 
+
 private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balanceParam:Long, delegateParam:String):Long
 {
     var i = 0
@@ -1057,6 +1058,49 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
 
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
 
+fun isOriginatePayloadValid(payload:String, params: JSONObject):Boolean
+{
+    var isValid = false
+    if (payload != null && params != null)
+    {
+        val data = payload.hexToByteArray()
+
+        val obj = params["dsts"] as JSONArray
+        val dstObj = obj[0] as JSONObject
+
+        val dataField = data.slice(32 until data.size).toByteArray()
+
+        val revealFees = isRevealTagCorrect(dataField, params["src"] as String, params["src_pk"] as String)
+        if (revealFees.first != -1L)
+        {
+            val transactionByteArray = revealFees.second
+
+            val srcParam = params["src"] as String
+
+            val originationFees = isOriginationTagCorrect(transactionByteArray!!, srcParam, dstObj["balance"] as Long, dstObj["delegate"] as String)
+            if (originationFees != -1L)
+            {
+                val totalFees = revealFees.first + originationFees
+                if (totalFees == dstObj["fee"])
+                {
+                    return true
+                }
+            }
+        }
+        else
+        {
+            val originationFees = isOriginationTagCorrect(dataField, params["src"] as String, dstObj["balance"] as Long, dstObj["delegate"] as String)
+            if (originationFees != -1L)
+            {
+                if (originationFees == dstObj["fee"])
+                {
+                    return true
+                }
+            }
+        }
+    }
+    return isValid
+}
 
 fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
 {
@@ -1076,42 +1120,11 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
             val transactionByteArray = revealFees.second
 
             val srcParam = params["src"] as String
-            val dstParam = dstObj["dst"] as String
 
-            val dstAccount =
-                    if (dstObj.has("dst_account"))
-                    {
-                        dstObj["dst_account"] as String?
-                    }
-                    else
-                    {
-                        null
-                    }
-
-            val amountTransfer =
-                    if (dstObj.has("transfer_amount"))
-                    {
-                        dstObj["transfer_amount"] as Long?
-                    }
-                    else
-                    {
-                        null
-                    }
-
-            val contractType =
-                    if (dstObj.has("contract_type"))
-                    {
-                        dstObj["contract_type"] as String?
-                    }
-                    else
-                    {
-                        null
-                    }
-
-            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType)
-            if (transactionFees != -1L)
+            val originationFees = isOriginationTagCorrect(transactionByteArray!!, srcParam, dstObj["balance"] as Long, dstObj["delegate"] as String)
+            if (originationFees != -1L)
             {
-                val totalFees = revealFees.first + transactionFees
+                val totalFees = revealFees.first + originationFees
                 if (totalFees == dstObj["fee"])
                 {
                     return true
@@ -1120,40 +1133,10 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
         }
         else
         {
-            val dstAccount =
-                    if (dstObj.has("dst_account"))
-                    {
-                        dstObj["dst_account"] as String?
-                    }
-                    else
-                    {
-                        null
-                    }
-
-            val amountTransfer =
-                    if (dstObj.has("transfer_amount"))
-                    {
-                        dstObj["transfer_amount"] as Long?
-                    }
-                    else
-                    {
-                        null
-                    }
-
-            val contractType =
-                    if (dstObj.has("contract_type"))
-                    {
-                        dstObj["contract_type"] as String?
-                    }
-                    else
-                    {
-                        null
-                    }
-
-            val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType)
-            if (transactionFees != -1L)
+            val originationFees = isOriginationTagCorrect(dataField, params["src"] as String, dstObj["balance"] as Long, dstObj["delegate"] as String)
+            if (originationFees != -1L)
             {
-                if (transactionFees == dstObj["fee"])
+                if (originationFees == dstObj["fee"])
                 {
                     return true
                 }
