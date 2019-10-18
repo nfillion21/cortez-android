@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!--
     <color name="colorPrimary">#3E7EEF</color>
     <color name="colorPrimaryDark">#1D2733</color>
-    <!--
-    <color name="colorPrimaryDark">#000000</color>
-    -->
     <color name="colorAccent">#1D2733</color>
+    -->
+
+    <!--
+    <color name="colorPrimary">#ff87af</color>
+    -->
+    <color name="colorBackground">@color/theme_boo_primary_dark</color>
+    <color name="colorPrimary">@color/theme_boo_primary_dark</color>
+    <color name="colorPrimaryDark">@color/theme_boo_primary_dark</color>
+    <color name="colorSecondary">@color/theme_boo_primary</color>
+    <color name="colorTertiary">@color/theme_boo_tertiary</color>
+    <color name="colorAccent">@color/theme_boo_text_secondary</color>
+    <color name="colorTitleText">@color/theme_boo_text</color>
+    <color name="colorAccentText">@color/theme_boo_primary_dark</color>
+    <color name="colorStandardText">@color/theme_boo_text_secondary</color>
+    <color name="colorAccentSecondary">@color/theme_yellow_primary</color>
+    <color name="colorAccentSecondaryDark">@color/theme_yellow_primary_dark</color>
 
     <!-- theme colors -->
     <color name="theme_blue_primary">#03a9f4</color>
@@ -29,6 +43,12 @@
     <color name="theme_yellow_text">@color/tz_text</color>
     <color name="theme_yellow_primary_dark">#e6d335</color>
 
+    <color name="theme_boo_primary_dark">#ff375f</color>
+    <color name="theme_boo_text">@color/tz_light</color>
+    <color name="theme_boo_text_secondary">@color/tz_dark</color>
+    <color name="theme_boo_primary">#ff87af</color>
+    <color name="theme_boo_tertiary">#ff5a5f</color>
+
     <color name="theme_tezos_primary">#3E7EEF</color>
     <color name="theme_tezos_text">@color/tz_light</color>
     <color name="theme_tezos_primary_dark">@color/colorAccent</color>
@@ -45,7 +65,7 @@
 
     <color name="tz_light">@android:color/white</color>
     <color name="tz_text">#606060</color>
-    <color name="tz_blank">@color/colorAccent</color>
+    <color name="tz_dark">#1d2733</color>
     <color name="tz_background">#F5F5FF</color>
     <color name="tz_background_dark">#8F9EC4</color>
 

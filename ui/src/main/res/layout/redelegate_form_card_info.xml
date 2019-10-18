@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="@string/address_delegate"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/colorPrimaryDark"
             android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
             tools:ignore="UnusedAttribute,NewApi" />
 
@@ -48,7 +48,7 @@
         android:layout_height="wrap_content"
         android:text="@string/fee_minimum"
         android:textStyle="bold"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/colorPrimaryDark"
         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
         tools:ignore="UnusedAttribute,NewApi" />
 
@@ -67,7 +67,7 @@
             android:layout_marginEnd="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/colorPrimaryDark"
             android:clipToPadding="false"
             tools:ignore="UnusedAttribute,NewApi" />
 

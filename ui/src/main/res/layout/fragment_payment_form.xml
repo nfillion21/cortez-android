@@ -57,11 +57,12 @@
 
                     android:drawableLeft="@drawable/ic_lock_black"
                     android:drawableStart="@drawable/ic_lock_black"
-                    android:drawableTint="@color/tz_light"
                     android:drawablePadding="@dimen/spacing_normal"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                    android:drawableTint="@color/colorTitleText"
                     android:layout_gravity="center"
                     android:enabled="false"
+                    android:textStyle="bold"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
 
                     android:background="@null"
                     android:clickable="false"
@@ -77,6 +78,7 @@
                 android:layout_width="@dimen/min_height_touch_target"
                 android:layout_height="@dimen/min_height_touch_target"
                 android:layout_centerInParent="true"
+                android:indeterminateTint="@color/colorTitleText"
                 android:visibility="invisible"
                 tools:ignore="UnusedAttribute" />
 

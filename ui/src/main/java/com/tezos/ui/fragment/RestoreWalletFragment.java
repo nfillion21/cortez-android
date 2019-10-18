@@ -204,8 +204,9 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
         if (validate) {
 
-            final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
-            CustomTheme theme = CustomTheme.fromBundle(customThemeBundle);
+            //final Bundle customThemeBundle = getArguments().getBundle(CustomTheme.TAG);
+            //CustomTheme theme = CustomTheme.fromBundle(customThemeBundle);
+            CustomTheme theme = new CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText);
 
             mValidateMnemonicsButton.setTextColor(ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
             mValidateMnemonicsButtonLayout.setEnabled(true);
@@ -213,7 +214,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
             Drawable[] drawables = mValidateMnemonicsButton.getCompoundDrawables();
             Drawable wrapDrawable = DrawableCompat.wrap(drawables[0]);
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getActivity(), theme.getTextColorPrimaryId()));
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(getContext(),R.color.tz_dark));
 
         } else {
 
@@ -255,7 +256,8 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
         //konami code
 
-        if (position == 23 && word.equalsIgnoreCase("zebra")){
+        if (position == 23 && word.equalsIgnoreCase("zebra"))
+        {
 
             List<String> zebras = Arrays.asList(
                     "zebra",
@@ -285,7 +287,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
             mAdapter.updateWords(zebras, null);
         }
-        /*
         else if (position == 0 && word.equalsIgnoreCase("link"))
         {
 
@@ -317,38 +318,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
             mAdapter.updateWords(link, null);
         }
-
-        else if (position == 0 && word.equalsIgnoreCase("green"))
-        {
-            List<String> link = Arrays.asList(
-                    "green",
-                    "kind",
-                    "inquiry",
-                    "alarm",
-                    "razor",
-                    "zone",
-                    "benefit",
-                    "again",
-                    "ski",
-                    "erase",
-                    "another",
-                    "wide",
-                    "liberty",
-                    "multiply",
-                    "pen",
-                    "risk",
-                    "love",
-                    "corn",
-                    "monster",
-                    "honey",
-                    "level",
-                    "poem",
-                    "position",
-                    "spell" );
-
-            mAdapter.updateWords(link, null);
-        }
-        */
 
         boolean isValid = CryptoUtils.validateMnemonics(mAdapter.getWords());
         if (isValid)

@@ -80,7 +80,10 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         setContentView(R.layout.activity_restore_wallet)
 
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(themeBundle)
+        //val theme = CustomTheme.fromBundle(themeBundle)
+
+        val theme = CustomTheme(R.color.colorPrimaryDark, R.color.colorPrimary, R.color.colorTitleText)
+
         initToolbar(theme)
 
         if (savedInstanceState == null)
@@ -97,7 +100,7 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryDarkId))
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
         val window = window
@@ -139,7 +142,8 @@ class RestoreWalletActivity : BaseSecureActivity(), RestoreWalletFragment.OnWord
         val encryptedSecret = EncryptionServices().encrypt(mnemonics)
 
         val pkh = CryptoUtils.generatePkh(mnemonics, "")
-        return Storage.MnemonicsData(pkh, encryptedSecret)
+        val pk = CryptoUtils.generatePk(mnemonics, "")
+        return Storage.MnemonicsData(pkh, pk, encryptedSecret)
     }
 
     private fun createKeys(isFingerprintAllowed: Boolean) {

@@ -60,6 +60,7 @@
                                 android:id="@+id/nav_progress_balance"
                                 style="?android:attr/progressBarStyleSmall"
                                 android:layout_gravity="bottom"
+                                android:indeterminateTint="@color/colorTitleText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="0"
@@ -88,7 +89,7 @@
                                     android:text="@string/tez"
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                                     android:textStyle="bold"
-                                    android:textColor="@color/colorPrimary"
+                                    android:textColor="@color/colorAccentText"
                                     tools:ignore="UnusedAttribute,NewApi" />
                                 <View
                                     android:layout_height="0dp"
@@ -98,7 +99,6 @@
                                     android:id="@+id/empty_loading_balance_textview"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:textColor="@color/colorAccent"
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
                                     android:focusable="false"
                                     android:focusableInTouchMode="false"
@@ -109,7 +109,6 @@
                                     android:layout_height="wrap_content"
                                     android:elevation="@dimen/elevation_header"
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-                                    android:textColor="@color/colorAccent"
                                     android:clipToPadding="false"
                                     android:visibility="gone"
                                     tools:ignore="UnusedAttribute,NewApi" />
@@ -138,6 +137,7 @@
                                 android:id="@+id/nav_progress_operations"
                                 style="?android:attr/progressBarStyleSmall"
                                 android:layout_gravity="bottom"
+                                android:indeterminateTint="@color/colorTitleText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="0"
@@ -194,7 +194,6 @@
                             android:visibility="visible"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorAccent"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                             tools:ignore="UnusedAttribute,NewApi" />
 
@@ -208,7 +207,6 @@
                                 android:id="@+id/operation_date_textview"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/colorAccent"
                                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                                 tools:ignore="UnusedAttribute,NewApi" />
 
@@ -250,7 +248,6 @@
                                     android:layout_height="wrap_content"
                                     android:elevation="@dimen/elevation_header"
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                                    android:textColor="@color/colorAccent"
                                     android:clipToPadding="false"
                                     android:visibility="visible"
                                     tools:ignore="UnusedAttribute,NewApi" />
@@ -298,7 +295,6 @@
                                     android:layout_height="wrap_content"
                                     android:elevation="@dimen/elevation_header"
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                                    android:textColor="@color/colorAccent"
                                     android:clipToPadding="false"
                                     android:visibility="visible"
                                     tools:ignore="UnusedAttribute,NewApi" />
@@ -333,6 +329,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
+                            android:tint="@color/colorTitleText"
                             app:srcCompat="@drawable/ic_logo_tezos" />
                     </RelativeLayout>
 

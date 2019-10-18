@@ -182,9 +182,9 @@ open class HomeFragment : Fragment()
                 //Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
 
                 val mTezosTheme = CustomTheme(
-                        R.color.theme_tezos_primary,
-                        R.color.theme_tezos_primary_dark,
-                        R.color.theme_tezos_text)
+                        R.color.theme_boo_primary,
+                        R.color.theme_boo_primary_dark,
+                        R.color.theme_boo_text)
 
                 val bundles = itemsToBundles(mRecyclerViewItems)
                 OperationsActivity.start(activity!!, bundles!!, mTezosTheme)
@@ -507,7 +507,7 @@ open class HomeFragment : Fragment()
     // volley
     private fun startGetRequestLoadOperations()
     {
-        cancelRequest(true, true)
+        cancelRequest(operations = true, balance = true)
 
         mGetHistoryLoading = true
 

@@ -67,6 +67,7 @@ import kotlinx.android.synthetic.main.limits_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
+import kotlin.math.roundToLong
 
 /**
  * Created by nfillion on 26/02/19.
@@ -92,7 +93,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
     companion object
     {
-        var ADD_DELEGATE_REQUEST_CODE = 0x3100 // arbitrary int
+        var ADD_DSL_REQUEST_CODE = 0x3500 // arbitrary int
 
         private const val DELEGATE_INIT_TAG = "delegate_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
@@ -117,7 +118,7 @@ class AddLimitsActivity : BaseSecureActivity()
         fun start(activity: Activity, theme: CustomTheme)
         {
             val starter = getStartIntent(activity, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, ADD_DELEGATE_REQUEST_CODE, null)
+            ActivityCompat.startActivityForResult(activity, starter, ADD_DSL_REQUEST_CODE, null)
         }
     }
 
@@ -265,6 +266,14 @@ class AddLimitsActivity : BaseSecureActivity()
         startPostRequestLoadFinalizeDelegate(mnemonicsData)
     }
 
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(this)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
+    }
+
     // volley
     private fun startPostRequestLoadFinalizeDelegate(mnemonicsData: Storage.MnemonicsData)
     {
@@ -272,22 +281,16 @@ class AddLimitsActivity : BaseSecureActivity()
 
         if (isAddButtonValid() && mDelegatePayload != null)
         {
-            val pkhSrc = mnemonicsData.pkh
-            //val pkhDst = mDstAccount?.pubKeyHash
-
-            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
             var postParams = JSONObject()
-            postParams.put("src", pkhSrc)
-            postParams.put("src_pk", pk)
+            postParams.put("src", mnemonicsData.pkh)
+            postParams.put("src_pk", mnemonicsData.pk)
 
             var dstObjects = JSONArray()
 
             var dstObject = JSONObject()
             //dstObject.put("dst", pkhDst)
 
-            val mutezAmount = (mDelegateAmount*1000000.0).toLong()
+            val mutezAmount = (mDelegateAmount*1000000.0).roundToLong()
             dstObject.put("balance", mutezAmount)
 
             dstObject.put("fee", mDelegateFees)
@@ -309,6 +312,7 @@ class AddLimitsActivity : BaseSecureActivity()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
                 val sk = CryptoUtils.generateSk(mnemonics, "")
                 val signature = KeyPair.sign(sk, result)
 
@@ -330,7 +334,7 @@ class AddLimitsActivity : BaseSecureActivity()
                             //there's no need to do anything because we call finish()
                             //onFinalizeDelegationLoadComplete(null)
 
-                            setResult(R.id.add_address_succeed, null)
+                            setResult(R.id.add_dsl_succeed, null)
                             finish()
 
                             //TODO create the spending key
@@ -444,8 +448,15 @@ class AddLimitsActivity : BaseSecureActivity()
 
         val url = getString(R.string.originate_account_url)
 
-        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-        val pk = CryptoUtils.generatePk(mnemonics, "")
+        val pk = if (mnemonicsData.pk.isNullOrEmpty())
+        {
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+        }
+        else
+        {
+            mnemonicsData.pk
+        }
 
         val pkhSrc = mnemonicsData.pkh
         //val pkhDst = mDstAccount?.pubKeyHash
@@ -473,9 +484,9 @@ class AddLimitsActivity : BaseSecureActivity()
         dstObject.put("script", json)
 
         //TODO be careful, do it in mutez.
-        dstObject.put("credit", (mDelegateAmount*1000000L).toLong().toString())
+        dstObject.put("credit", (mDelegateAmount*1000000L).roundToLong().toString())
 
-        dstObject.put("delegatable", true)
+        //dstObject.put("delegatable", true)
 
         dstObjects.put(dstObject)
 
@@ -789,7 +800,7 @@ class AddLimitsActivity : BaseSecureActivity()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mDelegateFees = longTransferFee.toLong()
+                    mDelegateFees = longTransferFee.roundToLong()
                     return true
                 }
             }

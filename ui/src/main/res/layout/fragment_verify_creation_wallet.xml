@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                 android:text="@string/verify_creation_wallet_info"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/colorTitleText"
                 android:ellipsize="end" />
         </LinearLayout>
 
@@ -69,7 +69,6 @@
 
                     android:drawableLeft="@drawable/ic_lock_black"
                     android:drawableStart="@drawable/ic_lock_black"
-                    android:drawableTint="@color/tz_light"
                     android:drawablePadding="@dimen/spacing_normal"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
                     android:layout_gravity="center"

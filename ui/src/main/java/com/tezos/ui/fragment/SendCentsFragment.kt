@@ -489,6 +489,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             dstObject.put("dst", arguments!!.getString(CONTRACT_PUBLIC_KEY))
             dstObject.put("amount", "0")
 
+            /*
             val packSpending = Pack.prim(
                     Pack.pair(
                             Pack.listOf(
@@ -509,8 +510,10 @@ class SendCentsFragment : AppCompatDialogFragment()
             val salt = getSalt()
             val packSalt = Pack.prim(Pack.int(salt!!))
             val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
+            */
 
-            val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
+            //val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
+            val signedData = KeyPair.b2b(ByteArray(0))
 
             val signature = EncryptionServices().sign(signedData)
             val compressedSignature = compressFormat(signature)
@@ -542,8 +545,15 @@ class SendCentsFragment : AppCompatDialogFragment()
         }
         else
         {
-            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
+            val pk = if (mnemonicsData.pk.isNullOrEmpty())
+            {
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+            }
+            else
+            {
+                mnemonicsData.pk
+            }
 
             postParams.put("src", mnemonicsData.pkh)
             postParams.put("src_pk", pk)
@@ -614,6 +624,14 @@ class SendCentsFragment : AppCompatDialogFragment()
         jsObjRequest.tag = TRANSFER_INIT_TAG
         mInitTransferLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(activity!!)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
     }
 
     private fun onInitTransferLoadComplete(error: VolleyError?)

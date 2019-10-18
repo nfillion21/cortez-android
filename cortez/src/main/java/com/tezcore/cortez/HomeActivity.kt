@@ -31,8 +31,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.support.design.widget.Snackbar
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
@@ -47,39 +45,41 @@ import android.view.MenuItem
 import android.view.ViewGroup
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
-import com.tezcore.ui.activity.DelegateActivity
+import com.tezos.ui.activity.DelegateActivity
 import com.tezos.android.R
-import com.tezos.core.Pack
 import com.tezos.core.crypto.CryptoUtils
-import com.tezos.core.int
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.prim
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.activity.*
-import com.tezos.ui.authentication.ContractSelectorFragment
-import com.tezos.ui.fragment.*
+import com.tezos.ui.fragment.ContractSelectorFragment
+import com.tezos.ui.fragment.AddressBookFragment
+import com.tezos.ui.fragment.ContractsFragment
+import com.tezos.ui.fragment.HomeFragment
+import com.tezos.ui.fragment.SharingAddressFragment
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.hexToByteArray
-import com.tezos.ui.utils.toNoPrefixHexString
 import kotlinx.android.synthetic.main.activity_home.*
 import java.math.BigInteger
-import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.Signature
 import java.security.interfaces.ECPublicKey
-import java.security.spec.ECGenParameterSpec
-import java.time.Instant
-import java.util.*
 
 
 class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedListener, HomeFragment.HomeListener, ContractsFragment.OnDelegateAddressSelectedListener, ContractSelectorFragment.OnContractSelectorListener
 {
 
+    /*
     private val mTezosTheme: CustomTheme = CustomTheme(
             com.tezos.ui.R.color.theme_tezos_primary,
             com.tezos.ui.R.color.theme_tezos_primary_dark,
             com.tezos.ui.R.color.theme_tezos_text)
+    */
+
+    private val mTezosTheme: CustomTheme = CustomTheme(
+            com.tezos.ui.R.color.theme_boo_primary,
+            com.tezos.ui.R.color.theme_boo_primary_dark,
+            com.tezos.ui.R.color.theme_boo_text)
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
@@ -126,55 +126,55 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                         if (isPasswordSaved)
                         {
                             fabTransfer.show()
-                            fabSharing.hide()
-                            fabAddDelegate.hide()
                         }
                         else
                         {
                             fabTransfer.hide()
-                            fabSharing.hide()
-                            fabAddDelegate.hide()
                         }
+
+                        fabSharing.hide()
+                        fabAddAddress.hide()
+                        fabAddDelegate.hide()
                     }
 
                     1 ->
                     {
                         if (isPasswordSaved)
                         {
-                            fabTransfer.hide()
-                            fabSharing.show()
-                            fabAddDelegate.hide()
+                            fabTransfer.show()
                         }
                         else
                         {
                             fabTransfer.hide()
-                            fabSharing.hide()
-                            fabAddDelegate.hide()
                         }
+
+                        fabAddAddress.hide()
+                        fabSharing.hide()
+                        fabAddDelegate.hide()
                     }
 
                     2 ->
                     {
-                        if (isPasswordSaved)
-                        {
-                            fabTransfer.hide()
-                            fabSharing.hide()
-                            fabAddDelegate.show()
-                        }
-                        else
-                        {
-                            fabTransfer.hide()
-                            fabSharing.hide()
-                            fabAddDelegate.hide()
-                        }
+                        fabAddAddress.show()
+                        fabTransfer.hide()
+                        fabSharing.hide()
+                        fabAddDelegate.hide()
                     }
 
                     3 ->
                     {
-                        //TODO hide everything for now
+                        if (isPasswordSaved)
+                        {
+                            fabAddDelegate.show()
+                        }
+                        else
+                        {
+                            fabAddDelegate.hide()
+                        }
+
+                        fabAddAddress.hide()
                         fabTransfer.hide()
                         fabSharing.hide()
-                        fabAddDelegate.hide()
                     }
 
                     else ->
@@ -253,6 +253,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             }
         }
 
+        fabAddAddress.setOnClickListener {
+            AddAddressActivity.start(this, mTezosTheme)
+        }
+
         initActionBar(mTezosTheme)
     }
 
@@ -321,54 +325,54 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     if (isPasswordSaved)
                     {
                         fabTransfer.show()
-                        fabSharing.hide()
-                        fabAddDelegate.hide()
                     }
                     else
                     {
                         fabTransfer.hide()
-                        fabSharing.hide()
-                        fabAddDelegate.hide()
                     }
+
+                    fabSharing.hide()
+                    fabAddDelegate.hide()
+                    fabAddAddress.hide()
                 }
 
                 1 ->
                 {
                     if (isPasswordSaved)
                     {
-                        fabTransfer.hide()
                         fabSharing.show()
-                        fabAddDelegate.hide()
                     }
                     else
                     {
-                        fabTransfer.hide()
                         fabSharing.hide()
-                        fabAddDelegate.hide()
                     }
+
+                    fabTransfer.hide()
+                    fabAddDelegate.hide()
+                    fabAddAddress.hide()
                 }
 
                 2 ->
                 {
-                    if (isPasswordSaved)
-                    {
-                        fabTransfer.hide()
-                        fabSharing.hide()
-                        fabAddDelegate.show()
-                    }
-                    else
-                    {
-                        fabTransfer.hide()
-                        fabSharing.hide()
-                        fabAddDelegate.hide()
-                    }
+                    fabAddAddress.show()
+                    fabTransfer.hide()
+                    fabSharing.hide()
+                    fabAddDelegate.hide()
                 }
 
                 3 ->
                 {
+                    if (isPasswordSaved)
+                    {
+                        fabAddDelegate.show()
+                    }
+                    else
+                    {
+                        fabAddDelegate.hide()
+                    }
                     fabTransfer.hide()
                     fabSharing.hide()
-                    fabAddDelegate.hide()
+                    fabAddAddress.hide()
                 }
 
                 else ->
@@ -393,6 +397,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
                 2 ->
                 {
+                    return AddressBookFragment.newInstance(mTezosTheme, null, AddressBookActivity.Selection.SelectionAccountsAndAddresses)
+                }
+
+                3 ->
+                {
                     val hasMnemonics = Storage(this@HomeActivity).hasMnemonics()
 
                     return if (hasMnemonics)
@@ -415,8 +424,8 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
         override fun getCount(): Int
         {
-            // Show 5 total pages.
-            return 3
+            // Show 4 total pages.
+            return 4
         }
     }
 
@@ -506,6 +515,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
             }
 
+            AddLimitsActivity.ADD_DSL_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.add_dsl_succeed)
+                {
+                    showSnackBar(getString(R.string.dsl_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
+            }
+
             else ->
             {
             }
@@ -584,7 +601,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
 
         //toolbar.title = getString(R.string.app_name)
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryDarkId))
         toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
 
         setSupportActionBar(toolbar)

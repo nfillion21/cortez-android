@@ -10,9 +10,9 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <item name="android:textColorPrimary">@android:color/black</item>
-        <item name="android:textColorPrimaryInverse">@color/tz_light</item>
-        <item name="android:statusBarColor" tools:targetApi="lollipop">@color/tz_primary_dark</item>
+        <item name="android:textColorPrimary">@color/colorStandardText</item>
+        <item name="android:textColorPrimaryInverse">@color/colorStandardText</item>
+        <item name="android:statusBarColor" tools:targetApi="lollipop">@color/colorPrimaryDark</item>
     </style>
 
     <style name="PaymentScreens.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
@@ -51,7 +51,7 @@
     </style>
 
     <style name="PaymentScreens.TextAppearance.Title" parent="TextAppearance.AppCompat.Title">
-        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorTitleText</item>
     </style>
 
     <style name="PaymentScreens.TextAppearance.WordItem" parent="TextAppearance.AppCompat.Medium">
@@ -85,4 +85,4 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowFixedWidthMinor">90%</item>
     </style>
-</resources>
+    </resources>

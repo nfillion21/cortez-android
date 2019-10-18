@@ -38,7 +38,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                     android:text="@string/mnemonic_info"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/colorTitleText"
                     android:layout_marginBottom="@dimen/spacing_double"
                     android:ellipsize="end" />
 
@@ -58,12 +58,12 @@
                             android:id="@+id/mnemonics_textview"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:textColor="@color/colorStandardText"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                             />
                     </LinearLayout>
 
                     <android.support.design.widget.FloatingActionButton
-                        xmlns:android="http://schemas.android.com/apk/res/android"
                         xmlns:app="http://schemas.android.com/apk/res-auto"
                         android:id="@+id/renew"
                         android:layout_below="@id/mnemonics_layout"
@@ -71,9 +71,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/autorenew_white_24"
+                        android:tint="@color/colorStandardText"
+                        app:backgroundTint="@color/colorAccentSecondary"
                         android:layout_marginTop="@dimen/spacing_normal"
-                        android:layout_marginBottom="@dimen/spacing_double"
-                        app:backgroundTint="@color/colorAccent" />
+                        android:layout_marginBottom="@dimen/spacing_double" />
 
                 </RelativeLayout>
 
@@ -95,7 +96,8 @@
             android:layout_height="wrap_content"
             android:minHeight="?android:attr/actionBarSize"
             android:text="@string/mnemonics_backed_up"
-            android:textColor="@color/tz_accent"
+            android:buttonTint="@color/colorTitleText"
+            android:textColor="@color/colorTitleText"
             android:textStyle="bold"
             android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
             />
@@ -117,7 +119,6 @@
 
                 android:drawableLeft="@drawable/ic_lock_black"
                 android:drawableStart="@drawable/ic_lock_black"
-                android:drawableTint="@color/tz_light"
                 android:drawablePadding="@dimen/spacing_normal"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
                 android:layout_gravity="center"

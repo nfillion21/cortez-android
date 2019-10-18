@@ -71,6 +71,7 @@ import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
 import kotlin.collections.HashMap
 import kotlin.collections.set
+import kotlin.math.roundToLong
 
 /**
  * Created by nfillion on 20/04/16.
@@ -515,6 +516,7 @@ class TransferFormFragment : Fragment()
             dstObject.put("dst", arguments!!.getString(Address.TAG))
             dstObject.put("amount", "0")
 
+            /*
             val packSpending = Pack.prim(
                     Pack.pair(
                             Pack.listOf(
@@ -535,8 +537,10 @@ class TransferFormFragment : Fragment()
             val salt = getSalt(isRecipient = false)
             val packSalt = Pack.prim(Pack.int(salt!!))
             val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
+            */
 
-            val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
+            //val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
+            val signedData = KeyPair.b2b("hello".toByteArray())
 
             val signature = EncryptionServices().sign(signedData)
             val compressedSignature = compressFormat(signature)
@@ -552,7 +556,7 @@ class TransferFormFragment : Fragment()
             //edsig (p2sig)
 
             val spendingLimitContract = String.format(resScript.toString(),
-                    (mTransferAmount*1000000).toLong().toString(),
+                    (mTransferAmount*1000000).roundToLong().toString(),
                     mDstAccount,
                     tz3,
                     p2pk,
@@ -568,30 +572,72 @@ class TransferFormFragment : Fragment()
         }
         else
         {
-            val seed = Storage(activity!!).getMnemonics()
+            val mnemonicsData = Storage(activity!!).getMnemonics()
 
-            val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
-            postParams.put("src", mSrcAccount)
-            postParams.put("src_pk", pk)
-
-            var dstObjects = JSONArray()
-
-            var dstObject = JSONObject()
-            dstObject.put("dst", mDstAccount)
-            dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
-
-
-            //TODO handle that, we need to load storage from recipient
-            if (mRecipientKT1withCode)
+            val pk = if (mnemonicsData.pk.isNullOrEmpty())
             {
-                dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+            }
+            else
+            {
+                mnemonicsData.pk
             }
 
-            dstObjects.put(dstObject)
+            val beginsWith = mSrcAccount?.slice(0 until 3)
+            if (beginsWith?.toLowerCase() == "kt1")
+            {
+                postParams.put("src", mnemonicsData.pkh)
+                postParams.put("src_pk", pk)
 
-            postParams.put("dsts", dstObjects)
+                var dstObjects = JSONArray()
+
+                var dstObject = JSONObject()
+                dstObject.put("dst", mSrcAccount)
+                dstObject.put("amount", (0).toLong().toString())
+
+                dstObject.put("entrypoint", "do")
+
+                val destBeginsWith = mDstAccount?.slice(0 until 3)
+                val sendTzContract = if (destBeginsWith?.toLowerCase() == "kt1")
+                {
+                    String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                }
+                else
+                {
+                    String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                }
+
+                val json = JSONArray(sendTzContract)
+                dstObject.put("parameters", json)
+
+                //TODO handle that, we need to load storage from recipient
+                if (mRecipientKT1withCode)
+                {
+                    dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
+                }
+
+                dstObjects.put(dstObject)
+
+                postParams.put("dsts", dstObjects)
+            }
+            else
+            {
+                postParams.put("src", mSrcAccount)
+                postParams.put("src_pk", pk)
+
+                var dstObjects = JSONArray()
+
+                var dstObject = JSONObject()
+                dstObject.put("dst", mDstAccount)
+
+                dstObject.put("amount", (mTransferAmount*1000000).roundToLong().toString())
+
+                dstObjects.put(dstObject)
+
+                postParams.put("dsts", dstObjects)
+            }
+
 
         }
 
@@ -689,46 +735,85 @@ class TransferFormFragment : Fragment()
         return ecKeyFormat(ecKey)
     }
 
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(activity!!)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
+    }
+
     // volley
     private fun startPostRequestLoadFinalizeTransfer()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        val seed = Storage(activity!!).getMnemonics()
+        val mnemonicsData = Storage(activity!!).getMnemonics()
 
         //TODO we got to verify at this very moment.
         if (isPayButtonValid() && mTransferPayload != null)
         {
-            //val pkhSrc = seed.pkh
-            val pkhDst = mDstAccount
-
-            /*
-            val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
             var postParams = JSONObject()
-            postParams.put("src", mSrcAccount)
 
-            //TODO it won't be pk with contract transfer
-            postParams.put("src_pk", pk)
+            val beginsWith = mSrcAccount?.slice(0 until 3)
+            if (beginsWith?.toLowerCase() == "kt1")
+            {
+                postParams.put("src", mnemonicsData.pkh)
+                postParams.put("src_pk", mnemonicsData.pk)
 
-            var dstObjects = JSONArray()
+                var dstObjects = JSONArray()
 
-            var dstObject = JSONObject()
-            dstObject.put("dst", pkhDst)
+                var dstObject = JSONObject()
+                dstObject.put("dst", mSrcAccount)
+                dstObject.put("dst_account", mDstAccount)
+                dstObject.put("amount", 0.toLong())
 
-            val mutezAmount = (mTransferAmount*1000000.0).toLong()
-            dstObject.put("amount", mutezAmount)
+                val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
+                dstObject.put("transfer_amount", mutezAmount)
 
-            dstObject.put("fee", mTransferFees)
+                val destBeginsWith = mSrcAccount?.slice(0 until 3)
+                val sendTzContract = if (destBeginsWith?.toLowerCase() == "kt1")
+                {
+                    String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                }
+                else
+                {
+                    String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                }
 
-            dstObjects.put(dstObject)
+                val json = JSONArray(sendTzContract)
+                dstObject.put("parameters", json)
 
-            postParams.put("dsts", dstObjects)
-            */
+                dstObject.put("fee", mTransferFees)
+                dstObjects.put(dstObject)
+
+                postParams.put("dsts", dstObjects)
+            }
+            else
+            {
+                postParams.put("src", mSrcAccount)
+
+                //TODO it won't be pk with contract transfer
+                postParams.put("src_pk", mnemonicsData.pk)
+
+                var dstObjects = JSONArray()
+
+                var dstObject = JSONObject()
+                dstObject.put("dst", mDstAccount)
+
+                val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
+                dstObject.put("amount", mutezAmount)
+
+                dstObject.put("fee", mTransferFees)
+
+                dstObjects.put(dstObject)
+
+                postParams.put("dsts", dstObjects)
+            }
+
 
             //TODO verify the payloads
-            if (/*!isTransferPayloadValid(mTransferPayload!!, postParams)*/true)
+            if (isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -754,7 +839,7 @@ class TransferFormFragment : Fragment()
                 }
                 else
                 {
-                    val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
+                    val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
                     val sk = CryptoUtils.generateSk(mnemonics, "")
                     compressedSignature = KeyPair.sign(sk, result)
                 }
@@ -768,10 +853,10 @@ class TransferFormFragment : Fragment()
 
                 var payloadsign = newResult.toNoPrefixHexString()
 
-                val stringRequest = object : StringRequest(Request.Method.POST, url,
-                        Response.Listener<String> { response ->
+                val stringRequest = object : StringRequest(Method.POST, url,
+                        Response.Listener<String> {
 
-                            if (activity != null)
+                            if (content != null)
                             {
                                 onFinalizeTransferLoadComplete(null)
                                 listener?.onTransferSucceed()
@@ -779,7 +864,7 @@ class TransferFormFragment : Fragment()
                         },
                         Response.ErrorListener
                         {
-                            if (activity != null)
+                            if (content != null)
                             {
                                 onFinalizeTransferLoadComplete(it)
                                 listener?.onTransferFailed(it)
@@ -884,52 +969,64 @@ class TransferFormFragment : Fragment()
                 //TODO user needs to retry storage call
                 //TODO I will display elements depending on the situation
             }
+
+            /*
+        else
+        {
+            //TODO the best way to handle that is to parse the manager string
+
+            // 404 happens when there is no storage in this KT1
+            //it means this KT1 had no code
+
+            //TODO this case shouldn't happen anymore
+
+            if (isRecipient)
+            {
+                mRecipientKT1withCode = false
+
+                loading_progress.visibility = View.GONE
+                recipient_area.visibility = View.VISIBLE
+                amount_layout.visibility = View.VISIBLE
+
+                mClickRecipientKT1 = false
+            }
             else
             {
-                // 404 happens when there is no storage in this KT1
-                //it means this KT1 had no code
+                mSourceKT1withCode = false
+                mClickSourceKT1 = false
 
-                if (isRecipient)
+                val hasMnemonics = Storage(activity!!).hasMnemonics()
+                if (hasMnemonics)
                 {
-                    mRecipientKT1withCode = false
+                    val seed = Storage(activity!!).getMnemonics()
 
-                    loading_progress.visibility = View.GONE
-                    recipient_area.visibility = View.VISIBLE
-                    amount_layout.visibility = View.VISIBLE
-
-                    mClickRecipientKT1 = false
-                }
-                else
-                {
-                    mSourceKT1withCode = false
-                    mClickSourceKT1 = false
-
-                    val hasMnemonics = Storage(activity!!).hasMnemonics()
-                    if (hasMnemonics)
+                    if (seed.mnemonics.isEmpty())
                     {
-                        val seed = Storage(activity!!).getMnemonics()
-
-                        if (seed.mnemonics.isEmpty())
-                        {
-                            // TODO write a text to say we cannot transfer anything.
-                            loading_progress.visibility = View.GONE
-                            recipient_area.visibility = View.GONE
-                            amount_layout.visibility = View.GONE
-                            no_mnemonics.visibility = View.VISIBLE
-                        }
-                        else
-                        {
-                            loading_progress.visibility = View.GONE
-                            recipient_area.visibility = View.VISIBLE
-                            amount_layout.visibility = View.GONE
-                        }
+                        // TODO write a text to say we cannot transfer anything.
+                        loading_progress.visibility = View.GONE
+                        recipient_area.visibility = View.GONE
+                        amount_layout.visibility = View.GONE
+                        no_mnemonics.visibility = View.VISIBLE
+                    }
+                    else
+                    {
+                        loading_progress.visibility = View.GONE
+                        recipient_area.visibility = View.VISIBLE
+                        amount_layout.visibility = View.GONE
                     }
                 }
             }
+            }
+            */
         }
         else
         {
+
+            //TODO this is a KT1, default one or with code.
+
             //TODO check if our tz3 is the same as the contract tz3
+
+            //TODO if there is salt, this is a spending limit contract
 
             val salt = getSalt(isRecipient)
             if (salt != null && salt >= 0)
@@ -978,8 +1075,6 @@ class TransferFormFragment : Fragment()
                 {
                     mRecipientKT1withCode = false
 
-                    //this is a standard source tz1/2/3
-
                     if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith("KT1", true))
                     {
                         //this is a standard source tz1/2/3
@@ -995,6 +1090,8 @@ class TransferFormFragment : Fragment()
                         loading_progress.visibility = View.GONE
                         recipient_area.visibility = View.VISIBLE
                         amount_layout.visibility = View.VISIBLE
+
+                        mClickRecipientKT1 = false
                     }
                 }
                 else
@@ -1008,7 +1105,6 @@ class TransferFormFragment : Fragment()
                         {
                             //this is a standard source tz1/2/3
 
-
                             //no need to hide it anymore
                             loading_progress.visibility = View.GONE
                             recipient_area.visibility = View.VISIBLE
@@ -1017,6 +1113,8 @@ class TransferFormFragment : Fragment()
                         else
                         {
                             //it looks like it's a KT1 with no code in it.
+
+                            mClickSourceKT1 = false
 
                             // we got to handle if we have the mnemonics.
                             val hasMnemonics = Storage(activity!!).hasMnemonics()
@@ -1156,26 +1254,30 @@ class TransferFormFragment : Fragment()
             val storageJSONObject = JSONObject(mStorageRecipient)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
 
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-            val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
-            return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+                val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
+                return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+            }
         }
         else if (!isRecipient && mStorageSource != null)
         {
             val storageJSONObject = JSONObject(mStorageSource)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
 
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-            val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
-            return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+                val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
+                return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+            }
         }
 
         return null
@@ -1518,7 +1620,7 @@ class TransferFormFragment : Fragment()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mTransferFees = longTransferFee.toLong()
+                    mTransferFees = longTransferFee.roundToLong()
                     return true
                 }
             }
@@ -1553,8 +1655,11 @@ class TransferFormFragment : Fragment()
     {
         if (validate)
         {
+            /*
             val customThemeBundle = arguments!!.getBundle(CustomTheme.TAG)
             val theme = CustomTheme.fromBundle(customThemeBundle)
+            */
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             pay_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
             pay_button_layout.isEnabled = true

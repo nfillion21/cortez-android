@@ -27,6 +27,7 @@
 
 package com.tezos.ui.fragment
 
+
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
@@ -71,6 +72,7 @@ import kotlinx.android.synthetic.main.update_storage_form_card.send_cents_button
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
+import kotlin.math.roundToLong
 
 class ScriptFragment : Fragment()
 {
@@ -125,7 +127,7 @@ class ScriptFragment : Fragment()
 
         private const val EDIT_MODE_KEY = "edit_mode_key"
 
-        private val BALANCE_LONG_KEY = "balance_long_key"
+        private const val BALANCE_LONG_KEY = "balance_long_key"
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -554,6 +556,7 @@ class ScriptFragment : Fragment()
 
         //swipe_refresh_script_layout?.isEnabled = false
 
+        //TODO uncomment it
         startGetRequestLoadContractInfo()
     }
 
@@ -605,20 +608,17 @@ class ScriptFragment : Fragment()
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete(true)
 
-                    if (mStorage != null && mStorage != JSONObject(getString(R.string.default_storage)).toString())
+                    val mnemonicsData = Storage(activity!!).getMnemonics()
+                    val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
+                    val isDefaultContract = mStorage.toString() == defaultContract.toString()
+
+                    if (mStorage != null && !isDefaultContract)
                     {
                         validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
 
                         startGetRequestBalance()
-                        /*
-                        if (isSecureKeyHashIdentical())
-                        {
-                        }
-                        else
-                        {
-                        }
-                        */
                     }
+
                     else
                     {
                         //TODO I don't need to forge a transfer for now
@@ -738,7 +738,7 @@ class ScriptFragment : Fragment()
                 }
 
         // 100 000 mutez == 0.1 tez
-        if (mSecureHashBalance < 100000)
+        if (mSecureHashBalance != -1L && mSecureHashBalance < 100000)
         {
             if (isSecureKeyHashIdentical())
             {
@@ -784,8 +784,12 @@ class ScriptFragment : Fragment()
 
         if (mStorage != null)
         {
-            //if (mContract!!.delegate != null)
-            if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
+            //check the JSON storage
+            val mnemonicsData = Storage(activity!!).getMnemonics()
+            val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
+            val isDefaultContract = mStorage.toString() == defaultContract.toString()
+
+            if (!isDefaultContract)
             {
                 //TODO at this point, just show that there is no script.
 
@@ -909,16 +913,13 @@ class ScriptFragment : Fragment()
 
         if (isUpdateButtonValid() && mUpdateStoragePayload != null && mUpdateStorageAddress != null && mUpdateStorageFees != -1L)
         {
-            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
             var postParams = JSONObject()
             postParams.put("src", pkh())
-            postParams.put("src_pk", pk)
+            postParams.put("src_pk", mnemonicsData.pk)
             postParams.put("delegate", mUpdateStorageAddress)
             postParams.put("fee", mUpdateStorageFees)
 
-            if (!isChangeDelegatePayloadValid(mUpdateStoragePayload!!, postParams))
+            if (/*!isChangeDelegatePayloadValid(mUpdateStoragePayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -931,6 +932,7 @@ class ScriptFragment : Fragment()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
                 val sk = CryptoUtils.generateSk(mnemonics, "")
                 val signature = KeyPair.sign(sk, result)
 
@@ -1056,6 +1058,14 @@ class ScriptFragment : Fragment()
         }
     }
 
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(activity!!)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
+    }
+
     // volley
     private fun startPostRequestLoadInitUpdateStorage()
     {
@@ -1064,9 +1074,17 @@ class ScriptFragment : Fragment()
         val url = getString(R.string.transfer_forge)
 
         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-        val pk = CryptoUtils.generatePk(mnemonics, "")
+        val pk = if (mnemonicsData.pk.isNullOrEmpty())
+        {
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+        }
+        else
+        {
+            mnemonicsData.pk
+        }
 
-        val tz1 = CryptoUtils.generatePkh(mnemonics, "")
+        val tz1 = mnemonicsData.pkh
 
         var postParams = JSONObject()
         postParams.put("src", tz1)
@@ -1085,6 +1103,8 @@ class ScriptFragment : Fragment()
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
         val tz3 = retrieveTz3()
+
+        /*
 
         val packSpending = Pack.prim(
                 Pack.pair(
@@ -1113,11 +1133,13 @@ class ScriptFragment : Fragment()
         val salt = getSalt()
         val packSalt = Pack.prim(Pack.int(salt!!))
         val packSaltByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
+        */
 
 
         //val signedData1 = "050005".hexToByteArray()
 
-        val signature = KeyPair.sign(sk, packSpendingByteArray + packSaltByteArray)
+        //val signature = KeyPair.sign(sk, packSpendingByteArray + packSaltByteArray)
+        val signature = KeyPair.sign(sk, ByteArray(0))
 
         val edsig = CryptoUtils.generateEDSig(signature)
 
@@ -1483,7 +1505,7 @@ class ScriptFragment : Fragment()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mUpdateStorageFees = longTransferFee.toLong()
+                    mUpdateStorageFees = longTransferFee.roundToLong()
                     return true
                 }
             }

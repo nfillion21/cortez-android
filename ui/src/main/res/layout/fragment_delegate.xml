@@ -53,11 +53,12 @@
                             <ProgressBar
                                 android:id="@+id/nav_progress"
                                 style="?android:attr/progressBarStyleSmall"
-                                android:layout_gravity="center_vertical"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:visibility="gone"
-                                android:layout_weight="0" />
+                                android:layout_gravity="center_vertical"
+                                android:layout_weight="0"
+                                android:indeterminateTint="@color/colorTitleText"
+                                android:visibility="gone" />
 
                         </LinearLayout>
 
@@ -103,33 +104,33 @@
                             android:id="@+id/loading_textview"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:text="@string/loading_contract_info"
-                            android:textColor="@color/colorAccent"
                             android:layout_marginBottom="@dimen/spacing_double"
-                            android:ellipsize="end" />
+                            android:ellipsize="end"
+                            android:text="@string/loading_contract_info"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:textColor="@color/colorTitleText" />
 
                         <TextView
                             android:id="@+id/limits_info_textview"
-                            android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:text="@string/redelegate_address_info"
-                            android:textColor="@color/colorAccent"
                             android:layout_marginBottom="@dimen/spacing_double"
-                            android:ellipsize="end" />
+                            android:ellipsize="end"
+                            android:text="@string/redelegate_address_info"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:textColor="@color/colorTitleText"
+                            android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/storage_info_textview"
-                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:text="@string/remove_delegate_info"
-                            android:textColor="@color/colorAccent"
                             android:layout_marginBottom="@dimen/spacing_double"
-                            android:ellipsize="end" />
+                            android:ellipsize="end"
+                            android:text="@string/remove_delegate_info"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:textColor="@color/colorTitleText"
+                            android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/storage_info_address_textview"
@@ -198,7 +199,7 @@
                         android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
                         android:layout_gravity="center"
                         android:enabled="false"
-
+                        android:textStyle="bold"
                         android:background="@null"
                         android:clickable="false"
                         android:focusable="false"
@@ -229,6 +230,7 @@
                         android:drawableTint="@color/tz_light"
                         android:drawablePadding="@dimen/spacing_normal"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                        android:textStyle="bold"
                         android:layout_gravity="center"
                         android:enabled="false"
 

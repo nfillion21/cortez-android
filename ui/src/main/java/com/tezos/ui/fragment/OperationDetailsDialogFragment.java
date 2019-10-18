@@ -119,39 +119,35 @@ public class OperationDetailsDialogFragment extends DialogFragment
         );
 
         mList = dialogView.findViewById(R.id.list);
-        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+        mList.setOnItemClickListener((adapterView, view, i, l) -> {
+            String copied = null;
+
+            Bundle operationBundle = getArguments().getBundle(Operation.TAG);
+            Operation operation = Operation.fromBundle(operationBundle);
+
+            switch (i)
             {
-                String copied = null;
-
-                Bundle operationBundle = getArguments().getBundle(Operation.TAG);
-                Operation operation = Operation.fromBundle(operationBundle);
-
-                switch (i)
-                {
-                    case 0: { copied = operation.getHash(); } break;
-                    case 1: { copied = operation.getOperationId().toString(); } break;
-                    case 2: { copied = operation.getBlockHash(); } break;
-                    case 3: { copied = operation.getTimestamp(); } break;
-                    case 4: { copied = operation.getSource(); } break;
-                    case 5: { copied = operation.getSourceManager(); } break;
-                    case 6: { copied = operation.getDestination(); } break;
-                    case 7: { copied = operation.getDestinationManager(); } break;
-                    case 8: { copied = operation.getAmount().toString(); } break;
-                    case 9: { copied = operation.getFee().toString(); } break;
-                    default:
-                        //no-op
-                    break;
-                }
-
-                ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(copied, copied);
-                clipboard.setPrimaryClip(clip);
-
-                Toast.makeText(getActivity(), String.format(getString(R.string.copied), copied), Toast.LENGTH_SHORT).show();
-                getDialog().dismiss();
+                case 0: { copied = operation.getHash(); } break;
+                case 1: { copied = operation.getOperationId().toString(); } break;
+                case 2: { copied = operation.getBlockHash(); } break;
+                case 3: { copied = operation.getTimestamp(); } break;
+                case 4: { copied = operation.getSource(); } break;
+                case 5: { copied = operation.getSourceManager(); } break;
+                case 6: { copied = operation.getDestination(); } break;
+                case 7: { copied = operation.getDestinationManager(); } break;
+                case 8: { copied = operation.getAmount().toString(); } break;
+                case 9: { copied = operation.getFee().toString(); } break;
+                default:
+                    //no-op
+                break;
             }
+
+            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(copied, copied);
+            clipboard.setPrimaryClip(clip);
+
+            Toast.makeText(getActivity(), String.format(getString(R.string.copied), copied), Toast.LENGTH_SHORT).show();
+            getDialog().dismiss();
         });
 
         Bundle args = getArguments();
@@ -265,7 +261,7 @@ public class OperationDetailsDialogFragment extends DialogFragment
             switch (position)
             {
                 case 0:
-                    holder.valueTextView.setText(mOperation.getHash().toString()); break;
+                    holder.valueTextView.setText(mOperation.getHash()); break;
 
                 case 1:
                     holder.valueTextView.setText(mOperation.getOperationId().toString()); break;

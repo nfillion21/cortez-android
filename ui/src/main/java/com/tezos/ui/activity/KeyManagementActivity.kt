@@ -108,9 +108,9 @@ class KeyManagementActivity : BaseSecureActivity()
         setContentView(R.layout.activity_key_management)
 
         val tezosTheme = CustomTheme(
-                R.color.theme_tezos_primary,
-                R.color.theme_tezos_primary_dark,
-                R.color.theme_tezos_text)
+                R.color.colorPrimaryDark,
+                R.color.colorPrimaryDark,
+                R.color.colorTitleText)
 
         initActionBar(tezosTheme)
 
@@ -202,15 +202,19 @@ class KeyManagementActivity : BaseSecureActivity()
             val hasMasterkey = Storage(this).getMnemonics().mnemonics.isNotEmpty()
             with_mnemonics_layout.visibility = if (hasMasterkey) View.VISIBLE else View.GONE
             without_mnemonics_layout.visibility = if (hasMasterkey) View.GONE else View.VISIBLE
+
+            mnemonics_info_textview.visibility = View.GONE
         }
         else
         {
             with_mnemonics_layout.visibility = View.GONE
             without_mnemonics_layout.visibility = View.GONE
+
+            mnemonics_info_textview.visibility = View.VISIBLE
         }
     }
 
-    fun onLogOutClicked()
+    private fun onLogOutClicked()
     {
         val encryptionServices = EncryptionServices()
         encryptionServices.removeMasterKey()
@@ -224,7 +228,7 @@ class KeyManagementActivity : BaseSecureActivity()
         finish()
     }
 
-    fun onMasterKeyRemovedSeed()
+    private fun onMasterKeyRemovedSeed()
     {
         //Storage(baseContext).hasSeed()
         //Storage(baseContext).removeSeed()
@@ -241,7 +245,7 @@ class KeyManagementActivity : BaseSecureActivity()
     {
         if (validate)
         {
-            val theme = CustomTheme(R.color.tz_error, R.color.tz_accent, R.color.tz_light)
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             exit_button.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
             exit_button_layout.isEnabled = true

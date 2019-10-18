@@ -17,7 +17,7 @@
     <item >
         <shape android:shape="rectangle"  >
             <corners android:radius="13dip" />
-            <stroke android:width="@dimen/spacing_nano" android:color="@color/tz_background_dark" />
+            <stroke android:width="@dimen/spacing_one" android:color="@color/dark_grey" />
             <solid android:color="@color/tz_light"/>
         </shape>
     </item>

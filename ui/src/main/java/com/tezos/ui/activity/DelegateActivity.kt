@@ -25,7 +25,7 @@
 (*****************************************************************************)
 */
 
-package com.tezcore.ui.activity
+package com.tezos.ui.activity
 
 import android.app.Activity
 import android.content.Context
@@ -45,7 +45,6 @@ import android.view.ViewGroup
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
-import com.tezos.ui.activity.*
 import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_delegate.*
@@ -54,9 +53,9 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
 {
 
     private val mTezosTheme: CustomTheme = CustomTheme(
-            R.color.theme_tezos_primary,
-            R.color.theme_tezos_primary_dark,
-            R.color.theme_tezos_text)
+            R.color.colorPrimaryDark,
+            R.color.colorPrimaryDark,
+            R.color.colorTitleText)
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 

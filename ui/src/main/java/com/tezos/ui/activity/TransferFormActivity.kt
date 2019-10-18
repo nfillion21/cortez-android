@@ -109,8 +109,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
-        //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryDarkId))
 
         val window = window
         window.statusBarColor = ContextCompat.getColor(this,

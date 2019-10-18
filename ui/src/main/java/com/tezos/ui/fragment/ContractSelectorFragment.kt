@@ -25,7 +25,7 @@
 (*****************************************************************************)
 */
 
-package com.tezos.ui.authentication
+package com.tezos.ui.fragment
 
 import android.content.Context
 import android.os.Bundle

@@ -83,6 +83,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/arrow_drop_down_black"
             android:layout_gravity="center_horizontal"
+            android:tint="@color/colorTitleText"
             />
 
         <Button
@@ -90,16 +91,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
-            style="@style/PaymentScreens.SourceButton"
 
             android:drawableLeft="@drawable/redeem_black_24"
             android:drawableStart="@drawable/redeem_black_24"
             android:text="@string/select_recipient"
-
+            android:textColor="@color/colorStandardText"
             android:paddingLeft="@dimen/spacing_double"
             android:paddingRight="40dp"
 
+            style="@style/PaymentScreens.SourceButton"
+
             android:layout_marginBottom="@dimen/spacing_double" />
+
+        <!--
+        -->
 
         <LinearLayout
             android:id="@+id/transfer_destination_filled"
@@ -164,7 +169,7 @@
             android:layout_height="wrap_content"
             android:text="@string/amount"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/colorAccentText"
             android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
             tools:ignore="UnusedAttribute,NewApi" />
 
@@ -182,7 +187,7 @@
                 android:layout_marginRight="@dimen/spacing_normal"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorAccentText"
                 android:clipToPadding="false"
                 tools:ignore="UnusedAttribute,NewApi" />
             <android.support.design.widget.TextInputEditText
@@ -194,7 +199,6 @@
                 android:imeOptions="actionDone"
                 android:hint="@string/amount_default"
                 android:inputType="numberDecimal"
-                android:textColorHint="@color/tz_placeholder"
                 android:maxLength="15"
                 android:digits="0123456789."
                 android:textSize="@dimen/size_edit_text" />
@@ -208,7 +212,7 @@
             android:layout_marginTop="@dimen/spacing_double"
             android:text="@string/fee_minimum"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/colorAccentText"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
 
@@ -226,7 +230,7 @@
                 android:layout_marginEnd="@dimen/spacing_normal"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorAccentText"
                 android:clipToPadding="false"
                 tools:ignore="UnusedAttribute,NewApi" />
             <android.support.design.widget.TextInputEditText
@@ -239,7 +243,6 @@
                 android:hint="@string/neutral"
                 android:enabled="false"
                 android:inputType="numberDecimal"
-                android:textColorHint="@color/tz_placeholder"
                 android:maxLength="15"
                 android:digits="0123456789."
                 android:textSize="@dimen/size_edit_text" />
@@ -265,6 +268,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
+            android:indeterminateTint="@color/colorTitleText"
             android:layout_gravity="center_horizontal"
             tools:ignore="UnusedAttribute" />
 
@@ -336,7 +340,6 @@
             android:longClickable="false"
             android:enabled="true"
             android:inputType="numberDecimal"
-            android:textColorHint="@color/tz_placeholder"
             android:maxLength="15"
             android:digits="0123456789."
             android:textSize="@dimen/standard_item_text_size" />
@@ -365,7 +368,6 @@
             android:longClickable="false"
             android:enabled="true"
             android:inputType="numberDecimal"
-            android:textColorHint="@color/tz_placeholder"
             android:maxLength="15"
             android:digits="0123456789."
             android:textSize="@dimen/standard_item_text_size" />

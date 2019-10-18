@@ -71,15 +71,12 @@ class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.On
 
     private fun bundlesToItems( bundles:ArrayList<Bundle>?): ArrayList<Operation>?
     {
-        if (bundles != null)
+        if (!bundles.isNullOrEmpty())
         {
             var items = ArrayList<Operation>(bundles.size)
-            if (!bundles.isEmpty())
-            {
-                bundles.forEach {
-                    val op = Operation.fromBundle(it)
-                    items.add(op)
-                }
+            bundles.forEach {
+                val op = Operation.fromBundle(it)
+                items.add(op)
             }
             return items
         }
@@ -123,8 +120,7 @@ class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.On
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
-        //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryDarkId))
 
         val window = window
         window.statusBarColor = ContextCompat.getColor(this,
@@ -141,7 +137,7 @@ class OperationsActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.On
 
         val mCloseButton = findViewById<ImageButton>(R.id.close_button)
         mCloseButton.setColorFilter(ContextCompat.getColor(this, theme.textColorPrimaryId))
-        mCloseButton.setOnClickListener { _ ->
+        mCloseButton.setOnClickListener {
             //requests stop in onDestroy.
             finish()
         }

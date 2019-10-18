@@ -66,6 +66,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.InputStream
 import java.nio.charset.Charset
+import kotlin.math.roundToLong
 
 /**
  * Created by nfillion on 20/11/18.
@@ -183,7 +184,7 @@ class AddDelegateActivity : BaseSecureActivity()
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryDarkId))
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
         val window = window
@@ -234,29 +235,30 @@ class AddDelegateActivity : BaseSecureActivity()
         startPostRequestLoadFinalizeDelegate(mnemonicsData)
     }
 
-    // volley
+    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
+    {
+        with(Storage(this)) {
+            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
+        }
+        return pk
+    }
+
     private fun startPostRequestLoadFinalizeDelegate(mnemonicsData: Storage.MnemonicsData)
     {
         val url = getString(R.string.transfer_injection_operation)
 
         if (isAddButtonValid() && mDelegatePayload != null)
         {
-            val pkhSrc = mnemonicsData.pkh
-            //val pkhDst = mDstAccount?.pubKeyHash
-
-            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
             var postParams = JSONObject()
-            postParams.put("src", pkhSrc)
-            postParams.put("src_pk", pk)
+            postParams.put("src", mnemonicsData.pkh)
+            postParams.put("src_pk", mnemonicsData.pk)
 
             var dstObjects = JSONArray()
 
             var dstObject = JSONObject()
             //dstObject.put("dst", pkhDst)
 
-            val mutezAmount = (mDelegateAmount*1000000.0).toLong()
+            val mutezAmount = (mDelegateAmount*1000000.0).roundToLong()
             dstObject.put("balance", mutezAmount)
 
             dstObject.put("fee", mDelegateFees)
@@ -267,7 +269,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
             postParams.put("dsts", dstObjects)
 
-            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (isOriginatePayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -280,6 +282,7 @@ class AddDelegateActivity : BaseSecureActivity()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
                 val sk = CryptoUtils.generateSk(mnemonics, "")
                 val signature = KeyPair.sign(sk, result)
 
@@ -415,8 +418,15 @@ class AddDelegateActivity : BaseSecureActivity()
 
         val url = getString(R.string.originate_account_url)
 
-        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-        val pk = CryptoUtils.generatePk(mnemonics, "")
+        val pk = if (mnemonicsData.pk.isNullOrEmpty())
+        {
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+        }
+        else
+        {
+            mnemonicsData.pk
+        }
 
         val pkhSrc = mnemonicsData.pkh
         //val pkhDst = mDstAccount?.pubKeyHash
@@ -425,24 +435,30 @@ class AddDelegateActivity : BaseSecureActivity()
         postParams.put("src", pkhSrc)
         postParams.put("src_pk", pk)
 
-        var dstObjects = JSONArray()
-
         var dstObject = JSONObject()
-        dstObject.put("manager", pkhSrc)
+        //dstObject.put("manager", pkhSrc)
 
 
         dstObject.put("delegate", mDelegateTezosAddress)
 
         //TODO be careful, do it in mutez.
-        dstObject.put("credit", (mDelegateAmount*1000000).toLong().toString())
+        dstObject.put("credit", (mDelegateAmount*1000000).roundToLong().toString())
 
-        dstObject.put("delegatable", true)
+        //dstObject.put("delegatable", true)
+
+        var dstObjects = JSONArray()
+
+        
+        val originationContract = String.format(getString(R.string.origination_contract), pkhSrc)
+
+        val json = JSONObject(originationContract)
+        dstObject.put("script", json)
 
         dstObjects.put(dstObject)
 
         postParams.put("dsts", dstObjects)
 
-        val jsObjRequest = object : JsonObjectRequest(Request.Method.POST, url, postParams, Response.Listener<JSONObject>
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
@@ -562,8 +578,9 @@ class AddDelegateActivity : BaseSecureActivity()
 
     private fun validateAddButton(validate: Boolean)
     {
-        val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(themeBundle)
+        //val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
+        //val theme = CustomTheme.fromBundle(themeBundle)
+        val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
         if (validate)
         {
@@ -721,7 +738,7 @@ class AddDelegateActivity : BaseSecureActivity()
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mDelegateFees = longTransferFee.toLong()
+                    mDelegateFees = longTransferFee.roundToLong()
                     return true
                 }
             }

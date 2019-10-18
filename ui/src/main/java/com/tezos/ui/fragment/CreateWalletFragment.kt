@@ -103,7 +103,6 @@ class CreateWalletFragment : Fragment()
         }
 
         mMnemonicsTextview = view.findViewById(R.id.mnemonics_textview)
-        mMnemonicsTextview?.setTextColor(ContextCompat.getColor(activity!!, theme!!.colorPrimaryDarkId))
 
         mBackupCheckbox = view.findViewById(R.id.backup_checkbox)
 
@@ -235,17 +234,18 @@ class CreateWalletFragment : Fragment()
     {
         if (validate)
         {
-            mCreateButton?.setTextColor(ContextCompat.getColor(activity!!, theme!!.textColorPrimaryId))
+            val customTheme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
+
+            mCreateButton?.setTextColor(ContextCompat.getColor(activity!!, customTheme.textColorPrimaryId))
             mCreateButtonLayout?.isEnabled = true
-            mCreateButtonLayout?.background = makeSelector(theme)
+            mCreateButtonLayout?.background = makeSelector(customTheme)
 
             val drawables = mCreateButton?.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables!![0])
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme!!.textColorPrimaryId))
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, customTheme.textColorPrimaryId))
 
             mRenewFab?.isEnabled = false
             mRenewFab?.hide()
-
         }
         else
         {
