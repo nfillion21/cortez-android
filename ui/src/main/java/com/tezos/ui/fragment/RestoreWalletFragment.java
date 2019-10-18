@@ -319,68 +319,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             mAdapter.updateWords(link, null);
         }
 
-        else if (position == 0 && word.equalsIgnoreCase("green"))
-        {
-            List<String> link = Arrays.asList(
-                    "green",
-                    "kind",
-                    "inquiry",
-                    "alarm",
-                    "razor",
-                    "zone",
-                    "benefit",
-                    "again",
-                    "ski",
-                    "erase",
-                    "another",
-                    "wide",
-                    "liberty",
-                    "multiply",
-                    "pen",
-                    "risk",
-                    "love",
-                    "corn",
-                    "monster",
-                    "honey",
-                    "level",
-                    "poem",
-                    "position",
-                    "spell" );
-
-            mAdapter.updateWords(link, null);
-        }
-
-        else if (position == 0 && word.equalsIgnoreCase("blue"))
-        {
-            List<String> link = Arrays.asList(
-                    "blue",
-                    "junk",
-                    "trap",
-                    "expect",
-                    "mammal",
-                    "such",
-                    "vacant",
-                    "quarter",
-                    "siege",
-                    "carbon",
-                    "extra",
-                    "eight",
-                    "notice",
-                    "short",
-                    "cheap",
-                    "expose",
-                    "soccer",
-                    "clean",
-                    "lawn",
-                    "envelope",
-                    "goose",
-                    "major",
-                    "orange",
-                    "capable" );
-
-            mAdapter.updateWords(link, null);
-        }
-
         boolean isValid = CryptoUtils.validateMnemonics(mAdapter.getWords());
         if (isValid)
         {
