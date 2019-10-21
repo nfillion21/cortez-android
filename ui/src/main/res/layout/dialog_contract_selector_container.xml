@@ -40,8 +40,6 @@
                     android:layout_marginRight="@dimen/spacing_double"
                     style="@style/PaymentScreens.SourceButton"
                     android:padding="@dimen/spacing_double"
-                    android:textColor="@color/dark_grey"
-                    android:enabled="false"
                     android:text="@string/select_daily_spending_limit_contract"
                      />
 

@@ -468,7 +468,7 @@ class AddLimitsActivity : BaseSecureActivity()
         var dstObjects = JSONArray()
 
         var dstObject = JSONObject()
-        dstObject.put("manager", pkhSrc)
+        //dstObject.put("manager", pkhSrc)
 
         val ecKeys = retrieveECKeys()
         val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
@@ -477,14 +477,20 @@ class AddLimitsActivity : BaseSecureActivity()
         // second: mLimitAmount
         // third: masterkey tz1?
 
-        val jsonContractString = JSONObject(getString(R.string.spending_limit_contract_evo)).toString()
-        val spendingLimitContract = String.format(jsonContractString, tz3, (mLimitAmount*1000000L).toString(), pkhSrc)
+        val jsonContractString = JSONObject(getString(R.string.spending_limit_contract_babylon)).toString()
+
+        val a = tz3
+        val b = "86400"
+        val c = (mLimitAmount*1000000L).toString()
+        val d = pkhSrc
+
+        val spendingLimitContract = String.format(jsonContractString, tz3, "86400", (mLimitAmount*1000000L).toString(), pkhSrc)
 
         val json = JSONObject(spendingLimitContract)
         dstObject.put("script", json)
 
         //TODO be careful, do it in mutez.
-        dstObject.put("credit", (mDelegateAmount*1000000L).roundToLong().toString())
+        dstObject.put("balance", (mDelegateAmount*1000000L).roundToLong().toString())
 
         //dstObject.put("delegatable", true)
 

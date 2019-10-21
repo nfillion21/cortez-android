@@ -444,8 +444,6 @@ class AddDelegateActivity : BaseSecureActivity()
         //TODO be careful, do it in mutez.
         dstObject.put("credit", (mDelegateAmount*1000000).roundToLong().toString())
 
-        //dstObject.put("delegatable", true)
-
         var dstObjects = JSONArray()
 
         

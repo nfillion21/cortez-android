@@ -1790,7 +1790,7 @@
             "prim":"Pair",
             "args":[
                {
-                  "string":"tz1W9oeCwAtZCZcUzxuKiC8Ft2zJcyAMPM8a"
+                  "string":"%1$s"
                },
                {
                   "prim":"Pair",
@@ -1799,10 +1799,10 @@
                         "prim":"Pair",
                         "args":[
                            {
-                              "int":"20000000"
+                              "int":"%2$s"
                            },
                            {
-                              "int":"180"
+                              "int":"%3$s"
                            }
                         ]
                      },
@@ -1825,7 +1825,7 @@
             "prim":"Pair",
             "args":[
                {
-                  "string":"tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h"
+                  "string":"%4$s"
                },
                {
                   "int":"0"
