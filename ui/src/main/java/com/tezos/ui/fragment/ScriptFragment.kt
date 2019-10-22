@@ -54,7 +54,6 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.tezos.core.*
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
@@ -64,7 +63,6 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
-import kotlinx.android.synthetic.main.dialog_sent_cents.*
 import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
 import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
@@ -448,10 +446,7 @@ class ScriptFragment : Fragment()
 
                 val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
                 val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+                val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
 
                 public_address_edittext.setText(secureKeyHash)
                 public_address_edittext.isFocusableInTouchMode = false
@@ -1459,9 +1454,7 @@ class ScriptFragment : Fragment()
             val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
             val secureKeyJSONObject = argsSecureKey[0] as JSONObject
 
-            val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
-
-            return secureKeyHash
+            return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
         }
 
         return null
