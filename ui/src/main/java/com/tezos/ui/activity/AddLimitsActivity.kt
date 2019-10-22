@@ -465,32 +465,56 @@ class AddLimitsActivity : BaseSecureActivity()
         postParams.put("src", pkhSrc)
         postParams.put("src_pk", pk)
 
-        var dstObjects = JSONArray()
-
         var dstObject = JSONObject()
-        //dstObject.put("manager", pkhSrc)
 
+        //TODO be careful, do it in mutez.
+        dstObject.put("credit", (mDelegateAmount*1000000L).roundToLong().toString())
+
+        //dstObject.put("manager", pkhSrc)
         val ecKeys = retrieveECKeys()
         val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
 
-        // first: tz3
-        // second: mLimitAmount
-        // third: masterkey tz1?
+        val spendingLimitFile = "spending_limit.json"
+        val contract = application.assets.open(spendingLimitFile).bufferedReader()
+                .use {
+                    it.readText()
+                }
 
-        val jsonContractString = JSONObject(getString(R.string.spending_limit_contract_babylon)).toString()
+        val jsonContract = JSONObject(contract)
 
-        val a = tz3
-        val b = "86400"
-        val c = (mLimitAmount*1000000L).toString()
-        val d = pkhSrc
+        //val jsonScript = String.format(jsonContract.toString(), tz3, "86400", (mLimitAmount*1000000L).toString(), pkhSrc)
+        dstObject.put("script", jsonContract)
 
-        val spendingLimitContract = String.format(jsonContractString, tz3, "86400", (mLimitAmount*1000000L).toString(), pkhSrc)
+        val storage = jsonContract["storage"] as JSONObject
+        val argsStorage = storage["args"] as JSONArray
 
-        val json = JSONObject(spendingLimitContract)
-        dstObject.put("script", json)
+        val storageOne = argsStorage[0] as JSONObject
+        val argsStorageOne = storageOne["args"] as JSONArray
 
-        //TODO be careful, do it in mutez.
-        dstObject.put("balance", (mDelegateAmount*1000000L).roundToLong().toString())
+        // storage 1 and 2-3 separate here
+
+        val firstParamArgsStorageOne = argsStorageOne[0] as JSONObject
+        firstParamArgsStorageOne.put("string", tz3)
+
+        val secondAndThirdParamsArgsStorageOne = argsStorageOne[1] as JSONObject
+        val argsSecondAndThirdParamsArgsStorageOne = secondAndThirdParamsArgsStorageOne["args"] as JSONArray
+        val firstParamArgsSecondAndThirdParamsArgsStorageOne = argsSecondAndThirdParamsArgsStorageOne[0] as JSONObject
+        val argsFirstParamArgsSecondAndThirdParamsArgsStorageOne = firstParamArgsSecondAndThirdParamsArgsStorageOne["args"] as JSONArray
+
+        val firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[0] as JSONObject
+        firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", "86400")
+
+        val secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[1] as JSONObject
+        secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", (mLimitAmount*1000000L).toString())
+
+        val storageTwo = argsStorage[1] as JSONObject
+        val argsStorageTwo = storageTwo["args"] as JSONArray
+
+        val firstParamArgsStorageTwo = argsStorageTwo[0] as JSONObject
+        firstParamArgsStorageTwo.put("string", pkhSrc)
+
+
+        var dstObjects = JSONArray()
 
         //dstObject.put("delegatable", true)
 

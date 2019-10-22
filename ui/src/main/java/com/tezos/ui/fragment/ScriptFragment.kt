@@ -807,10 +807,10 @@ class ScriptFragment : Fragment()
 
                 val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
                 val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+                val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
 
-                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+                //val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
+                //val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
 
 
                 // get daily spending limit
@@ -823,7 +823,6 @@ class ScriptFragment : Fragment()
 
                 val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
                 val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
-
 
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
                 daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
@@ -1432,10 +1431,8 @@ class ScriptFragment : Fragment()
 
             val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
             val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
 
-            val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-            val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+            val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
 
             val tz3 = retrieveTz3()
             if (tz3 != null && tz3 == secureKeyHash)
@@ -1461,10 +1458,8 @@ class ScriptFragment : Fragment()
 
             val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
             val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
 
-            val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-            val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+            val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
 
             return secureKeyHash
         }

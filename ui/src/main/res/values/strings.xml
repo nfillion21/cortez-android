@@ -740,7 +740,7 @@
                                                                                  "prim":"nat"
                                                                               },
                                                                               {
-                                                                                 "int":"1"
+                                                                                 "int":\"1\"
                                                                               }
                                                                            ]
                                                                         },
@@ -1159,7 +1159,7 @@
                                                          "prim":"DIG",
                                                          "args":[
                                                             {
-                                                               "int":"5"
+                                                               "int":\"5\"
                                                             }
                                                          ]
                                                       },
@@ -1197,7 +1197,7 @@
                                                                         "prim":"nat"
                                                                      },
                                                                      {
-                                                                        "int":"1"
+                                                                        "int":\"1\"
                                                                      }
                                                                   ]
                                                                },
@@ -1214,7 +1214,7 @@
                                                          "prim":"DUG",
                                                          "args":[
                                                             {
-                                                               "int":"6"
+                                                               "int":\"6\"
                                                             }
                                                          ]
                                                       },
@@ -1344,7 +1344,7 @@
                                                                         "prim":"bool"
                                                                      },
                                                                      {
-                                                                        "prim":"True"
+                                                                        "prim":\"True\"
                                                                      }
                                                                   ]
                                                                },
@@ -1409,7 +1409,7 @@
                                                                                                       "prim":"bool"
                                                                                                    },
                                                                                                    {
-                                                                                                      "prim":"True"
+                                                                                                      "prim":\"True\"
                                                                                                    }
                                                                                                 ]
                                                                                              }
@@ -1425,7 +1425,7 @@
                                                                                                       "prim":"bool"
                                                                                                    },
                                                                                                    {
-                                                                                                      "prim":"False"
+                                                                                                      "prim":\"False\"
                                                                                                    }
                                                                                                 ]
                                                                                              }
@@ -1500,7 +1500,7 @@
                                                                                                    "prim":"bool"
                                                                                                 },
                                                                                                 {
-                                                                                                   "prim":"True"
+                                                                                                   "prim":\"True\"
                                                                                                 }
                                                                                              ]
                                                                                           }
@@ -1532,7 +1532,7 @@
                                                                                                    "prim":"bool"
                                                                                                 },
                                                                                                 {
-                                                                                                   "prim":"False"
+                                                                                                   "prim":\"False\"
                                                                                                 }
                                                                                              ]
                                                                                           }
@@ -1571,7 +1571,7 @@
                                                       "prim":"mutez"
                                                    },
                                                    {
-                                                      "int":"0"
+                                                      "int":\"0\"
                                                    }
                                                 ]
                                              },
@@ -1790,7 +1790,7 @@
             "prim":"Pair",
             "args":[
                {
-                  "string":"%1$s"
+                  "string":"tz3"
                },
                {
                   "prim":"Pair",
@@ -1799,10 +1799,10 @@
                         "prim":"Pair",
                         "args":[
                            {
-                              "int":"%2$s"
+                              "int":\"3\"
                            },
                            {
-                              "int":"%3$s"
+                              "int":\"2\"
                            }
                         ]
                      },
@@ -1825,10 +1825,10 @@
             "prim":"Pair",
             "args":[
                {
-                  "string":"%4$s"
+                  "string":"tz1"
                },
                {
-                  "int":"0"
+                  "int":\"0\"
                }
             ]
          }
