@@ -141,15 +141,15 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     {
                         if (isPasswordSaved)
                         {
-                            fabTransfer.show()
+                            fabSharing.show()
                         }
                         else
                         {
-                            fabTransfer.hide()
+                            fabSharing.hide()
                         }
 
                         fabAddAddress.hide()
-                        fabSharing.hide()
+                        fabTransfer.hide()
                         fabAddDelegate.hide()
                     }
 
