@@ -630,6 +630,7 @@ class TransferFormFragment : Fragment()
 
                 var dstObject = JSONObject()
                 dstObject.put("dst", mDstAccount)
+                dstObject.put("entrypoint", "send")
 
                 dstObject.put("amount", (mTransferAmount*1000000).roundToLong().toString())
 

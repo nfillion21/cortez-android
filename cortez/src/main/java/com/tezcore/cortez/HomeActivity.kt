@@ -260,52 +260,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         initActionBar(mTezosTheme)
     }
 
-    private fun verifySig(data:ByteArray, signature:ByteArray):Boolean
-    {
-        /*
-  * Verify a signature previously made by a PrivateKey in our
-  * KeyStore. This uses the X.509 certificate attached to our
-  * private key in the KeyStore to validate a previously
-  * generated signature.
-  */
-        val ks = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        val entry = ks.getEntry("key1", null) as? KeyStore.PrivateKeyEntry
-        if (entry != null)
-        {
-            return  Signature.getInstance("SHA256withECDSA").run {
-                initVerify(entry.certificate)
-                update(data)
-                verify(signature)
-            }
-        }
-
-        return false
-    }
-
-    private fun signData(data:ByteArray):ByteArray
-    {
-        /*
-        * Use a PrivateKey in the KeyStore to create a signature over
-        * some data.
-        */
-
-        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        val entry: KeyStore.Entry = ks.getEntry("key1", null)
-        if (entry is KeyStore.PrivateKeyEntry)
-        {
-            return Signature.getInstance("SHA256withECDSA").run {
-                initSign(entry.privateKey)
-                update(data)
-                sign()
-            }
-        }
-        return ByteArray(0)
-    }
-
     /**
      * A [FragmentPagerAdapter] that returns a fragment corresponding to
      * one of the sections/tabs/pages.

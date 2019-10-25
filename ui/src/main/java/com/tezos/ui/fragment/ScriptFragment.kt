@@ -362,25 +362,11 @@ class ScriptFragment : Fragment()
     {
         if (editMode)
         {
-            //TODO generate a new p2pk to let the user edit the form
-
-            if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
+            val secureKeyHash = getStorageSecureKeyHash()
+            if (!secureKeyHash.isNullOrEmpty())
             {
-                val storageJSONObject = JSONObject(mStorage)
-
-                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
-
-                // get securekey hash
-
-                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
-
                 val tz3 = retrieveTz3()
-                if (tz3 == null || tz3 != secureKeyHash)
+                if (tz3 != secureKeyHash)
                 {
                     public_address_edittext.setText("")
                     public_address_edittext.isEnabled = true
@@ -396,6 +382,7 @@ class ScriptFragment : Fragment()
                     }
                 }
             }
+
 
             update_storage_button_relative_layout.visibility = View.VISIBLE
 
@@ -1067,7 +1054,6 @@ class ScriptFragment : Fragment()
 
         val url = getString(R.string.transfer_forge)
 
-        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = if (mnemonicsData.pk.isNullOrEmpty())
         {
             val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
@@ -1084,16 +1070,19 @@ class ScriptFragment : Fragment()
         postParams.put("src", tz1)
         postParams.put("src_pk", pk)
 
-        var dstObjects = JSONArray()
 
         var dstObject = JSONObject()
         dstObject.put("dst", pkh())
         dstObject.put("amount", "0")
 
+        //TODO necessary?
+        dstObject.put("entrypoint", "appel_clef_maitresse")
+
         mUpdateStorageAddress = pk
 
         //TODO I need to insert a signature into parameters
 
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
         val tz3 = retrieveTz3()
@@ -1132,23 +1121,71 @@ class ScriptFragment : Fragment()
 
         //val signedData1 = "050005".hexToByteArray()
 
-        //val signature = KeyPair.sign(sk, packSpendingByteArray + packSaltByteArray)
-        val signature = KeyPair.sign(sk, ByteArray(0))
+
+
+
+        val chainId = "NetXKakFj1A7ouL"
+
+
+        val dataPack = "050505070707070a00000015027e67dda50de8d07140a972c9b82d1d385f9f3a71070707070080b4891300b4020707020000000002000000000a00000015001026aaa2d4373442ba756d657bf9824659bf37ca".hexToByteArray()
+        val addressAndChainIdPack = "0507070a00000016015538141a5f189f280cd8417fc8695fe131be4e21000a000000040f6f0310".hexToByteArray()
+        val saltPack = "050000".hexToByteArray()
+
+        val signature = KeyPair.sign(sk, dataPack + addressAndChainIdPack + saltPack)
 
         val edsig = CryptoUtils.generateEDSig(signature)
 
 
-        val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_update_storage))
-        val spendingLimitContract = String.format(resScript.toString(),
-                pk, //
-                edsig, //signature
-                tz3, //signataire
-                (mSpendingLimitAmount*1000000L).toString(), //amount
-                tz1) //remasterkey
+        val spendingLimitFile = "spending_limit_update_storage.json"
+        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                .use {
+                    it.readText()
+                }
 
-        val json = JSONObject(spendingLimitContract)
-        dstObject.put("parameters", json)
+        /*
+        val jsonContract = JSONObject(contract)
 
+        val value = jsonContract["value"] as JSONObject
+        */
+
+        val value = JSONObject(contract)
+
+        val args = value["args"] as JSONArray
+
+        val sigPart = args[0] as JSONObject
+        val argsSigPart = sigPart["args"] as JSONArray
+
+        val pkArgsSigPart = argsSigPart[0] as JSONObject
+        pkArgsSigPart.put("string", pk)
+
+        val sigArgsSigPart = argsSigPart[1] as JSONObject
+        sigArgsSigPart.put("string", edsig)
+
+
+        val keysPart = args[1] as JSONObject
+        val argsKeyPart = keysPart["args"] as JSONArray
+        val firstArgsKeyPart = argsKeyPart[0] as JSONObject
+        val argsFirstArgsKeyPart = firstArgsKeyPart["args"] as JSONArray
+
+        val argsTz3AndValues = (argsFirstArgsKeyPart[0] as JSONObject)["args"] as JSONArray
+
+        val tz3Args = argsTz3AndValues[0] as JSONObject
+        tz3Args.put("string", tz3)
+
+        val valuesArgs = (((argsTz3AndValues[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+        val spendingLimitOne = valuesArgs[0] as JSONObject
+        spendingLimitOne.put("int", "20000000")
+
+        val spendingLimitTwo = valuesArgs[1] as JSONObject
+        spendingLimitTwo.put("int", "180")
+
+        val masterKeyArgs = argsFirstArgsKeyPart[1] as JSONObject
+        masterKeyArgs.put("string", tz1)
+
+        dstObject.put("parameters", value)
+        dstObject.put("entrypoint", "appel_clef_maitresse")
+
+        var dstObjects = JSONArray()
         dstObjects.put(dstObject)
 
         //send 0.1 tz to recover your contract
@@ -1156,7 +1193,7 @@ class ScriptFragment : Fragment()
         {
             val dstCentsObject = JSONObject()
             dstCentsObject.put("dst", tz3)
-            dstCentsObject.put("amount", (100000).toLong().toString())
+            dstCentsObject.put("amount", "100000")
 
             dstObjects.put(dstCentsObject)
         }
@@ -1167,7 +1204,7 @@ class ScriptFragment : Fragment()
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
-            if (activity != null)
+            if (swipe_refresh_script_layout != null)
             {
                 mUpdateStoragePayload = answer.getString("result")
                 mUpdateStorageFees = answer.getLong("total_fee")
@@ -1204,7 +1241,7 @@ class ScriptFragment : Fragment()
 
         }, Response.ErrorListener
         {
-            if (activity != null)
+            if (swipe_refresh_script_layout != null)
             {
                 onInitEditLoadComplete(it)
 
@@ -1414,23 +1451,11 @@ class ScriptFragment : Fragment()
 
     private fun isSecureKeyHashIdentical(): Boolean
     {
-        if (mStorage != null && mStorage != JSONObject(getString(R.string.default_storage)).toString())
+        val secureKeyHash = getStorageSecureKeyHash()
+        if (!secureKeyHash.isNullOrEmpty())
         {
-            //TODO at this point, just show that there is no script.
-
-            val storageJSONObject = JSONObject(mStorage)
-
-            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
-
-            // get securekey hash
-
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-
-            val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
-
             val tz3 = retrieveTz3()
-            if (tz3 != null && tz3 == secureKeyHash)
+            if (!tz3.isNullOrEmpty() && tz3 == secureKeyHash)
             {
                 return true
             }
@@ -1441,7 +1466,7 @@ class ScriptFragment : Fragment()
 
     private fun getStorageSecureKeyHash(): String?
     {
-        if (mStorage != null && mStorage != JSONObject(getString(R.string.default_storage)).toString())
+        if (mStorage != null)
         {
             //TODO at this point, just show that there is no script.
 
