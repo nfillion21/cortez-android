@@ -970,55 +970,6 @@ class TransferFormFragment : Fragment()
                 //TODO user needs to retry storage call
                 //TODO I will display elements depending on the situation
             }
-
-            /*
-        else
-        {
-            //TODO the best way to handle that is to parse the manager string
-
-            // 404 happens when there is no storage in this KT1
-            //it means this KT1 had no code
-
-            //TODO this case shouldn't happen anymore
-
-            if (isRecipient)
-            {
-                mRecipientKT1withCode = false
-
-                loading_progress.visibility = View.GONE
-                recipient_area.visibility = View.VISIBLE
-                amount_layout.visibility = View.VISIBLE
-
-                mClickRecipientKT1 = false
-            }
-            else
-            {
-                mSourceKT1withCode = false
-                mClickSourceKT1 = false
-
-                val hasMnemonics = Storage(activity!!).hasMnemonics()
-                if (hasMnemonics)
-                {
-                    val seed = Storage(activity!!).getMnemonics()
-
-                    if (seed.mnemonics.isEmpty())
-                    {
-                        // TODO write a text to say we cannot transfer anything.
-                        loading_progress.visibility = View.GONE
-                        recipient_area.visibility = View.GONE
-                        amount_layout.visibility = View.GONE
-                        no_mnemonics.visibility = View.VISIBLE
-                    }
-                    else
-                    {
-                        loading_progress.visibility = View.GONE
-                        recipient_area.visibility = View.VISIBLE
-                        amount_layout.visibility = View.GONE
-                    }
-                }
-            }
-            }
-            */
         }
         else
         {
@@ -1145,71 +1096,6 @@ class TransferFormFragment : Fragment()
         }
 
         //refreshLoadingArea()
-    }
-
-    private fun refreshLoadingArea()
-    {
-        //TODO for paiements, there is nothing to handle right now, except building a pull to refresh screen
-
-        //TODO depending of the storage info result, display
-
-
-        //this method handles the data and loading texts
-        /*
-
-        if (mStorage != null)
-        {
-            //if (mContract!!.delegate != null)
-            if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
-            {
-                //TODO at this point, just show that there is no script.
-
-                val storageJSONObject = JSONObject(mStorage)
-
-                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
-
-                // get securekey hash
-
-                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
-
-                val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
-                val saltSpending = DataExtractor.getStringFromField(saltSpendingField, "int")
-                val saltSpending2 = DataExtractor.getStringFromField(secureKeyHashField, "int")
-
-            }
-            else
-            {
-                /*
-                update_storage_form_card?.visibility = View.GONE
-
-                public_address_layout?.visibility = View.VISIBLE
-
-                update_storage_button_layout?.visibility = View.GONE
-
-                storage_info_textview?.visibility = View.VISIBLE
-                storage_info_textview?.text = getString(R.string.no_script_info)
-                */
-
-                //TODO show everything related to the removing
-            }
-
-            //loading_textview?.visibility = View.GONE
-            //loading_textview?.text = null
-        }
-        else
-        {
-            // mContract is null then just show "-"
-            //loading_textview will be hidden behind other textview
-
-            //loading_textview?.visibility = View.VISIBLE
-            //loading_textview?.text = "-"
-        }
-        */
     }
 
     private fun getContractTz3(isRecipient: Boolean):String?

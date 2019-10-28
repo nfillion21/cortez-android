@@ -217,12 +217,11 @@
 
                         android:drawableStart="@drawable/ic_lock_black"
                         android:drawableLeft="@drawable/ic_lock_black"
-                        android:drawableTint="@color/tz_light"
                         android:drawablePadding="@dimen/spacing_normal"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
                         android:layout_gravity="center"
                         android:enabled="false"
-
+                        android:textStyle="bold"
                         android:background="@null"
                         android:clickable="false"
                         android:focusable="false"

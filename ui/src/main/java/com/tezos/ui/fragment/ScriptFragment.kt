@@ -57,7 +57,7 @@ import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.DataExtractor
+import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -69,6 +69,7 @@ import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
 import kotlinx.android.synthetic.main.update_storage_form_card.send_cents_button
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
 import kotlin.math.roundToLong
 
@@ -1087,49 +1088,51 @@ class ScriptFragment : Fragment()
 
         val tz3 = retrieveTz3()
 
-        /*
 
-        val packSpending = Pack.prim(
-                Pack.pair(
-                        Pack.pair(
-                                Pack.pair(
-                                        Pack.int(0),
-                                        Pack.keyHash(tz3!!)
-                                ),
-                                Pack.pair(
-                                        Pack.pair(
-                                                Pack.mutez(mSpendingLimitAmount*1000000L),
-                                                Pack.int(86400)
-                                        ),
-                                        Pack.pair(
-                                                Pack.listOf(),
-                                                Pack.listOf()
-                                        )
-                                )
-                        ),
-                        Pack.keyHash(tz1)
-                )
-        )
-
-        val packSpendingByteArray = packSpending.data.toNoPrefixHexString().hexToByteArray()
-
-        val salt = getSalt()
-        val packSalt = Pack.prim(Pack.int(salt!!))
-        val packSaltByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
-        */
-
-
-        //val signedData1 = "050005".hexToByteArray()
-
-
+        val dataPack = "050505070707070a00000015027e67dda50de8d07140a972c9b82d1d385f9f3a71070707070080b4891300b4020707020000000002000000000a00000015001026aaa2d4373442ba756d657bf9824659bf37ca".hexToByteArray()
+        val addressAndChainIdPack = "0507070a00000016015538141a5f189f280cd8417fc8695fe131be4e21000a000000040f6f0310".hexToByteArray()
 
 
         val chainId = "NetXKakFj1A7ouL"
 
+        val addressAndChainVisitable =
 
-        val dataPack = "050505070707070a00000015027e67dda50de8d07140a972c9b82d1d385f9f3a71070707070080b4891300b4020707020000000002000000000a00000015001026aaa2d4373442ba756d657bf9824659bf37ca".hexToByteArray()
-        val addressAndChainIdPack = "0507070a00000016015538141a5f189f280cd8417fc8695fe131be4e21000a000000040f6f0310".hexToByteArray()
-        val saltPack = "050000".hexToByteArray()
+                        Primitive(Primitive.Name.PAIR,
+                                arrayOf(
+                                        Visitable.string(pkh()!!),
+                                        Visitable.string(chainId)
+                                )
+                        )
+
+        val output = ByteArrayOutputStream()
+        output.write(0x05)
+
+        val p = Packer(output)
+        addressAndChainVisitable.accept(p)
+
+        val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+        if (addressAndChainIdPack.contentEquals(addressAndChainPack))
+        {
+            val b = "j"
+            val c = b + "j"
+        }
+
+
+        var saltVisitable:Visitable? = null
+        val salt = getSalt()
+        if (salt != null)
+        {
+            saltVisitable = Visitable.integer(salt.toLong())
+        }
+
+        val outputStream = ByteArrayOutputStream()
+        outputStream.write(0x05)
+
+        val packer = Packer(outputStream)
+        saltVisitable!!.accept(packer)
+
+        val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
 
         val signature = KeyPair.sign(sk, dataPack + addressAndChainIdPack + saltPack)
 
@@ -1141,12 +1144,6 @@ class ScriptFragment : Fragment()
                 .use {
                     it.readText()
                 }
-
-        /*
-        val jsonContract = JSONObject(contract)
-
-        val value = jsonContract["value"] as JSONObject
-        */
 
         val value = JSONObject(contract)
 
@@ -1188,7 +1185,7 @@ class ScriptFragment : Fragment()
         var dstObjects = JSONArray()
         dstObjects.put(dstObject)
 
-        //send 0.1 tz to recover your contract
+//send 0.1 tz to recover your contract
         if (!isSecureKeyHashIdentical())
         {
             val dstCentsObject = JSONObject()
@@ -1269,7 +1266,7 @@ class ScriptFragment : Fragment()
 
     private fun getSalt():Int?
     {
-        //TODO check if the storage follows our pattern
+//TODO check if the storage follows our pattern
 
         if (mStorage != null)
         {
@@ -1277,7 +1274,7 @@ class ScriptFragment : Fragment()
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-            // get masterkey hash
+// get masterkey hash
 
             val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
             val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
@@ -1289,18 +1286,18 @@ class ScriptFragment : Fragment()
 
     private fun transferLoading(loading:Boolean)
     {
-        // handle the visibility of bottom buttons
+// handle the visibility of bottom buttons
 
         if (loading)
         {
-            //update_storage_button_layout.visibility = View.GONE
-            //empty.visibility = View.VISIBLE
+//update_storage_button_layout.visibility = View.GONE
+//empty.visibility = View.VISIBLE
             nav_progress?.visibility = View.VISIBLE
         }
         else
         {
-            //update_storage_button_layout.visibility = View.VISIBLE
-            //empty.visibility = View.GONE
+//update_storage_button_layout.visibility = View.VISIBLE
+//empty.visibility = View.GONE
             nav_progress?.visibility = View.GONE
         }
     }
@@ -1322,14 +1319,14 @@ class ScriptFragment : Fragment()
     {
         if (error != null)
         {
-            //mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+//mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
             mCallback?.showSnackBar(error.toString(), color, textColor)
 
             loading_textview?.text = getString(R.string.generic_error)
         }
         else if (message != null)
         {
-            //mCallback?.showSnackBar(message, ContextCompat.getColor(context!!, android.R.color.holo_green_light), ContextCompat.getColor(context!!, R.color.tz_light))
+//mCallback?.showSnackBar(message, ContextCompat.getColor(context!!, android.R.color.holo_green_light), ContextCompat.getColor(context!!, R.color.tz_light))
             mCallback?.showSnackBar(message, color, textColor)
         }
     }
@@ -1338,8 +1335,9 @@ class ScriptFragment : Fragment()
     {
         if (activity != null)
         {
-            val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
-            val theme = CustomTheme.fromBundle(themeBundle)
+            //val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
+            //val theme = CustomTheme.fromBundle(themeBundle)
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             if (validate)
             {
@@ -1468,13 +1466,13 @@ class ScriptFragment : Fragment()
     {
         if (mStorage != null)
         {
-            //TODO at this point, just show that there is no script.
+//TODO at this point, just show that there is no script.
 
             val storageJSONObject = JSONObject(mStorage)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-            // get securekey hash
+// get securekey hash
 
             val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
             val secureKeyJSONObject = argsSecureKey[0] as JSONObject
@@ -1491,13 +1489,13 @@ class ScriptFragment : Fragment()
 
         if (!TextUtils.isEmpty(public_address_edittext?.text))
         {
-            /*
-            if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
-            {
-                mUpdateStorageAddress = public_address_edittext.text.toString()
-                isTzAddressValid = true
-            }
-            */
+/*
+if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
+{
+    mUpdateStorageAddress = public_address_edittext.text.toString()
+    isTzAddressValid = true
+}
+*/
             isTzAddressValid = true
         }
 
