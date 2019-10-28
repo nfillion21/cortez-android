@@ -1090,6 +1090,50 @@ class ScriptFragment : Fragment()
 
 
         val dataPack = "050505070707070a00000015027e67dda50de8d07140a972c9b82d1d385f9f3a71070707070080b4891300b4020707020000000002000000000a00000015001026aaa2d4373442ba756d657bf9824659bf37ca".hexToByteArray()
+
+        val dataVisitable =
+
+                Primitive(Primitive.Name.Left,
+                        arrayOf(
+                                Primitive(Primitive.Name.Pair,
+                                        arrayOf(
+                                                Primitive(Primitive.Name.Pair,
+                                                        arrayOf(
+                                                                Visitable.string("tz3XrRBZ9SRnYYNDWJSLqFMh9sE21iTnU5Uu"),
+                                                                Primitive(Primitive.Name.Pair,
+                                                                        arrayOf(
+
+                                                                                Primitive(Primitive.Name.Pair,
+                                                                                        arrayOf(
+                                                                                                Visitable.integer(20000000),
+                                                                                                Visitable.integer(180)
+                                                                                        )
+                                                                                ),
+                                                                                Primitive(Primitive.Name.Pair,
+                                                                                        arrayOf(
+                                                                                                Visitable.sequenceOf(),
+                                                                                                Visitable.sequenceOf()
+                                                                                        )
+                                                                                )
+                                                                        )
+                                                                )
+                                                        )
+                                                ),
+                                                Visitable.string("tz1M7RpncdPVx19rtZda42UNDWon4NE5kmGu")
+                                        )
+                                )
+                        )
+                )
+
+        val o = ByteArrayOutputStream()
+        o.write(0x05)
+
+        val dataPacker = Packer(o)
+        dataVisitable.accept(dataPacker)
+
+        val dataPack2 = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
         val addressAndChainIdPack = "0507070a00000016015538141a5f189f280cd8417fc8695fe131be4e21000a000000040f6f0310".hexToByteArray()
 
 
