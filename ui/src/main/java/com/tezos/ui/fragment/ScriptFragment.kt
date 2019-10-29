@@ -1088,42 +1088,42 @@ class ScriptFragment : Fragment()
 
         val tz3 = retrieveTz3()
 
-
-        val dataPack = "050505070707070a00000015027e67dda50de8d07140a972c9b82d1d385f9f3a71070707070080b4891300b4020707020000000002000000000a00000015001026aaa2d4373442ba756d657bf9824659bf37ca".hexToByteArray()
-
-        val dataVisitable =
-
-                Primitive(Primitive.Name.Left,
-                        arrayOf(
-                                Primitive(Primitive.Name.Pair,
-                                        arrayOf(
-                                                Primitive(Primitive.Name.Pair,
-                                                        arrayOf(
-                                                                Visitable.string("tz3XrRBZ9SRnYYNDWJSLqFMh9sE21iTnU5Uu"),
-                                                                Primitive(Primitive.Name.Pair,
-                                                                        arrayOf(
-
-                                                                                Primitive(Primitive.Name.Pair,
-                                                                                        arrayOf(
-                                                                                                Visitable.integer(20000000),
-                                                                                                Visitable.integer(180)
-                                                                                        )
-                                                                                ),
-                                                                                Primitive(Primitive.Name.Pair,
-                                                                                        arrayOf(
-                                                                                                Visitable.sequenceOf(),
-                                                                                                Visitable.sequenceOf()
-                                                                                        )
+        val dataVisitable = Primitive(
+                Primitive.Name.Left,
+                arrayOf(
+                        Primitive(
+                                Primitive.Name.Pair,
+                                arrayOf(
+                                        Primitive(
+                                                Primitive.Name.Pair,
+                                                arrayOf(
+                                                        Visitable.keyHash(tz3!!),
+                                                        Primitive(
+                                                                Primitive.Name.Pair,
+                                                                arrayOf(
+                                                                        Primitive(
+                                                                                Primitive.Name.Pair,
+                                                                                arrayOf(
+                                                                                        Visitable.integer(mSpendingLimitAmount*1000000),
+                                                                                        Visitable.integer(180)
+                                                                                )
+                                                                        ),
+                                                                        Primitive(
+                                                                                Primitive.Name.Pair,
+                                                                                arrayOf(
+                                                                                        Visitable.sequenceOf(),
+                                                                                        Visitable.sequenceOf()
                                                                                 )
                                                                         )
                                                                 )
                                                         )
-                                                ),
-                                                Visitable.string("tz1M7RpncdPVx19rtZda42UNDWon4NE5kmGu")
-                                        )
+                                                )
+                                        ),
+                                        Visitable.keyHash(tz1)
                                 )
                         )
                 )
+        )
 
         val o = ByteArrayOutputStream()
         o.write(0x05)
@@ -1131,8 +1131,7 @@ class ScriptFragment : Fragment()
         val dataPacker = Packer(o)
         dataVisitable.accept(dataPacker)
 
-        val dataPack2 = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
+        val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
 
         val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
@@ -1203,7 +1202,7 @@ class ScriptFragment : Fragment()
 
         val valuesArgs = (((argsTz3AndValues[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
         val spendingLimitOne = valuesArgs[0] as JSONObject
-        spendingLimitOne.put("int", "20000000")
+        spendingLimitOne.put("int", (mSpendingLimitAmount*1000000).toString())
 
         val spendingLimitTwo = valuesArgs[1] as JSONObject
         spendingLimitTwo.put("int", "180")
