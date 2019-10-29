@@ -1211,12 +1211,12 @@ class ScriptFragment : Fragment()
         masterKeyArgs.put("string", tz1)
 
         dstObject.put("parameters", value)
-        dstObject.put("entrypoint", "appel_clef_maitresse")
 
         var dstObjects = JSONArray()
         dstObjects.put(dstObject)
 
-//send 0.1 tz to recover your contract
+
+//send 0.1 tz if this tz3 is a new one
         if (!isSecureKeyHashIdentical())
         {
             val dstCentsObject = JSONObject()

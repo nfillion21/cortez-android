@@ -516,6 +516,8 @@ class TransferFormFragment : Fragment()
             dstObject.put("dst", arguments!!.getString(Address.TAG))
             dstObject.put("amount", "0")
 
+            dstObject.put("entrypoint", "transfer")
+
             /*
             val packSpending = Pack.prim(
                     Pack.pair(
@@ -537,7 +539,6 @@ class TransferFormFragment : Fragment()
             val salt = getSalt(isRecipient = false)
             val packSalt = Pack.prim(Pack.int(salt!!))
             val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
-            */
 
             //val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
             val signedData = KeyPair.b2b("hello".toByteArray())
@@ -562,9 +563,39 @@ class TransferFormFragment : Fragment()
                     p2pk,
                     p2sig)
 
-            //TODO we need to put a parameter
-            val json = JSONObject(spendingLimitContract)
-            dstObject.put("parameters", json)
+            */
+
+            val spendingLimitFile = "spending_limit_transfer.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
+
+            val args = value["args"] as JSONArray
+
+            val firstParamArgs = (args[0] as JSONObject)["args"] as JSONArray
+
+            val amountAndContract = ((firstParamArgs[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+            val amount = amountAndContract[0] as JSONObject
+            amount.put("int", "amount")
+
+            val contractKT1 = amountAndContract[1] as JSONObject
+            contractKT1.put("string", "contract")
+
+            val dst = firstParamArgs[1] as JSONObject
+            dst.put("string", "dst")
+
+            val secondParamArgs = (args[1] as JSONObject)["args"] as JSONArray
+
+            val pk = secondParamArgs[0] as JSONObject
+            pk.put("string", "pk")
+
+            val sig = secondParamArgs[1] as JSONObject
+            sig.put("string", "sig")
+
+            dstObject.put("parameters", contract)
 
             dstObjects.put(dstObject)
 
@@ -1143,12 +1174,9 @@ class TransferFormFragment : Fragment()
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
             if (args != null)
             {
-                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-                val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
-                return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
+                return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
             }
         }
         else if (!isRecipient && mStorageSource != null)
@@ -1158,12 +1186,9 @@ class TransferFormFragment : Fragment()
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
             if (args != null)
             {
-                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-                val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
-                return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
+                return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
             }
         }
 
