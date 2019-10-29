@@ -1134,19 +1134,13 @@ class ScriptFragment : Fragment()
         val dataPack2 = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
 
-        val addressAndChainIdPack = "0507070a00000016015538141a5f189f280cd8417fc8695fe131be4e21000a000000040f6f0310".hexToByteArray()
 
-
-        val chainId = "NetXKakFj1A7ouL"
-
-        val addressAndChainVisitable =
-
-                        Primitive(Primitive.Name.PAIR,
-                                arrayOf(
-                                        Visitable.string(pkh()!!),
-                                        Visitable.string(chainId)
-                                )
-                        )
+        val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                arrayOf(
+                        Visitable.address(pkh()!!),
+                        Visitable.chainID("NetXKakFj1A7ouL")
+                )
+        )
 
         val output = ByteArrayOutputStream()
         output.write(0x05)
@@ -1155,12 +1149,6 @@ class ScriptFragment : Fragment()
         addressAndChainVisitable.accept(p)
 
         val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
-
-        if (addressAndChainIdPack.contentEquals(addressAndChainPack))
-        {
-            val b = "j"
-            val c = b + "j"
-        }
 
 
         var saltVisitable:Visitable? = null
@@ -1178,7 +1166,7 @@ class ScriptFragment : Fragment()
 
         val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
 
-        val signature = KeyPair.sign(sk, dataPack + addressAndChainIdPack + saltPack)
+        val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
 
         val edsig = CryptoUtils.generateEDSig(signature)
 

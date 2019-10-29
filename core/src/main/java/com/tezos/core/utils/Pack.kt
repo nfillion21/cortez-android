@@ -1,5 +1,7 @@
 package com.tezos.core.utils
 
+import com.tezos.core.crypto.Base58
+import org.bitcoinj.core.AddressFormatException
 import java.io.OutputStream
 import kotlin.math.absoluteValue
 import kotlin.math.sign
@@ -9,6 +11,7 @@ interface Visitor {
     fun visit(string: String)
     fun visit(sequence: Array<out Visitable>)
     fun visit(primitive: Primitive)
+    fun visit(bytes: ByteArray)
 }
 
 interface Visitable {
@@ -181,6 +184,43 @@ data class Primitive(val name: Name, val arguments: Array<out Visitable>? = null
     }
 }
 
+@Suppress("ArrayInDataClass")
+data class VisitableBytes(val value: ByteArray): Visitable {
+    override fun accept(visitor: Visitor) {
+        visitor.visit(value)
+    }
+}
+
+fun Visitable.Companion.byteArrayOf(keyHash: String): ByteArray {
+    var bytes = Base58.decode(keyHash).slice(3 until (27 - 4)).toByteArray()
+    bytes = when(keyHash.slice(0 until 3)) {
+        "tz1" -> byteArrayOf(0x00) + bytes
+        "tz2" -> byteArrayOf(0x01) + bytes
+        "tz3" -> byteArrayOf(0x02) + bytes
+        else -> throw AddressFormatException("Unknown address prefix")
+    }
+    return bytes
+}
+
+fun Visitable.Companion.keyHash(value: String): Visitable {
+    return VisitableBytes(byteArrayOf(value))
+}
+
+fun Visitable.Companion.address(value: String): Visitable {
+    var bytes = Base58.decode(value).slice(3 until (27 - 4)).toByteArray()
+    //byteArrayOf(value)
+    bytes = when(value.slice(0 until 3)) {
+        "KT1" -> byteArrayOf(0x01) + bytes + byteArrayOf(0x00)
+        else -> byteArrayOf(0x00) + byteArrayOf(value)
+    }
+    return VisitableBytes(bytes)
+}
+
+fun Visitable.Companion.chainID(value: String): Visitable {
+    var bytes = Base58.decode(value).slice(3 until 7).toByteArray()
+    return VisitableBytes(bytes)
+}
+
 data class FakeOutputStream(var size: Int = 0): OutputStream() {
     override fun write(b: Int) {
         ++size
@@ -237,6 +277,12 @@ data class Packer(val output: OutputStream): Visitor {
             pack(length)
             output.write(toByteArray())
         }
+    }
+
+    override fun visit(bytes: ByteArray) {
+        output.write(0x0a)
+        pack(bytes.size)
+        output.write(bytes)
     }
 
     private fun packSizeOf(sequence: Array<out Visitable>) {
