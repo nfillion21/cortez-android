@@ -56,7 +56,7 @@ import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.DataExtractor
+import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.activity.TransferFormActivity
@@ -68,6 +68,7 @@ import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
 import kotlin.collections.HashMap
 import kotlin.collections.set
@@ -564,6 +565,49 @@ class TransferFormFragment : Fragment()
                     p2sig)
 
             */
+
+
+
+
+            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.address(arguments!!.getString(Address.TAG)),
+                            Visitable.chainID("NetXKakFj1A7ouL")
+                    )
+            )
+
+            val output = ByteArrayOutputStream()
+            output.write(0x05)
+
+            val p = Packer(output)
+            addressAndChainVisitable.accept(p)
+
+            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+
+
+            var saltVisitable: Visitable? = null
+            val salt = getSalt(isRecipient = false)
+            if (salt != null)
+            {
+                saltVisitable = Visitable.integer(salt.toLong())
+            }
+
+            val outputStream = ByteArrayOutputStream()
+            outputStream.write(0x05)
+
+            val packer = Packer(outputStream)
+            saltVisitable!!.accept(packer)
+
+            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+            
+
+            val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+
+            val p2sig = CryptoUtils.generateEDSig(signature)
+
 
             val spendingLimitFile = "spending_limit_transfer.json"
             val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
