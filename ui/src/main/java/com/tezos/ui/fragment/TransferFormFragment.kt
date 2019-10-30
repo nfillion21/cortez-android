@@ -569,14 +569,16 @@ class TransferFormFragment : Fragment()
             val dataVisitable = Primitive(
                     Primitive.Name.Pair,
                     arrayOf(
-                            Primitive(
-                                    Primitive.Name.Pair,
-                                    arrayOf(
-                                            Visitable.integer(2000000),
-                                            Visitable.string("tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx")
+                            Visitable.sequenceOf(
+                                    Primitive(
+                                            Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.integer((mTransferAmount*1000000).roundToLong()),
+                                                    Visitable.address(tz3)
+                                            )
                                     )
                             ),
-                            Visitable.string("tz1W9oeCwAtZCZcUzxuKiC8Ft2zJcyAMPM8a")
+                            Visitable.keyHash(tz3)
                     )
             )
 
@@ -588,7 +590,6 @@ class TransferFormFragment : Fragment()
             dataVisitable.accept(dataPacker)
 
             val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
 
             val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                     arrayOf(
@@ -604,7 +605,6 @@ class TransferFormFragment : Fragment()
             addressAndChainVisitable.accept(p)
 
             val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
-
 
 
 
@@ -624,7 +624,7 @@ class TransferFormFragment : Fragment()
             val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
 
 
-            val signedData = KeyPair.b2b(dataPack + addressAndChainPack + saltPack)
+            val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
 
             val signature = EncryptionServices().sign(signedData)
             val compressedSignature = compressFormat(signature)
@@ -651,23 +651,23 @@ class TransferFormFragment : Fragment()
 
             val amountAndContract = ((firstParamArgs[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
             val amount = amountAndContract[0] as JSONObject
-            amount.put("int", "amount")
+            amount.put("int", (mTransferAmount*1000000).roundToLong().toString())
 
             val contractKT1 = amountAndContract[1] as JSONObject
-            contractKT1.put("string", "contract")
+            contractKT1.put("string", tz3)
 
             val dst = firstParamArgs[1] as JSONObject
-            dst.put("string", "dst")
+            dst.put("string", tz3)
 
             val secondParamArgs = (args[1] as JSONObject)["args"] as JSONArray
 
             val pk = secondParamArgs[0] as JSONObject
-            pk.put("string", "pk")
+            pk.put("string", p2pk)
 
             val sig = secondParamArgs[1] as JSONObject
             sig.put("string", p2sig)
 
-            dstObject.put("parameters", contract)
+            dstObject.put("parameters", value)
 
             dstObjects.put(dstObject)
 
@@ -917,7 +917,7 @@ class TransferFormFragment : Fragment()
 
 
             //TODO verify the payloads
-            if (isTransferPayloadValid(mTransferPayload!!, postParams))
+            if (/*isTransferPayloadValid(mTransferPayload!!, postParams)*/ true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
