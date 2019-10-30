@@ -566,7 +566,28 @@ class TransferFormFragment : Fragment()
 
             */
 
+            val dataVisitable = Primitive(
+                    Primitive.Name.Pair,
+                    arrayOf(
+                            Primitive(
+                                    Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.integer(2000000),
+                                            Visitable.string("tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx")
+                                    )
+                            ),
+                            Visitable.string("tz1W9oeCwAtZCZcUzxuKiC8Ft2zJcyAMPM8a")
+                    )
+            )
 
+
+            val o = ByteArrayOutputStream()
+            o.write(0x05)
+
+            val dataPacker = Packer(o)
+            dataVisitable.accept(dataPacker)
+
+            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
 
             val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
@@ -602,11 +623,18 @@ class TransferFormFragment : Fragment()
 
             val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
 
-            
 
-            val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+            val signedData = KeyPair.b2b(dataPack + addressAndChainPack + saltPack)
 
-            val p2sig = CryptoUtils.generateEDSig(signature)
+            val signature = EncryptionServices().sign(signedData)
+            val compressedSignature = compressFormat(signature)
+
+            val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
+
+
+            //val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+
+            //val p2sig = CryptoUtils.generateEDSig(signature)
 
 
             val spendingLimitFile = "spending_limit_transfer.json"
@@ -637,7 +665,7 @@ class TransferFormFragment : Fragment()
             pk.put("string", "pk")
 
             val sig = secondParamArgs[1] as JSONObject
-            sig.put("string", "sig")
+            sig.put("string", p2sig)
 
             dstObject.put("parameters", contract)
 
