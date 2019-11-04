@@ -50,7 +50,6 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.tezos.core.*
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
@@ -235,9 +234,22 @@ class TransferFormFragment : Fragment()
             arguments?.let {
 
                 val srcAddress = it.getString(Address.TAG)
+                var dstAddress:String? = null
+
+                val bundle = it.getBundle(TransferFormActivity.DST_ADDRESS_KEY)
+                if (bundle != null)
+                {
+                    val dst = Address.fromBundle(bundle)
+                    dstAddress = dst?.pubKeyHash
+                }
+
                 if (!srcAddress.isNullOrEmpty() && srcAddress.startsWith("KT1", true))
                 {
                     startStorageInfoLoading(false)
+                }
+                else if (!dstAddress.isNullOrEmpty() && dstAddress.startsWith("kt1", true))
+                {
+                    startStorageInfoLoading(true)
                 }
                 else
                 {
@@ -688,7 +700,11 @@ class TransferFormFragment : Fragment()
 
                 var dstObject = JSONObject()
                 dstObject.put("dst", mDstAccount)
-                dstObject.put("entrypoint", "send")
+
+                if (mRecipientKT1withCode)
+                {
+                    dstObject.put("entrypoint", "send")
+                }
 
                 dstObject.put("amount", (mTransferAmount*1000000).roundToLong().toString())
 
