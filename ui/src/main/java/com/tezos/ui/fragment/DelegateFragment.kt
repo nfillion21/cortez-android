@@ -52,8 +52,7 @@ import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.DataExtractor
-import com.tezos.core.utils.Utils
+import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.authentication.AuthenticationDialog
@@ -63,6 +62,7 @@ import kotlinx.android.synthetic.main.fragment_delegate.*
 import kotlinx.android.synthetic.main.redelegate_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import kotlin.math.roundToLong
 
 class DelegateFragment : Fragment()
@@ -94,7 +94,8 @@ class DelegateFragment : Fragment()
             val spendable: Boolean,
             val delegatable: Boolean,
             val delegate: String?,
-            val script: String
+            val script: String,
+            val storage: String
     )
 
     internal class ContractSerialization internal constructor(private val contract: Contract)
@@ -108,6 +109,7 @@ class DelegateFragment : Fragment()
             contractBundle.putBoolean("delegatable", contract.delegatable)
             contractBundle.putString("delegate", contract.delegate)
             contractBundle.putString("script", contract.script)
+            contractBundle.putString("storage", contract.storage)
 
             return contractBundle
         }
@@ -122,8 +124,9 @@ class DelegateFragment : Fragment()
             val delegatable = this.bundle.getBoolean("delegatable", false)
             val delegate = this.bundle.getString("delegate", null)
             val script = this.bundle.getString("script", null)
+            val storage = this.bundle.getString("storage", null)
 
-            return Contract(blk, spendable, delegatable, delegate, script)
+            return Contract(blk, spendable, delegatable, delegate, script, storage)
         }
     }
 
@@ -455,7 +458,7 @@ class DelegateFragment : Fragment()
             {
 
                 //prevents from async crashes
-                if (R.id.content != null)
+                if (swipe_refresh_layout != null)
                 {
                     addContractInfoFromJSON(it)
                     onContractInfoComplete(true)
@@ -501,9 +504,12 @@ class DelegateFragment : Fragment()
             val spendable = DataExtractor.getBooleanFromField(contractJSON, "spendable")
             val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
             val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
+            val script = DataExtractor.getJSONObjectFromField(contractJSON, "script")
 
-            val resScript = JSONObject(getString(R.string.default_contract))
-            mContract = Contract(blk as String, spendable as Boolean, delegatable as Boolean, delegate, resScript.toString())
+            val storage = DataExtractor.getJSONObjectFromField(script, "storage")
+
+            //val resScript = JSONObject(getString(R.string.default_contract))
+            mContract = Contract(blk as String, spendable as Boolean, delegatable as Boolean, delegate, script.toString(), storage.toString())
         }
     }
 
@@ -527,7 +533,7 @@ class DelegateFragment : Fragment()
 
         if (mContract != null)
         {
-            if (mContract!!.delegate != null)
+            if (mContract?.delegate != null)
             {
                 limits_info_textview?.visibility = View.GONE
                 update_storage_form_card?.visibility = View.VISIBLE
@@ -607,6 +613,26 @@ class DelegateFragment : Fragment()
             loading_textview?.text = "-"
         }
     }
+
+    private fun getSalt():Int?
+    {
+        //TODO check if the storage follows our pattern
+        if (mContract != null && mContract?.storage != null)
+        {
+            val storageJSONObject = JSONObject(mContract?.storage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
+                return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
+            }
+        }
+
+        return null
+    }
+
 
     // volley
     private fun startPostRequestLoadFinalizeRemoveDelegate(mnemonicsData: Storage.MnemonicsData)
@@ -957,10 +983,138 @@ class DelegateFragment : Fragment()
         //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
         dstObject.put("amount", (0).toLong().toString())
 
-        dstObject.put("entrypoint", "do")
 
-        val json = JSONArray(String.format(getString(R.string.set_delegate_contract), mDelegateTezosAddress))
-        dstObject.put("parameters", json)
+        val salt = getSalt()
+        if (salt != null && salt >= 0)
+        {
+
+            dstObject.put("entrypoint", "appel_clef_maitresse")
+
+
+
+            /*
+            val dataVisitable = Primitive(
+                    Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.sequenceOf(
+                                    Primitive(
+                                            Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.integer((mTransferAmount*1000000).roundToLong()),
+                                                    Visitable.address(mDstAccount!!)
+                                            )
+                                    )
+                            ),
+                            Visitable.keyHash(tz3)
+                    )
+            )
+            */
+
+            val dataVisitable = Primitive(
+                    Primitive.Name.Right,
+                    arrayOf(
+                            Primitive(
+                                    Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.sequenceOf(
+                                                    Primitive(Primitive.Name.DROP),
+                                                    Primitive(
+                                                            Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))
+                                                    ),
+                                                    Primitive(
+                                                            Primitive.Name.PUSH,
+                                                            arrayOf(
+                                                                    Primitive(Primitive.Name.key_hash),
+                                                                    Visitable.string("tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx")
+                                                            )
+                                                    ),
+                                                    Primitive(Primitive.Name.SOME),
+                                                    Primitive(Primitive.Name.SET_DELEGATE),
+                                                    Primitive(Primitive.Name.CONS)
+
+                                            ),
+                                            Visitable.string("tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h")
+                                    )
+                            )
+                    )
+            )
+
+            /*
+
+            { "prim": "Right",
+        "args":
+          [ { "prim": "Pair",
+              "args":
+                [ [ { "prim": "DROP" },
+                    { "prim": "NIL", "args": [ { "prim": "operation" } ] },
+                    { "prim": "PUSH",
+                      "args":
+                        [ { "prim": "key_hash" },
+                          { "string": "tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx" } ] },
+                    { "prim": "SOME" }, { "prim": "SET_DELEGATE" },
+                    { "prim": "CONS" } ],
+                  { "string": "tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h" } ] } ] }
+
+             */
+
+
+
+            val o = ByteArrayOutputStream()
+            o.write(0x05)
+
+            val dataPacker = Packer(o)
+            dataVisitable.accept(dataPacker)
+
+            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+
+            val compare = "0505080707020000002a0320053d036d0743035d0a000000150002298c03ed7d454a101eb7022bc95f7e5f41ac780346034e031b0a0000001500dbd1087b133e63b9e320d20be9d1469621b6d682".hexToByteArray()
+
+            if (dataPack.contentEquals(compare))
+            {
+                val k = "j"
+                val k2 = "j1"
+                val k3 = "j2"
+            }
+
+
+            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.address(pkh()!!),
+                            Visitable.chainID("NetXKakFj1A7ouL")
+                    )
+            )
+
+            val output = ByteArrayOutputStream()
+            output.write(0x05)
+
+            val p = Packer(output)
+            addressAndChainVisitable.accept(p)
+
+            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+            val saltVisitable = Visitable.integer(salt.toLong())
+
+            val outputStream = ByteArrayOutputStream()
+            outputStream.write(0x05)
+
+            val packer = Packer(outputStream)
+            saltVisitable.accept(packer)
+
+            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+
+
+        }
+        else
+        {
+            dstObject.put("entrypoint", "do")
+
+            val json = JSONArray(String.format(getString(R.string.set_delegate_contract), mDelegateTezosAddress))
+            dstObject.put("parameters", json)
+        }
 
         dstObjects.put(dstObject)
 
