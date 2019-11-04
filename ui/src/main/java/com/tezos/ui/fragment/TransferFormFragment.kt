@@ -510,6 +510,8 @@ class TransferFormFragment : Fragment()
             val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
             postParams.put("src", tz3)
 
+            val kt1 = arguments!!.getString(Address.TAG)
+
             var dstObjects = JSONArray()
 
             var dstObject = JSONObject()
@@ -519,53 +521,6 @@ class TransferFormFragment : Fragment()
 
             dstObject.put("entrypoint", "transfer")
 
-            /*
-            val packSpending = Pack.prim(
-                    Pack.pair(
-                            Pack.listOf(
-                                    Pack.pair(
-                                            Pack.mutez((mTransferAmount*1000000).toLong()),
-                                            Pack.contract(mDstAccount!!)
-                                    )
-                            ),
-                            Pack.keyHash(getTz3() as String)
-                    )
-            )
-
-            val packSpendingByteArray = packSpending.data.toNoPrefixHexString().hexToByteArray()
-
-            //TODO we got the salt now
-            //TODO block the UI to be sure we got the salt
-
-            val salt = getSalt(isRecipient = false)
-            val packSalt = Pack.prim(Pack.int(salt!!))
-            val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
-
-            //val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
-            val signedData = KeyPair.b2b("hello".toByteArray())
-
-            val signature = EncryptionServices().sign(signedData)
-            val compressedSignature = compressFormat(signature)
-
-            val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
-
-            val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_spending))
-
-            //montant(mutez)
-            //destinataire (tz/KT)
-            //signataire (tz3)
-            //edpk (p2pk)
-            //edsig (p2sig)
-
-            val spendingLimitContract = String.format(resScript.toString(),
-                    (mTransferAmount*1000000).roundToLong().toString(),
-                    mDstAccount,
-                    tz3,
-                    p2pk,
-                    p2sig)
-
-            */
-
             val dataVisitable = Primitive(
                     Primitive.Name.Pair,
                     arrayOf(
@@ -574,7 +529,7 @@ class TransferFormFragment : Fragment()
                                             Primitive.Name.Pair,
                                             arrayOf(
                                                     Visitable.integer((mTransferAmount*1000000).roundToLong()),
-                                                    Visitable.address(tz3)
+                                                    Visitable.address(mDstAccount!!)
                                             )
                                     )
                             ),
@@ -593,7 +548,7 @@ class TransferFormFragment : Fragment()
 
             val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                     arrayOf(
-                            Visitable.address(arguments!!.getString(Address.TAG)),
+                            Visitable.address(kt1),
                             Visitable.chainID("NetXKakFj1A7ouL")
                     )
             )
@@ -654,7 +609,7 @@ class TransferFormFragment : Fragment()
             amount.put("int", (mTransferAmount*1000000).roundToLong().toString())
 
             val contractKT1 = amountAndContract[1] as JSONObject
-            contractKT1.put("string", tz3)
+            contractKT1.put("string", mDstAccount)
 
             val dst = firstParamArgs[1] as JSONObject
             dst.put("string", tz3)

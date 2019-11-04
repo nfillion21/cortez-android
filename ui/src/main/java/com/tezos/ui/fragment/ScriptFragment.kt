@@ -1105,7 +1105,7 @@ class ScriptFragment : Fragment()
                                                                                 Primitive.Name.Pair,
                                                                                 arrayOf(
                                                                                         Visitable.integer(mSpendingLimitAmount*1000000),
-                                                                                        Visitable.integer(180)
+                                                                                        Visitable.integer(10)
                                                                                 )
                                                                         ),
                                                                         Primitive(
@@ -1205,7 +1205,7 @@ class ScriptFragment : Fragment()
         spendingLimitOne.put("int", (mSpendingLimitAmount*1000000).toString())
 
         val spendingLimitTwo = valuesArgs[1] as JSONObject
-        spendingLimitTwo.put("int", "180")
+        spendingLimitTwo.put("int", "10")
 
         val masterKeyArgs = argsFirstArgsKeyPart[1] as JSONObject
         masterKeyArgs.put("string", tz1)
