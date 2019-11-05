@@ -616,7 +616,6 @@ class DelegateFragment : Fragment()
 
     private fun getSalt():Int?
     {
-        //TODO check if the storage follows our pattern
         if (mContract != null && mContract?.storage != null)
         {
             val storageJSONObject = JSONObject(mContract?.storage)
@@ -626,6 +625,9 @@ class DelegateFragment : Fragment()
             {
                 val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
                 val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
+
+                //TODO remove it
+                return 32
                 return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
             }
         }
@@ -664,7 +666,7 @@ class DelegateFragment : Fragment()
             postParams.put("dsts", dstObjects)
 
 
-            if (isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (/*isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -776,7 +778,7 @@ class DelegateFragment : Fragment()
 
             postParams.put("dsts", dstObjects)
 
-            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (/*isAddDelegatePayloadValid(mDelegatePayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -983,32 +985,13 @@ class DelegateFragment : Fragment()
         //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
         dstObject.put("amount", "0")
 
-
-        val salt = getSalt()
+        //TODO salt fail
+        //val salt = getSalt()
+        val salt = 31
         if (salt != null && salt >= 0)
         {
 
             dstObject.put("entrypoint", "appel_clef_maitresse")
-
-
-
-            /*
-            val dataVisitable = Primitive(
-                    Primitive.Name.Pair,
-                    arrayOf(
-                            Visitable.sequenceOf(
-                                    Primitive(
-                                            Primitive.Name.Pair,
-                                            arrayOf(
-                                                    Visitable.integer((mTransferAmount*1000000).roundToLong()),
-                                                    Visitable.address(mDstAccount!!)
-                                            )
-                                    )
-                            ),
-                            Visitable.keyHash(tz3)
-                    )
-            )
-            */
 
             val dataVisitable = Primitive(
                     Primitive.Name.Right,
@@ -1038,26 +1021,6 @@ class DelegateFragment : Fragment()
                     )
             )
 
-            /*
-
-            { "prim": "Right",
-        "args":
-          [ { "prim": "Pair",
-              "args":
-                [ [ { "prim": "DROP" },
-                    { "prim": "NIL", "args": [ { "prim": "operation" } ] },
-                    { "prim": "PUSH",
-                      "args":
-                        [ { "prim": "key_hash" },
-                          { "string": "tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx" } ] },
-                    { "prim": "SOME" }, { "prim": "SET_DELEGATE" },
-                    { "prim": "CONS" } ],
-                  { "string": "tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h" } ] } ] }
-
-             */
-
-
-
             val o = ByteArrayOutputStream()
             o.write(0x05)
 
@@ -1065,17 +1028,6 @@ class DelegateFragment : Fragment()
             dataVisitable.accept(dataPacker)
 
             val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-            /*
-            val compare = "0505080707020000002a0320053d036d0743035d0a000000150002298c03ed7d454a101eb7022bc95f7e5f41ac780346034e031b0a0000001500dbd1087b133e63b9e320d20be9d1469621b6d682".hexToByteArray()
-
-            if (dataPack.contentEquals(compare))
-            {
-                val k = "j"
-                val k2 = "j1"
-                val k3 = "j2"
-            }
-            */
 
             val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                     arrayOf(
@@ -1111,18 +1063,36 @@ class DelegateFragment : Fragment()
             //val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
             //val signature = KeyPair.sign(sk, signedData)
 
-            val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+            val signature = KeyPair.sign(sk,"0x".hexToByteArray() + dataPack + addressAndChainPack + saltPack)
             val edsig = CryptoUtils.generateEDSig(signature)
 
 
-            val spendingLimitFile = "spending_limit_update_storage.json"
+            val spendingLimitFile = "spending_limit_delegate.json"
             val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
                     .use {
                         it.readText()
                     }
 
             val value = JSONObject(contract)
+            val args = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
+            val pkValue = args[0] as JSONObject
+            pkValue.put("string", pk)
+
+            val sig = args[1] as JSONObject
+            sig.put("string", edsig)
+
+            val argsRight = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+            val argsDelegate = ((argsRight[0] as JSONArray)[2] as JSONObject)["args"] as JSONArray
+            val delegate = argsDelegate[1] as JSONObject
+            delegate.put("string", mDelegateTezosAddress)
+
+
+            val masterKey = argsRight[1] as JSONObject
+            masterKey.put("string", mnemonicsData.pkh)
+
+            dstObject.put("parameters", value)
         }
         else
         {
@@ -1242,12 +1212,116 @@ class DelegateFragment : Fragment()
         dstObject.put("dst", pkh())
 
         //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
-        dstObject.put("amount", (0).toLong().toString())
+        dstObject.put("amount", "0")
 
-        dstObject.put("entrypoint", "do")
 
-        val json = JSONArray(getString(R.string.remove_delegate_contract))
-        dstObject.put("parameters", json)
+        //TODO salt fail
+        val salt = getSalt()
+        if (salt != null && salt >= 0)
+        {
+            dstObject.put("entrypoint", "appel_clef_maitresse")
+
+            val dataVisitable = Primitive(
+                    Primitive.Name.Right,
+                    arrayOf(
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.sequenceOf(
+                                                    Primitive(Primitive.Name.DROP),
+                                                    Primitive(
+                                                            Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))
+                                                    ),
+                                                    Primitive(
+                                                            Primitive.Name.NONE,
+                                                            arrayOf(
+                                                                    Primitive(Primitive.Name.key_hash)
+                                                            )
+                                                    ),
+                                                    Primitive(Primitive.Name.SET_DELEGATE),
+                                                    Primitive(Primitive.Name.CONS)
+
+                                            ),
+                                            Visitable.keyHash(mnemonicsData.pkh)
+                                    )
+                            )
+                    )
+            )
+
+            val o = ByteArrayOutputStream()
+            o.write(0x05)
+
+            val dataPacker = Packer(o)
+            dataVisitable.accept(dataPacker)
+
+            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.address(pkh()!!),
+                            Visitable.chainID("NetXKakFj1A7ouL")
+                    )
+            )
+
+            val output = ByteArrayOutputStream()
+            output.write(0x05)
+
+            val p = Packer(output)
+            addressAndChainVisitable.accept(p)
+
+            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+            val saltVisitable = Visitable.integer(salt.toLong())
+
+            val outputStream = ByteArrayOutputStream()
+            outputStream.write(0x05)
+
+            val packer = Packer(outputStream)
+            saltVisitable.accept(packer)
+
+            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+
+
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            val sk = CryptoUtils.generateSk(mnemonics, "")
+
+            //val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+            //val signature = KeyPair.sign(sk, signedData)
+
+            val signature = KeyPair.sign(sk,"0x".hexToByteArray() + dataPack + addressAndChainPack + saltPack)
+            val edsig = CryptoUtils.generateEDSig(signature)
+
+
+            val spendingLimitFile = "spending_limit_remove_delegate.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
+            val args = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+            val pkValue = args[0] as JSONObject
+            pkValue.put("string", pk)
+
+            val sig = args[1] as JSONObject
+            sig.put("string", edsig)
+
+            val argsRight = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+            val masterKey = argsRight[1] as JSONObject
+            masterKey.put("string", mnemonicsData.pkh)
+
+            dstObject.put("parameters", value)
+        }
+        else
+        {
+            dstObject.put("entrypoint", "do")
+
+            val json = JSONArray(getString(R.string.remove_delegate_contract))
+            dstObject.put("parameters", json)
+        }
 
         dstObjects.put(dstObject)
 
