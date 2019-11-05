@@ -981,7 +981,7 @@ class DelegateFragment : Fragment()
         dstObject.put("dst", pkh())
 
         //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
-        dstObject.put("amount", (0).toLong().toString())
+        dstObject.put("amount", "0")
 
 
         val salt = getSalt()
@@ -1013,8 +1013,7 @@ class DelegateFragment : Fragment()
             val dataVisitable = Primitive(
                     Primitive.Name.Right,
                     arrayOf(
-                            Primitive(
-                                    Primitive.Name.Pair,
+                            Primitive(Primitive.Name.Pair,
                                     arrayOf(
                                             Visitable.sequenceOf(
                                                     Primitive(Primitive.Name.DROP),
@@ -1025,7 +1024,7 @@ class DelegateFragment : Fragment()
                                                             Primitive.Name.PUSH,
                                                             arrayOf(
                                                                     Primitive(Primitive.Name.key_hash),
-                                                                    Visitable.string("tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx")
+                                                                    Visitable.keyHash(mDelegateTezosAddress!!)
                                                             )
                                                     ),
                                                     Primitive(Primitive.Name.SOME),
@@ -1033,7 +1032,7 @@ class DelegateFragment : Fragment()
                                                     Primitive(Primitive.Name.CONS)
 
                                             ),
-                                            Visitable.string("tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h")
+                                            Visitable.keyHash(mnemonicsData.pkh)
                                     )
                             )
                     )
@@ -1067,8 +1066,7 @@ class DelegateFragment : Fragment()
 
             val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
-
-
+            /*
             val compare = "0505080707020000002a0320053d036d0743035d0a000000150002298c03ed7d454a101eb7022bc95f7e5f41ac780346034e031b0a0000001500dbd1087b133e63b9e320d20be9d1469621b6d682".hexToByteArray()
 
             if (dataPack.contentEquals(compare))
@@ -1077,7 +1075,7 @@ class DelegateFragment : Fragment()
                 val k2 = "j1"
                 val k3 = "j2"
             }
-
+            */
 
             val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                     arrayOf(
@@ -1106,6 +1104,24 @@ class DelegateFragment : Fragment()
             val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
 
 
+
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            val sk = CryptoUtils.generateSk(mnemonics, "")
+
+            //val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+            //val signature = KeyPair.sign(sk, signedData)
+
+            val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+            val edsig = CryptoUtils.generateEDSig(signature)
+
+
+            val spendingLimitFile = "spending_limit_update_storage.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
 
         }
         else

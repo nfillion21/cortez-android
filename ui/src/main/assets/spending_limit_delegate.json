@@ -1,0 +1,62 @@
+{
+  "prim": "Pair",
+  "args": [
+    {
+      "prim": "Pair",
+      "args": [
+        {
+          "string": "edpkuyVYkuZJQtu6jEfUTakLiukPUezEqT86rsLmWR3FiriWyxKYk5"
+        },
+        {
+          "string": "edsigtvYHghiHPCY5G4jgsVKduXL6Nk3HGCPU8eH97sgkrLXS6xtkpKyU8w6rvE9zy4XNARM9F2pu2HzZp4sL4E5S9AyPvQhRUo"
+        }
+      ]
+    },
+    {
+      "prim": "Right",
+      "args": [
+        {
+          "prim": "Pair",
+          "args": [
+            [
+              {
+                "prim": "DROP"
+              },
+              {
+                "prim": "NIL",
+                "args": [
+                  {
+                    "prim": "operation"
+                  }
+                ]
+              },
+              {
+                "prim": "PUSH",
+                "args": [
+                  {
+                    "prim": "key_hash"
+                  },
+                  {
+                    "string": "tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx"
+                  }
+                ]
+              },
+              {
+                "prim": "SOME"
+              },
+              {
+                "prim": "SET_DELEGATE"
+              },
+              {
+                "prim": "CONS"
+              }
+            ],
+            {
+              "string": "tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
