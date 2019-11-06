@@ -627,7 +627,7 @@ class DelegateFragment : Fragment()
                 val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
 
                 //TODO remove it
-                return 32
+                return 34
                 return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
             }
         }
@@ -986,8 +986,7 @@ class DelegateFragment : Fragment()
         dstObject.put("amount", "0")
 
         //TODO salt fail
-        //val salt = getSalt()
-        val salt = 31
+        val salt = getSalt()
         if (salt != null && salt >= 0)
         {
 

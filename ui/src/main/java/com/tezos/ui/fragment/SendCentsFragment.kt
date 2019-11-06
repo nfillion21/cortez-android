@@ -18,11 +18,10 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.tezos.core.*
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.DataExtractor
+import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -32,6 +31,7 @@ import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.dialog_sent_cents.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
 
 class SendCentsFragment : AppCompatDialogFragment()
@@ -482,62 +482,119 @@ class SendCentsFragment : AppCompatDialogFragment()
             val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
             postParams.put("src", tz3)
 
+            val kt1 = arguments!!.getString(CONTRACT_PUBLIC_KEY)
+
             var dstObjects = JSONArray()
 
             var dstObject = JSONObject()
 
-            dstObject.put("dst", arguments!!.getString(CONTRACT_PUBLIC_KEY))
+            dstObject.put("dst", kt1)
             dstObject.put("amount", "0")
 
-            /*
-            val packSpending = Pack.prim(
-                    Pack.pair(
-                            Pack.listOf(
-                                    Pack.pair(
-                                            Pack.mutez((100000).toLong()),
-                                            Pack.contract(tz3)
+            dstObject.put("entrypoint", "transfer")
+
+            val dataVisitable = Primitive(
+                    Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.sequenceOf(
+                                    Primitive(
+                                            Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.integer(100000),
+                                                    Visitable.address(tz3)
+                                            )
                                     )
                             ),
-                            Pack.keyHash(retrieveTz3() as String)
+                            Visitable.keyHash(tz3)
                     )
             )
 
-            val packSpendingByteArray = packSpending.data.toNoPrefixHexString().hexToByteArray()
 
-            //TODO we got the salt now
-            //TODO block the UI to be sure we got the salt
+            val o = ByteArrayOutputStream()
+            o.write(0x05)
 
+            val dataPacker = Packer(o)
+            dataVisitable.accept(dataPacker)
+
+            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.address(kt1),
+                            Visitable.chainID("NetXKakFj1A7ouL")
+                    )
+            )
+
+            val output = ByteArrayOutputStream()
+            output.write(0x05)
+
+            val p = Packer(output)
+            addressAndChainVisitable.accept(p)
+
+            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+
+            var saltVisitable: Visitable? = null
             val salt = getSalt()
-            val packSalt = Pack.prim(Pack.int(salt!!))
-            val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
-            */
+            if (salt != null)
+            {
+                saltVisitable = Visitable.integer(salt.toLong())
+            }
 
-            //val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
-            val signedData = KeyPair.b2b(ByteArray(0))
+            val outputStream = ByteArrayOutputStream()
+            outputStream.write(0x05)
+
+            val packer = Packer(outputStream)
+            saltVisitable!!.accept(packer)
+
+            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+
+            val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
 
             val signature = EncryptionServices().sign(signedData)
             val compressedSignature = compressFormat(signature)
 
             val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
 
-            val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_spending))
 
-            //montant(mutez)
-            //destinataire (tz/KT)
-            //signataire (tz3)
-            //edpk (p2pk)
-            //edsig (p2sig)
+            //val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
 
-            val spendingLimitContract = String.format(resScript.toString(),
-                    (100000).toLong().toString(),
-                    retrieveTz3(),
-                    tz3,
-                    p2pk,
-                    p2sig)
+            //val p2sig = CryptoUtils.generateEDSig(signature)
 
-            //TODO we need to put a parameter
-            val json = JSONObject(spendingLimitContract)
-            dstObject.put("parameters", json)
+
+            val spendingLimitFile = "spending_limit_transfer.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
+
+            val args = value["args"] as JSONArray
+
+            val firstParamArgs = (args[0] as JSONObject)["args"] as JSONArray
+
+            val amountAndContract = ((firstParamArgs[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+            val amount = amountAndContract[0] as JSONObject
+            amount.put("int", "100000")
+
+            val contractKT1 = amountAndContract[1] as JSONObject
+            contractKT1.put("string", tz3)
+
+            val dst = firstParamArgs[1] as JSONObject
+            dst.put("string", tz3)
+
+            val secondParamArgs = (args[1] as JSONObject)["args"] as JSONArray
+
+            val pk = secondParamArgs[0] as JSONObject
+            pk.put("string", p2pk)
+
+            val sig = secondParamArgs[1] as JSONObject
+            sig.put("string", p2sig)
+
+            dstObject.put("parameters", value)
 
             dstObjects.put(dstObject)
 
@@ -562,7 +619,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             dstObject.put("dst", retrieveTz3())
 
             //0.1 tez == 100 000 mutez
-            dstObject.put("amount", (100000).toLong().toString())
+            dstObject.put("amount", "100000")
 
             var dstObjects = JSONArray()
             dstObjects.put(dstObject)
@@ -783,8 +840,10 @@ class SendCentsFragment : AppCompatDialogFragment()
 
     private fun validateSendCentsButton(validate: Boolean)
     {
-        val bundleTheme = arguments!!.getBundle(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(bundleTheme)
+        //val bundleTheme = arguments!!.getBundle(CustomTheme.TAG)
+        //val theme = CustomTheme.fromBundle(bundleTheme)
+
+        val theme = CustomTheme(R.color.colorPrimaryDark, R.color.colorPrimaryVeryDark, R.color.colorTitleText)
 
         if (validate)
         {
@@ -837,13 +896,12 @@ class SendCentsFragment : AppCompatDialogFragment()
             val storageJSONObject = JSONObject(mStorage)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
-
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-            val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
-            return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+            if (args != null)
+            {
+                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
+                return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
+            }
         }
 
         return null
