@@ -29,7 +29,6 @@ package com.tezos.ui.fragment
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
@@ -516,14 +515,40 @@ class TransferFormFragment : Fragment()
 
         if (mSourceKT1withCode)
         {
-
             //TODO need to handle if this is a tz1 massive transfer or a tz3 transfer.
-
-            val kt1 = arguments!!.getString(Address.TAG)
 
             val hasMnemonics = Storage(context!!).hasMnemonics()
             if (hasMnemonics)
             {
+                val mnemonicsData = Storage(activity!!).getMnemonics()
+
+                val pk = if (mnemonicsData.pk.isNullOrEmpty())
+                {
+                    val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                    updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+                }
+                else
+                {
+                    mnemonicsData.pk
+                }
+
+                val pkh = mnemonicsData.pkh
+
+                postParams.put("src_pk", pk)
+                postParams.put("src", pkh)
+
+                val kt1 = arguments!!.getString(Address.TAG)
+
+                var dstObjects = JSONArray()
+
+                var dstObject = JSONObject()
+
+                dstObject.put("dst", arguments!!.getString(Address.TAG))
+                dstObject.put("amount", "0")
+
+                dstObject.put("entrypoint", "appel_clef_maitresse")
+
+
                 // use the tz1 to transfer
 
                 val dataVisitable = Primitive(
@@ -547,14 +572,14 @@ class TransferFormFragment : Fragment()
                                                                                 Primitive(Primitive.Name.PUSH,
                                                                                         arrayOf(
                                                                                                 Primitive(Primitive.Name.key_hash),
-                                                                                                Visitable.keyHash("tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx")
+                                                                                                Visitable.keyHash(mDstAccount!!)
                                                                                         )
                                                                                 ),
                                                                                 Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
                                                                                 Primitive(Primitive.Name.PUSH,
                                                                                         arrayOf(
                                                                                                 Primitive(Primitive.Name.mutez),
-                                                                                                Visitable.integer(1000000000000)
+                                                                                                Visitable.integer((mTransferAmount*1000000).roundToLong())
                                                                                         )
                                                                                 )
                                                                         )
@@ -563,7 +588,7 @@ class TransferFormFragment : Fragment()
                                                         Primitive(Primitive.Name.TRANSFER_TOKENS),
                                                         Primitive(Primitive.Name.CONS)
                                                 ),
-                                                Visitable.keyHash("tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h")
+                                                Visitable.keyHash(pkh)
                                         )
                                 )
                         )
@@ -610,12 +635,45 @@ class TransferFormFragment : Fragment()
 
                 val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
 
-                val mnemonicsData = Storage(activity!!).getMnemonics()
                 val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
                 val sk = CryptoUtils.generateSk(mnemonics, "")
 
-                compressedSignature = KeyPair.sign(sk, result)
+                val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
 
+                val edsig = CryptoUtils.generateEDSig(signature)
+
+                val spendingLimitFile = "spending_limit_massive_transfer.json"
+                val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                        .use {
+                            it.readText()
+                        }
+
+                val value = JSONObject(contract)
+
+                val argsSig = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                val argPk = argsSig[0] as JSONObject
+                argPk.put("string", pk)
+
+                val argSig = argsSig[1] as JSONObject
+                argSig.put("string", edsig)
+
+                val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+                val keyHash = argsTz[1] as JSONObject
+                keyHash.put("string", mDstAccount)
+
+                val arggs = ((((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0]) as JSONObject)["args"] as JSONArray)[0] as JSONArray)
+                val masterKeyHash = ((arggs[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                masterKeyHash.put("string", pkh)
+
+                val mutezArgs = ((arggs[3] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                mutezArgs.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                dstObject.put("parameters", value)
+
+                dstObjects.put(dstObject)
+
+                postParams.put("dsts", dstObjects)
             }
             else
             {
@@ -830,8 +888,6 @@ class TransferFormFragment : Fragment()
 
                 postParams.put("dsts", dstObjects)
             }
-
-
         }
 
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
