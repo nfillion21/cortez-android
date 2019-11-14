@@ -580,6 +580,9 @@ class SendCentsFragment : AppCompatDialogFragment()
             val amount = amountAndContract[0] as JSONObject
             amount.put("int", "100000")
 
+            //val timer = amountAndContract[1] as JSONObject
+            //timer.put("int", "86400")
+
             val contractKT1 = amountAndContract[1] as JSONObject
             contractKT1.put("string", tz3)
 

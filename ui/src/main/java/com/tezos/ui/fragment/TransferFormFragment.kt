@@ -62,8 +62,10 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
+import kotlinx.android.synthetic.main.fragment_delegate.*
 import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
+import kotlinx.android.synthetic.main.payment_form_card_info.no_mnemonics
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -517,9 +519,17 @@ class TransferFormFragment : Fragment()
         {
             //TODO need to handle if this is a tz1 massive transfer or a tz3 transfer.
 
+            var canSignWithMaster = false
             val hasMnemonics = Storage(context!!).hasMnemonics()
             if (hasMnemonics)
             {
+                val seed = Storage(activity!!).getMnemonics()
+                canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
+            }
+
+            if (canSignWithMaster)
+            {
+
                 val mnemonicsData = Storage(activity!!).getMnemonics()
 
                 val pk = if (mnemonicsData.pk.isNullOrEmpty())
@@ -1076,8 +1086,18 @@ class TransferFormFragment : Fragment()
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
                 var compressedSignature = ByteArray(64)
-                if (mSourceKT1withCode)
+
+                var canSignWithMaster = false
+                val hasMnemonics = Storage(context!!).hasMnemonics()
+                if (hasMnemonics)
                 {
+                    val seed = Storage(activity!!).getMnemonics()
+                    canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
+                }
+
+                if (mSourceKT1withCode && !canSignWithMaster)
+                {
+
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
 
