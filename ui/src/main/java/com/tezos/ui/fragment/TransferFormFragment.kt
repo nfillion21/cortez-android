@@ -517,7 +517,30 @@ class TransferFormFragment : Fragment()
 
         if (mSourceKT1withCode)
         {
-            //TODO need to handle if this is a tz1 massive transfer or a tz3 transfer.
+
+
+            //TODO need to try if it does work
+            //I need to send some tez to an SLC, from an SLC.
+
+            if (mRecipientKT1withCode)
+            {
+
+                val spendingLimitFile = "spending_limit_transfer_slc.json"
+                val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                        .use {
+                            it.readText()
+                        }
+
+                val value = JSONObject(contract)
+
+                val argsSend = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                val argsSend2 = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+                val argsSig = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
+                val argsSig2 = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
+            }
+
+
 
             var canSignWithMaster = false
             val hasMnemonics = Storage(context!!).hasMnemonics()
@@ -582,7 +605,8 @@ class TransferFormFragment : Fragment()
                                                                                 Primitive(Primitive.Name.PUSH,
                                                                                         arrayOf(
                                                                                                 Primitive(Primitive.Name.key_hash),
-                                                                                                Visitable.keyHash(mDstAccount!!)
+                                                                                                //Visitable.keyHash(mDstAccount!!)
+                                                                                                Visitable.address(mDstAccount!!)
                                                                                         )
                                                                                 ),
                                                                                 Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
