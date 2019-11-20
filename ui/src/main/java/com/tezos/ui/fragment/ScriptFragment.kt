@@ -619,6 +619,7 @@ class ScriptFragment : Fragment()
                             val response = it.networkResponse?.statusCode
                             if (response == 404)
                             {
+                                //TODO this doesn't exist anymore
                                 mStorage = JSONObject(getString(R.string.default_storage)).toString()
                             }
                             else

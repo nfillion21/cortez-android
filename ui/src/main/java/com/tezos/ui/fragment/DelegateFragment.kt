@@ -59,6 +59,13 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_delegate.*
+import kotlinx.android.synthetic.main.fragment_delegate.loading_textview
+import kotlinx.android.synthetic.main.fragment_delegate.nav_progress
+import kotlinx.android.synthetic.main.fragment_delegate.storage_info_textview
+import kotlinx.android.synthetic.main.fragment_delegate.update_storage_button
+import kotlinx.android.synthetic.main.fragment_delegate.update_storage_button_layout
+import kotlinx.android.synthetic.main.fragment_delegate.update_storage_form_card
+import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.redelegate_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -77,6 +84,8 @@ class DelegateFragment : Fragment()
 
     private var mContractInfoLoading:Boolean = false
 
+    private var mStorageInfoLoading:Boolean = false
+
     private var mDelegatePayload:String? = null
     private var mDelegateFees:Long = -1
 
@@ -87,6 +96,8 @@ class DelegateFragment : Fragment()
     private var mContract:Contract? = null
 
     private var mWalletEnabled:Boolean = false
+
+    private var mStorage:String? = null
 
     data class Contract
     (
@@ -157,6 +168,7 @@ class DelegateFragment : Fragment()
         private const val REMOVE_DELEGATE_FINALIZE_TAG = "remove_delegate_finalize"
 
         private const val CONTRACT_INFO_TAG = "contract_info"
+        private const val STORAGE_INFO_TAG = "storage_info"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
@@ -164,6 +176,8 @@ class DelegateFragment : Fragment()
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
+
+        private const val STORAGE_DATA_KEY = "storage_data_key"
 
         private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
@@ -251,6 +265,10 @@ class DelegateFragment : Fragment()
 
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
 
+            mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
+
+            mStorageInfoLoading = savedInstanceState.getBoolean(STORAGE_INFO_TAG)
+
             val contractBundle = savedInstanceState.getBundle(CONTRACT_DATA_KEY)
             if (contractBundle != null)
             {
@@ -265,40 +283,49 @@ class DelegateFragment : Fragment()
             }
             else
             {
-                onContractInfoComplete(false)
+                onContractInfoComplete(true)
 
-                if (mInitRemoveDelegateLoading)
+                if (mStorageInfoLoading)
                 {
-                    startInitRemoveDelegateLoading()
+                    startGetRequestLoadContractStorage()
                 }
                 else
                 {
-                    onInitRemoveDelegateLoadComplete(null)
+                    onStorageInfoComplete(true)
 
-                    if (mFinalizeRemoveDelegateLoading)
+                    if (mInitRemoveDelegateLoading)
                     {
-                        startFinalizeRemoveDelegateLoading()
+                        startInitRemoveDelegateLoading()
                     }
                     else
                     {
-                        onFinalizeDelegationLoadComplete(null)
+                        onInitRemoveDelegateLoadComplete(null)
 
-                        //TODO we got to keep in mind there's an id already.
-                        if (mInitDelegateLoading)
+                        if (mFinalizeRemoveDelegateLoading)
                         {
-                            startInitDelegationLoading()
+                            startFinalizeRemoveDelegateLoading()
                         }
                         else
                         {
-                            onInitDelegateLoadComplete(null)
+                            onFinalizeDelegationLoadComplete(null)
 
-                            if (mFinalizeDelegateLoading)
+                            //TODO we got to keep in mind there's an id already.
+                            if (mInitDelegateLoading)
                             {
-                                startFinalizeAddDelegateLoading()
+                                startInitDelegationLoading()
                             }
                             else
                             {
-                                onFinalizeDelegationLoadComplete(null)
+                                onInitDelegateLoadComplete(null)
+
+                                if (mFinalizeDelegateLoading)
+                                {
+                                    startFinalizeAddDelegateLoading()
+                                }
+                                else
+                                {
+                                    onFinalizeDelegationLoadComplete(null)
+                                }
                             }
                         }
                     }
@@ -439,12 +466,8 @@ class DelegateFragment : Fragment()
     // volley
     private fun startGetRequestLoadContractInfo()
     {
-        cancelRequests(true)
-
-        mContractInfoLoading = true
 
         loading_textview.setText(R.string.loading_contract_info)
-
 
         nav_progress.visibility = View.VISIBLE
 
@@ -461,23 +484,22 @@ class DelegateFragment : Fragment()
                 if (swipe_refresh_layout != null)
                 {
                     addContractInfoFromJSON(it)
-                    onContractInfoComplete(true)
 
                     val hasMnemonics = Storage(activity!!).hasMnemonics()
                     if (hasMnemonics)
                     {
                         val seed = Storage(activity!!).getMnemonics()
+                        val isMnemonicsEmpty = seed.mnemonics.isNullOrEmpty()
 
-                        if (seed.mnemonics.isNotEmpty())
+                        onContractInfoComplete(isMnemonicsEmpty)
+
+                        if (!isMnemonicsEmpty)
                         {
-                            if (mContract?.delegate != null)
-                            {
-                                startInitRemoveDelegateLoading()
-                            }
-                            else
-                            {
-                                validateAddButton(isInputDataValid() && isDelegateFeeValid())
-                            }
+                            //TODO need to check here if we need to get salt
+                            //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
+
+                            validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                            startGetRequestLoadContractStorage()
                         }
                     }
                 }
@@ -489,7 +511,108 @@ class DelegateFragment : Fragment()
                         showSnackBar(it, null)
                     })
 
+
+            cancelRequests(true)
+            mContractInfoLoading = true
+
             jsonArrayRequest.tag = CONTRACT_INFO_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
+    // volley
+    private fun startGetRequestLoadContractStorage()
+    {
+
+        loading_textview.setText(R.string.loading_contract_info)
+        nav_progress.visibility = View.VISIBLE
+
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.contract_storage_url), pkh)
+
+            // Request a string response from the provided URL.
+            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener<JSONObject>
+            {
+
+                //prevents from async crashes
+                if (swipe_refresh_layout != null)
+                {
+                    addStorageInfoFromJSON(it)
+                    onStorageInfoComplete(true)
+
+                    val hasMnemonics = Storage(activity!!).hasMnemonics()
+                    if (hasMnemonics)
+                    {
+                        val seed = Storage(activity!!).getMnemonics()
+
+                        if (seed.mnemonics.isNotEmpty())
+                        {
+                            //TODO need to check here if we need to get salt
+                            //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
+
+                            if (mContract?.delegate != null)
+                            {
+                                startInitRemoveDelegateLoading()
+                            }
+                            else
+                            {
+                                validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                            }
+                        }
+                    }
+
+                    /*
+                    val mnemonicsData = Storage(activity!!).getMnemonics()
+                    val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
+                    val isDefaultContract = mStorage.toString() == defaultContract.toString()
+
+                    if (mStorage != null && !isDefaultContract)
+                    {
+                        validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
+
+                        startGetRequestBalance()
+                    }
+
+                    else
+                    {
+                        //TODO I don't need to forge a transfer for now
+                        //TODO hide the whole thing
+
+                        //I need the right data inputs before.
+                        //startInitRemoveDelegateLoading()
+                    }
+                    */
+                }
+            },
+                    Response.ErrorListener {
+
+                        if (swipe_refresh_script_layout != null)
+                        {
+                            /*
+                            val response = it.networkResponse?.statusCode
+                            if (response == 404)
+                            {
+                                //TODO this doesn't exist anymore
+                                mStorage = JSONObject(getString(R.string.default_storage)).toString()
+                            }
+                            else
+                            {
+                                // 404 happens when there is no storage in this KT1
+                                //showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                            }
+                            */
+
+                            showSnackBar(it, null)
+                            onStorageInfoComplete(false)
+                        }
+                    })
+
+            cancelRequests(true)
+            mStorageInfoLoading = true
+
+            jsonArrayRequest.tag = STORAGE_INFO_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
     }
@@ -513,15 +636,37 @@ class DelegateFragment : Fragment()
         }
     }
 
+    private fun addStorageInfoFromJSON(answer: JSONObject)
+    {
+        if (answer != null && answer.length() > 0)
+        {
+            mStorage = answer.toString()
+        }
+    }
+
+    private fun onStorageInfoComplete(animating:Boolean)
+    {
+        mStorageInfoLoading = false
+        nav_progress?.visibility = View.GONE
+
+        //TODO handle the swipe refresh
+        swipe_refresh_script_layout?.isEnabled = true
+        swipe_refresh_script_layout?.isRefreshing = false
+
+        refreshTextUnderDelegation(animating)
+    }
+
     private fun onContractInfoComplete(animating:Boolean)
     {
         mContractInfoLoading = false
-        nav_progress?.visibility = View.GONE
+        if (animating)
+        {
+            nav_progress?.visibility = View.GONE
+        }
 
         //TODO handle the swipe refresh
         swipe_refresh_layout?.isEnabled = true
         swipe_refresh_layout?.isRefreshing = false
-
         refreshTextUnderDelegation(animating)
     }
 
@@ -616,9 +761,9 @@ class DelegateFragment : Fragment()
 
     private fun getSalt():Int?
     {
-        if (mContract != null && mContract?.storage != null)
+        if (mStorage != null)
         {
-            val storageJSONObject = JSONObject(mContract?.storage)
+            val storageJSONObject = JSONObject(mStorage)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
             if (args != null)
@@ -626,8 +771,6 @@ class DelegateFragment : Fragment()
                 val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
                 val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
 
-                //TODO remove it
-                return 34
                 return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
             }
         }
@@ -865,7 +1008,7 @@ class DelegateFragment : Fragment()
     private fun onFinalizeDelegationLoadComplete(error: VolleyError?)
     {
         // everything is over, there's no call to make
-        cancelRequests(true)
+        cancelRequests(false)
 
         if (error != null)
         {
@@ -911,7 +1054,7 @@ class DelegateFragment : Fragment()
         else
         {
             transferLoading(false)
-            cancelRequests(true)
+            cancelRequests(false)
             // it's signed, looks like it worked.
             //transferLoading(true)
         }
@@ -948,7 +1091,7 @@ class DelegateFragment : Fragment()
         else
         {
             transferLoading(false)
-            cancelRequests(true)
+            cancelRequests(false)
             // it's signed, looks like it worked.
             //transferLoading(true)
         }
@@ -1784,6 +1927,7 @@ class DelegateFragment : Fragment()
             requestQueue?.cancelAll(REMOVE_DELEGATE_INIT_TAG)
             requestQueue?.cancelAll(REMOVE_DELEGATE_FINALIZE_TAG)
             requestQueue?.cancelAll(CONTRACT_INFO_TAG)
+            requestQueue?.cancelAll(STORAGE_INFO_TAG)
 
             if (resetBooleans)
             {
@@ -1792,6 +1936,7 @@ class DelegateFragment : Fragment()
                 mInitRemoveDelegateLoading = false
                 mFinalizeRemoveDelegateLoading = false
                 mContractInfoLoading = false
+                mStorageInfoLoading = false
             }
         }
     }
@@ -1819,6 +1964,10 @@ class DelegateFragment : Fragment()
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
 
         outState.putBundle(CONTRACT_DATA_KEY, this.toBundle(mContract))
+
+        outState.putString(STORAGE_DATA_KEY, mStorage)
+
+        outState.putBoolean(STORAGE_INFO_TAG, mStorageInfoLoading)
     }
 
     override fun onDetach()
