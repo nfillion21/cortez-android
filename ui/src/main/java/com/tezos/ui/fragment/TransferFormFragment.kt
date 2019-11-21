@@ -552,7 +552,38 @@ class TransferFormFragment : Fragment()
 
                 dstObject.put("entrypoint", "transfer")
 
-                val dataPack = "0507070200000026070700a0d9e2060a0000001a01974ada48e6c21d75f3576c4e22d292e59410411e0073656e640a000000150244f02653b4fb64e58a345754988fac9b5eaf2622".hexToByteArray()
+                val dataPackCompare = "05070702000000260707008092f4010a0000001a01974ada48e6c21d75f3576c4e22d292e59410411e0073656e640a000000150244f02653b4fb64e58a345754988fac9b5eaf2622".hexToByteArray()
+
+                val dataVisitable = Primitive(
+                        Primitive.Name.Pair,
+                        arrayOf(
+                                Visitable.sequenceOf(
+                                        Primitive(
+                                                Primitive.Name.Pair,
+                                                arrayOf(
+                                                        Visitable.integer((mTransferAmount*1000000).roundToLong()),
+
+                                                        Visitable.address(mDstAccount!!)
+                                                )
+                                        )
+                                ),
+                                Visitable.keyHash(tz3)
+                        )
+                )
+
+                val o = ByteArrayOutputStream()
+                o.write(0x05)
+
+                val dataPacker = Packer(o)
+                dataVisitable.accept(dataPacker)
+
+                val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+                if (dataPack.contentEquals(dataPackCompare))
+                {
+                    val k = "h1"
+                    val k2 = "h2"
+                }
 
 
                 val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
