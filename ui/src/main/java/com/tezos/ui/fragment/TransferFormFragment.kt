@@ -517,43 +517,18 @@ class TransferFormFragment : Fragment()
 
         if (mSourceKT1withCode)
         {
-
-
             //TODO need to try if it does work
             //I need to send some tez to an SLC, from an SLC.
 
             if (mRecipientKT1withCode)
             {
-
-                val spendingLimitFile = "spending_limit_transfer_slc.json"
-                val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                        .use {
-                            it.readText()
-                        }
-
-                val value = JSONObject(contract)
-
-                val argsSend = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-                val argsSend2 = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-
-                val argsSig = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
-                val argsSig2 = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
-            }
-
-
-
-            var canSignWithMaster = false
-            val hasMnemonics = Storage(context!!).hasMnemonics()
-            if (hasMnemonics)
-            {
-                val seed = Storage(activity!!).getMnemonics()
-                canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
-            }
-
-            if (canSignWithMaster)
-            {
-
                 val mnemonicsData = Storage(activity!!).getMnemonics()
+                val kt1 = arguments!!.getString(Address.TAG)
+                val tz1 = mnemonicsData.pkh
+
+                val ecKeys = retrieveECKeys()
+                val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
 
                 val pk = if (mnemonicsData.pk.isNullOrEmpty())
                 {
@@ -565,78 +540,20 @@ class TransferFormFragment : Fragment()
                     mnemonicsData.pk
                 }
 
-                val pkh = mnemonicsData.pkh
-
-                postParams.put("src_pk", pk)
-                postParams.put("src", pkh)
-
-                val kt1 = arguments!!.getString(Address.TAG)
+                postParams.put("src_pk", p2pk)
+                postParams.put("src", tz3)
 
                 var dstObjects = JSONArray()
 
                 var dstObject = JSONObject()
 
-                dstObject.put("dst", arguments!!.getString(Address.TAG))
+                dstObject.put("dst", kt1)
                 dstObject.put("amount", "0")
 
-                dstObject.put("entrypoint", "appel_clef_maitresse")
+                dstObject.put("entrypoint", "transfer")
 
+                val dataPack = "0507070200000026070700a0d9e2060a0000001a01974ada48e6c21d75f3576c4e22d292e59410411e0073656e640a000000150244f02653b4fb64e58a345754988fac9b5eaf2622".hexToByteArray()
 
-                // use the tz1 to transfer
-
-                val dataVisitable = Primitive(
-                        Primitive.Name.Right,
-                        arrayOf(
-                                Primitive(
-                                        Primitive.Name.Pair,
-                                        arrayOf(
-
-                                                Visitable.sequenceOf(
-
-                                                        Primitive(
-                                                                Primitive.Name.DIP,
-                                                                arrayOf(
-                                                                        Visitable.sequenceOf(
-
-                                                                                Primitive(Primitive.Name.NIL,
-                                                                                arrayOf(Primitive(Primitive.Name.operation))
-                                                                                ),
-
-                                                                                Primitive(Primitive.Name.PUSH,
-                                                                                        arrayOf(
-                                                                                                Primitive(Primitive.Name.key_hash),
-                                                                                                //Visitable.keyHash(mDstAccount!!)
-                                                                                                Visitable.address(mDstAccount!!)
-                                                                                        )
-                                                                                ),
-                                                                                Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
-                                                                                Primitive(Primitive.Name.PUSH,
-                                                                                        arrayOf(
-                                                                                                Primitive(Primitive.Name.mutez),
-                                                                                                Visitable.integer((mTransferAmount*1000000).roundToLong())
-                                                                                        )
-                                                                                )
-                                                                        )
-                                                                )
-                                                        ),
-                                                        Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                                        Primitive(Primitive.Name.CONS)
-                                                ),
-                                                Visitable.keyHash(pkh)
-                                        )
-                                )
-                        )
-                )
-
-                val o = ByteArrayOutputStream()
-                o.write(0x05)
-
-                val dataPacker = Packer(o)
-                dataVisitable.accept(dataPacker)
-
-                val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                //val packCompare = "0505080707020000003a051f020000002f053d036d0743035d0a000000150002298c03ed7d454a101eb7022bc95f7e5f41ac78031e0743036a0080c0a8ca9a3a034d031b0a0000001500dbd1087b133e63b9e320d20be9d1469621b6d682".hexToByteArray()
 
                 val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                         arrayOf(
@@ -673,10 +590,17 @@ class TransferFormFragment : Fragment()
                 val sk = CryptoUtils.generateSk(mnemonics, "")
 
                 val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
-
                 val edsig = CryptoUtils.generateEDSig(signature)
 
-                val spendingLimitFile = "spending_limit_massive_transfer.json"
+                val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+
+                val signatureTz3 = EncryptionServices().sign(signedData)
+                val compressedSignature = compressFormat(signatureTz3)
+                val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
+
+
+
+                val spendingLimitFile = "spending_limit_transfer_slc.json"
                 val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
                         .use {
                             it.readText()
@@ -684,24 +608,24 @@ class TransferFormFragment : Fragment()
 
                 val value = JSONObject(contract)
 
-                val argsSig = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-                val argPk = argsSig[0] as JSONObject
-                argPk.put("string", pk)
+                val argsSend = (((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
-                val argSig = argsSig[1] as JSONObject
-                argSig.put("string", edsig)
+                val argsSendAmount = argsSend[0] as JSONObject
+                argsSendAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
 
-                val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                val argsSendContract = argsSend[1] as JSONObject
+                argsSendContract.put("string", "$mDstAccount%send")
 
-                val keyHash = argsTz[1] as JSONObject
-                keyHash.put("string", mDstAccount)
+                val argsSendTz = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                argsSendTz.put("string", tz3)
 
-                val arggs = ((((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0]) as JSONObject)["args"] as JSONArray)[0] as JSONArray)
-                val masterKeyHash = ((arggs[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                masterKeyHash.put("string", pkh)
+                val argsSig = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
 
-                val mutezArgs = ((arggs[3] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                mutezArgs.put("int", (mTransferAmount*1000000).roundToLong().toString())
+                val argsSigPk = argsSig[0] as JSONObject
+                argsSigPk.put("string", p2pk)
+
+                val argsSigSig = argsSig[1] as JSONObject
+                argsSigSig.put("string", p2sig)
 
                 dstObject.put("parameters", value)
 
@@ -711,131 +635,302 @@ class TransferFormFragment : Fragment()
             }
             else
             {
-                // use the tz3 to transfer
-
-                val ecKeys = retrieveECKeys()
-                val p2pk = CryptoUtils.generateP2Pk(ecKeys)
-                postParams.put("src_pk", p2pk)
-                val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-                postParams.put("src", tz3)
-
-                val kt1 = arguments!!.getString(Address.TAG)
-
-                var dstObjects = JSONArray()
-
-                var dstObject = JSONObject()
-
-                dstObject.put("dst", arguments!!.getString(Address.TAG))
-                dstObject.put("amount", "0")
-
-                dstObject.put("entrypoint", "transfer")
-
-                val dataVisitable = Primitive(
-                        Primitive.Name.Pair,
-                        arrayOf(
-                                Visitable.sequenceOf(
-                                        Primitive(
-                                                Primitive.Name.Pair,
-                                                arrayOf(
-                                                        Visitable.integer((mTransferAmount*1000000).roundToLong()),
-                                                        Visitable.address(mDstAccount!!)
-                                                )
-                                        )
-                                ),
-                                Visitable.keyHash(tz3)
-                        )
-                )
-
-
-                val o = ByteArrayOutputStream()
-                o.write(0x05)
-
-                val dataPacker = Packer(o)
-                dataVisitable.accept(dataPacker)
-
-                val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
-                        arrayOf(
-                                Visitable.address(kt1),
-                                Visitable.chainID("NetXKakFj1A7ouL")
-                        )
-                )
-
-                val output = ByteArrayOutputStream()
-                output.write(0x05)
-
-                val p = Packer(output)
-                addressAndChainVisitable.accept(p)
-
-                val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
-
-
-
-                var saltVisitable: Visitable? = null
-                val salt = getSalt(isRecipient = false)
-                if (salt != null)
+                var canSignWithMaster = false
+                val hasMnemonics = Storage(context!!).hasMnemonics()
+                if (hasMnemonics)
                 {
-                    saltVisitable = Visitable.integer(salt.toLong())
+                    val seed = Storage(activity!!).getMnemonics()
+                    canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
                 }
 
-                val outputStream = ByteArrayOutputStream()
-                outputStream.write(0x05)
+                if (canSignWithMaster)
+                {
 
-                val packer = Packer(outputStream)
-                saltVisitable!!.accept(packer)
+                    val mnemonicsData = Storage(activity!!).getMnemonics()
 
-                val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+                    val pk = if (mnemonicsData.pk.isNullOrEmpty())
+                    {
+                        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                        updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+                    }
+                    else
+                    {
+                        mnemonicsData.pk
+                    }
+
+                    val pkh = mnemonicsData.pkh
+
+                    postParams.put("src_pk", pk)
+                    postParams.put("src", pkh)
+
+                    val kt1 = arguments!!.getString(Address.TAG)
+
+                    var dstObjects = JSONArray()
+
+                    var dstObject = JSONObject()
+
+                    dstObject.put("dst", kt1)
+                    dstObject.put("amount", "0")
+
+                    dstObject.put("entrypoint", "appel_clef_maitresse")
 
 
-                val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+                    // use the tz1 to transfer
 
-                val signature = EncryptionServices().sign(signedData)
-                val compressedSignature = compressFormat(signature)
+                    val dataVisitable = Primitive(
+                            Primitive.Name.Right,
+                            arrayOf(
+                                    Primitive(
+                                            Primitive.Name.Pair,
+                                            arrayOf(
 
-                val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
+                                                    Visitable.sequenceOf(
+
+                                                            Primitive(
+                                                                    Primitive.Name.DIP,
+                                                                    arrayOf(
+                                                                            Visitable.sequenceOf(
+
+                                                                                    Primitive(Primitive.Name.NIL,
+                                                                                            arrayOf(Primitive(Primitive.Name.operation))
+                                                                                    ),
+
+                                                                                    Primitive(Primitive.Name.PUSH,
+                                                                                            arrayOf(
+                                                                                                    Primitive(Primitive.Name.key_hash),
+                                                                                                    //Visitable.keyHash(mDstAccount!!)
+                                                                                                    Visitable.address(mDstAccount!!)
+                                                                                            )
+                                                                                    ),
+                                                                                    Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
+                                                                                    Primitive(Primitive.Name.PUSH,
+                                                                                            arrayOf(
+                                                                                                    Primitive(Primitive.Name.mutez),
+                                                                                                    Visitable.integer((mTransferAmount*1000000).roundToLong())
+                                                                                            )
+                                                                                    )
+                                                                            )
+                                                                    )
+                                                            ),
+                                                            Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                            Primitive(Primitive.Name.CONS)
+                                                    ),
+                                                    Visitable.keyHash(pkh)
+                                            )
+                                    )
+                            )
+                    )
+
+                    val o = ByteArrayOutputStream()
+                    o.write(0x05)
+
+                    val dataPacker = Packer(o)
+                    dataVisitable.accept(dataPacker)
+
+                    val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+                    //val packCompare = "0505080707020000003a051f020000002f053d036d0743035d0a000000150002298c03ed7d454a101eb7022bc95f7e5f41ac78031e0743036a0080c0a8ca9a3a034d031b0a0000001500dbd1087b133e63b9e320d20be9d1469621b6d682".hexToByteArray()
+
+                    val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                            arrayOf(
+                                    Visitable.address(kt1),
+                                    Visitable.chainID("NetXKakFj1A7ouL")
+                            )
+                    )
+
+                    val output = ByteArrayOutputStream()
+                    output.write(0x05)
+
+                    val p = Packer(output)
+                    addressAndChainVisitable.accept(p)
+
+                    val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
 
 
-                //val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+                    var saltVisitable: Visitable? = null
+                    val salt = getSalt(isRecipient = false)
+                    if (salt != null)
+                    {
+                        saltVisitable = Visitable.integer(salt.toLong())
+                    }
 
-                //val p2sig = CryptoUtils.generateEDSig(signature)
+                    val outputStream = ByteArrayOutputStream()
+                    outputStream.write(0x05)
+
+                    val packer = Packer(outputStream)
+                    saltVisitable!!.accept(packer)
+
+                    val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+                    val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                    val sk = CryptoUtils.generateSk(mnemonics, "")
+
+                    val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+
+                    val edsig = CryptoUtils.generateEDSig(signature)
+
+                    val spendingLimitFile = "spending_limit_massive_transfer.json"
+                    val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                            .use {
+                                it.readText()
+                            }
+
+                    val value = JSONObject(contract)
+
+                    val argsSig = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                    val argPk = argsSig[0] as JSONObject
+                    argPk.put("string", pk)
+
+                    val argSig = argsSig[1] as JSONObject
+                    argSig.put("string", edsig)
+
+                    val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+                    val keyHash = argsTz[1] as JSONObject
+                    keyHash.put("string", mDstAccount)
+
+                    val arggs = ((((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0]) as JSONObject)["args"] as JSONArray)[0] as JSONArray)
+                    val masterKeyHash = ((arggs[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    masterKeyHash.put("string", pkh)
+
+                    val mutezArgs = ((arggs[3] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    mutezArgs.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                    dstObject.put("parameters", value)
+
+                    dstObjects.put(dstObject)
+
+                    postParams.put("dsts", dstObjects)
+                }
+                else
+                {
+                    // use the tz3 to transfer
+
+                    val ecKeys = retrieveECKeys()
+                    val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                    postParams.put("src_pk", p2pk)
+                    val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                    postParams.put("src", tz3)
+
+                    val kt1 = arguments!!.getString(Address.TAG)
+
+                    var dstObjects = JSONArray()
+
+                    var dstObject = JSONObject()
+
+                    dstObject.put("dst", arguments!!.getString(Address.TAG))
+                    dstObject.put("amount", "0")
+
+                    dstObject.put("entrypoint", "transfer")
+
+                    val dataVisitable = Primitive(
+                            Primitive.Name.Pair,
+                            arrayOf(
+                                    Visitable.sequenceOf(
+                                            Primitive(
+                                                    Primitive.Name.Pair,
+                                                    arrayOf(
+                                                            Visitable.integer((mTransferAmount*1000000).roundToLong()),
+                                                            Visitable.address(mDstAccount!!)
+                                                    )
+                                            )
+                                    ),
+                                    Visitable.keyHash(tz3)
+                            )
+                    )
 
 
-                val spendingLimitFile = "spending_limit_transfer.json"
-                val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                        .use {
-                            it.readText()
-                        }
+                    val o = ByteArrayOutputStream()
+                    o.write(0x05)
 
-                val value = JSONObject(contract)
+                    val dataPacker = Packer(o)
+                    dataVisitable.accept(dataPacker)
 
-                val args = value["args"] as JSONArray
+                    val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
-                val firstParamArgs = (args[0] as JSONObject)["args"] as JSONArray
+                    val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                            arrayOf(
+                                    Visitable.address(kt1),
+                                    Visitable.chainID("NetXKakFj1A7ouL")
+                            )
+                    )
 
-                val amountAndContract = ((firstParamArgs[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-                val amount = amountAndContract[0] as JSONObject
-                amount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+                    val output = ByteArrayOutputStream()
+                    output.write(0x05)
 
-                val contractKT1 = amountAndContract[1] as JSONObject
-                contractKT1.put("string", mDstAccount)
+                    val p = Packer(output)
+                    addressAndChainVisitable.accept(p)
 
-                val dst = firstParamArgs[1] as JSONObject
-                dst.put("string", tz3)
+                    val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
 
-                val secondParamArgs = (args[1] as JSONObject)["args"] as JSONArray
 
-                val pk = secondParamArgs[0] as JSONObject
-                pk.put("string", p2pk)
 
-                val sig = secondParamArgs[1] as JSONObject
-                sig.put("string", p2sig)
+                    var saltVisitable: Visitable? = null
+                    val salt = getSalt(isRecipient = false)
+                    if (salt != null)
+                    {
+                        saltVisitable = Visitable.integer(salt.toLong())
+                    }
 
-                dstObject.put("parameters", value)
+                    val outputStream = ByteArrayOutputStream()
+                    outputStream.write(0x05)
 
-                dstObjects.put(dstObject)
+                    val packer = Packer(outputStream)
+                    saltVisitable!!.accept(packer)
 
-                postParams.put("dsts", dstObjects)
+                    val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+
+                    val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+
+                    val signature = EncryptionServices().sign(signedData)
+                    val compressedSignature = compressFormat(signature)
+
+                    val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
+
+
+                    //val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+
+                    //val p2sig = CryptoUtils.generateEDSig(signature)
+
+
+                    val spendingLimitFile = "spending_limit_transfer.json"
+                    val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                            .use {
+                                it.readText()
+                            }
+
+                    val value = JSONObject(contract)
+
+                    val args = value["args"] as JSONArray
+
+                    val firstParamArgs = (args[0] as JSONObject)["args"] as JSONArray
+
+                    val amountAndContract = ((firstParamArgs[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                    val amount = amountAndContract[0] as JSONObject
+                    amount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                    val contractKT1 = amountAndContract[1] as JSONObject
+                    contractKT1.put("string", mDstAccount)
+
+                    val dst = firstParamArgs[1] as JSONObject
+                    dst.put("string", tz3)
+
+                    val secondParamArgs = (args[1] as JSONObject)["args"] as JSONArray
+
+                    val pk = secondParamArgs[0] as JSONObject
+                    pk.put("string", p2pk)
+
+                    val sig = secondParamArgs[1] as JSONObject
+                    sig.put("string", p2sig)
+
+                    dstObject.put("parameters", value)
+
+                    dstObjects.put(dstObject)
+
+                    postParams.put("dsts", dstObjects)
+                }
+
             }
         }
         else
@@ -1119,7 +1214,7 @@ class TransferFormFragment : Fragment()
                     canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
                 }
 
-                if (mSourceKT1withCode && !canSignWithMaster)
+                if ((mSourceKT1withCode && !canSignWithMaster) || (mSourceKT1withCode && mRecipientKT1withCode))
                 {
 
                     val bytes = KeyPair.b2b(result)

@@ -4,7 +4,7 @@
     "args":
     [ [ { "prim": "Pair",
       "args":
-      [ { "int": "2000000" },
+      [ { "int": "1000000" },
         { "string":
         "KT1TqF5NW1Kgrn4H8yky8RajFsH5SpfoW4Kk%send" } ] } ],
       { "string":
