@@ -524,21 +524,10 @@ class TransferFormFragment : Fragment()
             {
                 val mnemonicsData = Storage(activity!!).getMnemonics()
                 val kt1 = arguments!!.getString(Address.TAG)
-                val tz1 = mnemonicsData.pkh
 
                 val ecKeys = retrieveECKeys()
                 val p2pk = CryptoUtils.generateP2Pk(ecKeys)
                 val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-
-                val pk = if (mnemonicsData.pk.isNullOrEmpty())
-                {
-                    val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                    updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
-                }
-                else
-                {
-                    mnemonicsData.pk
-                }
 
                 postParams.put("src_pk", p2pk)
                 postParams.put("src", tz3)
@@ -552,7 +541,7 @@ class TransferFormFragment : Fragment()
 
                 dstObject.put("entrypoint", "transfer")
 
-                val dataPackCompare = "05070702000000260707008092f4010a0000001a01974ada48e6c21d75f3576c4e22d292e59410411e0073656e640a000000150244f02653b4fb64e58a345754988fac9b5eaf2622".hexToByteArray()
+                //val dataPackCompare = "05070702000000260707008092f4010a0000001a01974ada48e6c21d75f3576c4e22d292e59410411e0073656e640a000000150244f02653b4fb64e58a345754988fac9b5eaf2622".hexToByteArray()
 
                 val dataVisitable = Primitive(
                         Primitive.Name.Pair,
@@ -563,7 +552,7 @@ class TransferFormFragment : Fragment()
                                                 arrayOf(
                                                         Visitable.integer((mTransferAmount*1000000).roundToLong()),
 
-                                                        Visitable.address(mDstAccount!!)
+                                                        Visitable.address("${mDstAccount!!}%send")
                                                 )
                                         )
                                 ),
@@ -578,13 +567,6 @@ class TransferFormFragment : Fragment()
                 dataVisitable.accept(dataPacker)
 
                 val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                if (dataPack.contentEquals(dataPackCompare))
-                {
-                    val k = "h1"
-                    val k2 = "h2"
-                }
-
 
                 val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                         arrayOf(
@@ -616,12 +598,6 @@ class TransferFormFragment : Fragment()
                 saltVisitable!!.accept(packer)
 
                 val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
-
-                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                val sk = CryptoUtils.generateSk(mnemonics, "")
-
-                val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
-                val edsig = CryptoUtils.generateEDSig(signature)
 
                 val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
 

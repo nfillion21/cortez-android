@@ -41,6 +41,7 @@ fun Visitable.Companion.string(value: String): Visitable {
     return VisitableString(value)
 }
 
+
 @Suppress("ArrayInDataClass")
 data class VisitableSequence(val elements: Array<out Visitable>): Visitable {
     override fun accept(visitor: Visitor) {
@@ -192,7 +193,8 @@ data class VisitableBytes(val value: ByteArray): Visitable {
 }
 
 fun Visitable.Companion.byteArrayOf(keyHash: String): ByteArray {
-    var bytes = Base58.decode(keyHash).slice(3 until (27 - 4)).toByteArray()
+    var decodedValue = Base58.decode(keyHash.slice(0 until 36))
+    var bytes = decodedValue.slice(3 until (27 - 4)).toByteArray()
     bytes = when(keyHash.slice(0 until 3)) {
         "tz1" -> byteArrayOf(0x00) + bytes
         "tz2" -> byteArrayOf(0x01) + bytes
@@ -207,10 +209,15 @@ fun Visitable.Companion.keyHash(value: String): Visitable {
 }
 
 fun Visitable.Companion.address(value: String): Visitable {
-    var bytes = Base58.decode(value).slice(3 until (27 - 4)).toByteArray()
-    //byteArrayOf(value)
+    var decodedValue = Base58.decode(value.slice(0 until 36))
+    var bytes = decodedValue.slice(3 until (27 - 4)).toByteArray()
     bytes = when(value.slice(0 until 3)) {
-        "KT1" -> byteArrayOf(0x01) + bytes + byteArrayOf(0x00)
+        "KT1" -> if (value.length > 36) { // contract with specific entrypoint
+            byteArrayOf(0x01) + bytes + byteArrayOf(0x00) + value.slice(37 until value.length).toByteArray() // 37 to skip entrypoint symbol '%'
+        }
+        else {
+            byteArrayOf(0x01) + bytes + byteArrayOf(0x00)
+        }
         else -> byteArrayOf(0x00) + byteArrayOf(value)
     }
     return VisitableBytes(bytes)
@@ -278,7 +285,6 @@ data class Packer(val output: OutputStream): Visitor {
             output.write(toByteArray())
         }
     }
-
     override fun visit(bytes: ByteArray) {
         output.write(0x0a)
         pack(bytes.size)
@@ -297,4 +303,22 @@ data class Packer(val output: OutputStream): Visitor {
         output.write((value shr 8) and 0xff)
         output.write(value and 0xff)
     }
+}
+
+fun Primitive.Companion.pair(left: Visitable, right: Visitable): Visitable {
+    return Primitive(
+            Primitive.Name.Pair,
+            arrayOf(
+                    left, right
+            )
+    )
+}
+
+fun Primitive.Companion.left(value: Visitable): Visitable {
+    return Primitive(
+            Primitive.Name.Pair,
+            arrayOf(
+                    value
+            )
+    )
 }
