@@ -705,8 +705,7 @@ class TransferFormFragment : Fragment()
                                                                                     Primitive(Primitive.Name.PUSH,
                                                                                             arrayOf(
                                                                                                     Primitive(Primitive.Name.key_hash),
-                                                                                                    //Visitable.keyHash(mDstAccount!!)
-                                                                                                    Visitable.address(mDstAccount!!)
+                                                                                                    Visitable.keyHash(mDstAccount!!)
                                                                                             )
                                                                                     ),
                                                                                     Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
@@ -969,6 +968,7 @@ class TransferFormFragment : Fragment()
                 dstObject.put("dst", mSrcAccount)
                 dstObject.put("amount", "0")
 
+
                 if (mRecipientKT1withCode && false)
                 {
                     dstObject.put("entrypoint", "send")
@@ -979,17 +979,41 @@ class TransferFormFragment : Fragment()
                 }
 
                 val destBeginsWith = mDstAccount?.slice(0 until 3)
-                val sendTzContract = if (destBeginsWith?.toLowerCase() == "kt1")
+
+                var value:JSONArray
+
+                if (destBeginsWith?.toLowerCase() == "kt1")
                 {
-                    String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                    val spendingLimitFile = "standard_to_standard_transfer.json"
+                    val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                            .use {
+                                it.readText()
+                            }
+
+                    value = JSONArray(contract)
+                    val dstValue = ((value[2] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    dstValue.put("string", mDstAccount)
+
+                    val dstAmount = ((value[5] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    dstAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
                 }
                 else
                 {
-                    String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                    val spendingLimitFile = "standard_to_implicit_transfer.json"
+                    val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                            .use {
+                                it.readText()
+                            }
+
+                    value = JSONArray(contract)
+                    val dstValue = ((value[2] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    dstValue.put("string", mDstAccount)
+
+                    val dstAmount = ((value[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    dstAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
                 }
 
-                val json = JSONArray(sendTzContract)
-                dstObject.put("parameters", json)
+                dstObject.put("parameters", value)
 
                 /*
                 //TODO handle that, we need to load storage from recipient
