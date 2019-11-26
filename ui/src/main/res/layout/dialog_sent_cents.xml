@@ -49,7 +49,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="From :"
+                    android:text="@string/from"
                     />
 
                 <RadioGroup
@@ -82,7 +82,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/spacing_normal"
-                    android:text="To :"
+                    android:text="@string/to"
                     />
 
                 <TextView

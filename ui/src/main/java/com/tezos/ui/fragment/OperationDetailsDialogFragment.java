@@ -264,7 +264,7 @@ public class OperationDetailsDialogFragment extends DialogFragment
                     holder.valueTextView.setText(mOperation.getHash()); break;
 
                 case 1:
-                    holder.valueTextView.setText(mOperation.getOperationId().toString()); break;
+                    holder.valueTextView.setText(String.format("%d", mOperation.getOperationId())); break;
 
                 case 2:
                     holder.valueTextView.setText(mOperation.getBlockHash()); break;
@@ -285,10 +285,10 @@ public class OperationDetailsDialogFragment extends DialogFragment
                     holder.valueTextView.setText(mOperation.getDestinationManager()); break;
 
                 case 8:
-                    holder.valueTextView.setText(mOperation.getAmount().toString()); break;
+                    holder.valueTextView.setText(String.format("%d", mOperation.getAmount().toString())); break;
 
                 case 9:
-                    holder.valueTextView.setText(mOperation.getFee().toString()); break;
+                    holder.valueTextView.setText(String.format("%d", mOperation.getFee().toString())); break;
 
                 default: break;
             }

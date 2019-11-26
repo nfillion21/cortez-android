@@ -102,6 +102,7 @@ public class PublicKeyHashActivity extends BaseSecureActivity
         mLinearLayout = findViewById(R.id.pkh_info_layout);
         mLinearLayout.setOnTouchListener((view, motionEvent) ->
         {
+            view.performClick();
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText(getString(R.string.copied_pkh), mPublicKeyHash);
             clipboard.setPrimaryClip(clip);
@@ -109,6 +110,7 @@ public class PublicKeyHashActivity extends BaseSecureActivity
             Toast.makeText(PublicKeyHashActivity.this, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show();
             return false;
         });
+
 
         mShareButton = findViewById(R.id.shareButton);
         mShareButton.setOnClickListener(view -> {
