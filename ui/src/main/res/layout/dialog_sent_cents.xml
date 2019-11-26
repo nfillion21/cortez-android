@@ -23,6 +23,7 @@
             android:layout_weight="0"
             android:layout_gravity="end"
             android:background="@null"
+            android:contentDescription="@string/content_description"
             android:src="@drawable/close_black_24"
             />
 

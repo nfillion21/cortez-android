@@ -597,7 +597,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         val beginsWith = dstParam.slice(0 until 3)
 
-        val begins = when (beginsWith.toLowerCase())
+        val begins = when (beginsWith.toLowerCase(Locale.US))
         {
             "kt1" -> CryptoUtils.genericHashToKT(dst)
             "tz1" -> CryptoUtils.genericHashToPkh(dst)
@@ -693,7 +693,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             //TODO add some more contract types
             else -> {
                 val sendToBegins = dstAccountParam!!.slice(0 until 3)
-                parameters = when (sendToBegins.toLowerCase()) {
+                parameters = when (sendToBegins.toLowerCase(Locale.US)) {
                     "kt1" -> {
 
                         Visitable.sequenceOf(
@@ -981,7 +981,7 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
 
         val beginsWith = delegateParam.slice(0 until 3)
 
-        val cryptoDelegate = when (beginsWith.toLowerCase())
+        val cryptoDelegate = when (beginsWith.toLowerCase(Locale.US))
         {
             "tz1" -> CryptoUtils.genericHashToPkh(delegateParse)
             "tz2" -> CryptoUtils.genericHashToPkhTz2(delegateParse)

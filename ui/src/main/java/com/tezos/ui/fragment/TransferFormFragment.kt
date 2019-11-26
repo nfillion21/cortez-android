@@ -70,6 +70,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
+import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.set
 import kotlin.math.roundToLong
@@ -957,7 +958,7 @@ class TransferFormFragment : Fragment()
 
 
             //this one is a standard KT1
-            if (beginsWith?.toLowerCase() == "kt1")
+            if (beginsWith?.toLowerCase(Locale.US) == "kt1")
             {
                 postParams.put("src", mnemonicsData.pkh)
                 postParams.put("src_pk", pk)
@@ -982,7 +983,7 @@ class TransferFormFragment : Fragment()
 
                 var value:JSONArray
 
-                if (destBeginsWith?.toLowerCase() == "kt1")
+                if (destBeginsWith?.toLowerCase(Locale.US) == "kt1")
                 {
                     val spendingLimitFile = "standard_to_standard_transfer.json"
                     val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
@@ -1165,7 +1166,7 @@ class TransferFormFragment : Fragment()
             var postParams = JSONObject()
 
             val beginsWith = mSrcAccount?.slice(0 until 3)
-            if (beginsWith?.toLowerCase() == "kt1")
+            if (beginsWith?.toLowerCase(Locale.US) == "kt1")
             {
                 postParams.put("src", mnemonicsData.pkh)
                 postParams.put("src_pk", mnemonicsData.pk)
@@ -1181,7 +1182,7 @@ class TransferFormFragment : Fragment()
                 dstObject.put("transfer_amount", mutezAmount)
 
                 val destBeginsWith = mSrcAccount?.slice(0 until 3)
-                val sendTzContract = if (destBeginsWith?.toLowerCase() == "kt1")
+                val sendTzContract = if (destBeginsWith?.toLowerCase(Locale.US) == "kt1")
                 {
                     String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
                 }
