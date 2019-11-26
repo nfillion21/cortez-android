@@ -110,7 +110,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
                 val words = it.getString(CreateWalletActivity.MNEMONICS_STR)
                 //val words = "link warm visual pony bike person truck pupil moral gift shoulder eye kit human jacket rich sand cupboard position friend fox calm bring kick"
-                listener?.mnemonicsVerified(words)
+                listener?.mnemonicsVerified(words!!)
             }
         }
 
@@ -141,7 +141,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
                 var sixNumbers = HashSet<Int>(MNEMONICS_WORDS_NUMBER)
                 while (sixNumbers.size < MNEMONICS_WORDS_NUMBER)
                 {
-                    val randomInt = (0 until words.size).random()
+                    val randomInt = (words.indices).random()
                     sixNumbers.add(randomInt)
                 }
 
@@ -190,7 +190,7 @@ class VerifyCreationWalletFragment : Fragment(), MnemonicWordsViewAdapter.OnItem
 
         for (item:Bundle in verifyWords)
         {
-            list.add(item.getString(WORD_STRING_KEY))
+            list.add(item.getString(WORD_STRING_KEY)!!)
         }
         return list
     }

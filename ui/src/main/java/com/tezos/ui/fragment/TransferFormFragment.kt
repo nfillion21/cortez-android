@@ -475,7 +475,7 @@ class TransferFormFragment : Fragment()
 
     private fun addContractInfoFromJSON(answer: JSONObject, isRecipient: Boolean)
     {
-        if (answer != null && answer.length() > 0)
+        if (answer.length() > 0)
         {
             if (isRecipient)
             {
@@ -571,7 +571,7 @@ class TransferFormFragment : Fragment()
 
                 val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                         arrayOf(
-                                Visitable.address(kt1),
+                                Visitable.address(kt1!!),
                                 Visitable.chainID("NetXKakFj1A7ouL")
                         )
                 )
@@ -740,7 +740,7 @@ class TransferFormFragment : Fragment()
 
                     val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                             arrayOf(
-                                    Visitable.address(kt1),
+                                    Visitable.address(kt1!!),
                                     Visitable.chainID("NetXKakFj1A7ouL")
                             )
                     )
@@ -857,7 +857,7 @@ class TransferFormFragment : Fragment()
 
                     val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                             arrayOf(
-                                    Visitable.address(kt1),
+                                    Visitable.address(kt1!!),
                                     Visitable.chainID("NetXKakFj1A7ouL")
                             )
                     )
@@ -1073,7 +1073,7 @@ class TransferFormFragment : Fragment()
                 */
 
                 // we use this call to ask for payload and fees
-                if (mTransferPayload != null && mTransferFees != null)
+                if (mTransferPayload != null && mTransferFees != -1L)
                 {
                     onInitTransferLoadComplete(null)
 
@@ -1236,7 +1236,6 @@ class TransferFormFragment : Fragment()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
-                var compressedSignature = ByteArray(64)
 
                 var canSignWithMaster = false
                 val hasMnemonics = Storage(context!!).hasMnemonics()
@@ -1246,22 +1245,17 @@ class TransferFormFragment : Fragment()
                     canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
                 }
 
-                if ((mSourceKT1withCode && !canSignWithMaster) || (mSourceKT1withCode && mRecipientKT1withCode))
+                var compressedSignature = if ((mSourceKT1withCode && !canSignWithMaster) || (mSourceKT1withCode && mRecipientKT1withCode))
                 {
-
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
-
-                    if (signature != null)
-                    {
-                        compressedSignature = compressFormat(signature)
-                    }
+                    compressFormat(signature)
                 }
                 else
                 {
                     val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
                     val sk = CryptoUtils.generateSk(mnemonics, "")
-                    compressedSignature = KeyPair.sign(sk, result)
+                    KeyPair.sign(sk, result)
                 }
 
                 val pLen = byteArrayThree.size
@@ -1890,7 +1884,7 @@ class TransferFormFragment : Fragment()
     {
         val isAmountEquals = false
 
-        if (editable != null && !TextUtils.isEmpty(editable))
+        if (!TextUtils.isEmpty(editable))
         {
             try
             {

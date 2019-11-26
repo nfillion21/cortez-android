@@ -329,7 +329,7 @@ class AddLimitsActivity : BaseSecureActivity()
                 var payloadsign = newResult.toNoPrefixHexString()
 
                 val stringRequest = object : StringRequest(Method.POST, url,
-                        Response.Listener<String> { response ->
+                        Response.Listener<String> {
 
                             //there's no need to do anything because we call finish()
                             //onFinalizeDelegationLoadComplete(null)
@@ -541,7 +541,7 @@ class AddLimitsActivity : BaseSecureActivity()
             postParams.put("dsts", dstsArray)
 
             // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != null)
+            if (mDelegatePayload != null && mDelegateFees != -1L)
             {
                 onInitDelegateLoadComplete(null)
 
@@ -665,7 +665,7 @@ class AddLimitsActivity : BaseSecureActivity()
             create_limit_contract_button_layout.background = makeSelector(theme)
 
             val drawables = create_limit_contract_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
         }
         else
@@ -677,7 +677,7 @@ class AddLimitsActivity : BaseSecureActivity()
             create_limit_contract_button_layout.background = makeSelector(greyTheme)
 
             val drawables = create_limit_contract_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white))
         }
     }
@@ -769,7 +769,7 @@ class AddLimitsActivity : BaseSecureActivity()
         {
             val isAmountEquals = false
 
-            if (editable != null && !TextUtils.isEmpty(editable))
+            if (!TextUtils.isEmpty(editable))
             {
                 try
                 {
@@ -1005,7 +1005,7 @@ class AddLimitsActivity : BaseSecureActivity()
     private fun onDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        if (isFingerprintAllowed() && hasEnrolledFingerprints())
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }

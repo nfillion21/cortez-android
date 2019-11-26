@@ -57,6 +57,7 @@ import com.tezos.ui.activity.OperationsActivity
 import com.tezos.ui.activity.RestoreWalletActivity
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
+import kotlinx.android.synthetic.main.fragment_home.*
 import org.json.JSONArray
 import java.text.DateFormat
 import java.time.Instant
@@ -456,7 +457,7 @@ open class HomeFragment : Fragment()
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
 
-                        if (R.id.content != null)
+                        if (swipeRefreshLayout != null)
                         {
                             val balance = response.replace("[^0-9]".toRegex(), "")
                             mBalanceItem = balance?.toDouble()/1000000
@@ -470,7 +471,7 @@ open class HomeFragment : Fragment()
                         }
                     },
                     Response.ErrorListener {
-                        if (R.id.content != null)
+                        if (swipeRefreshLayout != null)
                         {
                             onBalanceLoadComplete(false)
                             onOperationsLoadHistoryComplete()
@@ -553,16 +554,9 @@ open class HomeFragment : Fragment()
 
     private fun showSnackbarError(error:VolleyError?)
     {
-        var error: String? = if (error != null)
-        {
-            error.toString()
-        }
-        else
-        {
-            getString(R.string.generic_error)
-        }
+        var err: String? = error?.toString() ?: getString(R.string.generic_error)
 
-        listener?.showSnackBar(error!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+        listener?.showSnackBar(err!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
         mEmptyLoadingOperationsTextView?.text = getString(R.string.generic_error)
         mEmptyLoadingBalanceTextview?.text = getString(R.string.generic_error)
@@ -615,7 +609,7 @@ open class HomeFragment : Fragment()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
-                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(lastOperation!!.timestamp)))
+                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
             }
         }
     }

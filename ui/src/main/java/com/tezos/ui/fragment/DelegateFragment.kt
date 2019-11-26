@@ -619,7 +619,7 @@ class DelegateFragment : Fragment()
 
     private fun addContractInfoFromJSON(answer: JSONArray)
     {
-        if (answer != null && answer.length() > 0)
+        if (answer.length() > 0)
         {
             val contractJSON = DataExtractor.getJSONObjectFromField(answer,0)
 
@@ -638,7 +638,7 @@ class DelegateFragment : Fragment()
 
     private fun addStorageInfoFromJSON(answer: JSONObject)
     {
-        if (answer != null && answer.length() > 0)
+        if (answer.length() > 0)
         {
             mStorage = answer.toString()
         }
@@ -784,7 +784,7 @@ class DelegateFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isRemoveButtonValid() && mDelegatePayload != null && mDelegateFees != null)
+        if (isRemoveButtonValid() && mDelegatePayload != null && mDelegateFees != -1L)
         {
 
             var postParams = JSONObject()
@@ -898,7 +898,7 @@ class DelegateFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isAddButtonValid() && mDelegatePayload != null && mDelegateTezosAddress != null && mDelegateFees != null)
+        if (isAddButtonValid() && mDelegatePayload != null && mDelegateTezosAddress != null && mDelegateFees != -1L)
         {
             var postParams = JSONObject()
             postParams.put("src", mnemonicsData.pkh)
@@ -1258,11 +1258,11 @@ class DelegateFragment : Fragment()
                 mDelegateFees = answer.getLong("total_fee")
 
                 // we use this call to ask for payload and fees
-                if (mDelegatePayload != null && mDelegateFees != null && activity != null)
+                if (mDelegatePayload != null && mDelegateFees != -1L && activity != null)
                 {
                     onInitDelegateLoadComplete(null)
 
-                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
+                    val feeInTez = mDelegateFees.toDouble()/1000000.0
                     fee_edittext?.setText(feeInTez.toString())
 
                     validateAddButton(isInputDataValid() && isDelegateFeeValid())
@@ -1478,12 +1478,12 @@ class DelegateFragment : Fragment()
                 mDelegateFees = answer.getLong("total_fee")
 
                 // we use this call to ask for payload and fees
-                if (mDelegatePayload != null && mDelegateFees != null)
+                if (mDelegatePayload != null && mDelegateFees != -1L)
                 {
                     onInitRemoveDelegateLoadComplete(null)
 
-                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
-                    fee_edittext?.setText(feeInTez?.toString())
+                    val feeInTez = mDelegateFees.toDouble()/1000000.0
+                    fee_edittext?.setText(feeInTez.toString())
 
                     validateRemoveDelegateButton(isDelegateFeeValid())
                 }
@@ -1589,7 +1589,7 @@ class DelegateFragment : Fragment()
                 val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
-                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
                 }
             }
@@ -1604,7 +1604,7 @@ class DelegateFragment : Fragment()
                 val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
-                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
                 }
             }
@@ -1626,7 +1626,7 @@ class DelegateFragment : Fragment()
             val drawables = remove_delegate_button?.compoundDrawables
             if (activity != null && drawables != null)
             {
-                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                val wrapDrawable = DrawableCompat.wrap(drawables[0])
                 DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
             }
         }
@@ -1640,7 +1640,7 @@ class DelegateFragment : Fragment()
             val drawables = remove_delegate_button?.compoundDrawables
             if (activity != null && drawables != null)
             {
-                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                val wrapDrawable = DrawableCompat.wrap(drawables[0])
                 DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
             }
         }
@@ -1794,7 +1794,7 @@ class DelegateFragment : Fragment()
     private fun onDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        if (isFingerprintAllowed() && hasEnrolledFingerprints())
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
@@ -1827,7 +1827,7 @@ class DelegateFragment : Fragment()
     private fun onRemoveDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        if (isFingerprintAllowed() && hasEnrolledFingerprints())
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }

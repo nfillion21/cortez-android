@@ -165,7 +165,7 @@ class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, Delega
 
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
-        fabTransfer.setOnClickListener { view ->
+        fabTransfer.setOnClickListener {
 
             val hasMnemonics = Storage(this).hasMnemonics()
             if (hasMnemonics)

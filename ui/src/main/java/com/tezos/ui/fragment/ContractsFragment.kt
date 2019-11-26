@@ -387,16 +387,9 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
 
     private fun showSnackbarError(error: VolleyError?)
     {
-        var error: String? = if (error != null)
-        {
-            error.toString()
-        }
-        else
-        {
-            getString(R.string.generic_error)
-        }
+        var err: String? = error?.toString() ?: getString(R.string.generic_error)
 
-        mCallback?.showSnackBar(error!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+        mCallback?.showSnackBar(err!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
         empty_loading_textview?.text = getString(R.string.generic_error)
     }

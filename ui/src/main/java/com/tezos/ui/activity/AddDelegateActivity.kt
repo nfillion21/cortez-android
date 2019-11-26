@@ -588,7 +588,7 @@ class AddDelegateActivity : BaseSecureActivity()
             update_storage_button_layout.background = makeSelector(theme)
 
             val drawables = update_storage_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
         }
         else
@@ -600,7 +600,7 @@ class AddDelegateActivity : BaseSecureActivity()
             update_storage_button_layout.background = makeSelector(greyTheme)
 
             val drawables = update_storage_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white))
         }
     }

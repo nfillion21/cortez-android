@@ -186,11 +186,7 @@ class ContactsDialogFragment : DialogFragment(), LoaderManager.LoaderCallbacks<C
 
     override fun onLoadFinished(loader: Loader<Cursor>, cursor: Cursor)
     {
-        if (cursor != null)
-        {
-            //TODO verify later
-            mCursorAdapter?.swapCursor(cursor)
-        }
+        mCursorAdapter?.swapCursor(cursor)
 
         /*
 

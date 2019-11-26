@@ -65,7 +65,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     private OnWordSelectedListener mCallback;
 
     private MnemonicWordsViewAdapter mAdapter;
-    private RecyclerView mRecyclerView;
 
     private Button mValidateMnemonicsButton;
     private FrameLayout mValidateMnemonicsButtonLayout;
@@ -146,7 +145,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             }
         });
 
-        mRecyclerView = view.findViewById(R.id.words);
+        RecyclerView mRecyclerView = view.findViewById(R.id.words);
         setUpWordGrid(mRecyclerView);
 
         if (savedInstanceState != null)

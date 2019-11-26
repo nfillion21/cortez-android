@@ -385,11 +385,7 @@ class SendCentsFragment : AppCompatDialogFragment()
                 {
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
-
-                    if (signature != null)
-                    {
-                        compressedSignature = compressFormat(signature)
-                    }
+                    compressedSignature = compressFormat(signature)
                 }
                 else
                 {
@@ -409,7 +405,7 @@ class SendCentsFragment : AppCompatDialogFragment()
                 var payloadsign = newResult.toNoPrefixHexString()
 
                 val stringRequest = object : StringRequest(Method.POST, url,
-                        Response.Listener<String> { response ->
+                        Response.Listener<String> {
 
                             if (rootView != null)
                             {
@@ -643,8 +639,8 @@ class SendCentsFragment : AppCompatDialogFragment()
                 {
                     onInitTransferLoadComplete(null)
 
-                    val feeInTez = mTransferFees?.toDouble()/1000000.0
-                    fee_edittext?.setText(feeInTez?.toString())
+                    val feeInTez = mTransferFees.toDouble()/1000000.0
+                    fee_edittext?.setText(feeInTez.toString())
 
                     validateSendCentsButton(isTransferFeeValid())
                     setTextPayButton()
@@ -740,12 +736,12 @@ class SendCentsFragment : AppCompatDialogFragment()
         {
             transferLoading(false)
 
-            var error: String = error?.toString()
+            var err: String = error.toString()
 
             //showSnackBar(error, ContextCompat.getColor(this,
                     //android.R.color.holo_red_light), null)
             //listener?.onTransferFailed(error)
-            showSnackBar(error, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            showSnackBar(err, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
         }
         else
         {
@@ -855,7 +851,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             send_cents_button_layout.background = makeSelector(theme)
 
             val drawables = send_cents_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
         }
         else
@@ -867,7 +863,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             send_cents_button_layout.background = makeSelector(greyTheme)
 
             val drawables = send_cents_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
     }
@@ -885,7 +881,7 @@ class SendCentsFragment : AppCompatDialogFragment()
         val keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
         if (keyPair != null)
         {
-            val ecKey = keyPair!!.public as ECPublicKey
+            val ecKey = keyPair.public as ECPublicKey
             return CryptoUtils.generatePkhTz3(ecKeyFormat(ecKey))
         }
 

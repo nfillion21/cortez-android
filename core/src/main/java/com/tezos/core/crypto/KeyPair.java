@@ -16,7 +16,6 @@
 
 package com.tezos.core.crypto;
 
-import org.libsodium.jni.SodiumJNI;
 import org.libsodium.jni.crypto.Point;
 import org.libsodium.jni.encoders.Encoder;
 import org.libsodium.jni.keys.PublicKey;
@@ -32,7 +31,6 @@ import static org.libsodium.jni.crypto.Util.zeros;
 public class KeyPair
 {
     private byte[] publicKey;
-    private byte[] seed;
     private final byte[] secretKey;
 
     public KeyPair()
@@ -45,7 +43,6 @@ public class KeyPair
     public KeyPair(byte[] seed)
     {
         //Util.checkLength(seed, SECRETKEY_BYTES);
-        this.seed = seed;
         this.secretKey = zeros(SECRETKEY_BYTES*2);
         this.publicKey = zeros(PUBLICKEY_BYTES);
         sodium().crypto_sign_seed_keypair(publicKey, secretKey, seed);

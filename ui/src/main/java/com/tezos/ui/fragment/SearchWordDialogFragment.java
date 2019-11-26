@@ -64,7 +64,6 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
     public static final String TAG = "search_word_dialog_fragment";
 
     private OnWordSelectedListener mCallback;
-    private TextInputEditText mSearchWordEditText;
 
     private CursorAdapter mCursorAdapter;
 
@@ -120,7 +119,7 @@ public class SearchWordDialogFragment extends DialogFragment implements LoaderMa
 
         View dialogView = inflater.inflate(R.layout.dialog_search_word, null);
 
-        mSearchWordEditText = dialogView.findViewById(R.id.search_name_edittext);
+        TextInputEditText mSearchWordEditText = dialogView.findViewById(R.id.search_name_edittext);
 
         int position = getArguments().getInt(CARD_POSITION_KEY);
         int cardPos = position + 1;

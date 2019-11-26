@@ -744,7 +744,7 @@ class ScriptFragment : Fragment()
 
     private fun addContractInfoFromJSON(answer: JSONObject)
     {
-        if (answer != null && answer.length() > 0)
+        if (answer.length() > 0)
         {
             mStorage = answer.toString()
         }
@@ -781,11 +781,6 @@ class ScriptFragment : Fragment()
 
                 val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-                // get masterkey hash
-
-                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
-                val masterKeyJSONObject = argsMasterKey[0] as JSONObject
-                val masterKeyHash = DataExtractor.getStringFromField(masterKeyJSONObject, "string")
 
                 // get securekey hash
 
@@ -932,7 +927,7 @@ class ScriptFragment : Fragment()
                 var payloadsign = newResult.toNoPrefixHexString()
 
                 val stringRequest = object : StringRequest(Method.POST, url,
-                        Response.Listener<String> { response ->
+                        Response.Listener<String> {
                             if (swipe_refresh_script_layout != null)
                             {
                                 //there's no need to do anything because we call finish()
@@ -1380,7 +1375,7 @@ class ScriptFragment : Fragment()
                 val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
-                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
                 }
             }
@@ -1395,7 +1390,7 @@ class ScriptFragment : Fragment()
                 val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
-                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
                 }
             }
