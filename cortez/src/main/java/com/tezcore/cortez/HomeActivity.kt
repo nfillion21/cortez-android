@@ -483,59 +483,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
     }
 
-    private fun getP256PublicKey():String
-    {
-        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        //val aliases: Enumeration<String> = ks.aliases()
-
-        var ecKey = ks.getCertificate("key1").publicKey as ECPublicKey
-        //var publicKey2 = keyStore.getCertificate("key1").publicKey
-
-        //var ecKey = publicKey as ECPublicKey
-
-        var x = ecKey.w.affineX.toByteArray()
-        //byte[] array = bigInteger.toByteArray();
-        if (x[0].toInt() == 0)
-        {
-            val tmp = ByteArray(x.size - 1)
-            System.arraycopy(x, 1, tmp, 0, tmp.size)
-            x = tmp
-        }
-
-
-        var y = ecKey.w.affineY
-
-        var yEvenOdd = if (y.rem(BigInteger.valueOf(2L)) == BigInteger.ZERO)
-        {
-            "0x02".hexToByteArray()
-        }
-        else
-        {
-            "0x03".hexToByteArray()
-        }
-
-        val xLen = x.size
-
-        val yLen = yEvenOdd.size
-        val result = ByteArray(yLen + xLen)
-
-        System.arraycopy(yEvenOdd, 0, result, 0, yLen)
-        System.arraycopy(x, 0, result, yLen, xLen)
-
-        return CryptoUtils.generatePkhTz3(result)
-        /*
-        val p2pk = CryptoUtils.generateP2Pk(result)
-        val tz34 = CryptoUtils.generatePkhTz3(result)
-
-        val signedData = signData("0x03".hexToByteArray())
-
-        val verified = verifySig("0x03".hexToByteArray(), signedData)
-        val verified2 = verifySig("0x02".hexToByteArray(), signedData)
-        */
-    }
-
     override fun showSnackBar(res:String, color:Int, textColor:Int)
     {
         val snackbar = Snackbar.make(fabTransfer, res, Snackbar.LENGTH_LONG)

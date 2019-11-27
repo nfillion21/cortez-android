@@ -748,6 +748,8 @@ class ScriptFragment : Fragment()
         {
             mStorage = answer.toString()
         }
+
+        val history = getHistoryPayment()
     }
 
     private fun onStorageInfoComplete(animating:Boolean)
@@ -1311,6 +1313,7 @@ class ScriptFragment : Fragment()
         return null
     }
 
+
     private fun transferLoading(loading:Boolean)
     {
 // handle the visibility of bottom buttons
@@ -1487,6 +1490,81 @@ class ScriptFragment : Fragment()
         }
 
         return false
+    }
+
+    private fun getHistoryPayment(): String?
+    {
+        if (mStorage != null)
+        {
+
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+            val historyPaymentJSONObject = ((argsSecureKey[1] as JSONObject)["args"]) as JSONArray
+
+            var fullAmount:Long = 0
+
+            for (i in 0 until historyPaymentJSONObject.length())
+            {
+                //first object (0) contains spending limit and global timing
+                if (i == 0)
+                {
+                    val spendingLimitAndTiming = (historyPaymentJSONObject[0] as JSONObject)["args"] as JSONArray
+
+                    val spendingLimit = ((spendingLimitAndTiming[0] as JSONObject)["int"] as String).toLong()
+
+                    fullAmount += spendingLimit
+
+                    val timing = spendingLimitAndTiming[1] as JSONObject
+                }
+                else
+                {
+                    // there will be a second index, not a third one.
+
+                    val allOfThen = (historyPaymentJSONObject[1] as JSONObject)["args"] as JSONArray
+
+                    var cumulatedAmount:Long = 0
+
+                    for (j in 0 until allOfThen.length())
+                    {
+                        if (j == 0)
+                        {
+                            // the element necessary to know when it resets the limit
+                            val necessaryElement = ((allOfThen[j] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+                            val necessaryElementDate = (necessaryElement[0] as JSONObject)["string"]
+                            val necessaryElementAmount = ((necessaryElement[1] as JSONObject)["int"] as String).toLong()
+
+                            cumulatedAmount += necessaryElementAmount
+                        }
+                        else
+                        {
+                            //the rest of it with j == 2
+                            val otherPayments = allOfThen[j] as JSONArray
+                            for (k in 0 until otherPayments.length())
+                            {
+                                val payment = (allOfThen[k] as JSONObject)["args"] as JSONArray
+                                val paymentDate = (payment[0] as JSONObject)["string"]
+
+
+                                val paymentAmount = ((payment[1] as JSONObject)["int"] as String).toLong()
+
+                                cumulatedAmount += paymentAmount
+                            }
+                        }
+                    }
+
+                    fullAmount += cumulatedAmount
+
+                }
+            }
+
+            val k = "hello"
+            val k2 = "hello2"
+        }
+
+        return null
     }
 
     private fun getStorageSecureKeyHash(): String?
