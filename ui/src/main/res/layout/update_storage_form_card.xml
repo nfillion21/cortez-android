@@ -137,6 +137,13 @@
                     android:textSize="@dimen/size_edit_text" />
             </LinearLayout>
 
+
+            <TextView
+                android:id="@+id/remaing_time_before_reset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/warning_change_p2pk" />
+
         </LinearLayout>
 
         <TextView

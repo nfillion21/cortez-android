@@ -748,8 +748,6 @@ class ScriptFragment : Fragment()
         {
             mStorage = answer.toString()
         }
-
-        val history = getHistoryPayment()
     }
 
     private fun onStorageInfoComplete(animating:Boolean)
@@ -796,6 +794,7 @@ class ScriptFragment : Fragment()
 
                 // get daily spending limit
 
+                /*
                 val dailySpendingLimitJSONObject = argsSecureKey[1] as JSONObject
                 val dailySpendingLimitJSONArray = DataExtractor.getJSONArrayFromField(dailySpendingLimitJSONObject, "args")
 
@@ -804,7 +803,15 @@ class ScriptFragment : Fragment()
 
                 val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
                 val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
+                */
 
+                val listStorageData = getHistoryPayment()
+
+
+                //remaing_time_before_reset.setText()
+
+
+                val dailySpendingLimit = listStorageData?.get(2) as Long
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
                 daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
 
@@ -1492,7 +1499,7 @@ class ScriptFragment : Fragment()
         return false
     }
 
-    private fun getHistoryPayment(): String?
+    private fun getHistoryPayment(): List<Any>?
     {
         if (mStorage != null)
         {
@@ -1504,7 +1511,9 @@ class ScriptFragment : Fragment()
             val historyPaymentJSONObject = ((argsSecureKey[1] as JSONObject)["args"]) as JSONArray
 
             var fullAmount:Long = 0
-            var firstDate:String? = null
+            var firstDate:String = ""
+            var sLimit:Long = -1L
+            var timingInSec:Long = -1L
 
             if (historyPaymentJSONObject != null && historyPaymentJSONObject.length() > 0)
             {
@@ -1516,10 +1525,12 @@ class ScriptFragment : Fragment()
                         val spendingLimitAndTiming = (historyPaymentJSONObject[0] as JSONObject)["args"] as JSONArray
 
                         val spendingLimit = ((spendingLimitAndTiming[0] as JSONObject)["int"] as String).toLong()
+                        sLimit = spendingLimit
 
                         fullAmount += spendingLimit
 
-                        val timing = spendingLimitAndTiming[1] as JSONObject
+                        val timing = ((spendingLimitAndTiming[1] as JSONObject)["int"] as String).toLong()
+                        timingInSec = timing
                     }
                     else
                     {
@@ -1580,6 +1591,15 @@ class ScriptFragment : Fragment()
                         }
                     }
                 }
+
+                val myList = mutableListOf<Any>()
+
+                myList.add(fullAmount)
+                myList.add(firstDate)
+                myList.add(sLimit)
+                myList.add(timingInSec)
+
+                return myList
             }
         }
 
