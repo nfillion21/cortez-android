@@ -1504,64 +1504,83 @@ class ScriptFragment : Fragment()
             val historyPaymentJSONObject = ((argsSecureKey[1] as JSONObject)["args"]) as JSONArray
 
             var fullAmount:Long = 0
+            var firstDate:String? = null
 
-            for (i in 0 until historyPaymentJSONObject.length())
+            if (historyPaymentJSONObject != null && historyPaymentJSONObject.length() > 0)
             {
-                //first object (0) contains spending limit and global timing
-                if (i == 0)
+                for (i in 0 until historyPaymentJSONObject.length())
                 {
-                    val spendingLimitAndTiming = (historyPaymentJSONObject[0] as JSONObject)["args"] as JSONArray
-
-                    val spendingLimit = ((spendingLimitAndTiming[0] as JSONObject)["int"] as String).toLong()
-
-                    fullAmount += spendingLimit
-
-                    val timing = spendingLimitAndTiming[1] as JSONObject
-                }
-                else
-                {
-                    // there will be a second index, not a third one.
-
-                    val allOfThen = (historyPaymentJSONObject[1] as JSONObject)["args"] as JSONArray
-
-                    var cumulatedAmount:Long = 0
-
-                    for (j in 0 until allOfThen.length())
+                    //first object (0) contains spending limit and global timing
+                    if (i == 0)
                     {
-                        if (j == 0)
-                        {
-                            // the element necessary to know when it resets the limit
-                            val necessaryElement = ((allOfThen[j] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                        val spendingLimitAndTiming = (historyPaymentJSONObject[0] as JSONObject)["args"] as JSONArray
 
-                            val necessaryElementDate = (necessaryElement[0] as JSONObject)["string"]
-                            val necessaryElementAmount = ((necessaryElement[1] as JSONObject)["int"] as String).toLong()
+                        val spendingLimit = ((spendingLimitAndTiming[0] as JSONObject)["int"] as String).toLong()
 
-                            cumulatedAmount += necessaryElementAmount
-                        }
-                        else
+                        fullAmount += spendingLimit
+
+                        val timing = spendingLimitAndTiming[1] as JSONObject
+                    }
+                    else
+                    {
+                        // there will be a second index, not a third one.
+
+                        val allOfThem = (historyPaymentJSONObject[1] as JSONObject)["args"] as JSONArray
+
+                        var cumulatedAmount:Long = 0
+
+                        if (allOfThem.length() != null && allOfThem.length() > 0)
                         {
-                            //the rest of it with j == 2
-                            val otherPayments = allOfThen[j] as JSONArray
-                            for (k in 0 until otherPayments.length())
+                            for (j in 0 until allOfThem.length())
                             {
-                                val payment = (allOfThen[k] as JSONObject)["args"] as JSONArray
-                                val paymentDate = (payment[0] as JSONObject)["string"]
+                                if (j == 0)
+                                {
+                                    // the element necessary to know when it resets the limit
+                                    //TODO the necessary element could be in the second index of allOfThem array
 
+                                    val necessaryElement = allOfThem[j] as JSONArray
 
-                                val paymentAmount = ((payment[1] as JSONObject)["int"] as String).toLong()
+                                    if (!necessaryElement.isNull(0))
+                                    {
+                                        val necessaryElement = ((allOfThem[j] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
-                                cumulatedAmount += paymentAmount
+                                        val necessaryElementDate = (necessaryElement[0] as JSONObject)["string"] as String
+                                        firstDate = necessaryElementDate
+
+                                        val necessaryElementAmount = ((necessaryElement[1] as JSONObject)["int"] as String).toLong()
+
+                                        cumulatedAmount += necessaryElementAmount
+                                    }
+                                }
+                                else
+                                {
+                                    //the rest of it with j == 1
+                                    val otherPayments = allOfThem[j] as JSONArray
+                                    if (!otherPayments.isNull(0))
+                                    {
+                                        for (k in 0 until otherPayments.length())
+                                        {
+                                            val payment = (otherPayments[k] as JSONObject)["args"] as JSONArray
+
+                                            val paymentAmount = ((payment[1] as JSONObject)["int"] as String).toLong()
+
+                                            cumulatedAmount += paymentAmount
+
+                                            val paymentDate = (payment[0] as JSONObject)["string"] as String
+                                            if ((allOfThem[0] as JSONArray).isNull(0))
+                                            {
+                                                firstDate = paymentDate
+                                            }
+                                        }
+                                    }
+                                }
                             }
+
+                            fullAmount += cumulatedAmount
                         }
                     }
-
-                    fullAmount += cumulatedAmount
-
                 }
             }
-
-            val k = "hello"
-            val k2 = "hello2"
         }
 
         return null
