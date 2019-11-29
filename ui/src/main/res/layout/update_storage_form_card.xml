@@ -217,28 +217,14 @@
                     android:layout_height="wrap_content"
                     android:enabled="false"
                     android:drawablePadding="@dimen/spacing_double"
-                    android:maxLength="4"
                     android:maxLines="1"
                     android:hint="@string/neutral"
                     android:singleLine="true"
                     android:textColorHint="@color/tz_placeholder"
                     android:imeOptions="actionDone"
                     android:inputType="numberDecimal"
-                    android:digits="0123456789"
                     android:textSize="@dimen/size_edit_text" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/remaining_spending_limit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/neutral" />
-
-            <TextView
-                android:id="@+id/remaining_time_before_reset"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/neutral" />
 
         </LinearLayout>
 

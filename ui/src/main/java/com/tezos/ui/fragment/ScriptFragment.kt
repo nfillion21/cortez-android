@@ -468,7 +468,7 @@ class ScriptFragment : Fragment()
                     TODO("VERSION.SDK_INT < O")
                 }
 
-                daily_spending_limit_edittext?.setText(mutezToTez(historyPayment?.get(1) as Long))
+                daily_spending_limit_edittext?.setText(mutezToTez(historyPayment?.get(0) as Long))
 
 
                 // 100 000 mutez == 0.1 tez
@@ -828,15 +828,11 @@ class ScriptFragment : Fragment()
 
 
 
-                val remainingTime = remainingTime(listStorageData?.get(3) as Long)
-                remaining_time_before_reset.text = "" + remainingTime!![0] + "d " + "" + remainingTime!![1] + "h " + remainingTime!![2] + "m " + remainingTime!![3] + "s"
-
-
                 val dailySpendingLimit = listStorageData?.get(0) as Long
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
                 daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
 
-                remaining_spending_limit.text = "You can still spend \$ " + dailySpendingLimitInTez + "on the \$ " + mutezToTez(listStorageData[0] as Long) + "limit of your SLC contract"
+                //remaining_spending_limit.text = "You can still spend \$ " + dailySpendingLimitInTez + "on the \$ " + mutezToTez(listStorageData[0] as Long) + "limit of your SLC contract"
 
                 val remainingDailySpendingLimit = listStorageData?.get(1) as Long
                 val remainingDailySpendingLimitInTez = mutezToTez(remainingDailySpendingLimit)
@@ -844,6 +840,8 @@ class ScriptFragment : Fragment()
 
                 remaining_time_daily_spending_limit_textview.text = String.format(getString(R.string.remaining_time_daily_spending_limit), dailySpendingLimitInTez)
 
+                val remainingTime = remainingTime(listStorageData?.get(3) as Long)
+                remaining_time_daily_spending_limit_edittext.setText( "" + remainingTime!![0] + "d " + "" + remainingTime!![1] + "h " + remainingTime!![2] + "m " + remainingTime!![3] + "s")
 
                 update_storage_form_card?.visibility = View.VISIBLE
 
