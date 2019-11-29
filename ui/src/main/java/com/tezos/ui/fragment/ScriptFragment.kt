@@ -36,7 +36,9 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -71,6 +73,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
+import java.time.Instant
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToLong
 
 class ScriptFragment : Fragment()
@@ -447,6 +451,7 @@ class ScriptFragment : Fragment()
 
                 // get daily spending limit
 
+                /*
                 val dailySpendingLimitJSONObject = argsSecureKey[1] as JSONObject
                 val dailySpendingLimitJSONArray = DataExtractor.getJSONArrayFromField(dailySpendingLimitJSONObject, "args")
 
@@ -455,8 +460,15 @@ class ScriptFragment : Fragment()
 
                 val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
                 val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
+                */
 
-                daily_spending_limit_edittext?.setText(mutezToTez(dailySpendingLimit))
+                val historyPayment = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    getHistoryPayment()
+                } else {
+                    TODO("VERSION.SDK_INT < O")
+                }
+
+                daily_spending_limit_edittext?.setText(mutezToTez(historyPayment?.get(1) as Long))
 
 
                 // 100 000 mutez == 0.1 tez
@@ -805,15 +817,33 @@ class ScriptFragment : Fragment()
                 val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
                 */
 
-                val listStorageData = getHistoryPayment()
+                val listStorageData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    getHistoryPayment()
+                } else {
+                    TODO("VERSION.SDK_INT < O")
+                }
+
+                //val timer = listStorageData?.get(3) as Long
+                //val firstPaymentData = listStorageData?.get(1) as String
 
 
-                //remaing_time_before_reset.setText()
+
+                val remainingTime = remainingTime(listStorageData?.get(3) as Long)
+                remaining_time_before_reset.text = "" + remainingTime!![0] + "d " + "" + remainingTime!![1] + "h " + remainingTime!![2] + "m " + remainingTime!![3] + "s"
 
 
-                val dailySpendingLimit = listStorageData?.get(2) as Long
+                val dailySpendingLimit = listStorageData?.get(0) as Long
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
                 daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
+
+                remaining_spending_limit.text = "You can still spend \$ " + dailySpendingLimitInTez + "on the \$ " + mutezToTez(listStorageData[0] as Long) + "limit of your SLC contract"
+
+                val remainingDailySpendingLimit = listStorageData?.get(1) as Long
+                val remainingDailySpendingLimitInTez = mutezToTez(remainingDailySpendingLimit)
+                remaining_daily_spending_limit_edittext.setText(remainingDailySpendingLimitInTez)
+
+                remaining_time_daily_spending_limit_textview.text = String.format(getString(R.string.remaining_time_daily_spending_limit), dailySpendingLimitInTez)
+
 
                 update_storage_form_card?.visibility = View.VISIBLE
 
@@ -891,6 +921,46 @@ class ScriptFragment : Fragment()
             loading_textview?.visibility = View.VISIBLE
             loading_textview?.text = "-"
         }
+    }
+
+    private fun remainingTime(diff:Long):List<Long>?
+    {
+        val str = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            //mDateFormat.format(Date.from())
+
+            /*
+            val firstDate = time.first
+            val howLong = time.second
+
+            val resetTime = firstDate + howLong
+
+            //val future = Instant.parse("2019-11-28T13:40:25Z")
+            //val epochFuture = future.epochSecond
+
+            val nowInEpoch = Instant.now().epochSecond
+
+            val diff = resetTime - nowInEpoch
+            */
+
+            val day = TimeUnit.SECONDS.toDays(diff)
+            val hours = TimeUnit.SECONDS.toHours(diff) - (day *24)
+            val minute = TimeUnit.SECONDS.toMinutes(diff) - (TimeUnit.SECONDS.toHours(diff)* 60)
+            val second = TimeUnit.SECONDS.toSeconds(diff) - (TimeUnit.SECONDS.toMinutes(diff) *60)
+
+            val list = mutableListOf<Long>()
+            list.add(day)
+            list.add(hours)
+            list.add(minute)
+            list.add(second)
+
+            return list
+
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
+
+        return null
     }
 
     // volley
@@ -1110,7 +1180,7 @@ class ScriptFragment : Fragment()
                                                                                 Primitive.Name.Pair,
                                                                                 arrayOf(
                                                                                         Visitable.integer(mSpendingLimitAmount*1000000),
-                                                                                        Visitable.integer(86400)
+                                                                                        Visitable.integer(300)
                                                                                 )
                                                                         ),
                                                                         Primitive(
@@ -1210,7 +1280,7 @@ class ScriptFragment : Fragment()
         spendingLimitOne.put("int", (mSpendingLimitAmount*1000000).toString())
 
         val spendingLimitTwo = valuesArgs[1] as JSONObject
-        spendingLimitTwo.put("int", "86400")
+        spendingLimitTwo.put("int", "300")
 
         val masterKeyArgs = argsFirstArgsKeyPart[1] as JSONObject
         masterKeyArgs.put("string", tz1)
@@ -1499,6 +1569,7 @@ class ScriptFragment : Fragment()
         return false
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun getHistoryPayment(): List<Any>?
     {
         if (mStorage != null)
@@ -1508,12 +1579,18 @@ class ScriptFragment : Fragment()
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
             val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+
             val historyPaymentJSONObject = ((argsSecureKey[1] as JSONObject)["args"]) as JSONArray
 
-            var fullAmount:Long = 0
-            var firstDate:String = ""
-            var sLimit:Long = -1L
+            var spendingLimit:Long = 0
+            var remainingSpendingLimit:Long = -1L
             var timingInSec:Long = -1L
+
+            val nowInEpoch = Instant.now().epochSecond
+
+
+            var sortedDatesList = mutableListOf<Long>()
+
 
             if (historyPaymentJSONObject != null && historyPaymentJSONObject.length() > 0)
             {
@@ -1524,13 +1601,14 @@ class ScriptFragment : Fragment()
                     {
                         val spendingLimitAndTiming = (historyPaymentJSONObject[0] as JSONObject)["args"] as JSONArray
 
-                        val spendingLimit = ((spendingLimitAndTiming[0] as JSONObject)["int"] as String).toLong()
-                        sLimit = spendingLimit
+                        val sLimit = ((spendingLimitAndTiming[0] as JSONObject)["int"] as String).toLong()
+                        remainingSpendingLimit = sLimit
 
-                        fullAmount += spendingLimit
+                        spendingLimit += sLimit
 
                         val timing = ((spendingLimitAndTiming[1] as JSONObject)["int"] as String).toLong()
                         timingInSec = timing
+
                     }
                     else
                     {
@@ -1555,12 +1633,25 @@ class ScriptFragment : Fragment()
                                     {
                                         val necessaryElement = ((allOfThem[j] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
-                                        val necessaryElementDate = (necessaryElement[0] as JSONObject)["string"] as String
-                                        firstDate = necessaryElementDate
-
                                         val necessaryElementAmount = ((necessaryElement[1] as JSONObject)["int"] as String).toLong()
-
                                         cumulatedAmount += necessaryElementAmount
+
+                                        val necessaryElementDate = (necessaryElement[0] as JSONObject)["string"] as String
+                                        //firstDate = necessaryElementDate
+
+                                        //lastDate = necessaryElementDate
+
+
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                        {
+                                            val time = Instant.parse(necessaryElementDate).epochSecond
+                                            sortedDatesList.add(time)
+
+                                            if (time <= nowInEpoch)
+                                            {
+                                                remainingSpendingLimit += necessaryElementAmount
+                                            }
+                                        }
                                     }
                                 }
                                 else
@@ -1578,29 +1669,72 @@ class ScriptFragment : Fragment()
                                             cumulatedAmount += paymentAmount
 
                                             val paymentDate = (payment[0] as JSONObject)["string"] as String
+
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                            {
+                                                val time = Instant.parse(paymentDate).epochSecond
+                                                sortedDatesList.add(time)
+
+                                                if (time <= nowInEpoch)
+                                                {
+                                                    remainingSpendingLimit += paymentAmount
+                                                }
+                                            }
+
+                                            /*
                                             if ((allOfThem[0] as JSONArray).isNull(0))
                                             {
                                                 firstDate = paymentDate
                                             }
+                                            */
                                         }
                                     }
                                 }
                             }
 
-                            fullAmount += cumulatedAmount
+                            spendingLimit += cumulatedAmount
                         }
                     }
                 }
 
                 val myList = mutableListOf<Any>()
 
-                myList.add(fullAmount)
-                myList.add(firstDate)
-                myList.add(sLimit)
+                myList.add(spendingLimit)
+                myList.add(remainingSpendingLimit)
                 myList.add(timingInSec)
+
+                if (sortedDatesList.isNotEmpty())
+                {
+                    sortedDatesList.sort()
+
+                    val lastDate = sortedDatesList.last()
+                    //TODO maybe the lastDate is already <= now, then it's unlocked already.
+
+                    val remainingTime = lastDate - nowInEpoch
+
+                    when {
+                        remainingTime > 0 ->
+                        {
+                            myList.add(remainingTime)
+                        }
+                        else ->
+                        {
+                            myList.add(0L)
+                        }
+                    }
+                }
+                else
+                {
+                    myList.add(0L)
+                }
 
                 return myList
             }
+
+
+            //TODO use sorted dates.
+
+
         }
 
         return null

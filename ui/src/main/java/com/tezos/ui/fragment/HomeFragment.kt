@@ -304,28 +304,6 @@ open class HomeFragment : Fragment()
         //avoid this call in OperationsFragment
         //this call is necessary to reload when
 
-        val str = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            //mDateFormat.format(Date.from())
-
-            val future = Instant.parse("2019-11-28T13:40:25Z")
-            val epochFuture = future.epochSecond
-
-            val nowInEpoch = Instant.now().epochSecond
-
-            val diff = epochFuture - nowInEpoch
-
-            val day = TimeUnit.SECONDS.toDays(diff)
-            val hours = TimeUnit.SECONDS.toHours(diff) - (day *24)
-            val minute = TimeUnit.SECONDS.toMinutes(diff) - (TimeUnit.SECONDS.toHours(diff)* 60)
-            val second = TimeUnit.SECONDS.toSeconds(diff) - (TimeUnit.SECONDS.toMinutes(diff) *60)
-
-            val k = "hello"
-
-        } else {
-            TODO("VERSION.SDK_INT < O")
-        }
-
         val isPasswordSaved = Storage(activity!!).isPasswordSaved()
         if (isPasswordSaved)
         {
