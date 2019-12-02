@@ -38,6 +38,7 @@ import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.support.annotation.RequiresApi
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -840,8 +841,45 @@ class ScriptFragment : Fragment()
 
                 remaining_time_daily_spending_limit_textview.text = String.format(getString(R.string.remaining_time_daily_spending_limit), dailySpendingLimitInTez)
 
-                val remainingTime = remainingTime(listStorageData?.get(3) as Long)
-                remaining_time_daily_spending_limit_edittext.setText( "" + remainingTime!![0] + "d " + "" + remainingTime!![1] + "h " + remainingTime!![2] + "m " + remainingTime!![3] + "s")
+                //val remainingTime = remainingTime(listStorageData?.get(3) as Long)
+                //remaining_time_daily_spending_limit_edittext.setText( "" + remainingTime!![0] + "d " + "" + remainingTime!![1] + "h " + remainingTime!![2] + "m " + remainingTime!![3] + "s")
+
+                view_timer.isCountDown = true
+                view_timer.base = SystemClock.elapsedRealtime() + (listStorageData?.get(3) as Long)*1000L
+                if (listStorageData?.get(3) as Long == 0L)
+                {
+                    view_timer.stop()
+                }
+                else
+                {
+                    view_timer.setOnChronometerTickListener {
+
+                        val k = it.base
+                        val k2 = SystemClock.elapsedRealtime()
+
+
+                        if (k == 0L)
+                        {
+                            val k2 = "hello"
+                            val k3 = "hello"
+                        }
+                    }
+                    view_timer.start()
+                }
+
+                /*
+                new CountDownTimer(30000, 1000) {
+
+                public void onTick(long millisUntilFinished) {
+                    mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
+                }
+
+                public void onFinish() {
+                    mTextField.setText("done!");
+                }
+            }.start();
+                */
+
 
                 update_storage_form_card?.visibility = View.VISIBLE
 
@@ -1178,7 +1216,7 @@ class ScriptFragment : Fragment()
                                                                                 Primitive.Name.Pair,
                                                                                 arrayOf(
                                                                                         Visitable.integer(mSpendingLimitAmount*1000000),
-                                                                                        Visitable.integer(300)
+                                                                                        Visitable.integer(121)
                                                                                 )
                                                                         ),
                                                                         Primitive(
@@ -1278,7 +1316,7 @@ class ScriptFragment : Fragment()
         spendingLimitOne.put("int", (mSpendingLimitAmount*1000000).toString())
 
         val spendingLimitTwo = valuesArgs[1] as JSONObject
-        spendingLimitTwo.put("int", "300")
+        spendingLimitTwo.put("int", "121")
 
         val masterKeyArgs = argsFirstArgsKeyPart[1] as JSONObject
         masterKeyArgs.put("string", tz1)
