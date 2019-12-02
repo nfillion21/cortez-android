@@ -801,33 +801,11 @@ class ScriptFragment : Fragment()
                 val secureKeyJSONObject = argsSecureKey[0] as JSONObject
                 val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
 
-                //val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-                //val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
-
-
-                // get daily spending limit
-
-                /*
-                val dailySpendingLimitJSONObject = argsSecureKey[1] as JSONObject
-                val dailySpendingLimitJSONArray = DataExtractor.getJSONArrayFromField(dailySpendingLimitJSONObject, "args")
-
-                val dailySpendingLimitHashField = DataExtractor.getJSONObjectFromField(dailySpendingLimitJSONArray, 0)
-                val dailySpendingLimitHashField2 = DataExtractor.getJSONArrayFromField(dailySpendingLimitHashField, "args") as JSONArray
-
-                val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
-                val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
-                */
-
                 val listStorageData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     getHistoryPayment()
                 } else {
                     TODO("VERSION.SDK_INT < O")
                 }
-
-                //val timer = listStorageData?.get(3) as Long
-                //val firstPaymentData = listStorageData?.get(1) as String
-
-
 
                 val dailySpendingLimit = listStorageData?.get(0) as Long
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
@@ -849,19 +827,16 @@ class ScriptFragment : Fragment()
                 if (listStorageData?.get(3) as Long == 0L)
                 {
                     view_timer.stop()
+                    view_timer.text = "The spending limit is reset."
                 }
                 else
                 {
                     view_timer.setOnChronometerTickListener {
 
-                        val k = it.base
-                        val k2 = SystemClock.elapsedRealtime()
-
-
-                        if (k == 0L)
+                        if (it.base - SystemClock.elapsedRealtime() <= 0L)
                         {
-                            val k2 = "hello"
-                            val k3 = "hello"
+                            view_timer.stop()
+                            view_timer.text = "The spending limit is reset."
                         }
                     }
                     view_timer.start()
