@@ -31,7 +31,6 @@
                     app:layout_behavior="com.tezos.ui.utils.FloatingActionButtonBehavior"
                     android:orientation="vertical">
 
-
                     <LinearLayout
                         android:id="@+id/pkh_empty_layout"
                         android:layout_width="match_parent"
@@ -173,22 +172,8 @@
                         layout="@layout/update_storage_form_card"
                         />
 
-                    <!--
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="700dp">
-                    </LinearLayout>
-                    -->
-
                 </LinearLayout>
             </android.support.v4.widget.NestedScrollView>
-
-            <!--
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-                -->
 
             <RelativeLayout
                 android:id="@+id/update_storage_button_relative_layout"
