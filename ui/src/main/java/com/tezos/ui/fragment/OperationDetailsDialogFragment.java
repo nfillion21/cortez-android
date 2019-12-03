@@ -285,10 +285,10 @@ public class OperationDetailsDialogFragment extends DialogFragment
                     holder.valueTextView.setText(mOperation.getDestinationManager()); break;
 
                 case 8:
-                    holder.valueTextView.setText(String.format("%d", mOperation.getAmount().toString())); break;
+                    holder.valueTextView.setText(mOperation.getAmount().toString()); break;
 
                 case 9:
-                    holder.valueTextView.setText(String.format("%d", mOperation.getFee().toString())); break;
+                    holder.valueTextView.setText(mOperation.getFee().toString()); break;
 
                 default: break;
             }

@@ -719,7 +719,7 @@ class ScriptFragment : Fragment()
     private fun onBalanceLoadComplete()
     {
         mSecureHashBalanceLoading = false
-        secure_hash_progress.visibility = View.GONE
+        secure_hash_progress.visibility = View.INVISIBLE
         secure_hash_balance_textview.text =
 
                 if (mSecureHashBalance != -1L)
