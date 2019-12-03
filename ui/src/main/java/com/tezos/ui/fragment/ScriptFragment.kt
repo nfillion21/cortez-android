@@ -395,7 +395,12 @@ class ScriptFragment : Fragment()
             gas_textview.visibility = View.VISIBLE
             gas_layout.visibility = View.VISIBLE
 
+
+            limit_infos_layout.visibility = View.GONE
+
             redelegate_address_textview.setText(R.string.secure_enclave_generated)
+
+            daily_spending_limit_textview.setText(R.string.daily_spending_limit_from_0_to_1k)
 
             daily_spending_limit_edittext.isEnabled = true
             daily_spending_limit_edittext.setText("")
@@ -416,13 +421,14 @@ class ScriptFragment : Fragment()
             transferLoading(false)
             putFeesToNegative()
 
-            //TODO looks like it's crashing when async
-            //TODO it's called
-
             update_storage_button_relative_layout?.visibility = View.GONE
 
             gas_textview?.visibility = View.GONE
             gas_layout?.visibility = View.GONE
+
+            limit_infos_layout.visibility = View.VISIBLE
+
+            daily_spending_limit_textview.setText(R.string.daily_spending_limit)
 
             daily_spending_limit_edittext?.isEnabled = false
 
@@ -827,7 +833,7 @@ class ScriptFragment : Fragment()
                 if (listStorageData?.get(3) as Long == 0L)
                 {
                     view_timer.stop()
-                    view_timer.text = "The spending limit is reset."
+                    view_timer.text = getString(R.string.spending_limit_reset)
                 }
                 else
                 {
@@ -836,7 +842,9 @@ class ScriptFragment : Fragment()
                         if (it.base - SystemClock.elapsedRealtime() <= 0L)
                         {
                             view_timer.stop()
-                            view_timer.text = "The spending limit is reset."
+                            view_timer.text = getString(R.string.spending_limit_reset)
+
+                            remaining_daily_spending_limit_edittext.setText(dailySpendingLimitInTez)
                         }
                     }
                     view_timer.start()
