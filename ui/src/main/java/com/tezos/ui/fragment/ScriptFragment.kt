@@ -39,7 +39,6 @@ import android.hardware.fingerprint.FingerprintManager
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
-import android.support.annotation.RequiresApi
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -68,14 +67,14 @@ import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
-import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
-import kotlinx.android.synthetic.main.update_storage_form_card.send_cents_button
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
+import java.text.SimpleDateFormat
 import java.time.Instant
-import java.util.concurrent.TimeUnit
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.math.roundToLong
 
 class ScriptFragment : Fragment()
@@ -458,23 +457,7 @@ class ScriptFragment : Fragment()
 
                 // get daily spending limit
 
-                /*
-                val dailySpendingLimitJSONObject = argsSecureKey[1] as JSONObject
-                val dailySpendingLimitJSONArray = DataExtractor.getJSONArrayFromField(dailySpendingLimitJSONObject, "args")
-
-                val dailySpendingLimitHashField = DataExtractor.getJSONObjectFromField(dailySpendingLimitJSONArray, 0)
-                val dailySpendingLimitHashField2 = DataExtractor.getJSONArrayFromField(dailySpendingLimitHashField, "args") as JSONArray
-
-                val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
-                val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
-                */
-
-                val historyPayment = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    getHistoryPayment()
-                } else {
-                    TODO("VERSION.SDK_INT < O")
-                }
-
+                val historyPayment = getHistoryPayment()
                 daily_spending_limit_edittext?.setText(mutezToTez(historyPayment?.get(0) as Long))
 
 
@@ -800,68 +783,56 @@ class ScriptFragment : Fragment()
 
                 val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-
                 // get securekey hash
 
                 val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
                 val secureKeyJSONObject = argsSecureKey[0] as JSONObject
                 val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
 
-                val listStorageData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    getHistoryPayment()
-                } else {
-                    TODO("VERSION.SDK_INT < O")
-                }
+                val listStorageData = getHistoryPayment()
 
-                val dailySpendingLimit = listStorageData?.get(0) as Long
+                val dailySpendingLimit = listStorageData[0] as Long
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
                 daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
 
                 //remaining_spending_limit.text = "You can still spend \$ " + dailySpendingLimitInTez + "on the \$ " + mutezToTez(listStorageData[0] as Long) + "limit of your SLC contract"
 
-                val remainingDailySpendingLimit = listStorageData?.get(1) as Long
+                val remainingDailySpendingLimit = listStorageData[1] as Long
                 val remainingDailySpendingLimitInTez = mutezToTez(remainingDailySpendingLimit)
                 remaining_daily_spending_limit_edittext.setText(remainingDailySpendingLimitInTez)
 
                 remaining_time_daily_spending_limit_textview.text = String.format(getString(R.string.remaining_time_daily_spending_limit), dailySpendingLimitInTez)
 
-                //val remainingTime = remainingTime(listStorageData?.get(3) as Long)
-                //remaining_time_daily_spending_limit_edittext.setText( "" + remainingTime!![0] + "d " + "" + remainingTime!![1] + "h " + remainingTime!![2] + "m " + remainingTime!![3] + "s")
 
-                view_timer.isCountDown = true
-                view_timer.base = SystemClock.elapsedRealtime() + (listStorageData?.get(3) as Long)*1000L
-                if (listStorageData?.get(3) as Long == 0L)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                 {
-                    view_timer.stop()
-                    view_timer.text = getString(R.string.spending_limit_reset)
+                    view_timer.isCountDown = false
+                    view_timer.base = SystemClock.elapsedRealtime() + (listStorageData[3] as Long)*1000L
+                    if (listStorageData[3] as Long == 0L)
+                    {
+                        view_timer.stop()
+                        view_timer.text = getString(R.string.spending_limit_reset)
+                    }
+                    else
+                    {
+                        view_timer.setOnChronometerTickListener {
+
+                            if (it.base - SystemClock.elapsedRealtime() <= 0L)
+                            {
+                                view_timer.stop()
+                                view_timer.text = getString(R.string.spending_limit_reset)
+
+                                remaining_daily_spending_limit_edittext.setText(dailySpendingLimitInTez)
+                            }
+                        }
+                        view_timer.start()
+                    }
                 }
                 else
                 {
-                    view_timer.setOnChronometerTickListener {
-
-                        if (it.base - SystemClock.elapsedRealtime() <= 0L)
-                        {
-                            view_timer.stop()
-                            view_timer.text = getString(R.string.spending_limit_reset)
-
-                            remaining_daily_spending_limit_edittext.setText(dailySpendingLimitInTez)
-                        }
-                    }
-                    view_timer.start()
+                    remaining_time_daily_spending_limit_textview.visibility = View.GONE
+                    view_timer.visibility = View.GONE
                 }
-
-                /*
-                new CountDownTimer(30000, 1000) {
-
-                public void onTick(long millisUntilFinished) {
-                    mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
-                }
-
-                public void onFinish() {
-                    mTextField.setText("done!");
-                }
-            }.start();
-                */
 
 
                 update_storage_form_card?.visibility = View.VISIBLE
@@ -874,16 +845,6 @@ class ScriptFragment : Fragment()
 
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.contract_storage_info)
-
-                //TODO handle there the right stuff
-                // try to get the secure key
-                // if there is a key and it's the same as in storage, no problem
-
-                //EncryptionServices().removeSpendingKey()
-                //EncryptionServices().createSpendingKey()
-
-                // if there is no key or it's not the same as in storage, put the information.
-
 
                 if (mEditMode)
                 {
@@ -940,46 +901,6 @@ class ScriptFragment : Fragment()
             loading_textview?.visibility = View.VISIBLE
             loading_textview?.text = "-"
         }
-    }
-
-    private fun remainingTime(diff:Long):List<Long>?
-    {
-        val str = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            //mDateFormat.format(Date.from())
-
-            /*
-            val firstDate = time.first
-            val howLong = time.second
-
-            val resetTime = firstDate + howLong
-
-            //val future = Instant.parse("2019-11-28T13:40:25Z")
-            //val epochFuture = future.epochSecond
-
-            val nowInEpoch = Instant.now().epochSecond
-
-            val diff = resetTime - nowInEpoch
-            */
-
-            val day = TimeUnit.SECONDS.toDays(diff)
-            val hours = TimeUnit.SECONDS.toHours(diff) - (day *24)
-            val minute = TimeUnit.SECONDS.toMinutes(diff) - (TimeUnit.SECONDS.toHours(diff)* 60)
-            val second = TimeUnit.SECONDS.toSeconds(diff) - (TimeUnit.SECONDS.toMinutes(diff) *60)
-
-            val list = mutableListOf<Long>()
-            list.add(day)
-            list.add(hours)
-            list.add(minute)
-            list.add(second)
-
-            return list
-
-        } else {
-            TODO("VERSION.SDK_INT < O")
-        }
-
-        return null
     }
 
     // volley
@@ -1588,12 +1509,10 @@ class ScriptFragment : Fragment()
         return false
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun getHistoryPayment(): List<Any>?
+    private fun getHistoryPayment(): List<Any>
     {
         if (mStorage != null)
         {
-
             val storageJSONObject = JSONObject(mStorage)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
@@ -1605,7 +1524,15 @@ class ScriptFragment : Fragment()
             var remainingSpendingLimit:Long = -1L
             var timingInSec:Long = -1L
 
-            val nowInEpoch = Instant.now().epochSecond
+            val nowInEpoch =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    {
+                        Instant.now().epochSecond
+                    }
+            else
+                    {
+                        System.currentTimeMillis()/1000
+                    }
 
 
             var sortedDatesList = mutableListOf<Long>()
@@ -1656,20 +1583,23 @@ class ScriptFragment : Fragment()
                                         cumulatedAmount += necessaryElementAmount
 
                                         val necessaryElementDate = (necessaryElement[0] as JSONObject)["string"] as String
-                                        //firstDate = necessaryElementDate
 
-                                        //lastDate = necessaryElementDate
-
-
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                        val time = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                                         {
-                                            val time = Instant.parse(necessaryElementDate).epochSecond
-                                            sortedDatesList.add(time)
+                                            Instant.parse(necessaryElementDate).epochSecond
+                                        }
+                                        else
+                                        {
+                                            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                                            format.timeZone = TimeZone.getTimeZone("UTC")
+                                            format.parse(necessaryElementDate).time/1000
+                                        }
 
-                                            if (time <= nowInEpoch)
-                                            {
-                                                remainingSpendingLimit += necessaryElementAmount
-                                            }
+                                        sortedDatesList.add(time)
+
+                                        if (time <= nowInEpoch)
+                                        {
+                                            remainingSpendingLimit += necessaryElementAmount
                                         }
                                     }
                                 }
@@ -1689,9 +1619,20 @@ class ScriptFragment : Fragment()
 
                                             val paymentDate = (payment[0] as JSONObject)["string"] as String
 
+                                            val time = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                            {
+                                                Instant.parse(paymentDate).epochSecond
+                                            }
+                                            else
+                                            {
+                                                val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                                                format.timeZone = TimeZone.getTimeZone("UTC")
+                                                format.parse(paymentDate).time/1000
+                                            }
+
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                                             {
-                                                val time = Instant.parse(paymentDate).epochSecond
+
                                                 sortedDatesList.add(time)
 
                                                 if (time <= nowInEpoch)
@@ -1699,13 +1640,6 @@ class ScriptFragment : Fragment()
                                                     remainingSpendingLimit += paymentAmount
                                                 }
                                             }
-
-                                            /*
-                                            if ((allOfThem[0] as JSONArray).isNull(0))
-                                            {
-                                                firstDate = paymentDate
-                                            }
-                                            */
                                         }
                                     }
                                 }
@@ -1749,14 +1683,9 @@ class ScriptFragment : Fragment()
 
                 return myList
             }
-
-
-            //TODO use sorted dates.
-
-
         }
 
-        return null
+        return listOf()
     }
 
     private fun getStorageSecureKeyHash(): String?
