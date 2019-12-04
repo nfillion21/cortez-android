@@ -570,6 +570,65 @@ class TransferFormFragment : Fragment()
                                     Primitive(
                                             Primitive.Name.Pair,
                                             arrayOf(
+                                                    Visitable.sequenceOf(
+
+                                                            Primitive(
+                                                                    Primitive.Name.DIP,
+                                                                    arrayOf(
+
+                                                                            Visitable.sequenceOf(
+
+                                                                                    Primitive(Primitive.Name.NIL,
+                                                                                            arrayOf(
+                                                                                                    Primitive(Primitive.Name.operation)
+                                                                                            )
+                                                                                    ),
+                                                                                    Primitive(Primitive.Name.PUSH,
+                                                                                            arrayOf(
+                                                                                                    Primitive(Primitive.Name.address),
+                                                                                                    Visitable.address("KT1GMNBUXSgUEZuaefGpFTq2RfeZKTVe1yZ5%send")
+                                                                                            )
+                                                                                    ),
+                                                                                    Primitive(Primitive.Name.CONTRACT,
+                                                                                            arrayOf(Primitive(Primitive.Name.unit))
+                                                                                    ),
+                                                                                    Primitive(Primitive.Name.IF_NONE,
+                                                                                            arrayOf(
+
+                                                                                                    Visitable.sequenceOf(
+                                                                                                            Visitable.sequenceOf(
+                                                                                                                    Primitive(Primitive.Name.UNIT),
+                                                                                                                    Primitive(Primitive.Name.FAILWITH)
+                                                                                                            )
+                                                                                                    ),
+                                                                                                    Visitable.sequenceOf()
+                                                                                            )
+                                                                                            ),
+                                                                                    Primitive(Primitive.Name.PUSH,
+                                                                                            arrayOf(
+                                                                                                    Primitive(Primitive.Name.mutez),
+                                                                                                    Visitable.integer(10)
+                                                                                            )
+                                                                                    )
+                                                                            )
+                                                                    )
+                                                            ),
+                                                            Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                            Primitive(Primitive.Name.CONS)
+                                                    ),
+                                                    Visitable.keyHash("tz1aWXP237BLwNHJcCD4b3DutCevhqq2T1Z9")
+                                            )
+                                    )
+                            )
+                    )
+
+                    /*
+                    val dataVisitable = Primitive(
+                            Primitive.Name.Right,
+                            arrayOf(
+                                    Primitive(
+                                            Primitive.Name.Pair,
+                                            arrayOf(
 
                                                     Visitable.sequenceOf(
 
@@ -606,6 +665,7 @@ class TransferFormFragment : Fragment()
                                     )
                             )
                     )
+                    */
 
                     val o = ByteArrayOutputStream()
                     o.write(0x05)
@@ -615,7 +675,14 @@ class TransferFormFragment : Fragment()
 
                     val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
-                    //val packCompare = "0505080707020000003a051f020000002f053d036d0743035d0a000000150002298c03ed7d454a101eb7022bc95f7e5f41ac78031e0743036a0080c0a8ca9a3a034d031b0a0000001500dbd1087b133e63b9e320d20be9d1469621b6d682".hexToByteArray()
+                    val packCompare = "05050807070200000056051f020000004b053d036d0743036e0a0000001a015538141a5f189f280cd8417fc8695fe131be4e210073656e640555036c0200000015072f02000000090200000004034f032702000000000743036a000a034d031b0a0000001500a31e81ac3425310e3274a4698a793b2839dc0afa".hexToByteArray()
+
+                    if (dataPack.contentEquals(packCompare))
+                    {
+                        val k = "hello"
+                        val k2 = "hello2"
+                    }
+
 
                     val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                             arrayOf(
