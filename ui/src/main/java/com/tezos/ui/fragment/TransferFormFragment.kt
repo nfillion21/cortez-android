@@ -49,6 +49,7 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.google.gson.stream.JsonWriter
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
@@ -630,7 +631,6 @@ class TransferFormFragment : Fragment()
 
                     val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
-
                     val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                             arrayOf(
                                     Visitable.address(kt1!!),
@@ -684,22 +684,16 @@ class TransferFormFragment : Fragment()
                     val argSig = argsSig[1] as JSONObject
                     argSig.put("string", edsig)
 
+                    val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    argsMasterKey.put("string", pkh)
 
-                    val argsTz = ((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0])
-                    val argsTz2 = ((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0])
+                    val argsTz = ((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray
 
-                    /*
-                    val keyHash = argsTz[1] as JSONObject
-                    keyHash.put("string", "$mDstAccount%send")
+                    val argAddress = ((argsTz[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    argAddress.put("string", "$mDstAccount%send")
 
-                    val arggs = ((((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0]) as JSONObject)["args"] as JSONArray)[0] as JSONArray)
-                    val masterKeyHash = ((arggs[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    masterKeyHash.put("string", pkh)
-
-                    val mutezArgs = ((arggs[3] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    mutezArgs.put("int", (mTransferAmount*1000000).roundToLong().toString())
-                    */
-
+                    val argAmount = ((argsTz[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    argAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
 
                     dstObject.put("parameters", value)
 
@@ -1440,7 +1434,7 @@ class TransferFormFragment : Fragment()
                     canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
                 }
 
-                var compressedSignature = if ((mSourceKT1withCode && !canSignWithMaster) || (mSourceKT1withCode && mRecipientKT1withCode))
+                var compressedSignature = if (mSourceKT1withCode && !canSignWithMaster)
                 {
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
