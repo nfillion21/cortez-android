@@ -567,11 +567,9 @@ class TransferFormFragment : Fragment()
                     val dataVisitable = Primitive(
                             Primitive.Name.Right,
                             arrayOf(
-                                    Primitive(
-                                            Primitive.Name.Pair,
+                                    Primitive(Primitive.Name.Pair,
                                             arrayOf(
                                                     Visitable.sequenceOf(
-
                                                             Primitive(
                                                                     Primitive.Name.DIP,
                                                                     arrayOf(
@@ -586,68 +584,26 @@ class TransferFormFragment : Fragment()
                                                                                     Primitive(Primitive.Name.PUSH,
                                                                                             arrayOf(
                                                                                                     Primitive(Primitive.Name.address),
-                                                                                                    Visitable.address("KT1GMNBUXSgUEZuaefGpFTq2RfeZKTVe1yZ5%send")
+                                                                                                    Visitable.address("$mDstAccount%send")
                                                                                             )
                                                                                     ),
                                                                                     Primitive(Primitive.Name.CONTRACT,
                                                                                             arrayOf(Primitive(Primitive.Name.unit))
                                                                                     ),
-                                                                                    Primitive(Primitive.Name.IF_NONE,
-                                                                                            arrayOf(
+                                                                                    Visitable.sequenceOf(
+                                                                                            Primitive(Primitive.Name.IF_NONE,
+                                                                                                    arrayOf(
 
-                                                                                                    Visitable.sequenceOf(
                                                                                                             Visitable.sequenceOf(
-                                                                                                                    Primitive(Primitive.Name.UNIT),
-                                                                                                                    Primitive(Primitive.Name.FAILWITH)
-                                                                                                            )
-                                                                                                    ),
-                                                                                                    Visitable.sequenceOf()
-                                                                                            )
-                                                                                            ),
-                                                                                    Primitive(Primitive.Name.PUSH,
-                                                                                            arrayOf(
-                                                                                                    Primitive(Primitive.Name.mutez),
-                                                                                                    Visitable.integer(10)
-                                                                                            )
-                                                                                    )
-                                                                            )
-                                                                    )
-                                                            ),
-                                                            Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                                            Primitive(Primitive.Name.CONS)
-                                                    ),
-                                                    Visitable.keyHash("tz1aWXP237BLwNHJcCD4b3DutCevhqq2T1Z9")
-                                            )
-                                    )
-                            )
-                    )
-
-                    /*
-                    val dataVisitable = Primitive(
-                            Primitive.Name.Right,
-                            arrayOf(
-                                    Primitive(
-                                            Primitive.Name.Pair,
-                                            arrayOf(
-
-                                                    Visitable.sequenceOf(
-
-                                                            Primitive(
-                                                                    Primitive.Name.DIP,
-                                                                    arrayOf(
-                                                                            Visitable.sequenceOf(
-
-                                                                                    Primitive(Primitive.Name.NIL,
-                                                                                            arrayOf(Primitive(Primitive.Name.operation))
-                                                                                    ),
-
-                                                                                    Primitive(Primitive.Name.PUSH,
-                                                                                            arrayOf(
-                                                                                                    Primitive(Primitive.Name.key_hash),
-                                                                                                    Visitable.address("${mDstAccount!!}%send")
+                                                                                                                    Visitable.sequenceOf(
+                                                                                                                            Primitive(Primitive.Name.UNIT),
+                                                                                                                            Primitive(Primitive.Name.FAILWITH)
+                                                                                                                    )
+                                                                                                            ),
+                                                                                                            Visitable.sequenceOf()
+                                                                                                    )
                                                                                             )
                                                                                     ),
-                                                                                    Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
                                                                                     Primitive(Primitive.Name.PUSH,
                                                                                             arrayOf(
                                                                                                     Primitive(Primitive.Name.mutez),
@@ -665,7 +621,6 @@ class TransferFormFragment : Fragment()
                                     )
                             )
                     )
-                    */
 
                     val o = ByteArrayOutputStream()
                     o.write(0x05)
@@ -674,14 +629,6 @@ class TransferFormFragment : Fragment()
                     dataVisitable.accept(dataPacker)
 
                     val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                    val packCompare = "05050807070200000056051f020000004b053d036d0743036e0a0000001a015538141a5f189f280cd8417fc8695fe131be4e210073656e640555036c0200000015072f02000000090200000004034f032702000000000743036a000a034d031b0a0000001500a31e81ac3425310e3274a4698a793b2839dc0afa".hexToByteArray()
-
-                    if (dataPack.contentEquals(packCompare))
-                    {
-                        val k = "hello"
-                        val k2 = "hello2"
-                    }
 
 
                     val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
@@ -722,7 +669,7 @@ class TransferFormFragment : Fragment()
 
                     val edsig = CryptoUtils.generateEDSig(signature)
 
-                    val spendingLimitFile = "spending_limit_massive_transfer.json"
+                    val spendingLimitFile = "spending_limit_massive_transfer_to_slc.json"
                     val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
                             .use {
                                 it.readText()
@@ -737,8 +684,11 @@ class TransferFormFragment : Fragment()
                     val argSig = argsSig[1] as JSONObject
                     argSig.put("string", edsig)
 
-                    val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
+                    val argsTz = ((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0])
+                    val argsTz2 = ((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0])
+
+                    /*
                     val keyHash = argsTz[1] as JSONObject
                     keyHash.put("string", "$mDstAccount%send")
 
@@ -748,6 +698,8 @@ class TransferFormFragment : Fragment()
 
                     val mutezArgs = ((arggs[3] as JSONObject)["args"] as JSONArray)[1] as JSONObject
                     mutezArgs.put("int", (mTransferAmount*1000000).roundToLong().toString())
+                    */
+
 
                     dstObject.put("parameters", value)
 
