@@ -836,7 +836,6 @@ class TransferFormFragment : Fragment()
                 {
 
                     val mnemonicsData = Storage(activity!!).getMnemonics()
-
                     val pk = if (mnemonicsData.pk.isNullOrEmpty())
                     {
                         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
@@ -869,28 +868,43 @@ class TransferFormFragment : Fragment()
                     val dataVisitable = Primitive(
                             Primitive.Name.Right,
                             arrayOf(
-                                    Primitive(
-                                            Primitive.Name.Pair,
+                                    Primitive(Primitive.Name.Pair,
                                             arrayOf(
-
                                                     Visitable.sequenceOf(
-
                                                             Primitive(
                                                                     Primitive.Name.DIP,
                                                                     arrayOf(
+
                                                                             Visitable.sequenceOf(
 
                                                                                     Primitive(Primitive.Name.NIL,
-                                                                                            arrayOf(Primitive(Primitive.Name.operation))
-                                                                                    ),
-
-                                                                                    Primitive(Primitive.Name.PUSH,
                                                                                             arrayOf(
-                                                                                                    Primitive(Primitive.Name.key_hash),
-                                                                                                    Visitable.keyHash(mDstAccount!!)
+                                                                                                    Primitive(Primitive.Name.operation)
                                                                                             )
                                                                                     ),
-                                                                                    Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
+                                                                                    Primitive(Primitive.Name.PUSH,
+                                                                                            arrayOf(
+                                                                                                    Primitive(Primitive.Name.address),
+                                                                                                    Visitable.address(mDstAccount!!)
+                                                                                            )
+                                                                                    ),
+                                                                                    Primitive(Primitive.Name.CONTRACT,
+                                                                                            arrayOf(Primitive(Primitive.Name.unit))
+                                                                                    ),
+                                                                                    Visitable.sequenceOf(
+                                                                                            Primitive(Primitive.Name.IF_NONE,
+                                                                                                    arrayOf(
+
+                                                                                                            Visitable.sequenceOf(
+                                                                                                                    Visitable.sequenceOf(
+                                                                                                                            Primitive(Primitive.Name.UNIT),
+                                                                                                                            Primitive(Primitive.Name.FAILWITH)
+                                                                                                                    )
+                                                                                                            ),
+                                                                                                            Visitable.sequenceOf()
+                                                                                                    )
+                                                                                            )
+                                                                                    ),
                                                                                     Primitive(Primitive.Name.PUSH,
                                                                                             arrayOf(
                                                                                                     Primitive(Primitive.Name.mutez),
@@ -916,8 +930,6 @@ class TransferFormFragment : Fragment()
                     dataVisitable.accept(dataPacker)
 
                     val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                    //val packCompare = "0505080707020000003a051f020000002f053d036d0743035d0a000000150002298c03ed7d454a101eb7022bc95f7e5f41ac78031e0743036a0080c0a8ca9a3a034d031b0a0000001500dbd1087b133e63b9e320d20be9d1469621b6d682".hexToByteArray()
 
                     val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                             arrayOf(
@@ -957,7 +969,7 @@ class TransferFormFragment : Fragment()
 
                     val edsig = CryptoUtils.generateEDSig(signature)
 
-                    val spendingLimitFile = "spending_limit_massive_transfer.json"
+                    val spendingLimitFile = "spending_limit_massive_transfer_to_slc.json"
                     val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
                             .use {
                                 it.readText()
@@ -972,23 +984,24 @@ class TransferFormFragment : Fragment()
                     val argSig = argsSig[1] as JSONObject
                     argSig.put("string", edsig)
 
-                    val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                    val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    argsMasterKey.put("string", pkh)
 
-                    val keyHash = argsTz[1] as JSONObject
-                    keyHash.put("string", mDstAccount)
+                    val argsTz = ((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray
 
-                    val arggs = ((((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0]) as JSONObject)["args"] as JSONArray)[0] as JSONArray)
-                    val masterKeyHash = ((arggs[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    masterKeyHash.put("string", pkh)
+                    val argAddress = ((argsTz[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    argAddress.put("string", mDstAccount)
 
-                    val mutezArgs = ((arggs[3] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    mutezArgs.put("int", (mTransferAmount*1000000).roundToLong().toString())
+                    val argAmount = ((argsTz[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                    argAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
 
                     dstObject.put("parameters", value)
 
                     dstObjects.put(dstObject)
 
                     postParams.put("dsts", dstObjects)
+
+
                 }
                 else
                 {
@@ -1150,15 +1163,7 @@ class TransferFormFragment : Fragment()
                 dstObject.put("dst", mSrcAccount)
                 dstObject.put("amount", "0")
 
-
-                if (mRecipientKT1withCode && false)
-                {
-                    dstObject.put("entrypoint", "send")
-                }
-                else
-                {
-                    dstObject.put("entrypoint", "do")
-                }
+                dstObject.put("entrypoint", "do")
 
                 val destBeginsWith = mDstAccount?.slice(0 until 3)
 

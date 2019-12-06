@@ -806,7 +806,7 @@ class ScriptFragment : Fragment()
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                 {
-                    view_timer.isCountDown = false
+                    view_timer.isCountDown = true
                     view_timer.base = SystemClock.elapsedRealtime() + (listStorageData[3] as Long)*1000L
                     if (listStorageData[3] as Long == 0L)
                     {
