@@ -474,7 +474,7 @@ class AddLimitsActivity : BaseSecureActivity()
         val ecKeys = retrieveECKeys()
         val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
 
-        val spendingLimitFile = "spending_limit.json"
+        val spendingLimitFile = "spending_limit_double_salt.json"
         val contract = application.assets.open(spendingLimitFile).bufferedReader()
                 .use {
                     it.readText()
@@ -502,10 +502,10 @@ class AddLimitsActivity : BaseSecureActivity()
         val argsFirstParamArgsSecondAndThirdParamsArgsStorageOne = firstParamArgsSecondAndThirdParamsArgsStorageOne["args"] as JSONArray
 
         val firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[0] as JSONObject
-        firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", "86400")
+        firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", (mLimitAmount*1000000L).toString())
 
         val secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[1] as JSONObject
-        secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", (mLimitAmount*1000000L).toString())
+        secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", "86400")
 
         val storageTwo = argsStorage[1] as JSONObject
         val argsStorageTwo = storageTwo["args"] as JSONArray

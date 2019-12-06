@@ -899,7 +899,11 @@ class SendCentsFragment : AppCompatDialogFragment()
             {
                 val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
                 val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
-                return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
+
+                val saltLeft = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+                val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+
+                return DataExtractor.getStringFromField(saltLeft, "int").toInt()
             }
         }
 

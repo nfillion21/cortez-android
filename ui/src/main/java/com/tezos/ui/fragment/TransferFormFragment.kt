@@ -1915,7 +1915,26 @@ class TransferFormFragment : Fragment()
             {
                 val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
                 val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
-                return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
+
+                var canSignWithMaster = false
+                val hasMnemonics = Storage(context!!).hasMnemonics()
+                if (hasMnemonics)
+                {
+                    val seed = Storage(activity!!).getMnemonics()
+                    canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
+                }
+
+                val salt = if (mSourceKT1withCode && !canSignWithMaster)
+                {
+                    (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
+                }
+                else
+                {
+                    (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+                }
+
+
+                return DataExtractor.getStringFromField(salt, "int").toInt()
             }
         }
         else if (!isRecipient && mStorageSource != null)
@@ -1927,7 +1946,25 @@ class TransferFormFragment : Fragment()
             {
                 val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
                 val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
-                return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
+
+                var canSignWithMaster = false
+                val hasMnemonics = Storage(context!!).hasMnemonics()
+                if (hasMnemonics)
+                {
+                    val seed = Storage(activity!!).getMnemonics()
+                    canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
+                }
+
+                val salt = if (mSourceKT1withCode && !canSignWithMaster)
+                {
+                    (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
+                }
+                else
+                {
+                    (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+                }
+
+                return DataExtractor.getStringFromField(salt, "int").toInt()
             }
         }
 
