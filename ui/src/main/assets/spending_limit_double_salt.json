@@ -49,7 +49,7 @@
     "args":
     [ { "prim": "or",
       "args":
-      [ { "prim": "unit", "annots": [ "%send" ] },
+      [ { "prim": "unit", "annots": [ "%default" ] },
         { "prim": "or",
           "args":
           [ { "prim": "pair",

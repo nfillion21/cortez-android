@@ -585,7 +585,7 @@ class TransferFormFragment : Fragment()
                                                                                     Primitive(Primitive.Name.PUSH,
                                                                                             arrayOf(
                                                                                                     Primitive(Primitive.Name.address),
-                                                                                                    Visitable.address("$mDstAccount%send")
+                                                                                                    Visitable.address(mDstAccount!!)
                                                                                             )
                                                                                     ),
                                                                                     Primitive(Primitive.Name.CONTRACT,
@@ -690,7 +690,7 @@ class TransferFormFragment : Fragment()
                     val argsTz = ((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray
 
                     val argAddress = ((argsTz[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    argAddress.put("string", "$mDstAccount%send")
+                    argAddress.put("string", mDstAccount)
 
                     val argAmount = ((argsTz[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
                     argAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
@@ -732,7 +732,7 @@ class TransferFormFragment : Fragment()
                                                     Primitive.Name.Pair,
                                                     arrayOf(
                                                             Visitable.integer((mTransferAmount*1000000).roundToLong()),
-                                                            Visitable.address("${mDstAccount!!}%send")
+                                                            Visitable.address(mDstAccount!!)
                                                     )
                                             )
                                     ),
@@ -801,7 +801,7 @@ class TransferFormFragment : Fragment()
                     argsSendAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
 
                     val argsSendContract = argsSend[1] as JSONObject
-                    argsSendContract.put("string", "$mDstAccount%send")
+                    argsSendContract.put("string", mDstAccount)
 
                     val argsSendTz = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
                     argsSendTz.put("string", tz3)
@@ -1343,14 +1343,7 @@ class TransferFormFragment : Fragment()
                     value = JSONArray(contract)
                     val dstValue = ((value[2] as JSONObject)["args"] as JSONArray)[1] as JSONObject
 
-                    if (mRecipientKT1withCode)
-                    {
-                        dstValue.put("string", "$mDstAccount%send")
-                    }
-                    else
-                    {
-                        dstValue.put("string", mDstAccount)
-                    }
+                    dstValue.put("string", mDstAccount)
 
                     val dstAmount = ((value[5] as JSONObject)["args"] as JSONArray)[1] as JSONObject
                     dstAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
@@ -1395,10 +1388,12 @@ class TransferFormFragment : Fragment()
                 var dstObject = JSONObject()
                 dstObject.put("dst", mDstAccount)
 
+                /*
                 if (mRecipientKT1withCode)
                 {
                     dstObject.put("entrypoint", "send")
                 }
+                */
 
                 dstObject.put("amount", (mTransferAmount*1000000).roundToLong().toString())
 
