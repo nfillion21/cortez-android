@@ -741,8 +741,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                                             Visitable.string("edpk"),
                                                             Visitable.string("edsig")
                                                     )
-                                            )
-                                            ,
+                                            ),
 
                                             Primitive(Primitive.Name.Right,
                                                     arrayOf(
@@ -756,17 +755,29 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                                                                            Primitive(Primitive.Name.DIP,
                                                                                                    arrayOf(
 
-                                                                                                           element1,
-                                                                                                           element2,
-                                                                                                           element3,
-                                                                                                           element4
+                                                                                                           Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                                                                                           Primitive(Primitive.Name.PUSH,
+                                                                                                                   arrayOf(
+
+                                                                                                                           Primitive(Primitive.Name.key_hash),
+                                                                                                                           Visitable.keyHash(dstAccountParam!!)
+
+                                                                                                                   )
+                                                                                                           ),
+                                                                                                           Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
+                                                                                                           Primitive(Primitive.Name.PUSH,
+                                                                                                                   arrayOf(
+                                                                                                                           Primitive(Primitive.Name.mutez),
+                                                                                                                           Visitable.integer(amountDstParam!!)
+                                                                                                                   )
+                                                                                                           )
                                                                                                    )
                                                                                            ),
                                                                                            Primitive(Primitive.Name.TRANSFER_TOKENS),
                                                                                            Primitive(Primitive.Name.CONS)
                                                                                    ),
 
-                                                                                   Visitable.string("tz1MasterKey")
+                                                                                   Visitable.keyHash("tz1MasterKey")
                                                                            )
                                                                    )
                                                            )
