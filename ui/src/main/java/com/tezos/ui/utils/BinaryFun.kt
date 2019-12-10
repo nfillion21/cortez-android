@@ -10,6 +10,7 @@ import java.security.interfaces.ECPublicKey
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.roundToLong
 
 /*
 (*****************************************************************************)
@@ -636,21 +637,6 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                     Primitive(Primitive.Name.CONS)
                             )
                     )
-            /*
-
-[
-{"prim": "DROP"},
-{"prim": "NIL", "args": [{"prim": "operation"}]},
-{
-    "prim": "NONE",
-    "args":[
-    {"prim": "key_hash"}
-    ]
-},
-{"prim": "SET_DELEGATE"},
-{"prim": "CONS"}
-]
-            */
             "add_delegate" -> parameters =
 
                     Visitable.sequenceOf(
@@ -668,120 +654,193 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                     Primitive(Primitive.Name.CONS)
                             )
                     )
-            /*
-
-    [
-                {"prim": "DROP"},
-                {"prim": "NIL", "args": [{"prim": "operation"}]},
-                {
-                    "prim": "PUSH",
-                    "args":[
-                        {"prim": "key_hash"},
-                        {"string": "%1$s"}
-                    ]
-                },
-                {"prim": "SOME"},
-                {"prim": "SET_DELEGATE"},
-                {"prim": "CONS"}
-            ]
-            */
             //TODO add some more contract types
+
+
+            "kt1_to_kt1" -> parameters =
+
+                    Visitable.sequenceOf(
+                            Visitable.sequenceOf(
+                                    Primitive(Primitive.Name.DROP),
+                                    Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                    Primitive(
+                                            Primitive.Name.PUSH,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.address),
+                                                    Visitable.string(dstAccountParam!!)
+                                            )
+                                    ),
+
+                                    Primitive(Primitive.Name.CONTRACT, arrayOf(Primitive(Primitive.Name.unit))),
+                                    Visitable.sequenceOf(
+                                            Primitive(
+                                                    Primitive.Name.IF_NONE,
+                                                    arrayOf(
+
+                                                            Visitable.sequenceOf(
+
+                                                                    Visitable.sequenceOf(
+
+                                                                            Primitive(Primitive.Name.UNIT),
+                                                                            Primitive(Primitive.Name.FAILWITH)
+                                                                    )
+                                                            ),
+                                                            Visitable.sequenceOf()
+
+                                                    )
+                                            )
+                                    ),
+                                    Primitive(
+                                            Primitive.Name.PUSH,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.mutez),
+                                                    Visitable.integer(amountDstParam!!)
+                                            )
+                                    ),
+                                    Primitive(Primitive.Name.UNIT),
+                                    Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                    Primitive(Primitive.Name.CONS)
+                            )
+                    )
+
+            "kt1_to_tz" -> parameters =
+
+                    Visitable.sequenceOf(
+                            Visitable.sequenceOf(
+                                    Primitive(Primitive.Name.DROP),
+                                    Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                    Primitive(
+                                            Primitive.Name.PUSH,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.key_hash),
+                                                    Visitable.string(dstAccountParam!!)
+                                            )
+                                    ),
+                                    Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
+                                    Primitive(
+                                            Primitive.Name.PUSH,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.mutez),
+                                                    Visitable.integer(amountDstParam!!)
+                                            )
+                                    ),
+                                    Primitive(Primitive.Name.UNIT),
+                                    Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                    Primitive(Primitive.Name.CONS)
+                            )
+                    )
+
+            "slc_master_to_tz" -> parameters =
+
+                    Visitable.sequenceOf(
+
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Primitive(Primitive.Name.Pair,
+                                                    arrayOf(
+                                                            Visitable.string("edpk"),
+                                                            Visitable.string("edsig")
+                                                    )
+                                            )
+                                            ,
+
+                                            Primitive(Primitive.Name.Right,
+                                                    arrayOf(
+                                                           Visitable.sequenceOf(
+
+                                                                   Primitive(Primitive.Name.Pair,
+                                                                           arrayOf(
+                                                                                   //this sequenceOf looks like an arrayOf
+                                                                                   Visitable.sequenceOf(
+
+                                                                                           Primitive(Primitive.Name.DIP,
+                                                                                                   arrayOf(
+
+                                                                                                           element1,
+                                                                                                           element2,
+                                                                                                           element3,
+                                                                                                           element4
+                                                                                                   )
+                                                                                           ),
+                                                                                           Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                                                           Primitive(Primitive.Name.CONS)
+                                                                                   ),
+
+                                                                                   Visitable.string("tz1MasterKey")
+                                                                           )
+                                                                   )
+                                                           )
+                                                    )
+                                            )
+                                    )
+                            )
+                    )
+
+            /*
+                Primitive(
+                    Primitive.Name.Right,
+                    arrayOf(
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.sequenceOf(
+                                                    Primitive(
+                                                            Primitive.Name.DIP,
+                                                            arrayOf(
+
+                                                                    Visitable.sequenceOf(
+
+                                                                            Primitive(Primitive.Name.NIL,
+                                                                                    arrayOf(
+                                                                                            Primitive(Primitive.Name.operation)
+                                                                                    )
+                                                                            ),
+                                                                            Primitive(Primitive.Name.PUSH,
+                                                                                    arrayOf(
+                                                                                            Primitive(Primitive.Name.address),
+                                                                                            Visitable.address(dstAccountParam!!)
+                                                                                    )
+                                                                            ),
+                                                                            Primitive(Primitive.Name.CONTRACT,
+                                                                                    arrayOf(Primitive(Primitive.Name.unit))
+                                                                            ),
+                                                                            Visitable.sequenceOf(
+                                                                                    Primitive(Primitive.Name.IF_NONE,
+                                                                                            arrayOf(
+
+                                                                                                    Visitable.sequenceOf(
+                                                                                                            Visitable.sequenceOf(
+                                                                                                                    Primitive(Primitive.Name.UNIT),
+                                                                                                                    Primitive(Primitive.Name.FAILWITH)
+                                                                                                            )
+                                                                                                    ),
+                                                                                                    Visitable.sequenceOf()
+                                                                                            )
+                                                                                    )
+                                                                            ),
+                                                                            Primitive(Primitive.Name.PUSH,
+                                                                                    arrayOf(
+                                                                                            Primitive(Primitive.Name.mutez),
+                                                                                            Visitable.integer(amountDstParam!!)
+                                                                                    )
+                                                                            )
+                                                                    )
+                                                            )
+                                                    ),
+                                                    Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                    Primitive(Primitive.Name.CONS)
+                                            ),
+                                            Visitable.keyHash("tz1M7RpncdPVx19rtZda42UNDWon4NE5kmGu")
+                                    )
+                            )
+                    )
+            )
+            */
+
+
             else -> {
-                val sendToBegins = dstAccountParam!!.slice(0 until 3)
-                parameters = when (sendToBegins.toLowerCase(Locale.US)) {
-                    "kt1" -> {
 
-                        Visitable.sequenceOf(
-                                Visitable.sequenceOf(
-                                        Primitive(Primitive.Name.DROP),
-                                        Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
-                                        Primitive(
-                                                Primitive.Name.PUSH,
-                                                arrayOf(
-                                                        Primitive(Primitive.Name.address),
-                                                        Visitable.string(dstAccountParam)
-                                                )
-                                        ),
-
-                                        Primitive(Primitive.Name.CONTRACT, arrayOf(Primitive(Primitive.Name.unit))),
-                                        Visitable.sequenceOf(
-                                                Primitive(
-                                                        Primitive.Name.IF_NONE,
-                                                        arrayOf(
-
-                                                                Visitable.sequenceOf(
-
-                                                                        Visitable.sequenceOf(
-
-                                                                                Primitive(Primitive.Name.UNIT),
-                                                                                Primitive(Primitive.Name.FAILWITH)
-                                                                        )
-                                                                ),
-                                                                Visitable.sequenceOf()
-
-                                                        )
-                                                )
-                                        ),
-
-                                        /*
-                            {"prim": "CONTRACT", "args": [{"prim": "unit"}]},
-
-                            [{ "prim": "IF_NONE",
-                                "args": [
-
-                                [
-                                    [
-                                        {"prim": "UNIT"},
-                                        {"prim": "FAILWITH"}
-                                    ]
-                                ],
-                                []
-                                ]
-                            }
-                            ],
-                                    */
-
-
-                                        Primitive(
-                                                Primitive.Name.PUSH,
-                                                arrayOf(
-                                                        Primitive(Primitive.Name.mutez),
-                                                        Visitable.integer(amountDstParam!!)
-                                                )
-                                        ),
-                                        Primitive(Primitive.Name.UNIT),
-                                        Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                        Primitive(Primitive.Name.CONS)
-                                ))
-
-                    }
-                    else -> {
-                        Visitable.sequenceOf(
-                                Visitable.sequenceOf(
-                                        Primitive(Primitive.Name.DROP),
-                                        Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
-                                        Primitive(
-                                                Primitive.Name.PUSH,
-                                                arrayOf(
-                                                        Primitive(Primitive.Name.key_hash),
-                                                        Visitable.string(dstAccountParam)
-                                                )
-                                        ),
-                                        Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
-                                        Primitive(
-                                                Primitive.Name.PUSH,
-                                                arrayOf(
-                                                        Primitive(Primitive.Name.mutez),
-                                                        Visitable.integer(amountDstParam!!)
-                                                )
-                                        ),
-                                        Primitive(Primitive.Name.UNIT),
-                                        Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                        Primitive(Primitive.Name.CONS)
-                                ))
-                    }
-                }
-
+                //no-op
+                parameters = Visitable.sequenceOf()
             }
         }
 
@@ -1000,6 +1059,181 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
         val scriptCodeField = script.slice(4 until script.size).toByteArray()
 
         val scriptCode = scriptCodeField.slice(0 until scriptSizeInt).toByteArray()
+
+        val binary = byteArrayOfInts(2, 0, 0, 0, 193, 5, 0, 7, 100, 8, 94, 3, 108, 5, 95, 3, 109, 0, 0, 0, 3, 37, 100, 111, 4, 108, 0, 0, 0, 8, 37, 100, 101,
+                102, 97, 117, 108, 116, 5, 1, 3, 93, 5, 2, 2, 0, 0, 0, 149, 2, 0, 0, 0, 18, 2, 0, 0, 0, 13, 3, 33, 3, 22, 5, 31, 2,
+                0, 0, 0, 2, 3, 23, 7, 46, 2, 0, 0, 0, 106, 7, 67, 3, 106, 0, 0, 3, 19, 2, 0, 0, 0, 30, 2, 0, 0, 0, 4, 3, 25,
+                3, 37, 7, 44, 2, 0, 0, 0, 0, 2, 0, 0, 0, 9, 2, 0, 0, 0, 4, 3, 79, 3, 39, 2, 0, 0, 0, 11, 5, 31, 2, 0, 0,
+                0, 2, 3, 33, 3, 76, 3, 30, 3, 84, 3, 72, 2, 0, 0, 0, 30, 2, 0, 0, 0, 4, 3, 25, 3, 37, 7, 44, 2, 0, 0, 0, 0,
+                2, 0, 0, 0, 9, 2, 0, 0, 0, 4, 3, 79, 3, 39, 3, 79, 3, 38, 3, 66, 2, 0, 0, 0, 8, 3, 32, 5, 61, 3, 109, 3, 66)
+
+        if (!scriptCode.contentEquals(binary))
+        {
+            return -1L
+        }
+
+        val storageField = scriptCodeField.slice(scriptSizeInt until scriptCodeField.size).toByteArray()
+
+        val storageSize = storageField.slice(0 until 4).toByteArray()
+        val storageSizeInt = ByteBuffer.wrap(storageSize, 0, 4).int
+
+        val storageBinary = storageField.slice(4 until storageField.size).toByteArray()
+
+        if (storageBinary.size != storageSizeInt)
+        {
+            return -1L
+        }
+
+        if (storageBinary[0].toInt() != 1)
+        {
+            return -1L
+        }
+
+        val hashSize = storageBinary.slice(1 until 5).toByteArray()
+        val hashSizeInt = ByteBuffer.wrap(hashSize, 0, 4).int
+
+        var hashField = storageBinary.slice(5 until storageBinary.size).toByteArray()
+
+        if (hashField.size != hashSizeInt)
+        {
+            return -1L
+        }
+
+        if (String(hashField) != srcParam)
+        {
+            return -1L
+        }
+
+        return  retFee
+    }
+
+    return -1L
+}
+
+private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balanceParam:Long, delegateParam:String):Long
+{
+    var i = 0
+
+    val isOriginationTag = data[i++]
+
+    if (isOriginationTag.compareTo(109) == 0)
+    {
+        var contract= data.slice(i+1 until i+21).toByteArray()
+        //contract = contract.dropWhile { it == "0".toByte() }.toByteArray()
+
+        val isContractValid = srcParam == CryptoUtils.genericHashToPkh(contract)
+        if (!isContractValid)
+        {
+            return -1L
+        }
+
+        i+=21
+
+        val size = data.size
+        val fee = data.slice((i) until size).toByteArray()
+
+        val feeList = ArrayList<Int>()
+        i = 0
+        do
+        {
+            val bytePos = Utils.byteToUnsignedInt(fee[i])
+
+            feeList.add(bytePos)
+            i++
+
+        } while (bytePos > 128)
+
+        //val dstFees = dstObj["fee"] as String
+
+        val retFee = addBytesLittleEndian(feeList)
+
+        val counter = fee.slice(i until fee.size).toByteArray()
+        i = 0
+        do
+        {
+            val bytePos = Utils.byteToUnsignedInt(counter[i])
+            i++
+
+        } while (bytePos >= 128)
+
+        val gasLimit = counter.slice(i until counter.size).toByteArray()
+        i = 0
+        do
+        {
+            val bytePos = Utils.byteToUnsignedInt(gasLimit[i])
+            i++
+
+        } while (bytePos >= 128)
+
+
+        val storageLimit = gasLimit.slice(i until gasLimit.size).toByteArray()
+        i = 0
+        do
+        {
+            val bytePos = Utils.byteToUnsignedInt(storageLimit[i])
+            i++
+
+        } while (bytePos >= 128)
+
+        val balance = storageLimit.slice(i until storageLimit.size).toByteArray()
+
+        val balanceList = ArrayList<Int>()
+        i = 0
+        do
+        {
+            val bytePos = Utils.byteToUnsignedInt(balance[i])
+
+            balanceList.add(bytePos)
+            i++
+
+        } while (bytePos >= 128)
+
+        val isBalanceValid =  addBytesLittleEndian(balanceList) == balanceParam
+        if (!isBalanceValid)
+        {
+            return -1L
+        }
+
+        val delegatableField = balance.slice(i until balance.size).toByteArray()
+        i = 0
+        val isDelegatableFieldValid = Utils.byteToUnsignedInt(delegatableField[i++]).compareTo(255) == 0
+        if (!isDelegatableFieldValid)
+        {
+            return -1L
+        }
+
+        val delegate = delegatableField.slice(i until delegatableField.size).toByteArray()
+        var delegateParse = delegate.slice(1 until 21).toByteArray()
+        //delegateParse = delegateParse.dropWhile { it == "0".toByte() }.toByteArray()
+
+        val beginsWith = delegateParam.slice(0 until 3)
+
+        val cryptoDelegate = when (beginsWith.toLowerCase(Locale.US))
+        {
+            "tz1" -> CryptoUtils.genericHashToPkh(delegateParse)
+            "tz2" -> CryptoUtils.genericHashToPkhTz2(delegateParse)
+            "tz3" -> CryptoUtils.genericHashToPkhTz3(delegateParse)
+            else -> null
+        }
+
+        val isDelegateValid = delegateParam == cryptoDelegate
+
+        if (!isDelegateValid)
+        {
+            return -1L
+        }
+
+        val script = delegate.slice(21 until delegate.size).toByteArray()
+
+        //TODO verify the script
+        val scriptSize = script.slice(0 until 4).toByteArray()
+        val scriptSizeInt = ByteBuffer.wrap(scriptSize,0,4).int
+
+        val scriptCodeField = script.slice(4 until script.size).toByteArray()
+
+        val scriptCode = scriptCodeField.slice(0 until scriptSizeInt).toByteArray()
+
+
 
         val binary = byteArrayOfInts(2, 0, 0, 0, 193, 5, 0, 7, 100, 8, 94, 3, 108, 5, 95, 3, 109, 0, 0, 0, 3, 37, 100, 111, 4, 108, 0, 0, 0, 8, 37, 100, 101,
                 102, 97, 117, 108, 116, 5, 1, 3, 93, 5, 2, 2, 0, 0, 0, 149, 2, 0, 0, 0, 18, 2, 0, 0, 0, 13, 3, 33, 3, 22, 5, 31, 2,

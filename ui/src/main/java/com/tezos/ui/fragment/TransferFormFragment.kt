@@ -1366,14 +1366,6 @@ class TransferFormFragment : Fragment()
 
                 dstObject.put("parameters", value)
 
-                /*
-                //TODO handle that, we need to load storage from recipient
-                if (mRecipientKT1withCode)
-                {
-                    dstObject.put("parameters", JSONObject(getString(R.string.transfer_args_none).toString()))
-                }
-                */
-
                 dstObjects.put(dstObject)
 
                 postParams.put("dsts", dstObjects)
@@ -1387,13 +1379,6 @@ class TransferFormFragment : Fragment()
 
                 var dstObject = JSONObject()
                 dstObject.put("dst", mDstAccount)
-
-                /*
-                if (mRecipientKT1withCode)
-                {
-                    dstObject.put("entrypoint", "send")
-                }
-                */
 
                 dstObject.put("amount", (mTransferAmount*1000000).roundToLong().toString())
 
@@ -1533,15 +1518,22 @@ class TransferFormFragment : Fragment()
                 val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
                 dstObject.put("transfer_amount", mutezAmount)
 
-                val destBeginsWith = mSrcAccount?.slice(0 until 3)
-                val sendTzContract = if (destBeginsWith?.toLowerCase(Locale.US) == "kt1")
+                val destBeginsWith = mDstAccount?.slice(0 until 3)
+                val sendTzContract:String
+
+                if (destBeginsWith?.toLowerCase(Locale.US) == "kt1")
                 {
-                    String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                    sendTzContract = String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+
+                    dstObject.put("contract_type", "kt1_to_kt1")
                 }
                 else
                 {
-                    String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                    sendTzContract = String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+
+                    dstObject.put("contract_type", "kt1_to_tz")
                 }
+
 
                 val json = JSONArray(sendTzContract)
                 dstObject.put("parameters", json)
@@ -1575,7 +1567,7 @@ class TransferFormFragment : Fragment()
 
 
             //TODO verify the payloads
-            if (/*isTransferPayloadValid(mTransferPayload!!, postParams)*/ true)
+            if (/*isTransferPayloadValid(mTransferPayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
