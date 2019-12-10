@@ -110,6 +110,9 @@ class TransferFormFragment : Fragment()
 
     private var mRecipientKT1withCode:Boolean = false
 
+    private var mPk:String? = null
+    private var mEdSig:String? = null
+
     companion object
     {
         @JvmStatic
@@ -1147,6 +1150,8 @@ class TransferFormFragment : Fragment()
                         val argSig = argsSig[1] as JSONObject
                         argSig.put("string", edsig)
 
+                        mEdSig = edsig
+
                         val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
                         val keyHash = argsTz[1] as JSONObject
@@ -1523,19 +1528,26 @@ class TransferFormFragment : Fragment()
 
                 if (destBeginsWith?.toLowerCase(Locale.US) == "kt1")
                 {
-                    sendTzContract = String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                    //sendTzContract = String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
 
                     dstObject.put("contract_type", "kt1_to_kt1")
                 }
                 else
                 {
-                    sendTzContract = String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                    //sendTzContract = String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
 
                     dstObject.put("contract_type", "kt1_to_tz")
                 }
 
+                dstObject.put("contract_type", "slc_master_to_tz")
 
-                val json = JSONArray(sendTzContract)
+                dstObject.put("edsig", mEdSig)
+
+                val json = JSONArray()
+
+                //TODO sending JSON contracts seems useless.
+
+
                 dstObject.put("parameters", json)
 
                 dstObject.put("fee", mTransferFees)
@@ -1567,7 +1579,7 @@ class TransferFormFragment : Fragment()
 
 
             //TODO verify the payloads
-            if (/*isTransferPayloadValid(mTransferPayload!!, postParams)*/true)
+            if (isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
