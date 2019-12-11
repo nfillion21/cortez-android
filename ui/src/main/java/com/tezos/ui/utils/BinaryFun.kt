@@ -3007,13 +3007,61 @@ private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balance
 
         val storageBinary = storageField.slice(4 until storageField.size).toByteArray()
 
-        //TODO compare this storageBinary to the Kotlin I will build.
-
-        /*
         if (storageBinary.size != storageSizeInt)
         {
             return -1L
         }
+
+        val storage =
+
+        Primitive(Primitive.Name.Pair,
+                arrayOf(
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.string("tz3WBj75AYEp8vaAWEL4xZf99PBMmLSmmC8N"),
+                                        Primitive(Primitive.Name.Pair,
+                                                arrayOf(
+                                                        Primitive(Primitive.Name.Pair,
+                                                                arrayOf(
+                                                                        Visitable.integer(999000000),
+                                                                        Visitable.integer(86400)
+                                                                )
+                                                        ),
+                                                        Primitive(Primitive.Name.Pair,
+                                                                arrayOf(
+                                                                        Visitable.sequenceOf(),
+                                                                        Visitable.sequenceOf()
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        ),
+
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.string("tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk"),
+                                        Primitive(Primitive.Name.Pair,
+                                                arrayOf(
+                                                        Visitable.integer(0),
+                                                        Visitable.integer(1)
+                                                )
+                                        )
+                                )
+                        )
+                )
+        )
+
+        val packer = Packer(ByteArrayOutputStream())
+        storage.accept(packer)
+
+        val binaryStorage = (packer.output as ByteArrayOutputStream).toByteArray()
+        if (storageBinary)
+
+
+
+        //TODO compare this storageBinary to the Kotlin I will build.
+
 
         if (storageBinary[0].toInt() != 1)
         {
