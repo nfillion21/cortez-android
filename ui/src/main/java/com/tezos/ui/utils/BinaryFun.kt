@@ -782,14 +782,14 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
             "slc_master_to_tz" -> parameters =
 
-                    //Visitable.sequenceOf(
+                    Visitable.sequenceOf(
 
                             Primitive(Primitive.Name.Pair,
                                     arrayOf(
                                             Primitive(Primitive.Name.Pair,
                                                     arrayOf(
-                                                            Visitable.string(pk!!),
-                                                            Visitable.string(edsig!!)
+                                                            Visitable.publicKey(pk!!),
+                                                            Visitable.signature(edsig!!)
                                                     )
                                             ),
 
@@ -835,7 +835,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                             )
                                     )
                             )
-                    //)
+                    )
 
             else -> {
 

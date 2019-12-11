@@ -192,9 +192,9 @@ data class VisitableBytes(val value: ByteArray): Visitable {
     }
 }
 
-fun Visitable.Companion.byteArrayOf(keyHash: String): ByteArray {
+fun Visitable.Companion.byteArrayOfKeyHash(keyHash: String): ByteArray {
     var decodedValue = Base58.decode(keyHash.slice(0 until 36))
-    var bytes = decodedValue.slice(3 until (27 - 4)).toByteArray()
+    var bytes = decodedValue.slice(3 until (decodedValue.size - 7)).toByteArray()
     bytes = when(keyHash.slice(0 until 3)) {
         "tz1" -> byteArrayOf(0x00) + bytes
         "tz2" -> byteArrayOf(0x01) + bytes
@@ -205,7 +205,39 @@ fun Visitable.Companion.byteArrayOf(keyHash: String): ByteArray {
 }
 
 fun Visitable.Companion.keyHash(value: String): Visitable {
-    return VisitableBytes(byteArrayOf(value))
+    return VisitableBytes(byteArrayOfKeyHash(value))
+}
+
+fun Visitable.Companion.byteArrayOfPublicKey(publicKey: String): ByteArray {
+    var decodedValue = Base58.decode(publicKey)
+    var bytes = decodedValue.slice(4 until (decodedValue.size - 8)).toByteArray()
+    bytes = when(publicKey.slice(0 until 4)) {
+        "edpk" -> byteArrayOf(0x00) + bytes
+        "sppk" -> byteArrayOf(0x01) + bytes
+        "p2pk" -> byteArrayOf(0x02) + bytes
+        else -> throw PublicKeyFormatException("Unknown public key prefix")
+    }
+    return bytes
+}
+
+fun Visitable.Companion.publicKey(value: String): Visitable {
+    return VisitableBytes(byteArrayOfPublicKey(value))
+}
+
+fun Visitable.Companion.byteArrayOfSignature(signature: String): ByteArray {
+    var decodedValue = Base58.decode(signature)
+    var bytes = decodedValue.slice(5 until (decodedValue.size - 9)).toByteArray()
+    bytes = when(signature.slice(0 until 5)) {
+        "edsig" -> byteArrayOf(0x00) + bytes
+        "spsig" -> byteArrayOf(0x01) + bytes // spsig1 <- 1? (lib_crypto/base58.ml)
+        "p2sig" -> byteArrayOf(0x02) + bytes
+        else -> throw SignatureFormatException("Unknown signature prefix")
+    }
+    return bytes
+}
+
+fun Visitable.Companion.signature(value: String): Visitable {
+    return VisitableBytes(byteArrayOfSignature(value))
 }
 
 fun Visitable.Companion.address(value: String): Visitable {
@@ -218,7 +250,7 @@ fun Visitable.Companion.address(value: String): Visitable {
         else {
             byteArrayOf(0x01) + bytes + byteArrayOf(0x00)
         }
-        else -> byteArrayOf(0x00) + byteArrayOf(value)
+        else -> byteArrayOf(0x00) + byteArrayOfKeyHash(value)
     }
     return VisitableBytes(bytes)
 }
@@ -322,3 +354,12 @@ fun Primitive.Companion.left(value: Visitable): Visitable {
             )
     )
 }
+
+class PublicKeyFormatException: IllegalArgumentException {
+    constructor(message: String?): super(message)
+}
+
+class SignatureFormatException: IllegalArgumentException {
+    constructor(message: String?): super(message)
+}
+
