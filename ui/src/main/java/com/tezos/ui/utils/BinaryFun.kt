@@ -668,6 +668,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         }
 
         val parametersDataField = parametersField.slice(i until parametersField.size).toByteArray()
+
         var parameters:Visitable
 
         when (contractType) {
@@ -780,7 +781,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                             )
                     )
 
-            "slc_master_to_tz" -> parameters =
+            "slc_master_to_tz_1" -> parameters =
 
                     Visitable.sequenceOf(
 
@@ -837,6 +838,60 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                             )
                     )
 
+
+
+            "slc_master_to_tz" -> parameters =
+
+                    Primitive(
+                            Primitive.Name.Pair,
+                            arrayOf(
+                                    Primitive(
+                                            Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.string(pk!!),
+                                                    Visitable.string(edsig!!)
+                                            )
+                                    ),
+                                    Primitive(
+                                            Primitive.Name.Right,
+                                            arrayOf(
+                                                    Primitive(
+                                                            Primitive.Name.Pair,
+                                                            arrayOf(
+                                                                    Visitable.sequenceOf(
+                                                                            Primitive(
+                                                                                    Primitive.Name.DIP,
+                                                                                    arrayOf(
+                                                                                            Visitable.sequenceOf(
+                                                                                                    Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                                                                                    Primitive(
+                                                                                                            Primitive.Name.PUSH,
+                                                                                                            arrayOf(
+                                                                                                                    Primitive(Primitive.Name.key_hash),
+                                                                                                                    Visitable.string(dstAccountParam!!)
+                                                                                                            )
+                                                                                                    ),
+                                                                                                    Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
+                                                                                                    Primitive(
+                                                                                                            Primitive.Name.PUSH,
+                                                                                                            arrayOf(
+                                                                                                                    Primitive(Primitive.Name.mutez),
+                                                                                                                    Visitable.integer(amountDstParam!!)
+                                                                                                            )
+                                                                                                    )
+                                                                                            )
+                                                                                    )
+                                                                            ),
+                                                                            Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                                            Primitive(Primitive.Name.CONS)
+                                                                    ),
+                                                                    Visitable.string(srcParam)
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )
+                    )
             else -> {
 
                 //no-op
@@ -849,9 +904,42 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         val binary = (packer.output as ByteArrayOutputStream).toByteArray()
 
-        if (!parametersDataField.contentEquals(binary))
+        //TODO parametersDataField here
+        // ok, need to work a bit on the entrypoint first.
+
+        if (contractType.equals("slc_master_to_tz", ignoreCase = true))
         {
-            return -1L
+
+            //entrypoint named (tag 255)
+            if ( Utils.byteToUnsignedInt(parametersDataField[0]) != 255)
+            {
+                return -1L
+            }
+
+            //val entryPointSize = parametersDataField.slice(1 until 5).toByteArray()
+            //val entryPointSizeInt = ByteBuffer.wrap(entryPointSize, 0, 1).int
+
+            val entryPointSizeInt = Utils.byteToUnsignedInt(parametersDataField[1])
+
+            val entryPointField = parametersDataField.slice(5 until parametersDataField.size)
+            val entryPoint = entryPointField.slice(0 until entryPointSizeInt).toByteArray()
+            //TODO check the entrypoint "appel_clef_maitresse"
+
+            val scriptField = parametersDataField.slice(2 + entryPointSizeInt until parametersDataField.size).toByteArray()
+
+
+            val scriptSize = scriptField.slice(0 until 4).toByteArray()
+            val scriptSizeInt = ByteBuffer.wrap(scriptSize,0,4).int
+
+            val scriptCodeField = scriptField.slice(4 until scriptField.size).toByteArray()
+
+            val scriptCode = scriptCodeField.slice(0 until scriptSizeInt).toByteArray()
+
+
+            if (!scriptCode.contentEquals(binary))
+            {
+                return -1L
+            }
         }
 
         return retFee
