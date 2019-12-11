@@ -299,7 +299,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
             postParams.put("dsts", dstObjects)
 
-            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (isOriginateSlcPayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 

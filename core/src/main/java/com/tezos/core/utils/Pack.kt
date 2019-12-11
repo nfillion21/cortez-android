@@ -194,7 +194,8 @@ data class VisitableBytes(val value: ByteArray): Visitable {
 
 fun Visitable.Companion.byteArrayOfKeyHash(keyHash: String): ByteArray {
     var decodedValue = Base58.decode(keyHash.slice(0 until 36))
-    var bytes = decodedValue.slice(3 until (decodedValue.size - 7)).toByteArray()
+    println("pikatos: " + decodedValue.size)
+    var bytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
     bytes = when(keyHash.slice(0 until 3)) {
         "tz1" -> byteArrayOf(0x00) + bytes
         "tz2" -> byteArrayOf(0x01) + bytes
@@ -210,7 +211,7 @@ fun Visitable.Companion.keyHash(value: String): Visitable {
 
 fun Visitable.Companion.byteArrayOfPublicKey(publicKey: String): ByteArray {
     var decodedValue = Base58.decode(publicKey)
-    var bytes = decodedValue.slice(4 until (decodedValue.size - 8)).toByteArray()
+    var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
     bytes = when(publicKey.slice(0 until 4)) {
         "edpk" -> byteArrayOf(0x00) + bytes
         "sppk" -> byteArrayOf(0x01) + bytes
@@ -226,7 +227,7 @@ fun Visitable.Companion.publicKey(value: String): Visitable {
 
 fun Visitable.Companion.byteArrayOfSignature(signature: String): ByteArray {
     var decodedValue = Base58.decode(signature)
-    var bytes = decodedValue.slice(5 until (decodedValue.size - 9)).toByteArray()
+    var bytes = decodedValue.slice(5 until (decodedValue.size - 4)).toByteArray()
     bytes = when(signature.slice(0 until 5)) {
         "edsig" -> byteArrayOf(0x00) + bytes
         "spsig" -> byteArrayOf(0x01) + bytes // spsig1 <- 1? (lib_crypto/base58.ml)
@@ -242,7 +243,7 @@ fun Visitable.Companion.signature(value: String): Visitable {
 
 fun Visitable.Companion.address(value: String): Visitable {
     var decodedValue = Base58.decode(value.slice(0 until 36))
-    var bytes = decodedValue.slice(3 until (27 - 4)).toByteArray()
+    var bytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
     bytes = when(value.slice(0 until 3)) {
         "KT1" -> if (value.length > 36) { // contract with specific entrypoint
             byteArrayOf(0x01) + bytes + byteArrayOf(0x00) + value.slice(37 until value.length).toByteArray() // 37 to skip entrypoint symbol '%'
@@ -362,4 +363,3 @@ class PublicKeyFormatException: IllegalArgumentException {
 class SignatureFormatException: IllegalArgumentException {
     constructor(message: String?): super(message)
 }
-
