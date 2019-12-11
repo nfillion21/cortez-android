@@ -3007,6 +3007,9 @@ private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balance
 
         val storageBinary = storageField.slice(4 until storageField.size).toByteArray()
 
+        //TODO compare this storageBinary to the Kotlin I will build.
+
+        /*
         if (storageBinary.size != storageSizeInt)
         {
             return -1L
@@ -3032,6 +3035,7 @@ private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balance
         {
             return -1L
         }
+        */
 
         return  retFee
     }
