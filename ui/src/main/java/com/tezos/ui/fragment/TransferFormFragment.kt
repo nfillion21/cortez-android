@@ -1155,11 +1155,11 @@ class TransferFormFragment : Fragment()
                         val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
                         val keyHash = argsTz[1] as JSONObject
-                        keyHash.put("string", mDstAccount)
+                        keyHash.put("string", pkh)
 
                         val arggs = ((((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0]) as JSONObject)["args"] as JSONArray)[0] as JSONArray)
                         val masterKeyHash = ((arggs[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                        masterKeyHash.put("string", pkh)
+                        masterKeyHash.put("string", mDstAccount)
 
                         val mutezArgs = ((arggs[3] as JSONObject)["args"] as JSONArray)[1] as JSONObject
                         mutezArgs.put("int", (mTransferAmount*1000000).roundToLong().toString())

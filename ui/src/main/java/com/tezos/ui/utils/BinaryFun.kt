@@ -781,65 +781,6 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                             )
                     )
 
-            "slc_master_to_tz_1" -> parameters =
-
-                    Visitable.sequenceOf(
-
-                            Primitive(Primitive.Name.Pair,
-                                    arrayOf(
-                                            Primitive(Primitive.Name.Pair,
-                                                    arrayOf(
-                                                            Visitable.publicKey(pk!!),
-                                                            Visitable.signature(edsig!!)
-                                                    )
-                                            ),
-
-                                            Primitive(Primitive.Name.Right,
-                                                    arrayOf(
-                                                           Visitable.sequenceOf(
-
-                                                                   Primitive(Primitive.Name.Pair,
-                                                                           arrayOf(
-                                                                                   //this sequenceOf looks like an arrayOf
-                                                                                   Visitable.sequenceOf(
-
-                                                                                           Primitive(Primitive.Name.DIP,
-                                                                                                   arrayOf(
-
-                                                                                                           Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
-                                                                                                           Primitive(Primitive.Name.PUSH,
-                                                                                                                   arrayOf(
-
-                                                                                                                           Primitive(Primitive.Name.key_hash),
-                                                                                                                           Visitable.keyHash(dstAccountParam!!)
-
-                                                                                                                   )
-                                                                                                           ),
-                                                                                                           Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
-                                                                                                           Primitive(Primitive.Name.PUSH,
-                                                                                                                   arrayOf(
-                                                                                                                           Primitive(Primitive.Name.mutez),
-                                                                                                                           Visitable.integer(amountDstParam!!)
-                                                                                                                   )
-                                                                                                           )
-                                                                                                   )
-                                                                                           ),
-                                                                                           Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                                                                           Primitive(Primitive.Name.CONS)
-                                                                                   ),
-
-                                                                                   Visitable.keyHash(srcParam)
-                                                                           )
-                                                                   )
-                                                           )
-                                                    )
-                                            )
-                                    )
-                            )
-                    )
-
-
-
             "slc_master_to_tz" -> parameters =
 
                     Primitive(
@@ -924,6 +865,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             val entryPointField = parametersDataField.slice(5 until parametersDataField.size)
             val entryPoint = entryPointField.slice(0 until entryPointSizeInt).toByteArray()
             //TODO check the entrypoint "appel_clef_maitresse"
+            val str = String(entryPoint)
 
             val scriptField = parametersDataField.slice(2 + entryPointSizeInt until parametersDataField.size).toByteArray()
 
@@ -1198,7 +1140,7 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
     return -1L
 }
 
-private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balanceParam:Long):Long
+private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balanceParam:Long, tz3:String, limit:Long):Long
 {
     var i = 0
 
@@ -1289,29 +1231,6 @@ private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balance
         {
             //return -1L
         }
-
-        /*
-        val delegate = delegatableField.slice(i until delegatableField.size).toByteArray()
-        var delegateParse = delegate.slice(1 until 21).toByteArray()
-        //delegateParse = delegateParse.dropWhile { it == "0".toByte() }.toByteArray()
-
-        val beginsWith = delegateParam.slice(0 until 3)
-
-        val cryptoDelegate = when (beginsWith.toLowerCase(Locale.US))
-        {
-            "tz1" -> CryptoUtils.genericHashToPkh(delegateParse)
-            "tz2" -> CryptoUtils.genericHashToPkhTz2(delegateParse)
-            "tz3" -> CryptoUtils.genericHashToPkhTz3(delegateParse)
-            else -> null
-        }
-
-        val isDelegateValid = delegateParam == cryptoDelegate
-
-        if (!isDelegateValid)
-        {
-            return -1L
-        }
-        */
 
         val script = delegatableField.slice(i until delegatableField.size).toByteArray()
 
@@ -3018,12 +2937,12 @@ private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balance
                 arrayOf(
                         Primitive(Primitive.Name.Pair,
                                 arrayOf(
-                                        Visitable.string("tz3WBj75AYEp8vaAWEL4xZf99PBMmLSmmC8N"),
+                                        Visitable.string(tz3),
                                         Primitive(Primitive.Name.Pair,
                                                 arrayOf(
                                                         Primitive(Primitive.Name.Pair,
                                                                 arrayOf(
-                                                                        Visitable.integer(999000000),
+                                                                        Visitable.integer(limit),
                                                                         Visitable.integer(86400)
                                                                 )
                                                         ),
@@ -3040,7 +2959,7 @@ private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balance
 
                         Primitive(Primitive.Name.Pair,
                                 arrayOf(
-                                        Visitable.string("tz1NF7b38uQ43N4nmTHvDKpr1Qo5LF9iYawk"),
+                                        Visitable.string(srcParam),
                                         Primitive(Primitive.Name.Pair,
                                                 arrayOf(
                                                         Visitable.integer(0),
@@ -3056,34 +2975,10 @@ private fun isOriginationSlcTagCorrect(data: ByteArray, srcParam:String, balance
         storage.accept(packer)
 
         val binaryStorage = (packer.output as ByteArrayOutputStream).toByteArray()
-        if (storageBinary)
-
-
-
-        //TODO compare this storageBinary to the Kotlin I will build.
-
-
-        if (storageBinary[0].toInt() != 1)
-        {
-            //return -1L
-            //TODO why does it needs 1
-        }
-
-        val hashSize = storageBinary.slice(1 until 5).toByteArray()
-        val hashSizeInt = ByteBuffer.wrap(hashSize, 0, 4).int
-
-        var hashField = storageBinary.slice(5 until storageBinary.size).toByteArray()
-
-        if (hashField.size != hashSizeInt)
+        if (!storageBinary.contentEquals(binaryStorage))
         {
             return -1L
         }
-
-        if (String(hashField) != srcParam)
-        {
-            return -1L
-        }
-        */
 
         return  retFee
     }
@@ -3151,7 +3046,7 @@ fun isOriginateSlcPayloadValid(payload:String, params: JSONObject):Boolean
 
         val srcParam = params["src"] as String
 
-        val originationFees = isOriginationSlcTagCorrect(transactionByteArray!!, srcParam, dstObj["balance"] as Long)
+        val originationFees = isOriginationSlcTagCorrect(transactionByteArray!!, srcParam, dstObj["balance"] as Long, dstObj["tz3"] as String, dstObj["limit"] as Long)
         if (originationFees != -1L)
         {
             val totalFees = revealFees.first + originationFees
@@ -3163,7 +3058,7 @@ fun isOriginateSlcPayloadValid(payload:String, params: JSONObject):Boolean
     }
     else
     {
-        val originationFees = isOriginationSlcTagCorrect(dataField, params["src"] as String, dstObj["balance"] as Long)
+        val originationFees = isOriginationSlcTagCorrect(dataField, params["src"] as String, dstObj["balance"] as Long, dstObj["tz3"] as String, dstObj["limit"] as Long)
         if (originationFees != -1L)
         {
             if (originationFees == dstObj["fee"])

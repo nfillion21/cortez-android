@@ -295,6 +295,12 @@ class AddLimitsActivity : BaseSecureActivity()
 
             dstObject.put("fee", mDelegateFees)
 
+            val ecKeys = retrieveECKeys()
+            val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+
+            dstObject.put("tz3", tz3)
+            dstObject.put("limit", mLimitAmount*1000000L)
+
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
