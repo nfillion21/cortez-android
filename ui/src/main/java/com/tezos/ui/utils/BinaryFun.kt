@@ -10,6 +10,7 @@ import java.security.interfaces.ECPublicKey
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.roundToLong
 
 /*
 (*****************************************************************************)
@@ -902,7 +903,21 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
                     Primitive(Primitive.Name.Pair,
                             arrayOf(
-                                  element1,
+                                    Primitive(Primitive.Name.Pair,
+                                            arrayOf(
+
+                                                    Visitable.sequenceOf(
+                                                            Primitive(
+                                                                    Primitive.Name.Pair,
+                                                                    arrayOf(
+                                                                            Visitable.integer(amountDstParam!!),
+                                                                            Visitable.string(dstAccountParam!!)
+                                                                    )
+                                                            )
+                                                    ),
+                                                    Visitable.string(srcParam)
+                                            )
+                                    ),
                                     Primitive(Primitive.Name.Pair,
                                             arrayOf(
                                                     Visitable.string(pk!!),
@@ -928,7 +943,9 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         // ok, need to work a bit on the entrypoint first.
 
         if (contractType.equals("slc_master_to_tz", ignoreCase = true) ||
-                contractType.equals("slc_master_to_kt1", ignoreCase = true))
+                contractType.equals("slc_master_to_kt1", ignoreCase = true) ||
+                contractType.equals("slc_enclave_to_tz", ignoreCase = true)
+        )
         {
 
             //entrypoint named (tag 255)
