@@ -108,8 +108,7 @@ class TransferFormFragment : Fragment()
 
     private var mRecipientKT1withCode:Boolean = false
 
-    private var mPk:String? = null
-    private var mEdSig:String? = null
+    private var mSig:String? = null
 
     companion object
     {
@@ -685,7 +684,7 @@ class TransferFormFragment : Fragment()
                     val argSig = argsSig[1] as JSONObject
                     argSig.put("string", edsig)
 
-                    mEdSig = edsig
+                    mSig = edsig
 
                     val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
                     argsMasterKey.put("string", pkh)
@@ -991,7 +990,7 @@ class TransferFormFragment : Fragment()
 
                         val argSig = argsSig[1] as JSONObject
                         argSig.put("string", edsig)
-                        mEdSig = edsig
+                        mSig = edsig
 
                         val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
                         argsMasterKey.put("string", pkh)
@@ -1151,7 +1150,7 @@ class TransferFormFragment : Fragment()
                         val argSig = argsSig[1] as JSONObject
                         argSig.put("string", edsig)
 
-                        mEdSig = edsig
+                        mSig = edsig
 
                         val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
@@ -1210,7 +1209,6 @@ class TransferFormFragment : Fragment()
                             )
                     )
 
-
                     val o = ByteArrayOutputStream()
                     o.write(0x05)
 
@@ -1258,12 +1256,6 @@ class TransferFormFragment : Fragment()
                     val compressedSignature = compressFormat(signature)
 
                     val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
-
-
-                    //val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
-
-                    //val p2sig = CryptoUtils.generateEDSig(signature)
-
 
                     val spendingLimitFile = "spending_limit_transfer.json"
                     val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
@@ -1403,18 +1395,6 @@ class TransferFormFragment : Fragment()
                 mTransferPayload = answer.getString("result")
                 mTransferFees = answer.getLong("total_fee")
 
-                // get back the object and
-
-                /*
-                val dstsArray = postParams["dsts"] as JSONArray
-                val dstObj = dstsArray[0] as JSONObject
-
-                dstObj.put("fee", mTransferFees.toString())
-                dstsArray.put(0, dstObj)
-
-                postParams.put("dsts", dstsArray)
-                */
-
                 // we use this call to ask for payload and fees
                 if (mTransferPayload != null && mTransferFees != -1L)
                 {
@@ -1501,18 +1481,39 @@ class TransferFormFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        val mnemonicsData = Storage(activity!!).getMnemonics()
 
         //TODO we got to verify at this very moment.
         if (isPayButtonValid() && mTransferPayload != null)
         {
+
+            val mnemonicsData = Storage(activity!!).getMnemonics()
             var postParams = JSONObject()
+
+            var canSignWithMaster = false
+            val hasMnemonics = Storage(context!!).hasMnemonics()
+            if (hasMnemonics)
+            {
+                val seed = Storage(activity!!).getMnemonics()
+                canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
+            }
 
             val beginsWith = mSrcAccount?.slice(0 until 3)
             if (beginsWith?.toLowerCase(Locale.US) == "kt1")
             {
-                postParams.put("src", mnemonicsData.pkh)
-                postParams.put("src_pk", mnemonicsData.pk)
+
+                if (mSourceKT1withCode && !canSignWithMaster)
+                {
+                    val ecKeys = retrieveECKeys()
+                    val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                    postParams.put("src_pk", p2pk)
+                    val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                    postParams.put("src", tz3)
+                }
+                else
+                {
+                    postParams.put("src", mnemonicsData.pkh)
+                    postParams.put("src_pk", mnemonicsData.pk)
+                }
 
                 var dstObjects = JSONArray()
 
@@ -1533,8 +1534,30 @@ class TransferFormFragment : Fragment()
                 {
                     if (mSourceKT1withCode)
                     {
-                        dstObject.put("contract_type", "slc_master_to_kt1")
-                        dstObject.put("edsig", mEdSig)
+                        if (mRecipientKT1withCode)
+                        {
+                            if (canSignWithMaster)
+                            {
+                                dstObject.put("contract_type", "slc_master_to_kt1")
+                            }
+                            else
+                            {
+                                dstObject.put("contract_type", "slc_enclave_to_kt1")
+                            }
+                        }
+                        else
+                        {
+                            if (canSignWithMaster)
+                            {
+                                dstObject.put("contract_type", "slc_master_to_kt1")
+                            }
+                            else
+                            {
+                                dstObject.put("contract_type", "slc_enclave_to_kt1")
+                            }
+                        }
+
+                        dstObject.put("edsig", mSig)
                     }
                     else
                     {
@@ -1545,24 +1568,21 @@ class TransferFormFragment : Fragment()
                 {
                     if (mSourceKT1withCode)
                     {
-
-                        dstObject.put("contract_type", "slc_master_to_tz")
-                        dstObject.put("edsig", mEdSig)
+                        if (canSignWithMaster)
+                        {
+                            dstObject.put("contract_type", "slc_master_to_tz")
+                        }
+                        else
+                        {
+                            dstObject.put("contract_type", "slc_enclave_to_tz")
+                        }
+                        dstObject.put("edsig", mSig)
                     }
                     else
                     {
                         dstObject.put("contract_type", "kt1_to_tz")
                     }
                 }
-
-
-
-                //val json = JSONArray()
-
-                //TODO sending JSON contracts seems useless.
-
-
-                //dstObject.put("parameters", json)
 
                 dstObjects.put(dstObject)
 

@@ -10,7 +10,6 @@ import java.security.interfaces.ECPublicKey
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.roundToLong
 
 /*
 (*****************************************************************************)
@@ -552,7 +551,7 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
     return Pair(-1L, null)
 }
 
-private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstParam:String, amountParam:Long, amountDstParam:Long?, dstAccountParam:String?, contractType:String?, pk:String?, edsig:String?):Long
+private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstParam:String, amountParam:Long, amountDstParam:Long?, dstAccountParam:String?, contractType:String?, pk:String?, sig:String?):Long
 {
     //TODO handle if delegation is correct, return the fees, or do something to add the fees with reveal.
 
@@ -661,8 +660,8 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         val parametersField = dstOrigin.slice(22 until dstOrigin.size).toByteArray()
 
         i = 0
-        val isDelegatableFieldValid = Utils.byteToUnsignedInt(parametersField[i++]).compareTo(255) == 0
-        if (!isDelegatableFieldValid)
+        val isParametersFieldValid = Utils.byteToUnsignedInt(parametersField[i++]).compareTo(255) == 0
+        if (!isParametersFieldValid)
         {
             return retFee
         }
@@ -790,7 +789,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                             Primitive.Name.Pair,
                                             arrayOf(
                                                     Visitable.string(pk!!),
-                                                    Visitable.string(edsig!!)
+                                                    Visitable.string(sig!!)
                                             )
                                     ),
                                     Primitive(
@@ -842,7 +841,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                     (Primitive.Name.Pair,
                                             arrayOf(
                                                     Visitable.string(pk!!),
-                                                    Visitable.string(edsig!!)
+                                                    Visitable.string(sig!!)
                                             )
                                     ),
                                     Primitive
@@ -894,6 +893,20 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                                                     Visitable.string(srcParam)
                                                             )
                                                     )
+                                            )
+                                    )
+                            )
+                    )
+
+            "slc_enclave_to_tz" -> parameters =
+
+                    Primitive(Primitive.Name.Pair,
+                            arrayOf(
+                                  element1,
+                                    Primitive(Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.string(pk!!),
+                                                    Visitable.string(sig!!)
                                             )
                                     )
                             )
