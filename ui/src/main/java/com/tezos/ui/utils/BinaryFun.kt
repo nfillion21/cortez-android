@@ -833,6 +833,50 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                     )
                             )
                     )
+
+            "slc_master_to_kt1" -> parameters =
+
+                    Primitive(Primitive.Name.Pair,
+                            arrayOf(
+                                    Primitive
+                                    (Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.string(pk!!),
+                                                    Visitable.string(edsig!!)
+                                            )
+                                    ),
+                                    Primitive
+                                    (Primitive.Name.Right,
+
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.Pair,
+                                                            arrayOf(
+                                                                    Visitable.sequenceOf
+                                                                    (
+                                                                            Primitive(Primitive.Name.DIP,
+                                                                                    arrayOf(
+                                                                                            Visitable.sequenceOf(
+                                                                                                    Primitive(Primitive.Name.NIL,
+                                                                                                            arrayOf(Primitive(Primitive.Name.operation))
+                                                                                                    ),
+                                                                                                    element2,
+                                                                                                    element3,
+                                                                                                    element4,
+                                                                                                    element5
+                                                                                            )
+                                                                                    )
+                                                                            ),
+                                                                            Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                                            Primitive(Primitive.Name.CONS)
+                                                                    ),
+                                                                    Visitable.string(srcParam)
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )
+                    )
+
             else -> {
 
                 //no-op
@@ -848,7 +892,8 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         //TODO parametersDataField here
         // ok, need to work a bit on the entrypoint first.
 
-        if (contractType.equals("slc_master_to_tz", ignoreCase = true))
+        if (contractType.equals("slc_master_to_tz", ignoreCase = true) ||
+                contractType.equals("slc_master_to_kt1", ignoreCase = true))
         {
 
             //entrypoint named (tag 255)

@@ -49,7 +49,6 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.google.gson.stream.JsonWriter
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
@@ -63,7 +62,6 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
-import kotlinx.android.synthetic.main.fragment_delegate.*
 import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
 import kotlinx.android.synthetic.main.payment_form_card_info.no_mnemonics
@@ -672,7 +670,7 @@ class TransferFormFragment : Fragment()
 
                     val edsig = CryptoUtils.generateEDSig(signature)
 
-                    val spendingLimitFile = "spending_limit_massive_transfer_to_slc.json"
+                    val spendingLimitFile = "{\n  \"prim\":\"Pair\",\n  \"args\":[\n    {\n      \"prim\":\"Pair\",\n      \"args\":[\n        {\n          \"string\":\"edpkuoqzDsqQzmUiCbtoW1HeoMpbWGCfSNSTQULxxJdCCkHB7ULkUf\"\n        },\n        {\n          \"string\":\"edsigtbXxErGGBjotbjub3XQAdBoqU3yDmfZHnXt71gt9errq1Xz6hp7ptbmtC5kF3s4tyZWwD4317LqviFsn4PsbVkje3qTfzP\"\n        }\n      ]\n    },\n    {\n      \"prim\":\"Right\",\n      \"args\":[\n        {\n          \"prim\":\"Pair\",\n          \"args\":[\n            [\n              {\n                \"prim\":\"DIP\",\n                \"args\":[\n                  [\n                    {\n                      \"prim\":\"NIL\",\n                      \"args\":[\n                        {\n                          \"prim\":\"operation\"\n                        }\n                      ]\n                    },\n                    {\n                      \"prim\":\"PUSH\",\n                      \"args\":[\n                        {\n                          \"prim\":\"address\"\n                        },\n                        {\n                          \"string\":\"KT1FuPUewVVbK4VAG2Ap7gRH5dmYBKeshRj6%send\"\n                        }\n                      ]\n                    },\n                    {\n                      \"prim\":\"CONTRACT\",\n                      \"args\":[\n                        {\n                          \"prim\":\"unit\"\n                        }\n                      ]\n                    },\n                    [\n                      {\n                        \"prim\":\"IF_NONE\",\n                        \"args\":[\n                          [\n                            [\n                              {\n                                \"prim\":\"UNIT\"\n                              },\n                              {\n                                \"prim\":\"FAILWITH\"\n                              }\n                            ]\n                          ],\n                          [\n\n                          ]\n                        ]\n                      }\n                    ],\n                    {\n                      \"prim\":\"PUSH\",\n                      \"args\":[\n                        {\n                          \"prim\":\"mutez\"\n                        },\n                        {\n                          \"int\":\"1000000000000\"\n                        }\n                      ]\n                    }\n                  ]\n                ]\n              },\n              {\n                \"prim\":\"TRANSFER_TOKENS\"\n              },\n              {\n                \"prim\":\"CONS\"\n              }\n            ],\n            {\n              \"string\":\"tz1TVCFSPkfrvkj7pESarvg3cbNrhQfWFYY7\"\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"
                     val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
                             .use {
                                 it.readText()
@@ -977,7 +975,7 @@ class TransferFormFragment : Fragment()
 
                         val edsig = CryptoUtils.generateEDSig(signature)
 
-                        val spendingLimitFile = "spending_limit_massive_transfer_to_slc.json"
+                        val spendingLimitFile = "spending_limit_massive_transfer_to_kt1.json"
                         val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
                                 .use {
                                     it.readText()
@@ -1523,34 +1521,46 @@ class TransferFormFragment : Fragment()
                 val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
                 dstObject.put("transfer_amount", mutezAmount)
 
+                dstObject.put("fee", mTransferFees)
+
                 val destBeginsWith = mDstAccount?.slice(0 until 3)
-                val sendTzContract:String
+
 
                 if (destBeginsWith?.toLowerCase(Locale.US) == "kt1")
                 {
-                    //sendTzContract = String.format(getString(R.string.send_from_KT1_to_KT1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
-
-                    dstObject.put("contract_type", "kt1_to_kt1")
+                    if (mSourceKT1withCode)
+                    {
+                        dstObject.put("contract_type", "slc_master_to_kt1")
+                        dstObject.put("edsig", mEdSig)
+                    }
+                    else
+                    {
+                        dstObject.put("contract_type", "kt1_to_kt1")
+                    }
                 }
                 else
                 {
-                    //sendTzContract = String.format(getString(R.string.send_from_KT1_to_tz1), mDstAccount, (mTransferAmount*1000000).roundToLong().toString())
+                    if (mSourceKT1withCode)
+                    {
 
-                    dstObject.put("contract_type", "kt1_to_tz")
+                        dstObject.put("contract_type", "slc_master_to_tz")
+                        dstObject.put("edsig", mEdSig)
+                    }
+                    else
+                    {
+                        dstObject.put("contract_type", "kt1_to_tz")
+                    }
                 }
 
-                dstObject.put("contract_type", "slc_master_to_tz")
 
-                dstObject.put("edsig", mEdSig)
 
-                val json = JSONArray()
+                //val json = JSONArray()
 
                 //TODO sending JSON contracts seems useless.
 
 
-                dstObject.put("parameters", json)
+                //dstObject.put("parameters", json)
 
-                dstObject.put("fee", mTransferFees)
                 dstObjects.put(dstObject)
 
                 postParams.put("dsts", dstObjects)
