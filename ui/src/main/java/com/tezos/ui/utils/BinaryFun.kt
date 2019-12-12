@@ -859,10 +859,32 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                                                                                     Primitive(Primitive.Name.NIL,
                                                                                                             arrayOf(Primitive(Primitive.Name.operation))
                                                                                                     ),
-                                                                                                    element2,
-                                                                                                    element3,
-                                                                                                    element4,
-                                                                                                    element5
+                                                                                                    Primitive(Primitive.Name.PUSH,
+                                                                                                            arrayOf(
+                                                                                                                    Primitive(Primitive.Name.address),
+                                                                                                                    Visitable.string(dstAccountParam!!)
+                                                                                                            )),
+                                                                                                    Primitive(Primitive.Name.CONTRACT,
+                                                                                                            arrayOf(
+                                                                                                                    Primitive(Primitive.Name.unit)
+                                                                                                            )),
+                                                                                                    Visitable.sequenceOf(
+                                                                                                            Primitive(Primitive.Name.IF_NONE,
+                                                                                                                    arrayOf(
+                                                                                                                            Visitable.sequenceOf(
+                                                                                                                                    Visitable.sequenceOf(
+                                                                                                                                            Primitive(Primitive.Name.UNIT),
+                                                                                                                                            Primitive(Primitive.Name.FAILWITH)
+                                                                                                                                    )
+                                                                                                                            ),
+                                                                                                                            Visitable.sequenceOf()
+                                                                                                                    ))
+                                                                                                    ),
+                                                                                                    Primitive(Primitive.Name.PUSH,
+                                                                                                            arrayOf(
+                                                                                                                    Primitive(Primitive.Name.mutez),
+                                                                                                                    Visitable.integer(amountDstParam!!)
+                                                                                                            ))
                                                                                             )
                                                                                     )
                                                                             ),
