@@ -670,7 +670,7 @@ class TransferFormFragment : Fragment()
 
                     val edsig = CryptoUtils.generateEDSig(signature)
 
-                    val spendingLimitFile = "{\n  \"prim\":\"Pair\",\n  \"args\":[\n    {\n      \"prim\":\"Pair\",\n      \"args\":[\n        {\n          \"string\":\"edpkuoqzDsqQzmUiCbtoW1HeoMpbWGCfSNSTQULxxJdCCkHB7ULkUf\"\n        },\n        {\n          \"string\":\"edsigtbXxErGGBjotbjub3XQAdBoqU3yDmfZHnXt71gt9errq1Xz6hp7ptbmtC5kF3s4tyZWwD4317LqviFsn4PsbVkje3qTfzP\"\n        }\n      ]\n    },\n    {\n      \"prim\":\"Right\",\n      \"args\":[\n        {\n          \"prim\":\"Pair\",\n          \"args\":[\n            [\n              {\n                \"prim\":\"DIP\",\n                \"args\":[\n                  [\n                    {\n                      \"prim\":\"NIL\",\n                      \"args\":[\n                        {\n                          \"prim\":\"operation\"\n                        }\n                      ]\n                    },\n                    {\n                      \"prim\":\"PUSH\",\n                      \"args\":[\n                        {\n                          \"prim\":\"address\"\n                        },\n                        {\n                          \"string\":\"KT1FuPUewVVbK4VAG2Ap7gRH5dmYBKeshRj6%send\"\n                        }\n                      ]\n                    },\n                    {\n                      \"prim\":\"CONTRACT\",\n                      \"args\":[\n                        {\n                          \"prim\":\"unit\"\n                        }\n                      ]\n                    },\n                    [\n                      {\n                        \"prim\":\"IF_NONE\",\n                        \"args\":[\n                          [\n                            [\n                              {\n                                \"prim\":\"UNIT\"\n                              },\n                              {\n                                \"prim\":\"FAILWITH\"\n                              }\n                            ]\n                          ],\n                          [\n\n                          ]\n                        ]\n                      }\n                    ],\n                    {\n                      \"prim\":\"PUSH\",\n                      \"args\":[\n                        {\n                          \"prim\":\"mutez\"\n                        },\n                        {\n                          \"int\":\"1000000000000\"\n                        }\n                      ]\n                    }\n                  ]\n                ]\n              },\n              {\n                \"prim\":\"TRANSFER_TOKENS\"\n              },\n              {\n                \"prim\":\"CONS\"\n              }\n            ],\n            {\n              \"string\":\"tz1TVCFSPkfrvkj7pESarvg3cbNrhQfWFYY7\"\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"
+                    val spendingLimitFile = "spending_limit_massive_transfer_to_kt1.json"
                     val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
                             .use {
                                 it.readText()
@@ -684,6 +684,8 @@ class TransferFormFragment : Fragment()
 
                     val argSig = argsSig[1] as JSONObject
                     argSig.put("string", edsig)
+
+                    mEdSig = edsig
 
                     val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
                     argsMasterKey.put("string", pkh)
@@ -989,6 +991,7 @@ class TransferFormFragment : Fragment()
 
                         val argSig = argsSig[1] as JSONObject
                         argSig.put("string", edsig)
+                        mEdSig = edsig
 
                         val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
                         argsMasterKey.put("string", pkh)

@@ -950,6 +950,21 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                 return -1L
             }
         }
+        else
+        {
+            //entrypoint tag 2?
+            /*
+            if ( Utils.byteToUnsignedInt(parametersDataField[0]) != 2)
+            {
+                return -1L
+            }
+            */
+
+            if (!parametersDataField.contentEquals(binary))
+            {
+                return -1L
+            }
+        }
 
         return retFee
     }
