@@ -964,6 +964,13 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                             )
                     )
 
+            "slc_enclave_to_kt1" -> parameters =
+
+                    Primitive(Primitive.Name.Pair,
+                            arrayOf(
+                            )
+                    )
+
             else -> {
 
                 //no-op

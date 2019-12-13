@@ -1546,7 +1546,7 @@ class TransferFormFragment : Fragment()
                             }
                             else
                             {
-                                dstObject.put("contract_type", "slc_enclave_to_kt1")
+                                dstObject.put("contract_type", "slc_enclave_to_slc")
                             }
                         }
                         else
@@ -1557,7 +1557,7 @@ class TransferFormFragment : Fragment()
                             }
                             else
                             {
-                                dstObject.put("contract_type", "slc_enclave_to_kt1")
+                                dstObject.put("contract_type", "slc_enclave_to_tz")
                             }
                         }
 
