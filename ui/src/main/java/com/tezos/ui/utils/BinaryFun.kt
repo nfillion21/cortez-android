@@ -574,7 +574,6 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
     {
 
         var src = payload.slice((i+1)..(21)).toByteArray()
-        src = src.dropWhile { it == "0".toByte() }.toByteArray()
 
         val srcCompare = if (srcParam.startsWith("KT1", true))
         {
@@ -665,19 +664,31 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         val dstOrigin = amount.slice(i until amount.size).toByteArray()
 
-        var dst = dstOrigin.slice(1..21).toByteArray()
-        dst = dst.dropWhile { it == "0".toByte() }.toByteArray()
-
         val beginsWith = dstParam.slice(0 until 3)
 
         val begins = when (beginsWith.toLowerCase(Locale.US))
         {
-            "kt1" -> CryptoUtils.genericHashToKT(dst)
-            "tz1" -> CryptoUtils.genericHashToPkh(dst)
-            "tz2" -> CryptoUtils.genericHashToPkhTz2(dst)
-            "tz3" -> CryptoUtils.genericHashToPkhTz3(dst)
+            "kt1" -> {
+                var dst2 = dstOrigin.slice(1..20).toByteArray()
+                CryptoUtils.genericHashToKT(dst2)
+            }
+
+            "tz1" -> {
+                var dst = dstOrigin.slice(2..21).toByteArray()
+                CryptoUtils.genericHashToPkh(dst)
+            }
+            "tz2" -> {
+                var dst = dstOrigin.slice(2..21).toByteArray()
+                CryptoUtils.genericHashToPkhTz2(dst)
+            }
+            "tz3" -> {
+                var dst = dstOrigin.slice(2..21).toByteArray()
+                CryptoUtils.genericHashToPkhTz3(dst)
+            }
             else -> null
         }
+
+
         val isDstValid = dstParam == begins
 
         if (!isDstValid)
@@ -1194,7 +1205,6 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
     if (isOriginationTag.compareTo(109) == 0)
     {
         var contract= data.slice(i+1 until i+21).toByteArray()
-        //contract = contract.dropWhile { it == "0".toByte() }.toByteArray()
 
         val isContractValid = srcParam == CryptoUtils.genericHashToPkh(contract)
         if (!isContractValid)

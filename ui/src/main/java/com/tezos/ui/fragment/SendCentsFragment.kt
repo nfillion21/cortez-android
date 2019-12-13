@@ -399,7 +399,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             */
 
             //TODO verify the payloads
-            if (!isTransferPayloadValid(mTransferPayload!!, postParams))
+            if (isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -931,7 +931,7 @@ class SendCentsFragment : AppCompatDialogFragment()
                 val saltLeft = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
                 val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
 
-                return DataExtractor.getStringFromField(saltLeft, "int").toInt()
+                return DataExtractor.getStringFromField(saltRight, "int").toInt()
             }
         }
 
