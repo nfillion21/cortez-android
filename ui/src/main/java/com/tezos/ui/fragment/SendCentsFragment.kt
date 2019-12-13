@@ -33,6 +33,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
+import kotlin.math.roundToLong
 
 class SendCentsFragment : AppCompatDialogFragment()
 {
@@ -338,14 +339,49 @@ class SendCentsFragment : AppCompatDialogFragment()
         //TODO we got to verify at this very moment.
         if (isTransferFeeValid() && mTransferPayload != null)
         {
-            //val pkhSrc = seed.pkh
-            //val pkhDst = mDstAccount
+            var postParams = JSONObject()
+
+            if (mIsFromContract)
+            {
+                //postParams.put("src", mnemonicsData.pkh)
+                //postParams.put("src_pk", pk)
+
+                var dstObject = JSONObject()
+                dstObject.put("dst", retrieveTz3())
+
+                //0.1 tez == 100 000 mutez
+                dstObject.put("amount", "100000")
+
+            }
+            else
+            {
+                val mnemonicsData = Storage(activity!!).getMnemonics()
+
+                postParams.put("src", mnemonicsData.pkh)
+                postParams.put("src_pk", mnemonicsData.pk)
+
+                var dstObjects = JSONArray()
+
+                var dstObject = JSONObject()
+                dstObject.put("dst", retrieveTz3())
+
+                dstObject.put("amount", "100000".toLong())
+
+                dstObject.put("fee", mTransferFees)
+
+                dstObjects.put(dstObject)
+
+                postParams.put("dsts", dstObjects)
+            }
+
 
             /*
+            val pkhSrc = seed.pkh
+            val pkhDst = mDstAccount
+
             val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
             val pk = CryptoUtils.generatePk(mnemonics, "")
 
-            var postParams = JSONObject()
             postParams.put("src", mSrcAccount)
 
             //TODO it won't be pk with contract transfer
@@ -360,14 +396,10 @@ class SendCentsFragment : AppCompatDialogFragment()
             dstObject.put("amount", mutezAmount)
 
             dstObject.put("fee", mTransferFees)
-
-            dstObjects.put(dstObject)
-
-            postParams.put("dsts", dstObjects)
             */
 
             //TODO verify the payloads
-            if (/*!isTransferPayloadValid(mTransferPayload!!, postParams)*/true)
+            if (!isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -380,7 +412,7 @@ class SendCentsFragment : AppCompatDialogFragment()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
-                var compressedSignature = ByteArray(64)
+                var compressedSignature: ByteArray
                 if (mIsFromContract)
                 {
                     val bytes = KeyPair.b2b(result)
@@ -458,10 +490,6 @@ class SendCentsFragment : AppCompatDialogFragment()
             onFinalizeTransferLoadComplete(volleyError)
         }
     }
-
-
-
-
 
     private fun startPostRequestLoadInitTransfer(fromContract: Boolean)
     {
