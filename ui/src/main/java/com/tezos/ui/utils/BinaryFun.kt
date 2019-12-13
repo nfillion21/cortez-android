@@ -725,6 +725,13 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                     Primitive(Primitive.Name.CONS)
                             )
                     )
+
+            "remove_delegate_slc" -> parameters =
+
+                    Primitive(Primitive.Name.Pair,
+                            arrayOf()
+                    )
+
             "add_delegate" -> parameters =
 
                     Visitable.sequenceOf(
