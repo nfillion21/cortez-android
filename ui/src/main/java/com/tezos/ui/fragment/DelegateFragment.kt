@@ -99,6 +99,8 @@ class DelegateFragment : Fragment()
 
     private var mStorage:String? = null
 
+    private var mSig:String? = null
+
     data class Contract
     (
             val blk: String,
@@ -914,7 +916,19 @@ class DelegateFragment : Fragment()
             //dstObject.put("dst", mDstAccount)
 
             dstObject.put("dst", pkh())
-            dstObject.put("contract_type", "add_delegate")
+
+            val salt = getSalt()
+            if (salt != null && salt >= 0)
+            {
+                dstObject.put("contract_type", "add_delegate_slc")
+                dstObject.put("edsig", mSig)
+            }
+            else
+            {
+                dstObject.put("contract_type", "add_delegate")
+            }
+
+
             dstObject.put("dst_account", mDelegateTezosAddress)
 
             dstObject.put("amount", (0).toLong())
@@ -925,7 +939,7 @@ class DelegateFragment : Fragment()
 
             postParams.put("dsts", dstObjects)
 
-            if (/*isAddDelegatePayloadValid(mDelegatePayload!!, postParams)*/true)
+            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -1227,6 +1241,8 @@ class DelegateFragment : Fragment()
 
             val sig = args[1] as JSONObject
             sig.put("string", edsig)
+
+            mSig = edsig
 
             val argsRight = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 

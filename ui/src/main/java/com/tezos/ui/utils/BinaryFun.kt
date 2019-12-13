@@ -742,8 +742,45 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                                     Primitive(Primitive.Name.CONS)
                             )
                     )
-            //TODO add some more contract types
 
+            "add_delegate_slc" -> parameters =
+
+                    Primitive(Primitive.Name.Pair,
+                            arrayOf(
+                                    Primitive(Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.string(pk!!),
+                                                    Visitable.string(sig!!)
+                                            )
+                                    ),
+                                    Primitive(Primitive.Name.Right,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.Pair,
+                                                            arrayOf(
+                                                                    Visitable.sequenceOf(
+                                                                            Primitive(Primitive.Name.DROP),
+                                                                            Primitive(Primitive.Name.NIL,
+                                                                                    arrayOf(
+                                                                                            Primitive(Primitive.Name.operation)
+                                                                                    )
+                                                                            ),
+                                                                            Primitive(Primitive.Name.PUSH,
+                                                                                    arrayOf(
+                                                                                            Primitive(Primitive.Name.key_hash),
+                                                                                            Visitable.string(dstAccountParam!!)
+                                                                                    )
+                                                                            ),
+                                                                            Primitive(Primitive.Name.SOME),
+                                                                            Primitive(Primitive.Name.SET_DELEGATE),
+                                                                            Primitive(Primitive.Name.CONS)
+                                                                    ),
+                                                                    Visitable.string(srcParam)
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )
+                    )
 
             "kt1_to_kt1" -> parameters =
 
@@ -981,7 +1018,8 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         if (contractType.equals("slc_master_to_tz", ignoreCase = true) ||
                 contractType.equals("slc_master_to_kt1", ignoreCase = true) ||
-                contractType.equals("slc_enclave_transfer", ignoreCase = true)
+                contractType.equals("slc_enclave_transfer", ignoreCase = true) ||
+                contractType.equals("add_delegate_slc", ignoreCase = true)
         )
         {
 
@@ -3269,16 +3307,6 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                         null
                     }
 
-            val pk =
-                    if (dstObj.has("pk"))
-                    {
-                        dstObj["pk"] as String?
-                    }
-                    else
-                    {
-                        null
-                    }
-
             val edsig =
                     if (dstObj.has("edsig"))
                     {
@@ -3289,7 +3317,7 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                         null
                     }
 
-            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, pk, edsig)
+            val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig)
             if (transactionFees != -1L)
             {
                 val totalFees = revealFees.first + transactionFees
@@ -3331,16 +3359,6 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                         null
                     }
 
-            val pk =
-                    if (dstObj.has("pk"))
-                    {
-                        dstObj["pk"] as String?
-                    }
-                    else
-                    {
-                        null
-                    }
-
             val edsig =
                     if (dstObj.has("edsig"))
                     {
@@ -3351,7 +3369,7 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                         null
                     }
 
-            val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, pk, edsig)
+            val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig)
             if (transactionFees != -1L)
             {
                 if (transactionFees == dstObj["fee"])
