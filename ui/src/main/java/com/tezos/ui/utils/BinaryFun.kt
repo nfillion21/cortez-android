@@ -141,16 +141,6 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
                         null
                     }
 
-            val pk =
-                    if (dstObj.has("pk"))
-                    {
-                        dstObj["pk"] as String?
-                    }
-                    else
-                    {
-                        null
-                    }
-
             val edsig =
                     if (dstObj.has("edsig"))
                     {
@@ -382,7 +372,17 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                     null
                 }
 
-        val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, null, null)
+        val edsig =
+                if (dstObj.has("edsig"))
+                {
+                    dstObj["edsig"] as String?
+                }
+                else
+                {
+                    null
+                }
+
+        val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig)
         if (transactionFees != -1L)
         {
             val totalFees = revealFees.first + transactionFees
@@ -424,16 +424,6 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                     null
                 }
 
-        val pk =
-                if (dstObj.has("pk"))
-                {
-                    dstObj["pk"] as String?
-                }
-                else
-                {
-                    null
-                }
-
         val edsig =
                 if (dstObj.has("edsig"))
                 {
@@ -444,7 +434,7 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                     null
                 }
 
-        val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, pk, edsig)
+        val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig)
         if (transactionFees != -1L)
         {
             if (transactionFees == dstObj["fee"])
@@ -729,7 +719,40 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             "remove_delegate_slc" -> parameters =
 
                     Primitive(Primitive.Name.Pair,
-                            arrayOf()
+                            arrayOf(
+                                    Primitive(Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.string(pk!!),
+                                                    Visitable.string(sig!!)
+                                            )
+                                    ),
+
+                                    Primitive(Primitive.Name.Right,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.Pair,
+                                                            arrayOf(
+                                                                    Visitable.sequenceOf(
+                                                                            Primitive(Primitive.Name.DROP),
+                                                                            Primitive(Primitive.Name.NIL,
+                                                                                    arrayOf(
+                                                                                            Primitive(Primitive.Name.operation)
+                                                                                    )
+                                                                            ),
+                                                                            Primitive(Primitive.Name.NONE,
+                                                                                    arrayOf(
+                                                                                            Primitive(Primitive.Name.key_hash)
+                                                                                    )
+                                                                            ),
+                                                                            Primitive(Primitive.Name.SET_DELEGATE),
+                                                                            Primitive(Primitive.Name.CONS)
+                                                                    ),
+                                                                    Visitable.string(srcParam)
+                                                            )
+                                                    )
+                                            )
+                                    )
+
+                            )
                     )
 
             "add_delegate" -> parameters =
@@ -1026,7 +1049,8 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         if (contractType.equals("slc_master_to_tz", ignoreCase = true) ||
                 contractType.equals("slc_master_to_kt1", ignoreCase = true) ||
                 contractType.equals("slc_enclave_transfer", ignoreCase = true) ||
-                contractType.equals("add_delegate_slc", ignoreCase = true)
+                contractType.equals("add_delegate_slc", ignoreCase = true) ||
+                contractType.equals("remove_delegate_slc", ignoreCase = true)
         )
         {
 
