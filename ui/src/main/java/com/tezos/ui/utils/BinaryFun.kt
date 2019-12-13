@@ -936,7 +936,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                             )
                     )
 
-            "slc_enclave_to_tz" -> parameters =
+            "slc_enclave_transfer" -> parameters =
 
                     Primitive(Primitive.Name.Pair,
                             arrayOf(
@@ -964,13 +964,6 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                             )
                     )
 
-            "slc_enclave_to_kt1" -> parameters =
-
-                    Primitive(Primitive.Name.Pair,
-                            arrayOf(
-                            )
-                    )
-
             else -> {
 
                 //no-op
@@ -988,7 +981,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         if (contractType.equals("slc_master_to_tz", ignoreCase = true) ||
                 contractType.equals("slc_master_to_kt1", ignoreCase = true) ||
-                contractType.equals("slc_enclave_to_tz", ignoreCase = true)
+                contractType.equals("slc_enclave_transfer", ignoreCase = true)
         )
         {
 

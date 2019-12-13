@@ -789,7 +789,7 @@ class TransferFormFragment : Fragment()
 
 
 
-                    val spendingLimitFile = "spending_limit_transfer_slc.json"
+                    val spendingLimitFile = "spending_limit_transfer.json"
                     val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
                             .use {
                                 it.readText()
@@ -1546,7 +1546,7 @@ class TransferFormFragment : Fragment()
                             }
                             else
                             {
-                                dstObject.put("contract_type", "slc_enclave_to_slc")
+                                dstObject.put("contract_type", "slc_enclave_transfer")
                             }
                         }
                         else
@@ -1557,7 +1557,7 @@ class TransferFormFragment : Fragment()
                             }
                             else
                             {
-                                dstObject.put("contract_type", "slc_enclave_to_tz")
+                                dstObject.put("contract_type", "slc_enclave_transfer")
                             }
                         }
 
@@ -1578,7 +1578,7 @@ class TransferFormFragment : Fragment()
                         }
                         else
                         {
-                            dstObject.put("contract_type", "slc_enclave_to_tz")
+                            dstObject.put("contract_type", "slc_enclave_transfer")
                         }
                         dstObject.put("edsig", mSig)
                     }
