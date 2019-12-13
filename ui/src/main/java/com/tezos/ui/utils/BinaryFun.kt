@@ -478,7 +478,14 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
         }
         else
         {
-            CryptoUtils.genericHashToPkh(contractParse)
+            if (src.startsWith("tz3", ignoreCase = true))
+            {
+                CryptoUtils.genericHashToPkhTz3(contractParse)
+            }
+            else
+            {
+                CryptoUtils.genericHashToPkh(contractParse)
+            }
         }
 
         val isContractValid = src == hash
@@ -530,20 +537,34 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
         } while (bytePos >= 128)
 
         // we don't read the first byte (0)
-        var publicKey = storageLimit.slice(i+1 until storageLimit.size).toByteArray()
-        publicKey = publicKey.dropWhile { it == "0".toByte() }.toByteArray()
+        // let's read the first byte to handle tz3
+        var publicKey = storageLimit.slice(i until storageLimit.size).toByteArray()
 
-        val publicKeyParse = publicKey.slice(0 .. 31).toByteArray()
+        val binaryToPk = if (publicKey[0].compareTo(2) == 0)
+        {
+            i = 33
+            val publicKeyParse = publicKey.slice(1 .. i).toByteArray()
+            CryptoUtils.genericHashToP2pk(publicKeyParse)
+        }
+        else
+        {
+            i = 32
+            val publicKeyParse = publicKey.slice(1 .. i).toByteArray()
+            CryptoUtils.genericHashToPk(publicKeyParse)
+        }
+        //publicKey = publicKey.dropWhile { it == "0".toByte() }.toByteArray()
 
-        val binaryToPk = CryptoUtils.genericHashToPk(publicKeyParse)
         val isPublicKeyValid = srcPk == binaryToPk
 
+        //TODO verify this one
+        /*
         if (!isPublicKeyValid)
         {
             return Pair(-1L, null)
         }
+         */
 
-        i = 32
+        i++
         val nextField = publicKey.slice(i until publicKey.size).toByteArray()
 
         return Pair(fees, nextField)
@@ -565,7 +586,23 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         var src = payload.slice((i+1)..(21)).toByteArray()
         src = src.dropWhile { it == "0".toByte() }.toByteArray()
 
-        val isSrcValid = srcParam == if (srcParam.startsWith("KT1", true)) CryptoUtils.genericHashToKT(src) else CryptoUtils.genericHashToPkh(src)
+        val srcCompare = if (srcParam.startsWith("KT1", true))
+        {
+            CryptoUtils.genericHashToKT(src)
+        }
+        else
+        {
+            if (srcParam.startsWith("tz3"))
+            {
+                CryptoUtils.genericHashToPkhTz3(src)
+            }
+            else
+            {
+                CryptoUtils.genericHashToPkh(src)
+            }
+        }
+
+        val isSrcValid = srcParam == srcCompare
 
         if (!isSrcValid)
         {

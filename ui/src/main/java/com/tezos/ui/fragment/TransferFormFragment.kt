@@ -816,6 +816,8 @@ class TransferFormFragment : Fragment()
                     val argsSigSig = argsSig[1] as JSONObject
                     argsSigSig.put("string", p2sig)
 
+                    mSig = p2sig
+
                     dstObject.put("parameters", value)
 
                     dstObjects.put(dstObject)
@@ -1286,6 +1288,8 @@ class TransferFormFragment : Fragment()
 
                     val sig = secondParamArgs[1] as JSONObject
                     sig.put("string", p2sig)
+
+                    mSig = p2sig
 
                     dstObject.put("parameters", value)
 
