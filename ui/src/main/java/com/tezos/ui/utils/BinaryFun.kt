@@ -581,7 +581,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         }
         else
         {
-            if (srcParam.startsWith("tz3"))
+            if (srcParam.startsWith("tz3", ignoreCase = true))
             {
                 CryptoUtils.genericHashToPkhTz3(src)
             }
@@ -1042,6 +1042,53 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                             )
                     )
 
+            "slc_update_storage" -> parameters =
+                    Primitive(Primitive.Name.Pair,
+                            arrayOf(
+                                    Primitive(Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.string(pk!!),
+                                                    Visitable.string(sig!!)
+                                            )
+                                    ),
+                                    Primitive(Primitive.Name.Left,
+                                            arrayOf(
+                                                    Primitive(Primitive.Name.Pair,
+                                                            arrayOf(
+
+                                                                    Primitive(
+                                                                            Primitive.Name.Pair,
+                                                                            arrayOf(
+                                                                                    Visitable.keyHash(srcParam),
+                                                                                    Primitive(
+                                                                                            Primitive.Name.Pair,
+                                                                                            arrayOf(
+                                                                                                    Primitive(
+                                                                                                            Primitive.Name.Pair,
+                                                                                                            arrayOf(
+                                                                                                                    Visitable.integer(amountDstParam!!),
+                                                                                                                    Visitable.integer(86400)
+                                                                                                            )
+                                                                                                    ),
+                                                                                                    Primitive(
+                                                                                                            Primitive.Name.Pair,
+                                                                                                            arrayOf(
+                                                                                                                    Visitable.sequenceOf(),
+                                                                                                                    Visitable.sequenceOf()
+                                                                                                            )
+                                                                                                    )
+                                                                                            )
+                                                                                    )
+                                                                            )
+                                                                    ),
+                                                                    Visitable.string(srcParam)
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )
+                    )
+
             else -> {
 
                 //no-op
@@ -1204,6 +1251,7 @@ private fun isOriginationTagCorrect(data: ByteArray, srcParam:String, balancePar
 
     if (isOriginationTag.compareTo(109) == 0)
     {
+        // exclude the first byte, and src is 20 bytes long
         var contract= data.slice(i+1 until i+21).toByteArray()
 
         val isContractValid = srcParam == CryptoUtils.genericHashToPkh(contract)

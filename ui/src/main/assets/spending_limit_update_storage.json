@@ -1,26 +1,60 @@
-{ "prim": "Pair",
-  "args":
-  [ { "prim": "Pair",
-    "args":
-    [ { "string":
-    "edpkuyVYkuZJQtu6jEfUTakLiukPUezEqT86rsLmWR3FiriWyxKYk5" },
-      { "string":
-      "edsigtXrWTfkikTESruLaKXUVioT7kWmKeCEUnK9J2Z8qTHGNtbBfLBjv8sKMS71jLAhiUZWsLgrWJNuhmVZyaJsq8wCeDGkLzT" } ] },
-    { "prim": "Left",
-      "args":
-      [ { "prim": "Pair",
-        "args":
-        [ { "prim": "Pair",
-          "args":
-          [ { "string":
-          "tz1W9oeCwAtZCZcUzxuKiC8Ft2zJcyAMPM8a" },
-            { "prim": "Pair",
-              "args":
-              [ { "prim": "Pair",
-                "args":
-                [ { "int": "20000000" },
-                  { "int": "86400" } ] },
-                { "prim": "Pair",
-                  "args": [ [], [] ] } ] } ] },
-          { "string":
-          "tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h" } ] } ] } ] }
+{
+  "prim": "Pair",
+  "args": [
+    {
+      "prim": "Pair",
+      "args": [
+        {
+          "string": "edpkuyVYkuZJQtu6jEfUTakLiukPUezEqT86rsLmWR3FiriWyxKYk5"
+        },
+        {
+          "string": "edsigtXrWTfkikTESruLaKXUVioT7kWmKeCEUnK9J2Z8qTHGNtbBfLBjv8sKMS71jLAhiUZWsLgrWJNuhmVZyaJsq8wCeDGkLzT"
+        }
+      ]
+    },
+    {
+      "prim": "Left",
+      "args": [
+        {
+          "prim": "Pair",
+          "args": [
+            {
+              "prim": "Pair",
+              "args": [
+                {
+                  "string": "tz1W9oeCwAtZCZcUzxuKiC8Ft2zJcyAMPM8a"
+                },
+                {
+                  "prim": "Pair",
+                  "args": [
+                    {
+                      "prim": "Pair",
+                      "args": [
+                        {
+                          "int": "20000000"
+                        },
+                        {
+                          "int": "86400"
+                        }
+                      ]
+                    },
+                    {
+                      "prim": "Pair",
+                      "args": [
+                        [],
+                        []
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "string": "tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

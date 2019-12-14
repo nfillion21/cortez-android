@@ -564,7 +564,7 @@ class ScriptFragment : Fragment()
         transferLoading(true)
 
         val mnemonicsData = Storage(activity!!).getMnemonics()
-        startPostRequestLoadFinalizeAddDelegate(mnemonicsData)
+        startPostRequestLoadFinalizeUpdateStorage(mnemonicsData)
     }
 
     // volley
@@ -904,7 +904,7 @@ class ScriptFragment : Fragment()
     }
 
     // volley
-    private fun startPostRequestLoadFinalizeAddDelegate(mnemonicsData: Storage.MnemonicsData)
+    private fun startPostRequestLoadFinalizeUpdateStorage(mnemonicsData: Storage.MnemonicsData)
     {
         val url = getString(R.string.transfer_injection_operation)
 
@@ -916,7 +916,7 @@ class ScriptFragment : Fragment()
             postParams.put("delegate", mUpdateStorageAddress)
             postParams.put("fee", mUpdateStorageFees)
 
-            if (/*!isChangeDelegatePayloadValid(mUpdateStoragePayload!!, postParams)*/true)
+            if (!isChangeDelegatePayloadValid(mUpdateStoragePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -1091,7 +1091,6 @@ class ScriptFragment : Fragment()
         dstObject.put("dst", pkh())
         dstObject.put("amount", "0")
 
-        //TODO necessary?
         dstObject.put("entrypoint", "appel_clef_maitresse")
 
         mUpdateStorageAddress = pk
@@ -1326,7 +1325,7 @@ class ScriptFragment : Fragment()
             val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
 
             val saltLeft = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
-            val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+            val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
 
             return DataExtractor.getStringFromField(saltLeft, "int").toInt()
         }

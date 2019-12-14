@@ -385,7 +385,6 @@ class SendCentsFragment : AppCompatDialogFragment()
             }
 
             dstObjects.put(dstObject)
-
             postParams.put("dsts", dstObjects)
 
             if (isTransferPayloadValid(mTransferPayload!!, postParams))
