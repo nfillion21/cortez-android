@@ -51,6 +51,8 @@ class SendCentsFragment : AppCompatDialogFragment()
 
     private var mIsFromContract:Boolean = true
 
+    private var mSig:String? = null
+
     interface OnSendCentsInteractionListener
     {
         fun isFingerprintAllowed():Boolean
@@ -340,18 +342,32 @@ class SendCentsFragment : AppCompatDialogFragment()
         if (isTransferFeeValid() && mTransferPayload != null)
         {
             var postParams = JSONObject()
+            var dstObjects = JSONArray()
+            var dstObject = JSONObject()
 
             if (mIsFromContract)
             {
-                //postParams.put("src", mnemonicsData.pkh)
-                //postParams.put("src_pk", pk)
+                val ecKeys = retrieveECKeys()
+                val p2pk = CryptoUtils.generateP2Pk(ecKeys)
 
-                var dstObject = JSONObject()
-                dstObject.put("dst", retrieveTz3())
+                postParams.put("src_pk", p2pk)
+
+                val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                postParams.put("src", tz3)
+
+                val kt1 = arguments!!.getString(CONTRACT_PUBLIC_KEY)
+                dstObject.put("dst", kt1)
+
+                dstObject.put("dst_account", tz3)
+
+                dstObject.put("amount", 0.toLong())
+                dstObject.put("contract_type", "slc_enclave_transfer")
+
+                dstObject.put("edsig", mSig)
 
                 //0.1 tez == 100 000 mutez
-                dstObject.put("amount", "100000")
-
+                dstObject.put("transfer_amount", "100000".toLong())
+                dstObject.put("fee", mTransferFees)
             }
             else
             {
@@ -360,45 +376,18 @@ class SendCentsFragment : AppCompatDialogFragment()
                 postParams.put("src", mnemonicsData.pkh)
                 postParams.put("src_pk", mnemonicsData.pk)
 
-                var dstObjects = JSONArray()
-
-                var dstObject = JSONObject()
                 dstObject.put("dst", retrieveTz3())
 
                 dstObject.put("amount", "100000".toLong())
 
                 dstObject.put("fee", mTransferFees)
 
-                dstObjects.put(dstObject)
-
-                postParams.put("dsts", dstObjects)
             }
 
+            dstObjects.put(dstObject)
 
-            /*
-            val pkhSrc = seed.pkh
-            val pkhDst = mDstAccount
+            postParams.put("dsts", dstObjects)
 
-            val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
-            postParams.put("src", mSrcAccount)
-
-            //TODO it won't be pk with contract transfer
-            postParams.put("src_pk", pk)
-
-            var dstObjects = JSONArray()
-
-            var dstObject = JSONObject()
-            dstObject.put("dst", pkhDst)
-
-            val mutezAmount = (mTransferAmount*1000000.0).toLong()
-            dstObject.put("amount", mutezAmount)
-
-            dstObject.put("fee", mTransferFees)
-            */
-
-            //TODO verify the payloads
             if (isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
@@ -425,7 +414,6 @@ class SendCentsFragment : AppCompatDialogFragment()
                     val sk = CryptoUtils.generateSk(mnemonics, "")
                     compressedSignature = KeyPair.sign(sk, result)
                 }
-
 
                 val pLen = byteArrayThree.size
                 val sLen = compressedSignature.size
@@ -596,30 +584,26 @@ class SendCentsFragment : AppCompatDialogFragment()
 
             val value = JSONObject(contract)
 
-            val args = value["args"] as JSONArray
+            val argsSend = (((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
-            val firstParamArgs = (args[0] as JSONObject)["args"] as JSONArray
+            val argsSendAmount = argsSend[0] as JSONObject
+            argsSendAmount.put("int", "100000")
 
-            val amountAndContract = ((firstParamArgs[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-            val amount = amountAndContract[0] as JSONObject
-            amount.put("int", "100000")
+            val argsSendContract = argsSend[1] as JSONObject
+            argsSendContract.put("string", tz3)
 
-            //val timer = amountAndContract[1] as JSONObject
-            //timer.put("int", "86400")
+            val argsSendTz = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+            argsSendTz.put("string", tz3)
 
-            val contractKT1 = amountAndContract[1] as JSONObject
-            contractKT1.put("string", tz3)
+            val argsSig = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
 
-            val dst = firstParamArgs[1] as JSONObject
-            dst.put("string", tz3)
+            val argsSigPk = argsSig[0] as JSONObject
+            argsSigPk.put("string", p2pk)
 
-            val secondParamArgs = (args[1] as JSONObject)["args"] as JSONArray
+            val argsSigSig = argsSig[1] as JSONObject
+            argsSigSig.put("string", p2sig)
 
-            val pk = secondParamArgs[0] as JSONObject
-            pk.put("string", p2pk)
-
-            val sig = secondParamArgs[1] as JSONObject
-            sig.put("string", p2sig)
+            mSig = p2sig
 
             dstObject.put("parameters", value)
 
@@ -929,7 +913,7 @@ class SendCentsFragment : AppCompatDialogFragment()
                 val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
 
                 val saltLeft = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
-                val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+                val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
 
                 return DataExtractor.getStringFromField(saltRight, "int").toInt()
             }

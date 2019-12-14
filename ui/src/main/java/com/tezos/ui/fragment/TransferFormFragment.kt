@@ -724,8 +724,6 @@ class TransferFormFragment : Fragment()
 
                     dstObject.put("entrypoint", "transfer")
 
-                    //val dataPackCompare = "05070702000000260707008092f4010a0000001a01974ada48e6c21d75f3576c4e22d292e59410411e0073656e640a000000150244f02653b4fb64e58a345754988fac9b5eaf2622".hexToByteArray()
-
                     val dataVisitable = Primitive(
                             Primitive.Name.Pair,
                             arrayOf(
