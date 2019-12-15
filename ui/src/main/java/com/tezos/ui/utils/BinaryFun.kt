@@ -111,9 +111,9 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
                     }
 
             val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig, tz3)
-            if (transactionFees != -1L)
+            if (transactionFees != Pair(-1L, ByteArray(0)))
             {
-                val totalFees = revealFees.first + transactionFees
+                val totalFees = revealFees.first + transactionFees.first
                 if (totalFees == dstObj["fee"])
                 {
                     return true
@@ -173,9 +173,9 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
                     }
 
             val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig, tz3)
-            if (transactionFees != -1L)
+            if (transactionFees != Pair(-1L, ByteArray(0)))
             {
-                if (transactionFees == dstObj["fee"])
+                if (transactionFees.first == dstObj["fee"])
                 {
                     return true
                 }
@@ -404,9 +404,9 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                 }
 
         val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig, null)
-        if (transactionFees != -1L)
+        if (transactionFees != Pair(-1L, ByteArray(0)))
         {
-            val totalFees = revealFees.first + transactionFees
+            val totalFees = revealFees.first + transactionFees.first
             if (totalFees == dstObj["fee"])
             {
                 return true
@@ -456,13 +456,14 @@ fun isRemoveDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                 }
 
         val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig, null)
-        if (transactionFees != -1L)
+        if (transactionFees != Pair(-1L, ByteArray(0)))
         {
-            if (transactionFees == dstObj["fee"])
+            if (transactionFees.first == dstObj["fee"])
             {
                 return true
             }
         }
+
     }
     return isValid
 }
@@ -584,7 +585,7 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
     return Pair(-1L, null)
 }
 
-private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstParam:String, amountParam:Long, amountDstParam:Long?, dstAccountParam:String?, contractType:String?, pk:String?, sig:String?, tz3:String?):Long
+private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstParam:String, amountParam:Long, amountDstParam:Long?, dstAccountParam:String?, contractType:String?, pk:String?, sig:String?, tz3:String?):Pair<Long,ByteArray>
 {
     //TODO handle if delegation is correct, return the fees, or do something to add the fees with reveal.
 
@@ -616,7 +617,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         if (!isSrcValid)
         {
-            return -1L
+            return Pair(-1L, ByteArray(0))
         }
 
         i = 22
@@ -680,7 +681,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         val isAmountValid = addBytesLittleEndian(amountList) == amountParam
         if (!isAmountValid)
         {
-            return -1L
+            return Pair(-1L, ByteArray(0))
         }
 
         val dstOrigin = amount.slice(i until amount.size).toByteArray()
@@ -714,7 +715,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
         if (!isDstValid)
         {
-            return -1L
+            return Pair(-1L, ByteArray(0))
         }
 
         val parametersField = dstOrigin.slice(22 until dstOrigin.size).toByteArray()
@@ -723,7 +724,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
         val isParametersFieldValid = Utils.byteToUnsignedInt(parametersField[i++]).compareTo(255) == 0
         if (!isParametersFieldValid)
         {
-            return retFee
+            return Pair(retFee, ByteArray(0))
         }
 
         val parametersDataField = parametersField.slice(i until parametersField.size).toByteArray()
@@ -1137,7 +1138,7 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
             //entrypoint named (tag 255)
             if ( Utils.byteToUnsignedInt(parametersDataField[0]) != 255)
             {
-                return -1L
+                return Pair(-1L, ByteArray(0))
             }
 
             //val entryPointSize = parametersDataField.slice(1 until 5).toByteArray()
@@ -1160,11 +1161,16 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
             val scriptCode = scriptCodeField.slice(0 until scriptSizeInt).toByteArray()
 
-
             if (!scriptCode.contentEquals(binary))
             {
-                return -1L
+                return Pair(-1L, ByteArray(0))
             }
+
+            val anotherTransactionField = scriptCodeField.slice(scriptCode.size until scriptCodeField.size)
+            val anotherTransactionField2 = scriptCodeField.slice(scriptCode.size until scriptCodeField.size)
+
+            //TODO scriptCodeField is still fat at this moment.
+            //we potentially have another transaction here.
         }
         else
         {
@@ -1178,14 +1184,14 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
 
             if (!parametersDataField.contentEquals(binary))
             {
-                return -1L
+                return Pair(-1L, ByteArray(0))
             }
         }
 
-        return retFee
+        return Pair(retFee, ByteArray(0))
     }
 
-    return -1L
+    return Pair(-1L, ByteArray(0))
 }
 
 private fun isDelegationTagCorrect(payload: ByteArray, src:String):Long
@@ -3429,9 +3435,9 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                     }
 
             val transactionFees = isTransactionTagCorrect(transactionByteArray!!, srcParam, dstParam, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig, null)
-            if (transactionFees != -1L)
+            if (transactionFees != Pair(-1L, ByteArray(0)))
             {
-                val totalFees = revealFees.first + transactionFees
+                val totalFees = revealFees.first + transactionFees.first
                 if (totalFees == dstObj["fee"])
                 {
                     return true
@@ -3481,9 +3487,9 @@ fun isAddDelegatePayloadValid(payload:String, params: JSONObject):Boolean
                     }
 
             val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig, null)
-            if (transactionFees != -1L)
+            if (transactionFees != Pair(-1L, ByteArray(0)))
             {
-                if (transactionFees == dstObj["fee"])
+                if (transactionFees.first == dstObj["fee"])
                 {
                     return true
                 }
