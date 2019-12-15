@@ -104,6 +104,8 @@ class ScriptFragment : Fragment()
 
     private var mSecureHashBalance:Long = -1L
 
+    private var mSig:String? = null
+
     companion object
     {
         const val CONTRACT_PUBLIC_KEY = "contract_public_key"
@@ -910,13 +912,37 @@ class ScriptFragment : Fragment()
 
         if (isUpdateButtonValid() && mUpdateStoragePayload != null && mUpdateStorageAddress != null && mUpdateStorageFees != -1L)
         {
+            val mnemonicsData = Storage(activity!!).getMnemonics()
             var postParams = JSONObject()
-            postParams.put("src", pkh())
-            postParams.put("src_pk", mnemonicsData.pk)
-            postParams.put("delegate", mUpdateStorageAddress)
-            postParams.put("fee", mUpdateStorageFees)
 
-            if (!isChangeDelegatePayloadValid(mUpdateStoragePayload!!, postParams))
+            postParams.put("src", mnemonicsData.pkh)
+
+            //TODO it won't be pk with contract transfer
+            postParams.put("src_pk", mnemonicsData.pk)
+
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+            dstObject.put("dst", pkh())
+
+            dstObject.put("amount", 0.toLong())
+
+            val mutezAmount = (mSpendingLimitAmount*1000000.0).roundToLong()
+            dstObject.put("transfer_amount", mutezAmount)
+
+            dstObject.put("fee", mUpdateStorageFees)
+
+            dstObject.put("edsig", mSig)
+
+            dstObject.put("tz3", retrieveTz3())
+
+            dstObject.put("contract_type", "slc_update_storage")
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+
+            if (isTransferPayloadValid(mUpdateStoragePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -1202,6 +1228,8 @@ class ScriptFragment : Fragment()
 
         val sigArgsSigPart = argsSigPart[1] as JSONObject
         sigArgsSigPart.put("string", edsig)
+
+        mSig = edsig
 
 
         val keysPart = args[1] as JSONObject
