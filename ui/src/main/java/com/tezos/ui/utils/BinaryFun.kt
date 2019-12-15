@@ -175,9 +175,22 @@ fun isTransferPayloadValid(payload:String, params: JSONObject):Boolean
             val transactionFees = isTransactionTagCorrect(dataField, params["src"] as String, dstObj["dst"] as String, dstObj["amount"] as Long, amountTransfer, dstAccount, contractType, params["src_pk"] as String, edsig, tz3)
             if (transactionFees != Pair(-1L, ByteArray(0)))
             {
-                if (transactionFees.first == dstObj["fee"])
+                if (transactionFees.second.isNotEmpty())
                 {
-                    return true
+                    val secondTransactionFees = isTransactionTagCorrect(transactionFees.second, params["src"] as String, tz3!!, 100000L, null, null, null, null, null, tz3)
+
+                    val totalFees = transactionFees.first + secondTransactionFees.first
+                    if (totalFees == dstObj["fee"])
+                    {
+                        return true
+                    }
+                }
+                else
+                {
+                    if (transactionFees.first == dstObj["fee"])
+                    {
+                        return true
+                    }
                 }
             }
         }
@@ -1166,11 +1179,13 @@ private fun isTransactionTagCorrect(payload: ByteArray, srcParam:String, dstPara
                 return Pair(-1L, ByteArray(0))
             }
 
-            val anotherTransactionField = scriptCodeField.slice(scriptCode.size until scriptCodeField.size)
-            val anotherTransactionField2 = scriptCodeField.slice(scriptCode.size until scriptCodeField.size)
+            //it handles 100 000 mutez we send for a newly created tz3
 
-            //TODO scriptCodeField is still fat at this moment.
-            //we potentially have another transaction here.
+            val anotherTransactionField = scriptCodeField.slice(scriptCode.size until scriptCodeField.size)
+            if (anotherTransactionField.isNotEmpty())
+            {
+                return Pair(retFee, anotherTransactionField.toByteArray())
+            }
         }
         else
         {
