@@ -763,12 +763,6 @@ class SendCentsFragment : AppCompatDialogFragment()
     private fun retrieveECKeys():ByteArray
     {
         var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
-        if (keyPair == null)
-        {
-            EncryptionServices().createSpendingKey()
-            keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
-        }
-
         val ecKey = keyPair!!.public as ECPublicKey
         return ecKeyFormat(ecKey)
     }

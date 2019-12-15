@@ -709,6 +709,15 @@ class TransferFormFragment : Fragment()
                     val kt1 = arguments!!.getString(Address.TAG)
 
                     val ecKeys = retrieveECKeys()
+                    if (ecKeys == null)
+                    {
+                        val volleyError = VolleyError(getString(R.string.generic_error))
+                        onInitTransferLoadComplete(volleyError)
+                        mClickCalculate = true
+
+                        return
+                    }
+
                     val p2pk = CryptoUtils.generateP2Pk(ecKeys)
                     val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
 
@@ -1177,6 +1186,14 @@ class TransferFormFragment : Fragment()
                     // use the tz3 to transfer
 
                     val ecKeys = retrieveECKeys()
+                    if (ecKeys == null)
+                    {
+                        val volleyError = VolleyError(getString(R.string.generic_error))
+                        onInitTransferLoadComplete(volleyError)
+                        mClickCalculate = true
+
+                        return
+                    }
                     val p2pk = CryptoUtils.generateP2Pk(ecKeys)
                     postParams.put("src_pk", p2pk)
                     val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
@@ -1457,17 +1474,15 @@ class TransferFormFragment : Fragment()
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
     }
 
-    private fun retrieveECKeys():ByteArray
+    private fun retrieveECKeys():ByteArray?
     {
         var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
-        if (keyPair == null)
+        if (keyPair != null)
         {
-            EncryptionServices().createSpendingKey()
-            keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
+            val ecKey = keyPair!!.public as ECPublicKey
+            ecKeyFormat(ecKey)
         }
-
-        val ecKey = keyPair!!.public as ECPublicKey
-        return ecKeyFormat(ecKey)
+        return null
     }
 
     private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
@@ -2004,48 +2019,6 @@ class TransferFormFragment : Fragment()
 
         return null
     }
-
-    private fun getTz3():String?
-    {
-        val keypair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
-        if (keypair != null)
-        {
-            val ecKey = keypair.public as ECPublicKey
-            val result = ecKeyFormat(ecKey)
-
-            return CryptoUtils.generatePkhTz3(result)
-        }
-
-        return null
-    }
-
-    /*
-    private fun signData(data:ByteArray):ByteArray
-    {
-        //TODO generic hash 32 bytes
-
-        val bytes = KeyPair.b2b(data)
-
-        /*
-        * Use a PrivateKey in the KeyStore to create a signature over
-        * some data.
-        */
-
-        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        val entry: KeyStore.Entry = ks.getEntry("key1", null)
-        if (entry is KeyStore.PrivateKeyEntry)
-        {
-            return Signature.getInstance("NONEwithECDSA").run {
-                initSign(entry.privateKey)
-                update(bytes)
-                sign()
-            }
-        }
-        return ByteArray(0)
-    }
-    */
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
