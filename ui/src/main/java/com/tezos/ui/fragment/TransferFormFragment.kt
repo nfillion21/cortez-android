@@ -638,7 +638,7 @@ class TransferFormFragment : Fragment()
                     val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                             arrayOf(
                                     Visitable.address(kt1!!),
-                                    Visitable.chainID("NetXKakFj1A7ouL")
+                                    Visitable.chainID(getString(R.string.chain_ID))
                             )
                     )
 
@@ -764,7 +764,7 @@ class TransferFormFragment : Fragment()
                     val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                             arrayOf(
                                     Visitable.address(kt1!!),
-                                    Visitable.chainID("NetXKakFj1A7ouL")
+                                    Visitable.chainID(getString(R.string.chain_ID))
                             )
                     )
 
@@ -954,7 +954,7 @@ class TransferFormFragment : Fragment()
                         val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                                 arrayOf(
                                         Visitable.address(kt1!!),
-                                        Visitable.chainID("NetXKakFj1A7ouL")
+                                        Visitable.chainID(getString(R.string.chain_ID))
                                 )
                         )
 
@@ -1113,7 +1113,7 @@ class TransferFormFragment : Fragment()
                         val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                                 arrayOf(
                                         Visitable.address(kt1!!),
-                                        Visitable.chainID("NetXKakFj1A7ouL")
+                                        Visitable.chainID(getString(R.string.chain_ID))
                                 )
                         )
 
@@ -1241,7 +1241,7 @@ class TransferFormFragment : Fragment()
                     val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
                             arrayOf(
                                     Visitable.address(kt1!!),
-                                    Visitable.chainID("NetXKakFj1A7ouL")
+                                    Visitable.chainID(getString(R.string.chain_ID))
                             )
                     )
 
