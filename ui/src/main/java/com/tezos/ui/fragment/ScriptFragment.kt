@@ -134,6 +134,8 @@ class ScriptFragment : Fragment()
 
         private const val BALANCE_LONG_KEY = "balance_long_key"
 
+        private const val CONTRACT_SIG_KEY = "contract_sig_key"
+
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
                 ScriptFragment().apply {
@@ -258,6 +260,8 @@ class ScriptFragment : Fragment()
             mEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY, false)
 
             mSecureHashBalance = savedInstanceState.getLong(BALANCE_LONG_KEY, -1)
+
+            mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
             if (mStorageInfoLoading)
             {
@@ -1991,6 +1995,8 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         outState.putBoolean(EDIT_MODE_KEY, mEditMode)
 
         outState.putLong(BALANCE_LONG_KEY, mSecureHashBalance)
+
+        outState.putString(CONTRACT_SIG_KEY, mSig)
     }
 
     private fun mutezToTez(mutez:String):String

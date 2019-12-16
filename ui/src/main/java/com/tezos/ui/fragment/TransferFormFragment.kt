@@ -152,6 +152,8 @@ class TransferFormFragment : Fragment()
         private const val TZ_OR_KT1_SOURCE_KEY = "tz_or_kt1_source_key"
 
         private const val TZ_OR_KT1_RECIPIENT_KEY = "tz_or_kt1_recipient_key"
+
+        private const val CONTRACT_SIG_KEY = "contract_sig_key"
     }
 
     interface OnTransferListener
@@ -225,6 +227,8 @@ class TransferFormFragment : Fragment()
             mSourceKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_SOURCE_KEY, false)
 
             mRecipientKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_RECIPIENT_KEY, false)
+
+            mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
             transferLoading(isLoading())
 
@@ -2629,6 +2633,8 @@ class TransferFormFragment : Fragment()
         outState.putBoolean(TZ_OR_KT1_SOURCE_KEY, mSourceKT1withCode)
 
         outState.putBoolean(TZ_OR_KT1_RECIPIENT_KEY, mRecipientKT1withCode)
+
+        outState.putString(CONTRACT_SIG_KEY, mSig)
     }
 
     override fun onDetach()

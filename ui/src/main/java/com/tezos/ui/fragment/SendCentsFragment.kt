@@ -79,6 +79,8 @@ class SendCentsFragment : AppCompatDialogFragment()
 
         private const val IS_CONTRACT_AVAILABLE_KEY = "is_contract_available_key"
 
+        private const val CONTRACT_SIG_KEY = "contract_sig_key"
+
         @JvmStatic
         fun newInstance(contractPkh:String, contractAvailable:Boolean, storage:String, theme: CustomTheme) =
                 SendCentsFragment().apply {
@@ -189,6 +191,8 @@ class SendCentsFragment : AppCompatDialogFragment()
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
             mIsFromContract = savedInstanceState.getBoolean(IS_FROM_CONTRACT_KEY)
+
+            mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
             if (mInitTransferLoading)
             {
@@ -928,6 +932,8 @@ class SendCentsFragment : AppCompatDialogFragment()
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
         outState.putBoolean(IS_FROM_CONTRACT_KEY, mIsFromContract)
+
+        outState.putString(CONTRACT_SIG_KEY, mSig)
     }
 
     /**
