@@ -185,6 +185,8 @@ class DelegateFragment : Fragment()
 
         private const val CONTRACT_DATA_KEY = "contract_data_key"
 
+        private const val CONTRACT_SIG_KEY = "contract_sig_key"
+
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
                 DelegateFragment().apply {
@@ -270,6 +272,8 @@ class DelegateFragment : Fragment()
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
             mStorageInfoLoading = savedInstanceState.getBoolean(STORAGE_INFO_TAG)
+
+            mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
             val contractBundle = savedInstanceState.getBundle(CONTRACT_DATA_KEY)
             if (contractBundle != null)
@@ -1998,6 +2002,8 @@ class DelegateFragment : Fragment()
         outState.putString(STORAGE_DATA_KEY, mStorage)
 
         outState.putBoolean(STORAGE_INFO_TAG, mStorageInfoLoading)
+
+        outState.putString(CONTRACT_SIG_KEY, mSig)
     }
 
     override fun onDetach()
