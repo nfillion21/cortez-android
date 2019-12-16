@@ -1484,7 +1484,7 @@ class TransferFormFragment : Fragment()
         if (keyPair != null)
         {
             val ecKey = keyPair!!.public as ECPublicKey
-            ecKeyFormat(ecKey)
+            return ecKeyFormat(ecKey)
         }
         return null
     }
