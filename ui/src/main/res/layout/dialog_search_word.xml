@@ -36,7 +36,7 @@
             android:textSize="@dimen/size_edit_text" />
     </android.support.design.widget.TextInputLayout>
 
-    <ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    <ListView
         android:id="@+id/list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />

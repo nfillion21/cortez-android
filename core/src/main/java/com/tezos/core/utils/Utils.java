@@ -27,13 +27,8 @@
 
 package com.tezos.core.utils;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextUtils;
-
-import com.tezos.core.crypto.Base58;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,7 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -90,7 +84,6 @@ public class Utils {
         return newUri.toURL();
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static String queryStringFromMap(Map<String, String> map) {
 
         if (map == null || map.isEmpty()) return null;
@@ -104,16 +97,8 @@ public class Utils {
                 String encodedKey;
                 String encodedValue;
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-                    // Do something for lollipop and above versions
-                    encodedKey = URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
-                    encodedValue = URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
-
-                } else {
-
-                    encodedKey = URLEncoder.encode(entry.getKey(),"UTF-8").replaceAll("\\+", "%20");
-                    encodedValue = URLEncoder.encode(entry.getValue(), "UTF-8").replaceAll("\\+", "%20");
-                }
+                encodedKey = URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
+                encodedValue = URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
 
                 String part = new StringBuilder(encodedKey).append("=").append(encodedValue).toString();
 
@@ -326,18 +311,13 @@ public class Utils {
         return null;
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     private static JSONObject fromBundleToJSON(Bundle bundle) {
 
         JSONObject json = new JSONObject();
         Set<String> keys = bundle.keySet();
         for (String key : keys) {
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    json.put(key, JSONObject.wrap(bundle.get(key)));
-                } else {
-                    json.put(key, bundle.get(key));
-                }
+                json.put(key, JSONObject.wrap(bundle.get(key)));
             } catch(JSONException e) {
                 //Handle exception here
                 json = null;
@@ -409,136 +389,11 @@ public class Utils {
     }
     */
 
-    public static String getDigitsOnlyString(String numString) {
-        StringBuilder sb = new StringBuilder();
-        for (char c : numString.toCharArray()) {
-            if (Character.isDigit(c)) {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-
-    private static String formatFifteenString(String digits) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 15; i++) {
-            if (i == 4 || i == 10) {
-                sb.append(' ');
-            }
-            sb.append(digits.charAt(i));
-        }
-        return sb.toString();
-    }
-
-    private static String formatSixteenString(String digits) {
-        StringBuilder sb = new StringBuilder();
-        {
-            for (int i = 0; i < 16; i++) {
-                if (i != 0 && i % 4 == 0) {
-                    sb.append(' ');// insert every 4th char, except at end
-                }
-                sb.append(digits.charAt(i));
-            }
-        }
-        return sb.toString();
-    }
-
-    public static int bytesToUnsignedShort(byte byte1, byte byte2, boolean bigEndian)
-    {
-        if (bigEndian)
-            return ( ( (byte1 & 0xFF) << 8) | (byte2 & 0xFF) );
-
-
-        return ( ( (byte2 & 0xFF) << 8) | (byte1 & 0xFF) );
-
-    }
 
     public static int byteToUnsignedInt(byte b)
     {
         int i = b & 0xFF;
         return i;
         //return Integer.toHexString(i);
-    }
-
-    public static String base58encode(byte[] byteArray)
-    {
-        return Base58.encode(byteArray);
-    }
-
-    /*
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    public static void logFromException(Exception exception, String client) {
-
-        Throwable throwable = exception;
-
-        do
-        {
-
-            StringBuilder stringBuilder;
-
-            if (client != null) {
-                stringBuilder = new StringBuilder("Error ").append(client).append(":");
-            } else {
-                stringBuilder = new StringBuilder("Error:");
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                stringBuilder.append(System.lineSeparator());
-
-            } else {
-                stringBuilder.append(System.getProperty("line.separator"));
-            }
-
-            if (throwable instanceof ApiException)
-            {
-                ApiException apiException = (ApiException) throwable;
-
-                stringBuilder.append("API code: ").append(apiException.getApiCode());
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    stringBuilder.append(System.lineSeparator());
-
-                } else {
-                    stringBuilder.append(System.getProperty("line.separator"));
-                }
-
-                stringBuilder.append("Status code: ").append(apiException.getStatusCode());
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    stringBuilder.append(System.lineSeparator());
-
-                } else {
-                    stringBuilder.append(System.getProperty("line.separator"));
-                }
-
-                stringBuilder.append("Message: ").append(apiException.getMessage());
-
-            } else
-
-            if (throwable instanceof HttpException)
-            {
-                HttpException httpException = (HttpException) throwable;
-                stringBuilder.append("Status code: ").append(httpException.getStatusCode());
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    stringBuilder.append(System.lineSeparator());
-
-                } else {
-                    stringBuilder.append(System.getProperty("line.separator"));
-                }
-
-                stringBuilder.append("Message: ").append(httpException.getMessage());
-            }
-
-            Logger.d(stringBuilder.toString());
-            throwable = throwable.getCause();
-
-        } while (throwable != null);
-    }
-    */
-
-    public static String formatCardNumber(String numStr)
-    {
-        return null;
     }
 }

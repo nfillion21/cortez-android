@@ -83,6 +83,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/arrow_drop_down_black"
             android:layout_gravity="center_horizontal"
+            android:contentDescription="@string/content_description"
             android:tint="@color/colorTitleText"
             />
 
@@ -183,7 +184,7 @@
                 android:layout_weight="0"
                 android:layout_height="wrap_content"
                 android:elevation="@dimen/elevation_header"
-                android:text="ꜩ"
+                android:text="@string/tez"
                 android:layout_marginRight="@dimen/spacing_normal"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                 android:textStyle="bold"
@@ -226,7 +227,7 @@
                 android:layout_weight="0"
                 android:layout_height="wrap_content"
                 android:elevation="@dimen/elevation_header"
-                android:text="ꜩ"
+                android:text="@string/tez"
                 android:layout_marginEnd="@dimen/spacing_normal"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                 android:textStyle="bold"

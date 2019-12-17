@@ -172,22 +172,8 @@
                         layout="@layout/update_storage_form_card"
                         />
 
-                    <!--
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="700dp">
-                    </LinearLayout>
-                    -->
-
                 </LinearLayout>
             </android.support.v4.widget.NestedScrollView>
-
-            <!--
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-                -->
 
             <RelativeLayout
                 android:id="@+id/update_storage_button_relative_layout"
@@ -216,12 +202,11 @@
 
                         android:drawableStart="@drawable/ic_lock_black"
                         android:drawableLeft="@drawable/ic_lock_black"
-                        android:drawableTint="@color/tz_light"
                         android:drawablePadding="@dimen/spacing_normal"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
                         android:layout_gravity="center"
                         android:enabled="false"
-
+                        android:textStyle="bold"
                         android:background="@null"
                         android:clickable="false"
                         android:focusable="false"

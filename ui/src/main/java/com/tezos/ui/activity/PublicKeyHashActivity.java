@@ -56,11 +56,7 @@ public class PublicKeyHashActivity extends BaseSecureActivity
 {
     public static final String PKH_KEY = "pkh_key";
 
-    private LinearLayout mLinearLayout;
-    private Button mShareButton;
     private String mPublicKeyHash;
-
-    private TextView mPkhTextview;
 
     public static Intent getStartIntent(Context context, String publicKeyHash, Bundle themeBundle)
     {
@@ -99,9 +95,10 @@ public class PublicKeyHashActivity extends BaseSecureActivity
         ImageView myImage = findViewById(R.id.qr_code);
         myImage.setImageBitmap(myBitmap);
 
-        mLinearLayout = findViewById(R.id.pkh_info_layout);
+        LinearLayout mLinearLayout = findViewById(R.id.pkh_info_layout);
         mLinearLayout.setOnTouchListener((view, motionEvent) ->
         {
+            view.performClick();
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText(getString(R.string.copied_pkh), mPublicKeyHash);
             clipboard.setPrimaryClip(clip);
@@ -110,7 +107,8 @@ public class PublicKeyHashActivity extends BaseSecureActivity
             return false;
         });
 
-        mShareButton = findViewById(R.id.shareButton);
+
+        Button mShareButton = findViewById(R.id.shareButton);
         mShareButton.setOnClickListener(view -> {
 
             Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
@@ -120,7 +118,7 @@ public class PublicKeyHashActivity extends BaseSecureActivity
         });
 
         String pkhash = getIntent().getStringExtra(PKH_KEY);
-        mPkhTextview = findViewById(R.id.pkh_textview);
+        TextView mPkhTextview = findViewById(R.id.pkh_textview);
         mPkhTextview.setText(pkhash);
     }
 

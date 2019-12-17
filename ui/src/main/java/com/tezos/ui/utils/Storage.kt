@@ -81,7 +81,7 @@ class Storage constructor(context: Context) {
         settings.edit().putString(STORAGE_PASSWORD, password).apply()
     }
 
-    fun getPassword(): String = settings.getString(STORAGE_PASSWORD, "")
+    fun getPassword(): String = settings.getString(STORAGE_PASSWORD, "")!!
 
     fun saveFingerprintAllowed(allowed: Boolean) {
         settings.edit().putBoolean(STORAGE_FINGERPRINT, allowed).apply()

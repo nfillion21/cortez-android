@@ -129,9 +129,9 @@ class AddressDetailsActivity : BaseSecureActivity(), HomeFragment.HomeListener
                 .commit()
     }
 
-    override fun showSnackBar(resText:String, color:Int, textColor:Int)
+    override fun showSnackBar(text:String, color:Int, textColor:Int)
     {
-        val snackbar = Snackbar.make(findViewById(android.R.id.content), resText, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(findViewById(android.R.id.content), text, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor(color)
         snackbar.setActionTextColor(textColor)
         snackbar.show()

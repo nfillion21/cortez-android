@@ -216,7 +216,7 @@ class AddLimitsActivity : BaseSecureActivity()
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryId))
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, theme.colorPrimaryDarkId))
         //toolbar.setTitleTextColor(ContextCompat.getColor(this, theme.getTextColorPrimaryId()));
 
         val window = window
@@ -295,11 +295,17 @@ class AddLimitsActivity : BaseSecureActivity()
 
             dstObject.put("fee", mDelegateFees)
 
+            val ecKeys = retrieveECKeys()
+            val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+
+            dstObject.put("tz3", tz3)
+            dstObject.put("limit", mLimitAmount*1000000L)
+
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
 
-            if (true/*!isAddDelegatePayloadValid(mDelegatePayload!!, postParams)*/)
+            if (isOriginateSlcPayloadValid(mDelegatePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -329,7 +335,7 @@ class AddLimitsActivity : BaseSecureActivity()
                 var payloadsign = newResult.toNoPrefixHexString()
 
                 val stringRequest = object : StringRequest(Method.POST, url,
-                        Response.Listener<String> { response ->
+                        Response.Listener<String> {
 
                             //there's no need to do anything because we call finish()
                             //onFinalizeDelegationLoadComplete(null)
@@ -465,26 +471,56 @@ class AddLimitsActivity : BaseSecureActivity()
         postParams.put("src", pkhSrc)
         postParams.put("src_pk", pk)
 
-        var dstObjects = JSONArray()
-
         var dstObject = JSONObject()
-        dstObject.put("manager", pkhSrc)
-
-        val ecKeys = retrieveECKeys()
-        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-
-        // first: tz3
-        // second: mLimitAmount
-        // third: masterkey tz1?
-
-        val jsonContractString = JSONObject(getString(R.string.spending_limit_contract_evo)).toString()
-        val spendingLimitContract = String.format(jsonContractString, tz3, (mLimitAmount*1000000L).toString(), pkhSrc)
-
-        val json = JSONObject(spendingLimitContract)
-        dstObject.put("script", json)
 
         //TODO be careful, do it in mutez.
         dstObject.put("credit", (mDelegateAmount*1000000L).roundToLong().toString())
+
+        //dstObject.put("manager", pkhSrc)
+        val ecKeys = retrieveECKeys()
+        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+
+        val spendingLimitFile = "spending_limit_double_salt.json"
+        val contract = application.assets.open(spendingLimitFile).bufferedReader()
+                .use {
+                    it.readText()
+                }
+
+        val jsonContract = JSONObject(contract)
+
+        //val jsonScript = String.format(jsonContract.toString(), tz3, "86400", (mLimitAmount*1000000L).toString(), pkhSrc)
+        dstObject.put("script", jsonContract)
+
+        val storage = jsonContract["storage"] as JSONObject
+        val argsStorage = storage["args"] as JSONArray
+
+        val storageOne = argsStorage[0] as JSONObject
+        val argsStorageOne = storageOne["args"] as JSONArray
+
+        // storage 1 and 2-3 separate here
+
+        val firstParamArgsStorageOne = argsStorageOne[0] as JSONObject
+        firstParamArgsStorageOne.put("string", tz3)
+
+        val secondAndThirdParamsArgsStorageOne = argsStorageOne[1] as JSONObject
+        val argsSecondAndThirdParamsArgsStorageOne = secondAndThirdParamsArgsStorageOne["args"] as JSONArray
+        val firstParamArgsSecondAndThirdParamsArgsStorageOne = argsSecondAndThirdParamsArgsStorageOne[0] as JSONObject
+        val argsFirstParamArgsSecondAndThirdParamsArgsStorageOne = firstParamArgsSecondAndThirdParamsArgsStorageOne["args"] as JSONArray
+
+        val firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[0] as JSONObject
+        firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", (mLimitAmount*1000000L).toString())
+
+        val secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[1] as JSONObject
+        secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", "86400")
+
+        val storageTwo = argsStorage[1] as JSONObject
+        val argsStorageTwo = storageTwo["args"] as JSONArray
+
+        val firstParamArgsStorageTwo = argsStorageTwo[0] as JSONObject
+        firstParamArgsStorageTwo.put("string", pkhSrc)
+
+
+        var dstObjects = JSONArray()
 
         //dstObject.put("delegatable", true)
 
@@ -511,7 +547,7 @@ class AddLimitsActivity : BaseSecureActivity()
             postParams.put("dsts", dstsArray)
 
             // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != null)
+            if (mDelegatePayload != null && mDelegateFees != -1L)
             {
                 onInitDelegateLoadComplete(null)
 
@@ -625,8 +661,9 @@ class AddLimitsActivity : BaseSecureActivity()
 
     private fun validateAddButton(validate: Boolean)
     {
-        val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(themeBundle)
+        //eBundle = intent.getBundleExtra(CustomTheme.TAG)
+        //val theme = CustomTheme.fromBundle(themeBundle)
+        val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
         if (validate)
         {
@@ -635,7 +672,7 @@ class AddLimitsActivity : BaseSecureActivity()
             create_limit_contract_button_layout.background = makeSelector(theme)
 
             val drawables = create_limit_contract_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
         }
         else
@@ -647,7 +684,7 @@ class AddLimitsActivity : BaseSecureActivity()
             create_limit_contract_button_layout.background = makeSelector(greyTheme)
 
             val drawables = create_limit_contract_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white))
         }
     }
@@ -739,7 +776,7 @@ class AddLimitsActivity : BaseSecureActivity()
         {
             val isAmountEquals = false
 
-            if (editable != null && !TextUtils.isEmpty(editable))
+            if (!TextUtils.isEmpty(editable))
             {
                 try
                 {
@@ -975,7 +1012,7 @@ class AddLimitsActivity : BaseSecureActivity()
     private fun onDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        if (isFingerprintAllowed() && hasEnrolledFingerprints())
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }

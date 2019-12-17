@@ -40,8 +40,6 @@
                     android:layout_marginRight="@dimen/spacing_double"
                     style="@style/PaymentScreens.SourceButton"
                     android:padding="@dimen/spacing_double"
-                    android:textColor="@color/dark_grey"
-                    android:enabled="false"
                     android:text="@string/select_daily_spending_limit_contract"
                      />
 
@@ -52,7 +50,7 @@
                     android:layout_marginLeft="@dimen/spacing_double"
                     android:layout_marginRight="@dimen/spacing_double"
                     android:layout_marginBottom="@dimen/spacing_double"
-                    android:text="@string/slc_available_soon"
+                    android:text="@string/slc_available"
                     android:autoLink="web"
                     />
 

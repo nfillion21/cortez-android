@@ -1,0 +1,37 @@
+{
+  "prim":"Pair",
+  "args":[
+    {
+      "prim":"Pair",
+      "args":[
+        [
+          {
+            "prim":"Pair",
+            "args":[
+              {
+                "int":"2000000"
+              },
+              {
+                "string":"KT1TqF5NW1Kgrn4H8yky8RajFsH5SpfoW4Kk%send"
+              }
+            ]
+          }
+        ],
+        {
+          "string":"tz1W9oeCwAtZCZcUzxuKiC8Ft2zJcyAMPM8a"
+        }
+      ]
+    },
+    {
+      "prim":"Pair",
+      "args":[
+        {
+          "string":"edpku2Gxg5v1Da7tGsYKxYHPEScR2qeNxbEx5td58HomoWMV26AMtb"
+        },
+        {
+          "string":"edsigthgy4dUs3C1ekhoeGExBrr137k1heoMaA7oU2qmQrqvvh7jiURqAtjpFVVrWDbCnv2nBN9tFRajj9VgBPnmLzUoDoHwX6Z"
+        }
+      ]
+    }
+  ]
+}

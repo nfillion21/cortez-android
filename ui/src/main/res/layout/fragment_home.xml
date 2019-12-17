@@ -329,6 +329,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
+                            android:contentDescription="@string/content_description"
                             android:tint="@color/colorTitleText"
                             app:srcCompat="@drawable/ic_logo_tezos" />
                     </RelativeLayout>

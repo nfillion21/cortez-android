@@ -298,8 +298,8 @@ class AddDelegateActivity : BaseSecureActivity()
 
                 var payloadsign = newResult.toNoPrefixHexString()
 
-                val stringRequest = object : StringRequest(Request.Method.POST, url,
-                        Response.Listener<String> { response ->
+                val stringRequest = object : StringRequest(Method.POST, url,
+                        Response.Listener<String> {
 
                             //there's no need to do anything because we call finish()
                             //onFinalizeDelegationLoadComplete(null)
@@ -444,16 +444,15 @@ class AddDelegateActivity : BaseSecureActivity()
         //TODO be careful, do it in mutez.
         dstObject.put("credit", (mDelegateAmount*1000000).roundToLong().toString())
 
-        //dstObject.put("delegatable", true)
-
-        var dstObjects = JSONArray()
 
         
         val originationContract = String.format(getString(R.string.origination_contract), pkhSrc)
 
         val json = JSONObject(originationContract)
+        
         dstObject.put("script", json)
 
+        var dstObjects = JSONArray()
         dstObjects.put(dstObject)
 
         postParams.put("dsts", dstObjects)
@@ -589,7 +588,7 @@ class AddDelegateActivity : BaseSecureActivity()
             update_storage_button_layout.background = makeSelector(theme)
 
             val drawables = update_storage_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, theme.textColorPrimaryId))
         }
         else
@@ -601,7 +600,7 @@ class AddDelegateActivity : BaseSecureActivity()
             update_storage_button_layout.background = makeSelector(greyTheme)
 
             val drawables = update_storage_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, android.R.color.white))
         }
     }

@@ -74,8 +74,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
     // The user view type.
     private static final int CONFIRM_CREDENTIALS_ITEM_VIEW_TYPE = 0;
 
-    private ListView mList;
-
     public interface OnFingerprintOptionSelectedListener
     {
         void onFingerprintOptionClicked(boolean isOptionChecked);
@@ -121,12 +119,12 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
     {
         super.onViewCreated(view, savedInstanceState);
 
-        mList = view.findViewById(R.id.list);
+        ListView mList = view.findViewById(R.id.list);
         mList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         mList.setItemsCanFocus(false);
         mList.setOnItemClickListener(this);
 
-        ArrayList settingsList = new ArrayList();
+        ArrayList<String> settingsList = new ArrayList<>();
 
         if (mSystemInformationsCallback.isDeviceSecure())
         {

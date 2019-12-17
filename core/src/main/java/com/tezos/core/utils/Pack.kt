@@ -1,5 +1,7 @@
 package com.tezos.core.utils
 
+import com.tezos.core.crypto.Base58
+import org.bitcoinj.core.AddressFormatException
 import java.io.OutputStream
 import kotlin.math.absoluteValue
 import kotlin.math.sign
@@ -9,6 +11,7 @@ interface Visitor {
     fun visit(string: String)
     fun visit(sequence: Array<out Visitable>)
     fun visit(primitive: Primitive)
+    fun visit(bytes: ByteArray)
 }
 
 interface Visitable {
@@ -37,6 +40,7 @@ data class VisitableString(val value: String): Visitable {
 fun Visitable.Companion.string(value: String): Visitable {
     return VisitableString(value)
 }
+
 
 @Suppress("ArrayInDataClass")
 data class VisitableSequence(val elements: Array<out Visitable>): Visitable {
@@ -181,6 +185,82 @@ data class Primitive(val name: Name, val arguments: Array<out Visitable>? = null
     }
 }
 
+@Suppress("ArrayInDataClass")
+data class VisitableBytes(val value: ByteArray): Visitable {
+    override fun accept(visitor: Visitor) {
+        visitor.visit(value)
+    }
+}
+
+fun Visitable.Companion.byteArrayOfKeyHash(keyHash: String): ByteArray {
+    var decodedValue = Base58.decode(keyHash.slice(0 until 36))
+    println("pikatos: " + decodedValue.size)
+    var bytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
+    bytes = when(keyHash.slice(0 until 3)) {
+        "tz1" -> byteArrayOf(0x00) + bytes
+        "tz2" -> byteArrayOf(0x01) + bytes
+        "tz3" -> byteArrayOf(0x02) + bytes
+        else -> throw AddressFormatException("Unknown address prefix")
+    }
+    return bytes
+}
+
+fun Visitable.Companion.keyHash(value: String): Visitable {
+    return VisitableBytes(byteArrayOfKeyHash(value))
+}
+
+fun Visitable.Companion.byteArrayOfPublicKey(publicKey: String): ByteArray {
+    var decodedValue = Base58.decode(publicKey)
+    var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
+    bytes = when(publicKey.slice(0 until 4)) {
+        "edpk" -> byteArrayOf(0x00) + bytes
+        "sppk" -> byteArrayOf(0x01) + bytes
+        "p2pk" -> byteArrayOf(0x02) + bytes
+        else -> throw PublicKeyFormatException("Unknown public key prefix")
+    }
+    return bytes
+}
+
+fun Visitable.Companion.publicKey(value: String): Visitable {
+    return VisitableBytes(byteArrayOfPublicKey(value))
+}
+
+fun Visitable.Companion.byteArrayOfSignature(signature: String): ByteArray {
+    var decodedValue = Base58.decode(signature)
+    var bytes = decodedValue.slice(5 until (decodedValue.size - 4)).toByteArray()
+    bytes = when(signature.slice(0 until 5)) {
+        "edsig" -> byteArrayOf(0x00) + bytes
+        "spsig" -> byteArrayOf(0x01) + bytes // spsig1 <- 1? (lib_crypto/base58.ml)
+        "p2sig" -> byteArrayOf(0x02) + bytes
+        else -> throw SignatureFormatException("Unknown signature prefix")
+    }
+    return bytes
+}
+
+fun Visitable.Companion.signature(value: String): Visitable {
+    return VisitableBytes(byteArrayOfSignature(value))
+}
+
+fun Visitable.Companion.address(value: String): Visitable {
+    var decodedValue = Base58.decode(value.slice(0 until 36))
+    var bytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
+    bytes = when(value.slice(0 until 3)) {
+        "KT1" -> if (value.length > 36) { // contract with specific entrypoint
+            byteArrayOf(0x01) + bytes + byteArrayOf(0x00) + value.slice(37 until value.length).toByteArray() // 37 to skip entrypoint symbol '%'
+        }
+        else {
+            byteArrayOf(0x01) + bytes + byteArrayOf(0x00)
+        }
+        else -> byteArrayOf(0x00) + byteArrayOfKeyHash(value)
+    }
+    return VisitableBytes(bytes)
+}
+
+fun Visitable.Companion.chainID(value: String): Visitable {
+    var bytes = Base58.decode(value).slice(3 until 7).toByteArray()
+    return VisitableBytes(bytes)
+}
+
 data class FakeOutputStream(var size: Int = 0): OutputStream() {
     override fun write(b: Int) {
         ++size
@@ -238,6 +318,11 @@ data class Packer(val output: OutputStream): Visitor {
             output.write(toByteArray())
         }
     }
+    override fun visit(bytes: ByteArray) {
+        output.write(0x0a)
+        pack(bytes.size)
+        output.write(bytes)
+    }
 
     private fun packSizeOf(sequence: Array<out Visitable>) {
         val fake = Packer(FakeOutputStream())
@@ -251,4 +336,30 @@ data class Packer(val output: OutputStream): Visitor {
         output.write((value shr 8) and 0xff)
         output.write(value and 0xff)
     }
+}
+
+fun Primitive.Companion.pair(left: Visitable, right: Visitable): Visitable {
+    return Primitive(
+            Primitive.Name.Pair,
+            arrayOf(
+                    left, right
+            )
+    )
+}
+
+fun Primitive.Companion.left(value: Visitable): Visitable {
+    return Primitive(
+            Primitive.Name.Pair,
+            arrayOf(
+                    value
+            )
+    )
+}
+
+class PublicKeyFormatException: IllegalArgumentException {
+    constructor(message: String?): super(message)
+}
+
+class SignatureFormatException: IllegalArgumentException {
+    constructor(message: String?): super(message)
 }

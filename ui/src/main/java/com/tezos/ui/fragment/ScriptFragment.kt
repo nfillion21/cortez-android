@@ -36,7 +36,9 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
+import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -54,24 +56,25 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.tezos.core.*
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.DataExtractor
+import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
-import kotlinx.android.synthetic.main.dialog_sent_cents.*
 import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
-import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
-import kotlinx.android.synthetic.main.update_storage_form_card.send_cents_button
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.math.roundToLong
 
 class ScriptFragment : Fragment()
@@ -101,6 +104,8 @@ class ScriptFragment : Fragment()
 
     private var mSecureHashBalance:Long = -1L
 
+    private var mSig:String? = null
+
     companion object
     {
         const val CONTRACT_PUBLIC_KEY = "contract_public_key"
@@ -128,6 +133,8 @@ class ScriptFragment : Fragment()
         private const val EDIT_MODE_KEY = "edit_mode_key"
 
         private const val BALANCE_LONG_KEY = "balance_long_key"
+
+        private const val CONTRACT_SIG_KEY = "contract_sig_key"
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -254,6 +261,8 @@ class ScriptFragment : Fragment()
 
             mSecureHashBalance = savedInstanceState.getLong(BALANCE_LONG_KEY, -1)
 
+            mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
+
             if (mStorageInfoLoading)
             {
                 refreshTextUnderDelegation(false)
@@ -364,25 +373,11 @@ class ScriptFragment : Fragment()
     {
         if (editMode)
         {
-            //TODO generate a new p2pk to let the user edit the form
-
-            if (mStorage != JSONObject(getString(R.string.default_storage)).toString())
+            val secureKeyHash = getStorageSecureKeyHash()
+            if (!secureKeyHash.isNullOrEmpty())
             {
-                val storageJSONObject = JSONObject(mStorage)
-
-                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
-
-                // get securekey hash
-
-                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
-
                 val tz3 = retrieveTz3()
-                if (tz3 == null || tz3 != secureKeyHash)
+                if (tz3 != secureKeyHash)
                 {
                     public_address_edittext.setText("")
                     public_address_edittext.isEnabled = true
@@ -399,12 +394,18 @@ class ScriptFragment : Fragment()
                 }
             }
 
+
             update_storage_button_relative_layout.visibility = View.VISIBLE
 
             gas_textview.visibility = View.VISIBLE
             gas_layout.visibility = View.VISIBLE
 
+
+            limit_infos_layout.visibility = View.GONE
+
             redelegate_address_textview.setText(R.string.secure_enclave_generated)
+
+            daily_spending_limit_textview.setText(R.string.daily_spending_limit_from_0_to_1k)
 
             daily_spending_limit_edittext.isEnabled = true
             daily_spending_limit_edittext.setText("")
@@ -425,13 +426,14 @@ class ScriptFragment : Fragment()
             transferLoading(false)
             putFeesToNegative()
 
-            //TODO looks like it's crashing when async
-            //TODO it's called
-
             update_storage_button_relative_layout?.visibility = View.GONE
 
             gas_textview?.visibility = View.GONE
             gas_layout?.visibility = View.GONE
+
+            limit_infos_layout.visibility = View.VISIBLE
+
+            daily_spending_limit_textview.setText(R.string.daily_spending_limit)
 
             daily_spending_limit_edittext?.isEnabled = false
 
@@ -448,10 +450,7 @@ class ScriptFragment : Fragment()
 
                 val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
                 val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+                val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
 
                 public_address_edittext.setText(secureKeyHash)
                 public_address_edittext.isFocusableInTouchMode = false
@@ -464,16 +463,8 @@ class ScriptFragment : Fragment()
 
                 // get daily spending limit
 
-                val dailySpendingLimitJSONObject = argsSecureKey[1] as JSONObject
-                val dailySpendingLimitJSONArray = DataExtractor.getJSONArrayFromField(dailySpendingLimitJSONObject, "args")
-
-                val dailySpendingLimitHashField = DataExtractor.getJSONObjectFromField(dailySpendingLimitJSONArray, 0)
-                val dailySpendingLimitHashField2 = DataExtractor.getJSONArrayFromField(dailySpendingLimitHashField, "args") as JSONArray
-
-                val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
-                val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
-
-                daily_spending_limit_edittext?.setText(mutezToTez(dailySpendingLimit))
+                val historyPayment = getHistoryPayment()
+                daily_spending_limit_edittext?.setText(mutezToTez(historyPayment?.get(0) as Long))
 
 
                 // 100 000 mutez == 0.1 tez
@@ -579,7 +570,7 @@ class ScriptFragment : Fragment()
         transferLoading(true)
 
         val mnemonicsData = Storage(activity!!).getMnemonics()
-        startPostRequestLoadFinalizeAddDelegate(mnemonicsData)
+        startPostRequestLoadFinalizeUpdateStorage(mnemonicsData)
     }
 
     // volley
@@ -636,6 +627,7 @@ class ScriptFragment : Fragment()
                             val response = it.networkResponse?.statusCode
                             if (response == 404)
                             {
+                                //TODO this doesn't exist anymore
                                 mStorage = JSONObject(getString(R.string.default_storage)).toString()
                             }
                             else
@@ -716,7 +708,7 @@ class ScriptFragment : Fragment()
     private fun onBalanceLoadComplete()
     {
         mSecureHashBalanceLoading = false
-        secure_hash_progress.visibility = View.GONE
+        secure_hash_progress.visibility = View.INVISIBLE
         secure_hash_balance_textview.text =
 
                 if (mSecureHashBalance != -1L)
@@ -760,7 +752,7 @@ class ScriptFragment : Fragment()
 
     private fun addContractInfoFromJSON(answer: JSONObject)
     {
-        if (answer != null && answer.length() > 0)
+        if (answer.length() > 0)
         {
             mStorage = answer.toString()
         }
@@ -797,36 +789,57 @@ class ScriptFragment : Fragment()
 
                 val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-                // get masterkey hash
-
-                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
-                val masterKeyJSONObject = argsMasterKey[0] as JSONObject
-                val masterKeyHash = DataExtractor.getStringFromField(masterKeyJSONObject, "string")
-
                 // get securekey hash
 
                 val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
                 val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+                val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
 
-                val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-                val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
+                val listStorageData = getHistoryPayment()
 
-
-                // get daily spending limit
-
-                val dailySpendingLimitJSONObject = argsSecureKey[1] as JSONObject
-                val dailySpendingLimitJSONArray = DataExtractor.getJSONArrayFromField(dailySpendingLimitJSONObject, "args")
-
-                val dailySpendingLimitHashField = DataExtractor.getJSONObjectFromField(dailySpendingLimitJSONArray, 0)
-                val dailySpendingLimitHashField2 = DataExtractor.getJSONArrayFromField(dailySpendingLimitHashField, "args") as JSONArray
-
-                val dailySpendingLimitObject = dailySpendingLimitHashField2[0] as JSONObject
-                val dailySpendingLimit = DataExtractor.getStringFromField(dailySpendingLimitObject, "int")
-
-
+                val dailySpendingLimit = listStorageData[0] as Long
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
                 daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
+
+                //remaining_spending_limit.text = "You can still spend \$ " + dailySpendingLimitInTez + "on the \$ " + mutezToTez(listStorageData[0] as Long) + "limit of your SLC contract"
+
+                val remainingDailySpendingLimit = listStorageData[1] as Long
+                val remainingDailySpendingLimitInTez = mutezToTez(remainingDailySpendingLimit)
+                remaining_daily_spending_limit_edittext.setText(remainingDailySpendingLimitInTez)
+
+                remaining_time_daily_spending_limit_textview.text = String.format(getString(R.string.remaining_time_daily_spending_limit), dailySpendingLimitInTez)
+
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                {
+                    view_timer.isCountDown = true
+                    view_timer.base = SystemClock.elapsedRealtime() + (listStorageData[3] as Long)*1000L
+                    if (listStorageData[3] as Long == 0L)
+                    {
+                        view_timer.stop()
+                        view_timer.text = getString(R.string.spending_limit_reset)
+                    }
+                    else
+                    {
+                        view_timer.setOnChronometerTickListener {
+
+                            if (it.base - SystemClock.elapsedRealtime() <= 0L)
+                            {
+                                view_timer.stop()
+                                view_timer.text = getString(R.string.spending_limit_reset)
+
+                                remaining_daily_spending_limit_edittext.setText(dailySpendingLimitInTez)
+                            }
+                        }
+                        view_timer.start()
+                    }
+                }
+                else
+                {
+                    remaining_time_daily_spending_limit_textview.visibility = View.GONE
+                    view_timer.visibility = View.GONE
+                }
+
 
                 update_storage_form_card?.visibility = View.VISIBLE
 
@@ -838,16 +851,6 @@ class ScriptFragment : Fragment()
 
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.contract_storage_info)
-
-                //TODO handle there the right stuff
-                // try to get the secure key
-                // if there is a key and it's the same as in storage, no problem
-
-                //EncryptionServices().removeSpendingKey()
-                //EncryptionServices().createSpendingKey()
-
-                // if there is no key or it's not the same as in storage, put the information.
-
 
                 if (mEditMode)
                 {
@@ -907,19 +910,43 @@ class ScriptFragment : Fragment()
     }
 
     // volley
-    private fun startPostRequestLoadFinalizeAddDelegate(mnemonicsData: Storage.MnemonicsData)
+    private fun startPostRequestLoadFinalizeUpdateStorage(mnemonicsData: Storage.MnemonicsData)
     {
         val url = getString(R.string.transfer_injection_operation)
 
         if (isUpdateButtonValid() && mUpdateStoragePayload != null && mUpdateStorageAddress != null && mUpdateStorageFees != -1L)
         {
+            val mnemonicsData = Storage(activity!!).getMnemonics()
             var postParams = JSONObject()
-            postParams.put("src", pkh())
-            postParams.put("src_pk", mnemonicsData.pk)
-            postParams.put("delegate", mUpdateStorageAddress)
-            postParams.put("fee", mUpdateStorageFees)
 
-            if (/*!isChangeDelegatePayloadValid(mUpdateStoragePayload!!, postParams)*/true)
+            postParams.put("src", mnemonicsData.pkh)
+
+            //TODO it won't be pk with contract transfer
+            postParams.put("src_pk", mnemonicsData.pk)
+
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+            dstObject.put("dst", pkh())
+
+            dstObject.put("amount", 0.toLong())
+
+            val mutezAmount = (mSpendingLimitAmount*1000000.0).roundToLong()
+            dstObject.put("transfer_amount", mutezAmount)
+
+            dstObject.put("fee", mUpdateStorageFees)
+
+            dstObject.put("edsig", mSig)
+
+            dstObject.put("tz3", retrieveTz3())
+
+            dstObject.put("contract_type", "slc_update_storage")
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+
+            if (isTransferPayloadValid(mUpdateStoragePayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -949,13 +976,13 @@ class ScriptFragment : Fragment()
                 var payloadsign = newResult.toNoPrefixHexString()
 
                 val stringRequest = object : StringRequest(Method.POST, url,
-                        Response.Listener<String> { response ->
+                        Response.Listener<String> {
                             if (swipe_refresh_script_layout != null)
                             {
                                 //there's no need to do anything because we call finish()
                                 onFinalizeDelegationLoadComplete(null)
 
-                                mCallback?.finish(R.id.add_delegate_succeed)
+                                mCallback?.finish(R.id.update_storage_succeed)
                             }
                         },
                         Response.ErrorListener
@@ -1073,7 +1100,6 @@ class ScriptFragment : Fragment()
 
         val url = getString(R.string.transfer_forge)
 
-        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val pk = if (mnemonicsData.pk.isNullOrEmpty())
         {
             val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
@@ -1090,79 +1116,158 @@ class ScriptFragment : Fragment()
         postParams.put("src", tz1)
         postParams.put("src_pk", pk)
 
-        var dstObjects = JSONArray()
 
         var dstObject = JSONObject()
         dstObject.put("dst", pkh())
         dstObject.put("amount", "0")
 
+        dstObject.put("entrypoint", "appel_clef_maitresse")
+
         mUpdateStorageAddress = pk
 
         //TODO I need to insert a signature into parameters
 
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
         val tz3 = retrieveTz3()
 
-        /*
-
-        val packSpending = Pack.prim(
-                Pack.pair(
-                        Pack.pair(
-                                Pack.pair(
-                                        Pack.int(0),
-                                        Pack.keyHash(tz3!!)
-                                ),
-                                Pack.pair(
-                                        Pack.pair(
-                                                Pack.mutez(mSpendingLimitAmount*1000000L),
-                                                Pack.int(86400)
+        val dataVisitable = Primitive(
+                Primitive.Name.Left,
+                arrayOf(
+                        Primitive(
+                                Primitive.Name.Pair,
+                                arrayOf(
+                                        Primitive(
+                                                Primitive.Name.Pair,
+                                                arrayOf(
+                                                        Visitable.keyHash(tz3!!),
+                                                        Primitive(
+                                                                Primitive.Name.Pair,
+                                                                arrayOf(
+                                                                        Primitive(
+                                                                                Primitive.Name.Pair,
+                                                                                arrayOf(
+                                                                                        Visitable.integer(mSpendingLimitAmount*1000000),
+                                                                                        Visitable.integer(86400)
+                                                                                )
+                                                                        ),
+                                                                        Primitive(
+                                                                                Primitive.Name.Pair,
+                                                                                arrayOf(
+                                                                                        Visitable.sequenceOf(),
+                                                                                        Visitable.sequenceOf()
+                                                                                )
+                                                                        )
+                                                                )
+                                                        )
+                                                )
                                         ),
-                                        Pack.pair(
-                                                Pack.listOf(),
-                                                Pack.listOf()
-                                        )
+                                        Visitable.keyHash(tz1)
                                 )
-                        ),
-                        Pack.keyHash(tz1)
+                        )
                 )
         )
 
-        val packSpendingByteArray = packSpending.data.toNoPrefixHexString().hexToByteArray()
+        val o = ByteArrayOutputStream()
+        o.write(0x05)
 
+        val dataPacker = Packer(o)
+        dataVisitable.accept(dataPacker)
+
+        val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+        val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                arrayOf(
+                        Visitable.address(pkh()!!),
+                        Visitable.chainID(getString(R.string.chain_ID))
+                )
+        )
+
+        val output = ByteArrayOutputStream()
+        output.write(0x05)
+
+        val p = Packer(output)
+        addressAndChainVisitable.accept(p)
+
+        val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+        var saltVisitable:Visitable? = null
         val salt = getSalt()
-        val packSalt = Pack.prim(Pack.int(salt!!))
-        val packSaltByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
-        */
+        if (salt != null)
+        {
+            saltVisitable = Visitable.integer(salt.toLong())
+        }
 
+        val outputStream = ByteArrayOutputStream()
+        outputStream.write(0x05)
 
-        //val signedData1 = "050005".hexToByteArray()
+        val packer = Packer(outputStream)
+        saltVisitable!!.accept(packer)
 
-        //val signature = KeyPair.sign(sk, packSpendingByteArray + packSaltByteArray)
-        val signature = KeyPair.sign(sk, ByteArray(0))
+        val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+        val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
 
         val edsig = CryptoUtils.generateEDSig(signature)
 
 
-        val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_update_storage))
-        val spendingLimitContract = String.format(resScript.toString(),
-                pk, //
-                edsig, //signature
-                tz3, //signataire
-                (mSpendingLimitAmount*1000000L).toString(), //amount
-                tz1) //remasterkey
+        val spendingLimitFile = "spending_limit_update_storage.json"
+        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                .use {
+                    it.readText()
+                }
 
-        val json = JSONObject(spendingLimitContract)
-        dstObject.put("parameters", json)
+        val value = JSONObject(contract)
 
+        val args = value["args"] as JSONArray
+
+        val sigPart = args[0] as JSONObject
+        val argsSigPart = sigPart["args"] as JSONArray
+
+        val pkArgsSigPart = argsSigPart[0] as JSONObject
+        pkArgsSigPart.put("string", pk)
+
+        val sigArgsSigPart = argsSigPart[1] as JSONObject
+        sigArgsSigPart.put("string", edsig)
+
+        mSig = edsig
+
+
+        val keysPart = args[1] as JSONObject
+        val argsKeyPart = keysPart["args"] as JSONArray
+        val firstArgsKeyPart = argsKeyPart[0] as JSONObject
+        val argsFirstArgsKeyPart = firstArgsKeyPart["args"] as JSONArray
+
+        val argsTz3AndValues = (argsFirstArgsKeyPart[0] as JSONObject)["args"] as JSONArray
+
+        val tz3Args = argsTz3AndValues[0] as JSONObject
+        tz3Args.put("string", tz3)
+
+        val valuesArgs = (((argsTz3AndValues[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+        val spendingLimitOne = valuesArgs[0] as JSONObject
+        spendingLimitOne.put("int", (mSpendingLimitAmount*1000000).toString())
+
+        val spendingLimitTwo = valuesArgs[1] as JSONObject
+        spendingLimitTwo.put("int", "86400")
+
+        val masterKeyArgs = argsFirstArgsKeyPart[1] as JSONObject
+        masterKeyArgs.put("string", tz1)
+
+        dstObject.put("parameters", value)
+
+        var dstObjects = JSONArray()
         dstObjects.put(dstObject)
 
-        //send 0.1 tz to recover your contract
+
+//send 0.1 tz if this tz3 is a new one
         if (!isSecureKeyHashIdentical())
         {
             val dstCentsObject = JSONObject()
             dstCentsObject.put("dst", tz3)
-            dstCentsObject.put("amount", (100000).toLong().toString())
+            dstCentsObject.put("amount", "100000")
 
             dstObjects.put(dstCentsObject)
         }
@@ -1173,7 +1278,7 @@ class ScriptFragment : Fragment()
         { answer ->
 
             //TODO check if the JSON is fine then launch the 2nd request
-            if (activity != null)
+            if (swipe_refresh_script_layout != null)
             {
                 mUpdateStoragePayload = answer.getString("result")
                 mUpdateStorageFees = answer.getLong("total_fee")
@@ -1210,7 +1315,7 @@ class ScriptFragment : Fragment()
 
         }, Response.ErrorListener
         {
-            if (activity != null)
+            if (swipe_refresh_script_layout != null)
             {
                 onInitEditLoadComplete(it)
 
@@ -1238,7 +1343,7 @@ class ScriptFragment : Fragment()
 
     private fun getSalt():Int?
     {
-        //TODO check if the storage follows our pattern
+//TODO check if the storage follows our pattern
 
         if (mStorage != null)
         {
@@ -1246,30 +1351,35 @@ class ScriptFragment : Fragment()
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-            // get masterkey hash
+// get masterkey hash
 
             val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
             val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
-            return DataExtractor.getStringFromField(masterKeySaltJSONObject, "int").toInt()
+
+            val saltLeft = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+            val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
+
+            return DataExtractor.getStringFromField(saltLeft, "int").toInt()
         }
 
         return null
     }
 
+
     private fun transferLoading(loading:Boolean)
     {
-        // handle the visibility of bottom buttons
+// handle the visibility of bottom buttons
 
         if (loading)
         {
-            //update_storage_button_layout.visibility = View.GONE
-            //empty.visibility = View.VISIBLE
+//update_storage_button_layout.visibility = View.GONE
+//empty.visibility = View.VISIBLE
             nav_progress?.visibility = View.VISIBLE
         }
         else
         {
-            //update_storage_button_layout.visibility = View.VISIBLE
-            //empty.visibility = View.GONE
+//update_storage_button_layout.visibility = View.VISIBLE
+//empty.visibility = View.GONE
             nav_progress?.visibility = View.GONE
         }
     }
@@ -1291,14 +1401,14 @@ class ScriptFragment : Fragment()
     {
         if (error != null)
         {
-            //mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+//mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
             mCallback?.showSnackBar(error.toString(), color, textColor)
 
             loading_textview?.text = getString(R.string.generic_error)
         }
         else if (message != null)
         {
-            //mCallback?.showSnackBar(message, ContextCompat.getColor(context!!, android.R.color.holo_green_light), ContextCompat.getColor(context!!, R.color.tz_light))
+//mCallback?.showSnackBar(message, ContextCompat.getColor(context!!, android.R.color.holo_green_light), ContextCompat.getColor(context!!, R.color.tz_light))
             mCallback?.showSnackBar(message, color, textColor)
         }
     }
@@ -1307,8 +1417,9 @@ class ScriptFragment : Fragment()
     {
         if (activity != null)
         {
-            val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
-            val theme = CustomTheme.fromBundle(themeBundle)
+            //val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
+            //val theme = CustomTheme.fromBundle(themeBundle)
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             if (validate)
             {
@@ -1319,7 +1430,7 @@ class ScriptFragment : Fragment()
                 val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
-                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
                 }
             }
@@ -1334,7 +1445,7 @@ class ScriptFragment : Fragment()
                 val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
-                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
                 }
             }
@@ -1420,25 +1531,11 @@ class ScriptFragment : Fragment()
 
     private fun isSecureKeyHashIdentical(): Boolean
     {
-        if (mStorage != null && mStorage != JSONObject(getString(R.string.default_storage)).toString())
+        val secureKeyHash = getStorageSecureKeyHash()
+        if (!secureKeyHash.isNullOrEmpty())
         {
-            //TODO at this point, just show that there is no script.
-
-            val storageJSONObject = JSONObject(mStorage)
-
-            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
-
-            // get securekey hash
-
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
-
-            val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-            val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
-
             val tz3 = retrieveTz3()
-            if (tz3 != null && tz3 == secureKeyHash)
+            if (!tz3.isNullOrEmpty() && tz3 == secureKeyHash)
             {
                 return true
             }
@@ -1447,26 +1544,201 @@ class ScriptFragment : Fragment()
         return false
     }
 
+    private fun getHistoryPayment(): List<Any>
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+
+            val historyPaymentJSONObject = ((argsSecureKey[1] as JSONObject)["args"]) as JSONArray
+
+            var spendingLimit:Long = 0
+            var remainingSpendingLimit:Long = -1L
+            var timingInSec:Long = -1L
+
+            val nowInEpoch =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    {
+                        Instant.now().epochSecond
+                    }
+            else
+                    {
+                        System.currentTimeMillis()/1000
+                    }
+
+
+            var sortedDatesList = mutableListOf<Long>()
+
+
+            if (historyPaymentJSONObject != null && historyPaymentJSONObject.length() > 0)
+            {
+                for (i in 0 until historyPaymentJSONObject.length())
+                {
+                    //first object (0) contains spending limit and global timing
+                    if (i == 0)
+                    {
+                        val spendingLimitAndTiming = (historyPaymentJSONObject[0] as JSONObject)["args"] as JSONArray
+
+                        val sLimit = ((spendingLimitAndTiming[0] as JSONObject)["int"] as String).toLong()
+                        remainingSpendingLimit = sLimit
+
+                        spendingLimit += sLimit
+
+                        val timing = ((spendingLimitAndTiming[1] as JSONObject)["int"] as String).toLong()
+                        timingInSec = timing
+
+                    }
+                    else
+                    {
+                        // there will be a second index, not a third one.
+
+                        val allOfThem = (historyPaymentJSONObject[1] as JSONObject)["args"] as JSONArray
+
+                        var cumulatedAmount:Long = 0
+
+                        if (allOfThem.length() != null && allOfThem.length() > 0)
+                        {
+                            for (j in 0 until allOfThem.length())
+                            {
+                                if (j == 0)
+                                {
+                                    // the element necessary to know when it resets the limit
+                                    //TODO the necessary element could be in the second index of allOfThem array
+
+                                    val necessaryElement = allOfThem[j] as JSONArray
+
+                                    if (!necessaryElement.isNull(0))
+                                    {
+                                        val necessaryElement = ((allOfThem[j] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+                                        val necessaryElementAmount = ((necessaryElement[1] as JSONObject)["int"] as String).toLong()
+                                        cumulatedAmount += necessaryElementAmount
+
+                                        val necessaryElementDate = (necessaryElement[0] as JSONObject)["string"] as String
+
+                                        val time = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                        {
+                                            Instant.parse(necessaryElementDate).epochSecond
+                                        }
+                                        else
+                                        {
+                                            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                                            format.timeZone = TimeZone.getTimeZone("UTC")
+                                            format.parse(necessaryElementDate).time/1000
+                                        }
+
+                                        sortedDatesList.add(time)
+
+                                        if (time <= nowInEpoch)
+                                        {
+                                            remainingSpendingLimit += necessaryElementAmount
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    //the rest of it with j == 1
+                                    val otherPayments = allOfThem[j] as JSONArray
+                                    if (!otherPayments.isNull(0))
+                                    {
+                                        for (k in 0 until otherPayments.length())
+                                        {
+                                            val payment = (otherPayments[k] as JSONObject)["args"] as JSONArray
+
+                                            val paymentAmount = ((payment[1] as JSONObject)["int"] as String).toLong()
+
+                                            cumulatedAmount += paymentAmount
+
+                                            val paymentDate = (payment[0] as JSONObject)["string"] as String
+
+                                            val time = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                            {
+                                                Instant.parse(paymentDate).epochSecond
+                                            }
+                                            else
+                                            {
+                                                val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                                                format.timeZone = TimeZone.getTimeZone("UTC")
+                                                format.parse(paymentDate).time/1000
+                                            }
+
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                            {
+
+                                                sortedDatesList.add(time)
+
+                                                if (time <= nowInEpoch)
+                                                {
+                                                    remainingSpendingLimit += paymentAmount
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            spendingLimit += cumulatedAmount
+                        }
+                    }
+                }
+
+                val myList = mutableListOf<Any>()
+
+                myList.add(spendingLimit)
+                myList.add(remainingSpendingLimit)
+                myList.add(timingInSec)
+
+                if (sortedDatesList.isNotEmpty())
+                {
+                    sortedDatesList.sort()
+
+                    val lastDate = sortedDatesList.last()
+                    //TODO maybe the lastDate is already <= now, then it's unlocked already.
+
+                    val remainingTime = lastDate - nowInEpoch
+
+                    when {
+                        remainingTime > 0 ->
+                        {
+                            myList.add(remainingTime)
+                        }
+                        else ->
+                        {
+                            myList.add(0L)
+                        }
+                    }
+                }
+                else
+                {
+                    myList.add(0L)
+                }
+
+                return myList
+            }
+        }
+
+        return listOf()
+    }
+
     private fun getStorageSecureKeyHash(): String?
     {
-        if (mStorage != null && mStorage != JSONObject(getString(R.string.default_storage)).toString())
+        if (mStorage != null)
         {
-            //TODO at this point, just show that there is no script.
+//TODO at this point, just show that there is no script.
 
             val storageJSONObject = JSONObject(mStorage)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-            // get securekey hash
+// get securekey hash
 
             val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
             val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
 
-            val secureKeyHashField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 1)
-            val secureKeyHash = DataExtractor.getStringFromField(secureKeyHashField, "string")
-
-            return secureKeyHash
+            return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
         }
 
         return null
@@ -1478,13 +1750,13 @@ class ScriptFragment : Fragment()
 
         if (!TextUtils.isEmpty(public_address_edittext?.text))
         {
-            /*
-            if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
-            {
-                mUpdateStorageAddress = public_address_edittext.text.toString()
-                isTzAddressValid = true
-            }
-            */
+/*
+if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
+{
+    mUpdateStorageAddress = public_address_edittext.text.toString()
+    isTzAddressValid = true
+}
+*/
             isTzAddressValid = true
         }
 
@@ -1723,6 +1995,8 @@ class ScriptFragment : Fragment()
         outState.putBoolean(EDIT_MODE_KEY, mEditMode)
 
         outState.putLong(BALANCE_LONG_KEY, mSecureHashBalance)
+
+        outState.putString(CONTRACT_SIG_KEY, mSig)
     }
 
     private fun mutezToTez(mutez:String):String

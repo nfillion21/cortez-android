@@ -134,7 +134,7 @@ class PasswordDialog : AppCompatDialogFragment()
 
         arguments?.let {
             val mnemonics = it.getString(MNEMONICS_KEY)
-            listener?.passwordVerified(mnemonics, password, fingerprint)
+            listener?.passwordVerified(mnemonics!!, password, fingerprint)
         }
     }
 

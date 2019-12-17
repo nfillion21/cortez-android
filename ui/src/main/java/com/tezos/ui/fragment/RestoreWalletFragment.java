@@ -65,7 +65,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
     private OnWordSelectedListener mCallback;
 
     private MnemonicWordsViewAdapter mAdapter;
-    private RecyclerView mRecyclerView;
 
     private Button mValidateMnemonicsButton;
     private FrameLayout mValidateMnemonicsButtonLayout;
@@ -146,7 +145,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
             }
         });
 
-        mRecyclerView = view.findViewById(R.id.words);
+        RecyclerView mRecyclerView = view.findViewById(R.id.words);
         setUpWordGrid(mRecyclerView);
 
         if (savedInstanceState != null)
@@ -258,7 +257,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
         if (position == 23 && word.equalsIgnoreCase("zebra"))
         {
-
             List<String> zebras = Arrays.asList(
                     "zebra",
                     "zebra",
@@ -289,7 +287,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
         }
         else if (position == 0 && word.equalsIgnoreCase("link"))
         {
-
             List<String> link = Arrays.asList(
                     "link",
                     "warm",
@@ -315,6 +312,97 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
                     "calm",
                     "bring",
                     "kick" );
+
+            mAdapter.updateWords(link, null);
+        }
+        else if (position == 0 && word.equalsIgnoreCase("blue"))
+        {
+            List<String> link = Arrays.asList(
+                    "blue",
+                    "junk",
+                    "trap",
+                    "expect",
+                    "mammal",
+                    "such",
+                    "vacant",
+                    "quarter",
+                    "siege",
+                    "carbon",
+                    "extra",
+                    "eight",
+                    "notice",
+                    "short",
+                    "cheap",
+                    "expose",
+                    "soccer",
+                    "clean",
+                    "lawn",
+                    "envelope",
+                    "goose",
+                    "major",
+                    "orange",
+                    "capable" );
+
+            mAdapter.updateWords(link, null);
+        }
+        else if (position == 0 && word.equalsIgnoreCase("green"))
+        {
+            List<String> link = Arrays.asList(
+                    "green",
+                    "kind",
+                    "inquiry",
+                    "alarm",
+                    "razor",
+                    "zone",
+                    "benefit",
+                    "again",
+                    "ski",
+                    "erase",
+                    "another",
+                    "wide",
+                    "liberty",
+                    "multiply",
+                    "pen",
+                    "risk",
+                    "love",
+                    "corn",
+                    "monster",
+                    "honey",
+                    "level",
+                    "poem",
+                    "position",
+                    "spell" );
+
+            mAdapter.updateWords(link, null);
+        }
+
+        else if (position == 0 && word.equalsIgnoreCase("bronze"))
+        {
+            List<String> link = Arrays.asList(
+                    "bronze",
+                    "avoid",
+                    "sound",
+                    "tongue",
+                    "claw",
+                    "reward",
+                    "choice",
+                    "pottery",
+                    "jump",
+                    "dream",
+                    "ripple",
+                    "extra",
+                    "adapt",
+                    "wisdom",
+                    "infant",
+                    "urban",
+                    "tenant",
+                    "squirrel",
+                    "crop",
+                    "midnight",
+                    "craft",
+                    "cool",
+                    "recall",
+                    "public" );
 
             mAdapter.updateWords(link, null);
         }
