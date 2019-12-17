@@ -184,7 +184,7 @@ class CreateWalletFragment : Fragment()
 
         validateCreateButton(isCreateButtonValid(), theme)
 
-        mBackupCheckbox?.setOnCheckedChangeListener { buttonView, isChecked ->
+        mBackupCheckbox?.setOnCheckedChangeListener { buttonView, _ ->
             mBackupChecked = buttonView.isChecked
             validateCreateButton(isCreateButtonValid(), theme)
         }

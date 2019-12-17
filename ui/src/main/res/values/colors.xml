@@ -13,6 +13,7 @@
     <color name="colorBackground">@color/theme_boo_primary_dark</color>
     <color name="colorPrimary">@color/theme_boo_primary_dark</color>
     <color name="colorPrimaryDark">@color/theme_boo_primary_dark</color>
+    <color name="colorPrimaryVeryDark">@color/theme_boo_primary_very_dark</color>
     <color name="colorSecondary">@color/theme_boo_primary</color>
     <color name="colorTertiary">@color/theme_boo_tertiary</color>
     <color name="colorAccent">@color/theme_boo_text_secondary</color>
@@ -44,6 +45,7 @@
     <color name="theme_yellow_primary_dark">#e6d335</color>
 
     <color name="theme_boo_primary_dark">#ff375f</color>
+    <color name="theme_boo_primary_very_dark">#ff2341</color>
     <color name="theme_boo_text">@color/tz_light</color>
     <color name="theme_boo_text_secondary">@color/tz_dark</color>
     <color name="theme_boo_primary">#ff87af</color>

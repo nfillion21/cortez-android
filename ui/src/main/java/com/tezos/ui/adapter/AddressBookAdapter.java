@@ -52,7 +52,6 @@ import java.util.List;
 
 public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.ViewHolder>
 {
-    private final Resources mResources;
     private LayoutInflater mLayoutInflater;
     private Activity mActivity;
     private List<Address> mAddresses;
@@ -74,7 +73,6 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
     public AddressBookAdapter(Activity activity, AddressBookActivity.Selection selection, CustomTheme customTheme)
     {
         mActivity = activity;
-        mResources = mActivity.getResources();
         mLayoutInflater = LayoutInflater.from(activity.getApplicationContext());
         mCustomTheme = customTheme;
 

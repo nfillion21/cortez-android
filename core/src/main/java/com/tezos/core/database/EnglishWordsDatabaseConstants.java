@@ -28,9 +28,9 @@
 package com.tezos.core.database;
 
 public interface EnglishWordsDatabaseConstants {
-	public static String DB_NAME = "english_words.db";
-	public static final String TABLE_WORD = "english_words";
-	public static final String FTS_VIRTUAL_TABLE = "FTS_english_words";
-	public static final String COL_ID = "_id";
-	public static final String COL_WORD = "word";
+	String DB_NAME = "english_words.db";
+	String TABLE_WORD = "english_words";
+	String FTS_VIRTUAL_TABLE = "FTS_english_words";
+	String COL_ID = "_id";
+	String COL_WORD = "word";
 }

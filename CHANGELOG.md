@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.5.0
+-----
+* Deployed the Daily Spending Limit contract feature.
+
 1.4.1
 -----
 * Adapting to the Babylon protocol.

@@ -52,17 +52,24 @@ import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.DataExtractor
-import com.tezos.core.utils.Utils
+import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_delegate.*
+import kotlinx.android.synthetic.main.fragment_delegate.loading_textview
+import kotlinx.android.synthetic.main.fragment_delegate.nav_progress
+import kotlinx.android.synthetic.main.fragment_delegate.storage_info_textview
+import kotlinx.android.synthetic.main.fragment_delegate.update_storage_button
+import kotlinx.android.synthetic.main.fragment_delegate.update_storage_button_layout
+import kotlinx.android.synthetic.main.fragment_delegate.update_storage_form_card
+import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.redelegate_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import kotlin.math.roundToLong
 
 class DelegateFragment : Fragment()
@@ -77,6 +84,8 @@ class DelegateFragment : Fragment()
 
     private var mContractInfoLoading:Boolean = false
 
+    private var mStorageInfoLoading:Boolean = false
+
     private var mDelegatePayload:String? = null
     private var mDelegateFees:Long = -1
 
@@ -88,13 +97,18 @@ class DelegateFragment : Fragment()
 
     private var mWalletEnabled:Boolean = false
 
+    private var mStorage:String? = null
+
+    private var mSig:String? = null
+
     data class Contract
     (
             val blk: String,
             val spendable: Boolean,
             val delegatable: Boolean,
             val delegate: String?,
-            val script: String
+            val script: String,
+            val storage: String
     )
 
     internal class ContractSerialization internal constructor(private val contract: Contract)
@@ -108,6 +122,7 @@ class DelegateFragment : Fragment()
             contractBundle.putBoolean("delegatable", contract.delegatable)
             contractBundle.putString("delegate", contract.delegate)
             contractBundle.putString("script", contract.script)
+            contractBundle.putString("storage", contract.storage)
 
             return contractBundle
         }
@@ -122,8 +137,9 @@ class DelegateFragment : Fragment()
             val delegatable = this.bundle.getBoolean("delegatable", false)
             val delegate = this.bundle.getString("delegate", null)
             val script = this.bundle.getString("script", null)
+            val storage = this.bundle.getString("storage", null)
 
-            return Contract(blk, spendable, delegatable, delegate, script)
+            return Contract(blk, spendable, delegatable, delegate, script, storage)
         }
     }
 
@@ -154,6 +170,7 @@ class DelegateFragment : Fragment()
         private const val REMOVE_DELEGATE_FINALIZE_TAG = "remove_delegate_finalize"
 
         private const val CONTRACT_INFO_TAG = "contract_info"
+        private const val STORAGE_INFO_TAG = "storage_info"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
@@ -162,9 +179,13 @@ class DelegateFragment : Fragment()
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
 
+        private const val STORAGE_DATA_KEY = "storage_data_key"
+
         private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
         private const val CONTRACT_DATA_KEY = "contract_data_key"
+
+        private const val CONTRACT_SIG_KEY = "contract_sig_key"
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -248,6 +269,12 @@ class DelegateFragment : Fragment()
 
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
 
+            mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
+
+            mStorageInfoLoading = savedInstanceState.getBoolean(STORAGE_INFO_TAG)
+
+            mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
+
             val contractBundle = savedInstanceState.getBundle(CONTRACT_DATA_KEY)
             if (contractBundle != null)
             {
@@ -262,40 +289,49 @@ class DelegateFragment : Fragment()
             }
             else
             {
-                onContractInfoComplete(false)
+                onContractInfoComplete(true)
 
-                if (mInitRemoveDelegateLoading)
+                if (mStorageInfoLoading)
                 {
-                    startInitRemoveDelegateLoading()
+                    startGetRequestLoadContractStorage()
                 }
                 else
                 {
-                    onInitRemoveDelegateLoadComplete(null)
+                    onStorageInfoComplete(true)
 
-                    if (mFinalizeRemoveDelegateLoading)
+                    if (mInitRemoveDelegateLoading)
                     {
-                        startFinalizeRemoveDelegateLoading()
+                        startInitRemoveDelegateLoading()
                     }
                     else
                     {
-                        onFinalizeDelegationLoadComplete(null)
+                        onInitRemoveDelegateLoadComplete(null)
 
-                        //TODO we got to keep in mind there's an id already.
-                        if (mInitDelegateLoading)
+                        if (mFinalizeRemoveDelegateLoading)
                         {
-                            startInitDelegationLoading()
+                            startFinalizeRemoveDelegateLoading()
                         }
                         else
                         {
-                            onInitDelegateLoadComplete(null)
+                            onFinalizeDelegationLoadComplete(null)
 
-                            if (mFinalizeDelegateLoading)
+                            //TODO we got to keep in mind there's an id already.
+                            if (mInitDelegateLoading)
                             {
-                                startFinalizeAddDelegateLoading()
+                                startInitDelegationLoading()
                             }
                             else
                             {
-                                onFinalizeDelegationLoadComplete(null)
+                                onInitDelegateLoadComplete(null)
+
+                                if (mFinalizeDelegateLoading)
+                                {
+                                    startFinalizeAddDelegateLoading()
+                                }
+                                else
+                                {
+                                    onFinalizeDelegationLoadComplete(null)
+                                }
                             }
                         }
                     }
@@ -436,12 +472,8 @@ class DelegateFragment : Fragment()
     // volley
     private fun startGetRequestLoadContractInfo()
     {
-        cancelRequests(true)
-
-        mContractInfoLoading = true
 
         loading_textview.setText(R.string.loading_contract_info)
-
 
         nav_progress.visibility = View.VISIBLE
 
@@ -455,26 +487,25 @@ class DelegateFragment : Fragment()
             {
 
                 //prevents from async crashes
-                if (R.id.content != null)
+                if (swipe_refresh_layout != null)
                 {
                     addContractInfoFromJSON(it)
-                    onContractInfoComplete(true)
 
                     val hasMnemonics = Storage(activity!!).hasMnemonics()
                     if (hasMnemonics)
                     {
                         val seed = Storage(activity!!).getMnemonics()
+                        val isMnemonicsEmpty = seed.mnemonics.isNullOrEmpty()
 
-                        if (seed.mnemonics.isNotEmpty())
+                        onContractInfoComplete(isMnemonicsEmpty)
+
+                        if (!isMnemonicsEmpty)
                         {
-                            if (mContract?.delegate != null)
-                            {
-                                startInitRemoveDelegateLoading()
-                            }
-                            else
-                            {
-                                validateAddButton(isInputDataValid() && isDelegateFeeValid())
-                            }
+                            //TODO need to check here if we need to get salt
+                            //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
+
+                            validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                            startGetRequestLoadContractStorage()
                         }
                     }
                 }
@@ -486,14 +517,115 @@ class DelegateFragment : Fragment()
                         showSnackBar(it, null)
                     })
 
+
+            cancelRequests(true)
+            mContractInfoLoading = true
+
             jsonArrayRequest.tag = CONTRACT_INFO_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
+    // volley
+    private fun startGetRequestLoadContractStorage()
+    {
+
+        loading_textview.setText(R.string.loading_contract_info)
+        nav_progress.visibility = View.VISIBLE
+
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.contract_storage_url), pkh)
+
+            // Request a string response from the provided URL.
+            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener<JSONObject>
+            {
+
+                //prevents from async crashes
+                if (swipe_refresh_layout != null)
+                {
+                    addStorageInfoFromJSON(it)
+                    onStorageInfoComplete(true)
+
+                    val hasMnemonics = Storage(activity!!).hasMnemonics()
+                    if (hasMnemonics)
+                    {
+                        val seed = Storage(activity!!).getMnemonics()
+
+                        if (seed.mnemonics.isNotEmpty())
+                        {
+                            //TODO need to check here if we need to get salt
+                            //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
+
+                            if (mContract?.delegate != null)
+                            {
+                                startInitRemoveDelegateLoading()
+                            }
+                            else
+                            {
+                                validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                            }
+                        }
+                    }
+
+                    /*
+                    val mnemonicsData = Storage(activity!!).getMnemonics()
+                    val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
+                    val isDefaultContract = mStorage.toString() == defaultContract.toString()
+
+                    if (mStorage != null && !isDefaultContract)
+                    {
+                        validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
+
+                        startGetRequestBalance()
+                    }
+
+                    else
+                    {
+                        //TODO I don't need to forge a transfer for now
+                        //TODO hide the whole thing
+
+                        //I need the right data inputs before.
+                        //startInitRemoveDelegateLoading()
+                    }
+                    */
+                }
+            },
+                    Response.ErrorListener {
+
+                        if (swipe_refresh_script_layout != null)
+                        {
+                            /*
+                            val response = it.networkResponse?.statusCode
+                            if (response == 404)
+                            {
+                                //TODO this doesn't exist anymore
+                                mStorage = JSONObject(getString(R.string.default_storage)).toString()
+                            }
+                            else
+                            {
+                                // 404 happens when there is no storage in this KT1
+                                //showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                            }
+                            */
+
+                            showSnackBar(it, null)
+                            onStorageInfoComplete(false)
+                        }
+                    })
+
+            cancelRequests(true)
+            mStorageInfoLoading = true
+
+            jsonArrayRequest.tag = STORAGE_INFO_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
     }
 
     private fun addContractInfoFromJSON(answer: JSONArray)
     {
-        if (answer != null && answer.length() > 0)
+        if (answer.length() > 0)
         {
             val contractJSON = DataExtractor.getJSONObjectFromField(answer,0)
 
@@ -501,21 +633,46 @@ class DelegateFragment : Fragment()
             val spendable = DataExtractor.getBooleanFromField(contractJSON, "spendable")
             val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
             val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
+            val script = DataExtractor.getJSONObjectFromField(contractJSON, "script")
 
-            val resScript = JSONObject(getString(R.string.default_contract))
-            mContract = Contract(blk as String, spendable as Boolean, delegatable as Boolean, delegate, resScript.toString())
+            val storage = DataExtractor.getJSONObjectFromField(script, "storage")
+
+            //val resScript = JSONObject(getString(R.string.default_contract))
+            mContract = Contract(blk as String, spendable as Boolean, delegatable as Boolean, delegate, script.toString(), storage.toString())
         }
+    }
+
+    private fun addStorageInfoFromJSON(answer: JSONObject)
+    {
+        if (answer.length() > 0)
+        {
+            mStorage = answer.toString()
+        }
+    }
+
+    private fun onStorageInfoComplete(animating:Boolean)
+    {
+        mStorageInfoLoading = false
+        nav_progress?.visibility = View.GONE
+
+        //TODO handle the swipe refresh
+        swipe_refresh_script_layout?.isEnabled = true
+        swipe_refresh_script_layout?.isRefreshing = false
+
+        refreshTextUnderDelegation(animating)
     }
 
     private fun onContractInfoComplete(animating:Boolean)
     {
         mContractInfoLoading = false
-        nav_progress?.visibility = View.GONE
+        if (animating)
+        {
+            nav_progress?.visibility = View.GONE
+        }
 
         //TODO handle the swipe refresh
         swipe_refresh_layout?.isEnabled = true
         swipe_refresh_layout?.isRefreshing = false
-
         refreshTextUnderDelegation(animating)
     }
 
@@ -527,7 +684,7 @@ class DelegateFragment : Fragment()
 
         if (mContract != null)
         {
-            if (mContract!!.delegate != null)
+            if (mContract?.delegate != null)
             {
                 limits_info_textview?.visibility = View.GONE
                 update_storage_form_card?.visibility = View.VISIBLE
@@ -608,12 +765,36 @@ class DelegateFragment : Fragment()
         }
     }
 
+    private fun getSalt():Int?
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
+
+                val saltLeft = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+
+                val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+
+                return DataExtractor.getStringFromField(saltLeft, "int").toInt()
+            }
+        }
+
+        return null
+    }
+
+
     // volley
     private fun startPostRequestLoadFinalizeRemoveDelegate(mnemonicsData: Storage.MnemonicsData)
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isRemoveButtonValid() && mDelegatePayload != null && mDelegateFees != null)
+        if (isRemoveButtonValid() && mDelegatePayload != null && mDelegateFees != -1L)
         {
 
             var postParams = JSONObject()
@@ -626,9 +807,18 @@ class DelegateFragment : Fragment()
             //dstObject.put("dst", mDstAccount)
 
             dstObject.put("dst", pkh())
-            dstObject.put("contract_type", "remove_delegate")
 
-            //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
+            val salt = getSalt()
+            if (salt != null && salt >= 0)
+            {
+                dstObject.put("contract_type", "remove_delegate_slc")
+                dstObject.put("edsig", mSig)
+            }
+            else
+            {
+                dstObject.put("contract_type", "remove_delegate")
+            }
+
             dstObject.put("amount", (0).toLong())
 
             dstObject.put("fee", mDelegateFees)
@@ -636,7 +826,6 @@ class DelegateFragment : Fragment()
             dstObjects.put(dstObject)
 
             postParams.put("dsts", dstObjects)
-
 
             if (isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams))
             {
@@ -727,7 +916,7 @@ class DelegateFragment : Fragment()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isAddButtonValid() && mDelegatePayload != null && mDelegateTezosAddress != null && mDelegateFees != null)
+        if (isAddButtonValid() && mDelegatePayload != null && mDelegateTezosAddress != null && mDelegateFees != -1L)
         {
             var postParams = JSONObject()
             postParams.put("src", mnemonicsData.pkh)
@@ -739,7 +928,19 @@ class DelegateFragment : Fragment()
             //dstObject.put("dst", mDstAccount)
 
             dstObject.put("dst", pkh())
-            dstObject.put("contract_type", "add_delegate")
+
+            val salt = getSalt()
+            if (salt != null && salt >= 0)
+            {
+                dstObject.put("contract_type", "add_delegate_slc")
+                dstObject.put("edsig", mSig)
+            }
+            else
+            {
+                dstObject.put("contract_type", "add_delegate")
+            }
+
+
             dstObject.put("dst_account", mDelegateTezosAddress)
 
             dstObject.put("amount", (0).toLong())
@@ -837,7 +1038,7 @@ class DelegateFragment : Fragment()
     private fun onFinalizeDelegationLoadComplete(error: VolleyError?)
     {
         // everything is over, there's no call to make
-        cancelRequests(true)
+        cancelRequests(false)
 
         if (error != null)
         {
@@ -883,7 +1084,7 @@ class DelegateFragment : Fragment()
         else
         {
             transferLoading(false)
-            cancelRequests(true)
+            cancelRequests(false)
             // it's signed, looks like it worked.
             //transferLoading(true)
         }
@@ -920,7 +1121,7 @@ class DelegateFragment : Fragment()
         else
         {
             transferLoading(false)
-            cancelRequests(true)
+            cancelRequests(false)
             // it's signed, looks like it worked.
             //transferLoading(true)
         }
@@ -955,12 +1156,125 @@ class DelegateFragment : Fragment()
         dstObject.put("dst", pkh())
 
         //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
-        dstObject.put("amount", (0).toLong().toString())
+        dstObject.put("amount", "0")
 
-        dstObject.put("entrypoint", "do")
+        //TODO salt fail
+        val salt = getSalt()
+        if (salt != null && salt >= 0)
+        {
 
-        val json = JSONArray(String.format(getString(R.string.set_delegate_contract), mDelegateTezosAddress))
-        dstObject.put("parameters", json)
+            dstObject.put("entrypoint", "appel_clef_maitresse")
+
+            val dataVisitable = Primitive(
+                    Primitive.Name.Right,
+                    arrayOf(
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.sequenceOf(
+                                                    Primitive(Primitive.Name.DROP),
+                                                    Primitive(
+                                                            Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))
+                                                    ),
+                                                    Primitive(
+                                                            Primitive.Name.PUSH,
+                                                            arrayOf(
+                                                                    Primitive(Primitive.Name.key_hash),
+                                                                    Visitable.keyHash(mDelegateTezosAddress!!)
+                                                            )
+                                                    ),
+                                                    Primitive(Primitive.Name.SOME),
+                                                    Primitive(Primitive.Name.SET_DELEGATE),
+                                                    Primitive(Primitive.Name.CONS)
+
+                                            ),
+                                            Visitable.keyHash(mnemonicsData.pkh)
+                                    )
+                            )
+                    )
+            )
+
+            val o = ByteArrayOutputStream()
+            o.write(0x05)
+
+            val dataPacker = Packer(o)
+            dataVisitable.accept(dataPacker)
+
+            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.address(pkh()!!),
+                            Visitable.chainID(getString(R.string.chain_ID))
+                    )
+            )
+
+            val output = ByteArrayOutputStream()
+            output.write(0x05)
+
+            val p = Packer(output)
+            addressAndChainVisitable.accept(p)
+
+            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+            val saltVisitable = Visitable.integer(salt.toLong())
+
+            val outputStream = ByteArrayOutputStream()
+            outputStream.write(0x05)
+
+            val packer = Packer(outputStream)
+            saltVisitable.accept(packer)
+
+            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+
+
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            val sk = CryptoUtils.generateSk(mnemonics, "")
+
+            //val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+            //val signature = KeyPair.sign(sk, signedData)
+
+            val signature = KeyPair.sign(sk,"0x".hexToByteArray() + dataPack + addressAndChainPack + saltPack)
+            val edsig = CryptoUtils.generateEDSig(signature)
+
+
+            val spendingLimitFile = "spending_limit_delegate.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
+            val args = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+            val pkValue = args[0] as JSONObject
+            pkValue.put("string", pk)
+
+            val sig = args[1] as JSONObject
+            sig.put("string", edsig)
+
+            mSig = edsig
+
+            val argsRight = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+            val argsDelegate = ((argsRight[0] as JSONArray)[2] as JSONObject)["args"] as JSONArray
+            val delegate = argsDelegate[1] as JSONObject
+            delegate.put("string", mDelegateTezosAddress)
+
+
+            val masterKey = argsRight[1] as JSONObject
+            masterKey.put("string", mnemonicsData.pkh)
+
+            dstObject.put("parameters", value)
+        }
+        else
+        {
+            dstObject.put("entrypoint", "do")
+
+            val json = JSONArray(String.format(getString(R.string.set_delegate_contract), mDelegateTezosAddress))
+            dstObject.put("parameters", json)
+        }
 
         dstObjects.put(dstObject)
 
@@ -976,11 +1290,11 @@ class DelegateFragment : Fragment()
                 mDelegateFees = answer.getLong("total_fee")
 
                 // we use this call to ask for payload and fees
-                if (mDelegatePayload != null && mDelegateFees != null && activity != null)
+                if (mDelegatePayload != null && mDelegateFees != -1L && activity != null)
                 {
                     onInitDelegateLoadComplete(null)
 
-                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
+                    val feeInTez = mDelegateFees.toDouble()/1000000.0
                     fee_edittext?.setText(feeInTez.toString())
 
                     validateAddButton(isInputDataValid() && isDelegateFeeValid())
@@ -1072,12 +1386,118 @@ class DelegateFragment : Fragment()
         dstObject.put("dst", pkh())
 
         //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
-        dstObject.put("amount", (0).toLong().toString())
+        dstObject.put("amount", "0")
 
-        dstObject.put("entrypoint", "do")
 
-        val json = JSONArray(getString(R.string.remove_delegate_contract))
-        dstObject.put("parameters", json)
+        //TODO salt fail
+        val salt = getSalt()
+        if (salt != null && salt >= 0)
+        {
+            dstObject.put("entrypoint", "appel_clef_maitresse")
+
+            val dataVisitable = Primitive(
+                    Primitive.Name.Right,
+                    arrayOf(
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.sequenceOf(
+                                                    Primitive(Primitive.Name.DROP),
+                                                    Primitive(
+                                                            Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))
+                                                    ),
+                                                    Primitive(
+                                                            Primitive.Name.NONE,
+                                                            arrayOf(
+                                                                    Primitive(Primitive.Name.key_hash)
+                                                            )
+                                                    ),
+                                                    Primitive(Primitive.Name.SET_DELEGATE),
+                                                    Primitive(Primitive.Name.CONS)
+
+                                            ),
+                                            Visitable.keyHash(mnemonicsData.pkh)
+                                    )
+                            )
+                    )
+            )
+
+            val o = ByteArrayOutputStream()
+            o.write(0x05)
+
+            val dataPacker = Packer(o)
+            dataVisitable.accept(dataPacker)
+
+            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.address(pkh()!!),
+                            Visitable.chainID(getString(R.string.chain_ID))
+                    )
+            )
+
+            val output = ByteArrayOutputStream()
+            output.write(0x05)
+
+            val p = Packer(output)
+            addressAndChainVisitable.accept(p)
+
+            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+            val saltVisitable = Visitable.integer(salt.toLong())
+
+            val outputStream = ByteArrayOutputStream()
+            outputStream.write(0x05)
+
+            val packer = Packer(outputStream)
+            saltVisitable.accept(packer)
+
+            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+
+
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            val sk = CryptoUtils.generateSk(mnemonics, "")
+
+            //val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+            //val signature = KeyPair.sign(sk, signedData)
+
+            val signature = KeyPair.sign(sk,"0x".hexToByteArray() + dataPack + addressAndChainPack + saltPack)
+            val edsig = CryptoUtils.generateEDSig(signature)
+
+
+            val spendingLimitFile = "spending_limit_remove_delegate.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
+            val args = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+            val pkValue = args[0] as JSONObject
+            pkValue.put("string", pk)
+
+            val sig = args[1] as JSONObject
+            sig.put("string", edsig)
+
+            mSig = edsig
+
+            val argsRight = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+            val masterKey = argsRight[1] as JSONObject
+            masterKey.put("string", mnemonicsData.pkh)
+
+            dstObject.put("parameters", value)
+        }
+        else
+        {
+            dstObject.put("entrypoint", "do")
+
+            val json = JSONArray(getString(R.string.remove_delegate_contract))
+            dstObject.put("parameters", json)
+        }
 
         dstObjects.put(dstObject)
 
@@ -1092,12 +1512,12 @@ class DelegateFragment : Fragment()
                 mDelegateFees = answer.getLong("total_fee")
 
                 // we use this call to ask for payload and fees
-                if (mDelegatePayload != null && mDelegateFees != null)
+                if (mDelegatePayload != null && mDelegateFees != -1L)
                 {
                     onInitRemoveDelegateLoadComplete(null)
 
-                    val feeInTez = mDelegateFees?.toDouble()/1000000.0
-                    fee_edittext?.setText(feeInTez?.toString())
+                    val feeInTez = mDelegateFees.toDouble()/1000000.0
+                    fee_edittext?.setText(feeInTez.toString())
 
                     validateRemoveDelegateButton(isDelegateFeeValid())
                 }
@@ -1203,7 +1623,7 @@ class DelegateFragment : Fragment()
                 val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
-                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
                 }
             }
@@ -1218,7 +1638,7 @@ class DelegateFragment : Fragment()
                 val drawables = update_storage_button?.compoundDrawables
                 if (drawables != null)
                 {
-                    val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
                 }
             }
@@ -1240,7 +1660,7 @@ class DelegateFragment : Fragment()
             val drawables = remove_delegate_button?.compoundDrawables
             if (activity != null && drawables != null)
             {
-                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                val wrapDrawable = DrawableCompat.wrap(drawables[0])
                 DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
             }
         }
@@ -1254,7 +1674,7 @@ class DelegateFragment : Fragment()
             val drawables = remove_delegate_button?.compoundDrawables
             if (activity != null && drawables != null)
             {
-                val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+                val wrapDrawable = DrawableCompat.wrap(drawables[0])
                 DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
             }
         }
@@ -1408,7 +1828,7 @@ class DelegateFragment : Fragment()
     private fun onDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        if (isFingerprintAllowed() && hasEnrolledFingerprints())
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
@@ -1441,7 +1861,7 @@ class DelegateFragment : Fragment()
     private fun onRemoveDelegateClick()
     {
         val dialog = AuthenticationDialog()
-        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        if (isFingerprintAllowed() && hasEnrolledFingerprints())
         {
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
@@ -1541,6 +1961,7 @@ class DelegateFragment : Fragment()
             requestQueue?.cancelAll(REMOVE_DELEGATE_INIT_TAG)
             requestQueue?.cancelAll(REMOVE_DELEGATE_FINALIZE_TAG)
             requestQueue?.cancelAll(CONTRACT_INFO_TAG)
+            requestQueue?.cancelAll(STORAGE_INFO_TAG)
 
             if (resetBooleans)
             {
@@ -1549,6 +1970,7 @@ class DelegateFragment : Fragment()
                 mInitRemoveDelegateLoading = false
                 mFinalizeRemoveDelegateLoading = false
                 mContractInfoLoading = false
+                mStorageInfoLoading = false
             }
         }
     }
@@ -1576,6 +1998,12 @@ class DelegateFragment : Fragment()
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
 
         outState.putBundle(CONTRACT_DATA_KEY, this.toBundle(mContract))
+
+        outState.putString(STORAGE_DATA_KEY, mStorage)
+
+        outState.putBoolean(STORAGE_INFO_TAG, mStorageInfoLoading)
+
+        outState.putString(CONTRACT_SIG_KEY, mSig)
     }
 
     override fun onDetach()

@@ -18,11 +18,10 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.tezos.core.*
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.DataExtractor
+import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -32,7 +31,9 @@ import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.dialog_sent_cents.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
+import kotlin.math.roundToLong
 
 class SendCentsFragment : AppCompatDialogFragment()
 {
@@ -49,6 +50,8 @@ class SendCentsFragment : AppCompatDialogFragment()
     private var mStorage:String? = null
 
     private var mIsFromContract:Boolean = true
+
+    private var mSig:String? = null
 
     interface OnSendCentsInteractionListener
     {
@@ -75,6 +78,8 @@ class SendCentsFragment : AppCompatDialogFragment()
         private const val IS_FROM_CONTRACT_KEY = "is_from_contract_key"
 
         private const val IS_CONTRACT_AVAILABLE_KEY = "is_contract_available_key"
+
+        private const val CONTRACT_SIG_KEY = "contract_sig_key"
 
         @JvmStatic
         fun newInstance(contractPkh:String, contractAvailable:Boolean, storage:String, theme: CustomTheme) =
@@ -186,6 +191,8 @@ class SendCentsFragment : AppCompatDialogFragment()
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
             mIsFromContract = savedInstanceState.getBoolean(IS_FROM_CONTRACT_KEY)
+
+            mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
             if (mInitTransferLoading)
             {
@@ -338,36 +345,53 @@ class SendCentsFragment : AppCompatDialogFragment()
         //TODO we got to verify at this very moment.
         if (isTransferFeeValid() && mTransferPayload != null)
         {
-            //val pkhSrc = seed.pkh
-            //val pkhDst = mDstAccount
-
-            /*
-            val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
-            val pk = CryptoUtils.generatePk(mnemonics, "")
-
             var postParams = JSONObject()
-            postParams.put("src", mSrcAccount)
-
-            //TODO it won't be pk with contract transfer
-            postParams.put("src_pk", pk)
-
             var dstObjects = JSONArray()
-
             var dstObject = JSONObject()
-            dstObject.put("dst", pkhDst)
 
-            val mutezAmount = (mTransferAmount*1000000.0).toLong()
-            dstObject.put("amount", mutezAmount)
+            if (mIsFromContract)
+            {
+                val ecKeys = retrieveECKeys()
+                val p2pk = CryptoUtils.generateP2Pk(ecKeys)
 
-            dstObject.put("fee", mTransferFees)
+                postParams.put("src_pk", p2pk)
+
+                val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                postParams.put("src", tz3)
+
+                val kt1 = arguments!!.getString(CONTRACT_PUBLIC_KEY)
+                dstObject.put("dst", kt1)
+
+                dstObject.put("dst_account", tz3)
+
+                dstObject.put("amount", 0.toLong())
+                dstObject.put("contract_type", "slc_enclave_transfer")
+
+                dstObject.put("edsig", mSig)
+
+                //0.1 tez == 100 000 mutez
+                dstObject.put("transfer_amount", "100000".toLong())
+                dstObject.put("fee", mTransferFees)
+            }
+            else
+            {
+                val mnemonicsData = Storage(activity!!).getMnemonics()
+
+                postParams.put("src", mnemonicsData.pkh)
+                postParams.put("src_pk", mnemonicsData.pk)
+
+                dstObject.put("dst", retrieveTz3())
+
+                dstObject.put("amount", "100000".toLong())
+
+                dstObject.put("fee", mTransferFees)
+
+            }
 
             dstObjects.put(dstObject)
-
             postParams.put("dsts", dstObjects)
-            */
 
-            //TODO verify the payloads
-            if (/*!isTransferPayloadValid(mTransferPayload!!, postParams)*/true)
+            if (isTransferPayloadValid(mTransferPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -380,16 +404,12 @@ class SendCentsFragment : AppCompatDialogFragment()
                 System.arraycopy(zeroThree, 0, result, 0, xLen)
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
-                var compressedSignature = ByteArray(64)
+                var compressedSignature: ByteArray
                 if (mIsFromContract)
                 {
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
-
-                    if (signature != null)
-                    {
-                        compressedSignature = compressFormat(signature)
-                    }
+                    compressedSignature = compressFormat(signature)
                 }
                 else
                 {
@@ -397,7 +417,6 @@ class SendCentsFragment : AppCompatDialogFragment()
                     val sk = CryptoUtils.generateSk(mnemonics, "")
                     compressedSignature = KeyPair.sign(sk, result)
                 }
-
 
                 val pLen = byteArrayThree.size
                 val sLen = compressedSignature.size
@@ -409,7 +428,7 @@ class SendCentsFragment : AppCompatDialogFragment()
                 var payloadsign = newResult.toNoPrefixHexString()
 
                 val stringRequest = object : StringRequest(Method.POST, url,
-                        Response.Listener<String> { response ->
+                        Response.Listener<String> {
 
                             if (rootView != null)
                             {
@@ -463,10 +482,6 @@ class SendCentsFragment : AppCompatDialogFragment()
         }
     }
 
-
-
-
-
     private fun startPostRequestLoadInitTransfer(fromContract: Boolean)
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
@@ -482,62 +497,118 @@ class SendCentsFragment : AppCompatDialogFragment()
             val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
             postParams.put("src", tz3)
 
+            val kt1 = arguments!!.getString(CONTRACT_PUBLIC_KEY)
+
             var dstObjects = JSONArray()
 
             var dstObject = JSONObject()
 
-            dstObject.put("dst", arguments!!.getString(CONTRACT_PUBLIC_KEY))
+            dstObject.put("dst", kt1)
             dstObject.put("amount", "0")
 
-            /*
-            val packSpending = Pack.prim(
-                    Pack.pair(
-                            Pack.listOf(
-                                    Pack.pair(
-                                            Pack.mutez((100000).toLong()),
-                                            Pack.contract(tz3)
+            dstObject.put("entrypoint", "transfer")
+
+            val dataVisitable = Primitive(
+                    Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.sequenceOf(
+                                    Primitive(
+                                            Primitive.Name.Pair,
+                                            arrayOf(
+                                                    Visitable.integer(100000),
+                                                    Visitable.address(tz3)
+                                            )
                                     )
                             ),
-                            Pack.keyHash(retrieveTz3() as String)
+                            Visitable.keyHash(tz3)
                     )
             )
 
-            val packSpendingByteArray = packSpending.data.toNoPrefixHexString().hexToByteArray()
 
-            //TODO we got the salt now
-            //TODO block the UI to be sure we got the salt
+            val o = ByteArrayOutputStream()
+            o.write(0x05)
 
+            val dataPacker = Packer(o)
+            dataVisitable.accept(dataPacker)
+
+            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                    arrayOf(
+                            Visitable.address(kt1),
+                            Visitable.chainID(getString(R.string.chain_ID))
+                    )
+            )
+
+            val output = ByteArrayOutputStream()
+            output.write(0x05)
+
+            val p = Packer(output)
+            addressAndChainVisitable.accept(p)
+
+            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+
+            var saltVisitable: Visitable? = null
             val salt = getSalt()
-            val packSalt = Pack.prim(Pack.int(salt!!))
-            val packByteArray = packSalt.data.toNoPrefixHexString().hexToByteArray()
-            */
+            if (salt != null)
+            {
+                saltVisitable = Visitable.integer(salt.toLong())
+            }
 
-            //val signedData = KeyPair.b2b(packSpendingByteArray + packByteArray)
-            val signedData = KeyPair.b2b(ByteArray(0))
+            val outputStream = ByteArrayOutputStream()
+            outputStream.write(0x05)
+
+            val packer = Packer(outputStream)
+            saltVisitable!!.accept(packer)
+
+            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+
+            val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
 
             val signature = EncryptionServices().sign(signedData)
             val compressedSignature = compressFormat(signature)
 
             val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
 
-            val resScript = JSONObject(getString(R.string.spending_limit_contract_evo_spending))
 
-            //montant(mutez)
-            //destinataire (tz/KT)
-            //signataire (tz3)
-            //edpk (p2pk)
-            //edsig (p2sig)
+            //val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
 
-            val spendingLimitContract = String.format(resScript.toString(),
-                    (100000).toLong().toString(),
-                    retrieveTz3(),
-                    tz3,
-                    p2pk,
-                    p2sig)
+            //val p2sig = CryptoUtils.generateEDSig(signature)
 
-            //TODO we need to put a parameter
-            val json = JSONObject(spendingLimitContract)
-            dstObject.put("parameters", json)
+
+            val spendingLimitFile = "spending_limit_transfer.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
+
+            val argsSend = (((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+            val argsSendAmount = argsSend[0] as JSONObject
+            argsSendAmount.put("int", "100000")
+
+            val argsSendContract = argsSend[1] as JSONObject
+            argsSendContract.put("string", tz3)
+
+            val argsSendTz = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+            argsSendTz.put("string", tz3)
+
+            val argsSig = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
+
+            val argsSigPk = argsSig[0] as JSONObject
+            argsSigPk.put("string", p2pk)
+
+            val argsSigSig = argsSig[1] as JSONObject
+            argsSigSig.put("string", p2sig)
+
+            mSig = p2sig
+
+            dstObject.put("parameters", value)
 
             dstObjects.put(dstObject)
 
@@ -562,7 +633,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             dstObject.put("dst", retrieveTz3())
 
             //0.1 tez == 100 000 mutez
-            dstObject.put("amount", (100000).toLong().toString())
+            dstObject.put("amount", "100000")
 
             var dstObjects = JSONArray()
             dstObjects.put(dstObject)
@@ -583,8 +654,8 @@ class SendCentsFragment : AppCompatDialogFragment()
                 {
                     onInitTransferLoadComplete(null)
 
-                    val feeInTez = mTransferFees?.toDouble()/1000000.0
-                    fee_edittext?.setText(feeInTez?.toString())
+                    val feeInTez = mTransferFees.toDouble()/1000000.0
+                    fee_edittext?.setText(feeInTez.toString())
 
                     validateSendCentsButton(isTransferFeeValid())
                     setTextPayButton()
@@ -680,12 +751,12 @@ class SendCentsFragment : AppCompatDialogFragment()
         {
             transferLoading(false)
 
-            var error: String = error?.toString()
+            var err: String = error.toString()
 
             //showSnackBar(error, ContextCompat.getColor(this,
                     //android.R.color.holo_red_light), null)
             //listener?.onTransferFailed(error)
-            showSnackBar(error, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            showSnackBar(err, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
         }
         else
         {
@@ -696,12 +767,6 @@ class SendCentsFragment : AppCompatDialogFragment()
     private fun retrieveECKeys():ByteArray
     {
         var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
-        if (keyPair == null)
-        {
-            EncryptionServices().createSpendingKey()
-            keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
-        }
-
         val ecKey = keyPair!!.public as ECPublicKey
         return ecKeyFormat(ecKey)
     }
@@ -783,8 +848,10 @@ class SendCentsFragment : AppCompatDialogFragment()
 
     private fun validateSendCentsButton(validate: Boolean)
     {
-        val bundleTheme = arguments!!.getBundle(CustomTheme.TAG)
-        val theme = CustomTheme.fromBundle(bundleTheme)
+        //val bundleTheme = arguments!!.getBundle(CustomTheme.TAG)
+        //val theme = CustomTheme.fromBundle(bundleTheme)
+
+        val theme = CustomTheme(R.color.colorPrimaryDark, R.color.colorPrimaryVeryDark, R.color.colorTitleText)
 
         if (validate)
         {
@@ -793,7 +860,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             send_cents_button_layout.background = makeSelector(theme)
 
             val drawables = send_cents_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
         }
         else
@@ -805,7 +872,7 @@ class SendCentsFragment : AppCompatDialogFragment()
             send_cents_button_layout.background = makeSelector(greyTheme)
 
             val drawables = send_cents_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables!![0])
+            val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
     }
@@ -823,7 +890,7 @@ class SendCentsFragment : AppCompatDialogFragment()
         val keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
         if (keyPair != null)
         {
-            val ecKey = keyPair!!.public as ECPublicKey
+            val ecKey = keyPair.public as ECPublicKey
             return CryptoUtils.generatePkhTz3(ecKeyFormat(ecKey))
         }
 
@@ -837,13 +904,16 @@ class SendCentsFragment : AppCompatDialogFragment()
             val storageJSONObject = JSONObject(mStorage)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
 
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyJSONArray = DataExtractor.getJSONArrayFromField(secureKeyJSONObject, "args")
+                val saltLeft = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+                val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
 
-            val saltSpendingField = DataExtractor.getJSONObjectFromField(secureKeyJSONArray, 0)
-            return DataExtractor.getStringFromField(saltSpendingField, "int").toInt()
+                return DataExtractor.getStringFromField(saltRight, "int").toInt()
+            }
         }
 
         return null
@@ -862,6 +932,8 @@ class SendCentsFragment : AppCompatDialogFragment()
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
         outState.putBoolean(IS_FROM_CONTRACT_KEY, mIsFromContract)
+
+        outState.putString(CONTRACT_SIG_KEY, mSig)
     }
 
     /**

@@ -1,0 +1,77 @@
+{
+  "prim": "Pair",
+  "args": [
+    {
+      "prim": "Pair",
+      "args": [
+        {
+          "string": "edpkuyVYkuZJQtu6jEfUTakLiukPUezEqT86rsLmWR3FiriWyxKYk5"
+        },
+        {
+          "string": "edsigttPED3Fky5gLSVuuktVrZ8D97Fj8cNg6koNd8q4xKgWPckRkZkJqa5GBmfctTU1gxqnc3ULaKD3HYXFwu3YLKfoUCj5Ltx"
+        }
+      ]
+    },
+    {
+      "prim": "Right",
+      "args": [
+        {
+          "prim": "Pair",
+          "args": [
+            [
+              {
+                "prim": "DIP",
+                "args": [
+                  [
+                    {
+                      "prim": "NIL",
+                      "args": [
+                        {
+                          "prim": "operation"
+                        }
+                      ]
+                    },
+                    {
+                      "prim": "PUSH",
+                      "args": [
+                        {
+                          "prim": "key_hash"
+                        },
+                        {
+                          "string": "tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx"
+                        }
+                      ]
+                    },
+                    {
+                      "prim": "IMPLICIT_ACCOUNT"
+                    },
+                    {
+                      "prim": "PUSH",
+                      "args": [
+                        {
+                          "prim": "mutez"
+                        },
+                        {
+                          "int": "1000000000000"
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              {
+                "prim": "TRANSFER_TOKENS"
+              },
+              {
+                "prim": "CONS"
+              }
+            ],
+            {
+              "string": "tz1fgK61Kopccy7bgq5wXbhQRXdXvkHYmF2h"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

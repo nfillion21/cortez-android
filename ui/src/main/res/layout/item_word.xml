@@ -39,7 +39,7 @@
                 android:textColor="@color/colorAccent"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                 android:gravity="center"
-                android:hint="-"
+                android:hint="@string/neutral"
                 android:ellipsize="marquee"
                 android:singleLine="true" />
         </LinearLayout>

@@ -190,7 +190,6 @@ class CreateWalletActivity : BaseSecureActivity(), CreateWalletFragment.OnCreate
     private fun createKeys(isFingerprintAllowed: Boolean) {
         val encryptionService = EncryptionServices()
         encryptionService.createMasterKey()
-        encryptionService.createSpendingKey()
 
         if (SystemServices.hasMarshmallow()) {
             if (isFingerprintAllowed && systemServices.hasEnrolledFingerprints()) {

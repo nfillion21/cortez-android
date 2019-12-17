@@ -141,15 +141,15 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     {
                         if (isPasswordSaved)
                         {
-                            fabTransfer.show()
+                            fabSharing.show()
                         }
                         else
                         {
-                            fabTransfer.hide()
+                            fabSharing.hide()
                         }
 
                         fabAddAddress.hide()
-                        fabSharing.hide()
+                        fabTransfer.hide()
                         fabAddDelegate.hide()
                     }
 
@@ -258,52 +258,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
 
         initActionBar(mTezosTheme)
-    }
-
-    private fun verifySig(data:ByteArray, signature:ByteArray):Boolean
-    {
-        /*
-  * Verify a signature previously made by a PrivateKey in our
-  * KeyStore. This uses the X.509 certificate attached to our
-  * private key in the KeyStore to validate a previously
-  * generated signature.
-  */
-        val ks = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        val entry = ks.getEntry("key1", null) as? KeyStore.PrivateKeyEntry
-        if (entry != null)
-        {
-            return  Signature.getInstance("SHA256withECDSA").run {
-                initVerify(entry.certificate)
-                update(data)
-                verify(signature)
-            }
-        }
-
-        return false
-    }
-
-    private fun signData(data:ByteArray):ByteArray
-    {
-        /*
-        * Use a PrivateKey in the KeyStore to create a signature over
-        * some data.
-        */
-
-        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        val entry: KeyStore.Entry = ks.getEntry("key1", null)
-        if (entry is KeyStore.PrivateKeyEntry)
-        {
-            return Signature.getInstance("SHA256withECDSA").run {
-                initSign(entry.privateKey)
-                update(data)
-                sign()
-            }
-        }
-        return ByteArray(0)
     }
 
     /**
@@ -513,6 +467,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 {
                     showSnackBar(getString(R.string.delegate_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
+                else if (resultCode == R.id.update_storage_succeed)
+                {
+                    showSnackBar(getString(R.string.contract_storage_successfully_updated), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
             }
 
             AddLimitsActivity.ADD_DSL_REQUEST_CODE ->
@@ -527,59 +485,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             {
             }
         }
-    }
-
-    private fun getP256PublicKey():String
-    {
-        val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-            load(null)
-        }
-        //val aliases: Enumeration<String> = ks.aliases()
-
-        var ecKey = ks.getCertificate("key1").publicKey as ECPublicKey
-        //var publicKey2 = keyStore.getCertificate("key1").publicKey
-
-        //var ecKey = publicKey as ECPublicKey
-
-        var x = ecKey.w.affineX.toByteArray()
-        //byte[] array = bigInteger.toByteArray();
-        if (x[0].toInt() == 0)
-        {
-            val tmp = ByteArray(x.size - 1)
-            System.arraycopy(x, 1, tmp, 0, tmp.size)
-            x = tmp
-        }
-
-
-        var y = ecKey.w.affineY
-
-        var yEvenOdd = if (y.rem(BigInteger.valueOf(2L)) == BigInteger.ZERO)
-        {
-            "0x02".hexToByteArray()
-        }
-        else
-        {
-            "0x03".hexToByteArray()
-        }
-
-        val xLen = x.size
-
-        val yLen = yEvenOdd.size
-        val result = ByteArray(yLen + xLen)
-
-        System.arraycopy(yEvenOdd, 0, result, 0, yLen)
-        System.arraycopy(x, 0, result, yLen, xLen)
-
-        return CryptoUtils.generatePkhTz3(result)
-        /*
-        val p2pk = CryptoUtils.generateP2Pk(result)
-        val tz34 = CryptoUtils.generatePkhTz3(result)
-
-        val signedData = signData("0x03".hexToByteArray())
-
-        val verified = verifySig("0x03".hexToByteArray(), signedData)
-        val verified2 = verifySig("0x02".hexToByteArray(), signedData)
-        */
     }
 
     override fun showSnackBar(res:String, color:Int, textColor:Int)

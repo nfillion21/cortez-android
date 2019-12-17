@@ -112,7 +112,7 @@ tools:ignore="UselessParent,UnusedAttribute">
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                         android:text="@string/contract_limits_info"
-                        android:textColor="@color/colorAccent"
+                        android:textColor="@color/colorTitleText"
                         android:layout_marginBottom="@dimen/spacing_double"
                         android:ellipsize="end" />
 
@@ -158,7 +158,7 @@ tools:ignore="UselessParent,UnusedAttribute">
                 android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
                 android:layout_gravity="center"
                 android:enabled="false"
-
+                android:textStyle="bold"
                 android:background="@null"
                 android:clickable="false"
                 android:focusable="false"

@@ -1,0 +1,35 @@
+[
+  {"prim": "DROP"},
+  {"prim": "NIL", "args": [{"prim": "operation"}]},
+  {
+    "prim": "PUSH",
+    "args":[
+      {"prim": "address"},
+      {"string": "%1$s"}
+    ]
+  },
+
+  {"prim": "CONTRACT", "args": [{"prim": "unit"}]},
+
+  [{ "prim": "IF_NONE",
+    "args": [
+
+      [
+        [
+          {"prim": "UNIT"},
+          {"prim": "FAILWITH"}
+        ]
+      ],
+      []
+    ]
+  }
+  ],
+
+  {
+    "prim": "PUSH",
+    "args": [{"prim": "mutez"}, {"int": "%2$s"}]
+  },
+  {"prim": "UNIT"},
+  {"prim": "TRANSFER_TOKENS"},
+  {"prim": "CONS"}
+]

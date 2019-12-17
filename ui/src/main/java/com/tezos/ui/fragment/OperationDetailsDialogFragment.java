@@ -264,7 +264,7 @@ public class OperationDetailsDialogFragment extends DialogFragment
                     holder.valueTextView.setText(mOperation.getHash()); break;
 
                 case 1:
-                    holder.valueTextView.setText(mOperation.getOperationId().toString()); break;
+                    holder.valueTextView.setText(String.format("%d", mOperation.getOperationId())); break;
 
                 case 2:
                     holder.valueTextView.setText(mOperation.getBlockHash()); break;

@@ -238,29 +238,6 @@ public class CryptoUtils
         return pkHash;
     }
 
-    public static String generateP2Pk(byte[] publicKey)
-    {
-        // then we got the KeyPair from the seed, thanks to sodium.
-
-        // These are our prefixes
-        byte[] p2pkPrefix = {(byte) 3, (byte) 178, (byte) 139, (byte) 127};
-
-        // Create Tezos PK.
-        byte[] prefixedPubKey = new byte[publicKey.length + p2pkPrefix.length];
-
-        System.arraycopy(p2pkPrefix, 0, prefixedPubKey, 0, p2pkPrefix.length);
-        System.arraycopy(publicKey, 0, prefixedPubKey, p2pkPrefix.length, publicKey.length);
-
-        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
-        byte[] prefixedPubKeyWithChecksum = new byte[publicKey.length + p2pkPrefix.length*2];
-
-        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, publicKey.length + p2pkPrefix.length);
-        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, publicKey.length + p2pkPrefix.length, p2pkPrefix.length);
-
-        String p2pkString = Base58.encode(prefixedPubKeyWithChecksum);
-        return p2pkString;
-    }
-
     public static String generateP2Sig(byte[] signature)
     {
         // then we got the KeyPair from the seed, thanks to sodium.
@@ -340,6 +317,24 @@ public class CryptoUtils
         return tezosPkString;
     }
 
+    public static String genericHashToPkh(byte[] genericHash)
+    {
+        byte[] tz1Prefix = {(byte) 6, (byte) 161, (byte) 159};
+
+        byte[] prefixedGenericHash = new byte[23];
+        System.arraycopy(tz1Prefix, 0, prefixedGenericHash, 0, 3);
+        System.arraycopy(genericHash, 0, prefixedGenericHash, 3, 20);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedGenericHash);
+        byte[] prefixedPKhashWithChecksum = new byte[27];
+        System.arraycopy(prefixedGenericHash, 0, prefixedPKhashWithChecksum, 0, 23);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPKhashWithChecksum, 23, 4);
+
+        String pkHash = Base58.encode(prefixedPKhashWithChecksum);
+
+        return pkHash;
+    }
+
     public static String genericHashToPk(byte[] genericHash)
     {
         // These are our prefixes
@@ -363,23 +358,54 @@ public class CryptoUtils
         return tezosPkString;
     }
 
-    public static String genericHashToPkh(byte[] genericHash)
+    public static String generateP2Pk(byte[] publicKey)
     {
-        byte[] tz1Prefix = {(byte) 6, (byte) 161, (byte) 159};
+        // then we got the KeyPair from the seed, thanks to sodium.
 
-        byte[] prefixedGenericHash = new byte[23];
-        System.arraycopy(tz1Prefix, 0, prefixedGenericHash, 0, 3);
-        System.arraycopy(genericHash, 0, prefixedGenericHash, 3, 20);
+        // These are our prefixes
+        byte[] p2pkPrefix = {(byte) 3, (byte) 178, (byte) 139, (byte) 127};
 
-        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedGenericHash);
-        byte[] prefixedPKhashWithChecksum = new byte[27];
-        System.arraycopy(prefixedGenericHash, 0, prefixedPKhashWithChecksum, 0, 23);
-        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPKhashWithChecksum, 23, 4);
+        // Create Tezos PK.
+        byte[] prefixedPubKey = new byte[publicKey.length + p2pkPrefix.length];
 
-        String pkHash = Base58.encode(prefixedPKhashWithChecksum);
+        System.arraycopy(p2pkPrefix, 0, prefixedPubKey, 0, p2pkPrefix.length);
+        System.arraycopy(publicKey, 0, prefixedPubKey, p2pkPrefix.length, publicKey.length);
 
-        return pkHash;
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
+        byte[] prefixedPubKeyWithChecksum = new byte[publicKey.length + p2pkPrefix.length*2];
+
+        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, publicKey.length + p2pkPrefix.length);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, publicKey.length + p2pkPrefix.length, p2pkPrefix.length);
+
+        String p2pkString = Base58.encode(prefixedPubKeyWithChecksum);
+        return p2pkString;
     }
+
+    public static String genericHashToP2pk(byte[] genericHash)
+    {
+
+        // These are our prefixes
+        //byte[] edpkPrefix = {(byte) 13, (byte) 15, (byte) 37, (byte) 217};
+        byte[] p2pkPrefix = {(byte) 3, (byte) 178, (byte) 139, (byte) 127};
+
+        // begins eztz b58encode
+
+        // Create Tezos PK.
+        byte[] prefixedPubKey = new byte[36];
+
+        System.arraycopy(p2pkPrefix, 0, prefixedPubKey, 0, 4);
+        System.arraycopy(genericHash, 0, prefixedPubKey, 4, 32);
+
+        byte[] firstFourOfDoubleChecksum = TzSha256Hash.hashTwiceThenFirstFourOnly(prefixedPubKey);
+        byte[] prefixedPubKeyWithChecksum = new byte[40];
+
+        System.arraycopy(prefixedPubKey, 0, prefixedPubKeyWithChecksum, 0, 36);
+        System.arraycopy(firstFourOfDoubleChecksum, 0, prefixedPubKeyWithChecksum, 36, 4);
+
+        String tezosPkString = Base58.encode(prefixedPubKeyWithChecksum);
+        return tezosPkString;
+    }
+
 
     public static String genericHashToPkhTz3(byte[] genericHash)
     {

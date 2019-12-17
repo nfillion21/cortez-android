@@ -80,17 +80,12 @@ public class AddAddressActivity extends BaseSecureActivity
 
     public static int READ_CONTACTS_PERMISSION_REQUEST_CODE = 0x3000; // arbitrary int
 
-    private TextInputLayout mOwnerLayout;
     private TextInputEditText mOwner;
 
-    private TextInputLayout mTzAddressLayout;
     private TextInputEditText mTzAddress;
 
     private Button mAddButton;
     private FrameLayout mAddButtonLayout;
-
-    private Button mScanButton;
-    private Button mContactsButton;
 
     public static Intent getStartIntent(Context context, Bundle themeBundle)
     {
@@ -115,25 +110,25 @@ public class AddAddressActivity extends BaseSecureActivity
 
         View.OnFocusChangeListener focusChangeListener = this.focusChangeListener();
 
-        mOwnerLayout = findViewById(R.id.address_owner_inputlayout);
+        TextInputLayout mOwnerLayout = findViewById(R.id.address_owner_inputlayout);
         mOwner = findViewById(R.id.address_owner);
         mOwner.addTextChangedListener(new GenericTextWatcher(mOwner));
         mOwner.setOnFocusChangeListener(focusChangeListener);
         mOwnerLayout.setError(" ");
 
-        mTzAddressLayout = findViewById(R.id.tezos_address_inputlayout);
+        TextInputLayout mTzAddressLayout = findViewById(R.id.tezos_address_inputlayout);
         mTzAddress = findViewById(R.id.tezos_address);
         mTzAddressLayout.setError(" ");
         mTzAddress.addTextChangedListener(new GenericTextWatcher(mTzAddress));
         mTzAddress.setOnFocusChangeListener(focusChangeListener);
 
-        mScanButton = findViewById(R.id.scan_button);
+        Button mScanButton = findViewById(R.id.scan_button);
         mScanButton.setOnClickListener(v -> askForScanPermission());
 
         boolean isPaymentCardScanButtonVisible = this.isScanButtonEnabled();
         mScanButton.setVisibility(isPaymentCardScanButtonVisible ? View.VISIBLE : View.GONE);
 
-        mContactsButton = findViewById(R.id.contacts_button);
+        Button mContactsButton = findViewById(R.id.contacts_button);
         mContactsButton.setOnClickListener(v ->
 
                 askForBrowseContactsPermission()
