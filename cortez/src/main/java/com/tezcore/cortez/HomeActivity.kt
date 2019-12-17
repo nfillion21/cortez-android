@@ -467,6 +467,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 {
                     showSnackBar(getString(R.string.delegate_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
+                else if (resultCode == R.id.update_storage_succeed)
+                {
+                    showSnackBar(getString(R.string.contract_storage_successfully_updated), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
             }
 
             AddLimitsActivity.ADD_DSL_REQUEST_CODE ->

@@ -419,15 +419,15 @@ private fun isRevealTagCorrect(payload: ByteArray, src:String, srcPk:String):Pai
         }
         //publicKey = publicKey.dropWhile { it == "0".toByte() }.toByteArray()
 
+        //if ()
         val isPublicKeyValid = srcPk == binaryToPk
 
         //TODO verify this one
-        /*
-        if (!isPublicKeyValid)
+        if (!isPublicKeyValid && publicKey[0].compareTo(2) != 0)
+
         {
             return Pair(-1L, null)
         }
-         */
 
         i++
         val nextField = publicKey.slice(i until publicKey.size).toByteArray()

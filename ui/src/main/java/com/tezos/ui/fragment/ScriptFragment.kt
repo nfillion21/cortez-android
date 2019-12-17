@@ -982,7 +982,7 @@ class ScriptFragment : Fragment()
                                 //there's no need to do anything because we call finish()
                                 onFinalizeDelegationLoadComplete(null)
 
-                                mCallback?.finish(R.id.add_delegate_succeed)
+                                mCallback?.finish(R.id.update_storage_succeed)
                             }
                         },
                         Response.ErrorListener
