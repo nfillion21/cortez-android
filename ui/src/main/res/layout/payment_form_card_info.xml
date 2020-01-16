@@ -191,7 +191,7 @@
                 android:textColor="@color/colorAccentText"
                 android:clipToPadding="false"
                 tools:ignore="UnusedAttribute,NewApi" />
-            <android.support.design.widget.TextInputEditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/amount_edittext"
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -234,7 +234,7 @@
                 android:textColor="@color/colorAccentText"
                 android:clipToPadding="false"
                 tools:ignore="UnusedAttribute,NewApi" />
-            <android.support.design.widget.TextInputEditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/fee_edittext"
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -328,7 +328,7 @@
         android:padding="@dimen/spacing_micro"
         android:layout_marginTop="@dimen/spacing_double">
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/fee_edittext_new"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -356,7 +356,7 @@
         android:background="@drawable/selector_rect_layout"
         android:padding="@dimen/spacing_micro">
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/fee_edittext_recipient"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

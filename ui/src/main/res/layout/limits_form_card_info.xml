@@ -33,7 +33,7 @@
             android:textColor="@color/colorPrimary"
             android:clipToPadding="false"
             tools:ignore="UnusedAttribute,NewApi" />
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/amount_limit_edittext"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -85,7 +85,7 @@
             android:clipToPadding="false"
             tools:ignore="UnusedAttribute,NewApi" />
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/limit_edittext"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -132,7 +132,7 @@
             android:clipToPadding="false"
             tools:ignore="UnusedAttribute,NewApi" />
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/fee_limit_edittext"
             android:layout_width="0dp"
             android:layout_weight="1"

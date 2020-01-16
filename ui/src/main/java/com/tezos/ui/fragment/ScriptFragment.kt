@@ -39,10 +39,10 @@ import android.hardware.fingerprint.FingerprintManager
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
-import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v4.view.animation.FastOutSlowInInterpolator
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher

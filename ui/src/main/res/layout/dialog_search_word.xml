@@ -10,7 +10,7 @@
     android:padding="@dimen/spacing_double"
     tools:ignore="UseCompoundDrawables,UselessParent">
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/search_name_edittext_layout"
         app:errorTextAppearance="@style/PaymentScreens.TextAppearance.ErrorSmallItem"
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
         android:transitionGroup="true"
         tools:ignore="UnusedAttribute,NewApi">
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/search_name_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -34,7 +34,7 @@
             android:maxLines="1"
             android:inputType="text|textNoSuggestions"
             android:textSize="@dimen/size_edit_text" />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <ListView
         android:id="@+id/list"

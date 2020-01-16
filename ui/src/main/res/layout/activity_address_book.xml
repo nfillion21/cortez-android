@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -18,14 +18,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.design.widget.AppBarLayout
+            <com.google.android.material.appbar.AppBarLayout
                 android:id="@+id/bar_layout"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:layout_alignParentTop="true"
                 android:theme="@style/PaymentScreens.AppBarOverlay">
 
-                <android.support.v7.widget.Toolbar
+                <androidx.appcompat.widget.Toolbar
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
@@ -61,8 +61,8 @@
                         android:layout_gravity="end|end|center_vertical"
                         />
 
-                </android.support.v7.widget.Toolbar>
-            </android.support.design.widget.AppBarLayout>
+                </androidx.appcompat.widget.Toolbar>
+            </com.google.android.material.appbar.AppBarLayout>
 
             <FrameLayout android:id="@+id/payment_products_container"
                 android:layout_below="@+id/bar_layout"
@@ -72,7 +72,7 @@
                 tools:ignore="MergeRootFrame">
             </FrameLayout>
 
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 app:fabSize="normal"
                 android:id="@+id/add"
                 android:layout_width="wrap_content"
@@ -86,4 +86,4 @@
         </RelativeLayout>
     </LinearLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
