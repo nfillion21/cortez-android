@@ -12,4 +12,7 @@
     <string name="contract_info_url" translatable="false">https://mezos.lamini.ca/mezos/mainnet/contract_info?ks=%1$s</string>
 
     <string name="contract_storage_url" translatable="false">https://mezos.lamini.ca/tezos/mainnet/chains/main/blocks/head/context/contracts/%1$s/storage</string>
+
+    <string name="chain_ID" translatable="false">NetXdQprcVkpaWU</string>
+
 </resources>
