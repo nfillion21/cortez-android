@@ -30,7 +30,6 @@ package com.tezos.core.network;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.AsyncTaskLoader;
 
 import com.tezos.core.utils.Utils;
 
@@ -41,13 +40,12 @@ import java.net.HttpURLConnection;
  * Created by nfillion on 21/01/16.
  */
 
-public abstract class AbstractHttpClient<T> extends AsyncTaskLoader<T> {
+public abstract class AbstractHttpClient<T>  {
 
     protected T mLastData;
     protected Bundle bundle;
 
     public AbstractHttpClient(Context context, Bundle bundle) {
-        super(context);
 
         this.setBundle(bundle);
     }
@@ -65,7 +63,6 @@ public abstract class AbstractHttpClient<T> extends AsyncTaskLoader<T> {
 
         boolean isCanceled = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            isCanceled = this.isLoadInBackgroundCanceled();
         }
 
         if (!isCanceled) {
@@ -100,68 +97,6 @@ public abstract class AbstractHttpClient<T> extends AsyncTaskLoader<T> {
 
         return httpResult;
 
-    }
-
-    @Override
-    public T loadInBackground() {
-        mLastData = this.buildFromHttpResponse(backgroundOperation());
-        return mLastData;
-    }
-
-    @Override
-    public void deliverResult(T data) {
-
-        if (isReset()) {
-            // An async query came in while the loader is stopped
-            onReleaseResources(data);
-            return;
-        }
-
-        T oldData = mLastData;
-        mLastData = data;
-
-        if (isStarted()) {
-            super.deliverResult(data);
-        }
-        if (oldData != null) {
-            onReleaseResources(oldData);
-        }
-    }
-
-    @Override
-    protected void onStartLoading() {
-        if (mLastData != null) {
-            deliverResult(mLastData);
-        }
-
-        if (takeContentChanged() || mLastData == null) {
-            forceLoad();
-        }
-    }
-
-    @Override
-    protected void onStopLoading() {
-        // Attempt to cancel the current load task if possible.
-        cancelLoad();
-    }
-
-    @Override
-    public void onCanceled(T dataList) {
-        if (dataList != null) {
-            onReleaseResources(dataList);
-        }
-    }
-
-    @Override
-    protected void onReset() {
-        super.onReset();
-
-        // Ensure the loader is stopped
-        onStopLoading();
-
-        if (mLastData != null) {
-            onReleaseResources(mLastData);
-        }
     }
 
     protected void onReleaseResources(T data) {

@@ -4,9 +4,6 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-apply plugin: 'com.google.gms.google-services'
-
-
 def publicKeyPropertiesFile = rootProject.file("cortez/public_deployment/cortez_key.properties")
 def zeronetPropertiesFile = rootProject.file("cortez/deployment/zeronet.properties")
 def mainnetPropertiesFile = rootProject.file("cortez/deployment/mainnet.properties")
@@ -108,4 +105,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.0'
     implementation "com.android.support:design:${supportLibVersion}"
     implementation project(':ui')
+    //implementation 'com.google.firebase:firebase-core:17.2.2'
+
 }
+
+apply plugin: 'com.google.gms.google-services'
+
