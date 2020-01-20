@@ -47,6 +47,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 
@@ -120,6 +121,7 @@ public class PublicKeyHashActivity extends BaseSecureActivity
         String pkhash = getIntent().getStringExtra(PKH_KEY);
         TextView mPkhTextview = findViewById(R.id.pkh_textview);
         mPkhTextview.setText(pkhash);
+
     }
 
     @Override
