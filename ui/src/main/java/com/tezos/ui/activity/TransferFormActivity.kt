@@ -30,7 +30,6 @@ package com.tezos.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
@@ -49,7 +48,6 @@ import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.fragment.TransferFormFragment
-import com.tezos.ui.service.FirebaseMessagingService
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_payment_form.*
 

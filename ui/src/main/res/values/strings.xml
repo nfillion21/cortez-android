@@ -215,6 +215,9 @@
     <string name="tab_script">Script</string>
 
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="notification_title">Notification title</string>
+    <string name="channel_description">Channel description</string>
+    <string name="channel_name">Channel name</string>
 
     <string name="default_storage" translatable="false"><![CDATA[
         {"prim":"Unit"}

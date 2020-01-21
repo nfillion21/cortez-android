@@ -32,6 +32,19 @@
             android:authorities="${applicationId}.provider"
             android:enabled="true"
             android:exported="false" />
+
+
+        <service
+            android:name="com.tezcore.cortez.services.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
     </application>
 
 </manifest>
