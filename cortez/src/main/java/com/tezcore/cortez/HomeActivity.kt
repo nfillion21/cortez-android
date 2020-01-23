@@ -44,6 +44,7 @@ import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
+import com.crashlytics.android.Crashlytics
 import com.tezcore.cortez.activities.AboutActivity
 import com.tezcore.cortez.activities.SettingsActivity
 import com.tezos.ui.activity.DelegateActivity
@@ -522,7 +523,6 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 .setPositiveButton(android.R.string.yes) {
                     _,
                     _ ->
-
                     super.onBackPressed()
 
                 }
