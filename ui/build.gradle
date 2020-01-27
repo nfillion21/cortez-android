@@ -29,7 +29,7 @@ android {
         zeronet {
             dimension "version"
         }
-        alphanet {
+        carthagenet {
             dimension "version"
         }
         mainnet {

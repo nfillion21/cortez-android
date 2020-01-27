@@ -284,7 +284,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
             mAdapter.updateWords(zebras, null);
         }
-        /*
         else if (position == 0 && word.equalsIgnoreCase("link"))
         {
             List<String> link = Arrays.asList(
@@ -406,7 +405,6 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
             mAdapter.updateWords(link, null);
         }
-         */
 
         boolean isValid = CryptoUtils.validateMnemonics(mAdapter.getWords());
         if (isValid)

@@ -7,17 +7,17 @@ apply plugin: 'kotlin-android-extensions'
 def publicKeyPropertiesFile = rootProject.file("cortez/public_deployment/cortez_key.properties")
 def zeronetPropertiesFile = rootProject.file("cortez/deployment/zeronet.properties")
 def mainnetPropertiesFile = rootProject.file("cortez/deployment/mainnet.properties")
-def alphanetPropertiesFile = rootProject.file("cortez/deployment/alphanet.properties")
+def carthagenetPropertiesFile = rootProject.file("cortez/public_deployment/cortez_key.properties")
 
 def publicKeystoreMainnetProperties = new Properties()
 def keystoreMainnetProperties = new Properties()
 def keystoreZeronetProperties = new Properties()
-def keystoreAlphanetProperties = new Properties()
+def keystoreCarthagenetProperties = new Properties()
 
 publicKeystoreMainnetProperties.load(new FileInputStream(publicKeyPropertiesFile))
 keystoreMainnetProperties.load(new FileInputStream(mainnetPropertiesFile))
 keystoreZeronetProperties.load(new FileInputStream(zeronetPropertiesFile))
-keystoreAlphanetProperties.load(new FileInputStream(alphanetPropertiesFile))
+keystoreCarthagenetProperties.load(new FileInputStream(carthagenetPropertiesFile))
 
 android {
     signingConfigs {
@@ -39,11 +39,11 @@ android {
             storeFile file(keystoreZeronetProperties['storeFile'])
             storePassword keystoreZeronetProperties['storePassword']
         }
-        alphanetConfig {
-            keyAlias keystoreAlphanetProperties['keyAlias']
-            keyPassword keystoreAlphanetProperties['keyPassword']
-            storeFile file(keystoreAlphanetProperties['storeFile'])
-            storePassword keystoreAlphanetProperties['storePassword']
+        carthagenetConfig {
+            keyAlias keystoreCarthagenetProperties['keyAlias']
+            keyPassword keystoreCarthagenetProperties['keyPassword']
+            storeFile file(keystoreCarthagenetProperties['storeFile'])
+            storePassword keystoreCarthagenetProperties['storePassword']
         }
     }
     compileSdkVersion 28
@@ -78,11 +78,11 @@ android {
             dimension "version"
             signingConfig signingConfigs.zeronetConfig
         }
-        alphanet {
-            applicationIdSuffix ".alphanet"
-            versionNameSuffix "-alphanet"
+        carthagenet {
+            applicationIdSuffix ".carthagenet"
+            versionNameSuffix "-carthagenet"
             dimension "version"
-            signingConfig signingConfigs.alphanetConfig
+            signingConfig signingConfigs.carthagenetConfig
         }
         mainnet {
             dimension "version"
