@@ -105,6 +105,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
                     .replace(R.id.form_fragment_container, TransferFormFragment.newInstance(srcAddressBundle, dstAddressBundle, themeBundle)).commit()
         }
 
+        /*
         // Get and display/log the Instance ID
         FirebaseInstanceId.getInstance().instanceId
                 .addOnSuccessListener { instanceIdResult ->
@@ -139,6 +140,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
             Log.d("Firebase", task.isSuccessful.toString())
             //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
         }
+        */
     }
 
     private fun initToolbar(theme: CustomTheme)

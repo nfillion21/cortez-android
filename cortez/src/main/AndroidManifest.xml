@@ -33,7 +33,7 @@
             android:enabled="true"
             android:exported="false" />
 
-
+        <!--
         <service
             android:name="com.tezcore.cortez.services.FirebaseMessagingService"
             android:exported="false">
@@ -41,6 +41,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        -->
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
