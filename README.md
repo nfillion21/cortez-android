@@ -35,7 +35,7 @@ The private keys and master password are encrypted using the _Android Keystore s
 
 **Cortez for Android** is available under the **MIT License**. Check out the [license file][project-license] for more information.
 
-[project-issues]: https://gitlab.com/tezos-private/cortez-android/issues
+[project-issues]: https://gitlab.com/nomadic-labs/cortez-android/issues
 
 [project-license]: LICENSE.md
 [project-changelog]: CHANGELOG.md
