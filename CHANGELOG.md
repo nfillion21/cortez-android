@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.5.1
+-----
+* Add Firebase sdk tools.
+
 1.5.0
 -----
 * Deployed the Daily Spending Limit contract feature.
