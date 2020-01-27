@@ -29,8 +29,8 @@ package com.tezos.ui.activity
 
 import android.app.Activity
 import android.content.Intent
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.authentication.SystemServices

@@ -23,7 +23,7 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
             tools:ignore="UnusedAttribute,NewApi" />
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/redelegate_address_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
             android:clipToPadding="false"
             tools:ignore="UnusedAttribute,NewApi" />
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/fee_edittext"
             android:layout_width="0dp"
             android:layout_weight="1"

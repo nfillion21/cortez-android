@@ -30,18 +30,20 @@ package com.tezos.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.Toolbar
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.appcompat.widget.Toolbar
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import com.android.volley.VolleyError
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.iid.FirebaseInstanceId
+import com.google.firebase.messaging.FirebaseMessaging
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
@@ -102,6 +104,43 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
             supportFragmentManager.beginTransaction()
                     .replace(R.id.form_fragment_container, TransferFormFragment.newInstance(srcAddressBundle, dstAddressBundle, themeBundle)).commit()
         }
+
+        /*
+        // Get and display/log the Instance ID
+        FirebaseInstanceId.getInstance().instanceId
+                .addOnSuccessListener { instanceIdResult ->
+                    val instanceId = instanceIdResult.id
+                    val instanceId2 = instanceIdResult.id
+                    //instanceIdText.text = getString(R.string.instance_id_fmt, instanceId)
+                    //Log.d(TAG, "InstanceId: $instanceId")
+                }
+
+        FirebaseInstanceId.getInstance().instanceId
+                .addOnCompleteListener(OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        //Log.w(TAG, "getInstanceId failed", task.exception)
+                        return@OnCompleteListener
+                    }
+
+                    // Get new Instance ID token
+                    val token = task.result?.token
+                    val token2 = task.result?.token
+
+                    // Log and toast
+                    //val msg = getString(R.string.msg_token_fmt, token)
+                    //Log.d(TAG, msg)
+                    //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                })
+
+        FirebaseMessaging.getInstance().subscribeToTopic("tz1").addOnCompleteListener { task ->
+            //var msg = getString(R.string.msg_subscribed)
+            if (!task.isSuccessful) {
+                //msg = getString(R.string.msg_subscribe_failed)
+            }
+            Log.d("Firebase", task.isSuccessful.toString())
+            //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+        }
+        */
     }
 
     private fun initToolbar(theme: CustomTheme)

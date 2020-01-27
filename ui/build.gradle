@@ -10,8 +10,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -49,17 +48,21 @@ ext {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.android.support:design:${supportLibVersion}"
-    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     implementation "com.google.code.gson:gson:2.8.5"
 
-    api "com.android.support:recyclerview-v7:${supportLibVersion}"
+    api 'androidx.recyclerview:recyclerview:1.0.0'
     api project(':core')
 
     implementation 'com.github.kenglxn.QRGen:android:2.5.0'
     api 'com.android.volley:volley:1.1.0'
 
     implementation 'me.dm7.barcodescanner:zxing:1.8.4'
+    api 'com.google.firebase:firebase-analytics:17.2.2'
+    api 'com.google.firebase:firebase-messaging:20.1.0'
+    //api 'com.google.firebase:firebase-crashlytics:17.0.0-beta01'
+    api 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 }
 repositories {
     mavenCentral()

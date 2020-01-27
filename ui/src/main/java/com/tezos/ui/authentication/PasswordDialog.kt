@@ -30,9 +30,9 @@ package com.tezos.ui.authentication
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.app.DialogFragment
-import android.support.v7.app.AppCompatDialogFragment
+import com.google.android.material.snackbar.Snackbar
+import androidx.fragment.app.DialogFragment
+import androidx.appcompat.app.AppCompatDialogFragment
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher

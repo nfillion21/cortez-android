@@ -34,9 +34,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Window;
@@ -47,6 +47,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.tezos.core.models.CustomTheme;
 import com.tezos.ui.R;
 
@@ -120,6 +121,7 @@ public class PublicKeyHashActivity extends BaseSecureActivity
         String pkhash = getIntent().getStringExtra(PKH_KEY);
         TextView mPkhTextview = findViewById(R.id.pkh_textview);
         mPkhTextview.setText(pkhash);
+
     }
 
     @Override

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
@@ -61,7 +61,7 @@
                     android:id="@+id/addresses_recyclerview_layout"
                     android:orientation="vertical">
 
-                    <android.support.v7.widget.RecyclerView
+                    <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/addresses_recyclerview"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
@@ -70,7 +70,7 @@
                         android:clipToPadding="false"
                         android:scrollbarStyle="outsideOverlay"
                         android:scrollbars="vertical"
-                        app:layoutManager="android.support.v7.widget.GridLayoutManager"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                         android:transitionGroup="false"
                         android:visibility="visible"
                         app:spanCount="2" tools:ignore="UnusedAttribute" />
@@ -83,7 +83,7 @@
                 <!--
                 Nested scrollview layout
                 -->
-                <android.support.v4.widget.NestedScrollView
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/empty_nested_scrollview">
@@ -170,7 +170,7 @@
 
                     </LinearLayout>
 
-                </android.support.v4.widget.NestedScrollView>
+                </androidx.core.widget.NestedScrollView>
 
                 <!--
                 End Nested scrollview layout
@@ -197,5 +197,5 @@
 
         </LinearLayout>
 
-    </android.support.design.widget.CoordinatorLayout>
-</android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
