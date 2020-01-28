@@ -85,7 +85,7 @@ class ContractSelectorFragment : AppCompatDialogFragment()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
     {
         super.onViewCreated(view, savedInstanceState)
-        dialog.setTitle(getString(R.string.delegate_and_contract_title))
+        dialog.setTitle(getString(R.string.contracts_and_delegation_title))
 
         default_contract_button.setOnClickListener {
             listener?.onContractClicked(false)

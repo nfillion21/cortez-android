@@ -32,6 +32,18 @@
                     android:layout_marginRight="@dimen/spacing_double" />
 
                 <Button
+                    android:id="@+id/mulsitig_contract_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/PaymentScreens.SourceButton"
+                    android:text="@string/select_default_contract"
+                    android:padding="@dimen/spacing_double"
+                    android:layout_marginTop="@dimen/spacing_double"
+                    android:layout_marginBottom="@dimen/spacing_double"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    android:layout_marginRight="@dimen/spacing_double" />
+
+                <Button
                     android:id="@+id/daily_spending_limit_contract_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
