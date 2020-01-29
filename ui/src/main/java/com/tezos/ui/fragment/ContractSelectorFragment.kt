@@ -43,7 +43,7 @@ class ContractSelectorFragment : AppCompatDialogFragment()
 
     interface OnContractSelectorListener
     {
-        fun onContractClicked(withScript:Boolean)
+        fun onContractClicked(contract:ContractType)
     }
 
     companion object
@@ -53,6 +53,11 @@ class ContractSelectorFragment : AppCompatDialogFragment()
                 ContractSelectorFragment().apply {
                     arguments = Bundle().apply {}
                 }
+
+        enum class ContractType
+        {
+            DEFAULT, SPENDING_LIMIT, MULTISIG
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -88,11 +93,16 @@ class ContractSelectorFragment : AppCompatDialogFragment()
         dialog.setTitle(getString(R.string.contracts_and_delegation_title))
 
         default_contract_button.setOnClickListener {
-            listener?.onContractClicked(false)
+            listener?.onContractClicked(ContractType.DEFAULT)
+            dismiss()
+        }
+
+        mulsitig_contract_button.setOnClickListener {
+            listener?.onContractClicked(ContractType.MULTISIG)
             dismiss()
         }
         daily_spending_limit_contract_button.setOnClickListener {
-            listener?.onContractClicked(true)
+            listener?.onContractClicked(ContractType.SPENDING_LIMIT)
             dismiss()
         }
     }

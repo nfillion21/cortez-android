@@ -7,6 +7,7 @@
     <string name="select_recipient">Select recipient</string>
     <string name="select_daily_spending_limit_contract">Daily spending limit contract</string>
     <string name="select_default_contract">Default contract</string>
+    <string name="select_multisig_contract">Multisig contract</string>
     <string name="select_source_title">Select source</string>
     <string name="select_destination_title">Select destination</string>
     <string name="address_book_title">Address book</string>

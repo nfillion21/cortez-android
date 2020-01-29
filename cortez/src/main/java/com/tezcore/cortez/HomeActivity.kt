@@ -596,15 +596,13 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         DelegateActivity.start(this, address, pos, mTezosTheme)
     }
 
-    override fun onContractClicked(withScript: Boolean)
+    override fun onContractClicked(withScript: ContractSelectorFragment.Companion.ContractType)
     {
-        if (withScript)
+        when(withScript)
         {
-            AddLimitsActivity.start(this, mTezosTheme)
-        }
-        else
-        {
-            AddDelegateActivity.start(this, mTezosTheme)
+            ContractSelectorFragment.Companion.ContractType.DEFAULT -> AddDelegateActivity.start(this, mTezosTheme)
+            ContractSelectorFragment.Companion.ContractType.SPENDING_LIMIT -> AddLimitsActivity.start(this, mTezosTheme)
+            ContractSelectorFragment.Companion.ContractType.MULTISIG -> AddLimitsActivity.start(this, mTezosTheme)
         }
     }
 }
