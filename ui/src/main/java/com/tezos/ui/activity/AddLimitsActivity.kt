@@ -49,7 +49,6 @@ import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
 import com.android.volley.AuthFailureError
-import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
@@ -146,7 +145,7 @@ class AddLimitsActivity : BaseSecureActivity()
             {
                 if (!mIsTyping)
                 {
-                    limit_edittext.setText( (i+1).toString())
+                    bullet_address_edittext.setText( (i+1).toString())
                     currentValue = i+1
                 }
             }
@@ -164,7 +163,7 @@ class AddLimitsActivity : BaseSecureActivity()
                 if (!mIsTyping)
                 {
                     mIsTracking = false
-                    limit_edittext.setText( (currentValue).toString())
+                    bullet_address_edittext.setText( (currentValue).toString())
                 }
             }
         })
@@ -174,8 +173,8 @@ class AddLimitsActivity : BaseSecureActivity()
         val focusChangeListener = this.focusChangeListener()
         amount_limit_edittext.onFocusChangeListener = focusChangeListener
 
-        limit_edittext.addTextChangedListener(GenericTextWatcher(limit_edittext))
-        limit_edittext.onFocusChangeListener = focusChangeListener
+        bullet_address_edittext.addTextChangedListener(GenericTextWatcher(bullet_address_edittext))
+        bullet_address_edittext.onFocusChangeListener = focusChangeListener
 
         if (savedInstanceState != null)
         {
@@ -203,7 +202,7 @@ class AddLimitsActivity : BaseSecureActivity()
             {
                 R.id.amount_limit_edittext -> putAmountInRed(!hasFocus)
 
-                R.id.limit_edittext -> putLimitInRed(!hasFocus)
+                R.id.bullet_address_edittext -> putLimitInRed(!hasFocus)
 
                 else -> throw UnsupportedOperationException(
                         "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
@@ -709,14 +708,14 @@ class AddLimitsActivity : BaseSecureActivity()
 
             if ((i == R.id.amount_limit_edittext && !isDelegateAmountEquals(editable))
                     ||
-                    (i == R.id.limit_edittext && !isLimitAmountEquals(editable)))
+                    (i == R.id.bullet_address_edittext && !isLimitAmountEquals(editable)))
             {
                 if (i == R.id.amount_limit_edittext )
                 {
                     putAmountInRed(false)
                 }
 
-                if (i == R.id.limit_edittext )
+                if (i == R.id.bullet_address_edittext )
                 {
                     if (!mIsTracking)
                     {
@@ -726,12 +725,12 @@ class AddLimitsActivity : BaseSecureActivity()
                         {
                             val progress = limits_seekbar.progress
 
-                            val change:Int = if (TextUtils.isEmpty(limit_edittext.text))
+                            val change:Int = if (TextUtils.isEmpty(bullet_address_edittext.text))
                             {
                                 0
                             } else
                             {
-                                limit_edittext.text.toString().toInt() - 1
+                                bullet_address_edittext.text.toString().toInt() - 1
                             }
 
                             if (progress != change)
@@ -765,7 +764,7 @@ class AddLimitsActivity : BaseSecureActivity()
                     putFeesToNegative()
                 }
             }
-            else if (i != R.id.amount_limit_edittext && i != R.id.limit_edittext)
+            else if (i != R.id.amount_limit_edittext && i != R.id.bullet_address_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -883,12 +882,12 @@ class AddLimitsActivity : BaseSecureActivity()
     {
         val isLimitValid = false
 
-        if (limit_edittext.text != null && !TextUtils.isEmpty(limit_edittext.text))
+        if (bullet_address_edittext.text != null && !TextUtils.isEmpty(bullet_address_edittext.text))
         {
             try
             {
                 //val amount = java.lang.Double.parseDouble()
-                val limit = limit_edittext.text!!.toString().toLong()
+                val limit = bullet_address_edittext.text!!.toString().toLong()
 
                 //no need
                 if (limit in 1..1000)
@@ -998,7 +997,7 @@ class AddLimitsActivity : BaseSecureActivity()
             color = R.color.tz_accent
         }
 
-        limit_edittext.setTextColor(ContextCompat.getColor(this, color))
+        bullet_address_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)

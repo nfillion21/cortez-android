@@ -121,7 +121,7 @@ tools:ignore="UselessParent,UnusedAttribute">
                 <include
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    layout="@layout/limits_form_card_info"
+                    layout="@layout/multisig_form_card_info"
                     />
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

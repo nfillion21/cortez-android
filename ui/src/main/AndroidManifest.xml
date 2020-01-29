@@ -78,6 +78,10 @@
             android:name="com.tezos.ui.activity.KeyManagementActivity"
             android:theme="@style/PaymentScreens.KeyManagementActivity"/>
 
+        <activity
+            android:name="com.tezos.ui.activity.AddMultisigActivity"
+            android:theme="@style/PaymentScreens.AddMultisigActivity"/>
+
     </application>
 
 </manifest>

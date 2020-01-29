@@ -34,22 +34,18 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
-import android.os.Build
 import android.os.Bundle
+import android.text.*
 import com.google.android.material.snackbar.Snackbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.appcompat.widget.Toolbar
-import android.text.Editable
-import android.text.TextUtils
-import android.text.TextWatcher
+import android.text.style.BulletSpan
 import android.util.Log
 import android.view.View
-import android.widget.SeekBar
 import android.widget.TextView
 import com.android.volley.AuthFailureError
-import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
@@ -63,7 +59,7 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.activity_add_limits.*
-import kotlinx.android.synthetic.main.limits_form_card_info.*
+import kotlinx.android.synthetic.main.multisig_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
@@ -125,7 +121,7 @@ class AddMultisigActivity : BaseSecureActivity()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_limits)
+        setContentView(R.layout.activity_add_multisig)
 
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
         val theme = CustomTheme.fromBundle(themeBundle)
@@ -138,44 +134,10 @@ class AddMultisigActivity : BaseSecureActivity()
 
         initToolbar(theme)
 
-        limits_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-
-            private var currentValue:Int = 1
-
-            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean)
-            {
-                if (!mIsTyping)
-                {
-                    limit_edittext.setText( (i+1).toString())
-                    currentValue = i+1
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar)
-            {
-                if (!mIsTyping)
-                {
-                    mIsTracking = true
-                }
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar)
-            {
-                if (!mIsTyping)
-                {
-                    mIsTracking = false
-                    limit_edittext.setText( (currentValue).toString())
-                }
-            }
-        })
-
         amount_limit_edittext.addTextChangedListener(GenericTextWatcher(amount_limit_edittext))
 
         val focusChangeListener = this.focusChangeListener()
         amount_limit_edittext.onFocusChangeListener = focusChangeListener
-
-        limit_edittext.addTextChangedListener(GenericTextWatcher(limit_edittext))
-        limit_edittext.onFocusChangeListener = focusChangeListener
 
         if (savedInstanceState != null)
         {
@@ -202,8 +164,6 @@ class AddMultisigActivity : BaseSecureActivity()
             when (i)
             {
                 R.id.amount_limit_edittext -> putAmountInRed(!hasFocus)
-
-                R.id.limit_edittext -> putLimitInRed(!hasFocus)
 
                 else -> throw UnsupportedOperationException(
                         "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
@@ -707,41 +667,11 @@ class AddMultisigActivity : BaseSecureActivity()
         {
             val i = v.id
 
-            if ((i == R.id.amount_limit_edittext && !isDelegateAmountEquals(editable))
-                    ||
-                    (i == R.id.limit_edittext && !isLimitAmountEquals(editable)))
+            if ((i == R.id.amount_limit_edittext && !isDelegateAmountEquals(editable)))
             {
                 if (i == R.id.amount_limit_edittext )
                 {
                     putAmountInRed(false)
-                }
-
-                if (i == R.id.limit_edittext )
-                {
-                    if (!mIsTracking)
-                    {
-                        putLimitInRed(false)
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                        {
-                            val progress = limits_seekbar.progress
-
-                            val change:Int = if (TextUtils.isEmpty(limit_edittext.text))
-                            {
-                                0
-                            } else
-                            {
-                                limit_edittext.text.toString().toInt() - 1
-                            }
-
-                            if (progress != change)
-                            {
-                                mIsTyping = true
-                                limits_seekbar.setProgress(change-1, true)
-                                mIsTyping = false
-                            }
-                        }
-                    }
                 }
 
                 //TODO text changed
@@ -765,7 +695,7 @@ class AddMultisigActivity : BaseSecureActivity()
                     putFeesToNegative()
                 }
             }
-            else if (i != R.id.amount_limit_edittext && i != R.id.limit_edittext)
+            else if (i != R.id.amount_limit_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -820,7 +750,7 @@ class AddMultisigActivity : BaseSecureActivity()
 
     fun isInputDataValid(): Boolean
     {
-        return isDelegateAmountValid() && isDailySpendingLimitValid()
+        return isDelegateAmountValid()
     }
 
     private fun isDelegateFeeValid():Boolean
@@ -879,34 +809,6 @@ class AddMultisigActivity : BaseSecureActivity()
         return isAmountValid
     }
 
-    private fun isDailySpendingLimitValid():Boolean
-    {
-        val isLimitValid = false
-
-        if (limit_edittext.text != null && !TextUtils.isEmpty(limit_edittext.text))
-        {
-            try
-            {
-                //val amount = java.lang.Double.parseDouble()
-                val limit = limit_edittext.text!!.toString().toLong()
-
-                //no need
-                if (limit in 1..1000)
-                {
-                    mLimitAmount = limit
-                    return true
-                }
-            }
-            catch (e: NumberFormatException)
-            {
-                mLimitAmount = -1
-                return false
-            }
-        }
-
-        return isLimitValid
-    }
-
     override fun onResume()
     {
         super.onResume()
@@ -936,15 +838,19 @@ class AddMultisigActivity : BaseSecureActivity()
                 onFinalizeDelegationLoadComplete(null)
             }
         }
+
+        val ss = SpannableString(" ")
+        ss.setSpan(BulletSpan(8, ContextCompat.getColor(this, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        bullet_textview.text = ss
     }
 
     private fun putEverythingInRed()
     {
         this.putAmountInRed(true)
-        this.putLimitInRed(true)
     }
 
-    fun isAddButtonValid(): Boolean
+    private fun isAddButtonValid(): Boolean
     {
         return mDelegatePayload != null
                 && isDelegateFeeValid()
@@ -980,25 +886,6 @@ class AddMultisigActivity : BaseSecureActivity()
         }
 
         amount_limit_edittext.setTextColor(ContextCompat.getColor(this, color))
-    }
-
-    private fun putLimitInRed(red: Boolean)
-    {
-        val color: Int
-
-        val limitValid = isDailySpendingLimitValid()
-
-        if (red && !limitValid)
-        {
-            color = R.color.tz_error
-            create_limit_contract_button.text = getString(R.string.delegate_format, "")
-        }
-        else
-        {
-            color = R.color.tz_accent
-        }
-
-        limit_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)

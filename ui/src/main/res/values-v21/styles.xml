@@ -51,4 +51,8 @@
         <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
+    <style name="PaymentScreens.AddMultisigActivity" parent="PaymentScreens.NoActionBar">
+        <item name="android:windowBackground">@color/colorBackground</item>
+    </style>
+
 </resources>

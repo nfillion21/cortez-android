@@ -602,7 +602,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         {
             ContractSelectorFragment.Companion.ContractType.DEFAULT -> AddDelegateActivity.start(this, mTezosTheme)
             ContractSelectorFragment.Companion.ContractType.SPENDING_LIMIT -> AddLimitsActivity.start(this, mTezosTheme)
-            ContractSelectorFragment.Companion.ContractType.MULTISIG -> AddLimitsActivity.start(this, mTezosTheme)
+            ContractSelectorFragment.Companion.ContractType.MULTISIG -> AddMultisigActivity.start(this, mTezosTheme)
         }
     }
 }

@@ -16,6 +16,7 @@
     <string name="amount">Amount</string>
     <string name="deposit_amount">Deposit amount</string>
     <string name="limit_1_to_1k">Daily spending limit (from 1 to 1000 ꜩ)</string>
+    <string name="signatories">Signatories</string>
     <string name="fee_minimum">Fee (calculated minimum)</string>
     <string name="delegate">Delegate</string>
     <string name="confirm_edition">Confirm the edition</string>
