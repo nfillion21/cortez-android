@@ -13,10 +13,13 @@
     <string name="address_book_title">Address book</string>
     <string name="transfer_title">Transfer</string>
     <string name="amount_default" translatable="false">0.05</string>
+    <string name="threshold_default" translatable="false">2</string>
     <string name="amount">Amount</string>
     <string name="deposit_amount">Deposit amount</string>
     <string name="limit_1_to_1k">Daily spending limit (from 1 to 1000 ꜩ)</string>
     <string name="signatories">Signatories</string>
+    <string name="threshold">Threshold (from 1 to 10)</string>
+    <string name="threshold_info">The threshold is the amount of signatories required to authorize an operation (transaction, delegation or change of the signatories)</string>
     <string name="fee_minimum">Fee (calculated minimum)</string>
     <string name="delegate">Delegate</string>
     <string name="confirm_edition">Confirm the edition</string>

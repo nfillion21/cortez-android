@@ -33,6 +33,7 @@
             android:textColor="@color/colorPrimary"
             android:clipToPadding="false"
             tools:ignore="UnusedAttribute,NewApi" />
+
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/amount_limit_edittext"
             android:layout_width="0dp"
@@ -49,8 +50,63 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_double"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/threshold_textview"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/threshold"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/threshold_edittext"
+            android:layout_height="wrap_content"
+            android:layout_width="@dimen/min_height_touch_target"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            android:gravity="center_horizontal"
+            android:imeOptions="actionNext"
+            android:hint="@string/threshold_default"
+            android:inputType="numberDecimal"
+            android:textColorHint="@color/tz_placeholder"
+            android:maxLength="2"
+            android:digits="0123456789"
+            android:textSize="@dimen/size_edit_text" />
+    </LinearLayout>
+
     <TextView
-        android:id="@+id/limit_textview"
+        android:id="@+id/threshold_info_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/threshold_info"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
+        tools:ignore="UnusedAttribute,NewApi" />
+
+        <!--
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            android:text="@string/tez"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:clipToPadding="false"
+            tools:ignore="UnusedAttribute,NewApi" />
+        -->
+
+    <TextView
+        android:id="@+id/signatories_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/signatories"
