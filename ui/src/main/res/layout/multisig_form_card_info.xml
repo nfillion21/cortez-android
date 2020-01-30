@@ -72,7 +72,7 @@
             android:layout_width="@dimen/min_height_touch_target"
             android:layout_marginLeft="@dimen/spacing_normal"
             android:gravity="center_horizontal"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionDone"
             android:hint="@string/threshold_default"
             android:inputType="numberDecimal"
             android:textColorHint="@color/tz_placeholder"

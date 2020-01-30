@@ -449,4 +449,19 @@
             android:src="@drawable/ic_clear_18" />
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/mailButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/spacing_double"
+        android:layout_marginBottom="@dimen/spacing_double"
+        style="@style/PaymentScreens.RoundedButton"
+        android:text="@string/add_multisig_signatory"
+        android:textSize="@dimen/info_item_text_size"
+        android:visibility="visible"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="@dimen/spacing_normal"
+        />
 </LinearLayout>

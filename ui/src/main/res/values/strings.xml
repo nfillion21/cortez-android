@@ -89,6 +89,7 @@
     <string name="send_10_cents">Send 0.1 ꜩ to it</string>
     <string name="send">Send 0.1 ꜩ</string>
     <string name="contact_us">Contact us</string>
+    <string name="add_multisig_signatory">Add a signatory</string>
     <string name="restore_your_24_words">Restore your 24 words</string>
     <string name="remove_your_24_words">Remove your master key</string>
     <string name="share_via">Share via</string>
