@@ -35,6 +35,7 @@
     <string name="delegate_title">Delegate</string>
     <string name="script_title">Script</string>
     <string name="limits_title">Limits</string>
+    <string name="multisig_title">Multisig</string>
     <string name="address_book_empty_info_title">Please fill in your address book by clicking on the add button</string>
     <string name="contracts_empty_info_title">Please create a contract and delegate your tez by clicking on the add button</string>
     <string name="create_wallet">Create Wallet</string>
@@ -45,6 +46,7 @@
     <string name="add_address_title">Add an address</string>
     <string name="add_delegate_title">Add a delegate</string>
     <string name="add_limits_title">Add a contract limit</string>
+    <string name="add_multisig_title">Add a multisig contract</string>
     <string name="delegation_title">Delegation</string>
     <string name="receive_title">Receive</string>
     <string name="restore_wallet_info">Please fill your 24 english words in the right order to recover your accounts.</string>
@@ -57,6 +59,7 @@
     <string name="copied">Copied %1$s</string>
     <string name="delegate_address_info">Please fill the form to delegate your tez. This will create a KT1 address and delegate it to the tz1 delegate address you choose.</string>
     <string name="contract_limits_info">Please fill the form to create a smart contract</string>
+    <string name="multisig_contract_info">Please fill the form to create a multisig contract</string>
     <string name="redelegate_address_info">Please fill the form to delegate your tez to your chosen baker\'s address.</string>
     <string name="no_baker_at_the_moment">You do not have a baker at the moment.</string>
     <string name="remove_delegate_info">Your current baker\'s address:</string>

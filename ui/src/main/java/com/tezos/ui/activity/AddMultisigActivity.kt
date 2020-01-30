@@ -843,6 +843,9 @@ class AddMultisigActivity : BaseSecureActivity()
         ss.setSpan(BulletSpan(8, ContextCompat.getColor(this, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         bullet_textview.text = ss
+        bullet_textview_2.text = ss
+        bullet_textview_3.text = ss
+        bullet_textview_4.text = ss
     }
 
     private fun putEverythingInRed()

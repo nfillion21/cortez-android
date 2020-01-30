@@ -53,7 +53,6 @@
         android:id="@+id/limit_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/spacing_double"
         android:text="@string/signatories"
         android:textStyle="bold"
         android:layout_marginTop="@dimen/spacing_double"
@@ -64,6 +63,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_double"
         android:layout_height="wrap_content">
 
         <TextView
@@ -72,7 +72,6 @@
             android:layout_weight="0"
             android:layout_height="wrap_content"
             android:elevation="@dimen/elevation_header"
-            android:text="hello"
             tools:ignore="unusedattribute,newapi" />
 
         <com.google.android.material.textfield.TextInputEditText
@@ -93,8 +92,144 @@
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
+        <ImageButton
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_weight="0"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            style="@style/PaymentScreens.RoundedButton"
+            android:src="@drawable/ic_clear_18" />
     </LinearLayout>
 
+    <!--
+    style="?android:attr/buttonStyleSmall"
+    -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_double"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/bullet_textview_2"
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            tools:ignore="unusedattribute,newapi" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/bullet_address_edittext_2"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:minWidth="@dimen/spacing_huge"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:hint="@string/one"
+            android:enabled="true"
+            android:inputType="numberDecimal"
+            android:focusableInTouchMode="false"
+            android:clickable="false"
+            android:longClickable="false"
+            android:focusable="false"
+            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
+            android:textColorHint="@color/tz_placeholder"
+            android:textSize="@dimen/standard_item_text_size" />
+
+        <ImageButton
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_weight="0"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            style="@style/PaymentScreens.RoundedButton"
+            android:src="@drawable/ic_clear_18" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_double"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/bullet_textview_3"
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            tools:ignore="unusedattribute,newapi" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/bullet_address_edittext_3"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:minWidth="@dimen/spacing_huge"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:hint="@string/one"
+            android:enabled="true"
+            android:inputType="numberDecimal"
+            android:focusableInTouchMode="false"
+            android:clickable="false"
+            android:longClickable="false"
+            android:focusable="false"
+            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
+            android:textColorHint="@color/tz_placeholder"
+            android:textSize="@dimen/standard_item_text_size" />
+
+        <ImageButton
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_weight="0"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            style="@style/PaymentScreens.RoundedButton"
+            android:src="@drawable/ic_clear_18" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_double"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/bullet_textview_4"
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            tools:ignore="unusedattribute,newapi" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/bullet_address_edittext_4"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:minWidth="@dimen/spacing_huge"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:hint="@string/one"
+            android:enabled="true"
+            android:inputType="numberDecimal"
+            android:focusableInTouchMode="false"
+            android:clickable="false"
+            android:longClickable="false"
+            android:focusable="false"
+            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
+            android:textColorHint="@color/tz_placeholder"
+            android:textSize="@dimen/standard_item_text_size" />
+
+        <ImageButton
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_weight="0"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            style="@style/PaymentScreens.RoundedButton"
+            android:src="@drawable/ic_clear_18" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/gas_textview"
