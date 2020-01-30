@@ -60,6 +60,7 @@ import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.activity_add_limits.*
 import kotlinx.android.synthetic.main.multisig_form_card_info.*
+import kotlinx.android.synthetic.main.multisig_form_card_info_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
@@ -133,6 +134,20 @@ class AddMultisigActivity : BaseSecureActivity()
         }
 
         initToolbar(theme)
+
+        val ss = SpannableString(" ")
+        ss.setSpan(BulletSpan(8, ContextCompat.getColor(this, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        bullet_textview_01.text = ss
+        bullet_textview_02.text = ss
+        bullet_textview_03.text = ss
+        bullet_textview_04.text = ss
+        bullet_textview_05.text = ss
+        bullet_textview_06.text = ss
+        bullet_textview_07.text = ss
+        bullet_textview_08.text = ss
+        bullet_textview_09.text = ss
+        bullet_textview_10.text = ss
 
         amount_limit_edittext.addTextChangedListener(GenericTextWatcher(amount_limit_edittext))
 
@@ -838,14 +853,6 @@ class AddMultisigActivity : BaseSecureActivity()
                 onFinalizeDelegationLoadComplete(null)
             }
         }
-
-        val ss = SpannableString(" ")
-        ss.setSpan(BulletSpan(8, ContextCompat.getColor(this, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        bullet_textview.text = ss
-        bullet_textview_2.text = ss
-        bullet_textview_3.text = ss
-        bullet_textview_4.text = ss
     }
 
     private fun putEverythingInRed()
