@@ -55,6 +55,8 @@ import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
+import com.tezos.core.models.Account
+import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
@@ -155,8 +157,6 @@ class AddMultisigActivity : BaseSecureActivity()
                         this,
                         theme,
                         AddressBookActivity.Selection.SelectionAddresses)
-                //mSignatoriesList.add("tz1slfkdjfsdjkfsdkjls")
-                //refreshSignatories()
             }
         }
 
@@ -322,6 +322,23 @@ class AddMultisigActivity : BaseSecureActivity()
             {
                 it.visibility = View.GONE
             }
+        }
+    }
+
+    private fun addSignatory(signatory:String)
+    {
+        if (mSignatoriesList.size >= 10)
+        {
+            //error message
+        }
+        else if (mSignatoriesList.contains(signatory))
+        {
+            //error message
+        }
+        else
+        {
+            mSignatoriesList.add(signatory)
+            refreshSignatories()
         }
     }
 
@@ -1011,6 +1028,17 @@ class AddMultisigActivity : BaseSecureActivity()
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
         super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == AddressBookActivity.TRANSFER_SELECT_REQUEST_CODE)
+        {
+            if (data != null && data.hasExtra(Account.TAG) && resultCode == R.id.multisig_address_selection_succeed)
+            {
+                val accountBundle = data.getBundleExtra(Account.TAG)
+                val account = Address.fromBundle(accountBundle)
+                val tz = account.pubKeyHash
+                addSignatory(tz)
+            }
+        }
 
         //val fragment = supportFragmentManager.findFragmentById(R.id.form_fragment_container)
         //fragment?.onActivityResult(requestCode, resultCode, data)

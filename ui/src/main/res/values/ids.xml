@@ -23,4 +23,5 @@
     <item name="logout_failed" type="id" />
     <item name="scan_succeed" type="id" />
     <item name="scan_failed" type="id" />
+    <item name="multisig_address_selection_succeed" type="id" />
 </resources>

@@ -211,6 +211,12 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
             }
             break;
 
+            case SelectionAddresses:
+            {
+                setResult(R.id.multisig_address_selection_succeed, intent);
+            }
+            break;
+
             default: //no-op;
                 break;
         }
