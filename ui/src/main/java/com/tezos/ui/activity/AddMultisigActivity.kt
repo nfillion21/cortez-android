@@ -39,6 +39,9 @@ import android.text.*
 import android.text.style.BulletSpan
 import android.util.Log
 import android.view.View
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
@@ -52,9 +55,7 @@ import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
-import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.models.Operation
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -66,12 +67,9 @@ import kotlinx.android.synthetic.main.multisig_form_card_info_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlin.collections.List
 import kotlin.collections.Map
-import kotlin.collections.emptyList
 import kotlin.collections.set
 import kotlin.math.roundToLong
 
@@ -97,7 +95,7 @@ class AddMultisigActivity : BaseSecureActivity()
     private var mIsTracking:Boolean = false
     private var mIsTyping:Boolean = false
 
-    private var mSignatoriesList:ArrayList<String> = ArrayList()
+    private var mSignatoriesList:ArrayList<String> = ArrayList(10)
 
     companion object
     {
@@ -146,21 +144,41 @@ class AddMultisigActivity : BaseSecureActivity()
             onDelegateClick()
         }
 
+        add_signatory_button.setOnClickListener {
+            if (mSignatoriesList.size == 10)
+            {
+                // display an error message
+            }
+            else
+            {
+                mSignatoriesList.add("tz1slfkdjfsdjkfsdkjls")
+                refreshSignatories()
+            }
+        }
+
+        val clearButtons = listOf<ImageButton>(
+                delete_address_button_01,
+                delete_address_button_02,
+                delete_address_button_03,
+                delete_address_button_04,
+                delete_address_button_05,
+                delete_address_button_06,
+                delete_address_button_07,
+                delete_address_button_08,
+                delete_address_button_09,
+                delete_address_button_10
+        )
+
+        for (i in clearButtons.indices)
+        {
+            clearButtons[i].setOnClickListener {
+                mSignatoriesList.removeAt(i)
+                refreshSignatories()
+            }
+        }
+
         initToolbar(theme)
 
-        val ss = SpannableString(" ")
-        ss.setSpan(BulletSpan(8, ContextCompat.getColor(this, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        bullet_textview_01.text = ss
-        bullet_textview_02.text = ss
-        bullet_textview_03.text = ss
-        bullet_textview_04.text = ss
-        bullet_textview_05.text = ss
-        bullet_textview_06.text = ss
-        bullet_textview_07.text = ss
-        bullet_textview_08.text = ss
-        bullet_textview_09.text = ss
-        bullet_textview_10.text = ss
 
         amount_limit_edittext.addTextChangedListener(GenericTextWatcher(amount_limit_edittext))
 
@@ -183,6 +201,22 @@ class AddMultisigActivity : BaseSecureActivity()
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
             mSignatoriesList = savedInstanceState.getStringArrayList(SIGNATORIES_LIST_KEY)
+        }
+        else
+        {
+            val ss = SpannableString(" ")
+            ss.setSpan(BulletSpan(8, ContextCompat.getColor(this, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            bullet_textview_01.text = ss
+            bullet_textview_02.text = ss
+            bullet_textview_03.text = ss
+            bullet_textview_04.text = ss
+            bullet_textview_05.text = ss
+            bullet_textview_06.text = ss
+            bullet_textview_07.text = ss
+            bullet_textview_08.text = ss
+            bullet_textview_09.text = ss
+            bullet_textview_10.text = ss
         }
     }
 
@@ -232,6 +266,59 @@ class AddMultisigActivity : BaseSecureActivity()
 
         val mTitleBar = findViewById<TextView>(R.id.barTitle)
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
+    }
+
+    private fun refreshSignatories()
+    {
+        val signatoryLayouts = listOf<LinearLayout>(
+                signatory_layout_01,
+                signatory_layout_02,
+                signatory_layout_03,
+                signatory_layout_04,
+                signatory_layout_05,
+                signatory_layout_06,
+                signatory_layout_07,
+                signatory_layout_08,
+                signatory_layout_09,
+                signatory_layout_10
+        )
+
+        val bulletEditTexts = listOf<TextView>(
+                bullet_address_edittext_01,
+                bullet_address_edittext_02,
+                bullet_address_edittext_03,
+                bullet_address_edittext_04,
+                bullet_address_edittext_05,
+                bullet_address_edittext_06,
+                bullet_address_edittext_07,
+                bullet_address_edittext_08,
+                bullet_address_edittext_09,
+                bullet_address_edittext_10
+        )
+
+        if (!mSignatoriesList.isNullOrEmpty())
+        {
+            val length = mSignatoriesList.size
+
+            for (i in 0 until length)
+            {
+                bulletEditTexts[i].text = mSignatoriesList[i]
+                signatoryLayouts[i].visibility = View.VISIBLE
+            }
+
+            for (i in length until 10)
+            {
+                bulletEditTexts[i].text = getString(R.string.neutral)
+                signatoryLayouts[i].visibility = View.GONE
+            }
+        }
+        else
+        {
+            for (it in signatoryLayouts)
+            {
+                it.visibility = View.GONE
+            }
+        }
     }
 
     private fun startInitOriginateContractLoading()
@@ -846,6 +933,7 @@ class AddMultisigActivity : BaseSecureActivity()
         putEverythingInRed()
 
         //TODO show the right list of signatories
+        refreshSignatories()
 
 
         if (isInputDataValid() && isDelegateFeeValid())
