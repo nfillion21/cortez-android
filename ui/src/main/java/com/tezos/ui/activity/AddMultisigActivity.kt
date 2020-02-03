@@ -36,23 +36,25 @@ import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
 import android.text.*
-import com.google.android.material.snackbar.Snackbar
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.appcompat.widget.Toolbar
 import android.text.style.BulletSpan
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import com.android.volley.AuthFailureError
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.google.android.material.snackbar.Snackbar
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
+import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.models.Operation
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -64,6 +66,13 @@ import kotlinx.android.synthetic.main.multisig_form_card_info_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.emptyList
+import kotlin.collections.set
 import kotlin.math.roundToLong
 
 /**
@@ -88,6 +97,8 @@ class AddMultisigActivity : BaseSecureActivity()
     private var mIsTracking:Boolean = false
     private var mIsTyping:Boolean = false
 
+    private var mSignatoriesList:ArrayList<String> = ArrayList()
+
     companion object
     {
         var ADD_DSL_REQUEST_CODE = 0x3500 // arbitrary int
@@ -103,6 +114,8 @@ class AddMultisigActivity : BaseSecureActivity()
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
+
+        private const val SIGNATORIES_LIST_KEY = "signatories_list"
 
         private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
         {
@@ -168,6 +181,8 @@ class AddMultisigActivity : BaseSecureActivity()
             mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
+
+            mSignatoriesList = savedInstanceState.getStringArrayList(SIGNATORIES_LIST_KEY)
         }
     }
 
@@ -830,6 +845,9 @@ class AddMultisigActivity : BaseSecureActivity()
 
         putEverythingInRed()
 
+        //TODO show the right list of signatories
+
+
         if (isInputDataValid() && isDelegateFeeValid())
         {
             validateAddButton(true)
@@ -1016,6 +1034,8 @@ class AddMultisigActivity : BaseSecureActivity()
         outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
 
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
+
+        outState.putStringArrayList(SIGNATORIES_LIST_KEY, mSignatoriesList)
     }
 
     override fun onDestroy()
