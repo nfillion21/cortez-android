@@ -39,7 +39,6 @@ import android.text.*
 import android.text.style.BulletSpan
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -147,17 +146,10 @@ class AddMultisigActivity : BaseSecureActivity()
         }
 
         add_signatory_button.setOnClickListener {
-            if (mSignatoriesList.size == 10)
-            {
-                // display an error message
-            }
-            else
-            {
-                AddressBookActivity.start(
-                        this,
-                        theme,
-                        AddressBookActivity.Selection.SelectionAddresses)
-            }
+            AddressBookActivity.start(
+                    this,
+                    theme,
+                    AddressBookActivity.Selection.SelectionAddresses)
         }
 
         val clearButtons = listOf<ImageButton>(
@@ -327,18 +319,23 @@ class AddMultisigActivity : BaseSecureActivity()
 
     private fun addSignatory(signatory:String)
     {
-        if (mSignatoriesList.size >= 10)
-        {
-            //error message
-        }
-        else if (mSignatoriesList.contains(signatory))
-        {
-            //error message
-        }
-        else
-        {
-            mSignatoriesList.add(signatory)
-            refreshSignatories()
+        when {
+
+            mSignatoriesList.size >= 10 ->
+            {
+                showSnackBar(null, getString(R.string.max_10_signatories))
+            }
+
+            mSignatoriesList.contains(signatory) ->
+            {
+                showSnackBar(null, getString(R.string.signatory_already_in_list))
+            }
+
+            else ->
+            {
+                mSignatoriesList.add(signatory)
+                refreshSignatories()
+            }
         }
     }
 
@@ -497,7 +494,7 @@ class AddMultisigActivity : BaseSecureActivity()
         {
             transferLoading(false)
 
-            showSnackBar(error)
+            showSnackBar(error, null)
         }
         else
         {
@@ -533,7 +530,7 @@ class AddMultisigActivity : BaseSecureActivity()
 
             if(error != null)
             {
-                showSnackBar(error)
+                showSnackBar(error, null)
             }
         }
         else
@@ -740,18 +737,14 @@ class AddMultisigActivity : BaseSecureActivity()
         mDelegatePayload = null
     }
 
-    private fun showSnackBar(error:VolleyError?)
+    private fun showSnackBar(volleyError:VolleyError?, errorMessage:String?)
     {
-        var error: String? = if (error != null)
-        {
-            error.toString()
-        }
-        else
-        {
-            getString(R.string.generic_error)
-        }
+        var error: String =
+                volleyError?.toString()
+                        ?: errorMessage
+                                ?: getString(R.string.generic_error)
 
-        val snackbar = Snackbar.make(findViewById(R.id.content), error.toString(), Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(findViewById(R.id.content), error, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,
                 android.R.color.holo_red_light)))
         snackbar.show()

@@ -10,6 +10,7 @@
     <string name="select_multisig_contract">Multisig contract</string>
     <string name="select_source_title">Select source</string>
     <string name="select_destination_title">Select destination</string>
+    <string name="select_an_address">Select an address</string>
     <string name="address_book_title">Address book</string>
     <string name="transfer_title">Transfer</string>
     <string name="amount_default" translatable="false">0.05</string>
@@ -68,9 +69,7 @@
     <string name="remove_delegate_info">Your current baker\'s address:</string>
     <string name="remove_delegate_info_address">%1$s</string>
     <string name="no_script_info">The script linked to this address is the default delegation contract one.</string>
-    <string name="contract_storage_info">Your current contract\'s storage informations</string>
-    <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string>
-    <string name="key_management_info">Please create or restore a wallet.</string>
+    <string name="contract_storage_info">Your current contract\'s storage informations</string> <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string> <string name="key_management_info">Please create or restore a wallet.</string>
     <string name="create_restore_wallet_delegate_info">Please create or restore a wallet to be able to delegate your tez.</string>
     <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez.</string>
     <string name="no_mnemonics_found">Please restore your 24 words in key management to transfer tez from your tz1 account.</string>
@@ -83,6 +82,8 @@
     <string name="remove_your_24_words_info">You can remove your Master Key from this device as a safety mesure. Please keep your 24 words in a safe place to recover it.\n\nBy doing this, you won\'t be able to transfer tez from your main tz1 account or standard KT1 contracts, you won\'t be able to create new contracts or remove/change your bakers.\n\nHowever you can still transfer tez from your Daily Spending Limit contracts if this device is linked to them.\n\nThe Log Out button removes all of your data from this device.</string>
     <string name="tap_to_copy_info">Tap to copy your address or share it with the sender via email or text.</string>
     <string name="slc_available">More information about the SLC on the blog:\nhttps://blog.nomadic-labs.com/cortez-security-by-using-the-spending-limit-contract.html</string>
+    <string name="signatory_already_in_list">This signatory is already in the list.</string>
+    <string name="max_10_signatories">Select 10 signatories at most.</string>
 
     <string name="not_mnemonics_expected">These 24 words are valid but not those expected to restore the current account.</string>
     <string name="share">Share</string>

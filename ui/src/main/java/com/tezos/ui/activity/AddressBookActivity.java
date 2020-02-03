@@ -166,7 +166,8 @@ public class AddressBookActivity extends BaseSecureActivity implements AddressBo
         }
         else if (selection.equals(Selection.SelectionAddresses))
         {
-            mTitleBar.setText(getString(R.string.select_destination_title));
+            //mTitleBar.setText(getString(R.string.select_destination_title));
+            mTitleBar.setText(getString(R.string.select_an_address));
         }
     }
 
