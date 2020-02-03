@@ -151,8 +151,12 @@ class AddMultisigActivity : BaseSecureActivity()
             }
             else
             {
-                mSignatoriesList.add("tz1slfkdjfsdjkfsdkjls")
-                refreshSignatories()
+                AddressBookActivity.start(
+                        this,
+                        theme,
+                        AddressBookActivity.Selection.SelectionAddresses)
+                //mSignatoriesList.add("tz1slfkdjfsdjkfsdkjls")
+                //refreshSignatories()
             }
         }
 

@@ -59,6 +59,8 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
     private OnItemClickListener mOnItemClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
     private CustomTheme mCustomTheme;
+    private AddressBookActivity.Selection mSelection;
+
 
     public interface OnItemClickListener
     {
@@ -75,11 +77,11 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
         mActivity = activity;
         mLayoutInflater = LayoutInflater.from(activity.getApplicationContext());
         mCustomTheme = customTheme;
+        mSelection = selection;
 
         mAddresses = new ArrayList<>();
 
         /*
-
         if (selection.equals(AddressBookActivity.Selection.SelectionAccounts))
         {
             removeAddresses(mAddresses);
@@ -129,13 +131,9 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
             mOnItemClickListener.onClick(v, getItem(holder.getAdapterPosition()));
         });
 
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view)
-            {
-                mOnItemLongClickListener.onLongClick(view, getItem(holder.getAdapterPosition()));
-                return false;
-            }
+        holder.itemView.setOnLongClickListener(view -> {
+            mOnItemLongClickListener.onLongClick(view, getItem(holder.getAdapterPosition()));
+            return false;
         });
     }
 
@@ -166,6 +164,17 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
         if (addresses != null && !addresses.isEmpty())
         {
             mAddresses.addAll(addresses);
+
+            if (mSelection == AddressBookActivity.Selection.SelectionAddresses)
+            {
+                for (Address a: mAddresses)
+                {
+                    if (a.getPubKeyHash().toLowerCase().startsWith("kt1"))
+                    {
+                        mAddresses.remove(a);
+                    }
+                }
+            }
         }
         notifyDataSetChanged();
     }
