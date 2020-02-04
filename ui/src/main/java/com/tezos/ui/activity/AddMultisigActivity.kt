@@ -61,8 +61,12 @@ import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
+import com.tezos.ui.fragment.AddSignatoryDialogFragment
+import com.tezos.ui.fragment.ContractSelectorFragment
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.activity_add_limits.*
+import kotlinx.android.synthetic.main.dialog_pwd_container.*
+import kotlinx.android.synthetic.main.dialog_pwd_content.*
 import kotlinx.android.synthetic.main.multisig_form_card_info.*
 import kotlinx.android.synthetic.main.multisig_form_card_info_signatories.*
 import org.json.JSONArray
@@ -77,7 +81,7 @@ import kotlin.math.roundToLong
 /**
  * Created by nfillion on 26/02/19.
  */
-class AddMultisigActivity : BaseSecureActivity()
+class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnSignatorySelectorListener
 {
     private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
@@ -146,10 +150,14 @@ class AddMultisigActivity : BaseSecureActivity()
         }
 
         add_signatory_button.setOnClickListener {
+            /*
             AddressBookActivity.start(
                     this,
                     theme,
                     AddressBookActivity.Selection.SelectionAddresses)
+            */
+            val dialog = AddSignatoryDialogFragment.newInstance()
+            dialog.show(supportFragmentManager, "AddSignatory")
         }
 
         val clearButtons = listOf<ImageButton>(
@@ -219,9 +227,8 @@ class AddMultisigActivity : BaseSecureActivity()
     private fun focusChangeListener(): View.OnFocusChangeListener
     {
         return View.OnFocusChangeListener { v, hasFocus ->
-            val i = v.id
 
-            when (i)
+            when (v.id)
             {
                 R.id.amount_limit_edittext -> putAmountInRed(!hasFocus)
 
@@ -1155,5 +1162,10 @@ class AddMultisigActivity : BaseSecureActivity()
     {
         super.onDestroy()
         cancelRequests(false)
+    }
+
+    override fun onContractClicked()
+    {
+
     }
 }

@@ -25,47 +25,38 @@
 (*****************************************************************************)
 */
 
-package com.tezos.ui.authentication
+package com.tezos.ui.fragment
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import androidx.fragment.app.DialogFragment
+import androidx.appcompat.app.AppCompatDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatDialogFragment
-import androidx.fragment.app.DialogFragment
-import com.google.android.material.snackbar.Snackbar
 import com.tezos.ui.R
-import com.tezos.ui.extentions.openSecuritySettings
-import kotlinx.android.synthetic.main.dialog_pwd_container.*
-import kotlinx.android.synthetic.main.dialog_pwd_content.*
+import kotlinx.android.synthetic.main.dialog_add_signatory_container.*
+import kotlinx.android.synthetic.main.dialog_add_signatory_content.*
 
-class PasswordDialog : AppCompatDialogFragment()
+class AddSignatoryDialogFragment : AppCompatDialogFragment()
 {
-    private var listener: OnPasswordDialogListener? = null
+    private var listener: OnSignatorySelectorListener? = null
 
-    interface OnPasswordDialogListener
+    interface OnSignatorySelectorListener
     {
-        fun isFingerprintHardwareAvailable():Boolean
-        fun hasEnrolledFingerprints():Boolean
-        fun passwordVerified(mnemonics: String, password: String, fingerprint: Boolean)
+        fun onContractClicked()
     }
 
     companion object
     {
         @JvmStatic
-        fun newInstance(mnemonics: String) =
-                PasswordDialog().apply {
-                    arguments = Bundle().apply {
-                        putString(MNEMONICS_KEY, mnemonics)
-                    }
+        fun newInstance() =
+                AddSignatoryDialogFragment().apply {
+                    arguments = Bundle().apply {}
                 }
-
-        private const val MNEMONICS_KEY = "mnemonics_key"
     }
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -79,76 +70,36 @@ class PasswordDialog : AppCompatDialogFragment()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.dialog_pwd_container, container, false)
+        return inflater.inflate(R.layout.dialog_add_signatory_container, container, false)
     }
 
     override fun onAttach(context: Context)
     {
         super.onAttach(context)
-        if (context is OnPasswordDialogListener)
+        if (context is OnSignatorySelectorListener)
         {
             listener = context
         }
         else
         {
-            throw RuntimeException(context.toString() + " must implement OnPasswordDialogListener")
+            throw RuntimeException("$context must implement onSignatorySelectorListener")
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
     {
         super.onViewCreated(view, savedInstanceState)
-        dialog.setTitle(getString(R.string.sign_up_create_master_password))
+        dialog.setTitle(getString(R.string.add_signatory_title))
 
-        cancelButtonPasswordView.setOnClickListener { dismiss() }
-        secondButtonPasswordView.setOnClickListener {
-            verifyPassword()
+        cancelButtonView.setOnClickListener { dismiss() }
+        OkButtonView.setOnClickListener {
+            //verifyPassword()
+            dismiss()
         }
 
-        if (listener!!.isFingerprintHardwareAvailable())
-        {
-            useFingerprintInFutureCheck.visibility = View.VISIBLE
-        }
-
-        useFingerprintInFutureCheck.isChecked = listener!!.hasEnrolledFingerprints()
-
-        useFingerprintInFutureCheck.setOnCheckedChangeListener { _, checked -> onAllowFingerprint(checked) }
-
-        enterPassword.addTextChangedListener(GenericTextWatcher(enterPassword))
-        confirmPassword.addTextChangedListener(GenericTextWatcher(confirmPassword))
+        enterPublicKeyEditText.addTextChangedListener(GenericTextWatcher(enterPublicKeyEditText))
 
         validateOkButton(isInputDataValid())
-    }
-
-    /**
-     * Checks whether the current entered password is correct, and dismisses the the dialog and
-     * let's the activity know about the result.
-     */
-    private fun verifyPassword() {
-        val password = enterPassword.text.toString()
-        val fingerprint = useFingerprintInFutureCheck.isChecked
-        dismiss()
-
-        val listener = listener
-
-        arguments?.let {
-            val mnemonics = it.getString(MNEMONICS_KEY)
-            listener?.passwordVerified(mnemonics!!, password, fingerprint)
-        }
-    }
-
-    private fun onAllowFingerprint(checked: Boolean)
-    {
-        if (checked && !listener!!.hasEnrolledFingerprints())
-        {
-            useFingerprintInFutureCheck.isChecked = false
-            Snackbar.make(rootView, R.string.sign_up_snack_message, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.sign_up_snack_action) {
-                        activity?.openSecuritySettings()
-                    }
-                    .setActionTextColor(Color.YELLOW)
-                    .show()
-        }
     }
 
     private inner class GenericTextWatcher internal constructor(private val v: View) : TextWatcher
@@ -160,7 +111,7 @@ class PasswordDialog : AppCompatDialogFragment()
         override fun afterTextChanged(editable: Editable)
         {
             val i = v.id
-            if (i != R.id.enterPassword && i != R.id.confirmPassword)
+            if (i != R.id.enterPublicKeyEditText)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -172,10 +123,18 @@ class PasswordDialog : AppCompatDialogFragment()
 
     fun isInputDataValid(): Boolean
     {
-        if (!TextUtils.isEmpty(enterPassword.text) && !TextUtils.isEmpty(confirmPassword.text))
+        if (!TextUtils.isEmpty(enterPublicKeyEditText.text))
         {
-            if (enterPassword.text.toString() == confirmPassword.text.toString()
-                    && enterPassword.text.length >= 6 )
+            if (
+                    (enterPublicKeyEditText.text.toString().startsWith("edpk", ignoreCase = true)
+                    && enterPublicKeyEditText.text.length == 54)
+                    ||
+                    (enterPublicKeyEditText.text.toString().startsWith("p2pk", ignoreCase = true)
+                            && enterPublicKeyEditText.text.length == 55)
+                    ||
+                    (enterPublicKeyEditText.text.toString().startsWith("sppk", ignoreCase = true)
+                            && enterPublicKeyEditText.text.length == 55)
+            )
             {
                 return true
             }
@@ -185,10 +144,11 @@ class PasswordDialog : AppCompatDialogFragment()
 
     private fun validateOkButton(validate: Boolean)
     {
-        secondButtonPasswordView.isEnabled = validate
+        OkButtonView.isEnabled = validate
     }
 
-    override fun onDetach() {
+    override fun onDetach()
+    {
         super.onDetach()
         listener = null
     }

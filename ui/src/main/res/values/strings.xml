@@ -21,6 +21,7 @@
     <string name="signatories">Signatories</string>
     <string name="threshold">Threshold (from 1 to 10)</string>
     <string name="threshold_info">The threshold is the amount of signatories required to authorize an operation (transaction, delegation or change of the signatories)</string>
+    <string name="edpk_hint">edpk…</string>
     <string name="fee_minimum">Fee (calculated minimum)</string>
     <string name="delegate">Delegate</string>
     <string name="confirm_edition">Confirm the edition</string>
@@ -161,6 +162,8 @@
     <string name="use_fingerprint">Use fingerprint option to confirm transfers</string>
 
     <string name="contracts_and_delegation_title">Contracts and delegation</string>
+    <string name="add_signatory_title">Add a signatory</string>
+    <string name="add_signatory_info">Enter a public key. A tezos public key begins with edpk/p2pk/sppk.\n\nNot to be confused with a public key hash which begins with tz1/tz2/tz3.</string>
 
     <string name="scan_address_permission">To scan the address, allow camera permission.</string>
     <string name="read_contacts_permission">To select a name, allow read contacts permission.</string>

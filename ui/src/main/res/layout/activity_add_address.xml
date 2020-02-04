@@ -145,7 +145,7 @@
                                     android:drawableRight="@drawable/ic_person_black"
                                     android:drawableEnd="@drawable/ic_person_black"
                                     android:drawablePadding="@dimen/spacing_double"
-                                    android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                    android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
                                     android:maxLength="30"
                                     android:maxLines="1"
                                     android:singleLine="true"
