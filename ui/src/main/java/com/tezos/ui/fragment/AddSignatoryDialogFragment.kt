@@ -37,6 +37,9 @@ import androidx.appcompat.app.AppCompatDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat.getSystemService
 import com.tezos.ui.R
 import kotlinx.android.synthetic.main.dialog_add_signatory_container.*
 import kotlinx.android.synthetic.main.dialog_add_signatory_content.*
@@ -95,6 +98,20 @@ class AddSignatoryDialogFragment : AppCompatDialogFragment()
         OkButtonView.setOnClickListener {
             //verifyPassword()
             dismiss()
+        }
+
+        enterPublicKeyEditText.setOnEditorActionListener { v, i, _ ->
+
+            when (i)
+            {
+                EditorInfo.IME_ACTION_DONE -> {
+
+                    val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                    imm?.hideSoftInputFromWindow(v.windowToken, 0)
+
+                    true }
+                else -> false
+            }
         }
 
         enterPublicKeyEditText.addTextChangedListener(GenericTextWatcher(enterPublicKeyEditText))
