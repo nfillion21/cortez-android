@@ -84,11 +84,11 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 {
     private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
-    private var mInitDelegateLoading:Boolean = false
-    private var mFinalizeDelegateLoading:Boolean = false
+    private var mInitLoading:Boolean = false
+    private var mFinalizeLoading:Boolean = false
 
-    private var mDelegatePayload:String? = null
-    private var mDelegateFees:Long = -1
+    private var mPayload:String? = null
+    private var mFees:Long = -1
 
     private var mDelegateAmount:Double = -1.0
     private var mThreshold:Int = 0
@@ -100,7 +100,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
     private var mIsTracking:Boolean = false
     private var mIsTyping:Boolean = false
 
-    private var mSignatoriesList:ArrayList<String> = ArrayList(10)
+    private var mSignatoriesList:ArrayList<String> = ArrayList(SIGNATORIES_CAPACITY)
 
     companion object
     {
@@ -121,6 +121,9 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
 
         private const val SIGNATORIES_LIST_KEY = "signatories_list"
+
+        private const val SIGNATORIES_CAPACITY = 10
+
 
         private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
         {
@@ -157,7 +160,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         val themeBundle = intent.getBundleExtra(CustomTheme.TAG)
         val theme = CustomTheme.fromBundle(themeBundle)
 
-        validateAddButton(isInputDataValid() && isDelegateFeeValid())
+        validateAddButton(isInputDataValid() && isFeeValid())
 
         create_limit_contract_button_layout.setOnClickListener {
             onDelegateClick()
@@ -233,10 +236,10 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
         if (savedInstanceState != null)
         {
-            mDelegatePayload = savedInstanceState.getString(DELEGATE_PAYLOAD_KEY, null)
+            mPayload = savedInstanceState.getString(DELEGATE_PAYLOAD_KEY, null)
 
-            mInitDelegateLoading = savedInstanceState.getBoolean(DELEGATE_INIT_TAG)
-            mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
+            mInitLoading = savedInstanceState.getBoolean(DELEGATE_INIT_TAG)
+            mFinalizeLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
 
             mDelegateAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
 
@@ -244,7 +247,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
             mLimitAmount = savedInstanceState.getLong(LIMIT_AMOUNT_KEY, -1L)
 
-            mDelegateFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
+            mFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
@@ -356,7 +359,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                 signatoryLayouts[i].visibility = View.VISIBLE
             }
 
-            for (i in length until 10)
+            for (i in length until SIGNATORIES_CAPACITY)
             {
                 bulletEditTexts[i].text = getString(R.string.neutral)
                 signatoryLayouts[i].visibility = View.GONE
@@ -428,7 +431,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isAddButtonValid() && mDelegatePayload != null)
+        if (isAddButtonValid() && mPayload != null)
         {
             var postParams = JSONObject()
             postParams.put("src", mnemonicsData.pkh)
@@ -442,7 +445,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             val mutezAmount = (mDelegateAmount*1000000.0).roundToLong()
             dstObject.put("balance", mutezAmount)
 
-            dstObject.put("fee", mDelegateFees)
+            dstObject.put("fee", mFees)
 
             val ecKeys = retrieveECKeys()
             val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
@@ -454,11 +457,11 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
             postParams.put("dsts", dstObjects)
 
-            if (isOriginateSlcPayloadValid(mDelegatePayload!!, postParams))
+            if (isOriginateSlcPayloadValid(mPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
-                val byteArrayThree = mDelegatePayload!!.hexToByteArray()
+                val byteArrayThree = mPayload!!.hexToByteArray()
 
                 val xLen = zeroThree.size
                 val yLen = byteArrayThree.size
@@ -522,7 +525,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
                 stringRequest.tag = DELEGATE_FINALIZE_TAG
 
-                mFinalizeDelegateLoading = true
+                mFinalizeLoading = true
                 VolleySingleton.getInstance(applicationContext).addToRequestQueue(stringRequest)
             }
             else
@@ -559,7 +562,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
     private fun onInitDelegateLoadComplete(error:VolleyError?)
     {
-        mInitDelegateLoading = false
+        mInitLoading = false
 
         if (error != null || mClickCalculate)
         {
@@ -568,7 +571,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             cancelRequests(true)
 
             //TODO should cancel the payloadTransfer too
-            mDelegatePayload = null
+            mPayload = null
 
             //TODO we should give access to the fees button
 
@@ -682,30 +685,30 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
             //TODO check if the JSON is fine then launch the 2nd request
 
-            mDelegatePayload = answer.getString("result")
-            mDelegateFees = answer.getLong("total_fee")
+            mPayload = answer.getString("result")
+            mFees = answer.getLong("total_fee")
 
             // get back the object and
 
             val dstsArray = postParams["dsts"] as JSONArray
             val dstObj = dstsArray[0] as JSONObject
 
-            dstObj.put("fee", mDelegateFees.toString())
+            dstObj.put("fee", mFees.toString())
             dstsArray.put(0, dstObj)
 
             postParams.put("dsts", dstsArray)
 
             // we use this call to ask for payload and fees
-            if (mDelegatePayload != null && mDelegateFees != -1L)
+            if (mPayload != null && mFees != -1L)
             {
                 onInitDelegateLoadComplete(null)
 
-                val feeInTez = mDelegateFees.toDouble()/1000000.0
+                val feeInTez = mFees.toDouble()/1000000.0
                 fee_limit_edittext.setText(feeInTez.toString())
 
-                validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                validateAddButton(isInputDataValid() && isFeeValid())
 
-                if (isInputDataValid() && isDelegateFeeValid())
+                if (isInputDataValid() && isFeeValid())
                 {
                     validateAddButton(true)
                 }
@@ -730,7 +733,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
             mClickCalculate = true
             //Log.i("mTransferId", ""+mTransferId)
-            Log.i("mDelegatePayload", ""+mDelegatePayload)
+            Log.i("mDelegatePayload", ""+mPayload)
         })
         {
             @Throws(AuthFailureError::class)
@@ -745,7 +748,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         cancelRequests(true)
 
         jsObjRequest.tag = DELEGATE_INIT_TAG
-        mInitDelegateLoading = true
+        mInitLoading = true
         VolleySingleton.getInstance(applicationContext).addToRequestQueue(jsObjRequest)
     }
 
@@ -786,9 +789,9 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         fee_limit_edittext.isEnabled = false
         fee_limit_edittext.hint = getString(R.string.neutral)
 
-        mDelegateFees = -1
+        mFees = -1
 
-        mDelegatePayload = null
+        mPayload = null
     }
 
     private fun showSnackBar(volleyError:VolleyError?, errorMessage:String?)
@@ -852,7 +855,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         {
             val i = v.id
 
-            if ((i == R.id.amount_limit_edittext && !isDelegateAmountEquals(editable)))
+            if ((i == R.id.amount_limit_edittext && !isDepositAmountEquals(editable)))
             {
                 if (i == R.id.amount_limit_edittext )
                 {
@@ -880,14 +883,14 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                     putFeesToNegative()
                 }
             }
-            else if (i != R.id.amount_limit_edittext)
+            else if (i != R.id.amount_limit_edittext && i != R.id.threshold_edittext)
             {
                 throw UnsupportedOperationException(
                         "OnClick has not been implemented for " + resources.getResourceName(v.id))
             }
         }
 
-        private fun isDelegateAmountEquals(editable: Editable):Boolean
+        private fun isDepositAmountEquals(editable: Editable):Boolean
         {
             val isAmountEquals = false
 
@@ -930,7 +933,6 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             }
             return isLimitAmountEquals
         }
-
     }
 
     private fun isInputDataValid(): Boolean
@@ -939,7 +941,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                 && isThresholdValid()
     }
 
-    private fun isDelegateFeeValid():Boolean
+    private fun isFeeValid():Boolean
     {
         val isFeeValid = false
 
@@ -953,13 +955,13 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                 if (fee >= 0.000001f)
                 {
                     val longTransferFee = fee*1000000
-                    mDelegateFees = longTransferFee.roundToLong()
+                    mFees = longTransferFee.roundToLong()
                     return true
                 }
             }
             catch (e: NumberFormatException)
             {
-                mDelegateFees = -1
+                mFees = -1
                 return false
             }
         }
@@ -1003,7 +1005,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         {
             try
             {
-                val threshold = amount_limit_edittext.text.toString().toInt()
+                val threshold = threshold_edittext.text.toString().toInt()
 
                 if (threshold in 1..10 && threshold <= mSignatoriesList.size)
                 {
@@ -1032,13 +1034,13 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         refreshSignatories()
 
 
-        if (isInputDataValid() && isDelegateFeeValid())
+        if (isInputDataValid() && isFeeValid())
         {
             validateAddButton(true)
         }
 
         //TODO we got to keep in mind there's an id already.
-        if (mInitDelegateLoading)
+        if (mInitLoading)
         {
             startInitOriginateContractLoading()
         }
@@ -1046,7 +1048,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         {
             onInitDelegateLoadComplete(null)
 
-            if (mFinalizeDelegateLoading)
+            if (mFinalizeLoading)
             {
                 startFinalizeLoadingOriginateContract()
             }
@@ -1064,8 +1066,8 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
     private fun isAddButtonValid(): Boolean
     {
-        return mDelegatePayload != null
-                && isDelegateFeeValid()
+        return mPayload != null
+                && isFeeValid()
                 && isInputDataValid()
     }
 
@@ -1208,8 +1210,8 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
         if (resetBooleans)
         {
-            mInitDelegateLoading = false
-            mFinalizeDelegateLoading = false
+            mInitLoading = false
+            mFinalizeLoading = false
         }
     }
 
@@ -1217,10 +1219,10 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
     {
         super.onSaveInstanceState(outState)
 
-        outState.putBoolean(DELEGATE_INIT_TAG, mInitDelegateLoading)
-        outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
+        outState.putBoolean(DELEGATE_INIT_TAG, mInitLoading)
+        outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeLoading)
 
-        outState.putString(DELEGATE_PAYLOAD_KEY, mDelegatePayload)
+        outState.putString(DELEGATE_PAYLOAD_KEY, mPayload)
 
         outState.putDouble(DELEGATE_AMOUNT_KEY, mDelegateAmount)
 
@@ -1228,7 +1230,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
         outState.putLong(LIMIT_AMOUNT_KEY, mLimitAmount)
 
-        outState.putLong(DELEGATE_FEE_KEY, mDelegateFees)
+        outState.putLong(DELEGATE_FEE_KEY, mFees)
 
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
 

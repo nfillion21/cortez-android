@@ -86,7 +86,7 @@
             tools:ignore="UnusedAttribute,NewApi" />
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext"
+            android:id="@+id/limit_edittext"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:minWidth="@dimen/spacing_huge"
