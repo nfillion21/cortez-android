@@ -29,6 +29,7 @@ package com.tezos.ui.activity
 
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
@@ -42,6 +43,7 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -62,11 +64,8 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.fragment.AddSignatoryDialogFragment
-import com.tezos.ui.fragment.ContractSelectorFragment
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.activity_add_limits.*
-import kotlinx.android.synthetic.main.dialog_pwd_container.*
-import kotlinx.android.synthetic.main.dialog_pwd_content.*
 import kotlinx.android.synthetic.main.multisig_form_card_info.*
 import kotlinx.android.synthetic.main.multisig_form_card_info_signatories.*
 import org.json.JSONArray
@@ -92,6 +91,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
     private var mDelegateFees:Long = -1
 
     private var mDelegateAmount:Double = -1.0
+    private var mThreshold:Int = 0
 
     private var mLimitAmount:Long = -1L
 
@@ -112,6 +112,8 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
         private const val DELEGATE_AMOUNT_KEY = "delegate_amount_key"
+        private const val THRESHOLD_KEY = "threshold_key"
+
         private const val LIMIT_AMOUNT_KEY = "limit_amount_key"
 
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
@@ -133,6 +135,18 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             val starter = getStartIntent(activity, theme.toBundle())
             ActivityCompat.startActivityForResult(activity, starter, ADD_DSL_REQUEST_CODE, null)
         }
+    }
+
+    private fun pk():String
+    {
+        val seed = Storage(context = this).getMnemonics()
+        return seed.pk
+    }
+
+    private fun pkh():String
+    {
+        val seed = Storage(context = this).getMnemonics()
+        return seed.pkh
     }
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -176,8 +190,36 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         for (i in clearButtons.indices)
         {
             clearButtons[i].setOnClickListener {
-                mSignatoriesList.removeAt(i)
-                refreshSignatories()
+
+                if (mSignatoriesList[i] == pk())
+                {
+                    val dialogClickListener = { dialog: DialogInterface, which:Int ->
+                        when (which) {
+                            DialogInterface.BUTTON_POSITIVE -> {
+                                dialog.dismiss()
+
+                                mSignatoriesList.removeAt(i)
+                                refreshSignatories()
+                            }
+
+                            DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+                        }
+                    }
+
+                    val builder = AlertDialog.Builder(this)
+                    builder.setTitle(R.string.alert_remove_own_signatory_title)
+                            .setMessage(String.format(getString(R.string.alert_remove_own_signatory_body), pkh()))
+
+                            .setNegativeButton(android.R.string.cancel, dialogClickListener)
+                            .setPositiveButton(android.R.string.yes, dialogClickListener)
+                            .setCancelable(false)
+                            .show()
+                }
+                else
+                {
+                    mSignatoriesList.removeAt(i)
+                    refreshSignatories()
+                }
             }
         }
 
@@ -197,6 +239,8 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
 
             mDelegateAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
+
+            mThreshold = savedInstanceState.getInt(THRESHOLD_KEY, 0)
 
             mLimitAmount = savedInstanceState.getLong(LIMIT_AMOUNT_KEY, -1L)
 
@@ -889,9 +933,10 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
     }
 
-    fun isInputDataValid(): Boolean
+    private fun isInputDataValid(): Boolean
     {
-        return isDelegateAmountValid()
+        return isDepositAmountValid()
+                && isThresholdValid()
     }
 
     private fun isDelegateFeeValid():Boolean
@@ -922,7 +967,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         return isFeeValid
     }
 
-    private fun isDelegateAmountValid():Boolean
+    private fun isDepositAmountValid():Boolean
     {
         val isAmountValid = false
 
@@ -948,6 +993,33 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         }
 
         return isAmountValid
+    }
+
+    private fun isThresholdValid():Boolean
+    {
+        val isThresholdValid = false
+
+        if (threshold_edittext.text != null && !TextUtils.isEmpty(threshold_edittext.text))
+        {
+            try
+            {
+                val threshold = amount_limit_edittext.text.toString().toInt()
+
+                if (threshold in 1..10 && threshold <= mSignatoriesList.size)
+                {
+                    mThreshold = threshold
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mDelegateAmount = -1.0
+                return false
+            }
+
+        }
+
+        return isThresholdValid
     }
 
     override fun onResume()
@@ -1003,7 +1075,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
     {
         val color: Int
 
-        val amountValid = isDelegateAmountValid()
+        val amountValid = isDepositAmountValid()
 
         if (red && !amountValid)
         {
@@ -1151,6 +1223,8 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         outState.putString(DELEGATE_PAYLOAD_KEY, mDelegatePayload)
 
         outState.putDouble(DELEGATE_AMOUNT_KEY, mDelegateAmount)
+
+        outState.putInt(THRESHOLD_KEY, mThreshold)
 
         outState.putLong(LIMIT_AMOUNT_KEY, mLimitAmount)
 

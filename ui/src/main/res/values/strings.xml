@@ -134,6 +134,8 @@
     <string name="alert_exit_account">Log Out</string>
     <string name="alert_remove_master_key">Remove Master Key</string>
     <string name="alert_exit_acccount_body">Please make sure you still have your 24 words list on a piece of paper or your data will be lost forever.</string>
+    <string name="alert_remove_own_signatory_title">Remove signatory</string>
+    <string name="alert_remove_own_signatory_body">This public key is the one corresponding to your wallet. Its corresponding public key hash is:\n\n%1$s\n\nAre you sure you don\'t want this public key as one of the signatories?</string>
     <string name="alert_remove_master_key_body">Your Master Key will be removed. Please make sure you still have your 24 words list on a piece of paper or your data will be lost forever.</string>
     <string name="address_successfully_added">Address successfully added!</string>
     <string name="dsl_successfully_added">Daily Spending Limit successfully created!</string>
