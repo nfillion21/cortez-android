@@ -642,10 +642,10 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         dstObject.put("credit", (mDepositAmount*1000000L).roundToLong().toString())
 
         //dstObject.put("manager", pkhSrc)
-        val ecKeys = retrieveECKeys()
-        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+        //val ecKeys = retrieveECKeys()
+        //val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
 
-        val spendingLimitFile = "spending_limit_double_salt.json"
+        val spendingLimitFile = "multisig.json"
         val contract = application.assets.open(spendingLimitFile).bufferedReader()
                 .use {
                     it.readText()
@@ -656,6 +656,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         //val jsonScript = String.format(jsonContract.toString(), tz3, "86400", (mLimitAmount*1000000L).toString(), pkhSrc)
         dstObject.put("script", jsonContract)
 
+        /*
         val storage = jsonContract["storage"] as JSONObject
         val argsStorage = storage["args"] as JSONArray
 
@@ -683,6 +684,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
         val firstParamArgsStorageTwo = argsStorageTwo[0] as JSONObject
         firstParamArgsStorageTwo.put("string", pkhSrc)
+        */
 
 
         var dstObjects = JSONArray()
