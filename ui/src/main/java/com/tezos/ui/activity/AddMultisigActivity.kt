@@ -371,6 +371,20 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                 it.visibility = View.GONE
             }
         }
+
+        if (isInputDataValid())
+        {
+            startInitOriginateContractLoading()
+        }
+        else
+        {
+            validateAddButton(false)
+
+            cancelRequests(false)
+            transferLoading(false)
+
+            putFeesToNegative()
+        }
     }
 
     private fun addSignatory(signatory:String)
@@ -869,13 +883,6 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                 {
                     putThresholdInRed(false)
                 }
-
-                //TODO text changed
-                //TODO load again but only if we don't have any same forged data.
-
-                //val amount = java.lang.Double.parseDouble()
-
-                //TODO check if it's already
 
                 if (isInputDataValid())
                 {
