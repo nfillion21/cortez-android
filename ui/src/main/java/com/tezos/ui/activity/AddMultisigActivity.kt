@@ -90,10 +90,8 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
     private var mPayload:String? = null
     private var mFees:Long = -1
 
-    private var mDelegateAmount:Double = -1.0
+    private var mDepositAmount:Double = -1.0
     private var mThreshold:Int = 0
-
-    private var mLimitAmount:Long = -1L
 
     private var mClickCalculate:Boolean = false
 
@@ -113,8 +111,6 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
         private const val DELEGATE_AMOUNT_KEY = "delegate_amount_key"
         private const val THRESHOLD_KEY = "threshold_key"
-
-        private const val LIMIT_AMOUNT_KEY = "limit_amount_key"
 
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
@@ -234,6 +230,9 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         val focusChangeListener = this.focusChangeListener()
         amount_limit_edittext.onFocusChangeListener = focusChangeListener
 
+        threshold_edittext.addTextChangedListener(GenericTextWatcher(threshold_edittext))
+        threshold_edittext.onFocusChangeListener = focusChangeListener
+
         if (savedInstanceState != null)
         {
             mPayload = savedInstanceState.getString(DELEGATE_PAYLOAD_KEY, null)
@@ -241,11 +240,9 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             mInitLoading = savedInstanceState.getBoolean(DELEGATE_INIT_TAG)
             mFinalizeLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
 
-            mDelegateAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
+            mDepositAmount = savedInstanceState.getDouble(DELEGATE_AMOUNT_KEY, -1.0)
 
             mThreshold = savedInstanceState.getInt(THRESHOLD_KEY, 0)
-
-            mLimitAmount = savedInstanceState.getLong(LIMIT_AMOUNT_KEY, -1L)
 
             mFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
@@ -281,6 +278,8 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             when (v.id)
             {
                 R.id.amount_limit_edittext -> putAmountInRed(!hasFocus)
+
+                R.id.threshold_edittext -> putThresholdInRed(!hasFocus)
 
                 else -> throw UnsupportedOperationException(
                         "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
@@ -442,7 +441,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             var dstObject = JSONObject()
             //dstObject.put("dst", pkhDst)
 
-            val mutezAmount = (mDelegateAmount*1000000.0).roundToLong()
+            val mutezAmount = (mDepositAmount*1000000.0).roundToLong()
             dstObject.put("balance", mutezAmount)
 
             dstObject.put("fee", mFees)
@@ -451,7 +450,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
 
             dstObject.put("tz3", tz3)
-            dstObject.put("limit", mLimitAmount*1000000L)
+            //dstObject.put("limit", mLimitAmount*1000000L)
 
             dstObjects.put(dstObject)
 
@@ -626,7 +625,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         var dstObject = JSONObject()
 
         //TODO be careful, do it in mutez.
-        dstObject.put("credit", (mDelegateAmount*1000000L).roundToLong().toString())
+        dstObject.put("credit", (mDepositAmount*1000000L).roundToLong().toString())
 
         //dstObject.put("manager", pkhSrc)
         val ecKeys = retrieveECKeys()
@@ -660,7 +659,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         val argsFirstParamArgsSecondAndThirdParamsArgsStorageOne = firstParamArgsSecondAndThirdParamsArgsStorageOne["args"] as JSONArray
 
         val firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[0] as JSONObject
-        firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", (mLimitAmount*1000000L).toString())
+        //firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", (mLimitAmount*1000000L).toString())
 
         val secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[1] as JSONObject
         secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", "86400")
@@ -855,11 +854,20 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         {
             val i = v.id
 
-            if ((i == R.id.amount_limit_edittext && !isDepositAmountEquals(editable)))
+            if (
+                    (i == R.id.amount_limit_edittext && !isDepositAmountEquals(editable))
+                    ||
+                    (i == R.id.threshold_edittext && !isThresholdAmountEquals(editable))
+            )
             {
                 if (i == R.id.amount_limit_edittext )
                 {
                     putAmountInRed(false)
+                }
+
+                if (i == R.id.threshold_edittext )
+                {
+                    putThresholdInRed(false)
                 }
 
                 //TODO text changed
@@ -869,7 +877,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
                 //TODO check if it's already
 
-                if (!mIsTracking && isInputDataValid())
+                if (isInputDataValid())
                 {
                     startInitOriginateContractLoading()
                 }
@@ -899,7 +907,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                 try
                 {
                     val amount = editable.toString().toDouble()
-                    if (amount != -1.0 && amount == mDelegateAmount)
+                    if (amount != -1.0 && amount == mDepositAmount)
                     {
                         return true
                     }
@@ -912,16 +920,16 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             return isAmountEquals
         }
 
-        private fun isLimitAmountEquals(editable: Editable):Boolean
+        private fun isThresholdAmountEquals(editable: Editable):Boolean
         {
-            val isLimitAmountEquals = false
+            val isThresholdAmountEquals = false
 
             if (editable != null && !TextUtils.isEmpty(editable))
             {
                 try
                 {
-                    val limit = editable.toString().toLong()
-                    if (limit != -1L && limit == mLimitAmount)
+                    val limit = editable.toString().toInt()
+                    if (limit != 0 && limit == mThreshold)
                     {
                         return true
                     }
@@ -931,7 +939,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                     return false
                 }
             }
-            return isLimitAmountEquals
+            return isThresholdAmountEquals
         }
     }
 
@@ -983,15 +991,19 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                 //no need
                 if (amount >= 0.0f)
                 {
-                    mDelegateAmount = amount
+                    mDepositAmount = amount
                     return true
                 }
             }
             catch (e: NumberFormatException)
             {
-                mDelegateAmount = -1.0
+                mDepositAmount = -1.0
                 return false
             }
+        }
+        else
+        {
+            mDepositAmount = -1.0
         }
 
         return isAmountValid
@@ -1015,10 +1027,14 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             }
             catch (e: NumberFormatException)
             {
-                mDelegateAmount = -1.0
+                mThreshold = 0
                 return false
             }
 
+        }
+        else
+        {
+            mThreshold = 0
         }
 
         return isThresholdValid
@@ -1062,6 +1078,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
     private fun putEverythingInRed()
     {
         this.putAmountInRed(true)
+        this.putThresholdInRed(true)
     }
 
     private fun isAddButtonValid(): Boolean
@@ -1100,6 +1117,35 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         }
 
         amount_limit_edittext.setTextColor(ContextCompat.getColor(this, color))
+    }
+
+    private fun putThresholdInRed(red: Boolean)
+    {
+        val color: Int
+
+        val thresholdValid = isThresholdValid()
+
+        if (red && !thresholdValid)
+        {
+            color = R.color.tz_error
+            //update_storage_button.text = getString(R.string.delegate_format, "")
+        }
+        else
+        {
+            color = R.color.tz_accent
+
+            if (thresholdValid)
+            {
+                //val amount = delegate_transfer_edittext.text.toString()
+                //this.setTextPayButton()
+            }
+            else
+            {
+                //update_storage_button.text = getString(R.string.delegate_format, "")
+            }
+        }
+
+        threshold_edittext.setTextColor(ContextCompat.getColor(this, color))
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -1224,11 +1270,9 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
         outState.putString(DELEGATE_PAYLOAD_KEY, mPayload)
 
-        outState.putDouble(DELEGATE_AMOUNT_KEY, mDelegateAmount)
+        outState.putDouble(DELEGATE_AMOUNT_KEY, mDepositAmount)
 
         outState.putInt(THRESHOLD_KEY, mThreshold)
-
-        outState.putLong(LIMIT_AMOUNT_KEY, mLimitAmount)
 
         outState.putLong(DELEGATE_FEE_KEY, mFees)
 
