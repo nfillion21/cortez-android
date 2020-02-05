@@ -39,7 +39,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import androidx.core.content.ContextCompat.getSystemService
 import com.tezos.ui.R
 import kotlinx.android.synthetic.main.dialog_add_signatory_container.*
 import kotlinx.android.synthetic.main.dialog_add_signatory_content.*
@@ -50,7 +49,7 @@ class AddSignatoryDialogFragment : AppCompatDialogFragment()
 
     interface OnSignatorySelectorListener
     {
-        fun onContractClicked()
+        fun onPublicKeyClicked(publicKey:String)
     }
 
     companion object
@@ -96,8 +95,11 @@ class AddSignatoryDialogFragment : AppCompatDialogFragment()
 
         cancelButtonView.setOnClickListener { dismiss() }
         OkButtonView.setOnClickListener {
-            //verifyPassword()
             dismiss()
+            if (isInputDataValid())
+            {
+                listener?.onPublicKeyClicked(enterPublicKeyEditText.text.toString())
+            }
         }
 
         enterPublicKeyEditText.setOnEditorActionListener { v, i, _ ->

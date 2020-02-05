@@ -221,6 +221,9 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             bullet_textview_08.text = ss
             bullet_textview_09.text = ss
             bullet_textview_10.text = ss
+
+            val seed = Storage(context = this).getMnemonics()
+            mSignatoriesList.add(seed.pk)
         }
     }
 
@@ -1164,8 +1167,8 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         cancelRequests(false)
     }
 
-    override fun onContractClicked()
+    override fun onPublicKeyClicked(publicKey:String)
     {
-
+        addSignatory(publicKey)
     }
 }
