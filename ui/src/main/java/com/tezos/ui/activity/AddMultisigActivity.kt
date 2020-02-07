@@ -677,6 +677,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         argsStorage.put(signatoriesTmp)
 
 
+        // BEGIN OF PACK BYTES TO SIGN
         //foo pk : edpku7AmXpyiF1cQVmyd2uf1kU6ZuQQ2Eoy8S8NwuZhwHUzXkHz4q4
 
         /*
@@ -704,6 +705,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                         ),
                         Primitive(Primitive.Name.Pair,
                                 arrayOf(
+                                        //I will need to get the storage first.
                                         Visitable.integer(1),
                                         Primitive(Primitive.Name.Left,
                                                 arrayOf(
@@ -721,8 +723,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
                 )
         )
 
-
-                val o = ByteArrayOutputStream()
+        val o = ByteArrayOutputStream()
         o.write(0x05)
 
         val dataPacker = Packer(o)
@@ -730,8 +731,6 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
         val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
-
-        //val dataPack2 = (dataPacker.output as ByteArrayOutputStream).toByteArray().toHexString()
 
         val dataHex = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e981043856000707000105050707008092f4010a0000001600000a7b0eb19b1e5f5e451baeca5e9304e6af922f2b".hexToByteArray()
 
@@ -746,121 +745,10 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
             val k2 = "values are not equal"
         }
 
-
-        //val dataCompare = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e981043856000707000105050707008092f4010a0000001600000a7b0eb19b1e5f5e451baeca5e9304e6af922f2b"
         val dataCompare2 = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e981043856000707000105050707008092f4010a0000001600000a7b0eb19b1e5f5e451baeca5e9304e6af922f2b".hexToByteArray()
 
-        /*
-        val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
-                arrayOf(
-                        Visitable.address(kt1!!),
-                        Visitable.chainID(getString(R.string.chain_ID))
-                )
-        )
-        */
 
-        // use the tz1 to transfer
-
-        /*
-        val dataVisitable = Primitive(
-                Primitive.Name.Right,
-                arrayOf(
-                        Primitive(Primitive.Name.Pair,
-                                arrayOf(
-                                        Visitable.sequenceOf(
-                                                Primitive(
-                                                        Primitive.Name.DIP,
-                                                        arrayOf(
-
-                                                                Visitable.sequenceOf(
-
-                                                                        Primitive(Primitive.Name.NIL,
-                                                                                arrayOf(
-                                                                                        Primitive(Primitive.Name.operation)
-                                                                                )
-                                                                        ),
-                                                                        Primitive(Primitive.Name.PUSH,
-                                                                                arrayOf(
-                                                                                        Primitive(Primitive.Name.address),
-                                                                                        Visitable.address(mDstAccount!!)
-                                                                                )
-                                                                        ),
-                                                                        Primitive(Primitive.Name.CONTRACT,
-                                                                                arrayOf(Primitive(Primitive.Name.unit))
-                                                                        ),
-                                                                        Visitable.sequenceOf(
-                                                                                Primitive(Primitive.Name.IF_NONE,
-                                                                                        arrayOf(
-
-                                                                                                Visitable.sequenceOf(
-                                                                                                        Visitable.sequenceOf(
-                                                                                                                Primitive(Primitive.Name.UNIT),
-                                                                                                                Primitive(Primitive.Name.FAILWITH)
-                                                                                                        )
-                                                                                                ),
-                                                                                                Visitable.sequenceOf()
-                                                                                        )
-                                                                                )
-                                                                        ),
-                                                                        Primitive(Primitive.Name.PUSH,
-                                                                                arrayOf(
-                                                                                        Primitive(Primitive.Name.mutez),
-                                                                                        Visitable.integer((mTransferAmount*1000000).roundToLong())
-                                                                                )
-                                                                        )
-                                                                )
-                                                        )
-                                                ),
-                                                Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                                Primitive(Primitive.Name.CONS)
-                                        ),
-                                        Visitable.keyHash(pkh)
-                                )
-                        )
-                )
-        )
-        */
-
-
-
-
-
-
-
-
-
-
-
-
-        //signatories.put("int", 1)
-
-        /*
-
-        val storageOne = argsStorage[0] as JSONObject
-        val argsStorageOne = storageOne["args"] as JSONArray
-
-        // storage 1 and 2-3 separate here
-
-        val firstParamArgsStorageOne = argsStorageOne[0] as JSONObject
-        firstParamArgsStorageOne.put("string", tz3)
-
-        val secondAndThirdParamsArgsStorageOne = argsStorageOne[1] as JSONObject
-        val argsSecondAndThirdParamsArgsStorageOne = secondAndThirdParamsArgsStorageOne["args"] as JSONArray
-        val firstParamArgsSecondAndThirdParamsArgsStorageOne = argsSecondAndThirdParamsArgsStorageOne[0] as JSONObject
-        val argsFirstParamArgsSecondAndThirdParamsArgsStorageOne = firstParamArgsSecondAndThirdParamsArgsStorageOne["args"] as JSONArray
-
-        val firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[0] as JSONObject
-        //firstParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", (mLimitAmount*1000000L).toString())
-
-        val secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne = argsFirstParamArgsSecondAndThirdParamsArgsStorageOne[1] as JSONObject
-        secondParamArgsFirstParamArgsSecondAndThirdParamsArgsStorageOne.put("int", "86400")
-
-        val storageTwo = argsStorage[1] as JSONObject
-        val argsStorageTwo = storageTwo["args"] as JSONArray
-
-        val firstParamArgsStorageTwo = argsStorageTwo[0] as JSONObject
-        firstParamArgsStorageTwo.put("string", pkhSrc)
-        */
+        // END OF PACK BYTES TO SIGN
 
 
         var dstObjects = JSONArray()
