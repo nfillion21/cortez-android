@@ -59,6 +59,7 @@ import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
+import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -70,6 +71,7 @@ import kotlinx.android.synthetic.main.multisig_form_card_info.*
 import kotlinx.android.synthetic.main.multisig_form_card_info_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -470,7 +472,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
             postParams.put("dsts", dstObjects)
 
-            if (isOriginateSlcPayloadValid(mPayload!!, postParams))
+            if (/*isOriginateSlcPayloadValid(mPayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -656,9 +658,183 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         //val jsonScript = String.format(jsonContract.toString(), tz3, "86400", (mLimitAmount*1000000L).toString(), pkhSrc)
         dstObject.put("script", jsonContract)
 
-        /*
         val storage = jsonContract["storage"] as JSONObject
-        val argsStorage = storage["args"] as JSONArray
+        val argsStorage = ((storage["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
+
+        val signatoriesNumber = argsStorage[0] as JSONObject
+        signatoriesNumber.put("int", "1")
+
+        argsStorage.remove(1)
+
+        val signatoriesTmp = JSONArray()
+        for (signatory in mSignatoriesList)
+        {
+            val sigObject = JSONObject()
+            sigObject.put("string", signatory)
+            signatoriesTmp.put(sigObject)
+        }
+
+        argsStorage.put(signatoriesTmp)
+
+
+        //foo pk : edpku7AmXpyiF1cQVmyd2uf1kU6ZuQQ2Eoy8S8NwuZhwHUzXkHz4q4
+
+        /*
+        prim pair
+                prim pair
+                    bytes chain_id
+                    address // KT1
+                prim pair
+                    int // count
+                    prim left
+                        prim pair
+                            int // (mutez)
+                            address // destination
+        */
+
+
+        val dataVisitable = Primitive(
+                Primitive.Name.Pair,
+                arrayOf(
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.chainID(getString(R.string.chain_ID)),
+                                        Visitable.address("KT1AouFCNCAq5mJseRBiYmc7e5yseadwzA5C")
+                                )
+                        ),
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.integer(1),
+                                        Primitive(Primitive.Name.Left,
+                                                arrayOf(
+                                                        Primitive(Primitive.Name.Pair,
+                                                                arrayOf(
+
+                                                                        Visitable.integer(2000000),
+                                                                        Visitable.address("tz1LbSsDSmekew3prdDGx1nS22ie6jjBN6B3")
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+        )
+
+
+                val o = ByteArrayOutputStream()
+        o.write(0x05)
+
+        val dataPacker = Packer(o)
+        dataVisitable.accept(dataPacker)
+
+        val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+        //val dataPack2 = (dataPacker.output as ByteArrayOutputStream).toByteArray().toHexString()
+
+        val dataHex = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e981043856000707000105050707008092f4010a0000001600000a7b0eb19b1e5f5e451baeca5e9304e6af922f2b".hexToByteArray()
+
+        if (dataPack.contentEquals(dataHex))
+        {
+            val k = "values are equal"
+            val k2 = "values are equal"
+        }
+        else
+        {
+            val k = "values are not equal"
+            val k2 = "values are not equal"
+        }
+
+
+        //val dataCompare = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e981043856000707000105050707008092f4010a0000001600000a7b0eb19b1e5f5e451baeca5e9304e6af922f2b"
+        val dataCompare2 = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e981043856000707000105050707008092f4010a0000001600000a7b0eb19b1e5f5e451baeca5e9304e6af922f2b".hexToByteArray()
+
+        /*
+        val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                arrayOf(
+                        Visitable.address(kt1!!),
+                        Visitable.chainID(getString(R.string.chain_ID))
+                )
+        )
+        */
+
+        // use the tz1 to transfer
+
+        /*
+        val dataVisitable = Primitive(
+                Primitive.Name.Right,
+                arrayOf(
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.sequenceOf(
+                                                Primitive(
+                                                        Primitive.Name.DIP,
+                                                        arrayOf(
+
+                                                                Visitable.sequenceOf(
+
+                                                                        Primitive(Primitive.Name.NIL,
+                                                                                arrayOf(
+                                                                                        Primitive(Primitive.Name.operation)
+                                                                                )
+                                                                        ),
+                                                                        Primitive(Primitive.Name.PUSH,
+                                                                                arrayOf(
+                                                                                        Primitive(Primitive.Name.address),
+                                                                                        Visitable.address(mDstAccount!!)
+                                                                                )
+                                                                        ),
+                                                                        Primitive(Primitive.Name.CONTRACT,
+                                                                                arrayOf(Primitive(Primitive.Name.unit))
+                                                                        ),
+                                                                        Visitable.sequenceOf(
+                                                                                Primitive(Primitive.Name.IF_NONE,
+                                                                                        arrayOf(
+
+                                                                                                Visitable.sequenceOf(
+                                                                                                        Visitable.sequenceOf(
+                                                                                                                Primitive(Primitive.Name.UNIT),
+                                                                                                                Primitive(Primitive.Name.FAILWITH)
+                                                                                                        )
+                                                                                                ),
+                                                                                                Visitable.sequenceOf()
+                                                                                        )
+                                                                                )
+                                                                        ),
+                                                                        Primitive(Primitive.Name.PUSH,
+                                                                                arrayOf(
+                                                                                        Primitive(Primitive.Name.mutez),
+                                                                                        Visitable.integer((mTransferAmount*1000000).roundToLong())
+                                                                                )
+                                                                        )
+                                                                )
+                                                        )
+                                                ),
+                                                Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                Primitive(Primitive.Name.CONS)
+                                        ),
+                                        Visitable.keyHash(pkh)
+                                )
+                        )
+                )
+        )
+        */
+
+
+
+
+
+
+
+
+
+
+
+
+        //signatories.put("int", 1)
+
+        /*
 
         val storageOne = argsStorage[0] as JSONObject
         val argsStorageOne = storageOne["args"] as JSONArray
