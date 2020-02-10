@@ -547,7 +547,6 @@ class ScriptFragment : Fragment()
 
         //swipe_refresh_script_layout?.isEnabled = false
 
-        //TODO uncomment it
         startGetRequestLoadContractInfo()
     }
 
@@ -781,19 +780,26 @@ class ScriptFragment : Fragment()
             val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
             val isDefaultContract = mStorage.toString() == defaultContract.toString()
 
-            if (!isDefaultContract)
+            if (isDefaultContract)
             {
-                //TODO at this point, just show that there is no script.
+                //This is a default contract
 
-                val storageJSONObject = JSONObject(mStorage)
+                update_storage_form_card?.visibility = View.GONE
 
-                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+                public_address_layout?.visibility = View.VISIBLE
 
-                // get securekey hash
+                update_storage_button_layout?.visibility = View.GONE
 
-                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+                storage_info_textview?.visibility = View.VISIBLE
+                storage_info_textview?.text = getString(R.string.no_script_info)
+
+                //TODO show everything related to the removing
+            }
+            else if (getStorageSecureKeyHash() != null)
+            {
+                //DAILY SPENDING LIMIT
+
+                val secureKeyHash = getStorageSecureKeyHash()
 
                 val listStorageData = getHistoryPayment()
 
@@ -861,7 +867,6 @@ class ScriptFragment : Fragment()
                     switchToEditMode(false)
                 }
 
-
                 val tz3 = retrieveTz3()
                 if (tz3 == null || tz3 != secureKeyHash)
                 {
@@ -877,24 +882,25 @@ class ScriptFragment : Fragment()
             }
             else
             {
-                update_storage_form_card?.visibility = View.GONE
+                // MULTISIG CONTRACT
 
-                public_address_layout?.visibility = View.VISIBLE
+                val storageJSONObject = JSONObject(mStorage)
+                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
 
-                update_storage_button_layout?.visibility = View.GONE
+                val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+                if (counter != null)
+                {
+                    val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
 
-                storage_info_textview?.visibility = View.VISIBLE
-                storage_info_textview?.text = getString(R.string.no_script_info)
+                    val signatoriesCount = DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
 
-                //TODO show everything related to the removing
+                    //TODO put it in an arrayList.
+                    val signatory = DataExtractor.getStringFromField((argsPk[1] as JSONArray)[0] as JSONObject, "string")
+
+                }
             }
 
-            if (!animating)
-            {
-                //no_delegates_text_layout.text = mSecureHashBalance.toString()
 
-                //reloadList()
-            }
 
             loading_textview?.visibility = View.GONE
             loading_textview?.text = null
@@ -1735,10 +1741,12 @@ class ScriptFragment : Fragment()
 
 // get securekey hash
 
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-
-            return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
+            if (argsSecureKey != null)
+            {
+                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+            }
         }
 
         return null
