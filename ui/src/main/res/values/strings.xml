@@ -70,7 +70,9 @@
     <string name="remove_delegate_info">Your current baker\'s address:</string>
     <string name="remove_delegate_info_address">%1$s</string>
     <string name="no_script_info">The script linked to this address is the default delegation contract one.</string>
-    <string name="contract_storage_info">Your current contract\'s storage informations</string> <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string> <string name="key_management_info">Please create or restore a wallet.</string>
+    <string name="contract_storage_info">Your current contract\'s storage informations</string>
+    <string name="create_restore_wallet_info">Please create or restore a wallet to get your public key.</string>
+    <string name="key_management_info">Please create or restore a wallet.</string>
     <string name="create_restore_wallet_delegate_info">Please create or restore a wallet to be able to delegate your tez.</string>
     <string name="create_restore_wallet_transfer_info">Please create or restore a wallet to transfer tez.</string>
     <string name="no_mnemonics_found">Please restore your 24 words in key management to transfer tez from your tz1 account.</string>

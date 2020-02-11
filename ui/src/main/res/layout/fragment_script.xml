@@ -74,6 +74,8 @@
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                             android:textColor="@color/colorTitleText" />
 
+
+
                         <TextView
                             android:id="@+id/storage_info_textview"
                             android:layout_width="match_parent"
@@ -84,6 +86,7 @@
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                             android:textColor="@color/colorTitleText"
                             android:visibility="gone" />
+
 
                         <LinearLayout
                             android:id="@+id/warning_p2pk_info"
@@ -122,6 +125,7 @@
                                 />
 
                         </LinearLayout>
+
 
                         <LinearLayout
                             android:id="@+id/warning_empty_secure_key_info"
@@ -170,6 +174,15 @@
                         android:layout_height="match_parent"
                         android:layout_weight="0"
                         layout="@layout/update_storage_form_card"
+                        />
+
+                    <include
+                        android:id="@+id/update_multisig_form_card"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0"
+                        layout="@layout/update_multisig_form_card"
                         />
 
                 </LinearLayout>

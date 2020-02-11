@@ -898,6 +898,8 @@ class ScriptFragment : Fragment()
                     val signatory = DataExtractor.getStringFromField((argsPk[1] as JSONArray)[0] as JSONObject, "string")
 
                 }
+
+                update_multisig_form_card.visibility = View.VISIBLE
             }
 
 
