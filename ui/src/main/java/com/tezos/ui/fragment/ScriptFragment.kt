@@ -98,7 +98,9 @@ class ScriptFragment : Fragment()
     private var mStorage:String? = null
     private var mWalletEnabled:Boolean = false
 
-    private var mEditMode:Boolean = false
+    private var mSpendingLimitEditMode:Boolean = false
+
+    private var mMultisigEditMode:Boolean = false
 
     private var mSpendingLimitAmount:Long = -1L
 
@@ -130,7 +132,7 @@ class ScriptFragment : Fragment()
 
         private const val SPENDING_AMOUNT_KEY = "spending_amount_key"
 
-        private const val EDIT_MODE_KEY = "edit_mode_key"
+        private const val EDIT_SPENDING_LIMIT_MODE_KEY = "edit_spending_limit_mode_key"
 
         private const val BALANCE_LONG_KEY = "balance_long_key"
 
@@ -179,7 +181,7 @@ class ScriptFragment : Fragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
+        validateConfirmEditionButton(isInputDataValid() && isUpdateStorageFeeValid())
 
         update_storage_button_layout.setOnClickListener {
             onDelegateClick()
@@ -257,7 +259,7 @@ class ScriptFragment : Fragment()
 
             mSpendingLimitAmount = savedInstanceState.getLong(SPENDING_AMOUNT_KEY, -1L)
 
-            mEditMode = savedInstanceState.getBoolean(EDIT_MODE_KEY, false)
+            mSpendingLimitEditMode = savedInstanceState.getBoolean(EDIT_SPENDING_LIMIT_MODE_KEY, false)
 
             mSecureHashBalance = savedInstanceState.getLong(BALANCE_LONG_KEY, -1)
 
@@ -313,11 +315,11 @@ class ScriptFragment : Fragment()
     {
         super.onResume()
 
-        if (mEditMode)
+        if (mSpendingLimitEditMode)
         {
             putEverythingInRed()
 
-            if (isDelegateFeeValid())
+            if (isUpdateStorageFeeValid())
             {
                 if (isInputDataValid())
                 {
@@ -496,7 +498,7 @@ class ScriptFragment : Fragment()
 
     private fun animateFabEditMode(editMode:Boolean)
     {
-        mEditMode = editMode
+        mSpendingLimitEditMode = editMode
 
         if (editMode)
         {
@@ -604,7 +606,7 @@ class ScriptFragment : Fragment()
 
                     if (mStorage != null && !isDefaultContract)
                     {
-                        validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
+                        validateConfirmEditionButton(isInputDataValid() && isUpdateStorageFeeValid())
 
                         startGetRequestBalance()
                     }
@@ -858,7 +860,7 @@ class ScriptFragment : Fragment()
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.contract_storage_info)
 
-                if (mEditMode)
+                if (mSpendingLimitEditMode)
                 {
                     switchToEditMode(true)
                 }
@@ -900,8 +902,16 @@ class ScriptFragment : Fragment()
                 }
 
                 update_multisig_form_card.visibility = View.VISIBLE
-            }
 
+                update_storage_form_card?.visibility = View.GONE
+
+
+                //TODO necessary to update the contract
+                update_storage_button_layout?.visibility = View.GONE
+
+                storage_info_textview?.visibility = View.VISIBLE
+                storage_info_textview?.text = getString(R.string.no_script_info)
+            }
 
 
             loading_textview?.visibility = View.GONE
@@ -1299,9 +1309,9 @@ class ScriptFragment : Fragment()
                     val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
                     storage_fee_edittext?.setText(feeInTez.toString())
 
-                    validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
+                    validateConfirmEditionButton(isInputDataValid() && isUpdateStorageFeeValid())
 
-                    if (isInputDataValid() && isDelegateFeeValid())
+                    if (isInputDataValid() && isUpdateStorageFeeValid())
                     {
                         validateConfirmEditionButton(true)
                     }
@@ -1477,7 +1487,7 @@ class ScriptFragment : Fragment()
 
         override fun afterTextChanged(editable: Editable)
         {
-            if (mEditMode)
+            if (mSpendingLimitEditMode)
             {
                 val i = v.id
                 if (i == R.id.daily_spending_limit_edittext && isSpendingLimitAmountDifferent(editable))
@@ -1773,7 +1783,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         return isTzAddressValid
     }
 
-    private fun isDelegateFeeValid():Boolean
+    private fun isUpdateStorageFeeValid():Boolean
     {
         val isFeeValid = false
 
@@ -1810,7 +1820,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
     fun isUpdateButtonValid(): Boolean
     {
         return mUpdateStoragePayload != null
-                && isDelegateFeeValid()
+                && isUpdateStorageFeeValid()
                 && isInputDataValid()
     }
 
@@ -2002,7 +2012,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
 
-        outState.putBoolean(EDIT_MODE_KEY, mEditMode)
+        outState.putBoolean(EDIT_SPENDING_LIMIT_MODE_KEY, mSpendingLimitEditMode)
 
         outState.putLong(BALANCE_LONG_KEY, mSecureHashBalance)
 
