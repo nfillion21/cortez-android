@@ -66,7 +66,9 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_script.*
+import kotlinx.android.synthetic.main.multisig_form_card_info.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
+import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -90,6 +92,13 @@ class ScriptFragment : Fragment()
 
     private var mUpdateStoragePayload:String? = null
     private var mUpdateStorageFees:Long = -1L
+
+    private var mMultisigFees:Long = -1
+
+    private var mDepositAmount:Double = -1.0
+    private var mSignatoriesList:ArrayList<String> = ArrayList(SIGNATORIES_CAPACITY)
+
+    private var mThreshold:Int = 0
 
     private var mUpdateStorageAddress:String? = null
 
@@ -134,9 +143,13 @@ class ScriptFragment : Fragment()
 
         private const val EDIT_SPENDING_LIMIT_MODE_KEY = "edit_spending_limit_mode_key"
 
+        private const val EDIT_MULTISIG_MODE_KEY = "edit_multisig_mode_key"
+
         private const val BALANCE_LONG_KEY = "balance_long_key"
 
         private const val CONTRACT_SIG_KEY = "contract_sig_key"
+
+        private const val SIGNATORIES_CAPACITY = 10
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -181,7 +194,7 @@ class ScriptFragment : Fragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        validateConfirmEditionButton(isInputDataValid() && isUpdateStorageFeeValid())
+        validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
 
         update_storage_button_layout.setOnClickListener {
             onDelegateClick()
@@ -261,6 +274,8 @@ class ScriptFragment : Fragment()
 
             mSpendingLimitEditMode = savedInstanceState.getBoolean(EDIT_SPENDING_LIMIT_MODE_KEY, false)
 
+            mMultisigEditMode = savedInstanceState.getBoolean(EDIT_MULTISIG_MODE_KEY, false)
+
             mSecureHashBalance = savedInstanceState.getLong(BALANCE_LONG_KEY, -1)
 
             mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
@@ -321,9 +336,21 @@ class ScriptFragment : Fragment()
 
             if (isUpdateStorageFeeValid())
             {
-                if (isInputDataValid())
+                if (isSpendingLimitInputDataValid())
                 {
                     validateConfirmEditionButton(true)
+                }
+            }
+        }
+        else if (mMultisigEditMode)
+        {
+            putEverythingInRed()
+
+            if (isMultisigFeeValid())
+            {
+                if (isMultisigInputDataValid())
+                {
+                    validateConfirmEditionMultisigButton(true)
                 }
             }
         }
@@ -606,7 +633,7 @@ class ScriptFragment : Fragment()
 
                     if (mStorage != null && !isDefaultContract)
                     {
-                        validateConfirmEditionButton(isInputDataValid() && isUpdateStorageFeeValid())
+                        validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
 
                         startGetRequestBalance()
                     }
@@ -1309,9 +1336,9 @@ class ScriptFragment : Fragment()
                     val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
                     storage_fee_edittext?.setText(feeInTez.toString())
 
-                    validateConfirmEditionButton(isInputDataValid() && isUpdateStorageFeeValid())
+                    validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
 
-                    if (isInputDataValid() && isUpdateStorageFeeValid())
+                    if (isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
                     {
                         validateConfirmEditionButton(true)
                     }
@@ -1471,6 +1498,47 @@ class ScriptFragment : Fragment()
         }
     }
 
+
+    private fun validateConfirmEditionMultisigButton(validate: Boolean)
+    {
+        if (activity != null)
+        {
+            //val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
+            //val theme = CustomTheme.fromBundle(themeBundle)
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
+
+            if (validate)
+            {
+                update_multisig_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                update_multisig_button_layout?.isEnabled = true
+                update_multisig_button_layout?.background = makeSelector(theme)
+
+                val drawables = update_multisig_button?.compoundDrawables
+                if (drawables != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                }
+            }
+            else
+            {
+                update_multisig_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                update_multisig_button_layout?.isEnabled = false
+
+                val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+                update_multisig_button_layout?.background = makeSelector(greyTheme)
+
+                val drawables = update_multisig_button?.compoundDrawables
+                if (drawables != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+                }
+            }
+
+        }
+    }
+
     private fun makeSelector(theme: CustomTheme): StateListDrawable
     {
         val res = StateListDrawable()
@@ -1490,14 +1558,19 @@ class ScriptFragment : Fragment()
             if (mSpendingLimitEditMode)
             {
                 val i = v.id
-                if (i == R.id.daily_spending_limit_edittext && isSpendingLimitAmountDifferent(editable))
+                if (
+                        i == R.id.daily_spending_limit_edittext && isSpendingLimitAmountDifferent(editable)
+                        //||
+                        //i == R.id.daily_spending_limit_edittext && isSpendingLimitAmountDifferent(editable)
+                    //TODO check about the threshold edittext
+                )
                 {
                     putSpendingLimitInRed(false)
 
                     //TODO text changed
                     //TODO load again but only if we don't have any same forged data.
 
-                    if (isInputDataValid())
+                    if (isSpendingLimitInputDataValid())
                     {
                         startInitUpdateStorageLoading()
                     }
@@ -1542,9 +1615,78 @@ class ScriptFragment : Fragment()
         return isSpendingAmountDifferent
     }
 
-    private fun isInputDataValid(): Boolean
+    private fun isSpendingLimitInputDataValid(): Boolean
     {
         return isP256AddressValid() && isSpendingLimitAmountValid()
+    }
+
+    private fun isMultisigInputDataValid(): Boolean
+    {
+        return isDepositAmountValid()
+                && isThresholdValid()
+    }
+
+    private fun isThresholdValid():Boolean
+    {
+        val isThresholdValid = false
+
+        if (threshold_edittext.text != null && !TextUtils.isEmpty(threshold_edittext.text))
+        {
+            try
+            {
+                val threshold = threshold_edittext.text.toString().toInt()
+
+                if (threshold in 1..10 && threshold <= mSignatoriesList.size)
+                {
+                    mThreshold = threshold
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mThreshold = 0
+                return false
+            }
+
+        }
+        else
+        {
+            mThreshold = 0
+        }
+
+        return isThresholdValid
+    }
+
+    private fun isDepositAmountValid():Boolean
+    {
+        val isAmountValid = false
+
+        if (amount_limit_edittext.text != null && !TextUtils.isEmpty(amount_limit_edittext.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val amount = amount_limit_edittext.text!!.toString().toDouble()
+
+                //no need
+                if (amount >= 0.0f)
+                {
+                    mDepositAmount = amount
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mDepositAmount = -1.0
+                return false
+            }
+        }
+        else
+        {
+            mDepositAmount = -1.0
+        }
+
+        return isAmountValid
     }
 
     private fun isSecureKeyHashIdentical(): Boolean
@@ -1811,6 +1953,34 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         return isFeeValid
     }
 
+    private fun isMultisigFeeValid():Boolean
+    {
+        val isFeeValid = false
+
+        if (fee_limit_edittext.text != null && !TextUtils.isEmpty(fee_limit_edittext.text))
+        {
+            try
+            {
+                //val amount = java.lang.Double.parseDouble()
+                val fee = fee_limit_edittext.text.toString().toDouble()
+
+                if (fee >= 0.000001f)
+                {
+                    val longTransferFee = fee*1000000
+                    mMultisigFees = longTransferFee.roundToLong()
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mMultisigFees = -1
+                return false
+            }
+        }
+
+        return isFeeValid
+    }
+
     private fun putEverythingInRed()
     {
         this.putTzAddressInRed(true)
@@ -1821,7 +1991,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
     {
         return mUpdateStoragePayload != null
                 && isUpdateStorageFeeValid()
-                && isInputDataValid()
+                && isSpendingLimitInputDataValid()
     }
 
     private fun putTzAddressInRed(red: Boolean)
@@ -2013,6 +2183,8 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         outState.putString(STORAGE_DATA_KEY, mStorage)
 
         outState.putBoolean(EDIT_SPENDING_LIMIT_MODE_KEY, mSpendingLimitEditMode)
+
+        outState.putBoolean(EDIT_MULTISIG_MODE_KEY, mMultisigEditMode)
 
         outState.putLong(BALANCE_LONG_KEY, mSecureHashBalance)
 
