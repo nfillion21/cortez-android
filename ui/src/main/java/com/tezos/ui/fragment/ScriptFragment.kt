@@ -243,8 +243,16 @@ class ScriptFragment : Fragment()
             }
         }
 
+        fab_edit_multisig_storage.setOnClickListener {
+            animateFabMultisigEditMode(true)
+        }
+
         fab_undo_storage.setOnClickListener {
             animateFabEditMode(false)
+        }
+
+        fab_undo_multisig_storage.setOnClickListener {
+            animateFabMultisigEditMode(false)
         }
 
         swipe_refresh_script_layout.setOnRefreshListener {
@@ -554,10 +562,12 @@ class ScriptFragment : Fragment()
                     }
                 }
             }
+            */
 
 
-            update_storage_button_relative_layout.visibility = View.VISIBLE
+            update_multisig_button_relative_layout.visibility = View.VISIBLE
 
+            /*
             gas_textview.visibility = View.VISIBLE
             gas_layout.visibility = View.VISIBLE
 
@@ -702,6 +712,51 @@ class ScriptFragment : Fragment()
                 {
                     super.onAnimationEnd(animation)
                     switchToEditMode(editMode)
+                }
+            })
+            animatorSet.start()
+        }
+    }
+
+
+    private fun animateFabMultisigEditMode(editMode:Boolean)
+    {
+        mMultisigEditMode = editMode
+
+        if (editMode)
+        {
+            val textViewAnimator = ObjectAnimator.ofFloat(fab_edit_multisig_storage, View.SCALE_X, 0f)
+            val textViewAnimator2 = ObjectAnimator.ofFloat(fab_edit_multisig_storage, View.SCALE_Y, 0f)
+            val textViewAnimator3 = ObjectAnimator.ofFloat(fab_edit_multisig_storage, View.ALPHA, 0f)
+
+            val animatorSet = AnimatorSet()
+            animatorSet.interpolator = FastOutSlowInInterpolator()
+            animatorSet.play(textViewAnimator).with(textViewAnimator2).with(textViewAnimator3)
+            animatorSet.addListener(object : AnimatorListenerAdapter()
+            {
+                override fun onAnimationEnd(animation: Animator)
+                {
+                    super.onAnimationEnd(animation)
+                    switchToMultisigEditMode(editMode)
+                }
+            })
+            animatorSet.start()
+        }
+        else
+        {
+            val textViewAnimator = ObjectAnimator.ofFloat(fab_undo_multisig_storage, View.SCALE_X, 0f)
+            val textViewAnimator2 = ObjectAnimator.ofFloat(fab_undo_multisig_storage, View.SCALE_Y, 0f)
+            val textViewAnimator3 = ObjectAnimator.ofFloat(fab_undo_multisig_storage, View.ALPHA, 0f)
+
+            val animatorSet = AnimatorSet()
+            animatorSet.interpolator = FastOutSlowInInterpolator()
+            animatorSet.play(textViewAnimator).with(textViewAnimator2).with(textViewAnimator3)
+            animatorSet.addListener(object : AnimatorListenerAdapter()
+            {
+                override fun onAnimationEnd(animation: Animator)
+                {
+                    super.onAnimationEnd(animation)
+                    switchToMultisigEditMode(editMode)
                 }
             })
             animatorSet.start()
@@ -1077,8 +1132,9 @@ class ScriptFragment : Fragment()
                 update_storage_form_card?.visibility = View.GONE
 
 
-                //TODO necessary to update the contract
                 update_storage_button_layout?.visibility = View.GONE
+
+                update_multisig_button_layout?.visibility = View.VISIBLE
 
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.no_script_info)
