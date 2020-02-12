@@ -67,6 +67,9 @@ import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.multisig_form_card_info.*
+import kotlinx.android.synthetic.main.multisig_form_card_info.fee_limit_edittext
+import kotlinx.android.synthetic.main.multisig_form_card_info.threshold_edittext
+import kotlinx.android.synthetic.main.update_multisig_form_card.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
 import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
 import org.json.JSONArray
@@ -195,6 +198,8 @@ class ScriptFragment : Fragment()
         super.onViewCreated(view, savedInstanceState)
 
         validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
+
+        validateConfirmEditionMultisigButton(isMultisigInputDataValid() && isMultisigFeeValid())
 
         update_storage_button_layout.setOnClickListener {
             onDelegateClick()
@@ -523,6 +528,142 @@ class ScriptFragment : Fragment()
         }
     }
 
+    private fun switchToMultisigEditMode(editMode:Boolean)
+    {
+        if (editMode)
+        {
+
+            /*
+            val threshold = getThreshold()
+            if (!threshold.isNullOrEmpty())
+            {
+                val tz3 = retrieveTz3()
+                if (tz3 != secureKeyHash)
+                {
+                    public_address_edittext.setText("")
+                    public_address_edittext.isEnabled = true
+                    public_address_edittext.isFocusable = false
+                    public_address_edittext.isClickable = false
+                    public_address_edittext.isLongClickable = false
+                    public_address_edittext.hint = getString(R.string.click_for_p2pk)
+
+                    public_address_edittext.setOnClickListener {
+                        val ecKeys = retrieveECKeys()
+                        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                        public_address_edittext.setText(tz3)
+                    }
+                }
+            }
+
+
+            update_storage_button_relative_layout.visibility = View.VISIBLE
+
+            gas_textview.visibility = View.VISIBLE
+            gas_layout.visibility = View.VISIBLE
+
+
+            limit_infos_layout.visibility = View.GONE
+
+            redelegate_address_textview.setText(R.string.secure_enclave_generated)
+
+            daily_spending_limit_textview.setText(R.string.daily_spending_limit_from_0_to_1k)
+
+            daily_spending_limit_edittext.isEnabled = true
+            daily_spending_limit_edittext.setText("")
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(daily_spending_limit_edittext, InputMethodManager.SHOW_IMPLICIT)
+
+            send_cents_button.visibility = View.GONE
+
+            secure_hash_balance_layout.visibility = View.GONE
+
+            */
+
+
+
+            fab_edit_multisig_storage.hide()
+            fab_undo_multisig_storage.show()
+        }
+        else
+        {
+            validateConfirmEditionMultisigButton(false)
+
+            cancelRequests(true)
+            transferLoading(false)
+            putFeesMultisigToNegative()
+
+            update_multisig_button_relative_layout?.visibility = View.GONE
+
+            //gas_textview?.visibility = View.GONE
+            //gas_layout?.visibility = View.GONE
+
+            //limit_infos_layout.visibility = View.VISIBLE
+
+            //daily_spending_limit_textview.setText(R.string.daily_spending_limit)
+
+            //daily_spending_limit_edittext?.isEnabled = false
+
+            //redelegate_address_textview.setText(R.string.secure_enclave)
+
+
+            /*
+            val storageJSONObject = JSONObject(mStorage)
+
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            // get securekey hash
+
+            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
+            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+            val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+            */
+
+
+            val threshold = getThreshold()
+
+            threshold_edittext.setText(threshold)
+            threshold_edittext.isFocusableInTouchMode = false
+            threshold_edittext.hint = null
+            threshold_edittext.isClickable = false
+            threshold_edittext.isLongClickable = false
+            threshold_edittext.isClickable = false
+            threshold_edittext.isEnabled = true
+            threshold_edittext.isFocusable = false
+
+            // get daily spending limit
+
+            /*
+            val historyPayment = getHistoryPayment()
+            daily_spending_limit_edittext?.setText(mutezToTez(historyPayment?.get(0) as Long))
+
+
+            // 100 000 mutez == 0.1 tez
+            if (mSecureHashBalance != -1L && mSecureHashBalance < 100000)
+            {
+                if (isSecureKeyHashIdentical())
+                {
+                    send_cents_button.visibility = View.VISIBLE
+                }
+                else
+                {
+                    send_cents_button.visibility = View.GONE
+                }
+            }
+            else
+            {
+                send_cents_button.visibility = View.GONE
+            }
+
+            putSpendingLimitInRed(false)
+
+            secure_hash_balance_layout.visibility = View.VISIBLE
+            */
+
+            fab_undo_multisig_storage.hide()
+            fab_edit_multisig_storage.show()
+        }
+    }
+
     private fun animateFabEditMode(editMode:Boolean)
     {
         mSpendingLimitEditMode = editMode
@@ -626,6 +767,9 @@ class ScriptFragment : Fragment()
                 {
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete(true)
+
+
+                    //TODO control more precisely the three different contracts
 
                     val mnemonicsData = Storage(activity!!).getMnemonics()
                     val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
@@ -938,6 +1082,16 @@ class ScriptFragment : Fragment()
 
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.no_script_info)
+
+
+                if (mMultisigEditMode)
+                {
+                    switchToMultisigEditMode(true)
+                }
+                else
+                {
+                    switchToMultisigEditMode(false)
+                }
             }
 
 
@@ -1442,6 +1596,19 @@ class ScriptFragment : Fragment()
         mUpdateStoragePayload = null
     }
 
+    private fun putFeesMultisigToNegative()
+    {
+        fee_limit_edittext?.setText("")
+
+        mClickCalculate = false
+        fee_limit_edittext?.isEnabled = false
+        fee_limit_edittext?.hint = getString(R.string.neutral)
+
+        mMultisigFees = -1
+
+        mUpdateStoragePayload = null
+    }
+
     private fun showSnackBar(error:VolleyError?, message:String?, color:Int, textColor: Int)
     {
         if (error != null)
@@ -1622,8 +1789,7 @@ class ScriptFragment : Fragment()
 
     private fun isMultisigInputDataValid(): Boolean
     {
-        return isDepositAmountValid()
-                && isThresholdValid()
+        return isThresholdValid()
     }
 
     private fun isThresholdValid():Boolean
@@ -1655,38 +1821,6 @@ class ScriptFragment : Fragment()
         }
 
         return isThresholdValid
-    }
-
-    private fun isDepositAmountValid():Boolean
-    {
-        val isAmountValid = false
-
-        if (amount_limit_edittext.text != null && !TextUtils.isEmpty(amount_limit_edittext.text))
-        {
-            try
-            {
-                //val amount = java.lang.Double.parseDouble()
-                val amount = amount_limit_edittext.text!!.toString().toDouble()
-
-                //no need
-                if (amount >= 0.0f)
-                {
-                    mDepositAmount = amount
-                    return true
-                }
-            }
-            catch (e: NumberFormatException)
-            {
-                mDepositAmount = -1.0
-                return false
-            }
-        }
-        else
-        {
-            mDepositAmount = -1.0
-        }
-
-        return isAmountValid
     }
 
     private fun isSecureKeyHashIdentical(): Boolean
@@ -1900,6 +2034,25 @@ class ScriptFragment : Fragment()
             {
                 val secureKeyJSONObject = argsSecureKey[0] as JSONObject
                 return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+            }
+        }
+
+        return null
+    }
+
+    private fun getThreshold(): String?
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
+
+            val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+            if (counter != null)
+            {
+                val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+
+                return DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
             }
         }
 
