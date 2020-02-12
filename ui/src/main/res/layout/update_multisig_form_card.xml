@@ -72,7 +72,7 @@
             />
 
         <TextView
-            android:id="@+id/gas_textview"
+            android:id="@+id/gas_multisig_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_double"
@@ -83,6 +83,7 @@
             tools:ignore="UnusedAttribute,NewApi" />
 
         <LinearLayout
+            android:id="@+id/gas_multisig_layout"
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:layout_height="wrap_content">

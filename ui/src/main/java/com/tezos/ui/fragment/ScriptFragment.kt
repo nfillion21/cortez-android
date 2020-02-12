@@ -39,17 +39,19 @@ import android.hardware.fingerprint.FingerprintManager
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
+import android.text.*
 import androidx.fragment.app.Fragment
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
-import android.text.Editable
-import android.text.TextUtils
-import android.text.TextWatcher
+import android.text.style.BulletSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
@@ -66,9 +68,7 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_script.*
-import kotlinx.android.synthetic.main.multisig_form_card_info.*
-import kotlinx.android.synthetic.main.multisig_form_card_info.fee_limit_edittext
-import kotlinx.android.synthetic.main.multisig_form_card_info.threshold_edittext
+import kotlinx.android.synthetic.main.multisig_form_card_info_signatories.*
 import kotlinx.android.synthetic.main.update_multisig_form_card.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
 import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
@@ -336,6 +336,20 @@ class ScriptFragment : Fragment()
         {
             mWalletEnabled = true
             startStorageInfoLoading()
+
+            val ss = SpannableString(" ")
+            ss.setSpan(BulletSpan(8, ContextCompat.getColor(activity!!, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            bullet_textview_01.text = ss
+            bullet_textview_02.text = ss
+            bullet_textview_03.text = ss
+            bullet_textview_04.text = ss
+            bullet_textview_05.text = ss
+            bullet_textview_06.text = ss
+            bullet_textview_07.text = ss
+            bullet_textview_08.text = ss
+            bullet_textview_09.text = ss
+            bullet_textview_10.text = ss
         }
     }
 
@@ -540,37 +554,28 @@ class ScriptFragment : Fragment()
     {
         if (editMode)
         {
+            threshold_edittext.setText("")
+            threshold_edittext.isEnabled = true
+            threshold_edittext.isFocusable = true
+            threshold_edittext.isClickable = true
+            threshold_edittext.isLongClickable = true
 
-            /*
             val threshold = getThreshold()
-            if (!threshold.isNullOrEmpty())
-            {
-                val tz3 = retrieveTz3()
-                if (tz3 != secureKeyHash)
-                {
-                    public_address_edittext.setText("")
-                    public_address_edittext.isEnabled = true
-                    public_address_edittext.isFocusable = false
-                    public_address_edittext.isClickable = false
-                    public_address_edittext.isLongClickable = false
-                    public_address_edittext.hint = getString(R.string.click_for_p2pk)
+            threshold_edittext.hint = threshold
 
-                    public_address_edittext.setOnClickListener {
-                        val ecKeys = retrieveECKeys()
-                        val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-                        public_address_edittext.setText(tz3)
-                    }
-                }
-            }
-            */
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(threshold_edittext, InputMethodManager.SHOW_IMPLICIT)
+
 
 
             update_multisig_button_relative_layout.visibility = View.VISIBLE
 
-            /*
-            gas_textview.visibility = View.VISIBLE
-            gas_layout.visibility = View.VISIBLE
+            gas_multisig_textview.visibility = View.VISIBLE
+            gas_multisig_layout.visibility = View.VISIBLE
 
+            add_signatory_button.visibility = View.VISIBLE
+
+            /*
 
             limit_infos_layout.visibility = View.GONE
 
@@ -589,6 +594,7 @@ class ScriptFragment : Fragment()
 
             */
 
+            hideClearButtons(hidden = false)
 
 
             fab_edit_multisig_storage.hide()
@@ -604,30 +610,8 @@ class ScriptFragment : Fragment()
 
             update_multisig_button_relative_layout?.visibility = View.GONE
 
-            //gas_textview?.visibility = View.GONE
-            //gas_layout?.visibility = View.GONE
-
-            //limit_infos_layout.visibility = View.VISIBLE
-
-            //daily_spending_limit_textview.setText(R.string.daily_spending_limit)
-
-            //daily_spending_limit_edittext?.isEnabled = false
-
-            //redelegate_address_textview.setText(R.string.secure_enclave)
-
-
-            /*
-            val storageJSONObject = JSONObject(mStorage)
-
-            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
-
-            // get securekey hash
-
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args") as JSONArray
-            val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-            val secureKeyHash = DataExtractor.getStringFromField(secureKeyJSONObject, "string")
-            */
-
+            gas_multisig_layout.visibility = View.GONE
+            gas_multisig_textview?.visibility = View.GONE
 
             val threshold = getThreshold()
 
@@ -640,38 +624,178 @@ class ScriptFragment : Fragment()
             threshold_edittext.isEnabled = true
             threshold_edittext.isFocusable = false
 
-            // get daily spending limit
+            add_signatory_button.visibility = View.GONE
 
+            hideClearButtons(hidden = true)
+
+            // eventually put threshold in red
             /*
-            val historyPayment = getHistoryPayment()
-            daily_spending_limit_edittext?.setText(mutezToTez(historyPayment?.get(0) as Long))
-
-
-            // 100 000 mutez == 0.1 tez
-            if (mSecureHashBalance != -1L && mSecureHashBalance < 100000)
-            {
-                if (isSecureKeyHashIdentical())
-                {
-                    send_cents_button.visibility = View.VISIBLE
-                }
-                else
-                {
-                    send_cents_button.visibility = View.GONE
-                }
-            }
-            else
-            {
-                send_cents_button.visibility = View.GONE
-            }
-
             putSpendingLimitInRed(false)
-
-            secure_hash_balance_layout.visibility = View.VISIBLE
             */
 
             fab_undo_multisig_storage.hide()
             fab_edit_multisig_storage.show()
         }
+    }
+
+    private fun hideClearButtons(hidden:Boolean)
+    {
+        val clearButtons = listOf<ImageButton>(
+                delete_address_button_01,
+                delete_address_button_02,
+                delete_address_button_03,
+                delete_address_button_04,
+                delete_address_button_05,
+                delete_address_button_06,
+                delete_address_button_07,
+                delete_address_button_08,
+                delete_address_button_09,
+                delete_address_button_10
+        )
+
+        if (hidden)
+        {
+            for (button in clearButtons)
+            {
+                button.visibility = View.GONE
+            }
+        }
+        else
+        {
+            val signatoriesList = getSignatoriesList()
+
+            if (!signatoriesList.isNullOrEmpty())
+            {
+                val length = signatoriesList.size
+
+                for (i in 0 until length)
+                {
+                    //bulletEditTexts[i].text = mSignatoriesList[i]
+                    clearButtons[i].visibility = View.VISIBLE
+                }
+
+                for (i in length until SIGNATORIES_CAPACITY)
+                {
+                    //bulletEditTexts[i].text = getString(R.string.neutral)
+                    clearButtons[i].visibility = View.GONE
+                }
+            }
+            else
+            {
+                for (it in clearButtons)
+                {
+                    it.visibility = View.GONE
+                }
+            }
+        }
+
+
+        /*
+        for (i in clearButtons.indices)
+        {
+            clearButtons[i].setOnClickListener {
+
+                if (mSignatoriesList[i] == pk())
+                {
+                    val dialogClickListener = { dialog: DialogInterface, which:Int ->
+                        when (which) {
+                            DialogInterface.BUTTON_POSITIVE -> {
+                                dialog.dismiss()
+
+                                mSignatoriesList.removeAt(i)
+                                refreshSignatories()
+                            }
+
+                            DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+                        }
+                    }
+
+                    val builder = AlertDialog.Builder(this)
+                    builder.setTitle(R.string.alert_remove_own_signatory_title)
+                            .setMessage(String.format(getString(R.string.alert_remove_own_signatory_body), pkh()))
+
+                            .setNegativeButton(android.R.string.cancel, dialogClickListener)
+                            .setPositiveButton(android.R.string.yes, dialogClickListener)
+                            .setCancelable(false)
+                            .show()
+                }
+                else
+                {
+                    mSignatoriesList.removeAt(i)
+                    refreshSignatories()
+                }
+            }
+        }
+        */
+    }
+
+    private fun refreshSignatories()
+    {
+        val signatoryLayouts = listOf<LinearLayout>(
+                signatory_layout_01,
+                signatory_layout_02,
+                signatory_layout_03,
+                signatory_layout_04,
+                signatory_layout_05,
+                signatory_layout_06,
+                signatory_layout_07,
+                signatory_layout_08,
+                signatory_layout_09,
+                signatory_layout_10
+        )
+
+        val bulletEditTexts = listOf<TextView>(
+                bullet_address_edittext_01,
+                bullet_address_edittext_02,
+                bullet_address_edittext_03,
+                bullet_address_edittext_04,
+                bullet_address_edittext_05,
+                bullet_address_edittext_06,
+                bullet_address_edittext_07,
+                bullet_address_edittext_08,
+                bullet_address_edittext_09,
+                bullet_address_edittext_10
+        )
+
+        /*
+        if (!mSignatoriesList.isNullOrEmpty())
+        {
+            val length = mSignatoriesList.size
+
+            for (i in 0 until length)
+            {
+                bulletEditTexts[i].text = mSignatoriesList[i]
+                signatoryLayouts[i].visibility = View.VISIBLE
+            }
+
+            for (i in length until AddMultisigActivity.SIGNATORIES_CAPACITY)
+            {
+                bulletEditTexts[i].text = getString(R.string.neutral)
+                signatoryLayouts[i].visibility = View.GONE
+            }
+        }
+        else
+        {
+            for (it in signatoryLayouts)
+            {
+                it.visibility = View.GONE
+            }
+        }
+
+        if (isInputDataValid())
+        {
+            startInitOriginateContractLoading()
+        }
+        else
+        {
+            validateAddButton(false)
+
+            cancelRequests(false)
+            transferLoading(false)
+
+            putFeesToNegative()
+        }
+        */
     }
 
     private fun animateFabEditMode(editMode:Boolean)
@@ -1108,24 +1232,9 @@ class ScriptFragment : Fragment()
 
                 }
             }
-            else
+            else if (getThreshold() != null)
             {
                 // MULTISIG CONTRACT
-
-                val storageJSONObject = JSONObject(mStorage)
-                val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
-
-                val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
-                if (counter != null)
-                {
-                    val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
-
-                    val signatoriesCount = DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
-
-                    //TODO put it in an arrayList.
-                    val signatory = DataExtractor.getStringFromField((argsPk[1] as JSONArray)[0] as JSONObject, "string")
-
-                }
 
                 update_multisig_form_card.visibility = View.VISIBLE
 
@@ -2109,6 +2218,24 @@ class ScriptFragment : Fragment()
                 val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
 
                 return DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
+            }
+        }
+
+        return null
+    }
+
+    private fun getSignatoriesList(): List<String>?
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
+
+            val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+            if (counter != null)
+            {
+                val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                return listOf(DataExtractor.getStringFromField((argsPk[1] as JSONArray)[0] as JSONObject, "string"))
             }
         }
 
