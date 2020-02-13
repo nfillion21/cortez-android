@@ -113,7 +113,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         container.adapter = mSectionsPagerAdapter
 
         container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
-        container.addOnPageChangeListener(object : androidx.viewpager.widget.ViewPager.OnPageChangeListener
+        container.addOnPageChangeListener(object : ViewPager.OnPageChangeListener
         {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int)
             {}
@@ -266,7 +266,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
      * A [FragmentPagerAdapter] that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    inner class SectionsPagerAdapter(fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentPagerAdapter(fm)
+    inner class SectionsPagerAdapter(fm: FragmentManager) : androidx.fragment.app.FragmentPagerAdapter(fm)
     {
 
         override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any)
@@ -338,7 +338,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
             }
         }
 
-        override fun getItem(position: Int): androidx.fragment.app.Fragment
+        override fun getItem(position: Int): Fragment
         {
             when (position)
             {
@@ -373,7 +373,7 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 else ->
                 {
                     //should not happen
-                    return androidx.fragment.app.Fragment()
+                    return Fragment()
                 }
             }
         }
@@ -461,17 +461,22 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
 
             DelegateActivity.DELEGATE_REQUEST_CODE ->
             {
-                if (resultCode == R.id.remove_delegate_succeed)
+                when (resultCode)
                 {
-                    showSnackBar(getString(R.string.delegation_successfully_deleted), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
-                }
-                else if (resultCode == R.id.add_delegate_succeed)
-                {
-                    showSnackBar(getString(R.string.delegate_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
-                }
-                else if (resultCode == R.id.update_storage_succeed)
-                {
-                    showSnackBar(getString(R.string.contract_storage_successfully_updated), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    R.id.remove_delegate_succeed ->
+                    {
+                        showSnackBar(getString(R.string.delegation_successfully_deleted), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    }
+
+                    R.id.add_delegate_succeed ->
+                    {
+                        showSnackBar(getString(R.string.delegate_successfully_added), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    }
+
+                    R.id.update_storage_succeed ->
+                    {
+                        showSnackBar(getString(R.string.contract_storage_successfully_updated), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    }
                 }
             }
 

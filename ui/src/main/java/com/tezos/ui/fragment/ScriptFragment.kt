@@ -82,7 +82,7 @@ import java.util.*
 import kotlin.collections.HashMap
 import kotlin.math.roundToLong
 
-class ScriptFragment : Fragment()
+class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelectorListener
 {
     private var mCallback: OnUpdateScriptListener? = null
 
@@ -98,7 +98,6 @@ class ScriptFragment : Fragment()
 
     private var mMultisigFees:Long = -1
 
-    private var mDepositAmount:Double = -1.0
     private var mSignatoriesList:ArrayList<String> = ArrayList(SIGNATORIES_CAPACITY)
 
     private var mThreshold:Int = 0
@@ -257,6 +256,18 @@ class ScriptFragment : Fragment()
 
         swipe_refresh_script_layout.setOnRefreshListener {
             startStorageInfoLoading()
+        }
+
+        add_signatory_button.setOnClickListener {
+            /*
+            AddressBookActivity.start(
+                    this,
+                    theme,
+                    AddressBookActivity.Selection.SelectionAddresses)
+            */
+            var dialog = AddSignatoryDialogFragment.newInstance()
+            dialog.setTargetFragment(this, 1)
+            dialog.show(activity?.supportFragmentManager, "AddSignatory")
         }
 
         daily_spending_limit_edittext.addTextChangedListener(GenericTextWatcher(daily_spending_limit_edittext))
@@ -567,7 +578,6 @@ class ScriptFragment : Fragment()
             imm.showSoftInput(threshold_edittext, InputMethodManager.SHOW_IMPLICIT)
 
 
-
             update_multisig_button_relative_layout.visibility = View.VISIBLE
 
             gas_multisig_textview.visibility = View.VISIBLE
@@ -594,8 +604,7 @@ class ScriptFragment : Fragment()
 
             */
 
-            hideClearButtons(hidden = false)
-
+            refreshSignatories(editMode = editMode)
 
             fab_edit_multisig_storage.hide()
             fab_undo_multisig_storage.show()
@@ -626,7 +635,7 @@ class ScriptFragment : Fragment()
 
             add_signatory_button.visibility = View.GONE
 
-            hideClearButtons(hidden = true)
+            refreshSignatories(editMode = editMode)
 
             // eventually put threshold in red
             /*
@@ -653,84 +662,35 @@ class ScriptFragment : Fragment()
                 delete_address_button_10
         )
 
-        if (hidden)
+        val signatoriesList = getSignatoriesList()
+
+        if (!signatoriesList.isNullOrEmpty() && !hidden)
         {
-            for (button in clearButtons)
+            val length = signatoriesList!!.size
+
+            for (i in 0 until length)
             {
-                button.visibility = View.GONE
+                clearButtons[i].visibility = View.VISIBLE
+            }
+
+            for (i in length until SIGNATORIES_CAPACITY)
+            {
+                clearButtons[i].visibility = View.GONE
             }
         }
         else
         {
-            val signatoriesList = getSignatoriesList()
-
-            if (!signatoriesList.isNullOrEmpty())
+            for (it in clearButtons)
             {
-                val length = signatoriesList.size
-
-                for (i in 0 until length)
-                {
-                    //bulletEditTexts[i].text = mSignatoriesList[i]
-                    clearButtons[i].visibility = View.VISIBLE
-                }
-
-                for (i in length until SIGNATORIES_CAPACITY)
-                {
-                    //bulletEditTexts[i].text = getString(R.string.neutral)
-                    clearButtons[i].visibility = View.GONE
-                }
-            }
-            else
-            {
-                for (it in clearButtons)
-                {
-                    it.visibility = View.GONE
-                }
+                it.visibility = View.GONE
             }
         }
-
-
-        /*
-        for (i in clearButtons.indices)
-        {
-            clearButtons[i].setOnClickListener {
-
-                if (mSignatoriesList[i] == pk())
-                {
-                    val dialogClickListener = { dialog: DialogInterface, which:Int ->
-                        when (which) {
-                            DialogInterface.BUTTON_POSITIVE -> {
-                                dialog.dismiss()
-
-                                mSignatoriesList.removeAt(i)
-                                refreshSignatories()
-                            }
-
-                            DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
-                        }
-                    }
-
-                    val builder = AlertDialog.Builder(this)
-                    builder.setTitle(R.string.alert_remove_own_signatory_title)
-                            .setMessage(String.format(getString(R.string.alert_remove_own_signatory_body), pkh()))
-
-                            .setNegativeButton(android.R.string.cancel, dialogClickListener)
-                            .setPositiveButton(android.R.string.yes, dialogClickListener)
-                            .setCancelable(false)
-                            .show()
-                }
-                else
-                {
-                    mSignatoriesList.removeAt(i)
-                    refreshSignatories()
-                }
-            }
-        }
-        */
     }
 
-    private fun refreshSignatories()
+    private fun refreshSignatories(editMode:Boolean)
     {
+        hideClearButtons(hidden = !editMode)
+
         val signatoryLayouts = listOf<LinearLayout>(
                 signatory_layout_01,
                 signatory_layout_02,
@@ -757,18 +717,19 @@ class ScriptFragment : Fragment()
                 bullet_address_edittext_10
         )
 
-        /*
-        if (!mSignatoriesList.isNullOrEmpty())
+        val signatoriesList = getSignatoriesList()
+
+        if (!signatoriesList.isNullOrEmpty())
         {
-            val length = mSignatoriesList.size
+            val length = signatoriesList.size
 
             for (i in 0 until length)
             {
-                bulletEditTexts[i].text = mSignatoriesList[i]
+                bulletEditTexts[i].text = signatoriesList[i]
                 signatoryLayouts[i].visibility = View.VISIBLE
             }
 
-            for (i in length until AddMultisigActivity.SIGNATORIES_CAPACITY)
+            for (i in length until SIGNATORIES_CAPACITY)
             {
                 bulletEditTexts[i].text = getString(R.string.neutral)
                 signatoryLayouts[i].visibility = View.GONE
@@ -782,6 +743,7 @@ class ScriptFragment : Fragment()
             }
         }
 
+        /*
         if (isInputDataValid())
         {
             startInitOriginateContractLoading()
@@ -1210,14 +1172,7 @@ class ScriptFragment : Fragment()
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.contract_storage_info)
 
-                if (mSpendingLimitEditMode)
-                {
-                    switchToEditMode(true)
-                }
-                else
-                {
-                    switchToEditMode(false)
-                }
+                switchToEditMode(mSpendingLimitEditMode)
 
                 val tz3 = retrieveTz3()
                 if (tz3 == null || tz3 != secureKeyHash)
@@ -1248,15 +1203,7 @@ class ScriptFragment : Fragment()
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.no_script_info)
 
-
-                if (mMultisigEditMode)
-                {
-                    switchToMultisigEditMode(true)
-                }
-                else
-                {
-                    switchToMultisigEditMode(false)
-                }
+                switchToMultisigEditMode(mMultisigEditMode)
             }
 
 
@@ -2566,6 +2513,26 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
 
         val ecKey = keyPair!!.public as ECPublicKey
         return ecKeyFormat(ecKey)
+    }
+
+    override fun onPublicKeyClicked(publicKey:String)
+    {
+
+        val k = "hello"
+        val k2 = "hello"
+        val k3 = "hello"
+        val k4 = "hello"
+        val k5 = "hello"
+        val k6 = "hello"
+        //addSignatory(publicKey)
+
+        /*
+        val fragment = supportFragmentManager.findFragmentById(R.id.create_wallet_container)
+        if (fragment != null && fragment is VerifyCreationWalletFragment) {
+            val verifyCreationWalletFragment = fragment as VerifyCreationWalletFragment?
+            verifyCreationWalletFragment!!.updateCard(word, position)
+        }
+        */
     }
 
     override fun onDetach()

@@ -82,9 +82,10 @@ class AddSignatoryDialogFragment : AppCompatDialogFragment()
         {
             listener = context
         }
-        else
+        else if (targetFragment is OnSignatorySelectorListener)
         {
-            throw RuntimeException("$context must implement onSignatorySelectorListener")
+            listener = targetFragment as OnSignatorySelectorListener
+            //throw RuntimeException("$context must implement onSignatorySelectorListener")
         }
     }
 
@@ -98,6 +99,8 @@ class AddSignatoryDialogFragment : AppCompatDialogFragment()
             dismiss()
             if (isInputDataValid())
             {
+                //listener?.onPublicKeyClicked(enterPublicKeyEditText.text.toString())
+                //val fragment = targetFragment as OnSignatorySelectorListener
                 listener?.onPublicKeyClicked(enterPublicKeyEditText.text.toString())
             }
         }

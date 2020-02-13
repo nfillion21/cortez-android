@@ -20,6 +20,7 @@
         android:id="@+id/signatory_layout_01"
         android:layout_width="match_parent"
         android:orientation="horizontal"
+        android:visibility="gone"
         android:layout_marginTop="@dimen/spacing_double"
         android:layout_height="wrap_content">
 
@@ -45,7 +46,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
@@ -89,7 +89,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
@@ -134,7 +133,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
@@ -179,7 +177,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
@@ -224,7 +221,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
@@ -269,7 +265,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
@@ -314,7 +309,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
@@ -359,7 +353,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
@@ -404,7 +397,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
@@ -449,7 +441,6 @@
             android:clickable="false"
             android:longClickable="false"
             android:focusable="false"
-            android:text="tz1MKWXFnWzQQMGKuuCinnSvyKdnBRBXm2TV"
             android:textColorHint="@color/tz_placeholder"
             android:textSize="@dimen/standard_item_text_size" />
 
