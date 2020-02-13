@@ -33,6 +33,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
@@ -52,6 +53,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
@@ -224,7 +226,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         {
             clearButtons[i].setOnClickListener {
 
-                /*
                 if (mSignatoriesList[i] == pk())
                 {
                     val dialogClickListener = { dialog: DialogInterface, which:Int ->
@@ -233,16 +234,16 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                                 dialog.dismiss()
 
                                 mSignatoriesList.removeAt(i)
-                                refreshSignatories()
+                                refreshSignatories(editMode = true)
                             }
 
                             DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
                         }
                     }
 
-                    val builder = AlertDialog.Builder(this)
+                    val builder = AlertDialog.Builder(activity!!)
                     builder.setTitle(R.string.alert_remove_own_signatory_title)
-                            .setMessage(String.format(getString(R.string.alert_remove_own_signatory_body), pkh()))
+                            .setMessage(String.format(getString(R.string.alert_remove_own_signatory_body), pkhtz1()))
 
                             .setNegativeButton(android.R.string.cancel, dialogClickListener)
                             .setPositiveButton(android.R.string.yes, dialogClickListener)
@@ -251,10 +252,9 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 }
                 else
                 {
+                    mSignatoriesList.removeAt(i)
+                    refreshSignatories(editMode = true)
                 }
-                */
-                mSignatoriesList.removeAt(i)
-                refreshSignatories(editMode = true)
             }
         }
 
@@ -326,6 +326,10 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         daily_spending_limit_edittext.addTextChangedListener(GenericTextWatcher(daily_spending_limit_edittext))
         //daily_spending_limit_edittext.onFocusChangeListener = focusChangeListener()
+
+        val focusListener = this.focusChangeListener()
+        threshold_edittext.addTextChangedListener(GenericTextWatcher(threshold_edittext))
+        threshold_edittext.onFocusChangeListener = focusListener
 
         if (savedInstanceState != null)
         {
@@ -458,20 +462,17 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
     }
 
-    /*
     private fun focusChangeListener(): View.OnFocusChangeListener
     {
         return View.OnFocusChangeListener { v, hasFocus ->
-            val i = v.id
-            when (i) {
+            when (v.id) {
                 //R.id.public_address_edittext -> putTzAddressInRed(!hasFocus)
-                R.id.daily_spending_limit_edittext -> putSpendingLimitInRed(!hasFocus)
+                R.id.threshold_edittext -> putThresholdInRed(!hasFocus)
                 else -> throw UnsupportedOperationException(
                         "onFocusChange has not been implemented for " + resources.getResourceName(v.id))
             }
         }
     }
-    */
 
     private fun pkh():String?
     {
@@ -490,6 +491,18 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
 
         return pkh
+    }
+
+    private fun pk():String?
+    {
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+        return mnemonicsData.pk
+    }
+
+    private fun pkhtz1():String?
+    {
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+        return mnemonicsData.pkh
     }
 
     private fun switchToEditMode(editMode:Boolean)
@@ -622,6 +635,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         if (editMode)
         {
             threshold_edittext.setText("")
+            threshold_edittext.isFocusableInTouchMode = true
             threshold_edittext.isEnabled = true
             threshold_edittext.isFocusable = true
             threshold_edittext.isClickable = true
@@ -640,25 +654,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             gas_multisig_layout.visibility = View.VISIBLE
 
             add_signatory_button.visibility = View.VISIBLE
-
-            /*
-
-            limit_infos_layout.visibility = View.GONE
-
-            redelegate_address_textview.setText(R.string.secure_enclave_generated)
-
-            daily_spending_limit_textview.setText(R.string.daily_spending_limit_from_0_to_1k)
-
-            daily_spending_limit_edittext.isEnabled = true
-            daily_spending_limit_edittext.setText("")
-            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(daily_spending_limit_edittext, InputMethodManager.SHOW_IMPLICIT)
-
-            send_cents_button.visibility = View.GONE
-
-            secure_hash_balance_layout.visibility = View.GONE
-
-            */
 
             refreshSignatories(editMode = editMode)
 
@@ -1913,36 +1908,59 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         override fun afterTextChanged(editable: Editable)
         {
-            if (mSpendingLimitEditMode)
+            if (mSpendingLimitEditMode || mMultisigEditMode)
             {
                 val i = v.id
                 if (
                         i == R.id.daily_spending_limit_edittext && isSpendingLimitAmountDifferent(editable)
-                        //||
-                        //i == R.id.daily_spending_limit_edittext && isSpendingLimitAmountDifferent(editable)
-                    //TODO check about the threshold edittext
+                        ||
+                        i == R.id.threshold_edittext && !isThresholdAmountEquals(editable)
+                //TODO check about the threshold edittext
                 )
                 {
-                    putSpendingLimitInRed(false)
+                    if (i == R.id.daily_spending_limit_edittext)
+                    {
+                        putSpendingLimitInRed(false)
+
+                        if (isSpendingLimitInputDataValid())
+                        {
+                            startInitUpdateStorageLoading()
+                        }
+                        else
+                        {
+                            validateConfirmEditionButton(false)
+
+                            cancelRequests(false)
+                            transferLoading(false)
+
+                            putFeesToNegative()
+                        }
+                    }
+
+                    if (i == R.id.threshold_edittext )
+                    {
+                        putThresholdInRed(false)
+
+                        if (isMultisigInputDataValid())
+                        {
+                            startInitUpdateStorageLoading()
+                        }
+                        else
+                        {
+                            validateConfirmEditionMultisigButton(false)
+
+                            cancelRequests(false)
+                            transferLoading(false)
+
+                            putFeesMultisigToNegative()
+                        }
+                    }
 
                     //TODO text changed
                     //TODO load again but only if we don't have any same forged data.
 
-                    if (isSpendingLimitInputDataValid())
-                    {
-                        startInitUpdateStorageLoading()
-                    }
-                    else
-                    {
-                        validateConfirmEditionButton(false)
-
-                        cancelRequests(false)
-                        transferLoading(false)
-
-                        putFeesToNegative()
-                    }
                 }
-                else if (i != R.id.daily_spending_limit_edittext)
+                else if (i != R.id.daily_spending_limit_edittext && i != R.id.threshold_edittext)
                 {
                     throw UnsupportedOperationException(
                             "OnClick has not been implemented for " + resources.getResourceName(v.id))
@@ -1971,6 +1989,28 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             }
         }
         return isSpendingAmountDifferent
+    }
+
+    private fun isThresholdAmountEquals(editable: Editable):Boolean
+    {
+        val isThresholdAmountEquals = false
+
+        if (editable != null && !TextUtils.isEmpty(editable))
+        {
+            try
+            {
+                val limit = editable.toString().toInt()
+                if (limit != 0 && limit == mThreshold)
+                {
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                return false
+            }
+        }
+        return isThresholdAmountEquals
     }
 
     private fun isSpendingLimitInputDataValid(): Boolean
@@ -2390,6 +2430,23 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         }
 
         daily_spending_limit_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
+    }
+
+    private fun putThresholdInRed(red: Boolean)
+    {
+
+        val thresholdValid = isThresholdValid()
+
+        val color = if (red && !thresholdValid)
+        {
+            R.color.tz_error
+        }
+        else
+        {
+            R.color.tz_accent
+        }
+
+        threshold_edittext.setTextColor(ContextCompat.getColor(activity!!, color))
     }
 
     private fun isSpendingLimitAmountValid():Boolean

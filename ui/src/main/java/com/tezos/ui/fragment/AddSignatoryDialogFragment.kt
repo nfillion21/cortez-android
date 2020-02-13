@@ -85,7 +85,10 @@ class AddSignatoryDialogFragment : AppCompatDialogFragment()
         else if (targetFragment is OnSignatorySelectorListener)
         {
             listener = targetFragment as OnSignatorySelectorListener
-            //throw RuntimeException("$context must implement onSignatorySelectorListener")
+        }
+        else
+        {
+            throw RuntimeException("$context or $targetFragment must implement onSignatorySelectorListener")
         }
     }
 
