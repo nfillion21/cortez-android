@@ -79,6 +79,7 @@ import java.security.interfaces.ECPublicKey
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.math.roundToLong
 
@@ -153,6 +154,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         private const val SIGNATORIES_CAPACITY = 10
 
+        private const val SIGNATORIES_LIST_KEY = "signatories_list"
+
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
                 ScriptFragment().apply {
@@ -202,6 +205,57 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         update_storage_button_layout.setOnClickListener {
             onDelegateClick()
+        }
+
+        val clearButtons = listOf<ImageButton>(
+                delete_address_button_01,
+                delete_address_button_02,
+                delete_address_button_03,
+                delete_address_button_04,
+                delete_address_button_05,
+                delete_address_button_06,
+                delete_address_button_07,
+                delete_address_button_08,
+                delete_address_button_09,
+                delete_address_button_10
+        )
+
+        for (i in clearButtons.indices)
+        {
+            clearButtons[i].setOnClickListener {
+
+                /*
+                if (mSignatoriesList[i] == pk())
+                {
+                    val dialogClickListener = { dialog: DialogInterface, which:Int ->
+                        when (which) {
+                            DialogInterface.BUTTON_POSITIVE -> {
+                                dialog.dismiss()
+
+                                mSignatoriesList.removeAt(i)
+                                refreshSignatories()
+                            }
+
+                            DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+                        }
+                    }
+
+                    val builder = AlertDialog.Builder(this)
+                    builder.setTitle(R.string.alert_remove_own_signatory_title)
+                            .setMessage(String.format(getString(R.string.alert_remove_own_signatory_body), pkh()))
+
+                            .setNegativeButton(android.R.string.cancel, dialogClickListener)
+                            .setPositiveButton(android.R.string.yes, dialogClickListener)
+                            .setCancelable(false)
+                            .show()
+                }
+                else
+                {
+                }
+                */
+                mSignatoriesList.removeAt(i)
+                refreshSignatories(editMode = true)
+            }
         }
 
         send_cents_button.setOnClickListener {
@@ -303,6 +357,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             mSecureHashBalance = savedInstanceState.getLong(BALANCE_LONG_KEY, -1)
 
             mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
+
+            mSignatoriesList = savedInstanceState.getStringArrayList(SIGNATORIES_LIST_KEY)
 
             if (mStorageInfoLoading)
             {
@@ -647,7 +703,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
     }
 
-    private fun hideClearButtons(hidden:Boolean)
+    private fun hideClearButtons(editMode:Boolean)
     {
         val clearButtons = listOf<ImageButton>(
                 delete_address_button_01,
@@ -662,9 +718,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 delete_address_button_10
         )
 
-        val signatoriesList = getSignatoriesList()
+        val signatoriesList =
 
-        if (!signatoriesList.isNullOrEmpty() && !hidden)
+                if (editMode)
+                {
+                    mSignatoriesList
+                }
+                else
+                {
+                    getSignatoriesList()
+                }
+
+
+        if (!signatoriesList.isNullOrEmpty() && editMode)
         {
             val length = signatoriesList!!.size
 
@@ -689,7 +755,12 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
     private fun refreshSignatories(editMode:Boolean)
     {
-        hideClearButtons(hidden = !editMode)
+        hideClearButtons(editMode = editMode)
+
+        if (!editMode)
+        {
+            mSignatoriesList = getSignatoriesList()
+        }
 
         val signatoryLayouts = listOf<LinearLayout>(
                 signatory_layout_01,
@@ -717,7 +788,15 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 bullet_address_edittext_10
         )
 
-        val signatoriesList = getSignatoriesList()
+        val signatoriesList =
+                if (editMode)
+                {
+                    mSignatoriesList
+                }
+                else
+                {
+                    getSignatoriesList()
+                }
 
         if (!signatoriesList.isNullOrEmpty())
         {
@@ -2171,7 +2250,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         return null
     }
 
-    private fun getSignatoriesList(): List<String>?
+    private fun getSignatoriesList(): ArrayList<String>
     {
         if (mStorage != null)
         {
@@ -2182,11 +2261,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             if (counter != null)
             {
                 val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
-                return listOf(DataExtractor.getStringFromField((argsPk[1] as JSONArray)[0] as JSONObject, "string"))
+                return arrayListOf(DataExtractor.getStringFromField((argsPk[1] as JSONArray)[0] as JSONObject, "string"))
             }
         }
 
-        return null
+        return ArrayList(SIGNATORIES_CAPACITY)
     }
 
     private fun isP256AddressValid(): Boolean
@@ -2472,6 +2551,8 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         outState.putLong(BALANCE_LONG_KEY, mSecureHashBalance)
 
         outState.putString(CONTRACT_SIG_KEY, mSig)
+
+        outState.putStringArrayList(SIGNATORIES_LIST_KEY, mSignatoriesList)
     }
 
     private fun mutezToTez(mutez:String):String
@@ -2515,16 +2596,33 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         return ecKeyFormat(ecKey)
     }
 
+    private fun addSignatory(signatory:String)
+    {
+        when {
+
+            mSignatoriesList.size >= 10 ->
+            {
+                //TODO show snackbar
+                //showSnackBar(null, getString(R.string.max_10_signatories))
+            }
+
+            mSignatoriesList.contains(signatory) ->
+            {
+                //TODO show snackbar
+                //showSnackBar(null, getString(R.string.signatory_already_in_list))
+            }
+
+            else ->
+            {
+                mSignatoriesList.add(signatory)
+                refreshSignatories(editMode = true)
+            }
+        }
+    }
+
     override fun onPublicKeyClicked(publicKey:String)
     {
-
-        val k = "hello"
-        val k2 = "hello"
-        val k3 = "hello"
-        val k4 = "hello"
-        val k5 = "hello"
-        val k6 = "hello"
-        //addSignatory(publicKey)
+        addSignatory(publicKey)
 
         /*
         val fragment = supportFragmentManager.findFragmentById(R.id.create_wallet_container)
