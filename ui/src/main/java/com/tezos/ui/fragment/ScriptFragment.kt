@@ -90,12 +90,18 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 {
     private var mCallback: OnUpdateScriptListener? = null
 
+    private var mInitUpdateMultisigStorageLoading:Boolean = false
+
     private var mInitUpdateStorageLoading:Boolean = false
     private var mFinalizeDelegateLoading:Boolean = false
 
     private var mSecureHashBalanceLoading:Boolean = false
 
     private var mStorageInfoLoading:Boolean = false
+
+
+    private var mUpdateMultisigStoragePayload:String? = null
+    private var mUpdateMultisigStorageFees:Long = -1L
 
     private var mUpdateStoragePayload:String? = null
     private var mUpdateStorageFees:Long = -1L
@@ -127,6 +133,9 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     {
         const val CONTRACT_PUBLIC_KEY = "contract_public_key"
 
+
+        private const val UPDATE_MULTISIG_STORAGE_INIT_TAG = "update_multisig_storage_init"
+
         private const val UPDATE_STORAGE_INIT_TAG = "update_storage_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
 
@@ -135,6 +144,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         private const val LOAD_SECURE_HASH_BALANCE_TAG = "load_secure_hash_balance"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
+
+        private const val MULTISIG_PAYLOAD_KEY = "multisig_payload_key"
 
         private const val DELEGATE_TEZOS_ADDRESS_KEY = "delegate_tezos_address_key"
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
@@ -335,6 +346,10 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         if (savedInstanceState != null)
         {
             mUpdateStoragePayload = savedInstanceState.getString(DELEGATE_PAYLOAD_KEY, null)
+
+            mUpdateMultisigStoragePayload = savedInstanceState.getString(MULTISIG_PAYLOAD_KEY, null)
+
+            mInitUpdateMultisigStorageLoading = savedInstanceState.getBoolean(UPDATE_MULTISIG_STORAGE_INIT_TAG)
 
             mInitUpdateStorageLoading = savedInstanceState.getBoolean(UPDATE_STORAGE_INIT_TAG)
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
@@ -1516,7 +1531,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         postParams.put("src", tz1)
         postParams.put("src_pk", pk)
 
-
         var dstObject = JSONObject()
         dstObject.put("dst", pkh())
         dstObject.put("amount", "0")
@@ -1524,8 +1538,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         dstObject.put("entrypoint", "default")
 
         mUpdateStorageAddress = pk
-
-        //TODO I need to insert a signature into parameters
 
         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val sk = CryptoUtils.generateSk(mnemonics, "")
@@ -1573,36 +1585,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
-
-        /*
-        val dataHex = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e9810438560007070002050805080707000102000000260a0000002100454444cef1138c6a96544e5ff55bd6ebc38d53a37f0f7f42e2c7d8ab9b337056".hexToByteArray()
-
-        if (dataPack.contentEquals(dataHex))
-        {
-            val k = "values are equal"
-            val k2 = "values are equal"
-        }
-        else
-        {
-            val k = "values are not equal"
-            val k2 = "values are not equal"
-        }
-        */
-
-        // signature by foo
-        // edsigu3kDzfUPwyCCY63PnoVDRJ1AF3eBV3npe4AWLxf25cpuom5AuFkY2ewGSmt6LorRj3U5eJF33mLfb7fBwjby9PMAFWniFj
-
         val signature = KeyPair.sign(sk, dataPack)
-
         val edsig = CryptoUtils.generateEDSig(signature)
-
-
-
-        //val k3 = Visitable.publicKey(k)
-        //val k4 = Visitable.publicKey(k2)
-        //val k5 = Visitable.publicKey(pk)
-
-
 
         val spendingLimitFile = "multisig_update_storage.json"
         val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
@@ -1647,28 +1631,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             //TODO check if the JSON is fine then launch the 2nd request
             if (swipe_refresh_script_layout != null)
             {
-                mUpdateStoragePayload = answer.getString("result")
-                mUpdateStorageFees = answer.getLong("total_fee")
+                mUpdateMultisigStoragePayload = answer.getString("result")
+                mUpdateMultisigStorageFees = answer.getLong("total_fee")
 
                 // we use this call to ask for payload and fees
-                if (mUpdateStoragePayload != null && mUpdateStorageFees != -1L && activity != null)
+                if (mUpdateMultisigStoragePayload != null && mUpdateMultisigStorageFees != -1L && activity != null)
                 {
+                    //TODO handle this one, need to make one for multisig
                     onInitEditLoadComplete(null)
 
-                    val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
-                    storage_fee_edittext?.setText(feeInTez.toString())
+                    val feeInTez = mUpdateMultisigStorageFees?.toDouble()/1000000.0
+                    fee_limit_edittext?.setText(feeInTez.toString())
 
-                    validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
-
-                    if (isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
-                    {
-                        validateConfirmEditionButton(true)
-                    }
-                    else
-                    {
-                        // should no happen
-                        validateConfirmEditionButton(false)
-                    }
+                    validateConfirmEditionMultisigButton(isMultisigInputDataValid() && isMultisigFeeValid())
                 }
                 else
                 {
@@ -1684,6 +1659,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         {
             if (swipe_refresh_script_layout != null)
             {
+
+                //TODO need to make one for multisig
                 onInitEditLoadComplete(it)
 
                 mClickCalculate = true
@@ -1703,8 +1680,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         cancelRequests(true)
 
-        jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
-        mInitUpdateStorageLoading = true
+        jsObjRequest.tag = UPDATE_MULTISIG_STORAGE_INIT_TAG
+        mInitUpdateMultisigStorageLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
 
         //*/
@@ -2024,7 +2001,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         mMultisigFees = -1
 
-        mUpdateStoragePayload = null
+        mUpdateMultisigStoragePayload = null
     }
 
     private fun showSnackBar(error:VolleyError?, message:String?, color:Int, textColor: Int)
@@ -2621,7 +2598,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         this.putSpendingLimitInRed(true)
     }
 
-    fun isUpdateButtonValid(): Boolean
+    private fun isUpdateButtonValid(): Boolean
     {
         return mUpdateStoragePayload != null
                 && isUpdateStorageFeeValid()
@@ -2794,12 +2771,14 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         {
             val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
             requestQueue?.cancelAll(UPDATE_STORAGE_INIT_TAG)
+            requestQueue?.cancelAll(UPDATE_MULTISIG_STORAGE_INIT_TAG)
             requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
             requestQueue?.cancelAll(LOAD_SECURE_HASH_BALANCE_TAG)
             requestQueue?.cancelAll(CONTRACT_SCRIPT_INFO_TAG)
 
             if (resetBooleans)
             {
+                mInitUpdateMultisigStorageLoading = false
                 mInitUpdateStorageLoading = false
                 mFinalizeDelegateLoading = false
                 mStorageInfoLoading = false
@@ -2811,6 +2790,8 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
     override fun onSaveInstanceState(outState: Bundle)
     {
         super.onSaveInstanceState(outState)
+
+        outState.putBoolean(UPDATE_MULTISIG_STORAGE_INIT_TAG, mInitUpdateMultisigStorageLoading)
 
         outState.putBoolean(UPDATE_STORAGE_INIT_TAG, mInitUpdateStorageLoading)
         outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
