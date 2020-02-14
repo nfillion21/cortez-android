@@ -1,0 +1,46 @@
+{
+  "prim": "Pair",
+  "args": [
+    {
+      "prim": "Pair",
+      "args": [
+        {
+          "int": "2"
+        },
+        {
+          "prim": "Right",
+          "args": [
+            {
+              "prim": "Right",
+              "args": [
+                {
+                  "prim": "Pair",
+                  "args": [
+                    {
+                      "int": "1"
+                    },
+                    [
+                      {
+                        "bytes": "00454444cef1138c6a96544e5ff55bd6ebc38d53a37f0f7f42e2c7d8ab9b337056"
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    [
+      {
+        "prim": "Some",
+        "args": [
+          {
+            "string": "edsigu3kDzfUPwyCCY63PnoVDRJ1AF3eBV3npe4AWLxf25cpuom5AuFkY2ewGSmt6LorRj3U5eJF33mLfb7fBwjby9PMAFWniFj"
+          }
+        ]
+      }
+    ]
+  ]
+}

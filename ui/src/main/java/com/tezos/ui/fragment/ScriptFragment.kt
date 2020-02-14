@@ -60,6 +60,7 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
@@ -948,6 +949,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         startPostRequestLoadInitUpdateStorage()
     }
 
+    private fun startInitUpdateMultisigStorageLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        putFeesMultisigToNegative()
+
+        // validatePay cannot be valid if there is no fees
+        validateConfirmEditionMultisigButton(false)
+
+        startPostRequestLoadInitUpdateMultisigStorage()
+    }
+
     private fun startFinalizeUpdateStorageLoading()
     {
         // we need to inform the UI we are going to call transfer
@@ -1478,6 +1492,215 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         return pk
     }
 
+
+    // volley
+    private fun startPostRequestLoadInitUpdateMultisigStorage()
+    {
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+
+        val url = getString(R.string.transfer_forge)
+
+        val pk = if (mnemonicsData.pk.isNullOrEmpty())
+        {
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+        }
+        else
+        {
+            mnemonicsData.pk
+        }
+
+        val tz1 = mnemonicsData.pkh
+
+        var postParams = JSONObject()
+        postParams.put("src", tz1)
+        postParams.put("src_pk", pk)
+
+
+        var dstObject = JSONObject()
+        dstObject.put("dst", pkh())
+        dstObject.put("amount", "0")
+
+        dstObject.put("entrypoint", "appel_clef_maitresse")
+
+        mUpdateStorageAddress = pk
+
+        //TODO I need to insert a signature into parameters
+
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+        val sk = CryptoUtils.generateSk(mnemonics, "")
+
+        val dataVisitable = Primitive(
+                Primitive.Name.Pair,
+                arrayOf(
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.chainID(getString(R.string.chain_ID)),
+                                        Visitable.address(pkh()!!)
+                                )
+                        ),
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        //I will need to get the storage first.
+                                        //TODO get the counter
+                                        Visitable.integer(2),
+                                        Primitive(Primitive.Name.Right,
+                                                arrayOf(
+                                                        Primitive(Primitive.Name.Right,
+                                                                arrayOf(
+                                                                        Primitive(Primitive.Name.Pair,
+                                                                                arrayOf(
+                                                                                        Visitable.integer(mThreshold.toLong()),
+                                                                                        Visitable.sequenceOf(
+                                                                                                Visitable.publicKey(pk)
+                                                                                        )
+                                                                                )
+                                                                        )
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+        )
+
+        val o = ByteArrayOutputStream()
+        o.write(0x05)
+
+        val dataPacker = Packer(o)
+        dataVisitable.accept(dataPacker)
+
+        val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+        /*
+        val dataHex = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e9810438560007070002050805080707000102000000260a0000002100454444cef1138c6a96544e5ff55bd6ebc38d53a37f0f7f42e2c7d8ab9b337056".hexToByteArray()
+
+        if (dataPack.contentEquals(dataHex))
+        {
+            val k = "values are equal"
+            val k2 = "values are equal"
+        }
+        else
+        {
+            val k = "values are not equal"
+            val k2 = "values are not equal"
+        }
+        */
+
+        // signature by foo
+        // edsigu3kDzfUPwyCCY63PnoVDRJ1AF3eBV3npe4AWLxf25cpuom5AuFkY2ewGSmt6LorRj3U5eJF33mLfb7fBwjby9PMAFWniFj
+
+        val signature = KeyPair.sign(sk, dataPack)
+
+        val edsig = CryptoUtils.generateEDSig(signature)
+
+
+
+        //val k3 = Visitable.publicKey(k)
+        //val k4 = Visitable.publicKey(k2)
+        //val k5 = Visitable.publicKey(pk)
+
+        val k = "edpkuAjG6hyZ86JJ8TWBZ5j8txMX6ySsBFBcRRgmkKVBFDf3RJXfdx"
+
+        var decodedValue = Base58.decode(k)
+        var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
+        bytes = byteArrayOf(0x00) + bytes
+
+        val k1b = bytes.toNoPrefixHexString()
+
+
+        val spendingLimitFile = "multisig_update_storage.json"
+        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                .use {
+                    it.readText()
+                }
+
+        val value = JSONObject(contract)
+
+        val args = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+        
+
+        dstObject.put("parameters", value)
+
+        var dstObjects = JSONArray()
+        dstObjects.put(dstObject)
+
+        postParams.put("dsts", dstObjects)
+
+        /*
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
+        { answer ->
+
+            //TODO check if the JSON is fine then launch the 2nd request
+            if (swipe_refresh_script_layout != null)
+            {
+                mUpdateStoragePayload = answer.getString("result")
+                mUpdateStorageFees = answer.getLong("total_fee")
+
+                // we use this call to ask for payload and fees
+                if (mUpdateStoragePayload != null && mUpdateStorageFees != -1L && activity != null)
+                {
+                    onInitEditLoadComplete(null)
+
+                    val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
+                    storage_fee_edittext?.setText(feeInTez.toString())
+
+                    validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
+
+                    if (isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
+                    {
+                        validateConfirmEditionButton(true)
+                    }
+                    else
+                    {
+                        // should no happen
+                        validateConfirmEditionButton(false)
+                    }
+                }
+                else
+                {
+                    val volleyError = VolleyError(getString(R.string.generic_error))
+                    onInitEditLoadComplete(volleyError)
+                    mClickCalculate = true
+
+                    //the call failed
+                }
+            }
+
+        }, Response.ErrorListener
+        {
+            if (swipe_refresh_script_layout != null)
+            {
+                onInitEditLoadComplete(it)
+
+                mClickCalculate = true
+                //Log.i("mTransferId", ""+mTransferId)
+                //Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
+            }
+        })
+        {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String>
+            {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        cancelRequests(true)
+
+        jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
+        mInitUpdateStorageLoading = true
+        VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+
+        */
+    }
+
+
+
     // volley
     private fun startPostRequestLoadInitUpdateStorage()
     {
@@ -1943,7 +2166,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
                         if (isMultisigInputDataValid())
                         {
-                            startInitUpdateStorageLoading()
+                            startInitUpdateMultisigStorageLoading()
                         }
                         else
                         {

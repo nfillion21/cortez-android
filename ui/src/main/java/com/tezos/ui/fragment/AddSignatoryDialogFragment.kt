@@ -78,18 +78,22 @@ class AddSignatoryDialogFragment : AppCompatDialogFragment()
     override fun onAttach(context: Context)
     {
         super.onAttach(context)
-        if (context is OnSignatorySelectorListener)
-        {
-            listener = context
-        }
-        else if (targetFragment is OnSignatorySelectorListener)
-        {
-            listener = targetFragment as OnSignatorySelectorListener
-        }
-        else
-        {
-            throw RuntimeException("$context or $targetFragment must implement onSignatorySelectorListener")
-        }
+
+        listener =
+                when {
+                    context is OnSignatorySelectorListener ->
+                    {
+                        context
+                    }
+                    targetFragment is OnSignatorySelectorListener ->
+                    {
+                        targetFragment as OnSignatorySelectorListener
+                    }
+                    else ->
+                    {
+                        throw RuntimeException("$context or $targetFragment must implement onSignatorySelectorListener")
+                    }
+                }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)
