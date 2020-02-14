@@ -1521,7 +1521,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         dstObject.put("dst", pkh())
         dstObject.put("amount", "0")
 
-        dstObject.put("entrypoint", "appel_clef_maitresse")
+        dstObject.put("entrypoint", "default")
 
         mUpdateStorageAddress = pk
 
@@ -1543,7 +1543,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                                 arrayOf(
                                         //I will need to get the storage first.
                                         //TODO get the counter
-                                        Visitable.integer(2),
+                                        Visitable.integer(0),
                                         Primitive(Primitive.Name.Right,
                                                 arrayOf(
                                                         Primitive(Primitive.Name.Right,
@@ -1602,13 +1602,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         //val k4 = Visitable.publicKey(k2)
         //val k5 = Visitable.publicKey(pk)
 
-        val k = "edpkuAjG6hyZ86JJ8TWBZ5j8txMX6ySsBFBcRRgmkKVBFDf3RJXfdx"
-
-        var decodedValue = Base58.decode(k)
-        var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
-        bytes = byteArrayOf(0x00) + bytes
-
-        val k1b = bytes.toNoPrefixHexString()
 
 
         val spendingLimitFile = "multisig_update_storage.json"
@@ -1620,7 +1613,25 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         val value = JSONObject(contract)
 
         val args = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-        
+
+        val counter = args[0] as JSONObject
+        counter.put("int", "0")
+
+        val argsb = (((((args[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+        val signatoriesCount = argsb[0] as JSONObject
+        signatoriesCount.put("int", "1")
+
+        val signatory = (argsb[1] as JSONArray)[0] as JSONObject
+
+        var decodedValue = Base58.decode(pk)
+        var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
+        bytes = byteArrayOf(0x00) + bytes
+
+        signatory.put("bytes", bytes.toNoPrefixHexString())
+
+        val sig = ((((value["args"] as JSONArray)[1] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+        sig.put("string", edsig)
 
         dstObject.put("parameters", value)
 
@@ -1629,7 +1640,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         postParams.put("dsts", dstObjects)
 
-        /*
+        //*
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
@@ -1696,10 +1707,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         mInitUpdateStorageLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
 
-        */
+        //*/
     }
-
-
 
     // volley
     private fun startPostRequestLoadInitUpdateStorage()
