@@ -414,6 +414,16 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                         else
                         {
                             onFinalizeDelegationLoadComplete(null)
+
+                            if (mInitUpdateMultisigStorageLoading)
+                            {
+                                startInitUpdateMultisigStorageLoading()
+                            }
+                            else
+                            {
+                                onInitEditLoadMultisigComplete(error = null)
+                            }
+
                         }
                     }
                 }
@@ -1499,6 +1509,41 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
     }
 
+    private fun onInitEditLoadMultisigComplete(error:VolleyError?)
+    {
+        mInitUpdateMultisigStorageLoading = false
+
+        if (error != null || mClickCalculate)
+        {
+            // stop the moulinette only if an error occurred
+            transferLoading(false)
+            cancelRequests(true)
+
+            mUpdateMultisigStoragePayload = null
+
+            fee_limit_edittext.isEnabled = true
+            fee_limit_edittext.isFocusable = false
+            fee_limit_edittext.isClickable = false
+            fee_limit_edittext.isLongClickable = false
+            fee_limit_edittext.hint = getString(R.string.click_for_fees)
+
+            fee_limit_edittext.setOnClickListener {
+                startInitUpdateMultisigStorageLoading()
+            }
+
+            if(error != null)
+            {
+                //TODO handle the show snackbar
+                showSnackBar(error, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            }
+        }
+        else
+        {
+            transferLoading(false)
+            cancelRequests(true)
+        }
+    }
+
     private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
     {
         with(Storage(activity!!)) {
@@ -1638,7 +1683,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 if (mUpdateMultisigStoragePayload != null && mUpdateMultisigStorageFees != -1L && activity != null)
                 {
                     //TODO handle this one, need to make one for multisig
-                    onInitEditLoadComplete(null)
+                    onInitEditLoadMultisigComplete(null)
 
                     val feeInTez = mUpdateMultisigStorageFees?.toDouble()/1000000.0
                     fee_limit_edittext?.setText(feeInTez.toString())
@@ -1648,7 +1693,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 else
                 {
                     val volleyError = VolleyError(getString(R.string.generic_error))
-                    onInitEditLoadComplete(volleyError)
+                    onInitEditLoadMultisigComplete(volleyError)
                     mClickCalculate = true
 
                     //the call failed
@@ -1659,9 +1704,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         {
             if (swipe_refresh_script_layout != null)
             {
-
-                //TODO need to make one for multisig
-                onInitEditLoadComplete(it)
+                onInitEditLoadMultisigComplete(it)
 
                 mClickCalculate = true
                 //Log.i("mTransferId", ""+mTransferId)
