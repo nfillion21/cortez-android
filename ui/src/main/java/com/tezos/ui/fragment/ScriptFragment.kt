@@ -95,6 +95,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     private var mInitUpdateStorageLoading:Boolean = false
     private var mFinalizeDelegateLoading:Boolean = false
 
+    private var mFinalizeMultisigLoading:Boolean = false
+
     private var mSecureHashBalanceLoading:Boolean = false
 
     private var mStorageInfoLoading:Boolean = false
@@ -111,8 +113,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     private var mSignatoriesList:ArrayList<String> = ArrayList(SIGNATORIES_CAPACITY)
 
     private var mThreshold:Int = 0
-
-    private var mUpdateStorageAddress:String? = null
 
     private var mClickCalculate:Boolean = false
 
@@ -139,6 +139,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         private const val UPDATE_STORAGE_INIT_TAG = "update_storage_init"
         private const val DELEGATE_FINALIZE_TAG = "delegate_finalize"
 
+        private const val MULTISIG_FINALIZE_TAG = "multisig_finalize"
+
         private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
 
         private const val LOAD_SECURE_HASH_BALANCE_TAG = "load_secure_hash_balance"
@@ -147,7 +149,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         private const val MULTISIG_PAYLOAD_KEY = "multisig_payload_key"
 
-        private const val DELEGATE_TEZOS_ADDRESS_KEY = "delegate_tezos_address_key"
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
@@ -218,7 +219,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         validateConfirmEditionMultisigButton(isMultisigInputDataValid() && isMultisigFeeValid())
 
         update_storage_button_layout.setOnClickListener {
-            onDelegateClick()
+            onUpdateSlcStorageClick()
+        }
+
+        update_multisig_button_layout.setOnClickListener {
+            onUpdateMultisigStorageClick()
         }
 
         val clearButtons = listOf<ImageButton>(
@@ -354,11 +359,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             mInitUpdateStorageLoading = savedInstanceState.getBoolean(UPDATE_STORAGE_INIT_TAG)
             mFinalizeDelegateLoading = savedInstanceState.getBoolean(DELEGATE_FINALIZE_TAG)
 
+            mFinalizeMultisigLoading = savedInstanceState.getBoolean(MULTISIG_FINALIZE_TAG)
+
             mSecureHashBalanceLoading = savedInstanceState.getBoolean(LOAD_SECURE_HASH_BALANCE_TAG)
 
             mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
-
-            mUpdateStorageAddress = savedInstanceState.getString(DELEGATE_TEZOS_ADDRESS_KEY, null)
 
             mUpdateStorageFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
 
@@ -413,7 +418,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                         }
                         else
                         {
-                            onFinalizeDelegationLoadComplete(null)
+                            onFinalizeLoadComplete(null)
 
                             if (mInitUpdateMultisigStorageLoading)
                             {
@@ -422,6 +427,15 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                             else
                             {
                                 onInitEditLoadMultisigComplete(error = null)
+
+                                if (mFinalizeMultisigLoading)
+                                {
+                                    startFinalizeUpdateMultisigStorageLoading()
+                                }
+                                else
+                                {
+                                    onFinalizeLoadComplete(null)
+                                }
                             }
 
                         }
@@ -992,8 +1006,15 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
 
-        val mnemonicsData = Storage(activity!!).getMnemonics()
-        startPostRequestLoadFinalizeUpdateStorage(mnemonicsData)
+        startPostRequestLoadFinalizeUpdateStorage()
+    }
+
+    private fun startFinalizeUpdateMultisigStorageLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        startPostRequestLoadFinalizeUpdateStorage()
     }
 
     // volley
@@ -1334,11 +1355,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     }
 
     // volley
-    private fun startPostRequestLoadFinalizeUpdateStorage(mnemonicsData: Storage.MnemonicsData)
+    private fun startPostRequestLoadFinalizeUpdateStorage()
     {
         val url = getString(R.string.transfer_injection_operation)
 
-        if (isUpdateButtonValid() && mUpdateStoragePayload != null && mUpdateStorageAddress != null && mUpdateStorageFees != -1L)
+        if (isUpdateButtonValid() && mUpdateStoragePayload != null && mUpdateStorageFees != -1L)
         {
             val mnemonicsData = Storage(activity!!).getMnemonics()
             var postParams = JSONObject()
@@ -1404,7 +1425,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                             if (swipe_refresh_script_layout != null)
                             {
                                 //there's no need to do anything because we call finish()
-                                onFinalizeDelegationLoadComplete(null)
+                                onFinalizeLoadComplete(null)
 
                                 mCallback?.finish(R.id.update_storage_succeed)
                             }
@@ -1413,7 +1434,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                         {
                             if (swipe_refresh_script_layout != null)
                             {
-                                onFinalizeDelegationLoadComplete(it)
+                                onFinalizeLoadComplete(it)
                             }
                         }
                 )
@@ -1444,17 +1465,141 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             else
             {
                 val volleyError = VolleyError(getString(R.string.generic_error))
-                onFinalizeDelegationLoadComplete(volleyError)
+                onFinalizeLoadComplete(volleyError)
             }
         }
         else
         {
             val volleyError = VolleyError(getString(R.string.generic_error))
-            onFinalizeDelegationLoadComplete(volleyError)
+            onFinalizeLoadComplete(volleyError)
         }
     }
 
-    private fun onFinalizeDelegationLoadComplete(error: VolleyError?)
+
+    // volley
+    private fun startPostRequestLoadFinalizeUpdateMultisigStorage()
+    {
+        val url = getString(R.string.transfer_injection_operation)
+
+        if (isUpdateMultisigButtonValid())
+        {
+            val mnemonicsData = Storage(activity!!).getMnemonics()
+            var postParams = JSONObject()
+
+            /*
+            postParams.put("src", mnemonicsData.pkh)
+
+            //TODO it won't be pk with contract transfer
+            postParams.put("src_pk", mnemonicsData.pk)
+
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+            dstObject.put("dst", pkh())
+
+            dstObject.put("amount", 0.toLong())
+
+            val mutezAmount = (mSpendingLimitAmount*1000000.0).roundToLong()
+            dstObject.put("transfer_amount", mutezAmount)
+
+            dstObject.put("fee", mUpdateStorageFees)
+
+            dstObject.put("edsig", mSig)
+
+            dstObject.put("tz3", retrieveTz3())
+
+            dstObject.put("contract_type", "slc_update_storage")
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+            */
+
+            if (!isTransferPayloadValid(mUpdateMultisigStoragePayload!!, postParams))
+            {
+                val zeroThree = "0x03".hexToByteArray()
+
+                val byteArrayThree = mUpdateMultisigStoragePayload!!.hexToByteArray()
+
+                val xLen = zeroThree.size
+                val yLen = byteArrayThree.size
+                val result = ByteArray(xLen + yLen)
+
+                System.arraycopy(zeroThree, 0, result, 0, xLen)
+                System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
+
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+                val signature = KeyPair.sign(sk, result)
+
+                //TODO verify signature
+                //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+
+                val pLen = byteArrayThree.size
+                val sLen = signature.size
+                val newResult = ByteArray(pLen + sLen)
+
+                System.arraycopy(byteArrayThree, 0, newResult, 0, pLen)
+                System.arraycopy(signature, 0, newResult, pLen, sLen)
+
+                var payloadsign = newResult.toNoPrefixHexString()
+
+                val stringRequest = object : StringRequest(Method.POST, url,
+                        Response.Listener<String> {
+                            if (swipe_refresh_script_layout != null)
+                            {
+                                //there's no need to do anything because we call finish()
+                                onFinalizeLoadComplete(null)
+
+                                mCallback?.finish(R.id.update_multisig_storage_succeed)
+                            }
+                        },
+                        Response.ErrorListener
+                        {
+                            if (swipe_refresh_script_layout != null)
+                            {
+                                onFinalizeLoadComplete(it)
+                            }
+                        }
+                )
+                {
+                    @Throws(AuthFailureError::class)
+                    override fun getBody(): ByteArray
+                    {
+                        val pay = "\""+payloadsign+"\""
+                        return pay.toByteArray()
+                    }
+
+                    @Throws(AuthFailureError::class)
+                    override fun getHeaders(): Map<String, String>
+                    {
+                        val headers = HashMap<String, String>()
+                        headers["Content-Type"] = "application/json"
+                        return headers
+                    }
+                }
+
+                cancelRequests(true)
+
+                stringRequest.tag = MULTISIG_FINALIZE_TAG
+
+                mFinalizeMultisigLoading = true
+                VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(stringRequest)
+            }
+            else
+            {
+                val volleyError = VolleyError(getString(R.string.generic_error))
+                onFinalizeLoadComplete(volleyError)
+            }
+        }
+        else
+        {
+            val volleyError = VolleyError(getString(R.string.generic_error))
+            onFinalizeLoadComplete(volleyError)
+        }
+    }
+
+    private fun onFinalizeLoadComplete(error: VolleyError?)
     {
         // everything is over, there's no call to make
         cancelRequests(true)
@@ -1581,8 +1726,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         dstObject.put("amount", "0")
 
         dstObject.put("entrypoint", "default")
-
-        mUpdateStorageAddress = pk
 
         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val sk = CryptoUtils.generateSk(mnemonics, "")
@@ -1759,8 +1902,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         dstObject.put("amount", "0")
 
         dstObject.put("entrypoint", "appel_clef_maitresse")
-
-        mUpdateStorageAddress = pk
 
         //TODO I need to insert a signature into parameters
 
@@ -2648,6 +2789,13 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
                 && isSpendingLimitInputDataValid()
     }
 
+    private fun isUpdateMultisigButtonValid(): Boolean
+    {
+        return mUpdateMultisigStoragePayload != null
+                && isMultisigFeeValid()
+                && isMultisigInputDataValid()
+    }
+
     private fun putTzAddressInRed(red: Boolean)
     {
         val color: Int
@@ -2727,7 +2875,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         return isAmountValid
     }
 
-    private fun onDelegateClick()
+    private fun onUpdateSlcStorageClick()
     {
         val dialog = AuthenticationDialog()
         if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
@@ -2735,7 +2883,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthentication(it)
+                validateKeyAuthentication(it, isSlcContract = true)
             }
             if (dialog.cryptoObjectToAuthenticateWith == null)
             {
@@ -2752,6 +2900,39 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         }
         dialog.authenticationSuccessListener = {
             startFinalizeUpdateStorageLoading()
+        }
+        dialog.passwordVerificationListener =
+                {
+                    validatePassword(it)
+                }
+        dialog.show(activity!!.supportFragmentManager, "Authentication")
+    }
+
+    private fun onUpdateMultisigStorageClick()
+    {
+        val dialog = AuthenticationDialog()
+        if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
+        {
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
+            dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
+            dialog.fingerprintAuthenticationSuccessListener = {
+                validateKeyAuthentication(it, isSlcContract = false)
+            }
+            if (dialog.cryptoObjectToAuthenticateWith == null)
+            {
+                dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
+            }
+            else
+            {
+                dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
+            }
+        }
+        else
+        {
+            dialog.stage = AuthenticationDialog.Stage.PASSWORD
+        }
+        dialog.authenticationSuccessListener = {
+            startFinalizeUpdateMultisigStorageLoading()
         }
         dialog.passwordVerificationListener =
                 {
@@ -2796,15 +2977,22 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
     }
 
-    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject, isSlcContract:Boolean)
     {
         if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeUpdateStorageLoading()
+            if (isSlcContract)
+            {
+                startFinalizeUpdateStorageLoading()
+            }
+            else
+            {
+                startFinalizeUpdateMultisigStorageLoading()
+            }
         }
         else
         {
-            onDelegateClick()
+            onUpdateSlcStorageClick()
         }
     }
 
@@ -2816,6 +3004,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
             requestQueue?.cancelAll(UPDATE_STORAGE_INIT_TAG)
             requestQueue?.cancelAll(UPDATE_MULTISIG_STORAGE_INIT_TAG)
             requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
+            requestQueue?.cancelAll(MULTISIG_FINALIZE_TAG)
             requestQueue?.cancelAll(LOAD_SECURE_HASH_BALANCE_TAG)
             requestQueue?.cancelAll(CONTRACT_SCRIPT_INFO_TAG)
 
@@ -2824,6 +3013,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
                 mInitUpdateMultisigStorageLoading = false
                 mInitUpdateStorageLoading = false
                 mFinalizeDelegateLoading = false
+                mFinalizeMultisigLoading = false
                 mStorageInfoLoading = false
                 mSecureHashBalanceLoading = false
             }
@@ -2839,13 +3029,13 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         outState.putBoolean(UPDATE_STORAGE_INIT_TAG, mInitUpdateStorageLoading)
         outState.putBoolean(DELEGATE_FINALIZE_TAG, mFinalizeDelegateLoading)
 
+        outState.putBoolean(MULTISIG_FINALIZE_TAG, mFinalizeMultisigLoading)
+
         outState.putBoolean(LOAD_SECURE_HASH_BALANCE_TAG, mSecureHashBalanceLoading)
 
         outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
 
         outState.putString(DELEGATE_PAYLOAD_KEY, mUpdateStoragePayload)
-
-        outState.putString(DELEGATE_TEZOS_ADDRESS_KEY, mUpdateStorageAddress)
 
         outState.putLong(DELEGATE_FEE_KEY, mUpdateStorageFees)
 
