@@ -112,7 +112,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
     private var mSignatoriesList:ArrayList<String> = ArrayList(SIGNATORIES_CAPACITY)
 
-    private var mThreshold:Int = 0
+    private var mThreshold:Long = 0
 
     private var mClickCalculate:Boolean = false
 
@@ -158,6 +158,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         private const val STORAGE_DATA_KEY = "storage_data_key"
 
         private const val SPENDING_AMOUNT_KEY = "spending_amount_key"
+
+        private const val THRESHOLD_KEY = "threshold_key"
 
         private const val EDIT_SPENDING_LIMIT_MODE_KEY = "edit_spending_limit_mode_key"
 
@@ -374,6 +376,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
             mSpendingLimitAmount = savedInstanceState.getLong(SPENDING_AMOUNT_KEY, -1L)
+
+            mThreshold = savedInstanceState.getLong(THRESHOLD_KEY, -1L)
 
             mSpendingLimitEditMode = savedInstanceState.getBoolean(EDIT_SPENDING_LIMIT_MODE_KEY, false)
 
@@ -857,6 +861,25 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             }
         }
 
+        if (editMode)
+        {
+            putThresholdInRed(false)
+
+            if (isMultisigInputDataValid())
+            {
+                startInitUpdateMultisigStorageLoading()
+            }
+            else
+            {
+                validateConfirmEditionMultisigButton(false)
+
+                cancelRequests(false)
+                transferLoading(false)
+
+                putFeesMultisigToNegative()
+            }
+        }
+
         /*
         if (isInputDataValid())
         {
@@ -1014,7 +1037,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
 
-        startPostRequestLoadFinalizeUpdateStorage()
+        startPostRequestLoadFinalizeUpdateMultisigStorage()
     }
 
     // volley
@@ -1515,7 +1538,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             postParams.put("dsts", dstObjects)
             */
 
-            if (!isTransferPayloadValid(mUpdateMultisigStoragePayload!!, postParams))
+            if (/*isTransferPayloadValid(mUpdateMultisigStoragePayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -1741,16 +1764,14 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                         ),
                         Primitive(Primitive.Name.Pair,
                                 arrayOf(
-                                        //I will need to get the storage first.
-                                        //TODO get the counter
-                                        Visitable.integer(0),
+                                        Visitable.integer(getCounter()!!.toLong()),
                                         Primitive(Primitive.Name.Right,
                                                 arrayOf(
                                                         Primitive(Primitive.Name.Right,
                                                                 arrayOf(
                                                                         Primitive(Primitive.Name.Pair,
                                                                                 arrayOf(
-                                                                                        Visitable.integer(mThreshold.toLong()),
+                                                                                        Visitable.integer(mThreshold),
                                                                                         Visitable.sequenceOf(
                                                                                                 Visitable.publicKey(pk)
                                                                                         )
@@ -1787,12 +1808,14 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         val args = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
         val counter = args[0] as JSONObject
-        counter.put("int", "0")
+        counter.put("int", getCounter())
 
         val argsb = (((((args[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
         val signatoriesCount = argsb[0] as JSONObject
-        signatoriesCount.put("int", "1")
+
+        // TODO get the textfield as signatoryCount
+        signatoriesCount.put("int", mThreshold.toString())
 
         val signatory = (argsb[1] as JSONArray)[0] as JSONObject
 
@@ -2392,8 +2415,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         {
             try
             {
-                val limit = editable.toString().toInt()
-                if (limit != 0 && limit == mThreshold)
+                val limit = editable.toString().toLong()
+                if (limit != 0L && limit == mThreshold)
                 {
                     return true
                 }
@@ -2424,7 +2447,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         {
             try
             {
-                val threshold = threshold_edittext.text.toString().toInt()
+                val threshold = threshold_edittext.text.toString().toLong()
 
                 if (threshold in 1..10 && threshold <= mSignatoriesList.size)
                 {
@@ -2678,6 +2701,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
                 return DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
             }
+        }
+
+        return null
+    }
+
+    private fun getCounter(): String?
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
+
+            return DataExtractor.getStringFromField(args[0] as JSONObject, "int")
         }
 
         return null
@@ -3044,6 +3080,8 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
 
         outState.putLong(SPENDING_AMOUNT_KEY, mSpendingLimitAmount)
+
+        outState.putLong(THRESHOLD_KEY, mThreshold)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
 

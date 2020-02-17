@@ -477,6 +477,11 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                     {
                         showSnackBar(getString(R.string.contract_storage_successfully_updated), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                     }
+
+                    R.id.update_multisig_storage_succeed ->
+                    {
+                        showSnackBar(getString(R.string.contract_storage_multisig_successfully_updated), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                    }
                 }
             }
 
