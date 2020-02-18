@@ -441,7 +441,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                                     onFinalizeLoadComplete(null)
                                 }
                             }
-
                         }
                     }
                 }
@@ -1066,27 +1065,30 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete(true)
 
-
                     //TODO control more precisely the three different contracts
 
                     val mnemonicsData = Storage(activity!!).getMnemonics()
                     val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
                     val isDefaultContract = mStorage.toString() == defaultContract.toString()
 
-                    if (mStorage != null && !isDefaultContract)
+                    if (isDefaultContract)
                     {
-                        validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
-
-                        startGetRequestBalance()
                     }
-
-                    else
+                    else if (getStorageSecureKeyHash() != null)
                     {
                         //TODO I don't need to forge a transfer for now
                         //TODO hide the whole thing
 
                         //I need the right data inputs before.
                         //startInitRemoveDelegateLoading()
+
+                        validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
+
+                        startGetRequestBalance()
+                    }
+                    else if (getThreshold() != null)
+                    {
+
                     }
                 }
             },
@@ -1772,9 +1774,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                                                                         Primitive(Primitive.Name.Pair,
                                                                                 arrayOf(
                                                                                         Visitable.integer(mThreshold),
-                                                                                        Visitable.sequenceOf(
-                                                                                                Visitable.publicKey(pk)
-                                                                                        )
+                                                                                        VisitableSequence(mSignatoriesList.map { Visitable.publicKey(it) }.toTypedArray())
                                                                                 )
                                                                         )
                                                                 )
@@ -1817,13 +1817,29 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         // TODO get the textfield as signatoryCount
         signatoriesCount.put("int", mThreshold.toString())
 
-        val signatory = (argsb[1] as JSONArray)[0] as JSONObject
 
-        var decodedValue = Base58.decode(pk)
-        var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
-        bytes = byteArrayOf(0x00) + bytes
+        // on recupere le signatory ici
 
-        signatory.put("bytes", bytes.toNoPrefixHexString())
+        // JSONArray
+
+        val signatories = argsb[1] as JSONArray
+        signatories.remove(0)
+
+
+        for (it in mSignatoriesList)
+        {
+            //val signatory = (argsb[1] as JSONArray)[0] as JSONObject
+
+            var decodedValue = Base58.decode(it)
+            var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
+            bytes = byteArrayOf(0x00) + bytes
+
+            val signatory = JSONObject()
+            signatory.put("bytes", bytes.toNoPrefixHexString())
+
+            signatories.put(signatory)
+        }
+
 
         val sig = ((((value["args"] as JSONArray)[1] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
         sig.put("string", edsig)
@@ -2729,8 +2745,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
             if (counter != null)
             {
-                val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
-                return arrayListOf(DataExtractor.getStringFromField((argsPk[1] as JSONArray)[0] as JSONObject, "string"))
+                val argsPk = (DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray)[1] as JSONArray
+
+                val list = ArrayList<String> ()
+
+                for (it in 0 until argsPk.length())
+                {
+                    val item = argsPk.getJSONObject(it)
+
+                    val pk = DataExtractor.getStringFromField(item, "string")
+                    list.add(pk)
+                }
+
+                return list
             }
         }
 
