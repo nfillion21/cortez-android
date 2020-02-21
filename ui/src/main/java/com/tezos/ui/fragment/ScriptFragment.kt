@@ -1840,26 +1840,32 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
 
         val sigs = (value["args"] as JSONArray)[1] as JSONArray
+        sigs.remove(0)
 
-        val sigNone = JSONObject()
-        sigNone.put("prim", "None")
+        val numberAndSpot = getNumberAndSpot(pk)
 
-        sigs.put(sigNone)
+        for (i in 0 until numberAndSpot.second)
+        {
+            val sigParam = JSONObject()
 
-        val sigSome = JSONObject()
-        sigSome.put("prim", "Some")
+            if (i == numberAndSpot.first)
+            {
+                sigParam.put("prim", "Some")
 
-        val argSig = JSONArray()
-        val argSigStr = JSONObject()
-        argSigStr.put("string", edsig)
-        argSig.put(argSigStr)
-        sigSome.put("args", argSig)
-        sigs.put(sigSome)
+                val argSig = JSONArray()
+                val argSigStr = JSONObject()
 
+                argSigStr.put("string", edsig)
+                argSig.put(argSigStr)
+                sigParam.put("args", argSig)
+            }
+            else
+            {
+                sigParam.put("prim", "None")
+            }
 
-
-        //val sig = ((((value["args"] as JSONArray)[1] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
-
+            sigs.put(sigParam)
+        }
 
         dstObject.put("parameters", value)
 
@@ -2779,6 +2785,17 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
 
         return ArrayList(SIGNATORIES_CAPACITY)
+    }
+
+    private fun getNumberAndSpot(publicKey:String): Pair<Int, Int>
+    {
+        val signatories = getSignatoriesList()
+        if (!signatories.isNullOrEmpty())
+        {
+            return Pair(signatories.indexOf(publicKey), signatories.size)
+        }
+
+        return Pair(-1, -1)
     }
 
     private fun isP256AddressValid(): Boolean
