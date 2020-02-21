@@ -1067,14 +1067,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
                     //TODO control more precisely the three different contracts
 
-                    val mnemonicsData = Storage(activity!!).getMnemonics()
-                    val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
-                    val isDefaultContract = mStorage.toString() == defaultContract.toString()
-
-                    if (isDefaultContract)
-                    {
-                    }
-                    else if (getStorageSecureKeyHash() != null)
+                    if (getStorageSecureKeyHash() != null)
                     {
                         //TODO I don't need to forge a transfer for now
                         //TODO hide the whole thing
@@ -1089,6 +1082,16 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     else if (getThreshold() != null)
                     {
 
+                    }
+                    else
+                    {
+                        val mnemonicsData = Storage(activity!!).getMnemonics()
+                        val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
+                        val isDefaultContract = mStorage.toString() == defaultContract.toString()
+
+                        if (isDefaultContract)
+                        {
+                        }
                     }
                 }
             },

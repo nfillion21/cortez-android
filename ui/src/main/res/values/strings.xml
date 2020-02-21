@@ -166,6 +166,12 @@
     <string name="ask_for_credentials">Ask for confirm credentials when the app goes to background</string>
     <string name="use_fingerprint">Use fingerprint option to confirm transfers</string>
 
+    <string name="warning_signatory_info">The contract storage indicates your phone is not part of the signatories list.\n\n
+        However, you can still request a change of the storage from the signatories by editing the form below.</string>
+    <!--
+    <string name="warning_signatory_info">The contract storage indicates your phone is not part of the signatories list.</string>
+    -->
+
     <string name="contracts_and_delegation_title">Contracts and delegation</string>
     <string name="add_signatory_title">Add a signatory</string>
     <string name="add_signatory_info">Enter a public key. A tezos public key begins with edpk/p2pk/sppk.\n\nNot to be confused with a public key hash which begins with tz1/tz2/tz3.</string>
