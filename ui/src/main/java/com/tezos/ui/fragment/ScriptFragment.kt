@@ -1810,6 +1810,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         val counter = args[0] as JSONObject
         counter.put("int", getCounter())
 
+
         val argsb = (((((args[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
         val signatoriesCount = argsb[0] as JSONObject
@@ -1817,14 +1818,12 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         // TODO get the textfield as signatoryCount
         signatoriesCount.put("int", mThreshold.toString())
 
-
         // on recupere le signatory ici
 
         // JSONArray
 
         val signatories = argsb[1] as JSONArray
         signatories.remove(0)
-
 
         for (it in mSignatoriesList)
         {
@@ -1840,9 +1839,27 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             signatories.put(signatory)
         }
 
+        val sigs = (value["args"] as JSONArray)[1] as JSONArray
 
-        val sig = ((((value["args"] as JSONArray)[1] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
-        sig.put("string", edsig)
+        val sigNone = JSONObject()
+        sigNone.put("prim", "None")
+
+        sigs.put(sigNone)
+
+        val sigSome = JSONObject()
+        sigSome.put("prim", "Some")
+
+        val argSig = JSONArray()
+        val argSigStr = JSONObject()
+        argSigStr.put("string", edsig)
+        argSig.put(argSigStr)
+        sigSome.put("args", argSig)
+        sigs.put(sigSome)
+
+
+
+        //val sig = ((((value["args"] as JSONArray)[1] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+
 
         dstObject.put("parameters", value)
 
