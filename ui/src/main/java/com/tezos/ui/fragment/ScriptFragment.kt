@@ -316,7 +316,21 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
 
         fab_edit_multisig_storage.setOnClickListener {
-            animateFabMultisigEditMode(true)
+
+            val hasMnemonics = Storage(activity!!).hasMnemonics()
+            if (hasMnemonics)
+            {
+                val seed = Storage(activity!!).getMnemonics()
+
+                if (seed.mnemonics.isEmpty())
+                {
+                    mCallback?.showSnackBar(getString(R.string.no_mnemonics_script), ContextCompat.getColor(activity!!, R.color.tz_accent), ContextCompat.getColor(context!!, R.color.tz_light))
+                }
+                else
+                {
+                    animateFabMultisigEditMode(editMode = true)
+                }
+            }
         }
 
         fab_undo_storage.setOnClickListener {
