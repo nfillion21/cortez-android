@@ -1346,7 +1346,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     warning_p2pk_info?.visibility = View.GONE
 
                     //TODO at this point, the secure enclave key is the good one. better check if there is enough fees to make a transfer.
-
                 }
             }
             else if (getThreshold() != null)
@@ -1364,6 +1363,30 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.no_script_info)
+
+                //need to check if our edpk is contained in the signatories
+                //even if he's contained, we need to check the threshold
+                var threshold = getThreshold()
+                val numberAndSpotPair = getNumberAndSpot(mnemonicsData.pk)
+                if (numberAndSpotPair.first != -1)
+                {
+                    // our edpk is in the list. great. it's fine if we have a threshold of 1.
+                    if (threshold!!.toInt() == 1)
+                    {
+                        warning_signatory_info.visibility = View.GONE
+                    }
+                    else
+                    {
+                        // we are on the list but it needs another signatory
+                        warning_signatory_textview.text = String.format(getString(R.string.warning_other_signatories_info), threshold.toInt()-1)
+                        warning_signatory_info.visibility = View.VISIBLE
+                    }
+                }
+                else
+                {
+                    warning_signatory_textview.text = String.format(getString(R.string.warning_not_signatory_info), threshold)
+                    warning_signatory_info.visibility = View.VISIBLE
+                }
 
                 switchToMultisigEditMode(mMultisigEditMode)
             }
