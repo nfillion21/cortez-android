@@ -2750,16 +2750,17 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 //TODO at this point, just show that there is no script.
 
             val storageJSONObject = JSONObject(mStorage)
-
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-// get securekey hash
-
-            val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
-            if (argsSecureKey != null)
+            // get securekey hash
+            if (args != null)
             {
-                val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
+                if (argsSecureKey != null)
+                {
+                    val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                    return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+                }
             }
         }
 
@@ -2771,14 +2772,15 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         if (mStorage != null)
         {
             val storageJSONObject = JSONObject(mStorage)
-            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
-
-            val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
-            if (counter != null)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
             {
-                val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
-
-                return DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
+                val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+                if (counter != null)
+                {
+                    val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                    return DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
+                }
             }
         }
 
