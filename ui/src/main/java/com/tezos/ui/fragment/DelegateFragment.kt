@@ -1323,7 +1323,6 @@ class DelegateFragment : Fragment()
             val delegate = argsDelegate[1] as JSONObject
             delegate.put("string", mDelegateTezosAddress)
 
-
             val masterKey = argsRight[1] as JSONObject
             masterKey.put("string", mnemonicsData.pkh)
 
@@ -1333,6 +1332,46 @@ class DelegateFragment : Fragment()
         {
             dstObject.put("entrypoint", "default")
 
+            val dataVisitable = Primitive(
+                    Primitive.Name.Pair,
+                    arrayOf(
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.chainID(getString(R.string.chain_ID)),
+                                            Visitable.address(pkh()!!)
+                                    )
+                            ),
+
+
+
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.integer(getCounter()!!.toLong()),
+                                            Primitive(Primitive.Name.Right,
+                                                    arrayOf(
+                                                            Primitive(Primitive.Name.Right,
+                                                                    arrayOf(
+                                                                            Primitive(Primitive.Name.Pair,
+                                                                                    arrayOf(
+                                                                                            Visitable.integer(mThreshold),
+                                                                                            VisitableSequence(mSignatoriesList.map { Visitable.publicKey(it) }.toTypedArray())
+                                                                                    )
+                                                                            )
+                                                                    )
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )
+
+
+
+                    )
+            )
+
+
+
+            /*
             val dataVisitable = Primitive(
                     Primitive.Name.Right,
                     arrayOf(
@@ -1360,6 +1399,8 @@ class DelegateFragment : Fragment()
                             )
                     )
             )
+            */
+
 
             val o = ByteArrayOutputStream()
             o.write(0x05)
@@ -1368,6 +1409,7 @@ class DelegateFragment : Fragment()
             dataVisitable.accept(dataPacker)
 
             val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
 
 
 
