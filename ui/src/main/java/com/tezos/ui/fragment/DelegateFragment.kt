@@ -49,6 +49,7 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
@@ -792,8 +793,6 @@ class DelegateFragment : Fragment()
     {
         if (mStorage != null)
         {
-//TODO at this point, just show that there is no script.
-
             val storageJSONObject = JSONObject(mStorage)
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
@@ -832,6 +831,18 @@ class DelegateFragment : Fragment()
         return null
     }
 
+    private fun getMultisigCounter(): String?
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
+
+            return DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+        }
+
+        return null
+    }
 
     // volley
     private fun startPostRequestLoadFinalizeRemoveDelegate(mnemonicsData: Storage.MnemonicsData)
@@ -1207,10 +1218,8 @@ class DelegateFragment : Fragment()
 
         dstObject.put("dst", pkh())
 
-        //dstObject.put("amount", (mTransferAmount*1000000).toLong().toString())
         dstObject.put("amount", "0")
 
-        //TODO salt fail
         if (!getStorageSecureKeyHash().isNullOrEmpty())
         {
 
@@ -1322,7 +1331,73 @@ class DelegateFragment : Fragment()
         }
         else if (!getThreshold().isNullOrEmpty())
         {
+            dstObject.put("entrypoint", "default")
 
+            val dataVisitable = Primitive(
+                    Primitive.Name.Right,
+                    arrayOf(
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.sequenceOf(
+                                                    Primitive(Primitive.Name.DROP),
+                                                    Primitive(
+                                                            Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))
+                                                    ),
+                                                    Primitive(
+                                                            Primitive.Name.PUSH,
+                                                            arrayOf(
+                                                                    Primitive(Primitive.Name.key_hash),
+                                                                    Visitable.keyHash(mDelegateTezosAddress!!)
+                                                            )
+                                                    ),
+                                                    Primitive(Primitive.Name.SOME),
+                                                    Primitive(Primitive.Name.SET_DELEGATE),
+                                                    Primitive(Primitive.Name.CONS)
+
+                                            ),
+                                            Visitable.keyHash(mnemonicsData.pkh)
+                                    )
+                            )
+                    )
+            )
+
+            val o = ByteArrayOutputStream()
+            o.write(0x05)
+
+            val dataPacker = Packer(o)
+            dataVisitable.accept(dataPacker)
+
+            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+
+
+
+            val spendingLimitFile = "multisig_set_delegate.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
+            val argSig = ((((value["args"] as JSONArray)[1] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+            //TODO handle verification here
+            //argSig.put("string", edsig)
+            //mSig = edsig
+
+            val argCounter = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+            argCounter.put("int", getMultisigCounter())
+
+            val argBaker = (((((((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+            argBaker.put("bytes", getMultisigCounter())
+
+            var decodedValue = Base58.decode(mDelegateTezosAddress)
+            var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
+            bytes = byteArrayOf(0x00) + bytes
+
+            argBaker.put("bytes", bytes.toNoPrefixHexString())
+
+            dstObject.put("parameters", value)
         }
         else
         {
