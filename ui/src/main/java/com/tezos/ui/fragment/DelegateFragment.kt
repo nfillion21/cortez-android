@@ -788,6 +788,50 @@ class DelegateFragment : Fragment()
         return null
     }
 
+    private fun getStorageSecureKeyHash(): String?
+    {
+        if (mStorage != null)
+        {
+//TODO at this point, just show that there is no script.
+
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+            // get securekey hash
+            if (args != null)
+            {
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
+                if (argsSecureKey != null)
+                {
+                    val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                    return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+                }
+            }
+        }
+
+        return null
+    }
+
+    private fun getThreshold(): String?
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+                if (counter != null)
+                {
+                    val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                    return DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
+                }
+            }
+        }
+
+        return null
+    }
+
 
     // volley
     private fun startPostRequestLoadFinalizeRemoveDelegate(mnemonicsData: Storage.MnemonicsData)
@@ -808,11 +852,15 @@ class DelegateFragment : Fragment()
 
             dstObject.put("dst", pkh())
 
-            val salt = getSalt()
-            if (salt != null && salt >= 0)
+
+            if (!getStorageSecureKeyHash().isNullOrEmpty())
             {
                 dstObject.put("contract_type", "remove_delegate_slc")
                 dstObject.put("edsig", mSig)
+            }
+            else if (!getThreshold().isNullOrEmpty())
+            {
+
             }
             else
             {
@@ -929,17 +977,21 @@ class DelegateFragment : Fragment()
 
             dstObject.put("dst", pkh())
 
-            val salt = getSalt()
-            if (salt != null && salt >= 0)
-            {
-                dstObject.put("contract_type", "add_delegate_slc")
-                dstObject.put("edsig", mSig)
+            when {
+                getStorageSecureKeyHash() != null ->
+                {
+                    dstObject.put("contract_type", "add_delegate_slc")
+                    dstObject.put("edsig", mSig)
+                }
+                getThreshold() != null ->
+                {
+                    //TODO necessary to verify the binary
+                }
+                else ->
+                {
+                    dstObject.put("contract_type", "add_delegate")
+                }
             }
-            else
-            {
-                dstObject.put("contract_type", "add_delegate")
-            }
-
 
             dstObject.put("dst_account", mDelegateTezosAddress)
 
@@ -1159,8 +1211,7 @@ class DelegateFragment : Fragment()
         dstObject.put("amount", "0")
 
         //TODO salt fail
-        val salt = getSalt()
-        if (salt != null && salt >= 0)
+        if (!getStorageSecureKeyHash().isNullOrEmpty())
         {
 
             dstObject.put("entrypoint", "appel_clef_maitresse")
@@ -1217,7 +1268,8 @@ class DelegateFragment : Fragment()
             val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
 
 
-            val saltVisitable = Visitable.integer(salt.toLong())
+            val salt = getSalt()
+            val saltVisitable = Visitable.integer(salt!!.toLong())
 
             val outputStream = ByteArrayOutputStream()
             outputStream.write(0x05)
@@ -1267,6 +1319,10 @@ class DelegateFragment : Fragment()
             masterKey.put("string", mnemonicsData.pkh)
 
             dstObject.put("parameters", value)
+        }
+        else if (!getThreshold().isNullOrEmpty())
+        {
+
         }
         else
         {
@@ -1389,9 +1445,7 @@ class DelegateFragment : Fragment()
         dstObject.put("amount", "0")
 
 
-        //TODO salt fail
-        val salt = getSalt()
-        if (salt != null && salt >= 0)
+        if (!getThreshold().isNullOrEmpty())
         {
             dstObject.put("entrypoint", "appel_clef_maitresse")
 
@@ -1444,8 +1498,8 @@ class DelegateFragment : Fragment()
 
             val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
 
-
-            val saltVisitable = Visitable.integer(salt.toLong())
+            val salt = getSalt()
+            val saltVisitable = Visitable.integer(salt!!.toLong())
 
             val outputStream = ByteArrayOutputStream()
             outputStream.write(0x05)
