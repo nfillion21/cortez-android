@@ -1376,7 +1376,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 update_multisig_button_layout?.visibility = View.VISIBLE
 
                 storage_info_textview?.visibility = View.VISIBLE
-                storage_info_textview?.text = getString(R.string.no_script_info)
+                storage_info_textview?.text = getString(R.string.multisig_script_info)
 
                 //need to check if our edpk is contained in the signatories
                 //even if he's contained, we need to check the threshold
