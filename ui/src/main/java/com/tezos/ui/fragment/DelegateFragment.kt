@@ -38,7 +38,6 @@ import androidx.core.graphics.drawable.DrawableCompat
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,7 +54,6 @@ import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.*
 import com.tezos.ui.R
-import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.*
@@ -187,6 +185,8 @@ class DelegateFragment : Fragment()
         private const val CONTRACT_DATA_KEY = "contract_data_key"
 
         private const val CONTRACT_SIG_KEY = "contract_sig_key"
+
+        private const val SIGNATORIES_CAPACITY = 10
 
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
@@ -831,6 +831,46 @@ class DelegateFragment : Fragment()
         return null
     }
 
+    private fun getNumberAndSpot(publicKey:String): Pair<Int, Int>
+    {
+        val signatories = getSignatoriesList()
+        if (!signatories.isNullOrEmpty())
+        {
+            return Pair(signatories.indexOf(publicKey), signatories.size)
+        }
+
+        return Pair(-1, -1)
+    }
+
+    private fun getSignatoriesList(): ArrayList<String>
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
+
+            val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+            if (counter != null)
+            {
+                val argsPk = (DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray)[1] as JSONArray
+
+                val list = ArrayList<String> ()
+
+                for (it in 0 until argsPk.length())
+                {
+                    val item = argsPk.getJSONObject(it)
+
+                    val pk = DataExtractor.getStringFromField(item, "string")
+                    list.add(pk)
+                }
+
+                return list
+            }
+        }
+
+        return ArrayList(SIGNATORIES_CAPACITY)
+    }
+
     private fun getMultisigCounter(): String?
     {
         if (mStorage != null)
@@ -1296,7 +1336,7 @@ class DelegateFragment : Fragment()
             //val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
             //val signature = KeyPair.sign(sk, signedData)
 
-            val signature = KeyPair.sign(sk,"0x".hexToByteArray() + dataPack + addressAndChainPack + saltPack)
+            val signature = KeyPair.sign(sk,dataPack + addressAndChainPack + saltPack)
             val edsig = CryptoUtils.generateEDSig(signature)
 
 
@@ -1342,19 +1382,16 @@ class DelegateFragment : Fragment()
                                     )
                             ),
 
-
-
                             Primitive(Primitive.Name.Pair,
                                     arrayOf(
-                                            Visitable.integer(getCounter()!!.toLong()),
+                                            Visitable.integer(getMultisigCounter()!!.toLong()),
                                             Primitive(Primitive.Name.Right,
                                                     arrayOf(
-                                                            Primitive(Primitive.Name.Right,
+                                                            Primitive (Primitive.Name.Left,
                                                                     arrayOf(
-                                                                            Primitive(Primitive.Name.Pair,
+                                                                            Primitive(Primitive.Name.Some,
                                                                                     arrayOf(
-                                                                                            Visitable.integer(mThreshold),
-                                                                                            VisitableSequence(mSignatoriesList.map { Visitable.publicKey(it) }.toTypedArray())
+                                                                                            Visitable.keyHash(mDelegateTezosAddress!!)
                                                                                     )
                                                                             )
                                                                     )
@@ -1363,44 +1400,8 @@ class DelegateFragment : Fragment()
                                             )
                                     )
                             )
-
-
-
                     )
             )
-
-
-
-            /*
-            val dataVisitable = Primitive(
-                    Primitive.Name.Right,
-                    arrayOf(
-                            Primitive(Primitive.Name.Pair,
-                                    arrayOf(
-                                            Visitable.sequenceOf(
-                                                    Primitive(Primitive.Name.DROP),
-                                                    Primitive(
-                                                            Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))
-                                                    ),
-                                                    Primitive(
-                                                            Primitive.Name.PUSH,
-                                                            arrayOf(
-                                                                    Primitive(Primitive.Name.key_hash),
-                                                                    Visitable.keyHash(mDelegateTezosAddress!!)
-                                                            )
-                                                    ),
-                                                    Primitive(Primitive.Name.SOME),
-                                                    Primitive(Primitive.Name.SET_DELEGATE),
-                                                    Primitive(Primitive.Name.CONS)
-
-                                            ),
-                                            Visitable.keyHash(mnemonicsData.pkh)
-                                    )
-                            )
-                    )
-            )
-            */
-
 
             val o = ByteArrayOutputStream()
             o.write(0x05)
@@ -1410,10 +1411,26 @@ class DelegateFragment : Fragment()
 
             val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
+            val compare = "0x05070707070a000000049caecab90a000000160170824606210b3ab3fef1168c53fe045a6774c60c000707000a0508050505090a0000001500712c4c4270d9e7f512115310d8ec6acfcd878bef".hexToByteArray()
+            val comparePack = dataPack.toNoPrefixHexString()
+
+            if (compare.contentEquals(dataPack))
+            {
+                val k = "fine"
+                val k2 = "fine"
+            }
+            else
+            {
+                val k = "not equals"
+                val k2 = "not equals 2"
+            }
 
 
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            val sk = CryptoUtils.generateSk(mnemonics, "")
 
-
+            val signature = KeyPair.sign(sk, dataPack)
+            val edsig = CryptoUtils.generateEDSig(signature)
 
             val spendingLimitFile = "multisig_set_delegate.json"
             val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
@@ -1422,22 +1439,54 @@ class DelegateFragment : Fragment()
                     }
 
             val value = JSONObject(contract)
+
+            /*
+            val vanillaArgSig = (value["args"] as JSONArray)[1] as JSONArray
             val argSig = ((((value["args"] as JSONArray)[1] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
             //TODO handle verification here
-            //argSig.put("string", edsig)
-            //mSig = edsig
+            argSig.put("string", edsig)
+            mSig = edsig
+            */
+
+            val sigs = (value["args"] as JSONArray)[1] as JSONArray
+            sigs.remove(0)
+
+            val numberAndSpot = getNumberAndSpot(pk)
+
+            for (i in 0 until numberAndSpot.second)
+            {
+                val sigParam = JSONObject()
+
+                if (i == numberAndSpot.first)
+                {
+                    sigParam.put("prim", "Some")
+
+                    val argSig = JSONArray()
+                    val argSigStr = JSONObject()
+
+                    argSigStr.put("string", edsig)
+                    argSig.put(argSigStr)
+                    sigParam.put("args", argSig)
+                }
+                else
+                {
+                    sigParam.put("prim", "None")
+                }
+
+                sigs.put(sigParam)
+            }
+
 
             val argCounter = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
             argCounter.put("int", getMultisigCounter())
 
             val argBaker = (((((((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
-            argBaker.put("bytes", getMultisigCounter())
+            //argBaker.put("bytes", getMultisigCounter())
 
             var decodedValue = Base58.decode(mDelegateTezosAddress)
-            var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
-            bytes = byteArrayOf(0x00) + bytes
-
-            argBaker.put("bytes", bytes.toNoPrefixHexString())
+            var bakerBytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
+            bakerBytes = byteArrayOf(0x00) + bakerBytes
+            argBaker.put("bytes", bakerBytes.toNoPrefixHexString())
 
             dstObject.put("parameters", value)
         }

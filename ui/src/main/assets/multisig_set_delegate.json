@@ -35,10 +35,10 @@
             "string": "edsigtcU2gHN3VuF3w15bJbJFRG8qgACAhVpHB2jESpUEH3RAfywCcKx3XhfMC7m6KpqwfQ11yHRFZkiTnyHfiY3oi534WUA4jF"
           }
         ]
-      },
-      {
-        "prim": "None"
-      }
+      }//,
+      //{
+        //"prim": "None"
+      //}
     ]
   ]
 }
