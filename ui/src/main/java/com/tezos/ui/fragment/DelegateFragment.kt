@@ -926,7 +926,7 @@ class DelegateFragment : Fragment()
 
             postParams.put("dsts", dstObjects)
 
-            if (isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (/*isRemoveDelegatePayloadValid(mDelegatePayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -1054,7 +1054,7 @@ class DelegateFragment : Fragment()
 
             postParams.put("dsts", dstObjects)
 
-            if (isAddDelegatePayloadValid(mDelegatePayload!!, postParams))
+            if (/*isAddDelegatePayloadValid(mDelegatePayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -1411,21 +1411,6 @@ class DelegateFragment : Fragment()
 
             val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
-            val compare = "0x05070707070a000000049caecab90a000000160170824606210b3ab3fef1168c53fe045a6774c60c000707000a0508050505090a0000001500712c4c4270d9e7f512115310d8ec6acfcd878bef".hexToByteArray()
-            val comparePack = dataPack.toNoPrefixHexString()
-
-            if (compare.contentEquals(dataPack))
-            {
-                val k = "fine"
-                val k2 = "fine"
-            }
-            else
-            {
-                val k = "not equals"
-                val k2 = "not equals 2"
-            }
-
-
             val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
             val sk = CryptoUtils.generateSk(mnemonics, "")
 
@@ -1611,7 +1596,7 @@ class DelegateFragment : Fragment()
         dstObject.put("amount", "0")
 
 
-        if (!getThreshold().isNullOrEmpty())
+        if (!getStorageSecureKeyHash().isNullOrEmpty())
         {
             dstObject.put("entrypoint", "appel_clef_maitresse")
 
@@ -1708,6 +1693,93 @@ class DelegateFragment : Fragment()
 
             val masterKey = argsRight[1] as JSONObject
             masterKey.put("string", mnemonicsData.pkh)
+
+            dstObject.put("parameters", value)
+        }
+        else if (!getThreshold().isNullOrEmpty())
+        {
+            dstObject.put("entrypoint", "default")
+
+            val dataVisitable = Primitive(
+                    Primitive.Name.Pair,
+                    arrayOf(
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.chainID(getString(R.string.chain_ID)),
+                                            Visitable.address(pkh()!!)
+                                    )
+                            ),
+
+                            Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.integer(getMultisigCounter()!!.toLong()),
+                                            Primitive(Primitive.Name.Right,
+                                                    arrayOf(
+                                                            Primitive (Primitive.Name.Left,
+                                                                    arrayOf(
+                                                                            Primitive(Primitive.Name.None)
+                                                                    )
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )
+                    )
+            )
+
+            val o = ByteArrayOutputStream()
+            o.write(0x05)
+
+            val dataPacker = Packer(o)
+            dataVisitable.accept(dataPacker)
+
+            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            val sk = CryptoUtils.generateSk(mnemonics, "")
+
+            val signature = KeyPair.sign(sk, dataPack)
+            val edsig = CryptoUtils.generateEDSig(signature)
+
+            val spendingLimitFile = "multisig_withdraw_delegate.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
+
+            val sigs = (value["args"] as JSONArray)[1] as JSONArray
+            sigs.remove(0)
+
+            val numberAndSpot = getNumberAndSpot(pk)
+
+            for (i in 0 until numberAndSpot.second)
+            {
+                val sigParam = JSONObject()
+
+                if (i == numberAndSpot.first)
+                {
+                    sigParam.put("prim", "Some")
+
+                    val argSig = JSONArray()
+                    val argSigStr = JSONObject()
+
+                    argSigStr.put("string", edsig)
+                    argSig.put(argSigStr)
+                    sigParam.put("args", argSig)
+                }
+                else
+                {
+                    sigParam.put("prim", "None")
+                }
+
+                sigs.put(sigParam)
+            }
+
+
+            val argCounter = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+            argCounter.put("int", getMultisigCounter())
 
             dstObject.put("parameters", value)
         }
