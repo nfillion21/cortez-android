@@ -249,14 +249,12 @@ public class AddAddressActivity extends BaseSecureActivity
 
     private boolean isTzAddressValid()
     {
-        boolean isTzAddressValid = false;
-
         if (!TextUtils.isEmpty(mTzAddress.getText()))
         {
             return Utils.isTzAddressValid(mTzAddress.getText().toString());
         }
 
-        return isTzAddressValid;
+        return false;
     }
 
     protected void putEverythingInRed()

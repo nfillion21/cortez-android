@@ -199,12 +199,17 @@ public class Utils {
         if (!TextUtils.isEmpty(tzAddress))
         {
             String addressText = tzAddress;
+            int length = addressText.length();
 
             if (
-                    (addressText.toLowerCase().startsWith("tz1") ||
-                            addressText.toLowerCase().startsWith("tz2") ||
-                            addressText.toLowerCase().startsWith("tz3")) ||
-                            addressText.toLowerCase().startsWith("kt1")
+                    (
+                            (addressText.toLowerCase().startsWith("tz1") ||
+                                    addressText.toLowerCase().startsWith("tz2") ||
+                                    addressText.toLowerCase().startsWith("tz3")) ||
+                                    addressText.toLowerCase().startsWith("kt1")
+                    )
+                    &&
+                            addressText.length() == 36
             )
 
             {

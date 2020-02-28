@@ -66,6 +66,7 @@ import kotlinx.android.synthetic.main.fragment_delegate.update_storage_button_la
 import kotlinx.android.synthetic.main.fragment_delegate.update_storage_form_card
 import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.redelegate_form_card_info.*
+import kotlinx.android.synthetic.main.update_storage_form_card.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
