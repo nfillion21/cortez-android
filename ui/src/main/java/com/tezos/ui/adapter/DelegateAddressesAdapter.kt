@@ -79,7 +79,7 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
     {
-        if (position == 5)
+        if (position == 1)
         {
             (holder as HeaderViewHolder).bind(position)
         }
@@ -91,10 +91,10 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
 
     private inner class HeaderViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
-        internal var headerTextView: TextView = itemView.findViewById(R.id.hello_info)
+        internal var headerTextView: TextView = itemView.findViewById(R.id.signatories_contracts_textview)
         internal fun bind(position: Int)
         {
-            headerTextView.text = "Hello world"
+            headerTextView.text = mContext.getString(R.string.multisig_contracts_as_signatory)
         }
     }
 
@@ -113,12 +113,12 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
 
     override fun getItemCount(): Int
     {
-        return mAddresses.size + 1
+        return mAddresses.size
     }
 
     override fun getItemViewType(position: Int): Int
     {
-        return if (position == 5)
+        return if (position == 1)
         {
             TYPE_HEADER
         }
