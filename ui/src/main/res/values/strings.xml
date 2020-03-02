@@ -29,7 +29,7 @@
     <string name="spending_limit_reset">The spending limit is reset.</string>
     <string name="fee">Fee</string>
     <string name="item_address">Address</string>
-    <string name="contract_address">Contract address</string>
+    <string name="contract_address">Contract address %1$s</string>
     <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
     <string name="public_key_info_title">Here is your Address</string>
@@ -52,7 +52,7 @@
     <string name="add_delegate_title">Add a delegate</string>
     <string name="add_limits_title">Add a contract limit</string>
     <string name="add_multisig_title">Add a multisig contract</string>
-    <string name="delegation_title">Delegation</string>
+    <string name="my_contracts_title">My contracts</string>
     <string name="receive_title">Receive</string>
     <string name="restore_wallet_info">Please fill your 24 english words in the right order to recover your accounts.</string>
     <string name="verify_creation_wallet_info">Please fill these 6 random words from the mnemonics to make sure you have previously noted it.</string>

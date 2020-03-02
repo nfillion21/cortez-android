@@ -61,6 +61,8 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
     private CustomTheme mCustomTheme;
     private AddressBookActivity.Selection mSelection;
 
+    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_HEADER = 1;
 
     public interface OnItemClickListener
     {
@@ -80,21 +82,6 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
         mSelection = selection;
 
         mAddresses = new ArrayList<>();
-
-        /*
-        if (selection.equals(AddressBookActivity.Selection.SelectionAccounts))
-        {
-            removeAddresses(mAddresses);
-        }
-        else if (selection.equals(AddressBookActivity.Selection.SelectionAddresses))
-        {
-            removeAccounts(mAddresses);
-        }
-        else
-        {
-            //do not remove anything.
-        }
-        */
     }
 
     @Override
@@ -107,17 +94,6 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
     public void onBindViewHolder(final ViewHolder holder, final int position)
     {
         Address address = mAddresses.get(holder.getAdapterPosition());
-
-        /*
-        if (address.getPrivateKeyHash() != null)
-        {
-            holder.keyIcon.setImageResource(R.drawable.vpn_key_black);
-        }
-        else
-        {
-            holder.keyIcon.setImageResource(R.drawable.redeem_black_24);
-        }
-        */
 
         holder.pubKeyHash.setText(address.getPubKeyHash());
 
@@ -229,6 +205,7 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
     static class ViewHolder extends RecyclerView.ViewHolder
     {
         final TextView title;
+        final TextView contractAddress;
         final TextView pubKeyHash;
         final ImageView keyIcon;
 
@@ -236,6 +213,7 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
         {
             super(container);
             title = container.findViewById(R.id.payment_account_title);
+            contractAddress = container.findViewById(R.id.info_textview);
             pubKeyHash = container.findViewById(R.id.src_payment_account_pub_key_hash);
             keyIcon = container.findViewById(R.id.payment_account_key_icon);
         }

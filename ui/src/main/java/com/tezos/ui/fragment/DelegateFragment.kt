@@ -2025,7 +2025,7 @@ class DelegateFragment : Fragment()
     {
         val isTezosAddressEquals = true
 
-        if (editable != null && !TextUtils.isEmpty(editable))
+        if (!TextUtils.isEmpty(editable))
         {
             val tezosAddress = editable.toString()
             return tezosAddress == mDelegateTezosAddress

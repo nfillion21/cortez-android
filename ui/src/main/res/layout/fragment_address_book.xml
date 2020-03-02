@@ -9,37 +9,37 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <TextView
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:layout_weight="0"
-            android:layout_marginTop="@dimen/spacing_double"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/spacing_double"
+            android:layout_marginTop="@dimen/spacing_double"
             android:layout_marginRight="@dimen/spacing_double"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
             android:layout_marginBottom="@dimen/spacing_normal"
-            android:text="@string/address_book_title"/>
+            android:text="@string/address_book_title"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.Title" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/addresses_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:padding="@dimen/spacing_micro"
             android:clipToPadding="false"
+            android:padding="@dimen/spacing_micro"
             android:scrollbarStyle="outsideOverlay"
             android:scrollbars="vertical"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             android:transitionGroup="false"
             android:visibility="visible"
-            app:spanCount="2" tools:ignore="UnusedAttribute" />
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            tools:ignore="UnusedAttribute" />
 
         <androidx.core.widget.NestedScrollView
+            android:id="@+id/empty_nested_scrollview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/empty_nested_scrollview">
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:id="@+id/pkh_info_layout"
@@ -52,17 +52,17 @@
                     android:id="@+id/addresses_empty_title_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
                     android:layout_marginBottom="@dimen/spacing_normal"
-                    android:text="@string/address_book_empty_title"/>
+                    android:text="@string/address_book_empty_title"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.Title" />
 
                 <TextView
                     android:id="@+id/addresses_empty_info_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text="@string/address_book_empty_info_title"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:textColor="@color/colorTitleText"
-                    android:text="@string/address_book_empty_info_title"/>
+                    android:textColor="@color/colorTitleText" />
                 <!--
                 android:textColor="@color/colorAccent"
                 android:layout_marginBottom="@dimen/spacing_double"

@@ -32,7 +32,7 @@
                     android:layout_weight="1"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.Title"
                     android:layout_marginBottom="@dimen/spacing_normal"
-                    android:text="@string/delegation_title"/>
+                    android:text="@string/my_contracts_title"/>
 
                 <ProgressBar
                     android:id="@+id/nav_progress"
@@ -73,7 +73,7 @@
                         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                         android:transitionGroup="false"
                         android:visibility="visible"
-                        app:spanCount="2" tools:ignore="UnusedAttribute" />
+                        app:spanCount="1" tools:ignore="UnusedAttribute" />
 
                 </LinearLayout>
                 <!--

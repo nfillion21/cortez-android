@@ -27,7 +27,6 @@
 
 package com.tezos.ui.adapter
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
 import androidx.annotation.ColorRes
@@ -36,9 +35,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
-import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import java.util.*
@@ -47,13 +44,15 @@ import java.util.*
  * Created by nfillion on 29/02/16.
  */
 
-class DelegateAddressesAdapter(private val mContext: Context, private val mCustomTheme: CustomTheme) : RecyclerView.Adapter<DelegateAddressesAdapter.ViewHolder>()
+class DelegateAddressesAdapter(private val mContext: Context, private val mCustomTheme: CustomTheme) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
     private val mResources: Resources
     private val mLayoutInflater: LayoutInflater
     private val mAddresses: MutableList<String>
 
     private var mOnItemClickListener: OnItemClickListener? = null
+    private val TYPE_ITEM = 0
+    private val TYPE_HEADER = 1
 
     interface OnItemClickListener
     {
@@ -68,34 +67,68 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
         mAddresses = ArrayList()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
     {
-        return ViewHolder(mLayoutInflater
-                .inflate(R.layout.item_delegated_address, parent, false))
+        return when (viewType)
+        {
+            TYPE_HEADER -> HeaderViewHolder(mLayoutInflater.inflate(R.layout.item_header, parent, false))
+            // other view holders...
+            else -> ContractViewHolder(mLayoutInflater.inflate(R.layout.item_contract, parent, false))
+        }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
     {
-        val address = mAddresses[holder.adapterPosition]
+        if (position == 5)
+        {
+            (holder as HeaderViewHolder).bind(position)
+        }
+        else
+        {
+            (holder as ContractViewHolder).bind(position)
+        }
+    }
 
-        holder.pubKeyHash.text = address
+    private inner class HeaderViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView)
+    {
+        internal var headerTextView: TextView = itemView.findViewById(R.id.hello_info)
+        internal fun bind(position: Int)
+        {
+            headerTextView.text = "Hello world"
+        }
+    }
 
-        holder.title.text = "#${holder.adapterPosition+1}"
-
-        holder.title.setTextColor(getColor(mCustomTheme.textColorPrimaryId))
-        holder.title.setBackgroundColor(getColor(mCustomTheme.colorPrimaryId))
-
-        holder.itemView.setBackgroundColor(getColor(android.R.color.background_light))
-
-        holder.itemView.setOnClickListener { v: View -> mOnItemClickListener!!.onClick(v, getItem(holder.adapterPosition), holder.adapterPosition+1) }
+    private inner class ContractViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView)
+    {
+        internal var titleTextView: TextView = itemView.findViewById(R.id.info_textview)
+        internal var publicKeyHashTextView: TextView = itemView.findViewById(R.id.pub_key_hash_textview)
+        internal fun bind(position: Int)
+        {
+            publicKeyHashTextView.text = mAddresses[position]
+            titleTextView.text = String.format(mContext.getString(R.string.contract_address), "#${position + 1}")
+            itemView.setBackgroundColor(getColor(android.R.color.background_light))
+            itemView.setOnClickListener { v: View -> mOnItemClickListener!!.onClick(v, getItem(position), position+1) }
+        }
     }
 
     override fun getItemCount(): Int
     {
-        return mAddresses.size
+        return mAddresses.size + 1
     }
 
-    fun getItem(position: Int): String
+    override fun getItemViewType(position: Int): Int
+    {
+        return if (position == 5)
+        {
+            TYPE_HEADER
+        }
+        else
+        {
+            TYPE_ITEM
+        }
+    }
+
+    private fun getItem(position: Int): String
     {
         return mAddresses[position]
     }
@@ -108,7 +141,7 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
     fun updateAddresses(addresses: List<String>?)
     {
         mAddresses.clear()
-        if (addresses != null && !addresses.isEmpty())
+        if (!addresses.isNullOrEmpty())
         {
             mAddresses.addAll(addresses)
         }
@@ -124,11 +157,5 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
     private fun getColor(@ColorRes colorRes: Int): Int
     {
         return ContextCompat.getColor(mContext, colorRes)
-    }
-
-    class ViewHolder(container: View) : RecyclerView.ViewHolder(container)
-    {
-        val title: TextView = container.findViewById(R.id.payment_account_title)
-        val pubKeyHash: TextView = container.findViewById(R.id.src_payment_account_pub_key_hash)
     }
 }

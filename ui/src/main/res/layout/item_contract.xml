@@ -20,6 +20,7 @@
             android:background="@drawable/shadow_border"
             android:orientation="vertical">
             <TextView
+                android:id="@+id/info_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
@@ -27,24 +28,13 @@
                 android:maxLines="1"
                 android:text="@string/contract_address"/>
             <TextView
-                android:id="@+id/src_payment_account_pub_key_hash"
+                android:id="@+id/pub_key_hash_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                 android:ellipsize="end"
                  />
         </LinearLayout>
-        <TextView
-            android:id="@+id/payment_account_title"
-            android:layout_marginRight="1dp"
-            android:layout_marginLeft="1dp"
-            android:layout_marginBottom="1dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-            android:singleLine="true"
-            android:padding="@dimen/spacing_double" />
 
     </LinearLayout>
 </FrameLayout>

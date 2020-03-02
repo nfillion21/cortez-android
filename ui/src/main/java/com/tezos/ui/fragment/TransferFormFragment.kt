@@ -1806,7 +1806,6 @@ class TransferFormFragment : Fragment()
             val salt = getSalt(isRecipient)
             if (salt != null && salt >= 0)
             {
-
                 if (isRecipient)
                 {
                     // the recipient is a KT1 with code
