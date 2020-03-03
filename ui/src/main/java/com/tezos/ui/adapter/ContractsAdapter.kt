@@ -44,7 +44,7 @@ import java.util.*
  * Created by nfillion on 29/02/16.
  */
 
-class DelegateAddressesAdapter(private val mContext: Context, private val mCustomTheme: CustomTheme) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
+class ContractsAdapter(private val mContext: Context, private val mCustomTheme: CustomTheme) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
     private val mResources: Resources
     private val mLayoutInflater: LayoutInflater
@@ -79,20 +79,16 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
     {
-        if (position == 1)
-        {
-            (holder as HeaderViewHolder).bind(position)
-        }
-        else
-        {
-            (holder as ContractViewHolder).bind(position)
+        when (holder) {
+            is ContractViewHolder -> holder.bind(position)
+            is HeaderViewHolder -> holder.bind()
         }
     }
 
     private inner class HeaderViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
         internal var headerTextView: TextView = itemView.findViewById(R.id.signatories_contracts_textview)
-        internal fun bind(position: Int)
+        internal fun bind()
         {
             headerTextView.text = mContext.getString(R.string.multisig_contracts_as_signatory)
         }
@@ -118,7 +114,7 @@ class DelegateAddressesAdapter(private val mContext: Context, private val mCusto
 
     override fun getItemViewType(position: Int): Int
     {
-        return if (position == 1)
+        return if (mAddresses[position] == mContext.getString(R.string.neutral))
         {
             TYPE_HEADER
         }

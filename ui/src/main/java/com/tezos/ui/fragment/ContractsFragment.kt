@@ -41,25 +41,28 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
-import com.tezos.ui.adapter.DelegateAddressesAdapter
+import com.tezos.ui.adapter.ContractsAdapter
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import com.tezos.ui.widget.OffsetDecoration
 import kotlinx.android.synthetic.main.fragment_delegation.*
 import org.json.JSONArray
+import org.json.JSONObject
 
 
 /**
  * Created by nfillion on 03/12/18.
  */
 
-class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListener
+class ContractsFragment : Fragment(), ContractsAdapter.OnItemClickListener
 {
     private var mCallback: OnDelegateAddressSelectedListener? = null
 
-    private var mAdapter: DelegateAddressesAdapter? = null
+    private var mAdapter: ContractsAdapter? = null
 
     private var mGetDelegatedAddressesLoading:Boolean = false
+
+    private var mGetSignatoryInMultisigLoading:Boolean = false
 
     private var mWalletEnabled:Boolean = false
 
@@ -69,8 +72,11 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
     {
         private const val PUBLIC_KEY = "publicKeyTag"
         private const val LOAD_DELEGATED_ADDRESSES_TAG = "load_delegated_addresses_tag"
+        private const val LOAD_SIGNATORY_IN_MULTISIG_TAG = "load_signatory_in_multisig_tag"
 
         private const val GET_DELEGATED_ADDRESSES_LOADING_KEY = "get_delegated_addresses_loading"
+
+        private const val GET_SIGNATORY_IN_MULTISIG_LOADING_KEY = "get_signatory_in_multisig_loading"
 
         private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
@@ -122,26 +128,17 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
         super.onViewCreated(view, savedInstanceState)
 
         swipe_refresh_layout.setOnRefreshListener {
-            startGetRequestLoadDelegatedAddresses()
+            startGetRequestLoadContracts()
         }
 
         setUpAccountGrid()
 
         var pkh:String? = pkh()
-
         if (pkh == null)
         {
-            cancelRequest()
+            cancelRequests()
             mGetDelegatedAddressesLoading = false
-
-
-            //no_delegates_text_layout.visibility = View.GONE
-            //swipe_refresh_layout.isEnabled = false
-        }
-        else
-        {
-            //no_delegates_text_layout.visibility = View.VISIBLE
-            //swipe_refresh_layout.isEnabled = true
+            mGetSignatoryInMultisigLoading = false
         }
 
         addresses_recyclerview_layout.visibility = View.GONE
@@ -150,6 +147,8 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
         if (savedInstanceState != null)
         {
             mGetDelegatedAddressesLoading = savedInstanceState.getBoolean(GET_DELEGATED_ADDRESSES_LOADING_KEY)
+
+            mGetSignatoryInMultisigLoading = savedInstanceState.getBoolean(GET_SIGNATORY_IN_MULTISIG_LOADING_KEY)
 
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
 
@@ -160,11 +159,22 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
                 mWalletEnabled = true
                 refreshTextUnderDelegation(false)
 
-                startInitialLoadingDelegatedAddresses()
+                startInitialLoadingContracts()
             }
             else
             {
                 onDelegatedAddressesComplete(false)
+                if (mGetSignatoryInMultisigLoading)
+                {
+                    mWalletEnabled = true
+                    refreshTextUnderDelegation(false)
+
+                    startInitialLoadingMultisigAsSignatory()
+                }
+                else
+                {
+                    onSignatoryInMultisigComplete(false)
+                }
             }
         }
         else
@@ -174,7 +184,7 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
             if (pkh != null)
             {
                 mWalletEnabled = true
-                startInitialLoadingDelegatedAddresses()
+                startInitialLoadingContracts()
             }
         }
     }
@@ -189,7 +199,7 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
         val customThemeBundle = args?.getBundle(CustomTheme.TAG)
         val customTheme = CustomTheme.fromBundle(customThemeBundle)
 
-        mAdapter = DelegateAddressesAdapter(activity!!, customTheme)
+        mAdapter = ContractsAdapter(activity!!, customTheme)
         mAdapter!!.setOnItemClickListener(this)
 
         addresses_recyclerview.adapter = mAdapter
@@ -271,8 +281,7 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
             if (!mWalletEnabled)
             {
                 mWalletEnabled = true
-
-                startInitialLoadingDelegatedAddresses()
+                startInitialLoadingContracts()
             }
         }
         else
@@ -280,7 +289,7 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
             mRecyclerViewAddresses = null
             refreshTextUnderDelegation(false)
 
-            cancelRequest()
+            cancelRequests()
 
             mWalletEnabled = false
 
@@ -296,11 +305,19 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
     }
 
     //requests
-    private fun startInitialLoadingDelegatedAddresses()
+    private fun startInitialLoadingContracts()
     {
         swipe_refresh_layout.isEnabled = false
 
-        startGetRequestLoadDelegatedAddresses()
+        startGetRequestLoadContracts()
+    }
+
+    //requests
+    private fun startInitialLoadingMultisigAsSignatory()
+    {
+        swipe_refresh_layout.isEnabled = false
+
+        startGetRequestLoadMultisigAsSignatoryContracts()
     }
 
     private fun onDelegatedAddressesComplete(animating:Boolean)
@@ -314,10 +331,21 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
         refreshTextUnderDelegation(animating)
     }
 
-    // volley
-    private fun startGetRequestLoadDelegatedAddresses()
+    private fun onSignatoryInMultisigComplete(animating:Boolean)
     {
-        cancelRequest()
+        mGetSignatoryInMultisigLoading = false
+        nav_progress?.visibility = View.GONE
+
+        swipe_refresh_layout?.isEnabled = true
+        swipe_refresh_layout?.isRefreshing = false
+
+        refreshTextUnderDelegation(animating)
+    }
+
+    // volley
+    private fun startGetRequestLoadContracts()
+    {
+        cancelRequests()
 
         mGetDelegatedAddressesLoading = true
 
@@ -333,17 +361,22 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
             // Request a string response from the provided URL.
             val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
             {
-                if (activity != null)
+                if (swipe_refresh_layout != null)
                 {
                     addContractAddressesFromJSON(it, pkh)
 
                     reloadList()
                     onDelegatedAddressesComplete(true)
+
+
+
+                    startGetRequestLoadMultisigAsSignatoryContracts()
+
                 }
             },
                     Response.ErrorListener {
 
-                        if (activity != null)
+                        if (swipe_refresh_layout != null)
                         {
                             onDelegatedAddressesComplete(false)
 
@@ -356,6 +389,48 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
         }
     }
 
+    // volley
+    private fun startGetRequestLoadMultisigAsSignatoryContracts()
+    {
+        cancelRequests()
+
+        mGetSignatoryInMultisigLoading = true
+
+        empty_loading_textview.setText(R.string.loading_contracts)
+
+        nav_progress.visibility = View.VISIBLE
+
+        val pk = pk()
+        if (pk != null)
+        {
+            val url = String.format(getString(R.string.signatory_in_multisig_contracts_url), pk())
+
+            // Request a string response from the provided URL.
+            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            {
+                if (swipe_refresh_layout != null)
+                {
+                    addSignatoryInMultisigContractsFromJSON(it)
+
+                    reloadList()
+                    onSignatoryInMultisigComplete(true)
+                }
+            },
+                    Response.ErrorListener {
+
+                        if (swipe_refresh_layout != null)
+                        {
+                            onSignatoryInMultisigComplete(false)
+
+                            showSnackbarError(it)
+                        }
+                    })
+
+            jsonArrayRequest.tag = LOAD_SIGNATORY_IN_MULTISIG_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
     private fun addContractAddressesFromJSON(answer: JSONArray, pkh: String?)
     {
         val contracts = DataExtractor.getJSONArrayFromField(answer,0)
@@ -364,7 +439,7 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
         {
             var contractsList = arrayListOf<String>()
 
-            for (i in 0..(contracts.length() - 1))
+            for (i in 0 until contracts.length())
             {
                 val item = contracts.getString(i)
                 if (item != pkh)
@@ -385,6 +460,46 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
         }
     }
 
+    private fun addSignatoryInMultisigContractsFromJSON(answer: JSONArray)
+    {
+        //val contracts = DataExtractor.getJSONArrayFromField(answer,0)
+        val contracts = answer[0] as JSONArray
+
+        if (contracts != null && contracts.length() > 0)
+        {
+            var contractsList = arrayListOf<String>()
+
+            for (i in 0 until contracts.length())
+            {
+                val item = contracts.getJSONObject(i)
+                contractsList.add(item.getString("k"))
+            }
+
+            if (!mRecyclerViewAddresses.isNullOrEmpty())
+            {
+                //mRecyclerViewAddresses?.clear()
+                if (mRecyclerViewAddresses!!.contains(getString(R.string.neutral)))
+                {
+                    mRecyclerViewAddresses!!.dropLastWhile {
+                        it != getString(R.string.neutral)
+                    }
+                }
+                else
+                {
+                    mRecyclerViewAddresses!!.add(getString(R.string.neutral))
+                }
+            }
+            else
+            {
+                mRecyclerViewAddresses = ArrayList()
+                mRecyclerViewAddresses!!.add(getString(R.string.neutral))
+                // it should not be null unless there is no originated contract
+            }
+
+            mRecyclerViewAddresses?.addAll(contractsList)
+        }
+    }
+
     private fun showSnackbarError(error: VolleyError?)
     {
         var err: String? = error?.toString() ?: getString(R.string.generic_error)
@@ -394,10 +509,11 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
         empty_loading_textview?.text = getString(R.string.generic_error)
     }
 
-    private fun cancelRequest()
+    private fun cancelRequests()
     {
         val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
         requestQueue?.cancelAll(LOAD_DELEGATED_ADDRESSES_TAG)
+        requestQueue?.cancelAll(LOAD_SIGNATORY_IN_MULTISIG_TAG)
     }
 
     fun pkh():String?
@@ -414,11 +530,27 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
         return pkh
     }
 
+    fun pk():String?
+    {
+        var pkh:String? = null
+
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            val seed = Storage(activity!!).getMnemonics()
+            pkh = seed.pk
+        }
+
+        return pkh
+    }
+
     override fun onSaveInstanceState(outState: Bundle)
     {
         super.onSaveInstanceState(outState)
 
         outState.putBoolean(GET_DELEGATED_ADDRESSES_LOADING_KEY, mGetDelegatedAddressesLoading)
+        outState.putBoolean(GET_SIGNATORY_IN_MULTISIG_LOADING_KEY, mGetSignatoryInMultisigLoading)
+
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
         outState.putStringArrayList(DELEGATED_ADDRESSES_ARRAYLIST_KEY, mRecyclerViewAddresses)
     }
@@ -426,13 +558,13 @@ class ContractsFragment : Fragment(), DelegateAddressesAdapter.OnItemClickListen
     override fun onDestroy()
     {
         super.onDestroy()
-        cancelRequest()
+        cancelRequests()
     }
 
     override fun onDetach()
     {
         super.onDetach()
-        cancelRequest()
+        cancelRequests()
         mCallback = null
     }
 

@@ -7,6 +7,9 @@
     <string name="transfer_injection_operation" translatable="false">https://mezos.lamini.ca/tezos/carthagenet/injection/operation</string>
 
     <string name="contracts_url" translatable="false">https://mezos.lamini.ca/mezos/carthagenet/contracts?mgrs=%1$s</string>
+
+    <string name="signatory_in_multisig_contracts_url" translatable="false">https://mezos2.lamini.ca/mezos/carthagenet/multisig?pks=%1$s</string>
+
     <string name="originate_account_url" translatable="false">https://mezos.lamini.ca/mezos/carthagenet/originate_account</string>
     <string name="change_delegate_url" translatable="false">https://mezos.lamini.ca/mezos/carthagenet/change_delegate</string>
     <string name="contract_info_url" translatable="false">https://mezos.lamini.ca/mezos/carthagenet/contract_info?ks=%1$s</string>
