@@ -365,10 +365,8 @@ class ContractsFragment : Fragment(), ContractsAdapter.OnItemClickListener
                 {
                     addContractAddressesFromJSON(it, pkh)
 
-                    reloadList()
-                    onDelegatedAddressesComplete(true)
-
-
+                    //reloadList()
+                    //onDelegatedAddressesComplete(true)
 
                     startGetRequestLoadMultisigAsSignatoryContracts()
 
