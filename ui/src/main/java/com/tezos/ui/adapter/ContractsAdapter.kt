@@ -46,8 +46,7 @@ import java.util.*
 
 class ContractsAdapter(private val mContext: Context, private val mCustomTheme: CustomTheme) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
-    private val mResources: Resources
-    private val mLayoutInflater: LayoutInflater
+    private val mLayoutInflater: LayoutInflater = LayoutInflater.from(mContext)
     private val mAddresses: MutableList<String>
 
     private var mOnItemClickListener: OnItemClickListener? = null
@@ -61,9 +60,6 @@ class ContractsAdapter(private val mContext: Context, private val mCustomTheme: 
 
     init
     {
-        mResources = mContext.resources
-        mLayoutInflater = LayoutInflater.from(mContext)
-
         mAddresses = ArrayList()
     }
 

@@ -480,8 +480,19 @@ class ContractsFragment : Fragment(), ContractsAdapter.OnItemClickListener
                 //mRecyclerViewAddresses?.clear()
                 if (mRecyclerViewAddresses!!.contains(getString(R.string.neutral)))
                 {
-                    mRecyclerViewAddresses!!.dropLastWhile {
-                        it != getString(R.string.neutral)
+                    val tmp =
+                            mRecyclerViewAddresses!!.dropLastWhile {
+                                it != getString(R.string.neutral)
+                            }
+
+                    if (tmp !is ArrayList<String>)
+                    {
+                        mRecyclerViewAddresses!!.clear()
+                        mRecyclerViewAddresses!!.add(getString(R.string.neutral))
+                    }
+                    else
+                    {
+                        mRecyclerViewAddresses = tmp as ArrayList<String>
                     }
                 }
                 else

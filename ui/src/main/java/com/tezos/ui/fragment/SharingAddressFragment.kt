@@ -93,6 +93,8 @@ class SharingAddressFragment : Fragment()
         //val isPasswordSaved = Storage(activity!!).isPasswordSaved()
         val pkh = pkh()
 
+        val pk = pk()
+
         if (pkh != null)
         {
             mPkhLayout?.visibility = View.VISIBLE
@@ -148,6 +150,20 @@ class SharingAddressFragment : Fragment()
         }
 
         return pkh
+    }
+
+    fun pk():String?
+    {
+        var pk:String? = null
+
+        val isPasswordSaved = Storage(activity!!).isPasswordSaved()
+        if (isPasswordSaved)
+        {
+            val seed = Storage(activity!!).getMnemonics()
+            pk = seed.pk
+        }
+
+        return pk
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
