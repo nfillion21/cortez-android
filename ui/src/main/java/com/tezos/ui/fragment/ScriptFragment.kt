@@ -2791,6 +2791,36 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         return null
     }
 
+    private fun canIsign()
+    {
+        var threshold = getThreshold()
+
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+        val numberAndSpotPair = getNumberAndSpot(mnemonicsData.pk)
+        if (numberAndSpotPair.first != -1)
+        {
+            // our edpk is in the list. great. it's fine if we have a threshold of 1.
+            if (threshold!!.toInt() == 1)
+            {
+                warning_signatory_info.visibility = View.GONE
+            }
+            else
+            {
+                // we are on the list but it needs another signatory
+                warning_signatory_textview.text = String.format(getString(R.string.warning_other_signatories_info), threshold.toInt()-1)
+                warning_signatory_info.visibility = View.VISIBLE
+            }
+        }
+        else
+        {
+            //TODO what if we're only a signatory?
+            //TODO we need to check if we're a notary, a signatory or nothing at all.
+
+            warning_signatory_textview.text = String.format(getString(R.string.warning_not_signatory_info), threshold)
+            warning_signatory_info.visibility = View.VISIBLE
+        }
+    }
+
     private fun getCounter(): String?
     {
         if (mStorage != null)
