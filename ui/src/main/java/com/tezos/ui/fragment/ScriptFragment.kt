@@ -705,7 +705,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             imm.showSoftInput(threshold_edittext, InputMethodManager.SHOW_IMPLICIT)
 
 
-            update_multisig_button_relative_layout.visibility = View.VISIBLE
+            //TODO check if we are allowed to modify or we need to ask for a change.
+
+
+            update_multisig_button_relative_layout.visibility = View.GONE
+            request_update_multisig_button_relative_layout.visibility = View.VISIBLE
 
             gas_multisig_textview.visibility = View.VISIBLE
             gas_multisig_layout.visibility = View.VISIBLE
@@ -725,7 +729,9 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             transferLoading(false)
             putFeesMultisigToNegative()
 
+            //TODO handle this
             update_multisig_button_relative_layout?.visibility = View.GONE
+            request_update_multisig_button_relative_layout.visibility = View.GONE
 
             gas_multisig_layout.visibility = View.GONE
             gas_multisig_textview?.visibility = View.GONE
@@ -1372,8 +1378,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
 
                 update_storage_button_layout?.visibility = View.GONE
-
-                update_multisig_button_layout?.visibility = View.VISIBLE
 
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.multisig_script_info)

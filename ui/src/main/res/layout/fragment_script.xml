@@ -294,14 +294,13 @@
                     style="@style/PaymentScreens.Button"
                     android:enabled="false"
                     android:layout_centerInParent="true"
-                    android:visibility="gone"
                     >
 
                     <Button
                         android:id="@+id/update_multisig_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/confirm_edition"
+                        android:text="@string/request_edition"
 
                         android:drawableStart="@drawable/ic_lock_black"
                         android:drawableLeft="@drawable/ic_lock_black"
@@ -327,6 +326,57 @@
                     tools:ignore="UnusedAttribute" />
 
             </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/request_update_multisig_button_relative_layout"
+                android:layout_weight="0"
+                android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/spacing_double"
+                android:visibility="gone"
+                android:layout_marginBottom="?attr/actionBarSize"
+                android:layout_height="?android:attr/actionBarSize">
+
+                <FrameLayout
+                    android:id="@+id/request_update_multisig_button_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    style="@style/PaymentScreens.Button"
+                    android:enabled="false"
+                    android:layout_centerInParent="true"
+                    >
+
+                    <Button
+                        android:id="@+id/request_update_multisig_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/confirm_edition"
+
+                        android:drawableStart="@drawable/ic_lock_black"
+                        android:drawableLeft="@drawable/ic_lock_black"
+                        android:drawablePadding="@dimen/spacing_normal"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                        android:layout_gravity="center"
+                        android:enabled="false"
+                        android:textStyle="bold"
+                        android:background="@null"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        />
+
+                </FrameLayout>
+                <ProgressBar
+                    android:id="@+id/request_multisig_progress"
+                    android:layout_width="@dimen/min_height_touch_target"
+                    android:layout_height="@dimen/min_height_touch_target"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone"
+                    tools:ignore="UnusedAttribute" />
+
+            </RelativeLayout>
+
+
         </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
