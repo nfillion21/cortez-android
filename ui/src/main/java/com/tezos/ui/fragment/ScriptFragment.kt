@@ -708,8 +708,16 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             //TODO check if we are allowed to modify or we need to ask for a change.
 
 
-            update_multisig_button_relative_layout.visibility = View.GONE
-            request_update_multisig_button_relative_layout.visibility = View.VISIBLE
+            if (askingForSignatories())
+            {
+                update_multisig_button_relative_layout.visibility = View.GONE
+                request_update_multisig_button_relative_layout.visibility = View.VISIBLE
+            }
+            else
+            {
+                update_multisig_button_relative_layout.visibility = View.VISIBLE
+                request_update_multisig_button_relative_layout.visibility = View.GONE
+            }
 
             gas_multisig_textview.visibility = View.VISIBLE
             gas_multisig_layout.visibility = View.VISIBLE
@@ -729,7 +737,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             transferLoading(false)
             putFeesMultisigToNegative()
 
-            //TODO handle this
             update_multisig_button_relative_layout?.visibility = View.GONE
             request_update_multisig_button_relative_layout.visibility = View.GONE
 
@@ -2371,6 +2378,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
                 }
+
+
+                request_update_multisig_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                request_update_multisig_button_layout?.isEnabled = true
+                request_update_multisig_button_layout?.background = makeSelector(theme)
+
+                val drawablesRequest = request_update_multisig_button?.compoundDrawables
+                if (drawablesRequest != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawablesRequest[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                }
+
             }
             else
             {
@@ -2386,8 +2406,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
                 }
-            }
 
+                request_update_multisig_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                request_update_multisig_button_layout?.isEnabled = false
+
+                request_update_multisig_button_layout?.background = makeSelector(greyTheme)
+
+                val drawablesRequest = request_update_multisig_button?.compoundDrawables
+                if (drawablesRequest != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawablesRequest[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+                }
+            }
         }
     }
 
@@ -2791,7 +2822,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         return null
     }
 
-    private fun canIsign()
+    private fun askingForSignatories():Boolean
     {
         var threshold = getThreshold()
 
@@ -2802,23 +2833,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             // our edpk is in the list. great. it's fine if we have a threshold of 1.
             if (threshold!!.toInt() == 1)
             {
-                warning_signatory_info.visibility = View.GONE
-            }
-            else
-            {
-                // we are on the list but it needs another signatory
-                warning_signatory_textview.text = String.format(getString(R.string.warning_other_signatories_info), threshold.toInt()-1)
-                warning_signatory_info.visibility = View.VISIBLE
+                return false
             }
         }
-        else
-        {
-            //TODO what if we're only a signatory?
-            //TODO we need to check if we're a notary, a signatory or nothing at all.
 
-            warning_signatory_textview.text = String.format(getString(R.string.warning_not_signatory_info), threshold)
-            warning_signatory_info.visibility = View.VISIBLE
-        }
+        return true
     }
 
     private fun getCounter(): String?

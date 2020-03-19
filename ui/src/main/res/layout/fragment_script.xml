@@ -300,7 +300,7 @@
                         android:id="@+id/update_multisig_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/request_edition"
+                        android:text="@string/confirm_edition"
 
                         android:drawableStart="@drawable/ic_lock_black"
                         android:drawableLeft="@drawable/ic_lock_black"
@@ -349,7 +349,7 @@
                         android:id="@+id/request_update_multisig_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/confirm_edition"
+                        android:text="@string/request_edition"
 
                         android:drawableStart="@drawable/ic_lock_black"
                         android:drawableLeft="@drawable/ic_lock_black"
