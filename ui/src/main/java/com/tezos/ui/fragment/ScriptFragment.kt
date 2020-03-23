@@ -58,6 +58,7 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.Base58
@@ -70,7 +71,9 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
+import kotlinx.android.synthetic.main.fragment_delegation.*
 import kotlinx.android.synthetic.main.fragment_script.*
+import kotlinx.android.synthetic.main.fragment_script.nav_progress
 import kotlinx.android.synthetic.main.multisig_form_card_info_signatories.*
 import kotlinx.android.synthetic.main.update_multisig_form_card.*
 import kotlinx.android.synthetic.main.update_storage_form_card.*
@@ -1047,7 +1050,17 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         // validatePay cannot be valid if there is no fees
         validateConfirmEditionMultisigButton(false)
 
-        startPostRequestLoadInitUpdateMultisigStorage()
+
+        // at this point, we will update the good request.
+
+        if (askingForSignatories())
+        {
+            startPostRequestLoadInitRequestUpdateStorage()
+        }
+        else
+        {
+            startPostRequestLoadInitUpdateMultisigStorage()
+        }
     }
 
     private fun startFinalizeUpdateStorageLoading()
@@ -1986,6 +1999,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         //*/
     }
 
+
     // volley
     private fun startPostRequestLoadInitUpdateStorage()
     {
@@ -2230,6 +2244,116 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
         mInitUpdateStorageLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+
+
+
+    // volley
+    private fun startPostRequestLoadInitRequestUpdateStorage()
+    {
+        //val mnemonicsData = Storage(activity!!).getMnemonics()
+        //val url = String.format(getString(R.string.manager_key_url), mnemonicsData.pk)
+
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.manager_key_url), pkh)
+
+            // Request a string response from the provided URL.
+            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            {
+                if (swipe_refresh_script_layout != null)
+                {
+                    //addContractAddressesFromJSON(it, pkh)
+
+                    //reloadList()
+                    //onDelegatedAddressesComplete(true)
+
+                    //startGetRequestLoadMultisigAsSignatoryContracts()
+                }
+            },
+                    Response.ErrorListener {
+
+                        if (swipe_refresh_script_layout != null)
+                        {
+                            //onDelegatedAddressesComplete(false)
+                            //showSnackbarError(it)
+                        }
+                    })
+
+            //jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+
+        /*
+
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
+        { answer ->
+
+            //TODO check if the JSON is fine then launch the 2nd request
+            if (swipe_refresh_script_layout != null)
+            {
+                mUpdateStoragePayload = answer.getString("result")
+                mUpdateStorageFees = answer.getLong("total_fee")
+
+                // we use this call to ask for payload and fees
+                if (mUpdateStoragePayload != null && mUpdateStorageFees != -1L && activity != null)
+                {
+                    onInitEditLoadComplete(null)
+
+                    val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
+                    storage_fee_edittext?.setText(feeInTez.toString())
+
+                    validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
+
+                    if (isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
+                    {
+                        validateConfirmEditionButton(true)
+                    }
+                    else
+                    {
+                        // should no happen
+                        validateConfirmEditionButton(false)
+                    }
+                }
+                else
+                {
+                    val volleyError = VolleyError(getString(R.string.generic_error))
+                    onInitEditLoadComplete(volleyError)
+                    mClickCalculate = true
+
+                    //the call failed
+                }
+            }
+
+        }, Response.ErrorListener
+        {
+            if (swipe_refresh_script_layout != null)
+            {
+                onInitEditLoadComplete(it)
+
+                mClickCalculate = true
+                //Log.i("mTransferId", ""+mTransferId)
+                //Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
+            }
+        })
+        {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String>
+            {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        cancelRequests(true)
+
+        jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
+        mInitUpdateStorageLoading = true
+        VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+        */
     }
 
     private fun getSalt():Int?

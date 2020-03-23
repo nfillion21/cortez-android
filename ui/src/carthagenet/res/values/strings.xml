@@ -16,5 +16,7 @@
 
     <string name="contract_storage_url" translatable="false">https://mezos.lamini.ca/tezos/carthagenet/chains/main/blocks/head/context/contracts/%1$s/storage</string>
 
+    <string name="manager_key_url" translatable="false">https://mezos.lamini.ca/mezos/carthagenet/manager?ks=%1$s</string>
+
     <string name="chain_ID" translatable="false">NetXjD3HPJJjmcd</string>
 </resources>
