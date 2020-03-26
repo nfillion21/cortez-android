@@ -1238,15 +1238,16 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 {
                     val k = "ok"
                     val k2 = "ok"
+                    warning_not_a_notary_info.visibility = View.GONE
                 }
                 else
                 {
                     val k = "ok"
                     val k2 = "ok"
 
-                    fdkjg
+                    warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), managerKey)
+                    warning_not_a_notary_info.visibility = View.VISIBLE
                     // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
-
 
                 }
 

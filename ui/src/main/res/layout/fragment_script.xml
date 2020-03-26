@@ -167,7 +167,7 @@
                         </LinearLayout>
 
                         <LinearLayout
-                            android:id="@+id/warning_signatory_info"
+                            android:id="@+id/warning_not_a_notary_info"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -188,7 +188,7 @@
                                 />
 
                             <TextView
-                                android:id="@+id/warning_signatory_textview"
+                                android:id="@+id/warning_not_a_notary_textview"
                                 android:layout_weight="1"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -200,7 +200,7 @@
                                 android:layout_marginTop="@dimen/spacing_normal"
                                 android:layout_marginBottom="@dimen/spacing_normal"
                                 android:gravity="center_vertical"
-                                android:text="@string/warning_not_signatory_info"
+                                android:text="@string/warning_not_the_notary_info"
                                 />
 
                         </LinearLayout>

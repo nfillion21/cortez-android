@@ -173,7 +173,7 @@
 
     <string name="warning_other_signatories_info">The contract storage indicates your public key is part of the signatories list but you will need the approval of %1$s more signatories to update the storage.\n\nYou can request a change of the storage from the signatories by editing the form below.</string>
 
-    <string name="warning_not_the_notary">The contract storage indicates your public key is part of the signatories list but you will need the approval of %1$s more signatories to update the storage.\n\nYou can request a change of the storage from the signatories by editing the form below.</string>
+    <string name="warning_not_the_notary_info">The contract storage indicates your public key is part of the signatories list but you will need to contact the contract notary in order to update the threshold and/or the signatories.\n\nThe contract notary address:\n %1$s</string>
 
 
     <string name="contracts_and_delegation_title">Contracts and delegation</string>
