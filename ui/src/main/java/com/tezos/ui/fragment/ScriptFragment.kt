@@ -1121,7 +1121,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     }
                     else if (getThreshold() != null)
                     {
-
+                        // here I need to check the user is notary or signatory only.
+                        startGetRequestManagerKey()
                     }
                     else
                     {
@@ -1218,6 +1219,56 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         stringRequest.tag = LOAD_SECURE_HASH_BALANCE_TAG
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(stringRequest)
 
+    }
+
+    // volley
+    private fun startGetRequestManagerKey()
+    {
+        cancelRequests(resetBooleans = true)
+
+        val url = String.format(getString(R.string.manager_key_url), pkh())
+
+        // Request a string response from the provided URL.
+        val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+        {
+            if (swipe_refresh_script_layout != null)
+            {
+                val managerKey = it.getJSONObject(0)["manager"] as String
+                if (managerKey == pkhtz1())
+                {
+                    val k = "ok"
+                    val k2 = "ok"
+                }
+                else
+                {
+                    val k = "ok"
+                    val k2 = "ok"
+
+                    fdkjg
+                    // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
+
+
+                }
+
+                //addContractAddressesFromJSON(it, pkh)
+
+                //reloadList()
+                //onDelegatedAddressesComplete(true)
+
+                //startGetRequestLoadMultisigAsSignatoryContracts()
+            }
+        },
+                Response.ErrorListener {
+
+                    if (swipe_refresh_script_layout != null)
+                    {
+                        //onDelegatedAddressesComplete(false)
+                        showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                    }
+                })
+
+        //jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
     }
 
     private fun onBalanceLoadComplete()
@@ -2247,13 +2298,15 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     }
 
 
-
-
     // volley
     private fun startPostRequestLoadInitRequestUpdateStorage()
     {
         //val mnemonicsData = Storage(activity!!).getMnemonics()
         //val url = String.format(getString(R.string.manager_key_url), mnemonicsData.pk)
+
+        // TODO
+        // this call will be made to Mezos to ask for a transaction instance.
+        //
 
         val pkh = pkh()
         if (pkh != null)
