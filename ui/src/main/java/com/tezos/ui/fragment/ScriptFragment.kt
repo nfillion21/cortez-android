@@ -1325,17 +1325,20 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         transferLoading(loading = false)
 
+        updateMultisigInfos()
+
+        /*
         if (mContractManager == pkhtz1())
         {
             warning_notary_info.visibility = View.GONE
         }
         else
         {
-            warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
+            warning_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
             warning_notary_info.visibility = View.VISIBLE
             // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
-
         }
+        */
     }
 
     private fun addContractInfoFromJSON(answer: JSONObject)
@@ -1475,63 +1478,24 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.multisig_script_info)
 
-//need to check if our edpk is contained in the signatories
-//even if he's contained, we need to check the threshold
-                val numberAndSpotPair = getNumberAndSpot(mnemonicsData.pk)
-                if (numberAndSpotPair.first != -1)
-                {
-                    warning_signatory_textview.text = getString(R.string.warning_signatory_info)
-                    warning_signatory_info.visibility = View.VISIBLE
-
-                    // about ths signatories
-                    warning_threshold_info.visibility = View.VISIBLE
-
-                    var threshold = getThreshold()
-                    if (threshold!!.toInt() == 1)
-                    {
-                        warning_threshold_textview.text = getString(R.string.warning_no_need_signatories_info)
-                    }
-                    else
-                    {
-                        warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_signatory_info), threshold.toInt()-1)
-                    }
-                }
-                else
-                {
-                    warning_signatory_textview.text = getString(R.string.warning_not_signatory_info)
-                    warning_signatory_info.visibility = View.VISIBLE
-
-                    warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_not_signatory_info), getThreshold())
-                }
+                updateMultisigInfos()
 
                 /*
-                if (threshold!!.toInt() == 1)
-                {
-                    warning_threshold_info.visibility = View.VISIBLE
-                    warning_threshold_textview.text =
-                }
-                else
-                {
-                    // we are on the list but it needs another signatory
-                    warning_signatory_textview.text = String.format(getString(R.string.warning_other_signatories_info), threshold.toInt()-1)
-                    warning_signatory_info.visibility = View.VISIBLE
-                }
-                */
-
                 if (!mContractManager.isNullOrEmpty())
                 {
+                    warning_notary_info.visibility = View.VISIBLE
+
                     if (mContractManager == pkhtz1())
                     {
-                        warning_notary_info.visibility = View.GONE
+                        warning_notary_textview.text = String.format(getString(R.string.warning_notary_threshold_signatory_info), mContractManager)
                     }
                     else
                     {
-                        warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
+                        warning_notary_textview.text = String.format(getString(R.string.warning_not_notary_not_signatory_info), mContractManager)
                         warning_notary_info.visibility = View.VISIBLE
-                        // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
-
                     }
                 }
+                */
 
                 switchToMultisigEditMode(mMultisigEditMode)
             }
@@ -1547,6 +1511,82 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             loading_textview?.visibility = View.VISIBLE
             loading_textview?.text = "-"
+        }
+    }
+
+    private fun updateMultisigInfos()
+    {
+
+//need to check if our edpk is contained in the signatories
+//even if he's contained, we need to check the threshold
+        val numberAndSpotPair = getNumberAndSpot(pk()!!)
+        if (numberAndSpotPair.first != -1)
+        {
+            warning_signatory_textview.text = getString(R.string.warning_signatory_info)
+            warning_signatory_info.visibility = View.VISIBLE
+
+            // about ths signatories
+            warning_threshold_info.visibility = View.VISIBLE
+
+            var threshold = getThreshold()
+            if (threshold!!.toInt() == 1)
+            {
+                warning_threshold_textview.text = getString(R.string.warning_no_need_signatories_info)
+            }
+            else
+            {
+                warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_signatory_info), threshold.toInt()-1)
+            }
+
+            if (!mContractManager.isNullOrEmpty())
+            {
+                warning_notary_info.visibility = View.VISIBLE
+
+                if (mContractManager == pkhtz1())
+                {
+                    if (threshold!!.toInt() == 1)
+                    {
+                        warning_notary_textview.text = getString(R.string.warning_notary_threshold_signatory_info)
+                    }
+                    else
+                    {
+                        warning_notary_textview.text = String.format(getString(R.string.warning_notary_signatory_not_threshold_info), threshold.toInt()-1)
+                    }
+                }
+                else
+                {
+                    warning_notary_textview.text = getString(R.string.warning_not_notary_signatory_info)
+                }
+
+            }
+            else
+            {
+                warning_notary_info.visibility = View.GONE
+            }
+        }
+        else
+        {
+            warning_signatory_textview.text = getString(R.string.warning_not_signatory_info)
+            warning_signatory_info.visibility = View.VISIBLE
+
+            warning_threshold_info.visibility = View.VISIBLE
+
+            var threshold = getThreshold()
+            warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_not_signatory_info), threshold)
+
+            if (!mContractManager.isNullOrEmpty())
+            {
+                warning_notary_info.visibility = View.VISIBLE
+
+                if (mContractManager == pkhtz1())
+                {
+                    warning_notary_textview.text = String.format(getString(R.string.warning_notary_not_signatory_info), threshold)
+                }
+                else
+                {
+                    warning_notary_textview.text = getString(R.string.warning_not_notary_not_signatory_info)
+                }
+            }
         }
     }
 

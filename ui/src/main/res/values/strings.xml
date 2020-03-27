@@ -169,21 +169,27 @@
     <string name="ask_for_credentials">Ask for confirm credentials when the app goes to background</string>
     <string name="use_fingerprint">Use fingerprint option to confirm transfers</string>
 
-    <string name="warning_signatory_info">The contract storage indicates your public key is part of the signatories list.</string>
-    <string name="warning_not_signatory_info">The contract storage indicates your public key is not part of the signatories list.</string>
+    <string name="warning_signatory_info">The contract storage indicates your are a signatory in this multisig contract.</string>
+    <string name="warning_not_signatory_info">The contract storage indicates you are not a signatory in this multisig contract.</string>
 
     <string name="warning_no_need_signatories_info">This contract has a threshold of 1, as a signatory you can update the storage.</string>
-    <string name="warning_need_signatories_signatory_info">You will need the approval of %1$s more signatories to update the storage.</string>
+    <string name="warning_need_signatories_signatory_info">You are a signatory but you will need the approval of %1$s more signatories to update the storage.</string>
 
     <string name="warning_need_signatories_not_signatory_info">You are currently not a signatory of this contract. This contract needs the approval of %1$s signatories to update the storage.</string>
 
+
+    <string name="warning_notary_threshold_signatory_info">You are the notary and a signatory of this multisig, the threshold is 1 then you can update the storage by yourself.</string>
+    <string name="warning_notary_not_signatory_info">You are the notary but not a signatory of this multisig. You can request an update of the storage from %1$s of the signatories.</string>
+    <string name="warning_notary_signatory_not_threshold_info">You are the notary and a signatory of this multisig, however you also need the approval from %1$s of the signatories.</string>
+
+    <string name="warning_not_notary_signatory_info">You are not the notary of this multisig contract, however as a signatory you can notify the notary for an update of the storage.</string>
+    <string name="warning_not_notary_not_signatory_info">You are neither the notary nor a signatory of this multisig contract. Please contact them to update the contract storage.</string>
+
+
     <!--
-   \n\nHowever, you can still request a change of the storage from %1$s of the signatories by editing the form below.
-
-    \n\nYou can request a change of the storage from the signatories by editing the form below.
-    -->
-
+    <string name="warning_notary_signatory_manager_info">The contract storage indicates your public key is part of the signatories list but you will need to contact the contract notary in order to update the threshold and/or the signatories.\n\nThe contract notary address:\n %1$s</string>
     <string name="warning_not_the_notary_info">The contract storage indicates your public key is part of the signatories list but you will need to contact the contract notary in order to update the threshold and/or the signatories.\n\nThe contract notary address:\n %1$s</string>
+    -->
 
 
     <string name="contracts_and_delegation_title">Contracts and delegation</string>
