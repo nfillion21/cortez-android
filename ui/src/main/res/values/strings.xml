@@ -20,6 +20,7 @@
     <string name="limit_1_to_1k">Daily spending limit (from 1 to 1000 ꜩ)</string>
     <string name="signatories">Signatories</string>
     <string name="threshold">Threshold (from 1 to 10)</string>
+    <string name="notary">Notary</string>
     <string name="threshold_info">The threshold is the amount of signatories required to authorize an operation (transaction, delegation or change of the signatories)</string>
     <string name="edpk_hint">edpk…</string>
     <string name="fee_minimum">Fee (calculated minimum)</string>
@@ -180,7 +181,7 @@
 
     <string name="warning_notary_threshold_signatory_info">You are the notary and a signatory of this multisig, the threshold is 1 then you can update the storage by yourself.</string>
     <string name="warning_notary_not_signatory_info">You are the notary but not a signatory of this multisig. You can request an update of the storage from %1$s of the signatories.</string>
-    <string name="warning_notary_signatory_not_threshold_info">You are the notary and a signatory of this multisig, however you also need the approval from %1$s of the signatories.</string>
+    <string name="warning_notary_signatory_not_threshold_info">You are the notary and a signatory of this multisig, however you also need the approval from %1$s more signatories.</string>
 
     <string name="warning_not_notary_signatory_info">You are not the notary of this multisig contract, however as a signatory you can notify the notary for an update of the storage.</string>
     <string name="warning_not_notary_not_signatory_info">You are neither the notary nor a signatory of this multisig contract. Please contact them to update the contract storage.</string>

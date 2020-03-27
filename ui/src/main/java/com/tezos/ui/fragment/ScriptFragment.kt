@@ -1326,19 +1326,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         transferLoading(loading = false)
 
         updateMultisigInfos()
-
-        /*
-        if (mContractManager == pkhtz1())
-        {
-            warning_notary_info.visibility = View.GONE
-        }
-        else
-        {
-            warning_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
-            warning_notary_info.visibility = View.VISIBLE
-            // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
-        }
-        */
     }
 
     private fun addContractInfoFromJSON(answer: JSONObject)
@@ -1542,6 +1529,10 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             {
                 warning_notary_info.visibility = View.VISIBLE
 
+                notary_tz1_edittext.setText(mContractManager)
+
+                notary_layout.visibility = View.VISIBLE
+
                 if (mContractManager == pkhtz1())
                 {
                     if (threshold!!.toInt() == 1)
@@ -1562,6 +1553,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             else
             {
                 warning_notary_info.visibility = View.GONE
+
+                notary_layout.visibility = View.GONE
             }
         }
         else
@@ -1578,6 +1571,10 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             {
                 warning_notary_info.visibility = View.VISIBLE
 
+                notary_tz1_edittext.setText(mContractManager)
+
+                notary_layout.visibility = View.VISIBLE
+
                 if (mContractManager == pkhtz1())
                 {
                     warning_notary_textview.text = String.format(getString(R.string.warning_notary_not_signatory_info), threshold)
@@ -1586,6 +1583,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 {
                     warning_notary_textview.text = getString(R.string.warning_not_notary_not_signatory_info)
                 }
+            }
+            else
+            {
+                warning_notary_info.visibility = View.GONE
+                notary_layout.visibility = View.GONE
             }
         }
     }

@@ -55,20 +55,39 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.InfoItem"
             tools:ignore="UnusedAttribute,NewApi" />
 
-        <!--
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_weight="0"
+        <LinearLayout
+            android:id="@+id/notary_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            android:text="@string/tez"
-            android:layout_marginEnd="@dimen/spacing_normal"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+            android:orientation="vertical"
+            >
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/notary"
             android:textStyle="bold"
             android:textColor="@color/colorPrimary"
-            android:clipToPadding="false"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
-        -->
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/notary_tz1_edittext"
+                android:layout_width="wrap_content"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
 
         <include
             layout="@layout/multisig_form_card_info_signatories"
