@@ -428,46 +428,54 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             {
                 onStorageInfoComplete(false)
 
-                if (mSecureHashBalanceLoading)
+                if (mContractManagerLoading)
                 {
-                    startGetRequestBalance()
+                    startGetRequestManagerKey()
                 }
                 else
                 {
-                    onBalanceLoadComplete()
-
-                    //TODO we got to keep in mind there's an id already.
-                    if (mInitUpdateStorageLoading)
+                    onContractManagerLoadComplete()
+                    if (mSecureHashBalanceLoading)
                     {
-                        startInitUpdateStorageLoading()
+                        startGetRequestBalance()
                     }
                     else
                     {
-                        onInitEditLoadComplete(null)
+                        onBalanceLoadComplete()
 
-                        if (mFinalizeDelegateLoading)
+                        //TODO we got to keep in mind there's an id already.
+                        if (mInitUpdateStorageLoading)
                         {
-                            startFinalizeUpdateStorageLoading()
+                            startInitUpdateStorageLoading()
                         }
                         else
                         {
-                            onFinalizeLoadComplete(null)
+                            onInitEditLoadComplete(null)
 
-                            if (mInitUpdateMultisigStorageLoading)
+                            if (mFinalizeDelegateLoading)
                             {
-                                startInitUpdateMultisigStorageLoading()
+                                startFinalizeUpdateStorageLoading()
                             }
                             else
                             {
-                                onInitEditLoadMultisigComplete(error = null)
+                                onFinalizeLoadComplete(null)
 
-                                if (mFinalizeMultisigLoading)
+                                if (mInitUpdateMultisigStorageLoading)
                                 {
-                                    startFinalizeUpdateMultisigStorageLoading()
+                                    startInitUpdateMultisigStorageLoading()
                                 }
                                 else
                                 {
-                                    onFinalizeLoadComplete(null)
+                                    onInitEditLoadMultisigComplete(error = null)
+
+                                    if (mFinalizeMultisigLoading)
+                                    {
+                                        startFinalizeUpdateMultisigStorageLoading()
+                                    }
+                                    else
+                                    {
+                                        onFinalizeLoadComplete(null)
+                                    }
                                 }
                             }
                         }
@@ -1240,6 +1248,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         mContractManagerLoading = true
 
+        transferLoading(loading = true)
+
         val url = String.format(getString(R.string.manager_key_url), pkh())
 
         // Request a string response from the provided URL.
@@ -1261,7 +1271,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     }
                 })
 
-        jsonArrayRequest.tag = LOAD_SECURE_HASH_BALANCE_TAG
+        jsonArrayRequest.tag = LOAD_CONTRACT_MANAGER_TAG
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
     }
 
@@ -1313,6 +1323,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     private fun onContractManagerLoadComplete()
     {
         mContractManagerLoading = false
+
+        transferLoading(loading = false)
 
         if (mContractManager == pkhtz1())
         {
@@ -1488,16 +1500,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     warning_signatory_info.visibility = View.VISIBLE
                 }
 
-                if (!mContractManager.isNullOrEmpty() && mContractManager == pkhtz1())
+                if (!mContractManager.isNullOrEmpty())
                 {
-                    warning_not_a_notary_info.visibility = View.GONE
-                }
-                else
-                {
-                    warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
-                    warning_not_a_notary_info.visibility = View.VISIBLE
-                    // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
+                    if (mContractManager == pkhtz1())
+                    {
+                        warning_not_a_notary_info.visibility = View.GONE
+                    }
+                    else
+                    {
+                        warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
+                        warning_not_a_notary_info.visibility = View.VISIBLE
+                        // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
 
+                    }
                 }
 
                 switchToMultisigEditMode(mMultisigEditMode)
@@ -3526,14 +3541,6 @@ isTzAddressValid = true
     override fun onPublicKeyClicked(publicKey:String)
     {
         addSignatory(publicKey)
-
-/*
-val fragment = supportFragmentManager.findFragmentById(R.id.create_wallet_container)
-if (fragment != null && fragment is VerifyCreationWalletFragment) {
-val verifyCreationWalletFragment = fragment as VerifyCreationWalletFragment?
-verifyCreationWalletFragment!!.updateCard(word, position)
-}
-*/
     }
 
     override fun onDetach()
