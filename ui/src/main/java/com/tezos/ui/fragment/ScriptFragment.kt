@@ -102,6 +102,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
     private var mSecureHashBalanceLoading:Boolean = false
 
+    private var mContractManagerLoading:Boolean = false
+
     private var mStorageInfoLoading:Boolean = false
 
 
@@ -130,6 +132,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
     private var mSecureHashBalance:Long = -1L
 
+    private var mContractManager:String? = null
+
     private var mSig:String? = null
 
     companion object
@@ -147,6 +151,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         private const val CONTRACT_SCRIPT_INFO_TAG = "contract_script_info"
 
         private const val LOAD_SECURE_HASH_BALANCE_TAG = "load_secure_hash_balance"
+
+        private const val LOAD_CONTRACT_MANAGER_TAG = "load_contract_manager"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
@@ -169,6 +175,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         private const val EDIT_MULTISIG_MODE_KEY = "edit_multisig_mode_key"
 
         private const val BALANCE_LONG_KEY = "balance_long_key"
+
+        private const val CONTRACT_MANAGER_KEY = "contract_manager_key"
 
         private const val CONTRACT_SIG_KEY = "contract_sig_key"
 
@@ -382,6 +390,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             mSecureHashBalanceLoading = savedInstanceState.getBoolean(LOAD_SECURE_HASH_BALANCE_TAG)
 
+            mContractManagerLoading = savedInstanceState.getBoolean(LOAD_CONTRACT_MANAGER_TAG)
+
             mStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_INFO_TAG)
 
             mUpdateStorageFees = savedInstanceState.getLong(DELEGATE_FEE_KEY, -1)
@@ -401,6 +411,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             mMultisigEditMode = savedInstanceState.getBoolean(EDIT_MULTISIG_MODE_KEY, false)
 
             mSecureHashBalance = savedInstanceState.getLong(BALANCE_LONG_KEY, -1)
+
+            mContractManager = savedInstanceState.getString(CONTRACT_MANAGER_KEY, null)
 
             mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
@@ -1226,6 +1238,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     {
         cancelRequests(resetBooleans = true)
 
+        mContractManagerLoading = true
+
         val url = String.format(getString(R.string.manager_key_url), pkh())
 
         // Request a string response from the provided URL.
@@ -1233,42 +1247,21 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         {
             if (swipe_refresh_script_layout != null)
             {
-                val managerKey = it.getJSONObject(0)["manager"] as String
-                if (managerKey == pkhtz1())
-                {
-                    val k = "ok"
-                    val k2 = "ok"
-                    warning_not_a_notary_info.visibility = View.GONE
-                }
-                else
-                {
-                    val k = "ok"
-                    val k2 = "ok"
+                mContractManager = it.getJSONObject(0)["manager"] as String
 
-                    warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), managerKey)
-                    warning_not_a_notary_info.visibility = View.VISIBLE
-                    // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
-
-                }
-
-                //addContractAddressesFromJSON(it, pkh)
-
-                //reloadList()
-                //onDelegatedAddressesComplete(true)
-
-                //startGetRequestLoadMultisigAsSignatoryContracts()
+                onContractManagerLoadComplete()
             }
         },
                 Response.ErrorListener {
 
                     if (swipe_refresh_script_layout != null)
                     {
-                        //onDelegatedAddressesComplete(false)
+                        onContractManagerLoadComplete()
                         showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
                     }
                 })
 
-        //jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
+        jsonArrayRequest.tag = LOAD_SECURE_HASH_BALANCE_TAG
         VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
     }
 
@@ -1317,6 +1310,23 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
     }
 
+    private fun onContractManagerLoadComplete()
+    {
+        mContractManagerLoading = false
+
+        if (mContractManager == pkhtz1())
+        {
+            warning_not_a_notary_info.visibility = View.GONE
+        }
+        else
+        {
+            warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
+            warning_not_a_notary_info.visibility = View.VISIBLE
+            // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
+
+        }
+    }
+
     private fun addContractInfoFromJSON(answer: JSONObject)
     {
         if (answer.length() > 0)
@@ -1330,7 +1340,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         mStorageInfoLoading = false
         nav_progress?.visibility = View.GONE
 
-        //TODO handle the swipe refresh
+//TODO handle the swipe refresh
         swipe_refresh_script_layout?.isEnabled = true
         swipe_refresh_script_layout?.isRefreshing = false
 
@@ -1339,18 +1349,18 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
     private fun refreshTextUnderDelegation(animating:Boolean)
     {
-        //this method handles the data and loading texts
+//this method handles the data and loading texts
 
         if (mStorage != null)
         {
-            //check the JSON storage
+//check the JSON storage
             val mnemonicsData = Storage(activity!!).getMnemonics()
             val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
             val isDefaultContract = mStorage.toString() == defaultContract.toString()
 
             if (isDefaultContract)
             {
-                //This is a default contract
+//This is a default contract
 
                 update_storage_form_card?.visibility = View.GONE
 
@@ -1361,11 +1371,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.no_script_info)
 
-                //TODO show everything related to the removing
+//TODO show everything related to the removing
             }
             else if (getStorageSecureKeyHash() != null)
             {
-                //DAILY SPENDING LIMIT
+//DAILY SPENDING LIMIT
 
                 val secureKeyHash = getStorageSecureKeyHash()
 
@@ -1375,7 +1385,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 val dailySpendingLimitInTez = mutezToTez(dailySpendingLimit)
                 daily_spending_limit_edittext?.setText(dailySpendingLimitInTez)
 
-                //remaining_spending_limit.text = "You can still spend \$ " + dailySpendingLimitInTez + "on the \$ " + mutezToTez(listStorageData[0] as Long) + "limit of your SLC contract"
+//remaining_spending_limit.text = "You can still spend \$ " + dailySpendingLimitInTez + "on the \$ " + mutezToTez(listStorageData[0] as Long) + "limit of your SLC contract"
 
                 val remainingDailySpendingLimit = listStorageData[1] as Long
                 val remainingDailySpendingLimitInTez = mutezToTez(remainingDailySpendingLimit)
@@ -1442,7 +1452,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             }
             else if (getThreshold() != null)
             {
-                // MULTISIG CONTRACT
+// MULTISIG CONTRACT
 
                 update_multisig_form_card.visibility = View.VISIBLE
 
@@ -1454,8 +1464,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 storage_info_textview?.visibility = View.VISIBLE
                 storage_info_textview?.text = getString(R.string.multisig_script_info)
 
-                //need to check if our edpk is contained in the signatories
-                //even if he's contained, we need to check the threshold
+//need to check if our edpk is contained in the signatories
+//even if he's contained, we need to check the threshold
                 var threshold = getThreshold()
                 val numberAndSpotPair = getNumberAndSpot(mnemonicsData.pk)
                 if (numberAndSpotPair.first != -1)
@@ -1478,6 +1488,18 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     warning_signatory_info.visibility = View.VISIBLE
                 }
 
+                if (!mContractManager.isNullOrEmpty() && mContractManager == pkhtz1())
+                {
+                    warning_not_a_notary_info.visibility = View.GONE
+                }
+                else
+                {
+                    warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
+                    warning_not_a_notary_info.visibility = View.VISIBLE
+                    // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
+
+                }
+
                 switchToMultisigEditMode(mMultisigEditMode)
             }
 
@@ -1487,8 +1509,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
         else
         {
-            // mContract is null then just show "-"
-            //loading_textview will be hidden behind other textview
+// mContract is null then just show "-"
+//loading_textview will be hidden behind other textview
 
             loading_textview?.visibility = View.VISIBLE
             loading_textview?.text = "-"
@@ -1507,7 +1529,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             postParams.put("src", mnemonicsData.pkh)
 
-            //TODO it won't be pk with contract transfer
+//TODO it won't be pk with contract transfer
             postParams.put("src_pk", mnemonicsData.pk)
 
             var dstObjects = JSONArray()
@@ -1549,8 +1571,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 val sk = CryptoUtils.generateSk(mnemonics, "")
                 val signature = KeyPair.sign(sk, result)
 
-                //TODO verify signature
-                //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+//TODO verify signature
+//val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
 
                 val pLen = byteArrayThree.size
                 val sLen = signature.size
@@ -1627,34 +1649,34 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             val mnemonicsData = Storage(activity!!).getMnemonics()
             var postParams = JSONObject()
 
-            /*
-            postParams.put("src", mnemonicsData.pkh)
+/*
+postParams.put("src", mnemonicsData.pkh)
 
-            //TODO it won't be pk with contract transfer
-            postParams.put("src_pk", mnemonicsData.pk)
+//TODO it won't be pk with contract transfer
+postParams.put("src_pk", mnemonicsData.pk)
 
-            var dstObjects = JSONArray()
+var dstObjects = JSONArray()
 
-            var dstObject = JSONObject()
-            dstObject.put("dst", pkh())
+var dstObject = JSONObject()
+dstObject.put("dst", pkh())
 
-            dstObject.put("amount", 0.toLong())
+dstObject.put("amount", 0.toLong())
 
-            val mutezAmount = (mSpendingLimitAmount*1000000.0).roundToLong()
-            dstObject.put("transfer_amount", mutezAmount)
+val mutezAmount = (mSpendingLimitAmount*1000000.0).roundToLong()
+dstObject.put("transfer_amount", mutezAmount)
 
-            dstObject.put("fee", mUpdateStorageFees)
+dstObject.put("fee", mUpdateStorageFees)
 
-            dstObject.put("edsig", mSig)
+dstObject.put("edsig", mSig)
 
-            dstObject.put("tz3", retrieveTz3())
+dstObject.put("tz3", retrieveTz3())
 
-            dstObject.put("contract_type", "slc_update_storage")
+dstObject.put("contract_type", "slc_update_storage")
 
-            dstObjects.put(dstObject)
+dstObjects.put(dstObject)
 
-            postParams.put("dsts", dstObjects)
-            */
+postParams.put("dsts", dstObjects)
+*/
 
             if (/*isTransferPayloadValid(mUpdateMultisigStoragePayload!!, postParams)*/true)
             {
@@ -1673,8 +1695,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 val sk = CryptoUtils.generateSk(mnemonics, "")
                 val signature = KeyPair.sign(sk, result)
 
-                //TODO verify signature
-                //val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
+//TODO verify signature
+//val signVerified = KeyPair.verifySign(signature, pk, payload_hash)
 
                 val pLen = byteArrayThree.size
                 val sLen = signature.size
@@ -1742,7 +1764,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
     private fun onFinalizeLoadComplete(error: VolleyError?)
     {
-        // everything is over, there's no call to make
+// everything is over, there's no call to make
         cancelRequests(true)
 
         if (error != null)
@@ -1753,7 +1775,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
         else
         {
-            // there is no finish
+// there is no finish
             transferLoading(false)
         }
     }
@@ -1764,7 +1786,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         if (error != null || mClickCalculate)
         {
-            // stop the moulinette only if an error occurred
+// stop the moulinette only if an error occurred
             transferLoading(false)
             cancelRequests(true)
 
@@ -1782,7 +1804,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             if(error != null)
             {
-                //TODO handle the show snackbar
+//TODO handle the show snackbar
                 showSnackBar(error, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
             }
         }
@@ -1790,8 +1812,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         {
             transferLoading(false)
             cancelRequests(true)
-            // it's signed, looks like it worked.
-            //transferLoading(true)
+// it's signed, looks like it worked.
+//transferLoading(true)
         }
     }
 
@@ -1801,7 +1823,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         if (error != null || mClickCalculate)
         {
-            // stop the moulinette only if an error occurred
+// stop the moulinette only if an error occurred
             transferLoading(false)
             cancelRequests(true)
 
@@ -1819,7 +1841,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             if(error != null)
             {
-                //TODO handle the show snackbar
+//TODO handle the show snackbar
                 showSnackBar(error, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
             }
         }
@@ -1931,19 +1953,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         val signatoriesCount = argsb[0] as JSONObject
 
-        // TODO get the textfield as signatoryCount
+// TODO get the textfield as signatoryCount
         signatoriesCount.put("int", mThreshold.toString())
 
-        // on recupere le signatory ici
+// on recupere le signatory ici
 
-        // JSONArray
+// JSONArray
 
         val signatories = argsb[1] as JSONArray
         signatories.remove(0)
 
         for (it in mSignatoriesList)
         {
-            //val signatory = (argsb[1] as JSONArray)[0] as JSONObject
+//val signatory = (argsb[1] as JSONArray)[0] as JSONObject
 
             var decodedValue = Base58.decode(it)
             var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
@@ -1990,7 +2012,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         postParams.put("dsts", dstObjects)
 
-        //*
+//*
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
@@ -2000,7 +2022,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 mUpdateMultisigStoragePayload = answer.getString("result")
                 mUpdateMultisigStorageFees = answer.getLong("total_fee")
 
-                // we use this call to ask for payload and fees
+// we use this call to ask for payload and fees
                 if (mUpdateMultisigStoragePayload != null && mUpdateMultisigStorageFees != -1L && activity != null)
                 {
                     //TODO handle this one, need to make one for multisig
@@ -2028,8 +2050,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 onInitEditLoadMultisigComplete(it)
 
                 mClickCalculate = true
-                //Log.i("mTransferId", ""+mTransferId)
-                //Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
+//Log.i("mTransferId", ""+mTransferId)
+//Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
             }
         })
         {
@@ -2048,7 +2070,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         mInitUpdateMultisigStorageLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
 
-        //*/
+//*/
     }
 
 
@@ -2082,7 +2104,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         dstObject.put("entrypoint", "appel_clef_maitresse")
 
-        //TODO I need to insert a signature into parameters
+//TODO I need to insert a signature into parameters
 
         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val sk = CryptoUtils.generateSk(mnemonics, "")
@@ -2240,7 +2262,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 mUpdateStoragePayload = answer.getString("result")
                 mUpdateStorageFees = answer.getLong("total_fee")
 
-                // we use this call to ask for payload and fees
+// we use this call to ask for payload and fees
                 if (mUpdateStoragePayload != null && mUpdateStorageFees != -1L && activity != null)
                 {
                     onInitEditLoadComplete(null)
@@ -2277,8 +2299,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 onInitEditLoadComplete(it)
 
                 mClickCalculate = true
-                //Log.i("mTransferId", ""+mTransferId)
-                //Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
+//Log.i("mTransferId", ""+mTransferId)
+//Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
             }
         })
         {
@@ -2302,19 +2324,19 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     // volley
     private fun startPostRequestLoadInitRequestUpdateStorage()
     {
-        //val mnemonicsData = Storage(activity!!).getMnemonics()
-        //val url = String.format(getString(R.string.manager_key_url), mnemonicsData.pk)
+//val mnemonicsData = Storage(activity!!).getMnemonics()
+//val url = String.format(getString(R.string.manager_key_url), mnemonicsData.pk)
 
-        // TODO
-        // this call will be made to Mezos to ask for a transaction instance.
-        //
+// TODO
+// this call will be made to Mezos to ask for a transaction instance.
+//
 
         val pkh = pkh()
         if (pkh != null)
         {
             val url = String.format(getString(R.string.manager_key_url), pkh)
 
-            // Request a string response from the provided URL.
+// Request a string response from the provided URL.
             val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
             {
                 if (swipe_refresh_script_layout != null)
@@ -2336,78 +2358,78 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                         }
                     })
 
-            //jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
+//jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
 
-        /*
+/*
 
-        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
-        { answer ->
+val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
+{ answer ->
 
-            //TODO check if the JSON is fine then launch the 2nd request
-            if (swipe_refresh_script_layout != null)
-            {
-                mUpdateStoragePayload = answer.getString("result")
-                mUpdateStorageFees = answer.getLong("total_fee")
+//TODO check if the JSON is fine then launch the 2nd request
+if (swipe_refresh_script_layout != null)
+{
+mUpdateStoragePayload = answer.getString("result")
+mUpdateStorageFees = answer.getLong("total_fee")
 
-                // we use this call to ask for payload and fees
-                if (mUpdateStoragePayload != null && mUpdateStorageFees != -1L && activity != null)
-                {
-                    onInitEditLoadComplete(null)
+// we use this call to ask for payload and fees
+if (mUpdateStoragePayload != null && mUpdateStorageFees != -1L && activity != null)
+{
+    onInitEditLoadComplete(null)
 
-                    val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
-                    storage_fee_edittext?.setText(feeInTez.toString())
+    val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
+    storage_fee_edittext?.setText(feeInTez.toString())
 
-                    validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
+    validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
 
-                    if (isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
-                    {
-                        validateConfirmEditionButton(true)
-                    }
-                    else
-                    {
-                        // should no happen
-                        validateConfirmEditionButton(false)
-                    }
-                }
-                else
-                {
-                    val volleyError = VolleyError(getString(R.string.generic_error))
-                    onInitEditLoadComplete(volleyError)
-                    mClickCalculate = true
+    if (isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
+    {
+        validateConfirmEditionButton(true)
+    }
+    else
+    {
+        // should no happen
+        validateConfirmEditionButton(false)
+    }
+}
+else
+{
+    val volleyError = VolleyError(getString(R.string.generic_error))
+    onInitEditLoadComplete(volleyError)
+    mClickCalculate = true
 
-                    //the call failed
-                }
-            }
+    //the call failed
+}
+}
 
-        }, Response.ErrorListener
-        {
-            if (swipe_refresh_script_layout != null)
-            {
-                onInitEditLoadComplete(it)
+}, Response.ErrorListener
+{
+if (swipe_refresh_script_layout != null)
+{
+onInitEditLoadComplete(it)
 
-                mClickCalculate = true
-                //Log.i("mTransferId", ""+mTransferId)
-                //Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
-            }
-        })
-        {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String>
-            {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
-            }
-        }
+mClickCalculate = true
+//Log.i("mTransferId", ""+mTransferId)
+//Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
+}
+})
+{
+@Throws(AuthFailureError::class)
+override fun getHeaders(): Map<String, String>
+{
+val headers = HashMap<String, String>()
+headers["Content-Type"] = "application/json"
+return headers
+}
+}
 
-        cancelRequests(true)
+cancelRequests(true)
 
-        jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
-        mInitUpdateStorageLoading = true
-        VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
-        */
+jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
+mInitUpdateStorageLoading = true
+VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+*/
     }
 
     private fun getSalt():Int?
@@ -2499,8 +2521,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     {
         if (activity != null)
         {
-            //val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
-            //val theme = CustomTheme.fromBundle(themeBundle)
+//val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
+//val theme = CustomTheme.fromBundle(themeBundle)
             val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             if (validate)
@@ -2540,8 +2562,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     {
         if (activity != null)
         {
-            //val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
-            //val theme = CustomTheme.fromBundle(themeBundle)
+//val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
+//val theme = CustomTheme.fromBundle(themeBundle)
             val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
 
             if (validate)
@@ -2623,7 +2645,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                         i == R.id.daily_spending_limit_edittext && isSpendingLimitAmountDifferent(editable)
                         ||
                         i == R.id.threshold_edittext && !isThresholdAmountEquals(editable)
-                //TODO check about the threshold edittext
+//TODO check about the threshold edittext
                 )
                 {
                     if (i == R.id.daily_spending_limit_edittext)
@@ -2797,7 +2819,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     {
                         Instant.now().epochSecond
                     }
-            else
+                    else
                     {
                         System.currentTimeMillis()/1000
                     }
@@ -2965,7 +2987,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             val storageJSONObject = JSONObject(mStorage)
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
 
-            // get securekey hash
+// get securekey hash
             if (args != null)
             {
                 val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
@@ -3008,7 +3030,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         val numberAndSpotPair = getNumberAndSpot(mnemonicsData.pk)
         if (numberAndSpotPair.first != -1)
         {
-            // our edpk is in the list. great. it's fine if we have a threshold of 1.
+// our edpk is in the list. great. it's fine if we have a threshold of 1.
             if (threshold!!.toInt() == 1)
             {
                 return false
@@ -3080,8 +3102,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 /*
 if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
 {
-    mUpdateStorageAddress = public_address_edittext.text.toString()
-    isTzAddressValid = true
+mUpdateStorageAddress = public_address_edittext.text.toString()
+isTzAddressValid = true
 }
 */
             isTzAddressValid = true
@@ -3098,7 +3120,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         {
             try
             {
-                //val amount = java.lang.Double.parseDouble()
+//val amount = java.lang.Double.parseDouble()
                 val fee = storage_fee_edittext.text.toString().toDouble()
 
                 if (fee >= 0.000001f)
@@ -3126,7 +3148,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         {
             try
             {
-                //val amount = java.lang.Double.parseDouble()
+//val amount = java.lang.Double.parseDouble()
                 val fee = fee_limit_edittext.text.toString().toDouble()
 
                 if (fee >= 0.000001f)
@@ -3376,6 +3398,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
             requestQueue?.cancelAll(DELEGATE_FINALIZE_TAG)
             requestQueue?.cancelAll(MULTISIG_FINALIZE_TAG)
             requestQueue?.cancelAll(LOAD_SECURE_HASH_BALANCE_TAG)
+            requestQueue?.cancelAll(LOAD_CONTRACT_MANAGER_TAG)
             requestQueue?.cancelAll(CONTRACT_SCRIPT_INFO_TAG)
 
             if (resetBooleans)
@@ -3386,6 +3409,7 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
                 mFinalizeMultisigLoading = false
                 mStorageInfoLoading = false
                 mSecureHashBalanceLoading = false
+                mContractManagerLoading = false
             }
         }
     }
@@ -3402,6 +3426,8 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         outState.putBoolean(MULTISIG_FINALIZE_TAG, mFinalizeMultisigLoading)
 
         outState.putBoolean(LOAD_SECURE_HASH_BALANCE_TAG, mSecureHashBalanceLoading)
+
+        outState.putBoolean(LOAD_CONTRACT_MANAGER_TAG, mContractManagerLoading)
 
         outState.putBoolean(CONTRACT_SCRIPT_INFO_TAG, mStorageInfoLoading)
 
@@ -3424,6 +3450,8 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
         outState.putBoolean(EDIT_MULTISIG_MODE_KEY, mMultisigEditMode)
 
         outState.putLong(BALANCE_LONG_KEY, mSecureHashBalance)
+
+        outState.putString(CONTRACT_MANAGER_KEY, mContractManager)
 
         outState.putString(CONTRACT_SIG_KEY, mSig)
 
@@ -3477,14 +3505,14 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
 
             mSignatoriesList.size >= 10 ->
             {
-                //TODO show snackbar
-                //showSnackBar(null, getString(R.string.max_10_signatories))
+//TODO show snackbar
+//showSnackBar(null, getString(R.string.max_10_signatories))
             }
 
             mSignatoriesList.contains(signatory) ->
             {
-                //TODO show snackbar
-                //showSnackBar(null, getString(R.string.signatory_already_in_list))
+//TODO show snackbar
+//showSnackBar(null, getString(R.string.signatory_already_in_list))
             }
 
             else ->
@@ -3499,13 +3527,13 @@ if (Utils.isTzAddressValid(public_address_edittext.text!!.toString()))
     {
         addSignatory(publicKey)
 
-        /*
-        val fragment = supportFragmentManager.findFragmentById(R.id.create_wallet_container)
-        if (fragment != null && fragment is VerifyCreationWalletFragment) {
-            val verifyCreationWalletFragment = fragment as VerifyCreationWalletFragment?
-            verifyCreationWalletFragment!!.updateCard(word, position)
-        }
-        */
+/*
+val fragment = supportFragmentManager.findFragmentById(R.id.create_wallet_container)
+if (fragment != null && fragment is VerifyCreationWalletFragment) {
+val verifyCreationWalletFragment = fragment as VerifyCreationWalletFragment?
+verifyCreationWalletFragment!!.updateCard(word, position)
+}
+*/
     }
 
     override fun onDetach()
