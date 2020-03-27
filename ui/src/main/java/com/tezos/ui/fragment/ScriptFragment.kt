@@ -71,7 +71,6 @@ import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
-import kotlinx.android.synthetic.main.fragment_delegation.*
 import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.fragment_script.nav_progress
 import kotlinx.android.synthetic.main.multisig_form_card_info_signatories.*
@@ -1328,12 +1327,12 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         if (mContractManager == pkhtz1())
         {
-            warning_not_a_notary_info.visibility = View.GONE
+            warning_notary_info.visibility = View.GONE
         }
         else
         {
             warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
-            warning_not_a_notary_info.visibility = View.VISIBLE
+            warning_notary_info.visibility = View.VISIBLE
             // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
 
         }
@@ -1478,38 +1477,57 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
 //need to check if our edpk is contained in the signatories
 //even if he's contained, we need to check the threshold
-                var threshold = getThreshold()
                 val numberAndSpotPair = getNumberAndSpot(mnemonicsData.pk)
                 if (numberAndSpotPair.first != -1)
                 {
-                    // our edpk is in the list. great. it's fine if we have a threshold of 1.
+                    warning_signatory_textview.text = getString(R.string.warning_signatory_info)
+                    warning_signatory_info.visibility = View.VISIBLE
+
+                    // about ths signatories
+                    warning_threshold_info.visibility = View.VISIBLE
+
+                    var threshold = getThreshold()
                     if (threshold!!.toInt() == 1)
                     {
-                        warning_signatory_info.visibility = View.GONE
+                        warning_threshold_textview.text = getString(R.string.warning_no_need_signatories_info)
                     }
                     else
                     {
-                        // we are on the list but it needs another signatory
-                        warning_signatory_textview.text = String.format(getString(R.string.warning_other_signatories_info), threshold.toInt()-1)
-                        warning_signatory_info.visibility = View.VISIBLE
+                        warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_signatory_info), threshold.toInt()-1)
                     }
                 }
                 else
                 {
-                    warning_signatory_textview.text = String.format(getString(R.string.warning_not_signatory_info), threshold)
+                    warning_signatory_textview.text = getString(R.string.warning_not_signatory_info)
+                    warning_signatory_info.visibility = View.VISIBLE
+
+                    warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_not_signatory_info), getThreshold())
+                }
+
+                /*
+                if (threshold!!.toInt() == 1)
+                {
+                    warning_threshold_info.visibility = View.VISIBLE
+                    warning_threshold_textview.text =
+                }
+                else
+                {
+                    // we are on the list but it needs another signatory
+                    warning_signatory_textview.text = String.format(getString(R.string.warning_other_signatories_info), threshold.toInt()-1)
                     warning_signatory_info.visibility = View.VISIBLE
                 }
+                */
 
                 if (!mContractManager.isNullOrEmpty())
                 {
                     if (mContractManager == pkhtz1())
                     {
-                        warning_not_a_notary_info.visibility = View.GONE
+                        warning_notary_info.visibility = View.GONE
                     }
                     else
                     {
                         warning_not_a_notary_textview.text = String.format(getString(R.string.warning_not_the_notary_info), mContractManager)
-                        warning_not_a_notary_info.visibility = View.VISIBLE
+                        warning_notary_info.visibility = View.VISIBLE
                         // dans ces cas-là il faut afficher le texte qui dit qu'on est signataire mais on ne peut pas faire de modification
 
                     }
