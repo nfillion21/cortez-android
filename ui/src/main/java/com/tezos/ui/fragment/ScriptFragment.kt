@@ -194,7 +194,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         enum class MULTISIG_UPDATE_STORAGE_ENUM
         {
-            CONFIRM_UPDATE, REQUEST_TO_SIGNATORIES, NOTIFY_NOTARY, NEITHER_NOTARY_NOR_SIGNATORY
+            CONFIRM_UPDATE, REQUEST_TO_SIGNATORIES, NOTIFY_NOTARY, NEITHER_NOTARY_NOR_SIGNATORY, NO_NOTARY_YET
         }
     }
 
@@ -343,7 +343,22 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 }
                 else
                 {
-                    animateFabMultisigEditMode(editMode = true)
+                    // we need to check here if we got a notary.
+                    when (askingForMultisigButton())
+                    {
+                        MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
+                        {
+                            // not related to the contract, contact the notary
+                        }
+                        MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET ->
+                        {
+                            // fail message, retry loading notary
+                        }
+                        else ->
+                        {
+                            animateFabMultisigEditMode(editMode = true)
+                        }
+                    }
                 }
             }
         }
@@ -1594,7 +1609,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
     }
 
-    private fun newclass():MULTISIG_UPDATE_STORAGE_ENUM?
+    private fun askingForMultisigButton():MULTISIG_UPDATE_STORAGE_ENUM
     {
         // 1. on recupere le storage
         // --> on sait si on est signataire, et si on a assez de signature ou non.
@@ -1651,7 +1666,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             }
         }
 
-        return null
+        return MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET
     }
 
     // volley
@@ -3161,16 +3176,6 @@ VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsO
 
     private fun askingForSignatories():Boolean
     {
-        // this method is not enough to get the right button
-        // how can I get the right one
-        // first, you load the storage then the notary.
-        // you can't display anything
-
-        // ok we can't know at first.
-        // we will put an error message if the notary is not loaded first.
-
-        // or we just don't display it.
-
         var threshold = getThreshold()
 
         val mnemonicsData = Storage(activity!!).getMnemonics()
