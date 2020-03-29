@@ -191,6 +191,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                         putString(CONTRACT_PUBLIC_KEY, contract)
                     }
                 }
+
+        enum class MULTISIG_UPDATE_STORAGE_ENUM
+        {
+            CONFIRM_UPDATE, REQUEST_TO_SIGNATORIES, NOTIFY_NOTARY, NEITHER_NOTARY_NOR_SIGNATORY
+        }
     }
 
     interface OnUpdateScriptListener
@@ -1249,7 +1254,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         transferLoading(loading = true)
 
-        val url = String.format(getString(R.string.manager_key_url), pkh())
+        val url = String.format(getString(R.string.manager_key_url)+"k", pkh())
 
         // Request a string response from the provided URL.
         val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
@@ -1503,9 +1508,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
     private fun updateMultisigInfos()
     {
-
-//need to check if our edpk is contained in the signatories
-//even if he's contained, we need to check the threshold
         val numberAndSpotPair = getNumberAndSpot(pk()!!)
         if (numberAndSpotPair.first != -1)
         {
@@ -1590,6 +1592,66 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 notary_layout.visibility = View.GONE
             }
         }
+    }
+
+    private fun newclass():MULTISIG_UPDATE_STORAGE_ENUM?
+    {
+        // 1. on recupere le storage
+        // --> on sait si on est signataire, et si on a assez de signature ou non.
+
+        // confirm_update --> signatory && notary && threshold 1
+        // request_to_signatories --> signatory && signatory < threshold && notary || notary && not signatory
+        // notify_notary --> signatory && not notary
+        // nothgin --> not signatory, not notary.
+
+        val numberAndSpotPair = getNumberAndSpot(pk()!!)
+        if (numberAndSpotPair.first != -1)
+        {
+            var threshold = getThreshold()
+
+            if (!mContractManager.isNullOrEmpty())
+            {
+                return if (mContractManager == pkhtz1())
+                {
+                    if (threshold!!.toInt() == 1)
+                    {
+                        MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE
+                    }
+                    else
+                    {
+                        MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES
+                    }
+                }
+                else
+                {
+                    MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY
+                }
+            }
+            else
+            {
+                // we don't know yet if we are a notary, then we just wait.
+            }
+        }
+        else
+        {
+            if (!mContractManager.isNullOrEmpty())
+            {
+                return if (mContractManager == pkhtz1())
+                {
+                    MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES
+                }
+                else
+                {
+                    MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY
+                }
+            }
+            else
+            {
+                // we don't know yet if we are a notary, then we just wait.
+            }
+        }
+
+        return null
     }
 
     // volley
@@ -3099,6 +3161,16 @@ VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsO
 
     private fun askingForSignatories():Boolean
     {
+        // this method is not enough to get the right button
+        // how can I get the right one
+        // first, you load the storage then the notary.
+        // you can't display anything
+
+        // ok we can't know at first.
+        // we will put an error message if the notary is not loaded first.
+
+        // or we just don't display it.
+
         var threshold = getThreshold()
 
         val mnemonicsData = Storage(activity!!).getMnemonics()
