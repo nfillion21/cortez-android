@@ -1285,8 +1285,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         mContractManagerLoading = true
 
         transferLoading(loading = true)
-
-        val url = String.format(getString(R.string.manager_key_url)+"k", pkh())
+        //val randomNumber = Math.random()
+        val url = String.format(getString(R.string.manager_key_url), pkh())
 
         // Request a string response from the provided URL.
         val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
@@ -1303,7 +1303,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     if (swipe_refresh_script_layout != null)
                     {
                         onContractManagerLoadComplete(it)
-                        showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                        //showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
                         mClickReloadNotary = true
                     }
@@ -1387,7 +1387,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
         else
         {
-            transferLoading(false)
             transferLoading(loading = false)
             cancelRequests(true)
 
@@ -1594,6 +1593,10 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 warning_notary_info.visibility = View.VISIBLE
 
                 notary_tz1_edittext.setText(mContractManager)
+                notary_tz1_edittext.isEnabled = true
+                notary_tz1_edittext.isFocusable = false
+                notary_tz1_edittext.isClickable = false
+                notary_tz1_edittext.isLongClickable = false
 
                 //notary_layout.visibility = View.VISIBLE
 
@@ -1636,6 +1639,12 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 warning_notary_info.visibility = View.VISIBLE
 
                 notary_tz1_edittext.setText(mContractManager)
+                notary_tz1_edittext.isEnabled = true
+
+                notary_tz1_edittext.isFocusable = false
+                notary_tz1_edittext.isClickable = false
+                notary_tz1_edittext.isLongClickable = false
+                //notary_tz1_edittext.hint = getString(R.string.click_to_reload)
 
                 //notary_layout.visibility = View.VISIBLE
 
@@ -3645,9 +3654,9 @@ isTzAddressValid = true
 
         outState.putLong(DELEGATE_FEE_KEY, mUpdateStorageFees)
 
-        outState.putBoolean(RELOAD_NOTARY_KEY, mClickCalculate)
+        outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
 
-        outState.putBoolean(FEES_CALCULATE_KEY, mClickReloadNotary)
+        outState.putBoolean(RELOAD_NOTARY_KEY, mClickReloadNotary)
 
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
 
