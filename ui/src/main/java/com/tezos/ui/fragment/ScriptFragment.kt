@@ -348,11 +348,13 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     {
                         MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
                         {
-                            // not related to the contract, contact the notary
+                            // not related to the contract, please contact the notary
+                            mCallback?.showSnackBar(getString(R.string.alert_neither_notary_nor_signatory), ContextCompat.getColor(activity!!, R.color.tz_accent), ContextCompat.getColor(context!!, R.color.tz_light))
                         }
                         MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET ->
                         {
                             // fail message, retry loading notary
+                            mCallback?.showSnackBar(getString(R.string.alert_reload_the_notary), ContextCompat.getColor(activity!!, R.color.tz_accent), ContextCompat.getColor(context!!, R.color.tz_light))
                         }
                         else ->
                         {
@@ -1269,7 +1271,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         transferLoading(loading = true)
 
-        val url = String.format(getString(R.string.manager_key_url)+"k", pkh())
+        val url = String.format(getString(R.string.manager_key_url), pkh())
 
         // Request a string response from the provided URL.
         val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>

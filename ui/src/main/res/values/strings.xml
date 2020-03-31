@@ -186,6 +186,8 @@
     <string name="warning_not_notary_signatory_info">You are not the notary of this multisig contract, however as a signatory you can notify the notary for an update of the storage.</string>
     <string name="warning_not_notary_not_signatory_info">You are neither the notary nor a signatory of this multisig contract. Please contact them to update the contract storage.</string>
 
+    <string name="alert_neither_notary_nor_signatory">You are neither the notary nor a signatory of this multisig contract. Please contact the notary.</string>
+    <string name="alert_reload_the_notary">Please reload the notary.</string>
 
     <!--
     <string name="warning_notary_signatory_manager_info">The contract storage indicates your public key is part of the signatories list but you will need to contact the contract notary in order to update the threshold and/or the signatories.\n\nThe contract notary address:\n %1$s</string>
