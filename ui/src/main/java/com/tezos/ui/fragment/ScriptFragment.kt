@@ -120,6 +120,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
     private var mClickCalculate:Boolean = false
 
+    private var mClickReloadNotary:Boolean = false
+
     private var mStorage:String? = null
     private var mWalletEnabled:Boolean = false
 
@@ -160,6 +162,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         private const val DELEGATE_FEE_KEY = "delegate_fee_key"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
+
+        private const val RELOAD_NOTARY_KEY = "reload_notary_key"
 
         private const val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
@@ -419,6 +423,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
+            mClickReloadNotary = savedInstanceState.getBoolean(RELOAD_NOTARY_KEY, false)
+
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
@@ -451,11 +457,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
                 if (mContractManagerLoading)
                 {
-                    startGetRequestManagerKey()
+                    startNotaryLoading()
                 }
                 else
                 {
-                    onContractManagerLoadComplete()
+                    onContractManagerLoadComplete(error = null)
                     if (mSecureHashBalanceLoading)
                     {
                         startGetRequestBalance()
@@ -1068,6 +1074,15 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         startGetRequestLoadContractInfo()
     }
 
+    private fun startNotaryLoading()
+    {
+        transferLoading(true)
+
+        putNotaryToNegative()
+
+        startGetRequestManagerKey()
+    }
+
     private fun startInitUpdateStorageLoading()
     {
         // we need to inform the UI we are going to call transfer
@@ -1163,7 +1178,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     else if (getThreshold() != null)
                     {
                         // here I need to check the user is notary or signatory only.
-                        startGetRequestManagerKey()
+                        startNotaryLoading()
                     }
                     else
                     {
@@ -1271,7 +1286,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         transferLoading(loading = true)
 
-        val url = String.format(getString(R.string.manager_key_url), pkh())
+        val url = String.format(getString(R.string.manager_key_url)+"k", pkh())
 
         // Request a string response from the provided URL.
         val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
@@ -1280,15 +1295,17 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             {
                 mContractManager = it.getJSONObject(0)["manager"] as String
 
-                onContractManagerLoadComplete()
+                onContractManagerLoadComplete(error = null)
             }
         },
                 Response.ErrorListener {
 
                     if (swipe_refresh_script_layout != null)
                     {
-                        onContractManagerLoadComplete()
+                        onContractManagerLoadComplete(it)
                         showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+
+                        mClickReloadNotary = true
                     }
                 })
 
@@ -1341,13 +1358,41 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
     }
 
-    private fun onContractManagerLoadComplete()
+    private fun onContractManagerLoadComplete(error: VolleyError?)
     {
         mContractManagerLoading = false
 
-        transferLoading(loading = false)
+        if (error != null || mClickReloadNotary)
+        {
+// stop the moulinette only if an error occurred
+            transferLoading(false)
+            cancelRequests(true)
 
-        updateMultisigInfos()
+            mContractManager = null
+
+            notary_tz1_edittext.isEnabled = true
+            notary_tz1_edittext.isFocusable = false
+            notary_tz1_edittext.isClickable = false
+            notary_tz1_edittext.isLongClickable = false
+            notary_tz1_edittext.hint = getString(R.string.click_to_reload)
+
+            notary_tz1_edittext.setOnClickListener {
+                startNotaryLoading()
+            }
+
+            if (error != null)
+            {
+                showSnackBar(error, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            }
+        }
+        else
+        {
+            transferLoading(false)
+            transferLoading(loading = false)
+            cancelRequests(true)
+
+            updateMultisigInfos()
+        }
     }
 
     private fun addContractInfoFromJSON(answer: JSONObject)
@@ -1550,7 +1595,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
                 notary_tz1_edittext.setText(mContractManager)
 
-                notary_layout.visibility = View.VISIBLE
+                //notary_layout.visibility = View.VISIBLE
 
                 if (mContractManager == pkhtz1())
                 {
@@ -1573,7 +1618,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             {
                 warning_notary_info.visibility = View.GONE
 
-                notary_layout.visibility = View.GONE
+                //notary_layout.visibility = View.GONE
             }
         }
         else
@@ -1592,7 +1637,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
                 notary_tz1_edittext.setText(mContractManager)
 
-                notary_layout.visibility = View.VISIBLE
+                //notary_layout.visibility = View.VISIBLE
 
                 if (mContractManager == pkhtz1())
                 {
@@ -1606,7 +1651,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             else
             {
                 warning_notary_info.visibility = View.GONE
-                notary_layout.visibility = View.GONE
+                //notary_layout.visibility = View.GONE
             }
         }
     }
@@ -2642,6 +2687,17 @@ VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsO
         mUpdateStoragePayload = null
     }
 
+    private fun putNotaryToNegative()
+    {
+        notary_tz1_edittext?.setText("")
+
+        mClickReloadNotary = false
+        notary_tz1_edittext?.isEnabled = false
+        notary_tz1_edittext?.hint = getString(R.string.neutral)
+
+        mContractManager = null
+    }
+
     private fun putFeesMultisigToNegative()
     {
         fee_limit_edittext?.setText("")
@@ -3589,7 +3645,9 @@ isTzAddressValid = true
 
         outState.putLong(DELEGATE_FEE_KEY, mUpdateStorageFees)
 
-        outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
+        outState.putBoolean(RELOAD_NOTARY_KEY, mClickCalculate)
+
+        outState.putBoolean(FEES_CALCULATE_KEY, mClickReloadNotary)
 
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
 
