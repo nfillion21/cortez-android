@@ -729,8 +729,8 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
         val dataPacker = Packer(o)
         dataVisitable.accept(dataPacker)
 
+        /*
         val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
 
         val dataHex = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e981043856000707000105050707008092f4010a0000001600000a7b0eb19b1e5f5e451baeca5e9304e6af922f2b".hexToByteArray()
 
@@ -747,6 +747,7 @@ class AddMultisigActivity : BaseSecureActivity(), AddSignatoryDialogFragment.OnS
 
         val dataCompare2 = "0x05070707070a000000049caecab90a0000001601186c11e42901924c6de8a5e9c0ed00e981043856000707000105050707008092f4010a0000001600000a7b0eb19b1e5f5e451baeca5e9304e6af922f2b".hexToByteArray()
 
+        */
 
         // END OF PACK BYTES TO SIGN
 

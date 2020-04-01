@@ -757,8 +757,53 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             //TODO check if we are allowed to modify or we need to ask for a change.
 
+            when (askingForMultisigButton())
+            {
+                MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+                {
+                    update_multisig_button_relative_layout.visibility = View.VISIBLE
+                    request_update_multisig_button_relative_layout.visibility = View.GONE
+                    //notify gone
+                }
 
-            if (askingForSignatories())
+                MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+                {
+                    update_multisig_button_relative_layout.visibility = View.GONE
+                    request_update_multisig_button_relative_layout.visibility = View.VISIBLE
+                    //notify gone
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
+                {
+                    update_multisig_button_relative_layout.visibility = View.GONE
+                    request_update_multisig_button_relative_layout.visibility = View.GONE
+                    //notify visible
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET ->
+                {
+                    //should not happen, the button should be locked
+                    //no-op
+                    update_multisig_button_relative_layout.visibility = View.GONE
+                    request_update_multisig_button_relative_layout.visibility = View.GONE
+                    //notify gone
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
+                {
+                    //could happen if this user is out of the multisig contract
+                    update_multisig_button_relative_layout.visibility = View.GONE
+                    request_update_multisig_button_relative_layout.visibility = View.GONE
+                    //notify gone
+                }
+                else ->
+                {
+                    //no-op
+                }
+            }
+
+            /*
+            if (askingForMultisigButton())
             {
                 update_multisig_button_relative_layout.visibility = View.GONE
                 request_update_multisig_button_relative_layout.visibility = View.VISIBLE
@@ -768,6 +813,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 update_multisig_button_relative_layout.visibility = View.VISIBLE
                 request_update_multisig_button_relative_layout.visibility = View.GONE
             }
+            */
 
             gas_multisig_textview.visibility = View.VISIBLE
             gas_multisig_layout.visibility = View.VISIBLE
@@ -1106,16 +1152,35 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         // validatePay cannot be valid if there is no fees
         validateConfirmEditionMultisigButton(false)
 
-
         // at this point, we will update the good request.
 
-        if (askingForSignatories())
+        when (askingForMultisigButton())
         {
-            startPostRequestLoadInitRequestUpdateStorage()
-        }
-        else
-        {
-            startPostRequestLoadInitUpdateMultisigStorage()
+            MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+            {
+                startPostRequestLoadInitUpdateMultisigStorage()
+            }
+
+            MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+            {
+                startPostRequestLoadInitRequestUpdateStorage()
+            }
+
+            MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
+            {
+                startPostRequestLoadInitNotifyUpdateStorage()
+            }
+
+            MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
+            {
+                // not related to the contract, please contact the notary
+                mCallback?.showSnackBar(getString(R.string.alert_neither_notary_nor_signatory), ContextCompat.getColor(activity!!, R.color.tz_accent), ContextCompat.getColor(context!!, R.color.tz_light))
+            }
+            MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET ->
+            {
+                // fail message, retry loading notary
+                mCallback?.showSnackBar(getString(R.string.alert_reload_the_notary), ContextCompat.getColor(activity!!, R.color.tz_accent), ContextCompat.getColor(context!!, R.color.tz_light))
+            }
         }
     }
 
@@ -2532,13 +2597,6 @@ postParams.put("dsts", dstObjects)
     // volley
     private fun startPostRequestLoadInitRequestUpdateStorage()
     {
-//val mnemonicsData = Storage(activity!!).getMnemonics()
-//val url = String.format(getString(R.string.manager_key_url), mnemonicsData.pk)
-
-// TODO
-// this call will be made to Mezos to ask for a transaction instance.
-//
-
         val pkh = pkh()
         if (pkh != null)
         {
@@ -2569,75 +2627,41 @@ postParams.put("dsts", dstObjects)
 //jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
-
-/*
-
-val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
-{ answer ->
-
-//TODO check if the JSON is fine then launch the 2nd request
-if (swipe_refresh_script_layout != null)
-{
-mUpdateStoragePayload = answer.getString("result")
-mUpdateStorageFees = answer.getLong("total_fee")
-
-// we use this call to ask for payload and fees
-if (mUpdateStoragePayload != null && mUpdateStorageFees != -1L && activity != null)
-{
-    onInitEditLoadComplete(null)
-
-    val feeInTez = mUpdateStorageFees?.toDouble()/1000000.0
-    storage_fee_edittext?.setText(feeInTez.toString())
-
-    validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
-
-    if (isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
-    {
-        validateConfirmEditionButton(true)
     }
-    else
+
+    // volley
+    private fun startPostRequestLoadInitNotifyUpdateStorage()
     {
-        // should no happen
-        validateConfirmEditionButton(false)
-    }
-}
-else
-{
-    val volleyError = VolleyError(getString(R.string.generic_error))
-    onInitEditLoadComplete(volleyError)
-    mClickCalculate = true
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.manager_key_url), pkh)
 
-    //the call failed
-}
-}
+// Request a string response from the provided URL.
+            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            {
+                if (swipe_refresh_script_layout != null)
+                {
+                    //addContractAddressesFromJSON(it, pkh)
 
-}, Response.ErrorListener
-{
-if (swipe_refresh_script_layout != null)
-{
-onInitEditLoadComplete(it)
+                    //reloadList()
+                    //onDelegatedAddressesComplete(true)
 
-mClickCalculate = true
-//Log.i("mTransferId", ""+mTransferId)
-//Log.i("mUpdateStoragePayload", ""+mUpdateStoragePayload)
-}
-})
-{
-@Throws(AuthFailureError::class)
-override fun getHeaders(): Map<String, String>
-{
-val headers = HashMap<String, String>()
-headers["Content-Type"] = "application/json"
-return headers
-}
-}
+                    //startGetRequestLoadMultisigAsSignatoryContracts()
+                }
+            },
+                    Response.ErrorListener {
 
-cancelRequests(true)
+                        if (swipe_refresh_script_layout != null)
+                        {
+                            //onDelegatedAddressesComplete(false)
+                            //showSnackbarError(it)
+                        }
+                    })
 
-jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
-mInitUpdateStorageLoading = true
-VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
-*/
+//jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
     }
 
     private fun getSalt():Int?
@@ -3241,6 +3265,7 @@ VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsO
         return null
     }
 
+    /*
     private fun askingForSignatories():Boolean
     {
         var threshold = getThreshold()
@@ -3258,6 +3283,7 @@ VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsO
 
         return true
     }
+    */
 
     private fun getCounter(): String?
     {
