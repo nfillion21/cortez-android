@@ -763,21 +763,21 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 {
                     update_multisig_button_relative_layout.visibility = View.VISIBLE
                     request_update_multisig_button_relative_layout.visibility = View.GONE
-                    //notify gone
+                    notify_update_multisig_button_relative_layout.visibility = View.GONE
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
                 {
                     update_multisig_button_relative_layout.visibility = View.GONE
                     request_update_multisig_button_relative_layout.visibility = View.VISIBLE
-                    //notify gone
+                    notify_update_multisig_button_relative_layout.visibility = View.GONE
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
                 {
                     update_multisig_button_relative_layout.visibility = View.GONE
                     request_update_multisig_button_relative_layout.visibility = View.GONE
-                    //notify visible
+                    notify_update_multisig_button_relative_layout.visibility = View.VISIBLE
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET ->
@@ -786,7 +786,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     //no-op
                     update_multisig_button_relative_layout.visibility = View.GONE
                     request_update_multisig_button_relative_layout.visibility = View.GONE
-                    //notify gone
+                    notify_update_multisig_button_relative_layout.visibility = View.GONE
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
@@ -794,7 +794,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     //could happen if this user is out of the multisig contract
                     update_multisig_button_relative_layout.visibility = View.GONE
                     request_update_multisig_button_relative_layout.visibility = View.GONE
-                    //notify gone
+                    notify_update_multisig_button_relative_layout.visibility = View.GONE
                 }
                 else ->
                 {
@@ -835,6 +835,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             update_multisig_button_relative_layout?.visibility = View.GONE
             request_update_multisig_button_relative_layout.visibility = View.GONE
+            notify_update_multisig_button_relative_layout.visibility = View.GONE
 
             gas_multisig_layout.visibility = View.GONE
             gas_multisig_textview?.visibility = View.GONE
@@ -1597,23 +1598,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 storage_info_textview?.text = getString(R.string.multisig_script_info)
 
                 updateMultisigInfos()
-
-                /*
-                if (!mContractManager.isNullOrEmpty())
-                {
-                    warning_notary_info.visibility = View.VISIBLE
-
-                    if (mContractManager == pkhtz1())
-                    {
-                        warning_notary_textview.text = String.format(getString(R.string.warning_notary_threshold_signatory_info), mContractManager)
-                    }
-                    else
-                    {
-                        warning_notary_textview.text = String.format(getString(R.string.warning_not_notary_not_signatory_info), mContractManager)
-                        warning_notary_info.visibility = View.VISIBLE
-                    }
-                }
-                */
 
                 switchToMultisigEditMode(mMultisigEditMode)
             }
@@ -2834,6 +2818,17 @@ postParams.put("dsts", dstObjects)
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
                 }
 
+
+                notify_update_multisig_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                notify_update_multisig_button_layout?.isEnabled = true
+                notify_update_multisig_button_layout?.background = makeSelector(theme)
+
+                val drawablesNotify = notify_update_multisig_button?.compoundDrawables
+                if (drawablesNotify != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawablesNotify[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                }
             }
             else
             {
@@ -2859,6 +2854,19 @@ postParams.put("dsts", dstObjects)
                 if (drawablesRequest != null)
                 {
                     val wrapDrawable = DrawableCompat.wrap(drawablesRequest[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+                }
+
+
+                notify_update_multisig_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                notify_update_multisig_button_layout?.isEnabled = false
+
+                notify_update_multisig_button_layout?.background = makeSelector(greyTheme)
+
+                val drawablesNotify = notify_update_multisig_button?.compoundDrawables
+                if (drawablesNotify != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawablesNotify[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
                 }
             }
