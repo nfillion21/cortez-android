@@ -1456,7 +1456,10 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             transferLoading(loading = false)
             cancelRequests(true)
 
-            updateMultisigInfos()
+            if (!getThreshold().isNullOrEmpty())
+            {
+                updateMultisigInfos()
+            }
         }
     }
 

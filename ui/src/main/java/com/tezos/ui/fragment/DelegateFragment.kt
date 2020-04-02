@@ -318,38 +318,47 @@ class DelegateFragment : Fragment()
                 {
                     onStorageInfoComplete(true)
 
-                    if (mInitRemoveDelegateLoading)
+                    if (mContractManagerLoading)
                     {
-                        startInitRemoveDelegateLoading()
+                        startNotaryLoading()
                     }
                     else
                     {
-                        onInitRemoveDelegateLoadComplete(null)
+                        onContractManagerLoadComplete(error = null)
 
-                        if (mFinalizeRemoveDelegateLoading)
+                        if (mInitRemoveDelegateLoading)
                         {
-                            startFinalizeRemoveDelegateLoading()
+                            startInitRemoveDelegateLoading()
                         }
                         else
                         {
-                            onFinalizeDelegationLoadComplete(null)
+                            onInitRemoveDelegateLoadComplete(null)
 
-                            //TODO we got to keep in mind there's an id already.
-                            if (mInitDelegateLoading)
+                            if (mFinalizeRemoveDelegateLoading)
                             {
-                                startInitDelegationLoading()
+                                startFinalizeRemoveDelegateLoading()
                             }
                             else
                             {
-                                onInitDelegateLoadComplete(null)
+                                onFinalizeDelegationLoadComplete(null)
 
-                                if (mFinalizeDelegateLoading)
+                                //TODO we got to keep in mind there's an id already.
+                                if (mInitDelegateLoading)
                                 {
-                                    startFinalizeAddDelegateLoading()
+                                    startInitDelegationLoading()
                                 }
                                 else
                                 {
-                                    onFinalizeDelegationLoadComplete(null)
+                                    onInitDelegateLoadComplete(null)
+
+                                    if (mFinalizeDelegateLoading)
+                                    {
+                                        startFinalizeAddDelegateLoading()
+                                    }
+                                    else
+                                    {
+                                        onFinalizeDelegationLoadComplete(null)
+                                    }
                                 }
                             }
                         }
@@ -712,7 +721,10 @@ class DelegateFragment : Fragment()
             transferLoading(loading = false)
             cancelRequests(true)
 
-            updateMultisigInfos()
+            if (!getThreshold().isNullOrEmpty())
+            {
+                updateMultisigInfos()
+            }
         }
     }
 
