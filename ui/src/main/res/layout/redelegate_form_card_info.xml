@@ -7,6 +7,39 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
+        android:id="@+id/notary_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/notary"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/notary_tz1_edittext"
+            android:layout_width="wrap_content"
+            android:minWidth="@dimen/spacing_huge"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:hint="@string/one"
+            android:enabled="true"
+            android:inputType="numberDecimal"
+            android:focusableInTouchMode="false"
+            android:clickable="false"
+            android:longClickable="false"
+            android:focusable="false"
+            android:textColorHint="@color/tz_placeholder"
+            android:textSize="@dimen/standard_item_text_size" />
+
+    </LinearLayout>
+    <LinearLayout
         android:id="@+id/redelegate_address_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

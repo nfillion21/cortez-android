@@ -66,7 +66,6 @@ import kotlinx.android.synthetic.main.fragment_delegate.update_storage_button_la
 import kotlinx.android.synthetic.main.fragment_delegate.update_storage_form_card
 import kotlinx.android.synthetic.main.fragment_script.*
 import kotlinx.android.synthetic.main.redelegate_form_card_info.*
-import kotlinx.android.synthetic.main.update_storage_form_card.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -100,6 +99,12 @@ class DelegateFragment : Fragment()
     private var mStorage:String? = null
 
     private var mSig:String? = null
+
+    private var mContractManager:String? = null
+
+    private var mContractManagerLoading:Boolean = false
+
+    private var mClickReloadNotary:Boolean = false
 
     data class Contract
     (
@@ -187,6 +192,12 @@ class DelegateFragment : Fragment()
 
         private const val CONTRACT_SIG_KEY = "contract_sig_key"
 
+        private const val CONTRACT_MANAGER_KEY = "contract_manager_key"
+
+        private const val LOAD_CONTRACT_MANAGER_TAG = "load_contract_manager"
+
+        private const val RELOAD_NOTARY_KEY = "reload_notary_key"
+
         private const val SIGNATORIES_CAPACITY = 10
 
         @JvmStatic
@@ -269,6 +280,8 @@ class DelegateFragment : Fragment()
 
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
+            mClickReloadNotary = savedInstanceState.getBoolean(RELOAD_NOTARY_KEY, false)
+
             mWalletEnabled = savedInstanceState.getBoolean(WALLET_AVAILABLE_KEY, false)
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
@@ -276,6 +289,10 @@ class DelegateFragment : Fragment()
             mStorageInfoLoading = savedInstanceState.getBoolean(STORAGE_INFO_TAG)
 
             mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
+
+            mContractManagerLoading = savedInstanceState.getBoolean(LOAD_CONTRACT_MANAGER_TAG)
+
+            mContractManager = savedInstanceState.getString(CONTRACT_MANAGER_KEY, null)
 
             val contractBundle = savedInstanceState.getBundle(CONTRACT_DATA_KEY)
             if (contractBundle != null)
@@ -501,6 +518,8 @@ class DelegateFragment : Fragment()
 
                         onContractInfoComplete(isMnemonicsEmpty)
 
+                        //TODO let's see how I handle that in scriptFragment
+
                         if (!isMnemonicsEmpty)
                         {
                             //TODO need to check here if we need to get salt
@@ -550,48 +569,39 @@ class DelegateFragment : Fragment()
                     addStorageInfoFromJSON(it)
                     onStorageInfoComplete(true)
 
-                    val hasMnemonics = Storage(activity!!).hasMnemonics()
-                    if (hasMnemonics)
+
+                    //TODO verification ici
+
+                    if (getThreshold() != null)
                     {
-                        val seed = Storage(activity!!).getMnemonics()
+                        // here I need to check the user is notary or signatory only.
+                        startNotaryLoading()
+                    }
+                    else
+                    {
+                        //if (getStorageSecureKeyHash() != null)
 
-                        if (seed.mnemonics.isNotEmpty())
+                        val hasMnemonics = Storage(activity!!).hasMnemonics()
+                        if (hasMnemonics)
                         {
-                            //TODO need to check here if we need to get salt
-                            //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
+                            val seed = Storage(activity!!).getMnemonics()
 
-                            if (mContract?.delegate != null)
+                            if (seed.mnemonics.isNotEmpty())
                             {
-                                startInitRemoveDelegateLoading()
-                            }
-                            else
-                            {
-                                validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                                //TODO need to check here if we need to get salt
+                                //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
+
+                                if (mContract?.delegate != null)
+                                {
+                                    startInitRemoveDelegateLoading()
+                                }
+                                else
+                                {
+                                    validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                                }
                             }
                         }
                     }
-
-                    /*
-                    val mnemonicsData = Storage(activity!!).getMnemonics()
-                    val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
-                    val isDefaultContract = mStorage.toString() == defaultContract.toString()
-
-                    if (mStorage != null && !isDefaultContract)
-                    {
-                        validateConfirmEditionButton(isInputDataValid() && isDelegateFeeValid())
-
-                        startGetRequestBalance()
-                    }
-
-                    else
-                    {
-                        //TODO I don't need to forge a transfer for now
-                        //TODO hide the whole thing
-
-                        //I need the right data inputs before.
-                        //startInitRemoveDelegateLoading()
-                    }
-                    */
                 }
             },
                     Response.ErrorListener {
@@ -623,6 +633,197 @@ class DelegateFragment : Fragment()
             jsonArrayRequest.tag = STORAGE_INFO_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
+    }
+
+    private fun startNotaryLoading()
+    {
+        transferLoading(true)
+
+        putNotaryToNegative()
+
+        startGetRequestManagerKey()
+    }
+
+    // volley
+    private fun startGetRequestManagerKey()
+    {
+        cancelRequests(resetBooleans = true)
+
+        mContractManagerLoading = true
+
+        transferLoading(loading = true)
+        //val randomNumber = Math.random()
+        val url = String.format(getString(R.string.manager_key_url), pkh())
+
+        // Request a string response from the provided URL.
+        val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+        {
+            if (swipe_refresh_layout != null)
+            {
+                mContractManager = it.getJSONObject(0)["manager"] as String
+
+                onContractManagerLoadComplete(error = null)
+            }
+        },
+                Response.ErrorListener {
+
+                    if (swipe_refresh_script_layout != null)
+                    {
+                        onContractManagerLoadComplete(it)
+
+                        mClickReloadNotary = true
+                    }
+                })
+
+        jsonArrayRequest.tag = LOAD_CONTRACT_MANAGER_TAG
+        VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+    }
+
+
+    private fun onContractManagerLoadComplete(error: VolleyError?)
+    {
+        mContractManagerLoading = false
+
+        if (error != null || mClickReloadNotary)
+        {
+// stop the moulinette only if an error occurred
+            transferLoading(false)
+            cancelRequests(true)
+
+            mContractManager = null
+
+            notary_tz1_edittext.isEnabled = true
+            notary_tz1_edittext.isFocusable = false
+            notary_tz1_edittext.isClickable = false
+            notary_tz1_edittext.isLongClickable = false
+            notary_tz1_edittext.hint = getString(R.string.click_to_reload)
+
+            notary_tz1_edittext.setOnClickListener {
+                startNotaryLoading()
+            }
+
+            if (error != null)
+            {
+                showSnackBar(error, null)
+            }
+        }
+        else
+        {
+            transferLoading(loading = false)
+            cancelRequests(true)
+
+            updateMultisigInfos()
+        }
+    }
+
+
+    private fun updateMultisigInfos()
+    {
+        val numberAndSpotPair = getNumberAndSpot(pk()!!)
+        if (numberAndSpotPair.first != -1)
+        {
+            signatory_textview.text = getString(R.string.warning_signatory_info)
+            signatory_info.visibility = View.VISIBLE
+
+            // about ths signatories
+            threshold_info.visibility = View.VISIBLE
+
+            var threshold = getThreshold()
+            if (threshold!!.toInt() == 1)
+            {
+                threshold_textview.text = getString(R.string.warning_no_need_signatories_info)
+            }
+            else
+            {
+                threshold_textview.text = String.format(getString(R.string.warning_need_signatories_signatory_info), threshold.toInt()-1)
+            }
+
+            if (!mContractManager.isNullOrEmpty())
+            {
+                notary_info.visibility = View.VISIBLE
+
+                notary_tz1_edittext.setText(mContractManager)
+                notary_tz1_edittext.isEnabled = true
+                notary_tz1_edittext.isFocusable = false
+                notary_tz1_edittext.isClickable = false
+                notary_tz1_edittext.isLongClickable = false
+
+                //notary_layout.visibility = View.VISIBLE
+
+                if (mContractManager == pkhtz1())
+                {
+                    if (threshold!!.toInt() == 1)
+                    {
+                        notary_textview.text = getString(R.string.warning_notary_threshold_signatory_info)
+                    }
+                    else
+                    {
+                        notary_textview.text = String.format(getString(R.string.warning_notary_signatory_not_threshold_info), threshold.toInt()-1)
+                    }
+                }
+                else
+                {
+                    notary_textview.text = getString(R.string.warning_not_notary_signatory_info)
+                }
+
+            }
+            else
+            {
+                notary_info.visibility = View.GONE
+
+                //notary_layout.visibility = View.GONE
+            }
+        }
+        else
+        {
+            signatory_textview.text = getString(R.string.warning_not_signatory_info)
+            signatory_info.visibility = View.VISIBLE
+
+            threshold_info.visibility = View.VISIBLE
+
+            var threshold = getThreshold()
+            threshold_textview.text = String.format(getString(R.string.warning_need_signatories_not_signatory_info), threshold)
+
+            if (!mContractManager.isNullOrEmpty())
+            {
+                notary_info.visibility = View.VISIBLE
+
+                notary_tz1_edittext.setText(mContractManager)
+                notary_tz1_edittext.isEnabled = true
+
+                notary_tz1_edittext.isFocusable = false
+                notary_tz1_edittext.isClickable = false
+                notary_tz1_edittext.isLongClickable = false
+                //notary_tz1_edittext.hint = getString(R.string.click_to_reload)
+
+                //notary_layout.visibility = View.VISIBLE
+
+                if (mContractManager == pkhtz1())
+                {
+                    notary_textview.text = String.format(getString(R.string.warning_notary_not_signatory_info), threshold)
+                }
+                else
+                {
+                    notary_textview.text = getString(R.string.warning_not_notary_not_signatory_info)
+                }
+            }
+            else
+            {
+                notary_info.visibility = View.GONE
+                //notary_layout.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun putNotaryToNegative()
+    {
+        notary_tz1_edittext?.setText("")
+
+        mClickReloadNotary = false
+        notary_tz1_edittext?.isEnabled = false
+        notary_tz1_edittext?.hint = getString(R.string.neutral)
+
+        mContractManager = null
     }
 
     private fun addContractInfoFromJSON(answer: JSONArray)
@@ -700,7 +901,7 @@ class DelegateFragment : Fragment()
                 storage_info_textview?.visibility = View.VISIBLE
 
                 storage_info_address_textview?.visibility = View.VISIBLE
-                storage_info_address_textview?.text = String.format(getString(R.string.remove_delegate_info_address, mContract?.delegate))
+                storage_info_address_textview?.text = String.format(getString(R.string.baker_address, mContract?.delegate))
 
 
                 val hasMnemonics = Storage(activity!!).hasMnemonics()
@@ -1229,6 +1430,18 @@ class DelegateFragment : Fragment()
             // it's signed, looks like it worked.
             //transferLoading(true)
         }
+    }
+
+    private fun pk():String?
+    {
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+        return mnemonicsData.pk
+    }
+
+    private fun pkhtz1():String?
+    {
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+        return mnemonicsData.pkh
     }
 
     // volley
@@ -2254,6 +2467,7 @@ class DelegateFragment : Fragment()
             requestQueue?.cancelAll(REMOVE_DELEGATE_INIT_TAG)
             requestQueue?.cancelAll(REMOVE_DELEGATE_FINALIZE_TAG)
             requestQueue?.cancelAll(CONTRACT_INFO_TAG)
+            requestQueue?.cancelAll(LOAD_CONTRACT_MANAGER_TAG)
             requestQueue?.cancelAll(STORAGE_INFO_TAG)
 
             if (resetBooleans)
@@ -2264,6 +2478,7 @@ class DelegateFragment : Fragment()
                 mFinalizeRemoveDelegateLoading = false
                 mContractInfoLoading = false
                 mStorageInfoLoading = false
+                mContractManagerLoading = false
             }
         }
     }
@@ -2297,6 +2512,12 @@ class DelegateFragment : Fragment()
         outState.putBoolean(STORAGE_INFO_TAG, mStorageInfoLoading)
 
         outState.putString(CONTRACT_SIG_KEY, mSig)
+
+        outState.putString(CONTRACT_MANAGER_KEY, mContractManager)
+
+        outState.putBoolean(LOAD_CONTRACT_MANAGER_TAG, mContractManagerLoading)
+
+        outState.putBoolean(RELOAD_NOTARY_KEY, mClickReloadNotary)
     }
 
     override fun onDetach()

@@ -72,7 +72,7 @@
     <string name="redelegate_address_info">Please fill the form to delegate your tez to your chosen baker\'s address.</string>
     <string name="no_baker_at_the_moment">You do not have a baker at the moment.</string>
     <string name="remove_delegate_info">Your current baker\'s address:</string>
-    <string name="remove_delegate_info_address">%1$s</string>
+    <string name="baker_address">%1$s</string>
     <string name="no_script_info">The script linked to this address is the default delegation contract one.</string>
     <string name="multisig_script_info">Your current multisig contract\'s storage informations</string>
     <string name="contract_storage_info">Your current contract\'s storage informations</string>

@@ -144,12 +144,131 @@
                             android:paddingLeft="@dimen/spacing_normal"
                             android:paddingRight="@dimen/spacing_normal"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:text="@string/remove_delegate_info_address"
+                            android:text="@string/baker_address"
                             android:textColor="@color/colorAccent"
                             android:autoSizeMinTextSize="12sp"
                             android:autoSizeMaxTextSize="14sp"
                             android:autoSizeStepGranularity="2sp"
                             android:autoSizeTextType="uniform" />
+
+                        <LinearLayout
+                            android:id="@+id/signatory_info"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="?attr/actionBarSize"
+                            android:orientation="horizontal"
+                            android:background="@drawable/selector_warning_layout"
+                            android:layout_marginBottom="@dimen/spacing_double">
+
+                            <ImageView
+                                android:layout_weight="0"
+                                android:layout_gravity="center_vertical"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_double"
+                                android:layout_marginLeft="@dimen/spacing_double"
+                                android:src="@drawable/ic_warning_24"
+                                android:contentDescription="@string/content_description"
+                                />
+
+                            <TextView
+                                android:id="@+id/signatory_textview"
+                                android:layout_weight="1"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginStart="@dimen/spacing_double"
+                                android:layout_marginLeft="@dimen/spacing_double"
+                                android:layout_marginRight="@dimen/spacing_normal"
+                                android:layout_marginEnd="@dimen/spacing_normal"
+                                android:layout_marginTop="@dimen/spacing_normal"
+                                android:layout_marginBottom="@dimen/spacing_normal"
+                                android:gravity="center_vertical"
+                                android:text="@string/warning_not_signatory_info"
+                                />
+
+                        </LinearLayout>
+
+
+                        <LinearLayout
+                            android:id="@+id/threshold_info"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="?attr/actionBarSize"
+                            android:orientation="horizontal"
+                            android:background="@drawable/selector_warning_layout"
+                            android:layout_marginBottom="@dimen/spacing_double">
+
+                            <ImageView
+                                android:layout_weight="0"
+                                android:layout_gravity="center_vertical"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_double"
+                                android:layout_marginLeft="@dimen/spacing_double"
+                                android:src="@drawable/ic_warning_24"
+                                android:contentDescription="@string/content_description"
+                                />
+
+                            <TextView
+                                android:id="@+id/threshold_textview"
+                                android:layout_weight="1"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginStart="@dimen/spacing_double"
+                                android:layout_marginLeft="@dimen/spacing_double"
+                                android:layout_marginRight="@dimen/spacing_normal"
+                                android:layout_marginEnd="@dimen/spacing_normal"
+                                android:layout_marginTop="@dimen/spacing_normal"
+                                android:layout_marginBottom="@dimen/spacing_normal"
+                                android:gravity="center_vertical"
+                                android:text="@string/warning_not_signatory_info"
+                                />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/notary_info"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="?attr/actionBarSize"
+                            android:orientation="horizontal"
+                            android:background="@drawable/selector_warning_layout"
+                            android:layout_marginBottom="@dimen/spacing_double">
+
+                            <ImageView
+                                android:layout_weight="0"
+                                android:layout_gravity="center_vertical"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_double"
+                                android:layout_marginLeft="@dimen/spacing_double"
+                                android:src="@drawable/ic_warning_24"
+                                android:contentDescription="@string/content_description"
+                                />
+
+                            <TextView
+                                android:id="@+id/notary_textview"
+                                android:layout_weight="1"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginStart="@dimen/spacing_double"
+                                android:layout_marginLeft="@dimen/spacing_double"
+                                android:layout_marginRight="@dimen/spacing_normal"
+                                android:layout_marginEnd="@dimen/spacing_normal"
+                                android:layout_marginTop="@dimen/spacing_normal"
+                                android:layout_marginBottom="@dimen/spacing_normal"
+                                android:gravity="center_vertical"
+                                />
+
+                        </LinearLayout>
+
+
 
                     </LinearLayout>
 
