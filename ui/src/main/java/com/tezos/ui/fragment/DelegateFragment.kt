@@ -308,7 +308,7 @@ class DelegateFragment : Fragment()
             }
             else
             {
-                onContractInfoComplete(true)
+                onContractInfoComplete(refreshingText = true)
 
                 if (mStorageInfoLoading)
                 {
@@ -316,7 +316,7 @@ class DelegateFragment : Fragment()
                 }
                 else
                 {
-                    onStorageInfoComplete(true)
+                    onStorageInfoComplete(refreshingText = true)
 
                     if (mContractManagerLoading)
                     {
@@ -880,12 +880,30 @@ class DelegateFragment : Fragment()
 
     private fun refreshTextUnderDelegation()
     {
-        //this method handles the data and loading texts
-
-        //TODO refreshing text with mnemonics or not.
+        //TODO refreshing text depending on contract type : default, multisig or spending limit.
 
         if (mContract != null)
         {
+            if (!mStorage.isNullOrEmpty())
+            {
+                val defaultContract = JSONObject().put("string", pkhtz1())
+                val isDefaultContract = mStorage.toString() == defaultContract.toString()
+
+                if (isDefaultContract)
+                {
+
+                }
+                else if (!getStorageSecureKeyHash().isNullOrEmpty())
+                {
+
+                }
+                else if (!getThreshold().isNullOrEmpty())
+                {
+
+                }
+            }
+
+
             if (mContract?.delegate != null)
             {
                 limits_info_textview?.visibility = View.GONE
