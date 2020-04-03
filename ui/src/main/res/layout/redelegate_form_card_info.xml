@@ -10,6 +10,8 @@
         android:id="@+id/notary_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginBottom="@dimen/spacing_double"
         android:orientation="vertical"
         >
         <TextView

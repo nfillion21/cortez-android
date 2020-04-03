@@ -153,7 +153,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         private const val LOAD_SECURE_HASH_BALANCE_TAG = "load_secure_hash_balance"
 
-        private const val LOAD_CONTRACT_MANAGER_TAG = "load_contract_manager"
+        private const val LOAD_CONTRACT_MANAGER_TAG = "load_contract_manager_script"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
@@ -1369,7 +1369,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     if (swipe_refresh_script_layout != null)
                     {
                         onContractManagerLoadComplete(it)
-                        //showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
                         mClickReloadNotary = true
                     }
@@ -3795,6 +3794,7 @@ isTzAddressValid = true
     override fun onDestroy()
     {
         super.onDestroy()
+        transferLoading(false)
         cancelRequests(false)
     }
 }

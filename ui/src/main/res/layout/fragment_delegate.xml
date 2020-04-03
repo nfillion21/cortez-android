@@ -159,6 +159,7 @@
                             android:minHeight="?attr/actionBarSize"
                             android:orientation="horizontal"
                             android:background="@drawable/selector_warning_layout"
+                            android:layout_marginTop="@dimen/spacing_double"
                             android:layout_marginBottom="@dimen/spacing_double">
 
                             <ImageView

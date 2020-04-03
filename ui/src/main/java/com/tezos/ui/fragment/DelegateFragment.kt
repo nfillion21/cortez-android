@@ -302,7 +302,7 @@ class DelegateFragment : Fragment()
 
             if (mContractInfoLoading)
             {
-                refreshTextUnderDelegation(false)
+                refreshTextUnderDelegation()
                 mWalletEnabled = true
                 startContractInfoLoading()
             }
@@ -525,28 +525,30 @@ class DelegateFragment : Fragment()
                         val seed = Storage(activity!!).getMnemonics()
                         val isMnemonicsEmpty = seed.mnemonics.isNullOrEmpty()
 
-                        onContractInfoComplete(isMnemonicsEmpty)
-
-                        //TODO let's see how I handle that in scriptFragment
-
                         if (!isMnemonicsEmpty)
                         {
+                            onContractInfoComplete(refreshingText = false)
                             //TODO need to check here if we need to get salt
                             //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
 
                             validateAddButton(isInputDataValid() && isDelegateFeeValid())
                             startGetRequestLoadContractStorage()
                         }
+                        else
+                        {
+                            onContractInfoComplete(refreshingText = true)
+                        }
                     }
                 }
             },
                     Response.ErrorListener {
 
-                        onContractInfoComplete(false)
-
-                        showSnackBar(it, null)
+                        if (swipe_refresh_layout != null)
+                        {
+                            onContractInfoComplete(false)
+                            showSnackBar(it, null)
+                        }
                     })
-
 
             cancelRequests(true)
             mContractInfoLoading = true
@@ -576,19 +578,20 @@ class DelegateFragment : Fragment()
                 if (swipe_refresh_layout != null)
                 {
                     addStorageInfoFromJSON(it)
-                    onStorageInfoComplete(true)
 
 
                     //TODO verification ici
 
                     if (getThreshold() != null)
                     {
+                        onStorageInfoComplete(refreshingText = false)
                         // here I need to check the user is notary or signatory only.
+                        updateMultisigInfos()
                         startNotaryLoading()
                     }
                     else
                     {
-                        //if (getStorageSecureKeyHash() != null)
+                        onStorageInfoComplete(refreshingText = true)
 
                         val hasMnemonics = Storage(activity!!).hasMnemonics()
                         if (hasMnemonics)
@@ -615,22 +618,8 @@ class DelegateFragment : Fragment()
             },
                     Response.ErrorListener {
 
-                        if (swipe_refresh_script_layout != null)
+                        if (swipe_refresh_layout != null)
                         {
-                            /*
-                            val response = it.networkResponse?.statusCode
-                            if (response == 404)
-                            {
-                                //TODO this doesn't exist anymore
-                                mStorage = JSONObject(getString(R.string.default_storage)).toString()
-                            }
-                            else
-                            {
-                                // 404 happens when there is no storage in this KT1
-                                //showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
-                            }
-                            */
-
                             showSnackBar(it, null)
                             onStorageInfoComplete(false)
                         }
@@ -662,7 +651,7 @@ class DelegateFragment : Fragment()
 
         transferLoading(loading = true)
         //val randomNumber = Math.random()
-        val url = String.format(getString(R.string.manager_key_url), pkh())
+        val url = String.format(getString(R.string.manager_key_url)+"k", pkh())
 
         // Request a string response from the provided URL.
         val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
@@ -676,7 +665,7 @@ class DelegateFragment : Fragment()
         },
                 Response.ErrorListener {
 
-                    if (swipe_refresh_script_layout != null)
+                    if (swipe_refresh_layout != null)
                     {
                         onContractManagerLoadComplete(it)
 
@@ -692,6 +681,11 @@ class DelegateFragment : Fragment()
     private fun onContractManagerLoadComplete(error: VolleyError?)
     {
         mContractManagerLoading = false
+
+        if (!getThreshold().isNullOrEmpty())
+        {
+            updateMultisigInfos()
+        }
 
         if (error != null || mClickReloadNotary)
         {
@@ -720,17 +714,14 @@ class DelegateFragment : Fragment()
         {
             transferLoading(loading = false)
             cancelRequests(true)
-
-            if (!getThreshold().isNullOrEmpty())
-            {
-                updateMultisigInfos()
-            }
         }
     }
 
 
     private fun updateMultisigInfos()
     {
+        notary_layout.visibility = View.VISIBLE
+
         val numberAndSpotPair = getNumberAndSpot(pk()!!)
         if (numberAndSpotPair.first != -1)
         {
@@ -760,8 +751,6 @@ class DelegateFragment : Fragment()
                 notary_tz1_edittext.isClickable = false
                 notary_tz1_edittext.isLongClickable = false
 
-                //notary_layout.visibility = View.VISIBLE
-
                 if (mContractManager == pkhtz1())
                 {
                     if (threshold!!.toInt() == 1)
@@ -782,8 +771,6 @@ class DelegateFragment : Fragment()
             else
             {
                 notary_info.visibility = View.GONE
-
-                //notary_layout.visibility = View.GONE
             }
         }
         else
@@ -808,8 +795,6 @@ class DelegateFragment : Fragment()
                 notary_tz1_edittext.isLongClickable = false
                 //notary_tz1_edittext.hint = getString(R.string.click_to_reload)
 
-                //notary_layout.visibility = View.VISIBLE
-
                 if (mContractManager == pkhtz1())
                 {
                     notary_textview.text = String.format(getString(R.string.warning_notary_not_signatory_info), threshold)
@@ -822,7 +807,6 @@ class DelegateFragment : Fragment()
             else
             {
                 notary_info.visibility = View.GONE
-                //notary_layout.visibility = View.GONE
             }
         }
     }
@@ -865,7 +849,7 @@ class DelegateFragment : Fragment()
         }
     }
 
-    private fun onStorageInfoComplete(animating:Boolean)
+    private fun onStorageInfoComplete(refreshingText:Boolean)
     {
         mStorageInfoLoading = false
         nav_progress?.visibility = View.GONE
@@ -874,24 +858,27 @@ class DelegateFragment : Fragment()
         swipe_refresh_script_layout?.isEnabled = true
         swipe_refresh_script_layout?.isRefreshing = false
 
-        refreshTextUnderDelegation(animating)
+        if (refreshingText)
+        {
+            refreshTextUnderDelegation()
+        }
     }
 
-    private fun onContractInfoComplete(animating:Boolean)
+    private fun onContractInfoComplete(refreshingText:Boolean)
     {
         mContractInfoLoading = false
-        if (animating)
-        {
-            nav_progress?.visibility = View.GONE
-        }
+        nav_progress?.visibility = View.GONE
 
-        //TODO handle the swipe refresh
         swipe_refresh_layout?.isEnabled = true
         swipe_refresh_layout?.isRefreshing = false
-        refreshTextUnderDelegation(animating)
+
+        if (refreshingText)
+        {
+            refreshTextUnderDelegation()
+        }
     }
 
-    private fun refreshTextUnderDelegation(animating:Boolean)
+    private fun refreshTextUnderDelegation()
     {
         //this method handles the data and loading texts
 
@@ -958,13 +945,6 @@ class DelegateFragment : Fragment()
                         no_mnemonics?.visibility = View.VISIBLE
                     }
                 }
-            }
-
-            if (!animating)
-            {
-                //no_delegates_text_layout.text = mBalanceItem.toString()
-
-                //reloadList()
             }
 
             loading_textview?.visibility = View.GONE
