@@ -308,7 +308,7 @@ class DelegateFragment : Fragment()
             }
             else
             {
-                onContractInfoComplete(refreshingText = true)
+                onContractInfoComplete()
 
                 if (mStorageInfoLoading)
                 {
@@ -316,7 +316,7 @@ class DelegateFragment : Fragment()
                 }
                 else
                 {
-                    onStorageInfoComplete(refreshingText = true)
+                    onStorageInfoComplete()
 
                     if (mContractManagerLoading)
                     {
@@ -527,7 +527,7 @@ class DelegateFragment : Fragment()
 
                         if (!isMnemonicsEmpty)
                         {
-                            onContractInfoComplete(refreshingText = false)
+                            onContractInfoComplete()
                             //TODO need to check here if we need to get salt
                             //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
 
@@ -536,7 +536,7 @@ class DelegateFragment : Fragment()
                         }
                         else
                         {
-                            onContractInfoComplete(refreshingText = true)
+                            onContractInfoComplete()
                         }
                     }
                 }
@@ -545,7 +545,7 @@ class DelegateFragment : Fragment()
 
                         if (swipe_refresh_layout != null)
                         {
-                            onContractInfoComplete(false)
+                            onContractInfoComplete()
                             showSnackBar(it, null)
                         }
                     })
@@ -579,19 +579,18 @@ class DelegateFragment : Fragment()
                 {
                     addStorageInfoFromJSON(it)
 
-
                     //TODO verification ici
 
                     if (getThreshold() != null)
                     {
-                        onStorageInfoComplete(refreshingText = false)
+                        onStorageInfoComplete()
                         // here I need to check the user is notary or signatory only.
                         updateMultisigInfos()
                         startNotaryLoading()
                     }
                     else
                     {
-                        onStorageInfoComplete(refreshingText = true)
+                        onStorageInfoComplete()
 
                         val hasMnemonics = Storage(activity!!).hasMnemonics()
                         if (hasMnemonics)
@@ -621,7 +620,7 @@ class DelegateFragment : Fragment()
                         if (swipe_refresh_layout != null)
                         {
                             showSnackBar(it, null)
-                            onStorageInfoComplete(false)
+                            onStorageInfoComplete()
                         }
                     })
 
@@ -651,7 +650,7 @@ class DelegateFragment : Fragment()
 
         transferLoading(loading = true)
         //val randomNumber = Math.random()
-        val url = String.format(getString(R.string.manager_key_url)+"k", pkh())
+        val url = String.format(getString(R.string.manager_key_url), pkh())
 
         // Request a string response from the provided URL.
         val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
@@ -849,7 +848,7 @@ class DelegateFragment : Fragment()
         }
     }
 
-    private fun onStorageInfoComplete(refreshingText:Boolean)
+    private fun onStorageInfoComplete()
     {
         mStorageInfoLoading = false
         nav_progress?.visibility = View.GONE
@@ -858,13 +857,10 @@ class DelegateFragment : Fragment()
         swipe_refresh_script_layout?.isEnabled = true
         swipe_refresh_script_layout?.isRefreshing = false
 
-        if (refreshingText)
-        {
-            refreshTextUnderDelegation()
-        }
+        refreshTextUnderDelegation()
     }
 
-    private fun onContractInfoComplete(refreshingText:Boolean)
+    private fun onContractInfoComplete()
     {
         mContractInfoLoading = false
         nav_progress?.visibility = View.GONE
@@ -872,10 +868,7 @@ class DelegateFragment : Fragment()
         swipe_refresh_layout?.isEnabled = true
         swipe_refresh_layout?.isRefreshing = false
 
-        if (refreshingText)
-        {
-            refreshTextUnderDelegation()
-        }
+        refreshTextUnderDelegation()
     }
 
     private fun refreshTextUnderDelegation()
@@ -886,6 +879,10 @@ class DelegateFragment : Fragment()
         {
             if (!mStorage.isNullOrEmpty())
             {
+                // si le storage n'envoie rien, on n'affiche rien
+
+
+                /*
                 val defaultContract = JSONObject().put("string", pkhtz1())
                 val isDefaultContract = mStorage.toString() == defaultContract.toString()
 
@@ -901,72 +898,79 @@ class DelegateFragment : Fragment()
                 {
 
                 }
-            }
+                */
 
-
-            if (mContract?.delegate != null)
-            {
-                limits_info_textview?.visibility = View.GONE
-                update_storage_form_card?.visibility = View.VISIBLE
-
-                redelegate_address_layout?.visibility = View.GONE
-
-                update_storage_button_layout?.visibility = View.GONE
-
-                remove_delegate_button_layout?.visibility = View.VISIBLE
-
-                storage_info_textview?.visibility = View.VISIBLE
-
-                storage_info_address_textview?.visibility = View.VISIBLE
-                storage_info_address_textview?.text = String.format(getString(R.string.baker_address, mContract?.delegate))
-
-
-                val hasMnemonics = Storage(activity!!).hasMnemonics()
-                if (hasMnemonics)
+                if (!getThreshold().isNullOrEmpty() && mContractManager.isNullOrEmpty())
                 {
-                    val seed = Storage(activity!!).getMnemonics()
+                    return
+                }
 
-                    if (seed.mnemonics.isEmpty())
+                // affichage de l'update storage form card
+
+                if (mContract?.delegate != null)
+                {
+                    limits_info_textview?.visibility = View.GONE
+                    update_storage_form_card?.visibility = View.VISIBLE
+
+                    redelegate_address_layout?.visibility = View.GONE
+
+                    update_storage_button_layout?.visibility = View.GONE
+
+                    remove_delegate_button_layout?.visibility = View.VISIBLE
+
+                    storage_info_textview?.visibility = View.VISIBLE
+
+                    storage_info_address_textview?.visibility = View.VISIBLE
+                    storage_info_address_textview?.text = String.format(getString(R.string.baker_address, mContract?.delegate))
+
+
+                    val hasMnemonics = Storage(activity!!).hasMnemonics()
+                    if (hasMnemonics)
                     {
-                        //remove_delegate_button_layout?.visibility = View.GONE
-                        update_storage_form_card?.visibility = View.GONE
+                        val seed = Storage(activity!!).getMnemonics()
 
-                        no_mnemonics?.visibility = View.VISIBLE
+                        if (seed.mnemonics.isEmpty())
+                        {
+                            //remove_delegate_button_layout?.visibility = View.GONE
+                            update_storage_form_card?.visibility = View.GONE
+
+                            no_mnemonics?.visibility = View.VISIBLE
+                        }
                     }
                 }
-            }
-            else
-            {
-                limits_info_textview?.visibility = View.VISIBLE
-                limits_info_textview?.text = getString(R.string.redelegate_address_info)
-
-                update_storage_form_card?.visibility = View.VISIBLE
-
-                redelegate_address_layout?.visibility = View.VISIBLE
-
-                update_storage_button_layout?.visibility = View.VISIBLE
-
-                storage_info_textview?.visibility = View.GONE
-                storage_info_address_textview?.visibility = View.GONE
-                remove_delegate_button_layout?.visibility = View.GONE
-
-                val hasMnemonics = Storage(activity!!).hasMnemonics()
-                if (hasMnemonics)
+                else
                 {
-                    val seed = Storage(activity!!).getMnemonics()
+                    limits_info_textview?.visibility = View.VISIBLE
+                    limits_info_textview?.text = getString(R.string.redelegate_address_info)
 
-                    if (seed.mnemonics.isEmpty())
+                    update_storage_form_card?.visibility = View.VISIBLE
+
+                    redelegate_address_layout?.visibility = View.VISIBLE
+
+                    update_storage_button_layout?.visibility = View.VISIBLE
+
+                    storage_info_textview?.visibility = View.GONE
+                    storage_info_address_textview?.visibility = View.GONE
+                    remove_delegate_button_layout?.visibility = View.GONE
+
+                    val hasMnemonics = Storage(activity!!).hasMnemonics()
+                    if (hasMnemonics)
                     {
-                        limits_info_textview?.text = getString(R.string.no_baker_at_the_moment)
-                        update_storage_form_card?.visibility = View.GONE
+                        val seed = Storage(activity!!).getMnemonics()
 
-                        no_mnemonics?.visibility = View.VISIBLE
+                        if (seed.mnemonics.isEmpty())
+                        {
+                            limits_info_textview?.text = getString(R.string.no_baker_at_the_moment)
+                            update_storage_form_card?.visibility = View.GONE
+
+                            no_mnemonics?.visibility = View.VISIBLE
+                        }
                     }
                 }
-            }
 
-            loading_textview?.visibility = View.GONE
-            loading_textview?.text = null
+                loading_textview?.visibility = View.GONE
+                loading_textview?.text = null
+                }
         }
         else
         {
