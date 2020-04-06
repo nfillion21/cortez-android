@@ -194,7 +194,7 @@ class DelegateFragment : Fragment()
 
         private const val CONTRACT_MANAGER_KEY = "contract_manager_key"
 
-        private const val LOAD_CONTRACT_MANAGER_TAG = "load_contract_manager"
+        private const val LOAD_CONTRACT_MANAGER_TAG = "load_contract_manager_delegate"
 
         private const val RELOAD_NOTARY_KEY = "reload_notary_key"
 
@@ -519,26 +519,33 @@ class DelegateFragment : Fragment()
                 {
                     addContractInfoFromJSON(it)
 
-                    val hasMnemonics = Storage(activity!!).hasMnemonics()
-                    if (hasMnemonics)
+                    /*
+                val hasMnemonics = Storage(activity!!).hasMnemonics()
+                if (hasMnemonics)
+                {
+
+                    val seed = Storage(activity!!).getMnemonics()
+                    val isMnemonicsEmpty = seed.mnemonics.isNullOrEmpty()
+
+                    if (!isMnemonicsEmpty)
                     {
-                        val seed = Storage(activity!!).getMnemonics()
-                        val isMnemonicsEmpty = seed.mnemonics.isNullOrEmpty()
+                        onContractInfoComplete()
+                        //TODO need to check here if we need to get salt
+                        //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
 
-                        if (!isMnemonicsEmpty)
-                        {
-                            onContractInfoComplete()
-                            //TODO need to check here if we need to get salt
-                            //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
-
-                            validateAddButton(isInputDataValid() && isDelegateFeeValid())
-                            startGetRequestLoadContractStorage()
-                        }
-                        else
-                        {
-                            onContractInfoComplete()
-                        }
+                        validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                        startGetRequestLoadContractStorage()
                     }
+                    else
+                    {
+                        onContractInfoComplete()
+                    }
+                }
+                    */
+
+                    onContractInfoComplete()
+                    validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                    startGetRequestLoadContractStorage()
                 }
             },
                     Response.ErrorListener {
@@ -578,20 +585,17 @@ class DelegateFragment : Fragment()
                 if (swipe_refresh_layout != null)
                 {
                     addStorageInfoFromJSON(it)
+                    onStorageInfoComplete()
 
                     //TODO verification ici
 
                     if (getThreshold() != null)
                     {
-                        onStorageInfoComplete()
                         // here I need to check the user is notary or signatory only.
-                        updateMultisigInfos()
                         startNotaryLoading()
                     }
                     else
                     {
-                        onStorageInfoComplete()
-
                         val hasMnemonics = Storage(activity!!).hasMnemonics()
                         if (hasMnemonics)
                         {
@@ -660,6 +664,26 @@ class DelegateFragment : Fragment()
                 mContractManager = it.getJSONObject(0)["manager"] as String
 
                 onContractManagerLoadComplete(error = null)
+
+                //TODO control better this
+
+                val hasMnemonics = Storage(activity!!).hasMnemonics()
+                if (hasMnemonics)
+                {
+                    val seed = Storage(activity!!).getMnemonics()
+
+                    if (seed.mnemonics.isNotEmpty())
+                    {
+                        if (mContract?.delegate != null)
+                        {
+                            startInitRemoveDelegateLoading()
+                        }
+                        else
+                        {
+                            validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                        }
+                    }
+                }
             }
         },
                 Response.ErrorListener {
@@ -680,11 +704,6 @@ class DelegateFragment : Fragment()
     private fun onContractManagerLoadComplete(error: VolleyError?)
     {
         mContractManagerLoading = false
-
-        if (!getThreshold().isNullOrEmpty())
-        {
-            updateMultisigInfos()
-        }
 
         if (error != null || mClickReloadNotary)
         {
@@ -711,6 +730,7 @@ class DelegateFragment : Fragment()
         }
         else
         {
+            refreshTextUnderDelegation()
             transferLoading(loading = false)
             cancelRequests(true)
         }
@@ -882,7 +902,6 @@ class DelegateFragment : Fragment()
                 // si le storage n'envoie rien, on n'affiche rien
 
 
-                /*
                 val defaultContract = JSONObject().put("string", pkhtz1())
                 val isDefaultContract = mStorage.toString() == defaultContract.toString()
 
@@ -896,14 +915,16 @@ class DelegateFragment : Fragment()
                 }
                 else if (!getThreshold().isNullOrEmpty())
                 {
-
+                    updateMultisigInfos()
                 }
-                */
 
+
+                /*
                 if (!getThreshold().isNullOrEmpty() && mContractManager.isNullOrEmpty())
                 {
                     return
                 }
+                */
 
                 // affichage de l'update storage form card
 
