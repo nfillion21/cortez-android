@@ -477,14 +477,12 @@ class DelegateFragment : Fragment()
 
             MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
             {
-                //startPostRequestLoadInitRequestUpdateStorage()
-                //TODO put a template for this one
+                startPostRequestLoadInitRequestUpdateStorage()
             }
 
             MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
             {
-                //startPostRequestLoadInitNotifyUpdateStorage()
-                //TODO put a template for this one
+                startPostRequestLoadInitNotifyUpdateStorage()
             }
 
             MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
@@ -521,14 +519,12 @@ class DelegateFragment : Fragment()
 
             MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
             {
-                //startPostRequestLoadInitRequestUpdateStorage()
-                //TODO put a template for this one
+                startPostRequestLoadInitRequestUpdateStorage()
             }
 
             MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
             {
-                //startPostRequestLoadInitNotifyUpdateStorage()
-                //TODO put a template for this one
+                startPostRequestLoadInitNotifyUpdateStorage()
             }
 
             MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
@@ -2016,6 +2012,82 @@ class DelegateFragment : Fragment()
         mInitDelegateLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
     }
+
+
+
+
+    // volley
+    private fun startPostRequestLoadInitRequestUpdateStorage()
+    {
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.manager_key_url), pkh)
+
+// Request a string response from the provided URL.
+            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            {
+                if (swipe_refresh_script_layout != null)
+                {
+                    //addContractAddressesFromJSON(it, pkh)
+
+                    //reloadList()
+                    //onDelegatedAddressesComplete(true)
+
+                    //startGetRequestLoadMultisigAsSignatoryContracts()
+                }
+            },
+                    Response.ErrorListener {
+
+                        if (swipe_refresh_script_layout != null)
+                        {
+                            //onDelegatedAddressesComplete(false)
+                            //showSnackbarError(it)
+                        }
+                    })
+
+//jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
+    // volley
+    private fun startPostRequestLoadInitNotifyUpdateStorage()
+    {
+        val pkh = pkh()
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.manager_key_url), pkh)
+
+            //TODO here we will need to check mContract.delegate to know if we remove or add a delegate.
+
+// Request a string response from the provided URL.
+            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            {
+                if (swipe_refresh_script_layout != null)
+                {
+                    //addContractAddressesFromJSON(it, pkh)
+
+                    //reloadList()
+                    //onDelegatedAddressesComplete(true)
+
+                    //startGetRequestLoadMultisigAsSignatoryContracts()
+                }
+            },
+                    Response.ErrorListener {
+
+                        if (swipe_refresh_script_layout != null)
+                        {
+                            //onDelegatedAddressesComplete(false)
+                            //showSnackbarError(it)
+                        }
+                    })
+
+//jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
 
     private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
     {
