@@ -362,6 +362,75 @@
                         />
 
                 </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/notify_delegate_button_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    style="@style/PaymentScreens.Button"
+                    android:enabled="false"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone"
+                    >
+
+                    <Button
+                        android:id="@+id/notify_delegate_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/notify_remove_delegate"
+
+                        android:drawableStart="@drawable/ic_lock_black"
+                        android:drawableLeft="@drawable/ic_lock_black"
+                        android:drawableTint="@color/tz_light"
+                        android:drawablePadding="@dimen/spacing_normal"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                        android:textStyle="bold"
+                        android:layout_gravity="center"
+                        android:enabled="false"
+
+                        android:background="@null"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/request_delegate_button_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    style="@style/PaymentScreens.Button"
+                    android:enabled="false"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone"
+                    >
+
+                    <Button
+                        android:id="@+id/request_delegate_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/request_remove_delegate"
+
+                        android:drawableStart="@drawable/ic_lock_black"
+                        android:drawableLeft="@drawable/ic_lock_black"
+                        android:drawableTint="@color/tz_light"
+                        android:drawablePadding="@dimen/spacing_normal"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                        android:textStyle="bold"
+                        android:layout_gravity="center"
+                        android:enabled="false"
+
+                        android:background="@null"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        />
+
+                </FrameLayout>
+
             </RelativeLayout>
         </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

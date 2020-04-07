@@ -29,6 +29,10 @@
     <string name="request_edition">Request the edition</string>
     <string name="notify_edition">Notify an edition</string>
     <string name="remove_delegate">Remove delegate</string>
+    <string name="notify_remove_delegate">Notify remove delegate</string>
+    <string name="notify_add_delegation">Notify add delegation</string>
+    <string name="request_remove_delegate">Request remove delegate</string>
+    <string name="request_add_delegation">Request add delegation</string>
     <string name="spending_limit_reset">The spending limit is reset.</string>
     <string name="fee">Fee</string>
     <string name="item_address">Address</string>

@@ -1227,15 +1227,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete(true)
 
-                    //TODO control more precisely the three different contracts
-
                     if (getStorageSecureKeyHash() != null)
                     {
-                        //TODO I don't need to forge a transfer for now
-                        //TODO hide the whole thing
-
-                        //I need the right data inputs before.
-                        //startInitRemoveDelegateLoading()
 
                         validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
 

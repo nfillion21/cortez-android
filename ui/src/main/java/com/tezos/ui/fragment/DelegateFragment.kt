@@ -200,6 +200,11 @@ class DelegateFragment : Fragment()
 
         private const val SIGNATORIES_CAPACITY = 10
 
+        enum class MULTISIG_UPDATE_STORAGE_ENUM
+        {
+            CONFIRM_UPDATE, REQUEST_TO_SIGNATORIES, NOTIFY_NOTARY, NEITHER_NOTARY_NOR_SIGNATORY, NO_NOTARY_YET
+        }
+
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
                 DelegateFragment().apply {
@@ -891,6 +896,66 @@ class DelegateFragment : Fragment()
         refreshTextUnderDelegation()
     }
 
+    private fun askingForMultisigButton():MULTISIG_UPDATE_STORAGE_ENUM
+    {
+        // 1. on recupere le storage
+        // --> on sait si on est signataire, et si on a assez de signature ou non.
+
+        // confirm_update --> signatory && notary && threshold 1
+        // request_to_signatories --> signatory && signatory < threshold && notary || notary && not signatory
+        // notify_notary --> signatory && not notary
+        // nothgin --> not signatory, not notary.
+
+        val numberAndSpotPair = getNumberAndSpot(pk()!!)
+        if (numberAndSpotPair.first != -1)
+        {
+            var threshold = getThreshold()
+
+            if (!mContractManager.isNullOrEmpty())
+            {
+                return if (mContractManager == pkhtz1())
+                {
+                    if (threshold!!.toInt() == 1)
+                    {
+                        MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE
+                    }
+                    else
+                    {
+                        MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES
+                    }
+                }
+                else
+                {
+                    MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY
+                }
+            }
+            else
+            {
+                // we don't know yet if we are a notary, then we just wait.
+            }
+        }
+        else
+        {
+            if (!mContractManager.isNullOrEmpty())
+            {
+                return if (mContractManager == pkhtz1())
+                {
+                    MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES
+                }
+                else
+                {
+                    MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY
+                }
+            }
+            else
+            {
+                // we don't know yet if we are a notary, then we just wait.
+            }
+        }
+
+        return MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET
+    }
+
     private fun refreshTextUnderDelegation()
     {
         //TODO refreshing text depending on contract type : default, multisig or spending limit.
@@ -935,15 +1000,61 @@ class DelegateFragment : Fragment()
 
                     redelegate_address_layout?.visibility = View.GONE
 
-                    update_storage_button_layout?.visibility = View.GONE
 
-                    remove_delegate_button_layout?.visibility = View.VISIBLE
+                    //TODO this is about having the right buttons
+                    if (!getThreshold().isNullOrEmpty())
+                    {
+
+                        when (askingForMultisigButton())
+                        {
+                            MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+                            {
+                                update_storage_button_layout?.visibility = View.GONE
+                                remove_delegate_button_layout?.visibility = View.VISIBLE
+
+                                notify_delegate_button_layout?.visibility = View.GONE
+                                request_delegate_button_layout?.visibility = View.GONE
+                            }
+
+                            MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+                            {
+                                update_storage_button_layout?.visibility = View.GONE
+                                remove_delegate_button_layout?.visibility = View.GONE
+                                notify_delegate_button_layout?.visibility = View.GONE
+                                request_delegate_button_layout?.visibility = View.VISIBLE
+                                request_delegate_button.text = getString(R.string.request_remove_delegate)
+                            }
+
+                            MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
+                            {
+                                update_storage_button_layout?.visibility = View.GONE
+                                remove_delegate_button_layout?.visibility = View.GONE
+
+                                notify_delegate_button_layout?.visibility = View.VISIBLE
+                                notify_delegate_button.text = getString(R.string.notify_remove_delegate)
+
+                                request_delegate_button_layout?.visibility = View.GONE
+                            }
+
+                            else ->
+                            {
+                                update_storage_button_layout?.visibility = View.GONE
+                                remove_delegate_button_layout?.visibility = View.GONE
+                                notify_delegate_button_layout?.visibility = View.GONE
+                                request_delegate_button_layout?.visibility = View.GONE
+                            }
+                        }
+                    }
+                    else
+                    {
+                        update_storage_button_layout?.visibility = View.GONE
+                        remove_delegate_button_layout?.visibility = View.VISIBLE
+                    }
 
                     storage_info_textview?.visibility = View.VISIBLE
 
                     storage_info_address_textview?.visibility = View.VISIBLE
                     storage_info_address_textview?.text = String.format(getString(R.string.baker_address, mContract?.delegate))
-
 
                     val hasMnemonics = Storage(activity!!).hasMnemonics()
                     if (hasMnemonics)
@@ -968,11 +1079,63 @@ class DelegateFragment : Fragment()
 
                     redelegate_address_layout?.visibility = View.VISIBLE
 
-                    update_storage_button_layout?.visibility = View.VISIBLE
 
                     storage_info_textview?.visibility = View.GONE
                     storage_info_address_textview?.visibility = View.GONE
-                    remove_delegate_button_layout?.visibility = View.GONE
+
+
+                    //TODO this is about having the right buttons
+                    if (!getThreshold().isNullOrEmpty())
+                    {
+
+                        when (askingForMultisigButton())
+                        {
+                            MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+                            {
+                                update_storage_button_layout?.visibility = View.VISIBLE
+                                remove_delegate_button_layout?.visibility = View.GONE
+
+                                notify_delegate_button_layout?.visibility = View.GONE
+                                request_delegate_button_layout?.visibility = View.GONE
+                            }
+
+                            MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+                            {
+                                update_storage_button_layout?.visibility = View.GONE
+                                remove_delegate_button_layout?.visibility = View.GONE
+                                notify_delegate_button_layout?.visibility = View.GONE
+
+                                request_delegate_button_layout?.visibility = View.VISIBLE
+                                request_delegate_button.text = getString(R.string.request_add_delegation)
+                            }
+
+                            MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
+                            {
+                                update_storage_button_layout?.visibility = View.GONE
+                                remove_delegate_button_layout?.visibility = View.GONE
+
+                                notify_delegate_button_layout?.visibility = View.VISIBLE
+                                notify_delegate_button.text = getString(R.string.notify_add_delegation)
+
+                                request_delegate_button_layout?.visibility = View.GONE
+                            }
+
+                            else ->
+                            {
+                                update_storage_button_layout?.visibility = View.GONE
+                                remove_delegate_button_layout?.visibility = View.GONE
+                                notify_delegate_button_layout?.visibility = View.GONE
+                                request_delegate_button_layout?.visibility = View.GONE
+                            }
+                        }
+                    }
+                    else
+                    {
+                        update_storage_button_layout?.visibility = View.VISIBLE
+                        remove_delegate_button_layout?.visibility = View.GONE
+                    }
+
+
 
                     val hasMnemonics = Storage(activity!!).hasMnemonics()
                     if (hasMnemonics)
@@ -2070,7 +2233,6 @@ class DelegateFragment : Fragment()
 
                     //the call failed
                 }
-
             }
         }, Response.ErrorListener
         {
