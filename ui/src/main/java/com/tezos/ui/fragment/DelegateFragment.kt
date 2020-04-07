@@ -467,7 +467,37 @@ class DelegateFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateAddButton(false)
 
-        startPostRequestLoadInitAddDelegate()
+
+        when (askingForMultisigButton())
+        {
+            MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+            {
+                startPostRequestLoadInitAddDelegate()
+            }
+
+            MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+            {
+                //startPostRequestLoadInitRequestUpdateStorage()
+                //TODO put a template for this one
+            }
+
+            MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
+            {
+                //startPostRequestLoadInitNotifyUpdateStorage()
+                //TODO put a template for this one
+            }
+
+            MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
+            {
+                // not related to the contract, please contact the notary
+                showSnackBar(null, getString(R.string.alert_neither_notary_nor_signatory))
+            }
+            MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET ->
+            {
+                // fail message, retry loading notary
+                showSnackBar(null, getString(R.string.alert_reload_the_notary))
+            }
+        }
     }
 
     private fun startInitRemoveDelegateLoading()
@@ -481,7 +511,37 @@ class DelegateFragment : Fragment()
         // validatePay cannot be valid if there is no fees
         validateRemoveDelegateButton(false)
 
-        startPostRequestLoadInitRemoveDelegate()
+
+        when (askingForMultisigButton())
+        {
+            MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+            {
+                startPostRequestLoadInitRemoveDelegate()
+            }
+
+            MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+            {
+                //startPostRequestLoadInitRequestUpdateStorage()
+                //TODO put a template for this one
+            }
+
+            MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
+            {
+                //startPostRequestLoadInitNotifyUpdateStorage()
+                //TODO put a template for this one
+            }
+
+            MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
+            {
+                // not related to the contract, please contact the notary
+                showSnackBar(null, getString(R.string.alert_neither_notary_nor_signatory))
+            }
+            MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET ->
+            {
+                // fail message, retry loading notary
+                showSnackBar(null, getString(R.string.alert_reload_the_notary))
+            }
+        }
     }
 
     private fun startFinalizeAddDelegateLoading()
@@ -1918,17 +1978,6 @@ class DelegateFragment : Fragment()
 
                     validateAddButton(isInputDataValid() && isDelegateFeeValid())
 
-                    if (isInputDataValid() && isDelegateFeeValid())
-                    {
-                        validateAddButton(true)
-
-                        //this.setTextPayButton()
-                    }
-                    else
-                    {
-                        // should no happen
-                        validateAddButton(false)
-                    }
                 }
                 else
                 {
@@ -2329,6 +2378,32 @@ class DelegateFragment : Fragment()
                     val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
                 }
+
+
+                notify_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                notify_delegate_button_layout?.isEnabled = true
+                notify_delegate_button_layout?.background = makeSelector(theme)
+
+                val drawablesNotify = notify_delegate_button?.compoundDrawables
+                if (drawablesNotify != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawablesNotify[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                }
+
+
+                request_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                request_delegate_button_layout?.isEnabled = true
+                request_delegate_button_layout?.background = makeSelector(theme)
+
+                val drawablesRequest = request_delegate_button?.compoundDrawables
+                if (drawablesRequest != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawablesRequest[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                }
+
+
             }
             else
             {
@@ -2344,8 +2419,36 @@ class DelegateFragment : Fragment()
                     val wrapDrawable = DrawableCompat.wrap(drawables[0])
                     DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
                 }
-            }
 
+
+
+                request_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                request_delegate_button_layout?.isEnabled = false
+
+                val greyThemeRequest = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+                request_delegate_button_layout?.background = makeSelector(greyThemeRequest)
+
+                val drawablesRequest = request_delegate_button?.compoundDrawables
+                if (drawablesRequest != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawablesRequest[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+                }
+
+                notify_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                notify_delegate_button_layout?.isEnabled = false
+
+                val greyThemeNotify = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+                notify_delegate_button_layout?.background = makeSelector(greyThemeNotify)
+
+                val drawablesNotify = notify_delegate_button?.compoundDrawables
+                if (drawablesNotify != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawablesNotify[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+                }
+
+            }
         }
     }
 
@@ -2366,6 +2469,30 @@ class DelegateFragment : Fragment()
                 val wrapDrawable = DrawableCompat.wrap(drawables[0])
                 DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
             }
+
+            notify_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            notify_delegate_button_layout?.isEnabled = true
+            notify_delegate_button_layout?.background = makeSelector(theme)
+
+            val drawablesNotify = notify_delegate_button?.compoundDrawables
+            if (drawablesNotify != null)
+            {
+                val wrapDrawable = DrawableCompat.wrap(drawablesNotify[0])
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            }
+
+
+            request_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            request_delegate_button_layout?.isEnabled = true
+            request_delegate_button_layout?.background = makeSelector(theme)
+
+            val drawablesRequest = request_delegate_button?.compoundDrawables
+            if (drawablesRequest != null)
+            {
+                val wrapDrawable = DrawableCompat.wrap(drawablesRequest[0])
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            }
+
         }
         else
         {
@@ -2380,6 +2507,34 @@ class DelegateFragment : Fragment()
                 val wrapDrawable = DrawableCompat.wrap(drawables[0])
                 DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
             }
+
+
+            request_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            request_delegate_button_layout?.isEnabled = false
+
+            val greyThemeRequest = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+            request_delegate_button_layout?.background = makeSelector(greyThemeRequest)
+
+            val drawablesRequest = request_delegate_button?.compoundDrawables
+            if (drawablesRequest != null)
+            {
+                val wrapDrawable = DrawableCompat.wrap(drawablesRequest[0])
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+            }
+
+            notify_delegate_button?.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            notify_delegate_button_layout?.isEnabled = false
+
+            val greyThemeNotify = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+            notify_delegate_button_layout?.background = makeSelector(greyThemeNotify)
+
+            val drawablesNotify = notify_delegate_button?.compoundDrawables
+            if (drawablesNotify != null)
+            {
+                val wrapDrawable = DrawableCompat.wrap(drawablesNotify[0])
+                DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+            }
+
         }
     }
 
