@@ -132,7 +132,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
                     //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                 })
 
-        FirebaseMessaging.getInstance().subscribeToTopic("tz1").addOnCompleteListener { task ->
+        FirebaseMessaging.getInstance().unsubscribeFromTopic("tz1").addOnCompleteListener { task ->
             //var msg = getString(R.string.msg_subscribed)
             if (!task.isSuccessful) {
                 //msg = getString(R.string.msg_subscribe_failed)

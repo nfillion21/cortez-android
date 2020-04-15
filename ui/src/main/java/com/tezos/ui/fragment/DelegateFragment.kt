@@ -510,33 +510,40 @@ class DelegateFragment : Fragment()
         validateRemoveDelegateButton(false)
 
 
-        when (askingForMultisigButton())
+        if (!getThreshold().isNullOrEmpty())
         {
-            MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+            when (askingForMultisigButton())
             {
-                startPostRequestLoadInitRemoveDelegate()
-            }
+                MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+                {
+                    startPostRequestLoadInitRemoveDelegate()
+                }
 
-            MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
-            {
-                startPostRequestLoadInitRequestUpdateStorage()
-            }
+                MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+                {
+                    startPostRequestLoadInitRequestUpdateStorage()
+                }
 
-            MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
-            {
-                startPostRequestLoadInitNotifyUpdateStorage()
-            }
+                MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
+                {
+                    startPostRequestLoadInitNotifyUpdateStorage()
+                }
 
-            MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
-            {
-                // not related to the contract, please contact the notary
-                showSnackBar(null, getString(R.string.alert_neither_notary_nor_signatory))
+                MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY ->
+                {
+                    // not related to the contract, please contact the notary
+                    showSnackBar(null, getString(R.string.alert_neither_notary_nor_signatory))
+                }
+                MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET ->
+                {
+                    // fail message, retry loading notary
+                    showSnackBar(null, getString(R.string.alert_reload_the_notary))
+                }
             }
-            MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET ->
-            {
-                // fail message, retry loading notary
-                showSnackBar(null, getString(R.string.alert_reload_the_notary))
-            }
+        }
+        else
+        {
+            startPostRequestLoadInitRemoveDelegate()
         }
     }
 
