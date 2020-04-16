@@ -157,6 +157,7 @@
     <string name="address_successfully_scanned">Address successfully scanned!</string>
     <string name="address_scan_failed">Please check the validity of the tezos address</string>
     <string name="loading_list_operations">Loading operations…</string>
+    <string name="loading_list_multisig_on_going_operations">Loading multisig ongoing operations…</string>
     <string name="loading_balance">Loading balance…</string>
     <string name="loading_contracts">Loading contracts…</string>
     <string name="loading_contract_info">Loading contract informations…</string>

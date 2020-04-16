@@ -34,14 +34,11 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.core.content.ContextCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
@@ -62,7 +59,6 @@ import org.json.JSONArray
 import java.text.DateFormat
 import java.time.Instant
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 open class HomeFragment : Fragment()
@@ -72,9 +68,11 @@ open class HomeFragment : Fragment()
 
     private val GET_OPERATIONS_LOADING_KEY = "get_operations_loading"
     private val GET_BALANCE_LOADING_KEY = "get_balance_loading"
+    private val GET_MULTISIG_ON_GOING_LOADING_KEY = "get_multisig_on_going_loading"
 
     private val LOAD_OPERATIONS_TAG = "load_operations"
     private val LOAD_BALANCE_TAG = "load_balance"
+    private val LOAD_MULTISIG_ONGOING_TAG = "load_multisig_ongoing"
 
     private val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
@@ -83,17 +81,7 @@ open class HomeFragment : Fragment()
 
     private var mGetHistoryLoading:Boolean = false
     private var mGetBalanceLoading:Boolean = false
-
-    private var mCoordinatorLayout: CoordinatorLayout? = null
-
-    private var mOperationAmountTextView: TextView? = null
-    private var mOperationFeeTextView: TextView? = null
-    private var mOperationDateTextView: TextView? = null
-
-    private var mNavProgressBalance: ProgressBar? = null
-    private var mNavProgressOperations: ProgressBar? = null
-
-    private var mLastOperationLayout: RelativeLayout? = null
+    private var mGetMultisigOnGoing:Boolean = false
 
     private var mWalletEnabled:Boolean = false
 
@@ -162,9 +150,7 @@ open class HomeFragment : Fragment()
             tzTheme = CustomTheme.fromBundle(themeBundle)
         }
 
-        mLastOperationLayout = view.findViewById(R.id.last_operation_layout)
-
-        mLastOperationLayout?.setOnClickListener {
+        last_operation_layout.setOnClickListener {
 
             if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty() != true)
             {
@@ -196,16 +182,7 @@ open class HomeFragment : Fragment()
             }
         }
 
-        mNavProgressBalance = view.findViewById(R.id.nav_progress_balance)
-        mNavProgressOperations = view.findViewById(R.id.nav_progress_operations)
-
-        mOperationAmountTextView = view.findViewById(R.id.operation_amount_textview)
-        mOperationFeeTextView = view.findViewById(R.id.operation_fee_textview)
-        mOperationDateTextView = view.findViewById(R.id.operation_date_textview)
-
-        mCoordinatorLayout = view.findViewById(R.id.coordinator)
-
-        swipeRefreshLayout.setOnRefreshListener {
+        swipe_refresh_layout.setOnRefreshListener {
             startGetRequestLoadBalance()
         }
 
@@ -219,21 +196,22 @@ open class HomeFragment : Fragment()
 
         if (pkh == null)
         {
-            cancelRequest(true, true)
+            cancelRequest(operations = true, balance = true, multisigOnGoing = true)
             mGetBalanceLoading = false
             mGetHistoryLoading = false
+            mGetMultisigOnGoing = false
 
             balance_layout?.visibility = View.GONE
             create_wallet_layout.visibility = View.VISIBLE
 
-            swipeRefreshLayout.isEnabled = false
+            swipe_refresh_layout.isEnabled = false
         }
         else
         {
             balance_layout?.visibility = View.VISIBLE
             create_wallet_layout.visibility = View.GONE
 
-            swipeRefreshLayout.isEnabled = true
+            swipe_refresh_layout.isEnabled = true
         }
 
         if (savedInstanceState != null)
@@ -243,6 +221,7 @@ open class HomeFragment : Fragment()
 
             mGetBalanceLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
             mGetHistoryLoading = savedInstanceState.getBoolean(GET_BALANCE_LOADING_KEY)
+            mGetMultisigOnGoing = savedInstanceState.getBoolean(GET_MULTISIG_ON_GOING_LOADING_KEY)
 
             mBalanceItem = savedInstanceState.getDouble(BALANCE_FLOAT_KEY, -1.0)
 
@@ -263,13 +242,17 @@ open class HomeFragment : Fragment()
                 {
                     refreshRecyclerViewAndTextHistory()
 
-                    //TODO check if there is a key before launching request
-
                     startInitialLoadingHistory()
                 }
                 else
                 {
                     onOperationsLoadHistoryComplete()
+
+                    if (mGetMultisigOnGoing)
+                    {
+                        refreshOnGoingMultisigOperations()
+                        startInitialLoadingMultisigOngoingOperations()
+                    }
                 }
             }
         }
@@ -315,8 +298,8 @@ open class HomeFragment : Fragment()
             mBalanceItem = -1.0
             refreshTextBalance(false)
 
-            swipeRefreshLayout.isEnabled = false
-            swipeRefreshLayout.isRefreshing = false
+            swipe_refresh_layout.isEnabled = false
+            swipe_refresh_layout.isRefreshing = false
 
             if (mWalletEnabled)
             {
@@ -345,51 +328,70 @@ open class HomeFragment : Fragment()
     {
         mGetHistoryLoading = false
 
-        mNavProgressOperations?.visibility = View.GONE
+        nav_progress_operations.visibility = View.GONE
 
         //TODO cancel the swipe refresh if you're not in the right layout
-        swipeRefreshLayout.isEnabled = true
-        swipeRefreshLayout.isRefreshing = false
+        swipe_refresh_layout.isEnabled = true
+        swipe_refresh_layout.isRefreshing = false
 
         refreshRecyclerViewAndTextHistory()
+    }
+
+    private fun onMultisigOnGoinLoadComplete()
+    {
+        mGetMultisigOnGoing = false
+
+        nav_progress_ongoing_operations.visibility = View.GONE
+
+        swipe_refresh_layout.isEnabled = true
+        swipe_refresh_layout.isRefreshing = false
+
+        refreshOnGoingMultisigOperations()
     }
 
     private fun onBalanceLoadComplete(animating:Boolean)
     {
         mGetBalanceLoading = false
-        mNavProgressBalance?.visibility = View.GONE
+        nav_progress_balance.visibility = View.GONE
 
         refreshTextBalance(animating)
     }
 
     private fun startInitialLoadingBalance()
     {
-        swipeRefreshLayout?.isEnabled = false
+        swipe_refresh_layout?.isEnabled = false
 
         startGetRequestLoadBalance()
     }
 
     private fun startInitialLoadingHistory()
     {
-        swipeRefreshLayout.isEnabled = false
+        swipe_refresh_layout.isEnabled = false
 
         startGetRequestLoadOperations()
+    }
+
+    private fun startInitialLoadingMultisigOngoingOperations()
+    {
+        swipe_refresh_layout.isEnabled = false
+
+        startGetRequestLoadMultisigOnGoingOperations()
     }
 
     private fun refreshRecyclerViewAndTextHistory()
     {
         if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty() == false)
         {
-            mLastOperationLayout?.visibility = View.VISIBLE
+            last_operation_layout.visibility = View.VISIBLE
 
             val lastOperation = mRecyclerViewItems!![0]
 
-            mOperationAmountTextView?.text = (lastOperation.amount/1000000).toString()
-            mOperationFeeTextView?.text = (lastOperation.fee/1000000).toString()
+            operation_amount_textview.text = (lastOperation.amount/1000000).toString()
+            operation_fee_textview.text = (lastOperation.fee/1000000).toString()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
-                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
+                operation_date_textview.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
             }
 
             empty_loading_operations_textview.visibility = View.GONE
@@ -399,7 +401,7 @@ open class HomeFragment : Fragment()
         }
         else
         {
-            mLastOperationLayout?.visibility = View.GONE
+            last_operation_layout.visibility = View.GONE
 
             empty_loading_operations_textview.visibility = View.VISIBLE
             empty_loading_operations_textview.text = "-"
@@ -423,21 +425,29 @@ open class HomeFragment : Fragment()
         {
             balance_textview.visibility = View.GONE
             empty_loading_balance_textview.visibility = View.VISIBLE
-            empty_loading_balance_textview.text = "-"
+            empty_loading_balance_textview.text = getString(R.string.neutral)
         }
+    }
+
+
+    private fun refreshOnGoingMultisigOperations()
+    {
+        ongoing_operation_layout.visibility = View.VISIBLE
+        empty_loading_ongoing_operations_textview.text = getString(R.string.neutral)
     }
 
     // volley
     private fun startGetRequestLoadBalance()
     {
-        cancelRequest(true, true)
+        cancelRequest(operations = true, balance = true, multisigOnGoing = true)
 
         mGetHistoryLoading = true
 
+        empty_loading_ongoing_operations_textview.setText(R.string.loading_list_multisig_on_going_operations)
         empty_loading_operations_textview.setText(R.string.loading_list_operations)
         empty_loading_balance_textview.setText(R.string.loading_balance)
 
-        mNavProgressBalance?.visibility = View.VISIBLE
+        nav_progress_balance.visibility = View.VISIBLE
 
         val pkh = pkh()
         if (pkh != null)
@@ -448,7 +458,7 @@ open class HomeFragment : Fragment()
             val stringRequest = StringRequest(Request.Method.GET, url,
                     Response.Listener<String> { response ->
 
-                        if (swipeRefreshLayout != null)
+                        if (swipe_refresh_layout != null)
                         {
                             val balance = response.replace("[^0-9]".toRegex(), "")
                             mBalanceItem = balance?.toDouble()/1000000
@@ -458,11 +468,11 @@ open class HomeFragment : Fragment()
                             }
 
                             onBalanceLoadComplete(true)
-                            startGetRequestLoadOperations()
+                            startInitialLoadingHistory()
                         }
                     },
                     Response.ErrorListener {
-                        if (swipeRefreshLayout != null)
+                        if (swipe_refresh_layout != null)
                         {
                             onBalanceLoadComplete(false)
                             onOperationsLoadHistoryComplete()
@@ -499,13 +509,13 @@ open class HomeFragment : Fragment()
     // volley
     private fun startGetRequestLoadOperations()
     {
-        cancelRequest(operations = true, balance = true)
+        cancelRequest(operations = true, balance = true, multisigOnGoing = true)
 
         mGetHistoryLoading = true
 
         empty_loading_operations_textview.setText(R.string.loading_list_operations)
 
-        mNavProgressOperations?.visibility = View.VISIBLE
+        nav_progress_operations.visibility = View.VISIBLE
 
         val pkh = pkh()
 
@@ -520,6 +530,8 @@ open class HomeFragment : Fragment()
                 {
                     addOperationItemsFromJSON(answer)
                     onOperationsLoadHistoryComplete()
+
+                    startInitialLoadingMultisigOngoingOperations()
                 }
 
             }, Response.ErrorListener
@@ -532,6 +544,48 @@ open class HomeFragment : Fragment()
             })
 
             jsObjRequest.tag = LOAD_OPERATIONS_TAG
+
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
+        }
+    }
+
+
+    // volley
+    private fun startGetRequestLoadMultisigOnGoingOperations()
+    {
+        cancelRequest(operations = true, balance = true, multisigOnGoing = true)
+
+        mGetMultisigOnGoing = true
+
+        empty_loading_ongoing_operations_textview.setText(R.string.loading_list_multisig_on_going_operations)
+
+        nav_progress_ongoing_operations.visibility = View.VISIBLE
+
+        val pkh = pkh()
+
+        if (pkh != null)
+        {
+            val url = String.format(getString(R.string.history_url), pkh)
+
+            val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
+            { answer ->
+
+                if (swipe_refresh_layout != null)
+                {
+                    //addOperationItemsFromJSON(answer)
+                    onMultisigOnGoinLoadComplete()
+                }
+
+            }, Response.ErrorListener
+            { volleyError ->
+                if (swipe_refresh_layout != null)
+                {
+                    onMultisigOnGoinLoadComplete()
+                    showSnackbarError(volleyError)
+                }
+            })
+
+            jsObjRequest.tag = LOAD_MULTISIG_ONGOING_TAG
 
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
         }
@@ -595,12 +649,12 @@ open class HomeFragment : Fragment()
             val lastOperation = sortedList[0]
 
             //TODO put that
-            mOperationAmountTextView?.text = (lastOperation!!.amount/1000000).toString()
-            mOperationFeeTextView?.text = (lastOperation!!.fee/1000000).toString()
+            operation_amount_textview.text = (lastOperation!!.amount/1000000).toString()
+            operation_fee_textview.text = (lastOperation!!.fee/1000000).toString()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
-                mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
+                operation_date_textview.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
             }
         }
     }
@@ -618,6 +672,7 @@ open class HomeFragment : Fragment()
 
         outState.putBoolean(GET_OPERATIONS_LOADING_KEY, mGetHistoryLoading)
         outState.putBoolean(GET_BALANCE_LOADING_KEY, mGetBalanceLoading)
+        outState.putBoolean(GET_MULTISIG_ON_GOING_LOADING_KEY, mGetMultisigOnGoing)
 
         outState.putBoolean(WALLET_AVAILABLE_KEY, mWalletEnabled)
     }
@@ -656,7 +711,7 @@ open class HomeFragment : Fragment()
         return null
     }
 
-    private fun cancelRequest(operations: Boolean, balance:Boolean)
+    private fun cancelRequest(operations: Boolean, balance:Boolean, multisigOnGoing:Boolean)
     {
         val requestQueue = VolleySingleton.getInstance(activity?.applicationContext).requestQueue
         if (requestQueue != null)
@@ -665,9 +720,15 @@ open class HomeFragment : Fragment()
             {
                 requestQueue.cancelAll(LOAD_OPERATIONS_TAG)
             }
+
             if (balance)
             {
                 requestQueue.cancelAll(LOAD_BALANCE_TAG)
+            }
+
+            if (multisigOnGoing)
+            {
+                requestQueue.cancelAll(LOAD_MULTISIG_ONGOING_TAG)
             }
         }
     }
@@ -681,6 +742,6 @@ open class HomeFragment : Fragment()
     override fun onDestroy()
     {
         super.onDestroy()
-        cancelRequest(true, true)
+        cancelRequest(operations = true, balance = true, multisigOnGoing = true)
     }
 }
