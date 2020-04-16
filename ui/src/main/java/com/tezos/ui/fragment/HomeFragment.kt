@@ -78,33 +78,22 @@ open class HomeFragment : Fragment()
 
     private val WALLET_AVAILABLE_KEY = "wallet_available_key"
 
-    private var mSwipeRefreshLayout: SwipeRefreshLayout? = null
-
     private var mRecyclerViewItems:ArrayList<Operation>? = null
     private var mBalanceItem:Double? = null
 
     private var mGetHistoryLoading:Boolean = false
     private var mGetBalanceLoading:Boolean = false
 
-    private var mEmptyLoadingBalanceTextview: TextView? = null
-
     private var mEmptyLoadingOperationsTextView:TextView? = null
 
     private var mCoordinatorLayout: CoordinatorLayout? = null
 
-    private var mBalanceTextView: TextView? = null
     private var mOperationAmountTextView: TextView? = null
     private var mOperationFeeTextView: TextView? = null
     private var mOperationDateTextView: TextView? = null
 
     private var mNavProgressBalance: ProgressBar? = null
     private var mNavProgressOperations: ProgressBar? = null
-
-    private var mRestoreWalletButton: Button? = null
-    private var mCreateWalletButton: Button? = null
-
-    private var mBalanceLayout: LinearLayout? = null
-    private var mCreateWalletLayout: LinearLayout? = null
 
     private var mLastOperationLayout: RelativeLayout? = null
 
@@ -193,16 +182,24 @@ open class HomeFragment : Fragment()
             }
         }
 
-        mCreateWalletButton = view.findViewById(R.id.createWalletButton)
-        mRestoreWalletButton = view.findViewById(R.id.restoreWalletButton)
+        ongoing_operation_layout?.setOnClickListener {
 
-        mCreateWalletLayout = view.findViewById(R.id.create_wallet_layout)
-        mBalanceLayout = view.findViewById(R.id.balance_layout)
+            if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty() != true)
+            {
+                //Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
+
+                val mTezosTheme = CustomTheme(
+                        R.color.theme_boo_primary,
+                        R.color.theme_boo_primary_dark,
+                        R.color.theme_boo_text)
+
+                val bundles = itemsToBundles(mRecyclerViewItems)
+                OperationsActivity.start(activity!!, bundles!!, mTezosTheme)
+            }
+        }
 
         mNavProgressBalance = view.findViewById(R.id.nav_progress_balance)
         mNavProgressOperations = view.findViewById(R.id.nav_progress_operations)
-
-        mBalanceTextView = view.findViewById(R.id.balance_textview)
 
         mOperationAmountTextView = view.findViewById(R.id.operation_amount_textview)
         mOperationFeeTextView = view.findViewById(R.id.operation_fee_textview)
@@ -210,20 +207,16 @@ open class HomeFragment : Fragment()
 
         mCoordinatorLayout = view.findViewById(R.id.coordinator)
         mEmptyLoadingOperationsTextView = view.findViewById(R.id.empty_loading_operations_textview)
-        mEmptyLoadingBalanceTextview = view.findViewById(R.id.empty_loading_balance_textview)
 
-        mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
-        mSwipeRefreshLayout?.setOnRefreshListener {
+        swipeRefreshLayout.setOnRefreshListener {
             startGetRequestLoadBalance()
         }
 
-        mRestoreWalletButton = view.findViewById(R.id.restoreWalletButton)
-        mRestoreWalletButton!!.setOnClickListener {
+        restoreWalletButton.setOnClickListener {
             RestoreWalletActivity.start(activity!!, tzTheme!!)
         }
 
-        mCreateWalletButton = view.findViewById(R.id.createWalletButton)
-        mCreateWalletButton!!.setOnClickListener {
+        createWalletButton.setOnClickListener {
             CreateWalletActivity.start(activity!!, tzTheme!!)
         }
 
@@ -233,17 +226,17 @@ open class HomeFragment : Fragment()
             mGetBalanceLoading = false
             mGetHistoryLoading = false
 
-            mBalanceLayout?.visibility = View.GONE
-            mCreateWalletLayout?.visibility = View.VISIBLE
+            balance_layout?.visibility = View.GONE
+            create_wallet_layout.visibility = View.VISIBLE
 
-            mSwipeRefreshLayout?.isEnabled = false
+            swipeRefreshLayout.isEnabled = false
         }
         else
         {
-            mBalanceLayout?.visibility = View.VISIBLE
-            mCreateWalletLayout?.visibility = View.GONE
+            balance_layout?.visibility = View.VISIBLE
+            create_wallet_layout.visibility = View.GONE
 
-            mSwipeRefreshLayout?.isEnabled = true
+            swipeRefreshLayout.isEnabled = true
         }
 
         if (savedInstanceState != null)
@@ -312,8 +305,8 @@ open class HomeFragment : Fragment()
                 mWalletEnabled = true
 
                 // put the good layers
-                mBalanceLayout?.visibility = View.VISIBLE
-                mCreateWalletLayout?.visibility = View.GONE
+                balance_layout?.visibility = View.VISIBLE
+                create_wallet_layout.visibility = View.GONE
 
                 startInitialLoadingBalance()
             }
@@ -325,15 +318,15 @@ open class HomeFragment : Fragment()
             mBalanceItem = -1.0
             refreshTextBalance(false)
 
-            mSwipeRefreshLayout?.isEnabled = false
-            mSwipeRefreshLayout?.isRefreshing = false
+            swipeRefreshLayout.isEnabled = false
+            swipeRefreshLayout.isRefreshing = false
 
             if (mWalletEnabled)
             {
                 mWalletEnabled = false
                 // put the good layers
-                mBalanceLayout?.visibility = View.GONE
-                mCreateWalletLayout?.visibility = View.VISIBLE
+                balance_layout?.visibility = View.GONE
+                create_wallet_layout.visibility = View.VISIBLE
 
                 val args = arguments
                 args?.putBundle(Address.TAG, null)
@@ -358,8 +351,8 @@ open class HomeFragment : Fragment()
         mNavProgressOperations?.visibility = View.GONE
 
         //TODO cancel the swipe refresh if you're not in the right layout
-        mSwipeRefreshLayout?.isEnabled = true
-        mSwipeRefreshLayout?.isRefreshing = false
+        swipeRefreshLayout.isEnabled = true
+        swipeRefreshLayout.isRefreshing = false
 
         refreshRecyclerViewAndTextHistory()
     }
@@ -374,14 +367,14 @@ open class HomeFragment : Fragment()
 
     private fun startInitialLoadingBalance()
     {
-        mSwipeRefreshLayout?.isEnabled = false
+        swipeRefreshLayout?.isEnabled = false
 
         startGetRequestLoadBalance()
     }
 
     private fun startInitialLoadingHistory()
     {
-        mSwipeRefreshLayout?.isEnabled = false
+        swipeRefreshLayout.isEnabled = false
 
         startGetRequestLoadOperations()
     }
@@ -420,20 +413,20 @@ open class HomeFragment : Fragment()
     {
         if (mBalanceItem != -1.0 && mBalanceItem != null)
         {
-            mBalanceTextView?.visibility = View.VISIBLE
+            balance_textview.visibility = View.VISIBLE
             if (!animating)
             {
-                mBalanceTextView?.text = mBalanceItem.toString()
+                balance_textview.text = mBalanceItem.toString()
             }
 
-            mEmptyLoadingBalanceTextview?.visibility = View.GONE
-            mEmptyLoadingBalanceTextview?.text = null
+            empty_loading_balance_textview.visibility = View.GONE
+            empty_loading_balance_textview.text = null
         }
         else
         {
-            mBalanceTextView?.visibility = View.GONE
-            mEmptyLoadingBalanceTextview?.visibility = View.VISIBLE
-            mEmptyLoadingBalanceTextview?.text = "-"
+            balance_textview.visibility = View.GONE
+            empty_loading_balance_textview.visibility = View.VISIBLE
+            empty_loading_balance_textview.text = "-"
         }
     }
 
@@ -445,7 +438,7 @@ open class HomeFragment : Fragment()
         mGetHistoryLoading = true
 
         mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
-        mEmptyLoadingBalanceTextview?.setText(R.string.loading_balance)
+        empty_loading_balance_textview.setText(R.string.loading_balance)
 
         mNavProgressBalance?.visibility = View.VISIBLE
 
@@ -487,17 +480,17 @@ open class HomeFragment : Fragment()
 
     private fun animateBalance(balance: Double?)
     {
-        val objectAnimator = ObjectAnimator.ofFloat(mBalanceTextView, View.ALPHA, 0f)
+        val objectAnimator = ObjectAnimator.ofFloat(balance_textview, View.ALPHA, 0f)
         objectAnimator.addListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {}
             override fun onAnimationCancel(animation: Animator) {}
             override fun onAnimationRepeat(animation: Animator) {}
             override fun onAnimationEnd(animation: Animator) {
-                mBalanceTextView?.text = balance.toString()
+                balance_textview.text = balance.toString()
             }
         })
 
-        val objectAnimator2 = ObjectAnimator.ofFloat(mBalanceTextView, View.ALPHA, 1f)
+        val objectAnimator2 = ObjectAnimator.ofFloat(balance_textview, View.ALPHA, 1f)
 
         //mBalanceTextView?.text = balance.toString()
 
@@ -560,7 +553,7 @@ open class HomeFragment : Fragment()
         listener?.showSnackBar(err!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
         mEmptyLoadingOperationsTextView?.text = getString(R.string.generic_error)
-        mEmptyLoadingBalanceTextview?.text = getString(R.string.generic_error)
+        empty_loading_balance_textview.text = getString(R.string.generic_error)
     }
 
     private fun addOperationItemsFromJSON(answer:JSONArray)
@@ -571,7 +564,7 @@ open class HomeFragment : Fragment()
         {
             var sortedList = arrayListOf<Operation>()
 
-            for (i in 0..(response.length() - 1))
+            for (i in 0 until response.length())
             {
                 val item = response.getJSONObject(i)
                 val operation = Operation.fromJSONObject(item)
