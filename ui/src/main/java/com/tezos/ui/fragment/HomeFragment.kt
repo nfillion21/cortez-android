@@ -84,8 +84,6 @@ open class HomeFragment : Fragment()
     private var mGetHistoryLoading:Boolean = false
     private var mGetBalanceLoading:Boolean = false
 
-    private var mEmptyLoadingOperationsTextView:TextView? = null
-
     private var mCoordinatorLayout: CoordinatorLayout? = null
 
     private var mOperationAmountTextView: TextView? = null
@@ -206,7 +204,6 @@ open class HomeFragment : Fragment()
         mOperationDateTextView = view.findViewById(R.id.operation_date_textview)
 
         mCoordinatorLayout = view.findViewById(R.id.coordinator)
-        mEmptyLoadingOperationsTextView = view.findViewById(R.id.empty_loading_operations_textview)
 
         swipeRefreshLayout.setOnRefreshListener {
             startGetRequestLoadBalance()
@@ -395,8 +392,8 @@ open class HomeFragment : Fragment()
                 mOperationDateTextView?.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
             }
 
-            mEmptyLoadingOperationsTextView?.visibility = View.GONE
-            mEmptyLoadingOperationsTextView?.text = null
+            empty_loading_operations_textview.visibility = View.GONE
+            empty_loading_operations_textview.text = null
 
             //TODO handle the click or not click.
         }
@@ -404,8 +401,8 @@ open class HomeFragment : Fragment()
         {
             mLastOperationLayout?.visibility = View.GONE
 
-            mEmptyLoadingOperationsTextView?.visibility = View.VISIBLE
-            mEmptyLoadingOperationsTextView?.text = "-"
+            empty_loading_operations_textview.visibility = View.VISIBLE
+            empty_loading_operations_textview.text = "-"
         }
     }
 
@@ -437,7 +434,7 @@ open class HomeFragment : Fragment()
 
         mGetHistoryLoading = true
 
-        mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
+        empty_loading_operations_textview.setText(R.string.loading_list_operations)
         empty_loading_balance_textview.setText(R.string.loading_balance)
 
         mNavProgressBalance?.visibility = View.VISIBLE
@@ -506,7 +503,7 @@ open class HomeFragment : Fragment()
 
         mGetHistoryLoading = true
 
-        mEmptyLoadingOperationsTextView?.setText(R.string.loading_list_operations)
+        empty_loading_operations_textview.setText(R.string.loading_list_operations)
 
         mNavProgressOperations?.visibility = View.VISIBLE
 
@@ -552,7 +549,7 @@ open class HomeFragment : Fragment()
 
         listener?.showSnackBar(err!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
-        mEmptyLoadingOperationsTextView?.text = getString(R.string.generic_error)
+        empty_loading_operations_textview.text = getString(R.string.generic_error)
         empty_loading_balance_textview.text = getString(R.string.generic_error)
     }
 
