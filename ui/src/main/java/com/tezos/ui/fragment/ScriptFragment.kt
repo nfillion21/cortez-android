@@ -79,6 +79,7 @@ import kotlinx.android.synthetic.main.update_storage_form_card.*
 import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
 import java.text.SimpleDateFormat
@@ -2145,6 +2146,92 @@ postParams.put("dsts", dstObjects)
         val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
         val sk = CryptoUtils.generateSk(mnemonics, "")
 
+
+
+
+
+        /*
+        val d = Primitive(
+                Primitive.Name.Pair,
+                arrayOf(
+                        Primitive(
+                                Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.string("edpkvPcLCihE21pYk2s9TNjNqoiZPmDm1tCs9Wp7m7kzaTqFgZg3f4"),
+                                        Visitable.string("edsigtdqQAdYVnVpoEWNbNiWV15tiDnqm7p7h4uSAT6TDhM3itR9RDPhpqpuK1doVUa8XNnAY7Q4ZWwhGSkSnTubyHEVLZZBLCH")
+                                )
+                        ),
+                        Primitive(
+                                Primitive.Name.Right,
+                                arrayOf(
+                                        Primitive(
+                                                Primitive.Name.Pair,
+                                                arrayOf(
+                                                        Visitable.sequenceOf(
+                                                                Primitive(
+                                                                        Primitive.Name.DIP,
+                                                                        arrayOf(
+                                                                                Visitable.sequenceOf(
+                                                                                        Primitive(Primitive.Name.NIL, arrayOf(Primitive(Primitive.Name.operation))),
+                                                                                        Primitive(
+                                                                                                Primitive.Name.PUSH,
+                                                                                                arrayOf(
+                                                                                                        Primitive(Primitive.Name.key_hash),
+                                                                                                        Visitable.string("tz1M7RpncdPVx19rtZda42UNDWon4NE5kmGu")
+                                                                                                )
+                                                                                        ),
+                                                                                        Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
+                                                                                        Primitive(
+                                                                                                Primitive.Name.PUSH,
+                                                                                                arrayOf(
+                                                                                                        Primitive(Primitive.Name.mutez),
+                                                                                                        Visitable.integer(1000000)
+                                                                                                )
+                                                                                        )
+                                                                                )
+                                                                        )
+                                                                ),
+                                                                Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                                Primitive(Primitive.Name.CONS)
+                                                        ),
+                                                        Visitable.string("tz1M7RpncdPVx19rtZda42UNDWon4NE5kmGu")
+                                                )
+                                        )
+                                )
+                        )
+                )
+        )
+        val o2 = ByteArrayOutputStream()
+        o2.write(0x05)
+        val p = Packer(o2)
+        d.accept(p)
+        //val s = o2.toByteArray().joinToString("") { "%02X".format(it).toLowerCase() }
+        //println("pikatos: $s")
+
+        val i = ByteArrayInputStream(o2.toByteArray())
+        i.read() // 0x05
+        val v = Unpacker(i).unpack()
+        println("pikatos: $v")
+
+
+
+
+        val hexa = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d100070700060508050807070001020000004c0a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c4"
+        val array = hexa.toByteArray()
+
+        //val s3 = array.joinToString("") { "%02X".format(it).toLowerCase() }
+        //println("pikatos: $s3")
+
+        //val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+
+
+        val ok = Visitable.chainID(getString(R.string.chain_ID))
+        val ok2 = Visitable.address(pkh()!!)
+        */
+
+
         val dataVisitable = Primitive(
                 Primitive.Name.Pair,
                 arrayOf(
@@ -2183,6 +2270,20 @@ postParams.put("dsts", dstObjects)
         dataVisitable.accept(dataPacker)
 
         val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+        /*
+
+        val i3 = ByteArrayInputStream(o.toByteArray())
+        i3.read() // 0x05
+        val v3 = Unpacker(i3).unpack()
+
+
+        println("pikatos: $v3")
+
+        */
+
+
 
         val signature = KeyPair.sign(sk, dataPack)
         val edsig = CryptoUtils.generateEDSig(signature)

@@ -177,7 +177,11 @@ data class Primitive(val name: Name, val arguments: Array<out Visitable>? = null
         EMPTY_BIG_MAP,
         APPLY,
         chain_id,
-        CHAIN_ID
+        CHAIN_ID;
+
+        companion object {
+            fun valueOf(value: Int) = values().first { it.ordinal == value }
+        }
     }
 
     override fun accept(visitor: Visitor) {
