@@ -21,8 +21,35 @@ interface Visitable {
     fun accept(visitor: Visitor)
 }
 
-data class VisitableLong(val value: Long): Visitable {
-    override fun accept(visitor: Visitor) {
+val Visitable.integer: Long? get()
+{
+    return (this as? VisitableLong)?.value
+}
+
+val Visitable.string: String? get()
+{
+    return (this as? VisitableString)?.value
+}
+
+val Visitable.sequence: Array<out Visitable>? get()
+{
+    return (this as? VisitableSequence)?.elements
+}
+
+val Visitable.primitive: Primitive? get()
+{
+    return this as? Primitive
+}
+
+val Visitable.bytes: ByteArray? get()
+{
+    return (this as? VisitableBytes)?.value
+}
+
+data class VisitableLong(val value: Long): Visitable
+{
+    override fun accept(visitor: Visitor)
+    {
         visitor.visit(value)
     }
 }

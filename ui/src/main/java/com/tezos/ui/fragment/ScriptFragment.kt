@@ -2281,8 +2281,56 @@ postParams.put("dsts", dstObjects)
 
         println("pikatos: $v3")
 
-        */
+        println("pikatos: ${v3.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)?.string}")
 
+        val visitabl = v3.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)
+        val visitabl3 = v3.primitive?.arguments?.get(0)?.primitive?.arguments?.get(1)
+
+
+        val counterVisitable = v3.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)
+        val counterV = counterVisitable?.integer
+
+        val signatoriesss = v3.primitive?.arguments?.get(1)?.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)?.primitive?.arguments
+        val threshold = signatoriesss?.get(0)?.integer
+
+        val sequence = signatoriesss?.get(1)?.sequence
+        val size = sequence?.size
+        for (entry in sequence!!)
+        {
+            val k = entry
+            val k2 = entry
+        }
+
+
+        val visitabl2 = Visitable.chainID(getString(R.string.chain_ID))
+
+
+
+        val vBytes = visitabl!!.bytes.toString()
+        val vBytes2 = visitabl2!!.bytes!!
+        val vBytes3 = visitabl3!!.bytes
+
+
+        val pkh = pkh()
+        val visPkh = Visitable.address(pkh()!!)
+
+
+        val newVBytes3 = vBytes3!!.slice(1 until 21).toByteArray()
+
+        val pkhh = CryptoUtils.genericHashToKT(vBytes3)
+        val pkhhv3 = CryptoUtils.genericHashToKT(newVBytes3)
+
+
+
+        val chain = getString(R.string.chain_ID)
+        var bytes = Base58.decode(chain)
+
+        val k = Base58.encode(bytes)
+        val k2 = Base58.encode(vBytes2)
+
+        val k3 = String(vBytes3!!)
+
+        */
 
 
         val signature = KeyPair.sign(sk, dataPack)
