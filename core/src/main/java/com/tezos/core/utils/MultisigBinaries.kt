@@ -3,6 +3,7 @@ package com.tezos.core.utils
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.ui.utils.hexToByteArray
 import java.io.ByteArrayInputStream
+import kotlin.math.sign
 
 class MultisigBinaries(val hexaInput: String)
 {
@@ -10,7 +11,7 @@ class MultisigBinaries(val hexaInput: String)
     {
         enum class MULTISIG_BINARY_TYPE
         {
-            UPDATE_SIGNATORIES, DELEGATE, TRANSFER
+            UPDATE_SIGNATORIES, DELEGATE, UNDELEGATE, TRANSFER
         }
     }
 
@@ -34,21 +35,45 @@ class MultisigBinaries(val hexaInput: String)
         val counterVisitable = visitable.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)
         val counterV = counterVisitable?.integer
 
-        val signatoriesss = visitable.primitive?.arguments?.get(1)?.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)?.primitive?.arguments
-        val threshold = signatoriesss?.get(0)?.integer
+        val signatories = visitable.primitive?.arguments?.get(1)?.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)?.primitive?.arguments
 
-        val sequence = signatoriesss?.get(1)?.sequence
-        if (!sequence.isNullOrEmpty())
+        var threshold:Long? = null
+        var baker:String? = null
+        val signatoriesArray = ArrayList<String>()
+
+        if (!signatories.isNullOrEmpty())
         {
-            val signatoriesArray = ArrayList<String>(sequence.size)
-
-            for (entry in sequence)
+            val prethreshold = signatories?.get(0)
+            if (prethreshold != null)
             {
-                val hashPublicKey = entry?.bytes?.slice(1 until entry!!.bytes!!.size)?.toByteArray()
+                if (prethreshold is VisitableBytes)
+                {
+                    val bytes = prethreshold.bytes
 
-                signatoriesArray.add(CryptoUtils.genericHashToPk(hashPublicKey))
+                    val hashBaker = bytes?.slice(1 until bytes?.size)?.toByteArray()
+                    baker = CryptoUtils.genericHashToPkh(hashBaker)
+                }
+                else if (prethreshold is VisitableLong)
+                {
+                    threshold = signatories?.get(0)?.integer
+                }
+            }
+
+            if (signatories.size > 1)
+            {
+                val sequence = signatories?.get(1)?.sequence
+                if (!sequence.isNullOrEmpty())
+                {
+                    for (entry in sequence)
+                    {
+                        val hashPublicKey = entry?.bytes?.slice(1 until entry!!.bytes!!.size)?.toByteArray()
+
+                        signatoriesArray.add(CryptoUtils.genericHashToPk(hashPublicKey))
+                    }
+                }
             }
         }
+
 
         val delegate = visitable.primitive?.arguments?.get(1)?.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)?.primitive
         val delegateNone = delegate?.name == Primitive.Name.None
@@ -58,18 +83,20 @@ class MultisigBinaries(val hexaInput: String)
                 !pkhh.isNullOrEmpty() &&
                 counterV != null )
         {
-
             if (
                     threshold != null &&
-                    !sequence.isNullOrEmpty()
+                    !signatoriesArray.isNullOrEmpty()
             )
             {
                 return MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES
             }
-
-            if (delegateNone)
+            else if (delegateNone)
             {
                 return MULTISIG_BINARY_TYPE.DELEGATE
+            }
+            else if (!baker.isNullOrEmpty())
+            {
+                return MULTISIG_BINARY_TYPE.UNDELEGATE
             }
         }
 
