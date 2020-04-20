@@ -38,7 +38,6 @@ class MultisigBinaries(val hexaInput: String)
         val threshold = signatoriesss?.get(0)?.integer
 
         val sequence = signatoriesss?.get(1)?.sequence
-
         if (!sequence.isNullOrEmpty())
         {
             val signatoriesArray = ArrayList<String>(sequence.size)
@@ -51,27 +50,27 @@ class MultisigBinaries(val hexaInput: String)
             }
         }
 
+        val delegate = visitable.primitive?.arguments?.get(1)?.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)?.primitive
+        val delegateNone = delegate?.name == Primitive.Name.None
+
         if (
             vChainId != null && //maybe check if it's the good network id
                 !pkhh.isNullOrEmpty() &&
-                counterV == null &&
-                        threshold == null &&
-                        !sequence.isNullOrEmpty()
-        )
-        {
-            //fail
-            return MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES
-        }
-        else // check for delegation
+                counterV != null )
         {
 
+            if (
+                    threshold != null &&
+                    !sequence.isNullOrEmpty()
+            )
+            {
+                return MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES
+            }
 
-
-
-
-
-
-
+            if (delegateNone)
+            {
+                return MULTISIG_BINARY_TYPE.DELEGATE
+            }
         }
 
         return null

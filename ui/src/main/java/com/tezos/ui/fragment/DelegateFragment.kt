@@ -2276,6 +2276,7 @@ class DelegateFragment : Fragment()
             val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
             val multisigBinaries = MultisigBinaries(dataPack.toNoPrefixHexString())
+            val type = multisigBinaries.getType()
 
             val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
             val sk = CryptoUtils.generateSk(mnemonics, "")
