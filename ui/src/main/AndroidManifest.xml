@@ -60,6 +60,11 @@
             />
 
         <activity
+            android:name=".activity.OngoingMultisigActivity"
+            android:theme="@style/PaymentScreens.OngoingMultisigActivity"
+            />
+
+        <activity
             android:name=".activity.DelegateActivity"
             android:theme="@style/PaymentScreens.DelegateActivity"
             android:windowSoftInputMode="adjustPan|stateHidden" />

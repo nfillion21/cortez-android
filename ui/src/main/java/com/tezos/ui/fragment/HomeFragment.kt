@@ -50,6 +50,7 @@ import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
 import com.tezos.ui.activity.CreateWalletActivity
+import com.tezos.ui.activity.OngoingMultisigActivity
 import com.tezos.ui.activity.OperationsActivity
 import com.tezos.ui.activity.RestoreWalletActivity
 import com.tezos.ui.utils.Storage
@@ -178,7 +179,7 @@ open class HomeFragment : Fragment()
                         R.color.theme_boo_text)
 
                 val bundles = itemsToBundles(mRecyclerViewItems)
-                OperationsActivity.start(activity!!, bundles!!, mTezosTheme)
+                OngoingMultisigActivity.start(activity!!, bundles!!, mTezosTheme)
             }
         }
 
