@@ -42,10 +42,11 @@ import android.widget.TextView
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.ui.R
+import com.tezos.ui.adapter.OngoingMultisigRecyclerViewAdapter
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
 import com.tezos.ui.fragment.OperationDetailsDialogFragment
 
-class OngoingMultisigActivity : BaseSecureActivity(), OperationRecyclerViewAdapter.OnItemClickListener
+class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerViewAdapter.OnItemClickListener
 {
     private var mRecyclerView: RecyclerView? = null
 
@@ -97,7 +98,7 @@ class OngoingMultisigActivity : BaseSecureActivity(), OperationRecyclerViewAdapt
         var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
 
         val elements = intent.getParcelableArrayListExtra<Bundle>(ONGOING_MULTISIG_KEY)
-        val adapter = OperationRecyclerViewAdapter(bundlesToItems(elements))
+        val adapter = OngoingMultisigRecyclerViewAdapter(bundlesToItems(elements))
 
         adapter.setOnItemClickListener(this)
         recyclerView.adapter = adapter

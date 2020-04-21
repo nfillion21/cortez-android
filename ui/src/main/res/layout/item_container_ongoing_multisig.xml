@@ -29,10 +29,29 @@
         >
 
         <TextView
+            android:id="@+id/submission_date_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/operation_item_date"
-            android:text="@string/amount"
+            android:text="@string/submission_date"
+            android:textStyle="bold"
+            android:textColor="@color/colorAccentText"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <TextView
+            android:id="@+id/submission_item_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/submission_date_textview"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
+
+        <TextView
+            android:id="@+id/operation_type_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/operation_type"
+            android:layout_below="@+id/submission_item_date"
             android:textStyle="bold"
             android:textColor="@color/colorAccentText"
             android:layout_marginTop="@dimen/spacing_double"
@@ -40,102 +59,13 @@
             tools:ignore="UnusedAttribute,NewApi" />
 
         <TextView
-            android:id="@+id/operation_item_date"
+            android:id="@+id/operation_type_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/operation_type_textview"
+            android:text="Update signatories"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
-
-        <TextView
-            android:id="@+id/amount_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/operation_item_date"
-            android:text="@string/amount"
-            android:textStyle="bold"
-            android:textColor="@color/colorAccentText"
-            android:layout_marginTop="@dimen/spacing_double"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-            tools:ignore="UnusedAttribute,NewApi" />
-
-        <LinearLayout
-            android:id="@+id/operation_amount_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/amount_textview"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tez"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:textStyle="bold"
-                android:textColor="@color/colorAccentText"
-                tools:ignore="UnusedAttribute,NewApi" />
-
-            <Space
-                android:layout_height="0dp"
-                android:layout_width="@dimen/spacing_normal" />
-
-            <TextView
-                android:id="@+id/operation_item_amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:elevation="@dimen/elevation_header"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:clipToPadding="false"
-                android:visibility="visible"
-                tools:ignore="UnusedAttribute,NewApi" />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/fee_textview"
-            android:layout_width="wrap_content"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/operation_amount_layout"
-            android:elevation="@dimen/elevation_header"
-            android:layout_marginTop="@dimen/spacing_double"
-            android:text="@string/fee"
-            android:textStyle="bold"
-            android:textColor="@color/colorAccentText"
-            android:clipToPadding="false"
-            tools:ignore="UnusedAttribute,NewApi" />
-
-        <LinearLayout
-            android:id="@+id/operation_fee_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/fee_textview"
-            android:orientation="horizontal"
-            >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tez"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:textStyle="bold"
-                android:textColor="@color/colorAccentText"
-                tools:ignore="UnusedAttribute,NewApi" />
-
-            <Space
-                android:layout_height="0dp"
-                android:layout_width="@dimen/spacing_normal" />
-
-            <TextView
-                android:id="@+id/operation_item_fee"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:elevation="@dimen/elevation_header"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:clipToPadding="false"
-                android:visibility="visible"
-                tools:ignore="UnusedAttribute,NewApi" />
-
-        </LinearLayout>
 
         <ImageView
             android:layout_width="wrap_content"

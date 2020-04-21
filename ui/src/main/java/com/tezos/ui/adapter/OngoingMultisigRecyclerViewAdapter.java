@@ -89,17 +89,15 @@ public class OngoingMultisigRecyclerViewAdapter extends RecyclerView.Adapter<Rec
      */
     class OperationItemViewHolder extends RecyclerView.ViewHolder
     {
-        private final TextView itemAmount;
-        private final TextView itemFee;
+        //private final TextView itemAmount;
         private final TextView itemDate;
 
         OperationItemViewHolder(View view)
         {
             super(view);
 
-            itemAmount = view.findViewById(R.id.operation_item_amount);
-            itemFee = view.findViewById(R.id.operation_item_fee);
-            itemDate = view.findViewById(R.id.operation_item_date);
+            //itemAmount = view.findViewById(R.id.operation_item_amount);
+            itemDate = view.findViewById(R.id.submission_item_date);
         }
     }
 
@@ -131,7 +129,7 @@ public class OngoingMultisigRecyclerViewAdapter extends RecyclerView.Adapter<Rec
             case OPERATION_ITEM_VIEW_TYPE:
             {
                 View messageItemLayoutView = LayoutInflater.from(viewGroup.getContext()).inflate(
-                        R.layout.item_container_operation, viewGroup, false);
+                        R.layout.item_container_ongoing_multisig, viewGroup, false);
                 return new OperationItemViewHolder(messageItemLayoutView);
             }
 
@@ -155,8 +153,7 @@ public class OngoingMultisigRecyclerViewAdapter extends RecyclerView.Adapter<Rec
                 OperationItemViewHolder operationItemHolder = (OperationItemViewHolder) holder;
                 Operation operationItem = mRecyclerViewItems.get(position);
 
-                operationItemHolder.itemAmount.setText(String.valueOf(operationItem.getAmount()/1000000.0));
-                operationItemHolder.itemFee.setText(String.valueOf(operationItem.getFee()/1000000.0));
+                //operationItemHolder.itemAmount.setText(String.valueOf(operationItem.getAmount()/1000000.0));
 
                 Date date;
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
