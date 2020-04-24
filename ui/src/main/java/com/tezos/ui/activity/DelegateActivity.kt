@@ -49,7 +49,7 @@ import com.tezos.ui.fragment.*
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_delegate.*
 
-class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener, ScriptFragment.OnUpdateScriptListener, SendCentsFragment.OnSendCentsInteractionListener
+class DelegateActivity : BaseSecureActivity(), HomeFragment.HomeListener, DelegateFragment.OnAddedDelegationListener, ScriptFragment.OnUpdateScriptListener, SendCentsDialogFragment.OnSendCentsInteractionListener
 {
 
     private val mTezosTheme: CustomTheme = CustomTheme(

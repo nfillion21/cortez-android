@@ -79,7 +79,6 @@ import kotlinx.android.synthetic.main.update_storage_form_card.*
 import kotlinx.android.synthetic.main.update_storage_form_card.gas_textview
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
 import java.text.SimpleDateFormat
@@ -311,8 +310,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                     val themeBundle = it.getBundle(CustomTheme.TAG)
                     val theme = CustomTheme.fromBundle(themeBundle)
 
-                    val sendCentsFragment = SendCentsFragment.newInstance(pkh()!!, mSecureHashBalance > 0, mStorage!!, theme)
-                    sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsFragment.TAG)
+                    val sendCentsFragment = SendCentsDialogFragment.newInstance(pkh()!!, mSecureHashBalance > 0, mStorage!!, theme)
+                    sendCentsFragment.show(activity!!.supportFragmentManager, SendCentsDialogFragment.TAG)
                 }
             }
         }

@@ -44,6 +44,7 @@ import com.tezos.core.models.Operation
 import com.tezos.ui.R
 import com.tezos.ui.adapter.OngoingMultisigRecyclerViewAdapter
 import com.tezos.ui.adapter.OperationRecyclerViewAdapter
+import com.tezos.ui.fragment.OngoingMultisigDialogFragment
 import com.tezos.ui.fragment.OperationDetailsDialogFragment
 
 class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerViewAdapter.OnItemClickListener
@@ -149,7 +150,12 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
 
     override fun onOperationSelected(view: View?, operation: Operation?)
     {
+        /*
         val operationDetailsFragment = OperationDetailsDialogFragment.newInstance(operation)
         operationDetailsFragment.show(supportFragmentManager, OperationDetailsDialogFragment.TAG)
+        */
+
+        val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance()
+        ongoingDialogFragment.show(supportFragmentManager, OperationDetailsDialogFragment.TAG)
     }
 }

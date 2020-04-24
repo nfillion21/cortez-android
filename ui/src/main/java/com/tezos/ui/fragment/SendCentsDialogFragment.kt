@@ -33,9 +33,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
-import kotlin.math.roundToLong
 
-class SendCentsFragment : AppCompatDialogFragment()
+class SendCentsDialogFragment : AppCompatDialogFragment()
 {
     private var listener: OnSendCentsInteractionListener? = null
 
@@ -83,7 +82,7 @@ class SendCentsFragment : AppCompatDialogFragment()
 
         @JvmStatic
         fun newInstance(contractPkh:String, contractAvailable:Boolean, storage:String, theme: CustomTheme) =
-                SendCentsFragment().apply {
+                SendCentsDialogFragment().apply {
                     arguments = Bundle().apply {
 
                         val bundleTheme = theme.toBundle()
