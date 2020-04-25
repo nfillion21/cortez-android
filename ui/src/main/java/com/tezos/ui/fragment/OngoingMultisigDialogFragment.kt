@@ -138,46 +138,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             dismiss()
         }
 
-        from_radio_group.setOnCheckedChangeListener { _, i ->
-
-            when (i)
-            {
-                R.id.from_contract_button ->
-                {
-                    mIsFromContract = true
-                    startInitTransferLoading(true)
-                }
-
-                R.id.from_tz1_button ->
-                {
-                    mIsFromContract = false
-                    startInitTransferLoading(false)
-                    /*
-                    val seed = Storage(context!!).getMnemonics()
-                    if (seed.mnemonics.isEmpty())
-                    {
-                        showSnackBar(getString(R.string.no_mnemonics_refill_tz3), ContextCompat.getColor(activity!!, R.color.tz_accent), Color.RED)
-                        from_contract_button.isChecked = true
-                    }
-                    */
-                }
-            }
-        }
-
-        val tz3 = retrieveTz3()
-        tz3_address_textview.text = tz3
 
         //startInitTransferLoading(mIsFromContract)
         //from_tz1_button.isChecked = !from_contract_button.isChecked
 
-        arguments?.let {
-            from_contract_button.text = it.getString(CONTRACT_PUBLIC_KEY)
-            from_contract_button.isEnabled = it.getBoolean(IS_CONTRACT_AVAILABLE_KEY)
-        }
 
         val seed = Storage(context!!).getMnemonics()
-        from_tz1_button.text = seed.pkh
-        from_tz1_button.isEnabled = seed.mnemonics.isNotEmpty()
 
 
         if (savedInstanceState != null)
@@ -215,10 +181,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
         else
         {
-            arguments?.let {
-                from_contract_button.isChecked = it.getBoolean(IS_CONTRACT_AVAILABLE_KEY)
-                from_tz1_button.isChecked = !from_contract_button.isChecked && seed.mnemonics.isNotEmpty()
-            }
         }
 
         validateSendCentsButton(isTransferFeeValid())

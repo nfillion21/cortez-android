@@ -847,7 +847,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             threshold_edittext.hint = null
             threshold_edittext.isClickable = false
             threshold_edittext.isLongClickable = false
-            threshold_edittext.isClickable = false
             threshold_edittext.isEnabled = true
             threshold_edittext.isFocusable = false
 

@@ -84,59 +84,77 @@
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                     tools:ignore="UnusedAttribute,NewApi" />
 
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/from"
-                    />
-
-                <RadioGroup
-                    android:id="@+id/from_radio_group"
-                    android:layout_width="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_normal"
-                    android:layout_marginBottom="@dimen/spacing_normal"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:layout_height="wrap_content">
 
-                    <RadioButton
-                        android:id="@+id/from_contract_button"
-                        android:layout_marginBottom="@dimen/spacing_normal"
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/threshold_textview"
                         android:layout_height="wrap_content"
-                        style="@style/TextAppearance.AppCompat.Small"
-                        android:textColor="@color/colorAccent"
-                        android:text="@string/neutral" />
-
-                    <RadioButton
-                        android:id="@+id/from_tz1_button"
                         android:layout_width="wrap_content"
+                        android:text="@string/threshold"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                        tools:ignore="UnusedAttribute,NewApi" />
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/threshold_edittext"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorAccent"
-                        style="@style/TextAppearance.AppCompat.Small"
-                        android:text="@string/neutral" />
+                        android:layout_width="@dimen/min_height_touch_target"
+                        android:layout_marginLeft="@dimen/spacing_normal"
+                        android:gravity="center_horizontal"
+                        android:imeOptions="actionDone"
+                        android:hint="@string/threshold_default"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="false"
+                        android:longClickable="false"
+                        android:text="@string/threshold_default"
+                        android:inputType="numberDecimal"
+                        android:textColorHint="@color/tz_placeholder"
+                        android:maxLength="2"
+                        android:digits="0123456789"
+                        android:textSize="@dimen/size_edit_text" />
+                </LinearLayout>
 
-                </RadioGroup>
-
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/notary_layout"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/spacing_normal"
-                    android:text="@string/to"
-                    />
+                    android:orientation="vertical"
+                    >
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/notary"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginTop="@dimen/spacing_normal"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                        tools:ignore="UnusedAttribute,NewApi" />
 
-                <TextView
-                    android:id="@+id/tz3_address_textview"
-                    android:background="@drawable/selector_rect_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="@dimen/spacing_double"
-                    android:padding="@dimen/spacing_normal"
-                    style="@style/TextAppearance.AppCompat.Small"
-                    android:textColor="@color/colorAccent"
-                    android:text="@string/neutral"
-                    />
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/notary_tz1_edittext"
+                        android:layout_width="wrap_content"
+                        android:minWidth="@dimen/spacing_huge"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionDone"
+                        android:hint="@string/one"
+                        android:enabled="true"
+                        android:inputType="numberDecimal"
+                        android:focusableInTouchMode="false"
+                        android:text="tz1fhudfdskjhsfjdkhsdhjk"
+                        android:clickable="false"
+                        android:longClickable="false"
+                        android:focusable="false"
+                        android:textColorHint="@color/tz_placeholder"
+                        android:textSize="@dimen/standard_item_text_size" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -181,79 +199,84 @@
     <!--
     From KT1 button
     -->
-    <FrameLayout
-        android:id="@+id/send_cents_button_layout"
+
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        style="@style/PaymentScreens.Button"
-        android:enabled="false"
-        android:visibility="visible"
-        android:orientation="vertical"
-        android:layout_marginRight="@dimen/spacing_double"
-        android:layout_marginLeft="@dimen/spacing_double"
-        android:layout_marginBottom="@dimen/spacing_double"
+        android:orientation="horizontal"
         >
 
-        <Button
-            android:id="@+id/send_cents_button"
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:id="@+id/send_cents_button_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/send"
-
-            android:drawableStart="@drawable/ic_lock_black"
-            android:drawableLeft="@drawable/ic_lock_black"
-            android:drawableTint="@color/tz_light"
-            android:drawablePadding="@dimen/spacing_normal"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
-            android:layout_gravity="center"
+            style="@style/PaymentScreens.Button"
             android:enabled="false"
+            android:visibility="visible"
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/spacing_double"
+            android:layout_marginBottom="@dimen/spacing_double"
+            >
 
-            android:background="@null"
-            android:clickable="false"
-            android:focusable="false"
-            android:minHeight="0dp"
-            android:minWidth="0dp"
-            />
+            <Button
+                android:id="@+id/send_cents_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/send"
 
-    </FrameLayout>
+                android:drawableStart="@drawable/ic_lock_black"
+                android:drawableLeft="@drawable/ic_lock_black"
+                android:drawableTint="@color/tz_light"
+                android:drawablePadding="@dimen/spacing_normal"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                android:layout_gravity="center"
+                android:enabled="false"
 
-    <!--
-    From tz1 button
-    <FrameLayout
-        android:id="@+id/send_cents_from_tz1_button_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        style="@style/PaymentScreens.Button"
-        android:enabled="false"
-        android:visibility="visible"
-        android:orientation="vertical"
-        android:layout_marginTop="@dimen/spacing_micro"
-        >
+                android:background="@null"
+                android:clickable="false"
+                android:focusable="false"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                />
+        </FrameLayout>
 
-        <Button
-            android:id="@+id/send_cents_from_tz1_button"
-            android:layout_width="wrap_content"
+
+        <FrameLayout
+            android:id="@+id/send_button_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/send"
-
-            android:drawableStart="@drawable/ic_lock_black"
-            android:drawableLeft="@drawable/ic_lock_black"
-            android:drawableTint="@color/tz_light"
-            android:drawablePadding="@dimen/spacing_normal"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
-            android:layout_gravity="center"
+            style="@style/PaymentScreens.Button"
             android:enabled="false"
+            android:visibility="visible"
+            android:orientation="vertical"
+            android:layout_marginRight="@dimen/spacing_double"
+            >
 
-            android:background="@null"
-            android:clickable="false"
-            android:focusable="false"
-            android:minHeight="0dp"
-            android:minWidth="0dp"
-            />
+            <Button
+                android:id="@+id/send_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/send"
 
-    </FrameLayout>
-    -->
+                android:drawableStart="@drawable/ic_lock_black"
+                android:drawableLeft="@drawable/ic_lock_black"
+                android:drawableTint="@color/tz_light"
+                android:drawablePadding="@dimen/spacing_normal"
+                android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                android:layout_gravity="center"
+                android:enabled="false"
+
+                android:background="@null"
+                android:clickable="false"
+                android:focusable="false"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                />
+
+        </FrameLayout>
+    </LinearLayout>
+
 
 </LinearLayout>

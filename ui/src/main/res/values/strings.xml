@@ -18,10 +18,12 @@
     <string name="amount">Amount</string>
     <string name="submission_date">Submission date</string>
     <string name="operation_type">Operation type</string>
+    <string name="ongoing_contract_address">Contract address</string>
     <string name="deposit_amount">Deposit amount</string>
     <string name="limit_1_to_1k">Daily spending limit (from 1 to 1000 ꜩ)</string>
     <string name="signatories">Signatories</string>
-    <string name="threshold">Threshold (from 1 to 10)</string>
+    <string name="threshold_from">Threshold (from 1 to 10)</string>
+    <string name="threshold">Threshold</string>
     <string name="notary">Notary</string>
     <string name="threshold_info">The threshold is the amount of signatories required to authorize an operation (transaction, delegation or change of the signatories)</string>
     <string name="edpk_hint">edpk…</string>

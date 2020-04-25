@@ -25,7 +25,7 @@
                 android:id="@+id/threshold_textview"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="@string/threshold"
+                android:text="@string/threshold_from"
                 android:textStyle="bold"
                 android:textColor="@color/colorPrimary"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
