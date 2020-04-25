@@ -46,11 +46,29 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/contract_address_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ongoing_contract_address"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorAccentText"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    tools:ignore="UnusedAttribute,NewApi" />
+
+                <TextView
+                    android:id="@+id/contract_address_item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="KT1esfkjfsdjkfldksfdjslsfdfsd"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    tools:ignore="UnusedAttribute,NewApi" />
 
                 <TextView
                     android:id="@+id/submission_date_textview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_double"
                     android:text="@string/submission_date"
                     android:textStyle="bold"
                     android:textColor="@color/colorAccentText"
