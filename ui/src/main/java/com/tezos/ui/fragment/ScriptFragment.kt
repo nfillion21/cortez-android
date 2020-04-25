@@ -847,6 +847,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             threshold_edittext.hint = null
             threshold_edittext.isClickable = false
             threshold_edittext.isLongClickable = false
+            threshold_edittext.isClickable = false
             threshold_edittext.isEnabled = true
             threshold_edittext.isFocusable = false
 
@@ -2182,6 +2183,10 @@ postParams.put("dsts", dstObjects)
         dataVisitable.accept(dataPacker)
 
         val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+        //val multisigBinaries = MultisigBinaries(dataPack.toNoPrefixHexString())
+        //val type = multisigBinaries.getType()
 
         val signature = KeyPair.sign(sk, dataPack)
         val edsig = CryptoUtils.generateEDSig(signature)
