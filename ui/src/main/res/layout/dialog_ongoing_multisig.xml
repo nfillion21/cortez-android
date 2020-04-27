@@ -9,6 +9,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:background="@color/theme_green_primary"
         android:orientation="horizontal">
 
         <Space
@@ -32,6 +34,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="@color/theme_blue_primary"
         android:layout_weight="1"
         android:paddingLeft="@dimen/spacing_double"
         android:paddingRight="@dimen/spacing_double"
@@ -39,7 +42,8 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:fillViewport="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -51,9 +55,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/ongoing_contract_address"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorAccentText"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:textColor="@color/colorAccentText"
+                    android:textStyle="bold"
                     tools:ignore="UnusedAttribute,NewApi" />
 
                 <TextView
@@ -70,9 +74,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_double"
                     android:text="@string/submission_date"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorAccentText"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:textColor="@color/colorAccentText"
+                    android:textStyle="bold"
                     tools:ignore="UnusedAttribute,NewApi" />
 
                 <TextView
@@ -87,11 +91,11 @@
                     android:id="@+id/operation_type_textview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/operation_type"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorAccentText"
                     android:layout_marginTop="@dimen/spacing_double"
+                    android:text="@string/operation_type"
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:textColor="@color/colorAccentText"
+                    android:textStyle="bold"
                     tools:ignore="UnusedAttribute,NewApi" />
 
                 <TextView
@@ -104,142 +108,153 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:orientation="horizontal"
+                    android:layout_height="wrap_content"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:layout_height="wrap_content">
+                    android:orientation="horizontal">
 
                     <TextView
                         android:id="@+id/threshold_textview"
-                        android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="@string/threshold"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorPrimary"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"
                         tools:ignore="UnusedAttribute,NewApi" />
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/threshold_edittext"
-                        android:layout_height="wrap_content"
                         android:layout_width="@dimen/min_height_touch_target"
+                        android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/spacing_normal"
-                        android:gravity="center_horizontal"
-                        android:imeOptions="actionDone"
-                        android:hint="@string/threshold_default"
+                        android:clickable="false"
+                        android:digits="0123456789"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:clickable="false"
-                        android:longClickable="false"
-                        android:text="@string/threshold_default"
+                        android:gravity="center_horizontal"
+                        android:hint="@string/threshold_default"
+                        android:imeOptions="actionDone"
                         android:inputType="numberDecimal"
-                        android:textColorHint="@color/tz_placeholder"
+                        android:longClickable="false"
                         android:maxLength="2"
-                        android:digits="0123456789"
+                        android:text="@string/threshold_default"
+                        android:textColorHint="@color/tz_placeholder"
                         android:textSize="@dimen/size_edit_text" />
                 </LinearLayout>
 
+                <!--
                 <LinearLayout
                     android:id="@+id/notary_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    >
+                    android:orientation="vertical">
+
                     <TextView
-                        android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
-                        android:text="@string/notary"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorPrimary"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_normal"
+                        android:text="@string/notary"
                         android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"
                         tools:ignore="UnusedAttribute,NewApi" />
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/notary_tz1_edittext"
                         android:layout_width="wrap_content"
-                        android:minWidth="@dimen/spacing_huge"
                         android:layout_height="wrap_content"
-                        android:imeOptions="actionDone"
-                        android:hint="@string/one"
-                        android:enabled="true"
-                        android:inputType="numberDecimal"
-                        android:focusableInTouchMode="false"
-                        android:text="tz1fhudfdskjhsfjdkhsdhjk"
                         android:clickable="false"
-                        android:longClickable="false"
+                        android:enabled="true"
                         android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:hint="@string/one"
+                        android:imeOptions="actionDone"
+                        android:inputType="numberDecimal"
+                        android:longClickable="false"
+                        android:minWidth="@dimen/spacing_huge"
+                        android:text="tz1fhudfdskjhsfjdkhsdhjk"
                         android:textColorHint="@color/tz_placeholder"
                         android:textSize="@dimen/standard_item_text_size" />
 
                 </LinearLayout>
+                -->
 
-                <include
-                    layout="@layout/multisig_ongoing_signatories"
-                    />
+                <include layout="@layout/multisig_ongoing_signatories" />
 
             </LinearLayout>
 
         </ScrollView>
     </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_marginLeft="@dimen/spacing_double"
-            android:layout_marginRight="@dimen/spacing_double"
-            android:layout_height="wrap_content">
+    <!--
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:background="@color/theme_red_primary"
+        android:layout_marginLeft="@dimen/spacing_double"
+        android:layout_marginRight="@dimen/spacing_double"
+        android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_weight="0"
-                android:layout_height="wrap_content"
-                android:elevation="@dimen/elevation_header"
-                android:text="@string/tez"
-                android:layout_marginEnd="@dimen/spacing_normal"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
-                tools:ignore="UnusedAttribute,NewApi" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            android:text="@string/tez"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            tools:ignore="UnusedAttribute,NewApi" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/fee_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:imeOptions="actionDone"
-                android:hint="@string/neutral"
-                android:enabled="false"
-                android:inputType="numberDecimal"
-                android:textColorHint="@color/tz_placeholder"
-                android:maxLength="15"
-                android:digits="0123456789."
-                android:textSize="@dimen/standard_item_text_size" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/fee_edittext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:imeOptions="actionDone"
+            android:hint="@string/neutral"
+            android:enabled="false"
+            android:inputType="numberDecimal"
+            android:textColorHint="@color/tz_placeholder"
+            android:maxLength="15"
+            android:digits="0123456789."
+            android:textSize="@dimen/standard_item_text_size" />
 
     </LinearLayout>
+    -->
 
     <!--
     From KT1 button
     -->
 
+    <!--
+    <View
+        android:layout_width="match_parent"
+        android:background="@color/colorAccentSecondary"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    -->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
+        android:background="@color/theme_purple_primary"
         android:orientation="horizontal"
+        android:padding="@dimen/spacing_normal"
         >
 
         <FrameLayout
             android:id="@+id/send_cents_button_layout"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             style="@style/PaymentScreens.Button"
             android:enabled="false"
             android:visibility="visible"
             android:orientation="vertical"
-            android:layout_marginLeft="@dimen/spacing_double"
-            android:layout_marginBottom="@dimen/spacing_double"
             >
 
             <Button
@@ -254,6 +269,7 @@
                 android:drawablePadding="@dimen/spacing_normal"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
                 android:layout_gravity="center"
+                android:gravity="center"
                 android:enabled="false"
 
                 android:background="@null"
@@ -264,16 +280,16 @@
                 />
         </FrameLayout>
 
-
         <FrameLayout
             android:id="@+id/send_button_layout"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             style="@style/PaymentScreens.Button"
             android:enabled="false"
             android:visibility="visible"
+            android:layout_marginLeft="@dimen/spacing_normal"
             android:orientation="vertical"
-            android:layout_marginRight="@dimen/spacing_double"
             >
 
             <Button

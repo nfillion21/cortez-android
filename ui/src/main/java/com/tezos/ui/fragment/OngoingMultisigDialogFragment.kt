@@ -8,26 +8,27 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BulletSpan
-import com.google.android.material.snackbar.Snackbar
-import androidx.fragment.app.DialogFragment
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.appcompat.app.AppCompatDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatDialogFragment
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.fragment.app.DialogFragment
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.google.android.material.snackbar.Snackbar
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.utils.*
+import com.tezos.core.utils.DataExtractor
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
@@ -37,7 +38,6 @@ import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.dialog_ongoing_multisig.*
 import kotlinx.android.synthetic.main.dialog_sent_cents.*
 import kotlinx.android.synthetic.main.dialog_sent_cents.close_button
-import kotlinx.android.synthetic.main.dialog_sent_cents.fee_edittext
 import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button
 import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button_layout
 import kotlinx.android.synthetic.main.multisig_ongoing_signatories.*
@@ -112,7 +112,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         super.onCreate(savedInstanceState)
 
         //TODO Check for a 90% dialog
-        setStyle(DialogFragment.STYLE_NORMAL, 0)
+        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.DialogTheme)
         arguments?.let {
             mStorage = it.getString(STORAGE_DATA_KEY)
         }
@@ -291,6 +291,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                               savedInstanceState: Bundle?): View?
     {
         // Inflate the layout for this fragment
+        dialog.setTitle("Multisig contract operation")
+
         return inflater.inflate(R.layout.dialog_ongoing_multisig, container, false)
     }
 
