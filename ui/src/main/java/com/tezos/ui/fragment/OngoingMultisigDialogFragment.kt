@@ -706,6 +706,13 @@ private fun refreshTextsAndLayouts()
             if (getThreshold() != null)
             {
                 refreshSignatories()
+
+                threshold_layout.visibility = View.VISIBLE
+                current_storage_title_textview.visibility = View.VISIBLE
+                signatories_layout.visibility = View.VISIBLE
+
+                threshold_edittext.setText(getThreshold())
+
 // MULTISIG CONTRACT
                 /*
                 update_multisig_form_card.visibility = View.VISIBLE

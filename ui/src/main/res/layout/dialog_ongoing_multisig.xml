@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        android:background="@color/theme_green_primary"
         android:orientation="horizontal">
 
         <Space
@@ -34,7 +33,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/theme_blue_primary"
         android:layout_weight="1"
         android:paddingLeft="@dimen/spacing_double"
         android:paddingRight="@dimen/spacing_double"
@@ -106,7 +104,21 @@
                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                     tools:ignore="UnusedAttribute,NewApi" />
 
+                <TextView
+                    android:id="@+id/current_storage_title_textview"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_double"
+                    android:text="Current contract storage"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                    android:textColor="@color/colorAccentText"
+                    android:textStyle="bold"
+                    tools:ignore="UnusedAttribute,NewApi" />
+
                 <LinearLayout
+                    android:id="@+id/threshold_layout"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="true"
@@ -138,7 +150,6 @@
                         android:inputType="numberDecimal"
                         android:longClickable="false"
                         android:maxLength="2"
-                        android:text="@string/threshold_default"
                         android:textColorHint="@color/tz_placeholder"
                         android:textSize="@dimen/size_edit_text" />
                 </LinearLayout>
@@ -241,7 +252,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        android:background="@color/theme_purple_primary"
         android:orientation="horizontal"
         android:padding="@dimen/spacing_normal"
         >
