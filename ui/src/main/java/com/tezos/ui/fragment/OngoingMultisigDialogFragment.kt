@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
@@ -35,6 +37,7 @@ import kotlinx.android.synthetic.main.dialog_sent_cents.close_button
 import kotlinx.android.synthetic.main.dialog_sent_cents.fee_edittext
 import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button
 import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button_layout
+import kotlinx.android.synthetic.main.multisig_ongoing_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
@@ -54,6 +57,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     private var mStorage:String? = null
 
     private var mSig:String? = null
+
+    private var mSignatoriesList:ArrayList<String> = ArrayList(SIGNATORIES_CAPACITY)
 
     interface OnSendCentsInteractionListener
     {
@@ -81,8 +86,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         private const val SIGNATORIES_CAPACITY = 10
 
+        private const val SIGNATORIES_LIST_KEY = "signatories_list"
+
         @JvmStatic
-        //fun newInstance(contractPkh:String, contractAvailable:Boolean, storage:String, theme: CustomTheme) =
         fun newInstance() =
                 OngoingMultisigDialogFragment().apply {
                     arguments = Bundle().apply {
@@ -153,6 +159,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
             mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
+
+            mSignatoriesList = savedInstanceState.getStringArrayList(SIGNATORIES_LIST_KEY)
 
             if (mStorageInfoLoading)
             {
@@ -549,6 +557,109 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     }
 
 
+    private fun refreshSignatories(editMode:Boolean)
+    {
+        if (!editMode)
+        {
+            mSignatoriesList = getSignatoriesList()
+        }
+
+        val signatoryLayouts = listOf<LinearLayout>(
+                signatory_layout_01,
+                signatory_layout_02,
+                signatory_layout_03,
+                signatory_layout_04,
+                signatory_layout_05,
+                signatory_layout_06,
+                signatory_layout_07,
+                signatory_layout_08,
+                signatory_layout_09,
+                signatory_layout_10
+        )
+
+        val bulletEditTexts = listOf<TextView>(
+                bullet_address_edittext_01,
+                bullet_address_edittext_02,
+                bullet_address_edittext_03,
+                bullet_address_edittext_04,
+                bullet_address_edittext_05,
+                bullet_address_edittext_06,
+                bullet_address_edittext_07,
+                bullet_address_edittext_08,
+                bullet_address_edittext_09,
+                bullet_address_edittext_10
+        )
+
+        val signatoriesList =
+                if (editMode)
+                {
+                    mSignatoriesList
+                }
+                else
+                {
+                    getSignatoriesList()
+                }
+
+        if (!signatoriesList.isNullOrEmpty())
+        {
+            val length = signatoriesList.size
+
+            for (i in 0 until length)
+            {
+                bulletEditTexts[i].text = signatoriesList[i]
+                signatoryLayouts[i].visibility = View.VISIBLE
+            }
+
+            for (i in length until SIGNATORIES_CAPACITY)
+            {
+                bulletEditTexts[i].text = getString(R.string.neutral)
+                signatoryLayouts[i].visibility = View.GONE
+            }
+        }
+        else
+        {
+            for (it in signatoryLayouts)
+            {
+                it.visibility = View.GONE
+            }
+        }
+
+        if (editMode)
+        {
+            putThresholdInRed(false)
+
+            if (isMultisigInputDataValid())
+            {
+                startInitUpdateMultisigStorageLoading()
+            }
+            else
+            {
+                validateConfirmEditionMultisigButton(false)
+
+                cancelRequests(false)
+                transferLoading(false)
+
+                putFeesMultisigToNegative()
+            }
+        }
+
+        /*
+        if (isInputDataValid())
+        {
+            startInitOriginateContractLoading()
+        }
+        else
+        {
+            validateAddButton(false)
+
+            cancelRequests(false)
+            transferLoading(false)
+
+            putFeesToNegative()
+        }
+        */
+    }
+
     private fun getSignatoriesList(): ArrayList<String>
     {
         if (mStorage != null)
@@ -600,77 +711,195 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         refreshTextsAndLayouts()
     }
 
-    private fun refreshTextsAndLayouts()
-    {
+    private fun refreshTextsAndLayouts() {
+        if (!mStorage.isNullOrEmpty()) {
+            if (getThreshold() != null) {
 
+// MULTISIG CONTRACT
+                /*
+                update_multisig_form_card.visibility = View.VISIBLE
+
+                update_storage_form_card?.visibility = View.GONE
+
+
+                update_storage_button_layout?.visibility = View.GONE
+
+                storage_info_textview?.visibility = View.VISIBLE
+                storage_info_textview?.text = getString(R.string.multisig_script_info)
+
+                updateMultisigInfos()
+
+                switchToMultisigEditMode(mMultisigEditMode)
+                */
+            }
+        }
     }
 
-    /*
-    private fun startPostRequestLoadInitTransfer(fromContract: Boolean)
+
+    private fun updateMultisigInfos()
     {
-        val mnemonicsData = Storage(activity!!).getMnemonics()
+        val numberAndSpotPair = getNumberAndSpot(pk()!!)
+        if (numberAndSpotPair.first != -1)
+        {
+            warning_signatory_textview.text = getString(R.string.warning_signatory_info)
+            warning_signatory_info.visibility = View.VISIBLE
 
+            // about ths signatories
+            warning_threshold_info.visibility = View.VISIBLE
 
-
-        val url = String.format(getString(R.string.contract_storage_url), "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX")
-        //val url = getString(R.string.transfer_forge)
-
-        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
-        { answer ->
-
-            if (rootView != null)
+            var threshold = getThreshold()
+            if (threshold!!.toInt() == 1)
             {
-                mTransferPayload = answer.getString("result")
-                mTransferFees = answer.getLong("total_fee")
+                warning_threshold_textview.text = getString(R.string.warning_no_need_signatories_info)
+            }
+            else
+            {
+                warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_signatory_info), threshold.toInt()-1)
+            }
 
-                // we use this call to ask for payload and fees
-                if (mTransferPayload != null && mTransferFees != -1L)
+            if (!mContractManager.isNullOrEmpty())
+            {
+                warning_notary_info.visibility = View.VISIBLE
+
+                notary_tz1_edittext.setText(mContractManager)
+                notary_tz1_edittext.isEnabled = true
+                notary_tz1_edittext.isFocusable = false
+                notary_tz1_edittext.isClickable = false
+                notary_tz1_edittext.isLongClickable = false
+
+                //notary_layout.visibility = View.VISIBLE
+
+                if (mContractManager == pkhtz1())
                 {
-                    onInitTransferLoadComplete(null)
-
-                    val feeInTez = mTransferFees.toDouble()/1000000.0
-                    fee_edittext?.setText(feeInTez.toString())
-
-                    validateSendCentsButton(isTransferFeeValid())
-                    setTextPayButton()
+                    if (threshold!!.toInt() == 1)
+                    {
+                        warning_notary_textview.text = getString(R.string.warning_notary_threshold_signatory_info)
+                    }
+                    else
+                    {
+                        warning_notary_textview.text = String.format(getString(R.string.warning_notary_signatory_not_threshold_info), threshold.toInt()-1)
+                    }
                 }
                 else
                 {
-                    val volleyError = VolleyError(getString(R.string.generic_error))
-                    onInitTransferLoadComplete(volleyError)
-                    mClickCalculate = true
-
-                    //the call failed
+                    warning_notary_textview.text = getString(R.string.warning_not_notary_signatory_info)
                 }
-            }
-        }, Response.ErrorListener
-        {
-            if (rootView != null)
-            {
-                onInitTransferLoadComplete(it)
 
-                mClickCalculate = true
-                //Log.i("mTransferId", ""+mTransferId)
-                //Log.i("mDelegatePayload", ""+mDelegatePayload)
             }
-        })
-        {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String>
+            else
             {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
+                warning_notary_info.visibility = View.GONE
+
+                //notary_layout.visibility = View.GONE
             }
         }
+        else
+        {
+            warning_signatory_textview.text = getString(R.string.warning_not_signatory_info)
+            warning_signatory_info.visibility = View.VISIBLE
 
-        cancelRequests(true)
+            warning_threshold_info.visibility = View.VISIBLE
 
-        jsObjRequest.tag = LOAD_STORAGE_TAG
-        mStorageInfoLoading = true
-        VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+            var threshold = getThreshold()
+            warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_not_signatory_info), threshold)
+
+            if (!mContractManager.isNullOrEmpty())
+            {
+                warning_notary_info.visibility = View.VISIBLE
+
+                notary_tz1_edittext.setText(mContractManager)
+                notary_tz1_edittext.isEnabled = true
+
+                notary_tz1_edittext.isFocusable = false
+                notary_tz1_edittext.isClickable = false
+                notary_tz1_edittext.isLongClickable = false
+                //notary_tz1_edittext.hint = getString(R.string.click_to_reload)
+
+                //notary_layout.visibility = View.VISIBLE
+
+                if (mContractManager == pkhtz1())
+                {
+                    warning_notary_textview.text = String.format(getString(R.string.warning_notary_not_signatory_info), threshold)
+                }
+                else
+                {
+                    warning_notary_textview.text = getString(R.string.warning_not_notary_not_signatory_info)
+                }
+            }
+            else
+            {
+                warning_notary_info.visibility = View.GONE
+                //notary_layout.visibility = View.GONE
+            }
+        }
     }
-    */
+
+        /*
+        private fun startPostRequestLoadInitTransfer(fromContract: Boolean)
+        {
+            val mnemonicsData = Storage(activity!!).getMnemonics()
+
+
+
+            val url = String.format(getString(R.string.contract_storage_url), "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX")
+            //val url = getString(R.string.transfer_forge)
+
+            val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
+            { answer ->
+
+                if (rootView != null)
+                {
+                    mTransferPayload = answer.getString("result")
+                    mTransferFees = answer.getLong("total_fee")
+
+                    // we use this call to ask for payload and fees
+                    if (mTransferPayload != null && mTransferFees != -1L)
+                    {
+                        onInitTransferLoadComplete(null)
+
+                        val feeInTez = mTransferFees.toDouble()/1000000.0
+                        fee_edittext?.setText(feeInTez.toString())
+
+                        validateSendCentsButton(isTransferFeeValid())
+                        setTextPayButton()
+                    }
+                    else
+                    {
+                        val volleyError = VolleyError(getString(R.string.generic_error))
+                        onInitTransferLoadComplete(volleyError)
+                        mClickCalculate = true
+
+                        //the call failed
+                    }
+                }
+            }, Response.ErrorListener
+            {
+                if (rootView != null)
+                {
+                    onInitTransferLoadComplete(it)
+
+                    mClickCalculate = true
+                    //Log.i("mTransferId", ""+mTransferId)
+                    //Log.i("mDelegatePayload", ""+mDelegatePayload)
+                }
+            })
+            {
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String>
+                {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    return headers
+                }
+            }
+
+            cancelRequests(true)
+
+            jsObjRequest.tag = LOAD_STORAGE_TAG
+            mStorageInfoLoading = true
+            VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+        }
+        */
 
     private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
     {
@@ -908,6 +1137,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         outState.putString(STORAGE_DATA_KEY, mStorage)
 
         outState.putString(CONTRACT_SIG_KEY, mSig)
+
+        outState.putStringArrayList(SIGNATORIES_LIST_KEY, mSignatoriesList)
     }
 
     /**
