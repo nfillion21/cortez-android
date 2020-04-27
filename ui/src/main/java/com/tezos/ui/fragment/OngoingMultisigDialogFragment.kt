@@ -110,6 +110,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+
+        //TODO Check for a 90% dialog
         setStyle(DialogFragment.STYLE_NORMAL, 0)
         arguments?.let {
             mStorage = it.getString(STORAGE_DATA_KEY)
@@ -171,7 +173,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             }
             else
             {
-                onInitTransferLoadComplete(null)
+                //onInitTransferLoadComplete(null)
+                onStorageInfoComplete(error = null)
                 if (mFinalizeTransferLoading)
                 {
                     startFinalizeTransferLoading()
@@ -489,7 +492,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 if (dialogRootView != null)
                 {
                     addContractInfoFromJSON(it)
-                    onStorageInfoComplete(true)
+                    onStorageInfoComplete(error = null)
 
                     /*
                     if (getStorageSecureKeyHash() != null)
@@ -521,21 +524,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                         if (dialogRootView != null)
                         {
-                            /*
-                            val response = it.networkResponse?.statusCode
-                            if (response == 404)
-                            {
-                                //TODO this doesn't exist anymore
-                                mStorage = JSONObject(getString(R.string.default_storage)).toString()
-                            }
-                            else
-                            {
-                                // 404 happens when there is no storage in this KT1
-                                showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
-                            }
-                            */
-
-                            onStorageInfoComplete(false)
+                            onStorageInfoComplete(error = it)
+                            mClickCalculate = true
                         }
                     })
 
@@ -670,19 +660,46 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     }
 
 
-    private fun onStorageInfoComplete(animating:Boolean)
+    private fun onStorageInfoComplete(error:VolleyError?)
     {
         mStorageInfoLoading = false
 
-        //TODO not for now
-        //nav_progress?.visibility = View.GONE
+        if (error != null || mClickCalculate)
+        {
+            // stop the moulinette only if an error occurred
+            transferLoading(false)
+            cancelRequests(true)
 
+            mTransferPayload = null
+
+            fee_edittext?.isEnabled = true
+            fee_edittext?.isFocusable = false
+            fee_edittext?.isClickable = false
+            fee_edittext?.isLongClickable = false
+            fee_edittext?.hint = getString(R.string.click_for_fees)
+
+            fee_edittext?.setOnClickListener {
+                startInitContractInfoLoading()
+            }
+
+            if(error != null)
+            {
+                showSnackBar(getString(R.string.generic_error), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            }
+        }
+        else
+        {
+            transferLoading(false)
+            cancelRequests(true)
+        }
+
+        //TODO check if necessary
         refreshTextsAndLayouts()
     }
 
-    private fun refreshTextsAndLayouts()
-    {
-        if (!mStorage.isNullOrEmpty())
+private fun refreshTextsAndLayouts()
+{
+    if (!mStorage.isNullOrEmpty())
         {
             if (getThreshold() != null)
             {
@@ -782,6 +799,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         return pk
     }
 
+    /*
     private fun onInitTransferLoadComplete(error: VolleyError?)
     {
         mStorageInfoLoading = false
@@ -818,6 +836,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             //transferLoading(true)
         }
     }
+    */
 
     private fun onFinalizeTransferLoadComplete(error: VolleyError?)
     {
