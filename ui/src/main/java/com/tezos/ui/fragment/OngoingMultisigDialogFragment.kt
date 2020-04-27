@@ -5,6 +5,9 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.BulletSpan
 import com.google.android.material.snackbar.Snackbar
 import androidx.fragment.app.DialogFragment
 import androidx.core.content.ContextCompat
@@ -181,6 +184,20 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
         else
         {
+            val ss = SpannableString(" ")
+            ss.setSpan(BulletSpan(8, ContextCompat.getColor(activity!!, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            bullet_textview_01.text = ss
+            bullet_textview_02.text = ss
+            bullet_textview_03.text = ss
+            bullet_textview_04.text = ss
+            bullet_textview_05.text = ss
+            bullet_textview_06.text = ss
+            bullet_textview_07.text = ss
+            bullet_textview_08.text = ss
+            bullet_textview_09.text = ss
+            bullet_textview_10.text = ss
+
             startInitContractInfoLoading()
         }
 
@@ -557,12 +574,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     }
 
 
-    private fun refreshSignatories(editMode:Boolean)
+    private fun refreshSignatories()
     {
-        if (!editMode)
-        {
-            mSignatoriesList = getSignatoriesList()
-        }
+        mSignatoriesList = getSignatoriesList()
 
         val signatoryLayouts = listOf<LinearLayout>(
                 signatory_layout_01,
@@ -590,23 +604,13 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 bullet_address_edittext_10
         )
 
-        val signatoriesList =
-                if (editMode)
-                {
-                    mSignatoriesList
-                }
-                else
-                {
-                    getSignatoriesList()
-                }
-
-        if (!signatoriesList.isNullOrEmpty())
+        if (!mSignatoriesList.isNullOrEmpty())
         {
-            val length = signatoriesList.size
+            val length = mSignatoriesList.size
 
             for (i in 0 until length)
             {
-                bulletEditTexts[i].text = signatoriesList[i]
+                bulletEditTexts[i].text = mSignatoriesList[i]
                 signatoryLayouts[i].visibility = View.VISIBLE
             }
 
@@ -623,41 +627,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 it.visibility = View.GONE
             }
         }
-
-        if (editMode)
-        {
-            putThresholdInRed(false)
-
-            if (isMultisigInputDataValid())
-            {
-                startInitUpdateMultisigStorageLoading()
-            }
-            else
-            {
-                validateConfirmEditionMultisigButton(false)
-
-                cancelRequests(false)
-                transferLoading(false)
-
-                putFeesMultisigToNegative()
-            }
-        }
-
-        /*
-        if (isInputDataValid())
-        {
-            startInitOriginateContractLoading()
-        }
-        else
-        {
-            validateAddButton(false)
-
-            cancelRequests(false)
-            transferLoading(false)
-
-            putFeesToNegative()
-        }
-        */
     }
 
     private fun getSignatoriesList(): ArrayList<String>
@@ -711,10 +680,13 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         refreshTextsAndLayouts()
     }
 
-    private fun refreshTextsAndLayouts() {
-        if (!mStorage.isNullOrEmpty()) {
-            if (getThreshold() != null) {
-
+    private fun refreshTextsAndLayouts()
+    {
+        if (!mStorage.isNullOrEmpty())
+        {
+            if (getThreshold() != null)
+            {
+                refreshSignatories()
 // MULTISIG CONTRACT
                 /*
                 update_multisig_form_card.visibility = View.VISIBLE
@@ -731,105 +703,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                 switchToMultisigEditMode(mMultisigEditMode)
                 */
-            }
-        }
-    }
-
-
-    private fun updateMultisigInfos()
-    {
-        val numberAndSpotPair = getNumberAndSpot(pk()!!)
-        if (numberAndSpotPair.first != -1)
-        {
-            warning_signatory_textview.text = getString(R.string.warning_signatory_info)
-            warning_signatory_info.visibility = View.VISIBLE
-
-            // about ths signatories
-            warning_threshold_info.visibility = View.VISIBLE
-
-            var threshold = getThreshold()
-            if (threshold!!.toInt() == 1)
-            {
-                warning_threshold_textview.text = getString(R.string.warning_no_need_signatories_info)
-            }
-            else
-            {
-                warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_signatory_info), threshold.toInt()-1)
-            }
-
-            if (!mContractManager.isNullOrEmpty())
-            {
-                warning_notary_info.visibility = View.VISIBLE
-
-                notary_tz1_edittext.setText(mContractManager)
-                notary_tz1_edittext.isEnabled = true
-                notary_tz1_edittext.isFocusable = false
-                notary_tz1_edittext.isClickable = false
-                notary_tz1_edittext.isLongClickable = false
-
-                //notary_layout.visibility = View.VISIBLE
-
-                if (mContractManager == pkhtz1())
-                {
-                    if (threshold!!.toInt() == 1)
-                    {
-                        warning_notary_textview.text = getString(R.string.warning_notary_threshold_signatory_info)
-                    }
-                    else
-                    {
-                        warning_notary_textview.text = String.format(getString(R.string.warning_notary_signatory_not_threshold_info), threshold.toInt()-1)
-                    }
-                }
-                else
-                {
-                    warning_notary_textview.text = getString(R.string.warning_not_notary_signatory_info)
-                }
-
-            }
-            else
-            {
-                warning_notary_info.visibility = View.GONE
-
-                //notary_layout.visibility = View.GONE
-            }
-        }
-        else
-        {
-            warning_signatory_textview.text = getString(R.string.warning_not_signatory_info)
-            warning_signatory_info.visibility = View.VISIBLE
-
-            warning_threshold_info.visibility = View.VISIBLE
-
-            var threshold = getThreshold()
-            warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_not_signatory_info), threshold)
-
-            if (!mContractManager.isNullOrEmpty())
-            {
-                warning_notary_info.visibility = View.VISIBLE
-
-                notary_tz1_edittext.setText(mContractManager)
-                notary_tz1_edittext.isEnabled = true
-
-                notary_tz1_edittext.isFocusable = false
-                notary_tz1_edittext.isClickable = false
-                notary_tz1_edittext.isLongClickable = false
-                //notary_tz1_edittext.hint = getString(R.string.click_to_reload)
-
-                //notary_layout.visibility = View.VISIBLE
-
-                if (mContractManager == pkhtz1())
-                {
-                    warning_notary_textview.text = String.format(getString(R.string.warning_notary_not_signatory_info), threshold)
-                }
-                else
-                {
-                    warning_notary_textview.text = getString(R.string.warning_not_notary_not_signatory_info)
-                }
-            }
-            else
-            {
-                warning_notary_info.visibility = View.GONE
-                //notary_layout.visibility = View.GONE
             }
         }
     }
