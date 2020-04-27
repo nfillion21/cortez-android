@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.android.volley.AuthFailureError
+import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
@@ -28,10 +29,14 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.fragment.ScriptFragment.Companion.CONTRACT_PUBLIC_KEY
 import com.tezos.ui.utils.*
+import kotlinx.android.synthetic.main.dialog_ongoing_multisig.*
 import kotlinx.android.synthetic.main.dialog_sent_cents.*
+import kotlinx.android.synthetic.main.dialog_sent_cents.close_button
+import kotlinx.android.synthetic.main.dialog_sent_cents.fee_edittext
+import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button
+import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button_layout
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.ByteArrayOutputStream
 import java.security.interfaces.ECPublicKey
 
 class OngoingMultisigDialogFragment : AppCompatDialogFragment()
@@ -42,13 +47,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     private var mClickCalculate:Boolean = false
 
     private var mTransferPayload:String? = null
-    private var mInitTransferLoading:Boolean = false
+    private var mStorageInfoLoading:Boolean = false
 
     private var mFinalizeTransferLoading:Boolean = false
 
     private var mStorage:String? = null
-
-    private var mIsFromContract:Boolean = true
 
     private var mSig:String? = null
 
@@ -63,22 +66,20 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     companion object
     {
-        const val TAG = "send_cents_fragment"
+        const val TAG = "ongoing_multisig_dialog_fragment"
 
         private const val TRANSFER_FEE_KEY = "transfer_fee_key"
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
         private const val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
 
-        private const val TRANSFER_INIT_TAG = "transfer_init"
+        private const val LOAD_STORAGE_TAG = "transfer_init"
         private const val TRANSFER_FINALIZE_TAG = "transfer_finalize"
 
         private const val STORAGE_DATA_KEY = "storage_data_key"
 
-        private const val IS_FROM_CONTRACT_KEY = "is_from_contract_key"
-
-        private const val IS_CONTRACT_AVAILABLE_KEY = "is_contract_available_key"
-
         private const val CONTRACT_SIG_KEY = "contract_sig_key"
+
+        private const val SIGNATORIES_CAPACITY = 10
 
         @JvmStatic
         //fun newInstance(contractPkh:String, contractAvailable:Boolean, storage:String, theme: CustomTheme) =
@@ -103,14 +104,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         setStyle(DialogFragment.STYLE_NORMAL, 0)
         arguments?.let {
             mStorage = it.getString(STORAGE_DATA_KEY)
-
-            val isContractAvailable = it.getBoolean(IS_CONTRACT_AVAILABLE_KEY)
-            if (!isContractAvailable)
-            {
-                mIsFromContract = false
-            }
         }
-        //isCancelable = false
     }
 
     override fun onAttach(context: Context)
@@ -153,25 +147,23 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
 
-            mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INIT_TAG)
+            mStorageInfoLoading = savedInstanceState.getBoolean(LOAD_STORAGE_TAG)
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
-            mIsFromContract = savedInstanceState.getBoolean(IS_FROM_CONTRACT_KEY)
-
             mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
-            if (mInitTransferLoading)
+            if (mStorageInfoLoading)
             {
-                startInitTransferLoading(mIsFromContract)
+                startInitContractInfoLoading()
             }
             else
             {
                 onInitTransferLoadComplete(null)
                 if (mFinalizeTransferLoading)
                 {
-                    startFinalizeTransferLoading(mIsFromContract)
+                    startFinalizeTransferLoading()
                 }
                 else
                 {
@@ -181,6 +173,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
         else
         {
+            startInitContractInfoLoading()
         }
 
         validateSendCentsButton(isTransferFeeValid())
@@ -214,7 +207,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeTransferLoading(mIsFromContract)
+            startFinalizeTransferLoading()
         }
         dialog.passwordVerificationListener =
                 {
@@ -273,7 +266,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         return inflater.inflate(R.layout.dialog_ongoing_multisig, container, false)
     }
 
-    private fun startInitTransferLoading(fromContract:Boolean)
+    private fun startInitContractInfoLoading()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
@@ -285,22 +278,22 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         validateSendCentsButton(false)
 
-        startPostRequestLoadInitTransfer(fromContract)
+        startGetRequestLoadContractInfo()
     }
 
 
-    private fun startFinalizeTransferLoading(isFromContract: Boolean)
+    private fun startFinalizeTransferLoading()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
 
-        startPostRequestLoadFinalizeTransfer(isFromContract)
+        startPostRequestLoadFinalizeTransfer()
     }
 
     // REQUESTS
 
     // volley
-    private fun startPostRequestLoadFinalizeTransfer(mIsFromContract: Boolean)
+    private fun startPostRequestLoadFinalizeTransfer()
     {
         val url = getString(R.string.transfer_injection_operation)
 
@@ -313,7 +306,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             var dstObjects = JSONArray()
             var dstObject = JSONObject()
 
-            if (mIsFromContract)
+            if (true)
             {
                 val ecKeys = retrieveECKeys()
                 val p2pk = CryptoUtils.generateP2Pk(ecKeys)
@@ -369,7 +362,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
                 var compressedSignature: ByteArray
-                if (mIsFromContract)
+                if (true)
                 {
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
@@ -446,164 +439,181 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
     }
 
+    // volley
+    private fun startGetRequestLoadContractInfo()
+    {
+        cancelRequests(true)
+
+        //mStorageInfoLoading = true
+
+        //loading_textview.setText(R.string.loading_contract_info)
+
+        //nav_progress.visibility = View.VISIBLE
+
+        val pkh = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX"
+        if (pkh != null)
+        {
+            //val url = String.format(getString(R.string.contract_storage_url), pkh)
+            val url = String.format(getString(R.string.contract_storage_url), pkh)
+
+            // Request a string response from the provided URL.
+            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener<JSONObject>
+            {
+
+                //prevents from async crashes
+                if (dialogRootView != null)
+                {
+                    addContractInfoFromJSON(it)
+                    onStorageInfoComplete(true)
+
+                    /*
+                    if (getStorageSecureKeyHash() != null)
+                    {
+
+                        validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
+
+                        startGetRequestBalance()
+                    }
+                    else if (getThreshold() != null)
+                    {
+                        // here I need to check the user is notary or signatory only.
+                        startNotaryLoading()
+                    }
+                    else
+                    {
+                        val mnemonicsData = Storage(activity!!).getMnemonics()
+                        val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
+                        val isDefaultContract = mStorage.toString() == defaultContract.toString()
+
+                        if (isDefaultContract)
+                        {
+                        }
+                    }
+                    */
+                }
+            },
+                    Response.ErrorListener {
+
+                        if (dialogRootView != null)
+                        {
+                            /*
+                            val response = it.networkResponse?.statusCode
+                            if (response == 404)
+                            {
+                                //TODO this doesn't exist anymore
+                                mStorage = JSONObject(getString(R.string.default_storage)).toString()
+                            }
+                            else
+                            {
+                                // 404 happens when there is no storage in this KT1
+                                showSnackBar(it, null, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                            }
+                            */
+
+                            onStorageInfoComplete(false)
+                        }
+                    })
+
+            jsonArrayRequest.tag = LOAD_STORAGE_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
+    private fun addContractInfoFromJSON(answer: JSONObject)
+    {
+        if (answer.length() > 0)
+        {
+            mStorage = answer.toString()
+        }
+    }
+
+
+    private fun getThreshold(): String?
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+                if (counter != null)
+                {
+                    val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                    return DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
+                }
+            }
+        }
+
+        return null
+    }
+
+
+    private fun getSignatoriesList(): ArrayList<String>
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
+
+            val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+            if (counter != null)
+            {
+                val argsPk = (DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray)[1] as JSONArray
+
+                val list = ArrayList<String> ()
+
+                for (it in 0 until argsPk.length())
+                {
+                    val item = argsPk.getJSONObject(it)
+
+                    val pk = DataExtractor.getStringFromField(item, "string")
+                    list.add(pk)
+                }
+
+                return list
+            }
+        }
+
+        return ArrayList(SIGNATORIES_CAPACITY)
+    }
+
+    private fun getNumberAndSpot(publicKey:String): Pair<Int, Int>
+    {
+        val signatories = getSignatoriesList()
+        if (!signatories.isNullOrEmpty())
+        {
+            return Pair(signatories.indexOf(publicKey), signatories.size)
+        }
+
+        return Pair(-1, -1)
+    }
+
+
+    private fun onStorageInfoComplete(animating:Boolean)
+    {
+        mStorageInfoLoading = false
+
+        //TODO not for now
+        //nav_progress?.visibility = View.GONE
+
+        refreshTextsAndLayouts()
+    }
+
+    private fun refreshTextsAndLayouts()
+    {
+
+    }
+
+    /*
     private fun startPostRequestLoadInitTransfer(fromContract: Boolean)
     {
         val mnemonicsData = Storage(activity!!).getMnemonics()
 
-        val url = getString(R.string.transfer_forge)
-
-        var postParams = JSONObject()
-        if (fromContract)
-        {
-            val ecKeys = retrieveECKeys()
-            val p2pk = CryptoUtils.generateP2Pk(ecKeys)
-            postParams.put("src_pk", p2pk)
-            val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-            postParams.put("src", tz3)
-
-            val kt1 = arguments!!.getString(CONTRACT_PUBLIC_KEY)
-
-            var dstObjects = JSONArray()
-
-            var dstObject = JSONObject()
-
-            dstObject.put("dst", kt1)
-            dstObject.put("amount", "0")
-
-            dstObject.put("entrypoint", "transfer")
-
-            val dataVisitable = Primitive(
-                    Primitive.Name.Pair,
-                    arrayOf(
-                            Visitable.sequenceOf(
-                                    Primitive(
-                                            Primitive.Name.Pair,
-                                            arrayOf(
-                                                    Visitable.integer(100000),
-                                                    Visitable.address(tz3)
-                                            )
-                                    )
-                            ),
-                            Visitable.keyHash(tz3)
-                    )
-            )
 
 
-            val o = ByteArrayOutputStream()
-            o.write(0x05)
-
-            val dataPacker = Packer(o)
-            dataVisitable.accept(dataPacker)
-
-            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
-                    arrayOf(
-                            Visitable.address(kt1),
-                            Visitable.chainID(getString(R.string.chain_ID))
-                    )
-            )
-
-            val output = ByteArrayOutputStream()
-            output.write(0x05)
-
-            val p = Packer(output)
-            addressAndChainVisitable.accept(p)
-
-            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
-
-
-
-            var saltVisitable: Visitable? = null
-            val salt = getSalt()
-            if (salt != null)
-            {
-                saltVisitable = Visitable.integer(salt.toLong())
-            }
-
-            val outputStream = ByteArrayOutputStream()
-            outputStream.write(0x05)
-
-            val packer = Packer(outputStream)
-            saltVisitable!!.accept(packer)
-
-            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
-
-
-            val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
-
-            val signature = EncryptionServices().sign(signedData)
-            val compressedSignature = compressFormat(signature)
-
-            val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
-
-
-            //val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
-
-            //val p2sig = CryptoUtils.generateEDSig(signature)
-
-
-            val spendingLimitFile = "spending_limit_transfer.json"
-            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                    .use {
-                        it.readText()
-                    }
-
-            val value = JSONObject(contract)
-
-            val argsSend = (((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-
-            val argsSendAmount = argsSend[0] as JSONObject
-            argsSendAmount.put("int", "100000")
-
-            val argsSendContract = argsSend[1] as JSONObject
-            argsSendContract.put("string", tz3)
-
-            val argsSendTz = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-            argsSendTz.put("string", tz3)
-
-            val argsSig = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
-
-            val argsSigPk = argsSig[0] as JSONObject
-            argsSigPk.put("string", p2pk)
-
-            val argsSigSig = argsSig[1] as JSONObject
-            argsSigSig.put("string", p2sig)
-
-            mSig = p2sig
-
-            dstObject.put("parameters", value)
-
-            dstObjects.put(dstObject)
-
-            postParams.put("dsts", dstObjects)
-        }
-        else
-        {
-            val pk = if (mnemonicsData.pk.isNullOrEmpty())
-            {
-                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
-            }
-            else
-            {
-                mnemonicsData.pk
-            }
-
-            postParams.put("src", mnemonicsData.pkh)
-            postParams.put("src_pk", pk)
-
-            var dstObject = JSONObject()
-            dstObject.put("dst", retrieveTz3())
-
-            //0.1 tez == 100 000 mutez
-            dstObject.put("amount", "100000")
-
-            var dstObjects = JSONArray()
-            dstObjects.put(dstObject)
-            postParams.put("dsts", dstObjects)
-        }
-
+        val url = String.format(getString(R.string.contract_storage_url), "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX")
+        //val url = getString(R.string.transfer_forge)
 
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
@@ -656,10 +666,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         cancelRequests(true)
 
-        jsObjRequest.tag = TRANSFER_INIT_TAG
-        mInitTransferLoading = true
+        jsObjRequest.tag = LOAD_STORAGE_TAG
+        mStorageInfoLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
     }
+    */
 
     private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
     {
@@ -671,7 +682,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private fun onInitTransferLoadComplete(error: VolleyError?)
     {
-        mInitTransferLoading = false
+        mStorageInfoLoading = false
 
         if (error != null || mClickCalculate)
         {
@@ -688,7 +699,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             fee_edittext?.hint = getString(R.string.click_for_fees)
 
             fee_edittext?.setOnClickListener {
-                startInitTransferLoading(mIsFromContract)
+                startInitContractInfoLoading()
             }
 
             if(error != null)
@@ -891,11 +902,10 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 
-        outState.putBoolean(TRANSFER_INIT_TAG, mInitTransferLoading)
+        outState.putBoolean(LOAD_STORAGE_TAG, mStorageInfoLoading)
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
-        outState.putBoolean(IS_FROM_CONTRACT_KEY, mIsFromContract)
 
         outState.putString(CONTRACT_SIG_KEY, mSig)
     }
@@ -925,7 +935,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeTransferLoading(mIsFromContract)
+            startFinalizeTransferLoading()
         }
         else
         {
@@ -938,12 +948,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         if (activity != null)
         {
             val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
-            requestQueue?.cancelAll(TRANSFER_INIT_TAG)
+            requestQueue?.cancelAll(LOAD_STORAGE_TAG)
             requestQueue?.cancelAll(TRANSFER_FINALIZE_TAG)
 
             if (resetBooleans)
             {
-                mInitTransferLoading = false
+                mStorageInfoLoading = false
                 mFinalizeTransferLoading = false
             }
         }
