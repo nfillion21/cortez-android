@@ -707,11 +707,19 @@ private fun refreshTextsAndLayouts()
             {
                 refreshSignatories()
 
-                threshold_layout.visibility = View.VISIBLE
-                current_storage_title_textview.visibility = View.VISIBLE
-                signatories_layout.visibility = View.VISIBLE
+                update_signatories_layout.visibility = View.VISIBLE
+
+                //threshold_layout.visibility = View.VISIBLE
+                //current_storage_title_textview.visibility = View.VISIBLE
+                //signatories_layout.visibility = View.VISIBLE
 
                 threshold_edittext.setText(getThreshold())
+
+
+
+                "79046ce688e4a719d86cf74625baefeaeb272fe10ee8885dfa1077415b0efd556c00126f945de58d401b7a97d5d5119de169e14725118e1dbba50eecfb013a0001588317ff8c2df3024d180109239ce16c80e6f6d100ff00000000f6070707070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e020000006c05090100000063656473696774706e6f47614a726b67784c6746644a45395662706a36677231333847777479357959613561504a43576141484166375344646a62564c5a7a714a5345625a55676435723156695039766a347973575a55395a4b63737943676f534a746a0306"
+
+
 
 // MULTISIG CONTRACT
                 /*
