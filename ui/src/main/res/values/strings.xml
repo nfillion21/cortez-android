@@ -105,6 +105,8 @@
     <string name="share">Share</string>
     <string name="send_10_cents">Send 0.1 ꜩ to it</string>
     <string name="send">Send 0.1 ꜩ</string>
+    <string name="accept_proposal">Accept</string>
+    <string name="decline_proposal">Decline</string>
     <string name="contact_us">Contact us</string>
     <string name="add_multisig_signatory">Add a signatory</string>
     <string name="restore_your_24_words">Restore your 24 words</string>

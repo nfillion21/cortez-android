@@ -11,7 +11,6 @@ import android.text.style.BulletSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDialogFragment
@@ -37,10 +36,6 @@ import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.fragment.ScriptFragment.Companion.CONTRACT_PUBLIC_KEY
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.dialog_ongoing_multisig.*
-import kotlinx.android.synthetic.main.dialog_sent_cents.*
-import kotlinx.android.synthetic.main.dialog_sent_cents.close_button
-import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button
-import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button_layout
 import kotlinx.android.synthetic.main.multisig_ongoing_proposal_signatories.*
 import kotlinx.android.synthetic.main.multisig_ongoing_signatories.*
 import org.json.JSONArray
@@ -136,7 +131,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         super.onViewCreated(view, savedInstanceState)
 
-        send_cents_button_layout.setOnClickListener {
+        decline_button_layout.setOnClickListener {
             onSendClick()
         }
 
@@ -204,11 +199,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             startInitContractInfoLoading()
         }
 
-        validateSendCentsButton(isTransferFeeValid())
-        if (isTransferFeeValid())
-        {
-            setTextPayButton()
-        }
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+        validateAcceptDeclineButtons(areButtonsValid())
     }
 
     private fun onSendClick()
@@ -244,49 +240,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         dialog.show(activity?.supportFragmentManager, "Authentication")
     }
 
-    private fun setTextPayButton()
-    {
-        var amountDouble: Double = (mTransferFees.toDouble() + 100000)/1000000.0
-
-        var amount = amountDouble.toString()
-
-        if (amount.contains("."))
-        {
-            val elements = amount.substring(amount.indexOf("."))
-
-            when
-            {
-                elements.length > 7 ->
-                {
-                    amount = String.format("%.6f", amount.toDouble())
-                    val d = amount.toDouble()
-                    amount = d.toString()
-                }
-
-                elements.length <= 3 ->
-                {
-                    amount = String.format("%.2f", amount.toDouble())
-                }
-                else ->
-                {
-                    //                        int length = elements.length() - 1;
-                    //                        String format = "%." + length + "f";
-                    //                        Float f = Float.parseFloat(amount);
-                    //                        amount = String.format(format, f);
-                }
-            }
-        }
-        else
-        {
-            amount = String.format("%.2f", amount.toDouble())
-//amount = Double.parseDouble(amount).toString();
-        }
-
-        val moneyFormatted2 = "$amount ꜩ"
-//String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
-        send_cents_button.text = getString(R.string.pay, moneyFormatted2)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
     {
@@ -304,9 +257,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         //TODO need to handle transfers from KT1 or from tz1
 
         putFeesToNegative()
-        putPayButtonToNull()
 
-        validateSendCentsButton(false)
+        validateAcceptDeclineButtons(validate = false)
 
         startGetRequestLoadContractInfo()
     }
@@ -330,7 +282,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         val seed = Storage(activity!!).getMnemonics()
 
         //TODO we got to verify at this very moment.
-        if (isTransferFeeValid() && mTransferPayload != null)
+        if (areButtonsValid() && mTransferPayload != null)
         {
             var postParams = JSONObject()
             var dstObjects = JSONArray()
@@ -417,7 +369,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 val stringRequest = object : StringRequest(Method.POST, url,
                         Response.Listener<String> {
 
-                            if (rootView != null)
+                            if (dialogRootView != null)
                             {
                                 onFinalizeTransferLoadComplete(null)
                                 dismiss()
@@ -426,7 +378,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         },
                         Response.ErrorListener
                         {
-                            if (rootView != null)
+                            if (dialogRootView != null)
                             {
                                 onFinalizeTransferLoadComplete(it)
                             }
@@ -730,6 +682,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             mTransferPayload = null
 
+            /*
             fee_edittext?.isEnabled = true
             fee_edittext?.isFocusable = false
             fee_edittext?.isClickable = false
@@ -739,6 +692,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             fee_edittext?.setOnClickListener {
                 startInitContractInfoLoading()
             }
+            */
 
             if(error != null)
             {
@@ -780,6 +734,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
                     refreshProposalSignatories(binaryReader.getSignatories())
                 }
+
+                validateAcceptDeclineButtons(validate = true)
 
 
 // MULTISIG CONTRACT
@@ -947,7 +903,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     fun showSnackBar(res:String, color:Int, textColor:Int)
     {
-        val snackbar = Snackbar.make(rootView, res, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(dialogRootView, res, Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor(color)
         snackbar.setActionTextColor(textColor)
         snackbar.show()
@@ -957,6 +913,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         // handle the visibility of bottom buttons
 
+        /*
         if (loading)
         {
             fee_progress?.visibility = View.VISIBLE
@@ -965,27 +922,23 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         {
             fee_progress?.visibility = View.GONE
         }
+        */
     }
 
     private fun putFeesToNegative()
     {
-        fee_edittext?.setText("")
+        //fee_edittext?.setText("")
 
         mClickCalculate = false
-        fee_edittext?.isEnabled = false
-        fee_edittext?.hint = getString(R.string.neutral)
+        //fee_edittext?.isEnabled = false
+        //fee_edittext?.hint = getString(R.string.neutral)
 
         mTransferFees = -1
 
         mTransferPayload = null
     }
 
-    private fun putPayButtonToNull()
-    {
-        send_cents_button?.text = getString(R.string.pay, "")
-    }
-
-    private fun isTransferFeeValid():Boolean
+    private fun areButtonsValid():Boolean
     {
         return mTransferFees != -1L
 
@@ -1020,32 +973,53 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         */
     }
 
-    private fun validateSendCentsButton(validate: Boolean)
+    private fun validateAcceptDeclineButtons(validate: Boolean)
     {
         //val bundleTheme = arguments!!.getBundle(CustomTheme.TAG)
         //val theme = CustomTheme.fromBundle(bundleTheme)
 
-        val theme = CustomTheme(R.color.colorPrimaryDark, R.color.colorPrimaryVeryDark, R.color.colorTitleText)
+        //val theme = CustomTheme(R.color.colorPrimaryDark, R.color.colorPrimaryVeryDark, R.color.colorTitleText)
 
         if (validate)
         {
-            send_cents_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
-            send_cents_button_layout.isEnabled = true
-            send_cents_button_layout.background = makeSelector(theme)
+            val redTheme = CustomTheme(R.color.colorPrimaryDark, R.color.colorPrimaryVeryDark, R.color.colorTitleText)
+            decline_button.setTextColor(ContextCompat.getColor(activity!!, redTheme.textColorPrimaryId))
+            decline_button_layout.isEnabled = true
+            decline_button_layout.background = makeSelector(redTheme)
 
-            val drawables = send_cents_button.compoundDrawables
-            val wrapDrawable = DrawableCompat.wrap(drawables[0])
-            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            val declineDrawables = decline_button.compoundDrawables
+            val declineWrapDrawable = DrawableCompat.wrap(declineDrawables[0])
+            DrawableCompat.setTint(declineWrapDrawable, ContextCompat.getColor(activity!!, redTheme.textColorPrimaryId))
+
+
+            val yellowTheme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
+            accept_button.setTextColor(ContextCompat.getColor(activity!!, yellowTheme.textColorPrimaryId))
+            accept_button_layout.isEnabled = true
+            accept_button_layout.background = makeSelector(yellowTheme)
+
+            val acceptDrawables = decline_button.compoundDrawables
+            val acceptWrapDrawable = DrawableCompat.wrap(acceptDrawables[0])
+            DrawableCompat.setTint(acceptWrapDrawable, ContextCompat.getColor(activity!!, yellowTheme.textColorPrimaryId))
         }
         else
         {
-            send_cents_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
-            send_cents_button_layout.isEnabled = false
+            decline_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            decline_button_layout.isEnabled = false
 
             val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
-            send_cents_button_layout.background = makeSelector(greyTheme)
+            decline_button_layout.background = makeSelector(greyTheme)
 
-            val drawables = send_cents_button.compoundDrawables
+            val declineDrawables = decline_button.compoundDrawables
+            val declineWrapDrawable = DrawableCompat.wrap(declineDrawables[0])
+            DrawableCompat.setTint(declineWrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+
+
+            accept_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            accept_button_layout.isEnabled = false
+
+            accept_button_layout.background = makeSelector(greyTheme)
+
+            val drawables = decline_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
         }
@@ -1066,28 +1040,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         {
             val ecKey = keyPair.public as ECPublicKey
             return CryptoUtils.generatePkhTz3(ecKeyFormat(ecKey))
-        }
-
-        return null
-    }
-
-    private fun getSalt():Int?
-    {
-        if (mStorage != null)
-        {
-            val storageJSONObject = JSONObject(mStorage)
-
-            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
-            if (args != null)
-            {
-                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
-                val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
-
-                val saltLeft = (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
-                val saltRight = (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
-
-                return DataExtractor.getStringFromField(saltRight, "int").toInt()
-            }
         }
 
         return null

@@ -311,11 +311,12 @@
         android:layout_height="wrap_content"
         android:layout_weight="0"
         android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_double"
         android:padding="@dimen/spacing_normal"
         >
 
         <FrameLayout
-            android:id="@+id/send_cents_button_layout"
+            android:id="@+id/decline_button_layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -326,10 +327,10 @@
             >
 
             <Button
-                android:id="@+id/send_cents_button"
+                android:id="@+id/decline_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/send"
+                android:text="@string/decline_proposal"
 
                 android:drawableStart="@drawable/ic_lock_black"
                 android:drawableLeft="@drawable/ic_lock_black"
@@ -349,26 +350,26 @@
         </FrameLayout>
 
         <FrameLayout
-            android:id="@+id/send_button_layout"
+            android:id="@+id/accept_button_layout"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             style="@style/PaymentScreens.Button"
             android:enabled="false"
             android:visibility="visible"
-            android:layout_marginLeft="@dimen/spacing_normal"
+            android:layout_marginStart="@dimen/spacing_normal"
             android:orientation="vertical"
             >
 
             <Button
-                android:id="@+id/send_button"
+                android:id="@+id/accept_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/send"
+                android:text="@string/accept_proposal"
 
                 android:drawableStart="@drawable/ic_lock_black"
                 android:drawableLeft="@drawable/ic_lock_black"
-                android:drawableTint="@color/tz_light"
+                android:drawableTint="@color/tz_dark"
                 android:drawablePadding="@dimen/spacing_normal"
                 android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
                 android:layout_gravity="center"
