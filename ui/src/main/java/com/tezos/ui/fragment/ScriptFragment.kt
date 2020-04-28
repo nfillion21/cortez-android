@@ -2184,6 +2184,7 @@ postParams.put("dsts", dstObjects)
 
         val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
 
+        val hex = dataPack.toNoPrefixHexString()
 
         //val multisigBinaries = MultisigBinaries(dataPack.toNoPrefixHexString())
         //val type = multisigBinaries.getType()

@@ -209,6 +209,46 @@
                         android:textStyle="bold"
                         tools:ignore="UnusedAttribute,NewApi" />
 
+
+                    <LinearLayout
+                        android:id="@+id/threshold_proposal_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/threshold_proposal_textview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/threshold"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:textColor="@color/colorPrimary"
+                            android:textStyle="bold"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/threshold_proposal_edittext"
+                            android:layout_width="@dimen/min_height_touch_target"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/spacing_normal"
+                            android:clickable="false"
+                            android:digits="0123456789"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:gravity="center_horizontal"
+                            android:hint="@string/threshold_default"
+                            android:imeOptions="actionDone"
+                            android:inputType="numberDecimal"
+                            android:longClickable="false"
+                            android:maxLength="2"
+                            android:textColorHint="@color/tz_placeholder"
+                            android:textSize="@dimen/size_edit_text" />
+                    </LinearLayout>
+
+                    <include layout="@layout/multisig_ongoing_proposal_signatories" />
+
                 </LinearLayout>
 
             </LinearLayout>

@@ -3,10 +3,11 @@ package com.tezos.core.utils
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.ui.utils.hexToByteArray
 import java.io.ByteArrayInputStream
-import kotlin.math.sign
 
 class MultisigBinaries(val hexaInput: String)
 {
+    private var mThreshold: Long? = null
+
     companion object
     {
         enum class MULTISIG_BINARY_TYPE
@@ -37,7 +38,6 @@ class MultisigBinaries(val hexaInput: String)
 
         val signatories = visitable.primitive?.arguments?.get(1)?.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)?.primitive?.arguments
 
-        var threshold:Long? = null
         var baker:String? = null
         val signatoriesArray = ArrayList<String>()
 
@@ -55,7 +55,7 @@ class MultisigBinaries(val hexaInput: String)
                 }
                 else if (prethreshold is VisitableLong)
                 {
-                    threshold = signatories?.get(0)?.integer
+                    mThreshold = signatories?.get(0)?.integer
                 }
             }
 
@@ -84,7 +84,7 @@ class MultisigBinaries(val hexaInput: String)
                 counterV != null )
         {
             if (
-                    threshold != null &&
+                    mThreshold != null &&
                     !signatoriesArray.isNullOrEmpty()
             )
             {
@@ -101,6 +101,11 @@ class MultisigBinaries(val hexaInput: String)
         }
 
         return null
+    }
+
+    fun getThreshold():Long?
+    {
+        return mThreshold
     }
 
     private fun parsePrimitive(tag: Int): Visitable?
