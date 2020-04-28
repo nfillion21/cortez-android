@@ -41,6 +41,7 @@ import kotlinx.android.synthetic.main.dialog_sent_cents.*
 import kotlinx.android.synthetic.main.dialog_sent_cents.close_button
 import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button
 import kotlinx.android.synthetic.main.dialog_sent_cents.send_cents_button_layout
+import kotlinx.android.synthetic.main.multisig_ongoing_proposal_signatories.*
 import kotlinx.android.synthetic.main.multisig_ongoing_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -622,6 +623,62 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
     }
 
+    private fun refreshProposalSignatories(sigList:ArrayList<String>?)
+    {
+        if (!sigList.isNullOrEmpty())
+        {
+            val signatoryLayouts = listOf<LinearLayout>(
+                    signatory_proposal_layout_01,
+                    signatory_proposal_layout_02,
+                    signatory_proposal_layout_03,
+                    signatory_proposal_layout_04,
+                    signatory_proposal_layout_05,
+                    signatory_proposal_layout_06,
+                    signatory_proposal_layout_07,
+                    signatory_proposal_layout_08,
+                    signatory_proposal_layout_09,
+                    signatory_proposal_layout_10
+            )
+
+            val bulletEditTexts = listOf<TextView>(
+                    bullet_address_proposal_edittext_01,
+                    bullet_address_proposal_edittext_02,
+                    bullet_address_proposal_edittext_03,
+                    bullet_address_proposal_edittext_04,
+                    bullet_address_proposal_edittext_05,
+                    bullet_address_proposal_edittext_06,
+                    bullet_address_proposal_edittext_07,
+                    bullet_address_proposal_edittext_08,
+                    bullet_address_proposal_edittext_09,
+                    bullet_address_proposal_edittext_10
+            )
+
+            if (!sigList.isNullOrEmpty())
+            {
+                val length = sigList.size
+
+                for (i in 0 until length)
+                {
+                    bulletEditTexts[i].text = sigList[i]
+                    signatoryLayouts[i].visibility = View.VISIBLE
+                }
+
+                for (i in length until SIGNATORIES_CAPACITY)
+                {
+                    bulletEditTexts[i].text = getString(R.string.neutral)
+                    signatoryLayouts[i].visibility = View.GONE
+                }
+            }
+            else
+            {
+                for (it in signatoryLayouts)
+                {
+                    it.visibility = View.GONE
+                }
+            }
+        }
+    }
+
     private fun getSignatoriesList(): ArrayList<String>
     {
         if (mStorage != null)
@@ -700,9 +757,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         refreshTextsAndLayouts()
     }
 
-private fun refreshTextsAndLayouts()
-{
-    if (!mStorage.isNullOrEmpty())
+    private fun refreshTextsAndLayouts()
+    {
+        if (!mStorage.isNullOrEmpty())
         {
             if (getThreshold() != null)
             {
@@ -723,7 +780,9 @@ private fun refreshTextsAndLayouts()
                 if (binaryReader.getType() == MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES)
                 {
                     threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
+                    refreshProposalSignatories(binaryReader.getSignatories())
                 }
+
 
 
 // MULTISIG CONTRACT

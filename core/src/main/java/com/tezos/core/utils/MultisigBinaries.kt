@@ -8,6 +8,8 @@ class MultisigBinaries(val hexaInput: String)
 {
     private var mThreshold: Long? = null
 
+    private var mSignatoriesArray = ArrayList<String>()
+
     companion object
     {
         enum class MULTISIG_BINARY_TYPE
@@ -39,7 +41,6 @@ class MultisigBinaries(val hexaInput: String)
         val signatories = visitable.primitive?.arguments?.get(1)?.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)?.primitive?.arguments
 
         var baker:String? = null
-        val signatoriesArray = ArrayList<String>()
 
         if (!signatories.isNullOrEmpty())
         {
@@ -68,7 +69,7 @@ class MultisigBinaries(val hexaInput: String)
                     {
                         val hashPublicKey = entry?.bytes?.slice(1 until entry!!.bytes!!.size)?.toByteArray()
 
-                        signatoriesArray.add(CryptoUtils.genericHashToPk(hashPublicKey))
+                        mSignatoriesArray.add(CryptoUtils.genericHashToPk(hashPublicKey))
                     }
                 }
             }
@@ -85,7 +86,7 @@ class MultisigBinaries(val hexaInput: String)
         {
             if (
                     mThreshold != null &&
-                    !signatoriesArray.isNullOrEmpty()
+                    !mSignatoriesArray.isNullOrEmpty()
             )
             {
                 return MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES
@@ -106,6 +107,11 @@ class MultisigBinaries(val hexaInput: String)
     fun getThreshold():Long?
     {
         return mThreshold
+    }
+
+    fun getSignatories():ArrayList<String>?
+    {
+        return mSignatoriesArray
     }
 
     private fun parsePrimitive(tag: Int): Visitable?
