@@ -372,7 +372,7 @@ open class HomeFragment : Fragment()
         startGetRequestLoadOperations()
     }
 
-    private fun startInitialLoadingMultisigOngoingOperations()
+    protected open fun startInitialLoadingMultisigOngoingOperations()
     {
         swipe_refresh_layout.isEnabled = false
 
@@ -527,7 +527,7 @@ open class HomeFragment : Fragment()
             val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
             { answer ->
 
-                if (activity != null)
+                if (swipe_refresh_layout != null)
                 {
                     addOperationItemsFromJSON(answer)
                     onOperationsLoadHistoryComplete()
@@ -537,7 +537,8 @@ open class HomeFragment : Fragment()
 
             }, Response.ErrorListener
             { volleyError ->
-                if (activity != null)
+
+                if (swipe_refresh_layout != null)
                 {
                     onOperationsLoadHistoryComplete()
                     showSnackbarError(volleyError)

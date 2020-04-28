@@ -113,7 +113,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         super.onCreate(savedInstanceState)
 
-        //TODO Check for a 90% dialog
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.DialogTheme)
         arguments?.let {
             mStorage = it.getString(STORAGE_DATA_KEY)
@@ -175,7 +174,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             }
             else
             {
-                //onInitTransferLoadComplete(null)
                 onStorageInfoComplete(error = null)
                 if (mFinalizeTransferLoading)
                 {
@@ -782,7 +780,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
                     refreshProposalSignatories(binaryReader.getSignatories())
                 }
-
 
 
 // MULTISIG CONTRACT
