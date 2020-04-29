@@ -48,6 +48,7 @@ import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
 import com.tezos.core.utils.DataExtractor
+import com.tezos.core.utils.MultisigBinaries
 import com.tezos.ui.R
 import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.activity.OngoingMultisigActivity
@@ -81,7 +82,7 @@ open class HomeFragment : Fragment()
     private var mRecyclerViewItems:ArrayList<Operation>? = null
     private var mBalanceItem:Double? = null
 
-    private var mOngoingMultisigItems:ArrayList<Operation>? = null
+    private var mOngoingMultisigItems:ArrayList<OngoingMultisigOperation>? = null
 
     private var mGetHistoryLoading:Boolean = false
     private var mGetBalanceLoading:Boolean = false
@@ -619,7 +620,7 @@ open class HomeFragment : Fragment()
 
                 if (swipe_refresh_layout != null)
                 {
-                    addOperationItemsFromJSON(answer)
+                    addMultisigOngoingOperationsFromJSON(answer)
                     onMultisigOnGoinLoadComplete()
                 }
 
@@ -712,22 +713,41 @@ open class HomeFragment : Fragment()
 
         if (response.length() > 0)
         {
-            var sortedList = arrayListOf<Operation>()
+            var sortedList = arrayListOf<OngoingMultisigOperation>()
 
-            for (i in 0 until response.length())
+            //for (i in 0 until response.length())
+            for (i in 0 until 2)
             {
-                val item = response.getJSONObject(i)
-                val operation = Operation.fromJSONObject(item)
+                //val item = response.getJSONObject(i)
+                //val operation = Operation.fromJSONObject(item)
 
-                sortedList.add(operation)
+                if (i == 0)
+                {
+                    val ongoingOperation = OngoingMultisigOperation(
+                            contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
+                            submissionDate = "24/01/1987",
+                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d10007070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e"
+                    )
+
+                    sortedList.add(ongoingOperation)
+                }
+                else if (i == 1)
+                {
+                    val ongoingOperation = OngoingMultisigOperation(
+                            contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
+                            submissionDate = "25/01/1987",
+                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d10007070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e"
+                    )
+
+                    sortedList.add(ongoingOperation)
+                }
             }
 
+            /*
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
-                sortedList.sortWith(object: Comparator<Operation>
-                {
-                    @RequiresApi(Build.VERSION_CODES.O)
-                    override fun compare(o1: Operation, o2: Operation): Int = when {
+                sortedList.sortWith(Comparator<Operation> { o1, o2 ->
+                    when {
 
                         Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
                         Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
@@ -735,26 +755,37 @@ open class HomeFragment : Fragment()
                     }
                 })
             }
+            */
 
-            //TODO take the 10 last operations in a better way
-            if (mRecyclerViewItems == null)
+
+            if (mOngoingMultisigItems == null)
             {
-                mRecyclerViewItems = ArrayList()
+                mOngoingMultisigItems = ArrayList()
             }
-            mRecyclerViewItems?.clear()
-            mRecyclerViewItems?.addAll(sortedList.subList(0, minOf(10, sortedList.size)))
+            mOngoingMultisigItems?.clear()
 
-            //TODO what if the list is empty
+            //mOngoingMultisigItems?.addAll(sortedList.subList(0, minOf(10, sortedList.size)))
+            mOngoingMultisigItems?.addAll(sortedList)
+
+
             val lastOperation = sortedList[0]
 
             //TODO put that
-            operation_amount_textview.text = (lastOperation!!.amount/1000000).toString()
-            operation_fee_textview.text = (lastOperation!!.fee/1000000).toString()
+            ongoing_contract_textview.text = lastOperation?.contractAddress
 
+            ongoing_submission_date_textview.text = lastOperation?.submissionDate
+
+            val binaryReader = MultisigBinaries(lastOperation.hexaOperation)
+            binaryReader.getType()
+
+            ongoing_type_textview.text = binaryReader.getOperationTypeString()
+
+            /*
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
                 operation_date_textview.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
             }
+            */
         }
     }
 

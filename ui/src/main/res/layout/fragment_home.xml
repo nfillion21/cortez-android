@@ -348,17 +348,16 @@
                                     android:id="@+id/ongoing_contract_textview"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="KT1dfsdsfjhdsfkjhsdfjhkshdjfk"
                                     android:singleLine="true"
                                     android:layout_below="@+id/ongoing_contract_title_textview"
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                                     tools:ignore="UnusedAttribute,NewApi" />
 
                                 <TextView
-                                    android:id="@+id/ongoing_type_title_textview"
+                                    android:id="@+id/ongoing_submission_date_title_textview"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/operation_type"
+                                    android:text="@string/submission_date"
                                     android:textStyle="bold"
                                     android:layout_marginTop="@dimen/spacing_double"
                                     android:layout_below="@+id/ongoing_contract_textview"
@@ -367,10 +366,30 @@
                                     tools:ignore="UnusedAttribute,NewApi" />
 
                                 <TextView
+                                    android:id="@+id/ongoing_submission_date_textview"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_below="@+id/ongoing_submission_date_title_textview"
+                                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                                    tools:ignore="UnusedAttribute,NewApi" />
+
+
+                                <TextView
+                                    android:id="@+id/ongoing_type_title_textview"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/operation_type"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="@dimen/spacing_double"
+                                    android:layout_below="@+id/ongoing_submission_date_textview"
+                                    android:textColor="@color/colorPrimary"
+                                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                                    tools:ignore="UnusedAttribute,NewApi" />
+
+                                <TextView
                                     android:id="@+id/ongoing_type_textview"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Update signatories"
                                     android:layout_below="@+id/ongoing_type_title_textview"
                                     android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                                     tools:ignore="UnusedAttribute,NewApi" />
@@ -380,12 +399,11 @@
                                     android:layout_height="wrap_content"
                                     android:contentDescription="@string/content_description"
                                     android:src="@drawable/ic_navigate_next_24"
-                                    android:layout_alignParentRight="true"
+                                    android:layout_alignParentEnd="true"
                                     android:layout_centerVertical="true"
                                     />
                             </RelativeLayout>
                         </RelativeLayout>
-
 
                     </LinearLayout>
 
