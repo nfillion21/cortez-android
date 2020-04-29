@@ -31,21 +31,20 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
-import androidx.appcompat.widget.Toolbar
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.tezos.core.models.CustomTheme
-import com.tezos.core.models.Operation
 import com.tezos.ui.R
 import com.tezos.ui.adapter.OngoingMultisigRecyclerViewAdapter
-import com.tezos.ui.adapter.OperationRecyclerViewAdapter
+import com.tezos.ui.fragment.HomeFragment
 import com.tezos.ui.fragment.OngoingMultisigDialogFragment
-import com.tezos.ui.fragment.OperationDetailsDialogFragment
+import kotlinx.android.synthetic.main.activity_ongoing_multisig.*
 
 class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerViewAdapter.OnItemClickListener, OngoingMultisigDialogFragment.OnOngoinMultisigDialogInteractionListener
 {
@@ -69,16 +68,32 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
             val starter = getStartIntent(activity, list, theme.toBundle())
             ActivityCompat.startActivity(activity, starter, null)
         }
+
+        fun toBundle(ongoingOperation: HomeFragment.OngoingMultisigOperation): Bundle
+        {
+            val serializer = HomeFragment.OngoinMultisigSerialization(ongoingOperation)
+            return serializer.getSerializedBundle()
+        }
+
+        fun fromBundle(bundle: Bundle): HomeFragment.OngoingMultisigOperation
+        {
+            val mapper = HomeFragment.OngoingMultisigMapper(bundle)
+            return mapper.mappedObjectFromBundle()
+        }
     }
 
-    private fun bundlesToItems( bundles:ArrayList<Bundle>?): ArrayList<Operation>?
+
+    private fun bundlesToOngoingItems( bundles:ArrayList<Bundle>?): ArrayList<HomeFragment.OngoingMultisigOperation>?
     {
-        if (!bundles.isNullOrEmpty())
+        if (bundles != null)
         {
-            var items = ArrayList<Operation>(bundles.size)
-            bundles.forEach {
-                val op = Operation.fromBundle(it)
-                items.add(op)
+            var items = ArrayList<HomeFragment.OngoingMultisigOperation>(bundles.size)
+            if (bundles.isNotEmpty())
+            {
+                bundles.forEach {
+                    val op = fromBundle(it)
+                    items.add(op)
+                }
             }
             return items
         }
@@ -96,15 +111,15 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         val theme = CustomTheme.fromBundle(themeBundle)
         initToolbar(theme)
 
-        var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
+        //var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
 
         val elements = intent.getParcelableArrayListExtra<Bundle>(ONGOING_MULTISIG_KEY)
-        val adapter = OngoingMultisigRecyclerViewAdapter(bundlesToItems(elements))
+        val adapter = OngoingMultisigRecyclerViewAdapter(bundlesToOngoingItems(elements))
 
         adapter.setOnItemClickListener(this)
-        recyclerView.adapter = adapter
+        recycler_view.adapter = adapter
 
-        mRecyclerView = recyclerView
+        mRecyclerView = recycler_view
 
         if (savedInstanceState == null)
         {
@@ -148,10 +163,9 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
 
-    override fun onOperationSelected(view: View?, operation: Operation?)
+    override fun onOperationSelected(view: View?, operation: HomeFragment.OngoingMultisigOperation?)
     {
-        val hex = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d10007070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e"
-        val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance(hex)
+        val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance(operation!!.hexaOperation)
         ongoingDialogFragment.show(supportFragmentManager, OngoingMultisigDialogFragment.TAG)
     }
 

@@ -40,11 +40,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.tezos.core.models.Operation;
+import com.tezos.core.utils.MultisigBinaries;
 import com.tezos.ui.R;
+import com.tezos.ui.fragment.HomeFragment;
 
 import java.text.DateFormat;
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,7 +57,7 @@ public class OngoingMultisigRecyclerViewAdapter extends RecyclerView.Adapter<Rec
     private static final int OPERATION_ITEM_VIEW_TYPE = 0;
 
     // The list of message items.
-    private final List<Operation> mRecyclerViewItems;
+    private final List<HomeFragment.OngoingMultisigOperation> mRecyclerViewItems;
 
     private final DateFormat mDateFormat;
 
@@ -65,7 +65,7 @@ public class OngoingMultisigRecyclerViewAdapter extends RecyclerView.Adapter<Rec
 
     public interface OnItemClickListener
     {
-        void onOperationSelected(View view, Operation operation);
+        void onOperationSelected(View view, HomeFragment.OngoingMultisigOperation operation);
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener)
@@ -77,7 +77,7 @@ public class OngoingMultisigRecyclerViewAdapter extends RecyclerView.Adapter<Rec
      * For this example app, the recyclerViewItems list contains only
      * {@link Operation} type.
      */
-    public OngoingMultisigRecyclerViewAdapter(List<Operation> recyclerViewItems)
+    public OngoingMultisigRecyclerViewAdapter(List<HomeFragment.OngoingMultisigOperation> recyclerViewItems)
     {
         this.mRecyclerViewItems = recyclerViewItems;
         this.mDateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
@@ -89,15 +89,17 @@ public class OngoingMultisigRecyclerViewAdapter extends RecyclerView.Adapter<Rec
      */
     class OperationItemViewHolder extends RecyclerView.ViewHolder
     {
-        //private final TextView itemAmount;
-        private final TextView itemDate;
+        private final TextView submissionDateItem;
+        private final TextView contractAddressItem;
+        private final TextView operationTypeItem;
 
         OperationItemViewHolder(View view)
         {
             super(view);
 
-            //itemAmount = view.findViewById(R.id.operation_item_amount);
-            itemDate = view.findViewById(R.id.submission_item_date);
+            submissionDateItem = view.findViewById(R.id.submission_item_date);
+            contractAddressItem = view.findViewById(R.id.contract_address_item);
+            operationTypeItem = view.findViewById(R.id.operation_type_item);
         }
     }
 
@@ -151,19 +153,27 @@ public class OngoingMultisigRecyclerViewAdapter extends RecyclerView.Adapter<Rec
             case OPERATION_ITEM_VIEW_TYPE:
             {
                 OperationItemViewHolder operationItemHolder = (OperationItemViewHolder) holder;
-                Operation operationItem = mRecyclerViewItems.get(position);
+                HomeFragment.OngoingMultisigOperation operationItem = mRecyclerViewItems.get(position);
 
-                //operationItemHolder.itemAmount.setText(String.valueOf(operationItem.getAmount()/1000000.0));
-
+                /*
                 Date date;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                {
                     date = Date.from(Instant.parse(operationItem.getTimestamp()));
                     operationItemHolder.itemDate.setText(mDateFormat.format(date));
                 }
-                else {
-
+                else
+                {
                     operationItemHolder.itemDate.setText(operationItem.getTimestamp());
                 }
+                */
+
+                operationItemHolder.contractAddressItem.setText(operationItem.getContractAddress());
+                operationItemHolder.submissionDateItem.setText(operationItem.getSubmissionDate());
+
+                MultisigBinaries binaryReader = new MultisigBinaries(operationItem.getHexaOperation());
+                binaryReader.getType();
+                operationItemHolder.operationTypeItem.setText(binaryReader.getOperationTypeString());
 
                 holder.itemView.setOnClickListener(view -> mOnItemClickListener.onOperationSelected(view, operationItem));
             }

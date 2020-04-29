@@ -28,7 +28,6 @@
         android:layout_margin="@dimen/spacing_double"
         >
 
-
         <TextView
             android:id="@+id/contract_textview"
             android:layout_width="wrap_content"
@@ -44,7 +43,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/contract_textview"
-            android:text="KT1sfdkjfsdlkjsfdjlkfsdjkl"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
 
@@ -85,7 +83,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/operation_type_textview"
-            android:text="Update signatories"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
 

@@ -292,7 +292,6 @@ open class HomeFragment : Fragment()
                 if (mGetHistoryLoading)
                 {
                     refreshRecyclerViewAndTextHistory()
-
                     startInitialLoadingHistory()
                 }
                 else
@@ -303,6 +302,10 @@ open class HomeFragment : Fragment()
                     {
                         refreshOngoingOperationsLayouts()
                         startInitialLoadingMultisigOngoingOperations()
+                    }
+                    else
+                    {
+                        onMultisigOnGoinLoadComplete()
                     }
                 }
             }
