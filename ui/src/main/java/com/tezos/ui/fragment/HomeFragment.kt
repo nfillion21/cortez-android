@@ -267,6 +267,9 @@ open class HomeFragment : Fragment()
             var messagesBundle = savedInstanceState.getParcelableArrayList<Bundle>(OPERATIONS_ARRAYLIST_KEY)
             mRecyclerViewItems = bundlesToItems(messagesBundle)
 
+            var ongoingItemsBundle = savedInstanceState.getParcelableArrayList<Bundle>(ONGOING_OPERATIONS_ARRAYLIST_KEY)
+            mOngoingMultisigItems = bundlesToOngoingItems(ongoingItemsBundle)
+
             mGetBalanceLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
             mGetHistoryLoading = savedInstanceState.getBoolean(GET_BALANCE_LOADING_KEY)
             mGetMultisigOnGoing = savedInstanceState.getBoolean(GET_MULTISIG_ON_GOING_LOADING_KEY)
@@ -298,7 +301,7 @@ open class HomeFragment : Fragment()
 
                     if (mGetMultisigOnGoing)
                     {
-                        refreshOnGoingMultisigOperations()
+                        refreshOngoingOperationsLayouts()
                         startInitialLoadingMultisigOngoingOperations()
                     }
                 }
@@ -308,6 +311,8 @@ open class HomeFragment : Fragment()
         {
             mRecyclerViewItems = ArrayList()
             //there's no need to initialize mBalanceItem
+
+            mOngoingMultisigItems = ArrayList()
 
             //TODO we will start loading only if we got a pkh
             if (pkh != null)
@@ -399,7 +404,7 @@ open class HomeFragment : Fragment()
         swipe_refresh_layout.isEnabled = true
         swipe_refresh_layout.isRefreshing = false
 
-        refreshOnGoingMultisigOperations()
+        refreshOngoingOperationsLayouts()
     }
 
     private fun onBalanceLoadComplete(animating:Boolean)
@@ -461,6 +466,33 @@ open class HomeFragment : Fragment()
         }
     }
 
+    private fun refreshOngoingOperationsLayouts()
+    {
+        if (!mOngoingMultisigItems.isNullOrEmpty())
+        {
+            ongoing_operation_layout.visibility = View.VISIBLE
+
+            val lastOngoingOperation = mOngoingMultisigItems!![0]
+
+            ongoing_contract_textview.text = lastOngoingOperation.contractAddress
+            ongoing_submission_date_textview.text = lastOngoingOperation.submissionDate
+
+            val binaryReader = MultisigBinaries(lastOngoingOperation.hexaOperation)
+            binaryReader.getType()
+            ongoing_type_textview.text = binaryReader.getOperationTypeString()
+
+            empty_loading_ongoing_operations_textview.visibility = View.GONE
+            empty_loading_ongoing_operations_textview.text = null
+        }
+        else
+        {
+            ongoing_operation_layout.visibility = View.GONE
+
+            empty_loading_ongoing_operations_textview.visibility = View.VISIBLE
+            empty_loading_ongoing_operations_textview.text = "-"
+        }
+    }
+
     private fun refreshTextBalance(animating:Boolean)
     {
         if (mBalanceItem != -1.0 && mBalanceItem != null)
@@ -480,13 +512,6 @@ open class HomeFragment : Fragment()
             empty_loading_balance_textview.visibility = View.VISIBLE
             empty_loading_balance_textview.text = getString(R.string.neutral)
         }
-    }
-
-
-    private fun refreshOnGoingMultisigOperations()
-    {
-        ongoing_operation_layout.visibility = View.VISIBLE
-        empty_loading_ongoing_operations_textview.text = getString(R.string.neutral)
     }
 
     // volley
