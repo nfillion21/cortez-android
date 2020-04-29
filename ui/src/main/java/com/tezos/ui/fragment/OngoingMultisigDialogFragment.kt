@@ -44,9 +44,8 @@ import java.security.interfaces.ECPublicKey
 
 class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 {
-    private var listener: OnSendCentsInteractionListener? = null
+    private var listener: OnOngoinMultisigDialogInteractionListener? = null
 
-    private var mTransferFees:Long = -1
     private var mClickCalculate:Boolean = false
 
     private var mTransferPayload:String? = null
@@ -60,20 +59,19 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private var mSignatoriesList:ArrayList<String> = ArrayList(SIGNATORIES_CAPACITY)
 
-    interface OnSendCentsInteractionListener
+    interface OnOngoinMultisigDialogInteractionListener
     {
         fun isFingerprintAllowed():Boolean
         fun hasEnrolledFingerprints():Boolean
         fun saveFingerprintAllowed(useInFuture: Boolean)
 
-        fun onTransferSucceed()
+        fun onSigSentSucceed()
     }
 
     companion object
     {
         const val TAG = "ongoing_multisig_dialog_fragment"
 
-        private const val TRANSFER_FEE_KEY = "transfer_fee_key"
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
         private const val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
 
@@ -117,13 +115,13 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     override fun onAttach(context: Context)
     {
         super.onAttach(context)
-        if (context is OnSendCentsInteractionListener)
+        if (context is OnOngoinMultisigDialogInteractionListener)
         {
             listener = context
         }
         else
         {
-            //throw RuntimeException("$context must implement OnSendCentsInteractionListener")
+            throw RuntimeException("$context must implement OnGoingMultisigInteractionListener")
         }
     }
 
@@ -149,7 +147,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         if (savedInstanceState != null)
         {
-            mTransferFees = savedInstanceState.getLong(TRANSFER_FEE_KEY, -1)
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
             mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
@@ -310,7 +307,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                 //0.1 tez == 100 000 mutez
                 dstObject.put("transfer_amount", "100000".toLong())
-                dstObject.put("fee", mTransferFees)
             }
             else
             {
@@ -322,8 +318,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 dstObject.put("dst", retrieveTz3())
 
                 dstObject.put("amount", "100000".toLong())
-
-                dstObject.put("fee", mTransferFees)
 
             }
 
@@ -373,7 +367,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             {
                                 onFinalizeTransferLoadComplete(null)
                                 dismiss()
-                                listener?.onTransferSucceed()
+                                listener?.onSigSentSucceed()
                             }
                         },
                         Response.ErrorListener
@@ -941,36 +935,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     private fun areButtonsValid():Boolean
     {
         return mTransferFees != -1L
-
-        /*
-        val isFeeValid = false
-
-        val fee_edit = fee_edittext
-        val text = fee_edittext.text
-
-        if (fee_edittext?.text != null && !TextUtils.isEmpty(fee_edittext?.text))
-        {
-            try
-            {
-                //val amount = java.lang.Double.parseDouble()
-                val fee = fee_edittext.text.toString().toDouble()
-
-                if (fee >= 0.000001f)
-                {
-                    val longTransferFee = fee*1000000
-                    mTransferFees = longTransferFee.toLong()
-                    return true
-                }
-            }
-            catch (e: NumberFormatException)
-            {
-                mTransferFees = -1
-                return false
-            }
-        }
-
-        return isFeeValid
-        */
     }
 
     private fun validateAcceptDeclineButtons(validate: Boolean)
@@ -1049,7 +1013,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         super.onSaveInstanceState(outState)
 
-        outState.putLong(TRANSFER_FEE_KEY, mTransferFees)
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 

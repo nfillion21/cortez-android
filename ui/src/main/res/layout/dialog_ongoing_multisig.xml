@@ -1,389 +1,403 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/dialogRootView"
-    android:orientation="vertical">
+    android:id="@+id/swipe_refresh_script_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:orientation="horizontal">
+        android:layout_height="match_parent" >
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content" />
-
-        <ImageButton
-            android:id="@+id/close_button"
-            android:layout_width="@dimen/min_height_touch_target"
-            android:layout_height="@dimen/min_height_touch_target"
-            android:layout_weight="0"
-            android:layout_gravity="end"
-            android:background="@null"
-            android:contentDescription="@string/content_description"
-            android:src="@drawable/close_black_24"
-            />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingLeft="@dimen/spacing_double"
-        android:paddingRight="@dimen/spacing_double"
-        android:orientation="vertical">
-
-        <ScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fillViewport="true">
+            android:layout_height="match_parent"
+            android:id="@+id/dialogRootView"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:orientation="horizontal">
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content" />
+
+                <ImageButton
+                    android:id="@+id/close_button"
+                    android:layout_width="@dimen/min_height_touch_target"
+                    android:layout_height="@dimen/min_height_touch_target"
+                    android:layout_weight="0"
+                    android:layout_gravity="end"
+                    android:background="@null"
+                    android:contentDescription="@string/content_description"
+                    android:src="@drawable/close_black_24"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingLeft="@dimen/spacing_double"
+                android:paddingRight="@dimen/spacing_double"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/contract_address_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ongoing_contract_address"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:textColor="@color/colorAccentText"
-                    android:textStyle="bold"
-                    tools:ignore="UnusedAttribute,NewApi" />
-
-                <TextView
-                    android:id="@+id/contract_address_item"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="KT1esfkjfsdjkfldksfdjslsfdfsd"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    tools:ignore="UnusedAttribute,NewApi" />
-
-                <TextView
-                    android:id="@+id/submission_date_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_double"
-                    android:text="@string/submission_date"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:textColor="@color/colorAccentText"
-                    android:textStyle="bold"
-                    tools:ignore="UnusedAttribute,NewApi" />
-
-                <TextView
-                    android:id="@+id/submission_item_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="24/04/2020"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    tools:ignore="UnusedAttribute,NewApi" />
-
-                <TextView
-                    android:id="@+id/operation_type_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_double"
-                    android:text="@string/operation_type"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:textColor="@color/colorAccentText"
-                    android:textStyle="bold"
-                    tools:ignore="UnusedAttribute,NewApi" />
-
-                <TextView
-                    android:id="@+id/operation_type_item"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Update signatories"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    tools:ignore="UnusedAttribute,NewApi" />
-
-                <LinearLayout
-                    android:id="@+id/update_signatories_layout"
-                    android:visibility="gone"
+                <ScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/current_storage_title_textview"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_double"
-                        android:text="Current contract storage"
-                        android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-                        android:textColor="@color/colorAccentText"
-                        android:textStyle="bold"
-                        tools:ignore="UnusedAttribute,NewApi" />
+                    android:fillViewport="true">
 
                     <LinearLayout
-                        android:id="@+id/threshold_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:focusable="true"
-                        android:focusableInTouchMode="true"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/threshold_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/threshold"
-                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:textColor="@color/colorPrimary"
-                            android:textStyle="bold"
-                            tools:ignore="UnusedAttribute,NewApi" />
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/threshold_edittext"
-                            android:layout_width="@dimen/min_height_touch_target"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/spacing_normal"
-                            android:clickable="false"
-                            android:digits="0123456789"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-                            android:gravity="center_horizontal"
-                            android:hint="@string/threshold_default"
-                            android:imeOptions="actionDone"
-                            android:inputType="numberDecimal"
-                            android:longClickable="false"
-                            android:maxLength="2"
-                            android:textColorHint="@color/tz_placeholder"
-                            android:textSize="@dimen/size_edit_text" />
-                    </LinearLayout>
-
-                    <!--
-                    <LinearLayout
-                        android:id="@+id/notary_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/contract_address_textview"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_normal"
-                            android:text="@string/notary"
+                            android:text="@string/ongoing_contract_address"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="@color/colorAccentText"
                             android:textStyle="bold"
                             tools:ignore="UnusedAttribute,NewApi" />
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/notary_tz1_edittext"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="false"
-                            android:enabled="true"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-                            android:hint="@string/one"
-                            android:imeOptions="actionDone"
-                            android:inputType="numberDecimal"
-                            android:longClickable="false"
-                            android:minWidth="@dimen/spacing_huge"
-                            android:text="tz1fhudfdskjhsfjdkhsdhjk"
-                            android:textColorHint="@color/tz_placeholder"
-                            android:textSize="@dimen/standard_item_text_size" />
-
-                    </LinearLayout>
-                    -->
-
-                    <include layout="@layout/multisig_ongoing_signatories" />
-
-                    <TextView
-                        android:id="@+id/storage_proposal_title_textview"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_double"
-                        android:text="Contract storage proposal"
-                        android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
-                        android:textColor="@color/colorAccentText"
-                        android:textStyle="bold"
-                        tools:ignore="UnusedAttribute,NewApi" />
-
-
-                    <LinearLayout
-                        android:id="@+id/threshold_proposal_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:focusable="true"
-                        android:focusableInTouchMode="true"
-                        android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/threshold_proposal_textview"
+                            android:id="@+id/contract_address_item"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/threshold"
+                            android:text="KT1esfkjfsdjkfldksfdjslsfdfsd"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                            android:textColor="@color/colorPrimary"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <TextView
+                            android:id="@+id/submission_date_textview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_double"
+                            android:text="@string/submission_date"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:textColor="@color/colorAccentText"
                             android:textStyle="bold"
                             tools:ignore="UnusedAttribute,NewApi" />
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/threshold_proposal_edittext"
-                            android:layout_width="@dimen/min_height_touch_target"
+                        <TextView
+                            android:id="@+id/submission_item_date"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/spacing_normal"
-                            android:clickable="false"
-                            android:digits="0123456789"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-                            android:gravity="center_horizontal"
-                            android:hint="@string/threshold_default"
-                            android:imeOptions="actionDone"
-                            android:inputType="numberDecimal"
-                            android:longClickable="false"
-                            android:maxLength="2"
-                            android:textColorHint="@color/tz_placeholder"
-                            android:textSize="@dimen/size_edit_text" />
+                            android:text="24/04/2020"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <TextView
+                            android:id="@+id/operation_type_textview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_double"
+                            android:text="@string/operation_type"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            android:textColor="@color/colorAccentText"
+                            android:textStyle="bold"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <TextView
+                            android:id="@+id/operation_type_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Update signatories"
+                            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                            tools:ignore="UnusedAttribute,NewApi" />
+
+                        <LinearLayout
+                            android:id="@+id/update_signatories_layout"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/current_storage_title_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_double"
+                                android:text="Current contract storage"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textColor="@color/colorAccentText"
+                                android:textStyle="bold"
+                                tools:ignore="UnusedAttribute,NewApi" />
+
+                            <LinearLayout
+                                android:id="@+id/threshold_layout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:focusable="true"
+                                android:focusableInTouchMode="true"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/threshold_textview"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/threshold"
+                                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                                    android:textColor="@color/colorPrimary"
+                                    android:textStyle="bold"
+                                    tools:ignore="UnusedAttribute,NewApi" />
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/threshold_edittext"
+                                    android:layout_width="@dimen/min_height_touch_target"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="@dimen/spacing_normal"
+                                    android:clickable="false"
+                                    android:digits="0123456789"
+                                    android:focusable="false"
+                                    android:focusableInTouchMode="false"
+                                    android:gravity="center_horizontal"
+                                    android:hint="@string/threshold_default"
+                                    android:imeOptions="actionDone"
+                                    android:inputType="numberDecimal"
+                                    android:longClickable="false"
+                                    android:maxLength="2"
+                                    android:textColorHint="@color/tz_placeholder"
+                                    android:textSize="@dimen/size_edit_text" />
+                            </LinearLayout>
+
+                            <!--
+                            <LinearLayout
+                                android:id="@+id/notary_layout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/spacing_normal"
+                                    android:text="@string/notary"
+                                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                                    android:textColor="@color/colorPrimary"
+                                    android:textStyle="bold"
+                                    tools:ignore="UnusedAttribute,NewApi" />
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/notary_tz1_edittext"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:clickable="false"
+                                    android:enabled="true"
+                                    android:focusable="false"
+                                    android:focusableInTouchMode="false"
+                                    android:hint="@string/one"
+                                    android:imeOptions="actionDone"
+                                    android:inputType="numberDecimal"
+                                    android:longClickable="false"
+                                    android:minWidth="@dimen/spacing_huge"
+                                    android:text="tz1fhudfdskjhsfjdkhsdhjk"
+                                    android:textColorHint="@color/tz_placeholder"
+                                    android:textSize="@dimen/standard_item_text_size" />
+
+                            </LinearLayout>
+                            -->
+
+                            <include layout="@layout/multisig_ongoing_signatories" />
+
+                            <TextView
+                                android:id="@+id/storage_proposal_title_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_double"
+                                android:text="Contract storage proposal"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textColor="@color/colorAccentText"
+                                android:textStyle="bold"
+                                tools:ignore="UnusedAttribute,NewApi" />
+
+
+                            <LinearLayout
+                                android:id="@+id/threshold_proposal_layout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:focusable="true"
+                                android:focusableInTouchMode="true"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/threshold_proposal_textview"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/threshold"
+                                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                                    android:textColor="@color/colorPrimary"
+                                    android:textStyle="bold"
+                                    tools:ignore="UnusedAttribute,NewApi" />
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/threshold_proposal_edittext"
+                                    android:layout_width="@dimen/min_height_touch_target"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="@dimen/spacing_normal"
+                                    android:clickable="false"
+                                    android:digits="0123456789"
+                                    android:focusable="false"
+                                    android:focusableInTouchMode="false"
+                                    android:gravity="center_horizontal"
+                                    android:hint="@string/threshold_default"
+                                    android:imeOptions="actionDone"
+                                    android:inputType="numberDecimal"
+                                    android:longClickable="false"
+                                    android:maxLength="2"
+                                    android:textColorHint="@color/tz_placeholder"
+                                    android:textSize="@dimen/size_edit_text" />
+                            </LinearLayout>
+
+                            <include layout="@layout/multisig_ongoing_proposal_signatories" />
+
+                        </LinearLayout>
+
                     </LinearLayout>
 
-                    <include layout="@layout/multisig_ongoing_proposal_signatories" />
-
-                </LinearLayout>
-
+                </ScrollView>
             </LinearLayout>
 
-        </ScrollView>
-    </LinearLayout>
+            <!--
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:background="@color/theme_red_primary"
+                android:layout_marginLeft="@dimen/spacing_double"
+                android:layout_marginRight="@dimen/spacing_double"
+                android:layout_height="wrap_content">
 
-    <!--
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:background="@color/theme_red_primary"
-        android:layout_marginLeft="@dimen/spacing_double"
-        android:layout_marginRight="@dimen/spacing_double"
-        android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_weight="0"
+                    android:layout_height="wrap_content"
+                    android:elevation="@dimen/elevation_header"
+                    android:text="@string/tez"
+                    android:layout_marginEnd="@dimen/spacing_normal"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimary"
+                    tools:ignore="UnusedAttribute,NewApi" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_weight="0"
-            android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            android:text="@string/tez"
-            android:layout_marginEnd="@dimen/spacing_normal"
-            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-            android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
-            tools:ignore="UnusedAttribute,NewApi" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/fee_edittext"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:imeOptions="actionDone"
+                    android:hint="@string/neutral"
+                    android:enabled="false"
+                    android:inputType="numberDecimal"
+                    android:textColorHint="@color/tz_placeholder"
+                    android:maxLength="15"
+                    android:digits="0123456789."
+                    android:textSize="@dimen/standard_item_text_size" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/fee_edittext"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:imeOptions="actionDone"
-            android:hint="@string/neutral"
-            android:enabled="false"
-            android:inputType="numberDecimal"
-            android:textColorHint="@color/tz_placeholder"
-            android:maxLength="15"
-            android:digits="0123456789."
-            android:textSize="@dimen/standard_item_text_size" />
+            </LinearLayout>
+            -->
 
-    </LinearLayout>
-    -->
+            <!--
+            From KT1 button
+            -->
 
-    <!--
-    From KT1 button
-    -->
+            <!--
+            <View
+                android:layout_width="match_parent"
+                android:background="@color/colorAccentSecondary"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+            -->
 
-    <!--
-    <View
-        android:layout_width="match_parent"
-        android:background="@color/colorAccentSecondary"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-    -->
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:orientation="horizontal"
-        android:layout_marginTop="@dimen/spacing_double"
-        android:padding="@dimen/spacing_normal"
-        >
-
-        <FrameLayout
-            android:id="@+id/decline_button_layout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            style="@style/PaymentScreens.Button"
-            android:enabled="false"
-            android:visibility="visible"
-            android:orientation="vertical"
-            >
-
-            <Button
-                android:id="@+id/decline_button"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/decline_proposal"
+                android:layout_weight="0"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/spacing_double"
+                android:padding="@dimen/spacing_normal"
+                >
 
-                android:drawableStart="@drawable/ic_lock_black"
-                android:drawableLeft="@drawable/ic_lock_black"
-                android:drawableTint="@color/tz_light"
-                android:drawablePadding="@dimen/spacing_normal"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:enabled="false"
+                <FrameLayout
+                    android:id="@+id/decline_button_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/PaymentScreens.Button"
+                    android:enabled="false"
+                    android:visibility="visible"
+                    android:orientation="vertical"
+                    >
 
-                android:background="@null"
-                android:clickable="false"
-                android:focusable="false"
-                android:minHeight="0dp"
-                android:minWidth="0dp"
-                />
-        </FrameLayout>
+                    <Button
+                        android:id="@+id/decline_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/decline_proposal"
 
-        <FrameLayout
-            android:id="@+id/accept_button_layout"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            style="@style/PaymentScreens.Button"
-            android:enabled="false"
-            android:visibility="visible"
-            android:layout_marginStart="@dimen/spacing_normal"
-            android:orientation="vertical"
-            >
+                        android:drawableStart="@drawable/ic_lock_black"
+                        android:drawableLeft="@drawable/ic_lock_black"
+                        android:drawableTint="@color/tz_light"
+                        android:drawablePadding="@dimen/spacing_normal"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:enabled="false"
 
-            <Button
-                android:id="@+id/accept_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/accept_proposal"
+                        android:background="@null"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        />
+                </FrameLayout>
 
-                android:drawableStart="@drawable/ic_lock_black"
-                android:drawableLeft="@drawable/ic_lock_black"
-                android:drawableTint="@color/tz_dark"
-                android:drawablePadding="@dimen/spacing_normal"
-                android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
-                android:layout_gravity="center"
-                android:enabled="false"
+                <FrameLayout
+                    android:id="@+id/accept_button_layout"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    style="@style/PaymentScreens.Button"
+                    android:enabled="false"
+                    android:visibility="visible"
+                    android:layout_marginStart="@dimen/spacing_normal"
+                    android:orientation="vertical"
+                    >
 
-                android:background="@null"
-                android:clickable="false"
-                android:focusable="false"
-                android:minHeight="0dp"
-                android:minWidth="0dp"
-                />
+                    <Button
+                        android:id="@+id/accept_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/accept_proposal"
 
-        </FrameLayout>
-    </LinearLayout>
+                        android:drawableStart="@drawable/ic_lock_black"
+                        android:drawableLeft="@drawable/ic_lock_black"
+                        android:drawableTint="@color/tz_dark"
+                        android:drawablePadding="@dimen/spacing_normal"
+                        android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+                        android:layout_gravity="center"
+                        android:enabled="false"
+
+                        android:background="@null"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        />
+
+                </FrameLayout>
+            </LinearLayout>
 
 
-</LinearLayout>
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
