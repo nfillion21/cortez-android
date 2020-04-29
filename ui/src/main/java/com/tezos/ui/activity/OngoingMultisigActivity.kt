@@ -47,7 +47,7 @@ import com.tezos.ui.adapter.OperationRecyclerViewAdapter
 import com.tezos.ui.fragment.OngoingMultisigDialogFragment
 import com.tezos.ui.fragment.OperationDetailsDialogFragment
 
-class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerViewAdapter.OnItemClickListener
+class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerViewAdapter.OnItemClickListener, OngoingMultisigDialogFragment.OnOngoinMultisigDialogInteractionListener
 {
     private var mRecyclerView: RecyclerView? = null
 
@@ -157,5 +157,19 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
 
         val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance()
         ongoingDialogFragment.show(supportFragmentManager, OperationDetailsDialogFragment.TAG)
+    }
+
+    override fun isFingerprintAllowed(): Boolean {
+        return false
+    }
+
+    override fun hasEnrolledFingerprints(): Boolean {
+        return false
+    }
+
+    override fun saveFingerprintAllowed(useInFuture: Boolean) {
+    }
+
+    override fun onSigSentSucceed() {
     }
 }

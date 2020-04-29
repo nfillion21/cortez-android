@@ -137,6 +137,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             dismiss()
         }
 
+        swipe_refresh_multisig_dialog_layout.setOnRefreshListener {
+            startInitContractInfoLoading()
+        }
 
         //startInitTransferLoading(mIsFromContract)
         //from_tz1_button.isChecked = !from_contract_button.isChecked
@@ -252,8 +255,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         transferLoading(true)
 
         //TODO need to handle transfers from KT1 or from tz1
-
-        putFeesToNegative()
 
         validateAcceptDeclineButtons(validate = false)
 
@@ -667,11 +668,14 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     private fun onStorageInfoComplete(error:VolleyError?)
     {
         mStorageInfoLoading = false
+        transferLoading(false)
+
+        swipe_refresh_multisig_dialog_layout?.isEnabled = true
+        swipe_refresh_multisig_dialog_layout?.isRefreshing = false
 
         if (error != null || mClickCalculate)
         {
             // stop the moulinette only if an error occurred
-            transferLoading(false)
             cancelRequests(true)
 
             mTransferPayload = null
@@ -695,7 +699,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
         else
         {
-            transferLoading(false)
             cancelRequests(true)
         }
 
@@ -907,34 +910,20 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         // handle the visibility of bottom buttons
 
-        /*
         if (loading)
         {
-            fee_progress?.visibility = View.VISIBLE
+            nav_progress?.visibility = View.VISIBLE
         }
         else
         {
-            fee_progress?.visibility = View.GONE
+            nav_progress?.visibility = View.GONE
         }
-        */
-    }
-
-    private fun putFeesToNegative()
-    {
-        //fee_edittext?.setText("")
-
-        mClickCalculate = false
-        //fee_edittext?.isEnabled = false
-        //fee_edittext?.hint = getString(R.string.neutral)
-
-        mTransferFees = -1
-
-        mTransferPayload = null
     }
 
     private fun areButtonsValid():Boolean
     {
-        return mTransferFees != -1L
+        //return mTransferFees != -1L
+        return true
     }
 
     private fun validateAcceptDeclineButtons(validate: Boolean)
