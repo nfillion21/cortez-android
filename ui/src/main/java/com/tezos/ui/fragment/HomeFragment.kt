@@ -67,6 +67,7 @@ import kotlin.collections.ArrayList
 open class HomeFragment : Fragment()
 {
     private val OPERATIONS_ARRAYLIST_KEY = "operations_list"
+    private val ONGOING_OPERATIONS_ARRAYLIST_KEY = "ongoing_operations_list"
     private val BALANCE_FLOAT_KEY = "balance_float_item"
 
     private val GET_OPERATIONS_LOADING_KEY = "get_operations_loading"
@@ -199,7 +200,7 @@ open class HomeFragment : Fragment()
 
         last_operation_layout.setOnClickListener {
 
-            if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty() != true)
+            if (!mRecyclerViewItems.isNullOrEmpty())
             {
                 //Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
 
@@ -215,7 +216,7 @@ open class HomeFragment : Fragment()
 
         ongoing_operation_layout?.setOnClickListener {
 
-            if (mRecyclerViewItems != null && mRecyclerViewItems?.isEmpty() != true)
+            if (!mOngoingMultisigItems.isNullOrEmpty())
             {
                 //Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
 
@@ -224,7 +225,7 @@ open class HomeFragment : Fragment()
                         R.color.theme_boo_primary_dark,
                         R.color.theme_boo_text)
 
-                val bundles = itemsToBundles(mRecyclerViewItems)
+                val bundles = ongoingItemsToBundles(mOngoingMultisigItems)
                 OngoingMultisigActivity.start(activity!!, bundles!!, mTezosTheme)
             }
         }
@@ -361,6 +362,11 @@ open class HomeFragment : Fragment()
                 if (mRecyclerViewItems != null)
                 {
                     mRecyclerViewItems?.clear()
+                }
+
+                if (mOngoingMultisigItems != null)
+                {
+                    mOngoingMultisigItems?.clear()
                 }
 
                 if (mBalanceItem != null)
@@ -796,6 +802,9 @@ open class HomeFragment : Fragment()
         val bundles = itemsToBundles(mRecyclerViewItems)
         outState.putParcelableArrayList(OPERATIONS_ARRAYLIST_KEY, bundles)
 
+        val ongoingBundles = ongoingItemsToBundles(mOngoingMultisigItems)
+        outState.putParcelableArrayList(ONGOING_OPERATIONS_ARRAYLIST_KEY, ongoingBundles)
+
         mBalanceItem?.let {
             outState.putDouble(BALANCE_FLOAT_KEY, it)
         }
@@ -825,6 +834,41 @@ open class HomeFragment : Fragment()
         return ArrayList()
     }
 
+    private fun bundlesToOngoingItems( bundles:ArrayList<Bundle>?): ArrayList<OngoingMultisigOperation>?
+    {
+        if (bundles != null)
+        {
+            var items = ArrayList<OngoingMultisigOperation>(bundles.size)
+            if (bundles.isNotEmpty())
+            {
+                bundles.forEach {
+                    val op = fromBundle(it)
+                    items.add(op)
+                }
+            }
+            return items
+        }
+
+        return ArrayList()
+    }
+
+    private fun ongoingItemsToBundles(items:ArrayList<OngoingMultisigOperation>?):ArrayList<Bundle>?
+    {
+        if (items != null)
+        {
+            val bundles = ArrayList<Bundle>(items.size)
+            if (items.isNotEmpty())
+            {
+                items.forEach {
+                    bundles.add(toBundle(it))
+                }
+            }
+            return bundles
+        }
+        return null
+    }
+
+
     private fun itemsToBundles(items:ArrayList<Operation>?):ArrayList<Bundle>?
     {
         if (items != null)
@@ -840,6 +884,7 @@ open class HomeFragment : Fragment()
         }
         return null
     }
+
 
     private fun cancelRequest(operations: Boolean, balance:Boolean, multisigOnGoing:Boolean)
     {
