@@ -60,7 +60,7 @@
                 android:paddingRight="@dimen/spacing_double"
                 android:orientation="vertical">
 
-                <ScrollView
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fillViewport="true">
@@ -275,7 +275,7 @@
 
                     </LinearLayout>
 
-                </ScrollView>
+                </androidx.core.widget.NestedScrollView>
             </LinearLayout>
 
             <!--

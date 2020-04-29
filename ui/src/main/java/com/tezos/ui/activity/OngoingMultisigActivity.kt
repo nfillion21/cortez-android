@@ -150,13 +150,9 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
 
     override fun onOperationSelected(view: View?, operation: Operation?)
     {
-        /*
-        val operationDetailsFragment = OperationDetailsDialogFragment.newInstance(operation)
-        operationDetailsFragment.show(supportFragmentManager, OperationDetailsDialogFragment.TAG)
-        */
-
-        val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance()
-        ongoingDialogFragment.show(supportFragmentManager, OperationDetailsDialogFragment.TAG)
+        val hex = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d10007070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e"
+        val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance(hex)
+        ongoingDialogFragment.show(supportFragmentManager, OngoingMultisigDialogFragment.TAG)
     }
 
     override fun isFingerprintAllowed(): Boolean {

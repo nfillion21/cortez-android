@@ -55,8 +55,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private var mStorage:String? = null
 
-    private var mSig:String? = null
-
     private var mSignatoriesList:ArrayList<String> = ArrayList(SIGNATORIES_CAPACITY)
 
     interface OnOngoinMultisigDialogInteractionListener
@@ -80,24 +78,17 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         private const val STORAGE_DATA_KEY = "storage_data_key"
 
-        private const val CONTRACT_SIG_KEY = "contract_sig_key"
-
         private const val SIGNATORIES_CAPACITY = 10
 
         private const val SIGNATORIES_LIST_KEY = "signatories_list"
 
+        private const val HEX_OPERATION_KEY = "hex_operation"
+
         @JvmStatic
-        fun newInstance() =
+        fun newInstance(hexOperation:String) =
                 OngoingMultisigDialogFragment().apply {
                     arguments = Bundle().apply {
-
-                        /*
-                        val bundleTheme = theme.toBundle()
-                        putBundle(CustomTheme.TAG, bundleTheme)
-                        putString(CONTRACT_PUBLIC_KEY, contractPkh)
-                        putString(STORAGE_DATA_KEY, storage)
-                        putBoolean(IS_CONTRACT_AVAILABLE_KEY, contractAvailable)
-                        */
+                        putString(HEX_OPERATION_KEY, hexOperation)
                     }
                 }
     }
@@ -158,8 +149,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
-
-            mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
             mSignatoriesList = savedInstanceState.getStringArrayList(SIGNATORIES_LIST_KEY)
 
@@ -303,8 +292,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                 dstObject.put("amount", 0.toLong())
                 dstObject.put("contract_type", "slc_enclave_transfer")
-
-                dstObject.put("edsig", mSig)
 
                 //0.1 tez == 100 000 mutez
                 dstObject.put("transfer_amount", "100000".toLong())
@@ -676,7 +663,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         if (error != null || mClickCalculate)
         {
             // stop the moulinette only if an error occurred
-            cancelRequests(true)
+            cancelRequests(resetBooleans = true)
 
             mTransferPayload = null
 
@@ -722,14 +709,16 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                 threshold_edittext.setText(getThreshold())
 
-                //val hex = "79046ce688e4a719d86cf74625baefeaeb272fe10ee8885dfa1077415b0efd556c00126f945de58d401b7a97d5d5119de169e14725118e1dbba50eecfb013a0001588317ff8c2df3024d180109239ce16c80e6f6d100ff00000000f6070707070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e020000006c05090100000063656473696774706e6f47614a726b67784c6746644a45395662706a36677231333847777479357959613561504a43576141484166375344646a62564c5a7a714a5345625a55676435723156695039766a347973575a55395a4b63737943676f534a746a0306"
-                //val hex = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d100070700060508050807070001020000004c0a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c4"
-                val hex = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d10007070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e"
-                val binaryReader = MultisigBinaries(hex)
-                if (binaryReader.getType() == MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES)
-                {
-                    threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
-                    refreshProposalSignatories(binaryReader.getSignatories())
+                arguments?.let {
+
+                    val hex = it.getString(HEX_OPERATION_KEY)
+
+                    val binaryReader = MultisigBinaries(hex)
+                    if (binaryReader.getType() == MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES)
+                    {
+                        threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
+                        refreshProposalSignatories(binaryReader.getSignatories())
+                    }
                 }
 
                 validateAcceptDeclineButtons(validate = true)
@@ -922,8 +911,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private fun areButtonsValid():Boolean
     {
-        //return mTransferFees != -1L
-        return true
+        if (!mStorage.isNullOrEmpty())
+        {
+            return true
+        }
+
+        return false
     }
 
     private fun validateAcceptDeclineButtons(validate: Boolean)
@@ -1009,8 +1002,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
-
-        outState.putString(CONTRACT_SIG_KEY, mSig)
 
         outState.putStringArrayList(SIGNATORIES_LIST_KEY, mSignatoriesList)
     }
