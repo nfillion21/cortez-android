@@ -7,8 +7,9 @@ import java.io.ByteArrayInputStream
 class MultisigBinaries(val hexaInput: String)
 {
     private var mThreshold: Long? = null
-
+    private var mContractAddress: String? = null
     private var mSignatoriesArray = ArrayList<String>()
+    private var mOperationTypeString: String? = null
 
     companion object
     {
@@ -32,7 +33,7 @@ class MultisigBinaries(val hexaInput: String)
         val vContract = visitable.primitive?.arguments?.get(0)?.primitive?.arguments?.get(1)?.bytes
         val hashContract = vContract?.slice(1 until 21)?.toByteArray()
 
-        val pkhh = if (hashContract != null) CryptoUtils.genericHashToKT(hashContract) else null
+        mContractAddress = if (hashContract != null) CryptoUtils.genericHashToKT(hashContract) else null
 
 
         val counterVisitable = visitable.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)
@@ -81,7 +82,7 @@ class MultisigBinaries(val hexaInput: String)
 
         if (
             vChainId != null && //maybe check if it's the good network id
-                !pkhh.isNullOrEmpty() &&
+                !mContractAddress.isNullOrEmpty() &&
                 counterV != null )
         {
             if (
@@ -89,14 +90,17 @@ class MultisigBinaries(val hexaInput: String)
                     !mSignatoriesArray.isNullOrEmpty()
             )
             {
+                mOperationTypeString = "Update threshold and/or signatories"
                 return MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES
             }
             else if (delegateNone)
             {
+                mOperationTypeString = "Delegate"
                 return MULTISIG_BINARY_TYPE.DELEGATE
             }
             else if (!baker.isNullOrEmpty())
             {
+                mOperationTypeString = "Undelegate"
                 return MULTISIG_BINARY_TYPE.UNDELEGATE
             }
         }
@@ -107,6 +111,16 @@ class MultisigBinaries(val hexaInput: String)
     fun getThreshold():Long?
     {
         return mThreshold
+    }
+
+    fun getOperationTypeString():String?
+    {
+        return mOperationTypeString
+    }
+
+    fun getContractAddress():String?
+    {
+        return mContractAddress
     }
 
     fun getSignatories():ArrayList<String>?

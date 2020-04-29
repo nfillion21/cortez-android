@@ -98,9 +98,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         super.onCreate(savedInstanceState)
 
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.DialogTheme)
-        arguments?.let {
-            mStorage = it.getString(STORAGE_DATA_KEY)
-        }
+        //arguments?.let {
+            //mStorage = it.getString(STORAGE_DATA_KEY)
+        //}
     }
 
     override fun onAttach(context: Context)
@@ -134,9 +134,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         //startInitTransferLoading(mIsFromContract)
         //from_tz1_button.isChecked = !from_contract_button.isChecked
-
-
-        val seed = Storage(context!!).getMnemonics()
 
 
         if (savedInstanceState != null)
@@ -185,9 +182,20 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             bullet_textview_09.text = ss
             bullet_textview_10.text = ss
 
+            arguments?.let {
+
+                val hex = it.getString(HEX_OPERATION_KEY)
+
+                val binaryReader = MultisigBinaries(hex)
+                if (binaryReader.getType() == MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES)
+                {
+                    contract_address_item.text = binaryReader.getContractAddress()
+                    operation_type_item.text = binaryReader.getOperationTypeString()
+                }
+            }
+
             startInitContractInfoLoading()
         }
-
     }
 
     override fun onResume()
@@ -702,10 +710,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 refreshSignatories()
 
                 update_signatories_layout.visibility = View.VISIBLE
-
-                //threshold_layout.visibility = View.VISIBLE
-                //current_storage_title_textview.visibility = View.VISIBLE
-                //signatories_layout.visibility = View.VISIBLE
 
                 threshold_edittext.setText(getThreshold())
 
