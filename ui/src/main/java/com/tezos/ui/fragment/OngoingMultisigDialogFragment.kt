@@ -187,10 +187,18 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 val hex = it.getString(HEX_OPERATION_KEY)
 
                 val binaryReader = MultisigBinaries(hex)
-                if (binaryReader.getType() == MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES)
+
+                when(binaryReader.getType())
                 {
-                    contract_address_item.text = binaryReader.getContractAddress()
-                    operation_type_item.text = binaryReader.getOperationTypeString()
+                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
+                    {
+                        contract_address_item.text = binaryReader.getContractAddress()
+                        operation_type_item.text = binaryReader.getOperationTypeString()
+                    }
+
+                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.DELEGATE -> {}
+                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE -> {}
+                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.TRANSFER -> {}
                 }
             }
 

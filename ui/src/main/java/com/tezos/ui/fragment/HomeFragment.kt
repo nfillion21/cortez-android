@@ -57,6 +57,7 @@ import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import kotlinx.android.synthetic.main.fragment_home.*
 import org.json.JSONArray
+import java.io.Serializable
 import java.text.DateFormat
 import java.time.Instant
 import java.util.*
@@ -80,6 +81,8 @@ open class HomeFragment : Fragment()
     private var mRecyclerViewItems:ArrayList<Operation>? = null
     private var mBalanceItem:Double? = null
 
+    private var mOngoingMultisigItems:ArrayList<Operation>? = null
+
     private var mGetHistoryLoading:Boolean = false
     private var mGetBalanceLoading:Boolean = false
     private var mGetMultisigOnGoing:Boolean = false
@@ -89,6 +92,38 @@ open class HomeFragment : Fragment()
     private var listener: HomeListener? = null
 
     private var mDateFormat:DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
+
+
+    data class OngoingMultisigOperation(
+            val contractAddress: String,
+            val submissionDate:String,
+            val hexaOperation: String) : Serializable
+
+    internal class OngoinMultisigSerialization internal constructor(private val ongoingMultisigOperation: OngoingMultisigOperation)
+    {
+        internal fun getSerializedBundle():Bundle
+        {
+            val ongoingOperationBundle = Bundle()
+
+            ongoingOperationBundle.putString("contractAddress", ongoingMultisigOperation.contractAddress)
+            ongoingOperationBundle.putString("submissionDate", ongoingMultisigOperation.submissionDate)
+            ongoingOperationBundle.putString("hexaOperation", ongoingMultisigOperation.hexaOperation)
+
+            return ongoingOperationBundle
+        }
+    }
+
+    internal class OngoingMultisigMapper internal constructor(private val bundle: Bundle)
+    {
+        internal fun mappedObjectFromBundle(): OngoingMultisigOperation
+        {
+            val contractAddress = this.bundle.getString("contractAddress", null)
+            val submissionDate = this.bundle.getString("submissionDate", null)
+            val hexaOperation = this.bundle.getString("hexaOperation", null)
+
+            return OngoingMultisigOperation(contractAddress, submissionDate, hexaOperation)
+        }
+    }
 
     companion object
     {
@@ -100,6 +135,16 @@ open class HomeFragment : Fragment()
                         putBundle(CustomTheme.TAG, theme.toBundle())
                     }
                 }
+
+        fun toBundle(mnemonicsData: OngoingMultisigOperation): Bundle {
+            val serializer = OngoinMultisigSerialization(mnemonicsData)
+            return serializer.getSerializedBundle()
+        }
+
+        fun fromBundle(bundle: Bundle): OngoingMultisigOperation {
+            val mapper = OngoingMultisigMapper(bundle)
+            return mapper.mappedObjectFromBundle()
+        }
     }
 
     interface HomeListener
@@ -574,7 +619,7 @@ open class HomeFragment : Fragment()
 
                 if (swipe_refresh_layout != null)
                 {
-                    //addOperationItemsFromJSON(answer)
+                    addOperationItemsFromJSON(answer)
                     onMultisigOnGoinLoadComplete()
                 }
 
@@ -610,6 +655,58 @@ open class HomeFragment : Fragment()
     }
 
     private fun addOperationItemsFromJSON(answer:JSONArray)
+    {
+        val response = DataExtractor.getJSONArrayFromField(answer,0)
+
+        if (response.length() > 0)
+        {
+            var sortedList = arrayListOf<Operation>()
+
+            for (i in 0 until response.length())
+            {
+                val item = response.getJSONObject(i)
+                val operation = Operation.fromJSONObject(item)
+
+                sortedList.add(operation)
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                sortedList.sortWith(object: Comparator<Operation>
+                {
+                    @RequiresApi(Build.VERSION_CODES.O)
+                    override fun compare(o1: Operation, o2: Operation): Int = when {
+
+                        Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
+                        Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
+                        else -> 1
+                    }
+                })
+            }
+
+            //TODO take the 10 last operations in a better way
+            if (mRecyclerViewItems == null)
+            {
+                mRecyclerViewItems = ArrayList()
+            }
+            mRecyclerViewItems?.clear()
+            mRecyclerViewItems?.addAll(sortedList.subList(0, minOf(10, sortedList.size)))
+
+            //TODO what if the list is empty
+            val lastOperation = sortedList[0]
+
+            //TODO put that
+            operation_amount_textview.text = (lastOperation!!.amount/1000000).toString()
+            operation_fee_textview.text = (lastOperation!!.fee/1000000).toString()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                operation_date_textview.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
+            }
+        }
+    }
+
+    private fun addMultisigOngoingOperationsFromJSON(answer:JSONArray)
     {
         val response = DataExtractor.getJSONArrayFromField(answer,0)
 
@@ -702,7 +799,7 @@ open class HomeFragment : Fragment()
         if (items != null)
         {
             val bundles = ArrayList<Bundle>(items.size)
-            if (!items.isEmpty())
+            if (items.isNotEmpty())
             {
                 items.forEach {
                     bundles.add(it.toBundle())
