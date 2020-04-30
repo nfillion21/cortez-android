@@ -82,15 +82,26 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         private const val SIGNATORIES_LIST_KEY = "signatories_list"
 
-        private const val HEX_OPERATION_KEY = "hex_operation"
+        private const val ONGOING_OPERATION_KEY = "ongoing_operation"
 
         @JvmStatic
-        fun newInstance(hexOperation:String) =
+        fun newInstance(operation:HomeFragment.OngoingMultisigOperation) =
                 OngoingMultisigDialogFragment().apply {
                     arguments = Bundle().apply {
-                        putString(HEX_OPERATION_KEY, hexOperation)
+                        putBundle(ONGOING_OPERATION_KEY, toBundle(operation))
                     }
                 }
+
+        fun toBundle(operation: HomeFragment.OngoingMultisigOperation): Bundle {
+            val serializer = HomeFragment.OngoinMultisigSerialization(operation)
+            return serializer.getSerializedBundle()
+        }
+
+        fun fromBundle(bundle: Bundle): HomeFragment.OngoingMultisigOperation
+        {
+            val mapper = HomeFragment.OngoingMultisigMapper(bundle)
+            return mapper.mappedObjectFromBundle()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -98,9 +109,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         super.onCreate(savedInstanceState)
 
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.DialogTheme)
-        //arguments?.let {
-            //mStorage = it.getString(STORAGE_DATA_KEY)
-        //}
     }
 
     override fun onAttach(context: Context)
@@ -184,9 +192,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             arguments?.let {
 
-                val hex = it.getString(HEX_OPERATION_KEY)
+                //val hex = it.getString(ONGOING_OPERATION_KEY)
 
-                val binaryReader = MultisigBinaries(hex)
+                val operationBundle = it.getBundle(ONGOING_OPERATION_KEY)
+                val op = fromBundle(operationBundle)
+
+                val binaryReader = MultisigBinaries(op.hexaOperation)
 
                 when(binaryReader.getType())
                 {
@@ -424,20 +435,17 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         cancelRequests(true)
 
-        //mStorageInfoLoading = true
+        mStorageInfoLoading = true
 
-        //loading_textview.setText(R.string.loading_contract_info)
+        arguments?.let { it ->
 
-        //nav_progress.visibility = View.VISIBLE
+            val operationBundle = it.getBundle(ONGOING_OPERATION_KEY)
+            val op = fromBundle(operationBundle)
 
-        val pkh = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX"
-        if (pkh != null)
-        {
-            //val url = String.format(getString(R.string.contract_storage_url), pkh)
-            val url = String.format(getString(R.string.contract_storage_url), pkh)
+            val url = String.format(getString(R.string.contract_storage_url), op.contractAddress)
 
             // Request a string response from the provided URL.
-            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener<JSONObject>
+            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener
             {
 
                 //prevents from async crashes
@@ -445,31 +453,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 {
                     addContractInfoFromJSON(it)
                     onStorageInfoComplete(error = null)
-
-                    /*
-                    if (getStorageSecureKeyHash() != null)
-                    {
-
-                        validateConfirmEditionButton(isSpendingLimitInputDataValid() && isUpdateStorageFeeValid())
-
-                        startGetRequestBalance()
-                    }
-                    else if (getThreshold() != null)
-                    {
-                        // here I need to check the user is notary or signatory only.
-                        startNotaryLoading()
-                    }
-                    else
-                    {
-                        val mnemonicsData = Storage(activity!!).getMnemonics()
-                        val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
-                        val isDefaultContract = mStorage.toString() == defaultContract.toString()
-
-                        if (isDefaultContract)
-                        {
-                        }
-                    }
-                    */
                 }
             },
                     Response.ErrorListener {
@@ -721,11 +704,15 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                 threshold_edittext.setText(getThreshold())
 
+
                 arguments?.let {
 
-                    val hex = it.getString(HEX_OPERATION_KEY)
+                    val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
+                    val op = fromBundle(opBundle)
 
-                    val binaryReader = MultisigBinaries(hex)
+                    submission_item_date.text = op.submissionDate
+
+                    val binaryReader = MultisigBinaries(op.hexaOperation)
                     if (binaryReader.getType() == MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES)
                     {
                         threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())

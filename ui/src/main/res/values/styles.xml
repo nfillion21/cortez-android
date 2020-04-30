@@ -26,11 +26,11 @@
 
     <style name="DialogTheme" parent="Theme.MaterialComponents.Light.Dialog">
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="android:windowMinWidthMajor">90%</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:windowMinWidthMajor">90%</item>
     </style>
 
     <style name="PaymentScreens.Button" parent="Widget.AppCompat.Button.Borderless">

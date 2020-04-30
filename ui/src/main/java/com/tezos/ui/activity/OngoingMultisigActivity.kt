@@ -165,7 +165,7 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
 
     override fun onOperationSelected(view: View?, operation: HomeFragment.OngoingMultisigOperation?)
     {
-        val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance(operation!!.hexaOperation)
+        val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance(operation!!)
         ongoingDialogFragment.show(supportFragmentManager, OngoingMultisigDialogFragment.TAG)
     }
 

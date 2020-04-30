@@ -102,7 +102,7 @@
                             android:id="@+id/submission_item_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="24/04/2020"
+                            android:text="@string/neutral"
                             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
                             tools:ignore="UnusedAttribute,NewApi" />
 
@@ -136,7 +136,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/spacing_double"
-                                android:text="Current contract storage"
+                                android:text="@string/current_contract_storage"
                                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                                 android:textColor="@color/colorAccentText"
                                 android:textStyle="bold"
@@ -223,7 +223,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/spacing_double"
-                                android:text="Contract storage proposal"
+                                android:text="@string/contract_storage_proposal"
                                 android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
                                 android:textColor="@color/colorAccentText"
                                 android:textStyle="bold"
