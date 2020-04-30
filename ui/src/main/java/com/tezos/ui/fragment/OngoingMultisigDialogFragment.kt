@@ -190,28 +190,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             bullet_textview_09.text = ss
             bullet_textview_10.text = ss
 
-            arguments?.let {
-
-                //val hex = it.getString(ONGOING_OPERATION_KEY)
-
-                val operationBundle = it.getBundle(ONGOING_OPERATION_KEY)
-                val op = fromBundle(operationBundle)
-
-                val binaryReader = MultisigBinaries(op.hexaOperation)
-
-                when(binaryReader.getType())
-                {
-                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
-                    {
-                        contract_address_item.text = binaryReader.getContractAddress()
-                        operation_type_item.text = binaryReader.getOperationTypeString()
-                    }
-
-                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.DELEGATE -> {}
-                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE -> {}
-                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.TRANSFER -> {}
-                }
-            }
+            refreshTextsAndLayouts()
 
             startInitContractInfoLoading()
         }
@@ -437,21 +416,21 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         mStorageInfoLoading = true
 
-        arguments?.let { it ->
+        arguments?.let { bundle ->
 
-            val operationBundle = it.getBundle(ONGOING_OPERATION_KEY)
+            val operationBundle = bundle.getBundle(ONGOING_OPERATION_KEY)
             val op = fromBundle(operationBundle)
 
             val url = String.format(getString(R.string.contract_storage_url), op.contractAddress)
 
             // Request a string response from the provided URL.
             val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener
-            {
+            {o ->
 
                 //prevents from async crashes
                 if (dialogRootView != null)
                 {
-                    addContractInfoFromJSON(it)
+                    addContractInfoFromJSON(o)
                     onStorageInfoComplete(error = null)
                 }
             },
@@ -694,51 +673,35 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private fun refreshTextsAndLayouts()
     {
-        if (!mStorage.isNullOrEmpty())
-        {
-            if (getThreshold() != null)
+        arguments?.let {
+
+            val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
+            val op = fromBundle(opBundle)
+
+            submission_item_date.text = op.submissionDate
+
+            val binaryReader = MultisigBinaries(op.hexaOperation)
+            if (binaryReader.getType() == MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES)
             {
-                refreshSignatories()
+                threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
+                refreshProposalSignatories(binaryReader.getSignatories())
 
-                update_signatories_layout.visibility = View.VISIBLE
+                contract_address_item.text = binaryReader.getContractAddress()
+                operation_type_item.text = binaryReader.getOperationTypeString()
+            }
 
-                threshold_edittext.setText(getThreshold())
+            if (!mStorage.isNullOrEmpty())
+            {
+                if (getThreshold() != null)
+                {
+                    refreshSignatories()
 
+                    update_signatories_layout.visibility = View.VISIBLE
 
-                arguments?.let {
+                    threshold_edittext.setText(getThreshold())
 
-                    val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
-                    val op = fromBundle(opBundle)
-
-                    submission_item_date.text = op.submissionDate
-
-                    val binaryReader = MultisigBinaries(op.hexaOperation)
-                    if (binaryReader.getType() == MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES)
-                    {
-                        threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
-                        refreshProposalSignatories(binaryReader.getSignatories())
-                    }
+                    validateAcceptDeclineButtons(validate = true)
                 }
-
-                validateAcceptDeclineButtons(validate = true)
-
-
-// MULTISIG CONTRACT
-                /*
-                update_multisig_form_card.visibility = View.VISIBLE
-
-                update_storage_form_card?.visibility = View.GONE
-
-
-                update_storage_button_layout?.visibility = View.GONE
-
-                storage_info_textview?.visibility = View.VISIBLE
-                storage_info_textview?.text = getString(R.string.multisig_script_info)
-
-                updateMultisigInfos()
-
-                switchToMultisigEditMode(mMultisigEditMode)
-                */
             }
         }
     }
