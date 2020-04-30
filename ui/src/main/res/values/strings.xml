@@ -43,6 +43,7 @@
     <string name="contract_address">Contract address %1$s</string>
     <string name="contract_storage_proposal">Contract storage proposal</string>
     <string name="current_contract_storage">Current contract storage</string>
+    <string name="current_baker">Current baker</string>
     <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>
     <string name="mnemonic_info_title">Here is your Wallet mnemonics</string>
     <string name="public_key_info_title">Here is your Address</string>

@@ -750,7 +750,7 @@ open class HomeFragment : Fragment()
             var sortedList = arrayListOf<OngoingMultisigOperation>()
 
             //for (i in 0 until response.length())
-            for (i in 0 until 2)
+            for (i in 0 until 3)
             {
                 //val item = response.getJSONObject(i)
                 //val operation = Operation.fromJSONObject(item)
@@ -771,6 +771,16 @@ open class HomeFragment : Fragment()
                             contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
                             submissionDate = "25/01/1987",
                             hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d10007070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e"
+                    )
+
+                    sortedList.add(ongoingOperation)
+                }
+                else if (i == 2)
+                {
+                    val ongoingOperation = OngoingMultisigOperation(
+                            contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
+                            submissionDate = "26/01/1987",
+                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d100070700070508050505090a000000150018eaa9e67d24188b82b35d34d99afa6b0f780970"
                     )
 
                     sortedList.add(ongoingOperation)

@@ -15,7 +15,7 @@ class MultisigBinaries(val hexaInput: String)
     {
         enum class MULTISIG_BINARY_TYPE
         {
-            UPDATE_SIGNATORIES, DELEGATE, UNDELEGATE, TRANSFER
+            UPDATE_SIGNATORIES, SET_DELEGATE, UNDELEGATE, TRANSFER
         }
     }
 
@@ -95,13 +95,13 @@ class MultisigBinaries(val hexaInput: String)
             }
             else if (delegateNone)
             {
-                mOperationTypeString = "Delegate"
-                return MULTISIG_BINARY_TYPE.DELEGATE
+                mOperationTypeString = "Undelegate"
+                return MULTISIG_BINARY_TYPE.UNDELEGATE
             }
             else if (!baker.isNullOrEmpty())
             {
-                mOperationTypeString = "Undelegate"
-                return MULTISIG_BINARY_TYPE.UNDELEGATE
+                mOperationTypeString = "Set delegate"
+                return MULTISIG_BINARY_TYPE.SET_DELEGATE
             }
         }
 

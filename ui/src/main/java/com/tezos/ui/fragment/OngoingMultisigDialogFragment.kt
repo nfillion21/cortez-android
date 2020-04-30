@@ -681,26 +681,50 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             submission_item_date.text = op.submissionDate
 
             val binaryReader = MultisigBinaries(op.hexaOperation)
-            if (binaryReader.getType() == MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES)
-            {
-                threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
-                refreshProposalSignatories(binaryReader.getSignatories())
 
-                contract_address_item.text = binaryReader.getContractAddress()
-                operation_type_item.text = binaryReader.getOperationTypeString()
-            }
+            when (binaryReader.getType()) {
 
-            if (!mStorage.isNullOrEmpty())
-            {
-                if (getThreshold() != null)
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
                 {
-                    refreshSignatories()
 
-                    update_signatories_layout.visibility = View.VISIBLE
+                    threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
+                    refreshProposalSignatories(binaryReader.getSignatories())
 
-                    threshold_edittext.setText(getThreshold())
+                    contract_address_item.text = binaryReader.getContractAddress()
+                    operation_type_item.text = binaryReader.getOperationTypeString()
 
-                    validateAcceptDeclineButtons(validate = true)
+                    if (!mStorage.isNullOrEmpty())
+                    {
+                        if (getThreshold() != null)
+                        {
+                            refreshSignatories()
+
+                            update_signatories_layout.visibility = View.VISIBLE
+
+                            threshold_edittext.setText(getThreshold())
+
+                            validateAcceptDeclineButtons(validate = true)
+                        }
+                    }
+                }
+
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
+                {
+                    contract_address_item.text = binaryReader.getContractAddress()
+                    operation_type_item.text = binaryReader.getOperationTypeString()
+
+                    if (!mStorage.isNullOrEmpty())
+                    {
+                        if (getThreshold() != null)
+                        {
+                            refreshSignatories()
+                            threshold_edittext.setText(getThreshold())
+
+                            set_baker_layout.visibility = View.VISIBLE
+
+                            validateAcceptDeclineButtons(validate = true)
+                        }
+                    }
                 }
             }
         }
