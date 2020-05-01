@@ -10,6 +10,7 @@ class MultisigBinaries(val hexaInput: String)
     private var mContractAddress: String? = null
     private var mSignatoriesArray = ArrayList<String>()
     private var mOperationTypeString: String? = null
+    private var mBaker: String? = null
 
     companion object
     {
@@ -41,8 +42,6 @@ class MultisigBinaries(val hexaInput: String)
 
         val signatories = visitable.primitive?.arguments?.get(1)?.primitive?.arguments?.get(1)?.primitive?.arguments?.get(0)?.primitive?.arguments?.get(0)?.primitive?.arguments
 
-        var baker:String? = null
-
         if (!signatories.isNullOrEmpty())
         {
             val prethreshold = signatories?.get(0)
@@ -53,7 +52,7 @@ class MultisigBinaries(val hexaInput: String)
                     val bytes = prethreshold.bytes
 
                     val hashBaker = bytes?.slice(1 until bytes?.size)?.toByteArray()
-                    baker = CryptoUtils.genericHashToPkh(hashBaker)
+                    mBaker = CryptoUtils.genericHashToPkh(hashBaker)
                 }
                 else if (prethreshold is VisitableLong)
                 {
@@ -98,7 +97,7 @@ class MultisigBinaries(val hexaInput: String)
                 mOperationTypeString = "Undelegate"
                 return MULTISIG_BINARY_TYPE.UNDELEGATE
             }
-            else if (!baker.isNullOrEmpty())
+            else if (!mBaker.isNullOrEmpty() && !delegateNone)
             {
                 mOperationTypeString = "Set delegate"
                 return MULTISIG_BINARY_TYPE.SET_DELEGATE
@@ -111,6 +110,11 @@ class MultisigBinaries(val hexaInput: String)
     fun getThreshold():Long?
     {
         return mThreshold
+    }
+
+    fun getBaker():String?
+    {
+        return mBaker
     }
 
     fun getOperationTypeString():String?

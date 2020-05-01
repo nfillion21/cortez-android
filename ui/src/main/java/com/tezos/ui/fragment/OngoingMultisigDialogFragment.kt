@@ -501,7 +501,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                                 //prevents from async crashes
                                 if (dialogRootView != null)
                                 {
-                                    addContractInfoFromJSON(o)
+                                    addContractStorageFromJSON(o)
                                     onStorageInfoComplete(error = null)
                                 }
                             },
@@ -546,12 +546,41 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
                         }
 
+
+                        MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
+                        {
+                            val url = String.format(getString(R.string.contract_info_url), op.contractAddress)
+
+                            // Request a string response from the provided URL.
+                            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener
+                            {o ->
+
+                                //prevents from async crashes
+                                if (dialogRootView != null)
+                                {
+                                    addContractInfoFromJSON(o)
+                                    onStorageInfoComplete(error = null)
+                                }
+                            },
+                                    Response.ErrorListener {
+
+                                        if (dialogRootView != null)
+                                        {
+                                            onStorageInfoComplete(error = it)
+                                            mClickCalculate = true
+                                        }
+                                    })
+
+                            jsonArrayRequest.tag = LOAD_STORAGE_TAG
+                            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+                        }
+
                         else -> {""}
                     }
         }
     }
 
-    private fun addContractInfoFromJSON(answer: JSONObject)
+    private fun addContractStorageFromJSON(answer: JSONObject)
     {
         if (answer.length() > 0)
         {
@@ -820,6 +849,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                             update_signatories_layout.visibility = View.VISIBLE
 
+                            no_baker_textview.visibility = View.GONE
+
                             threshold_edittext.setText(getThreshold())
 
                             validateAcceptDeclineButtons(validate = true)
@@ -832,17 +863,43 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     contract_address_item.text = binaryReader.getContractAddress()
                     operation_type_item.text = binaryReader.getOperationTypeString()
 
-                    if (!mStorage.isNullOrEmpty())
+                    if (mContract != null)
                     {
-                        if (getThreshold() != null)
-                        {
-                            refreshSignatories()
-                            threshold_edittext.setText(getThreshold())
+                        refreshSignatories()
+                        threshold_edittext.setText(getThreshold())
 
-                            set_baker_layout.visibility = View.VISIBLE
+                        set_baker_layout.visibility = View.VISIBLE
 
-                            validateAcceptDeclineButtons(validate = true)
-                        }
+                        remove_baker_textview.visibility = View.GONE
+                        current_baker_textview.visibility = View.GONE
+
+                        set_baker_edittext.setText(binaryReader.getBaker())
+
+                        validateAcceptDeclineButtons(validate = true)
+                    }
+                }
+
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
+                {
+                    contract_address_item.text = binaryReader.getContractAddress()
+                    operation_type_item.text = binaryReader.getOperationTypeString()
+
+                    if (mContract != null)
+                    {
+                        refreshSignatories()
+                        threshold_edittext.setText(getThreshold())
+
+                        set_baker_layout.visibility = View.VISIBLE
+
+                        set_baker_textview.visibility = View.GONE
+
+                        no_baker_textview.visibility = View.GONE
+
+                        current_baker_textview.setText(mContract?.delegate)
+
+                        set_baker_edittext.visibility = View.GONE
+
+                        validateAcceptDeclineButtons(validate = true)
                     }
                 }
             }
@@ -1016,9 +1073,38 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private fun areButtonsValid():Boolean
     {
-        if (!mStorage.isNullOrEmpty())
-        {
-            return true
+        arguments?.let {
+
+            val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
+            val op = fromBundle(opBundle)
+            val binaryReader = MultisigBinaries(op.hexaOperation)
+
+            when (binaryReader.getType()) {
+
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
+                {
+                    if (!mStorage.isNullOrEmpty())
+                    {
+                        return true
+                    }
+                }
+
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
+                {
+                    if (mContract != null)
+                    {
+                        return true
+                    }
+                }
+
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
+                {
+                    if (mContract != null)
+                    {
+                        return true
+                    }
+                }
+            }
         }
 
         return false

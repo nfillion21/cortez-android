@@ -750,7 +750,7 @@ open class HomeFragment : Fragment()
             var sortedList = arrayListOf<OngoingMultisigOperation>()
 
             //for (i in 0 until response.length())
-            for (i in 0 until 3)
+            for (i in 0 until 4)
             {
                 //val item = response.getJSONObject(i)
                 //val operation = Operation.fromJSONObject(item)
@@ -777,10 +777,22 @@ open class HomeFragment : Fragment()
                 }
                 else if (i == 2)
                 {
+                    // remove delegate
                     val ongoingOperation = OngoingMultisigOperation(
                             contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
                             submissionDate = "26/01/1987",
-                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d100070700070508050505090a000000150018eaa9e67d24188b82b35d34d99afa6b0f780970"
+                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d1000707000c050805050306"
+                    )
+
+                    sortedList.add(ongoingOperation)
+                }
+                else if (i == 3)
+                {
+                    // set delegate
+                    val ongoingOperation = OngoingMultisigOperation(
+                            contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
+                            submissionDate = "27/01/1987",
+                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d100070700090508050505090a000000150018eaa9e67d24188b82b35d34d99afa6b0f780970"
                     )
 
                     sortedList.add(ongoingOperation)

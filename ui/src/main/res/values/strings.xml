@@ -42,6 +42,10 @@
     <string name="item_address">Address</string>
     <string name="contract_address">Contract address %1$s</string>
     <string name="contract_storage_proposal">Contract storage proposal</string>
+    <string name="contract_proposal">Proposal</string>
+    <string name="remove_baker_as_delegate">Remove current baker as a delegate.</string>
+    <string name="set_baker_as_delegate">Set this baker as a delegate.</string>
+    <string name="currently_no_baker">There is currently no baker for this contract.</string>
     <string name="current_contract_storage">Current contract storage</string>
     <string name="current_baker">Current baker</string>
     <string name="mnemonic_info">You need to backup these 24 english words in a safe place in case you need to recover your accounts.</string>

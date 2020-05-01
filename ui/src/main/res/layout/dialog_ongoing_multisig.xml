@@ -289,6 +289,77 @@
                                 android:textStyle="bold"
                                 tools:ignore="UnusedAttribute,NewApi" />
 
+                            <TextView
+                                android:id="@+id/no_baker_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_normal"
+                                android:text="@string/currently_no_baker"
+                                android:textColor="@color/colorAccent"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                                tools:ignore="UnusedAttribute,NewApi" />
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/current_baker_textview"
+                                android:layout_width="wrap_content"
+                                android:minWidth="@dimen/spacing_huge"
+                                android:layout_height="wrap_content"
+                                android:imeOptions="actionDone"
+                                android:enabled="true"
+                                android:inputType="numberDecimal"
+                                android:focusableInTouchMode="false"
+                                android:clickable="false"
+                                android:longClickable="false"
+                                android:focusable="false"
+                                android:textColorHint="@color/tz_placeholder"
+                                android:textSize="@dimen/standard_item_text_size" />
+
+                            <TextView
+                                android:id="@+id/proposal_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_double"
+                                android:text="@string/contract_proposal"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.WordItem"
+                                android:textColor="@color/colorAccentText"
+                                android:textStyle="bold"
+                                tools:ignore="UnusedAttribute,NewApi" />
+
+                            <TextView
+                                android:id="@+id/remove_baker_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_normal"
+                                android:text="@string/remove_baker_as_delegate"
+                                android:textColor="@color/colorAccent"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                                tools:ignore="UnusedAttribute,NewApi" />
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/set_baker_edittext"
+                                android:layout_width="wrap_content"
+                                android:minWidth="@dimen/spacing_huge"
+                                android:layout_height="wrap_content"
+                                android:imeOptions="actionDone"
+                                android:enabled="true"
+                                android:inputType="numberDecimal"
+                                android:focusableInTouchMode="false"
+                                android:clickable="false"
+                                android:longClickable="false"
+                                android:focusable="false"
+                                android:textColorHint="@color/tz_placeholder"
+                                android:textSize="@dimen/standard_item_text_size" />
+
+                            <TextView
+                                android:id="@+id/set_baker_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_normal"
+                                android:text="@string/set_baker_as_delegate"
+                                android:textColor="@color/colorAccent"
+                                android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+                                tools:ignore="UnusedAttribute,NewApi" />
+
                         </LinearLayout>
                     </LinearLayout>
 
