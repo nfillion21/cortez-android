@@ -83,7 +83,7 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
     }
 
 
-    private fun bundlesToOngoingItems( bundles:ArrayList<Bundle>?): ArrayList<HomeFragment.OngoingMultisigOperation>?
+    private fun bundlesToOngoingItems( bundles:ArrayList<Bundle>?): ArrayList<HomeFragment.OngoingMultisigOperation>
     {
         if (bundles != null)
         {
@@ -114,7 +114,7 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         //var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
 
         val elements = intent.getParcelableArrayListExtra<Bundle>(ONGOING_MULTISIG_KEY)
-        val adapter = OngoingMultisigRecyclerViewAdapter(bundlesToOngoingItems(elements))
+        val adapter = OngoingMultisigRecyclerViewAdapter(bundlesToOngoingItems(elements), bundlesToOngoingItems(elements))
 
         adapter.setOnItemClickListener(this)
         recycler_view.adapter = adapter
