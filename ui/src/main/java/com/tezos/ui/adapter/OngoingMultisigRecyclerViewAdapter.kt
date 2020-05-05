@@ -46,18 +46,18 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
 {
     // The list of message items.
     private val mOngoingOperationItems: List<OngoingMultisigOperation> = ongoingOperationItems
-    private val mOngoingOperationForNotaryItems: List<OngoingMultisigOperation> = ongoingOperationItems
+    private val mOngoingOperationForNotaryItems: List<OngoingMultisigOperation> = ongoingOperationForNotaryItems
 
     private var mOnItemClickListener: OnItemClickListener? = null
 
     companion object
     {
         // The operation view type.
-        private const val OPERATION_ITEM_VIEW_TYPE: Int = 0
-        private const val NOTARY_HEADER_ITEM_VIEW_TYPE: Int = 1
-        private const val NOTARY_ITEM_VIEW_TYPE: Int = 2
+        private const val HEADER_OPERATION_ITEM_VIEW_TYPE: Int = 0
+        private const val OPERATION_ITEM_VIEW_TYPE: Int = 1
 
-        private const val HEADER_COUNT: Int = 1
+        private const val HEADER_NOTARY_ITEM_VIEW_TYPE: Int = 2
+        private const val NOTARY_OPERATION_ITEM_VIEW_TYPE: Int = 3
     }
 
     open interface OnItemClickListener
@@ -72,7 +72,19 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
 
     override fun getItemCount(): Int
     {
-        return mOngoingOperationItems.size + mOngoingOperationForNotaryItems.size + HEADER_COUNT
+        var count = 0
+
+        if (mOngoingOperationItems.isNotEmpty())
+        {
+            count += mOngoingOperationItems.size + 1
+        }
+
+        if (mOngoingOperationForNotaryItems.isNotEmpty())
+        {
+            count += mOngoingOperationForNotaryItems.size + 1
+        }
+
+        return count
     }
 
     /**
@@ -80,16 +92,41 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
      */
     override fun getItemViewType(position: Int): Int
     {
-        return when
+
+        when (position)
         {
-            position < mOngoingOperationItems.size ->
-                OPERATION_ITEM_VIEW_TYPE
-
-            position == mOngoingOperationItems.size ->
-                NOTARY_HEADER_ITEM_VIEW_TYPE
-
-            else -> NOTARY_ITEM_VIEW_TYPE
+            0 ->
+            {
+                return if (mOngoingOperationItems.isNotEmpty())
+                    HEADER_OPERATION_ITEM_VIEW_TYPE else
+                    HEADER_NOTARY_ITEM_VIEW_TYPE
+            }
         }
+
+        if (mOngoingOperationItems.isNotEmpty())
+        {
+            return if (position <= mOngoingOperationItems.size)
+            {
+                OPERATION_ITEM_VIEW_TYPE
+            }
+            else
+            {
+                if (position == mOngoingOperationItems.size + 1)
+                {
+                    HEADER_NOTARY_ITEM_VIEW_TYPE
+                }
+                else
+                {
+                    NOTARY_OPERATION_ITEM_VIEW_TYPE
+                }
+            }
+        }
+        else
+        {
+            return NOTARY_OPERATION_ITEM_VIEW_TYPE
+        }
+
+        return -1
     }
 
     /**
@@ -101,7 +138,10 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
         return when (viewType)
         {
             OPERATION_ITEM_VIEW_TYPE -> OperationItemViewHolder(LayoutInflater.from(viewGroup.context).inflate(R.layout.item_container_ongoing_multisig, viewGroup, false))
-            NOTARY_ITEM_VIEW_TYPE -> ForNotaryOperationItemViewHolder(LayoutInflater.from(viewGroup.context).inflate(R.layout.item_container_ongoing_multisig, viewGroup, false))
+            NOTARY_OPERATION_ITEM_VIEW_TYPE -> ForNotaryOperationItemViewHolder(LayoutInflater.from(viewGroup.context).inflate(R.layout.item_container_ongoing_multisig, viewGroup, false))
+
+            HEADER_OPERATION_ITEM_VIEW_TYPE -> OperationsHeaderViewHolder(LayoutInflater.from(viewGroup.context).inflate(R.layout.item_header, viewGroup, false))
+            HEADER_NOTARY_ITEM_VIEW_TYPE -> OperationsForNotaryHeaderViewHolder(LayoutInflater.from(viewGroup.context).inflate(R.layout.item_header, viewGroup, false))
 
             else -> OperationsForNotaryHeaderViewHolder(LayoutInflater.from(viewGroup.context).inflate(R.layout.item_header, viewGroup, false))
         }
@@ -112,7 +152,16 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
         internal var headerTextView: TextView = itemView.findViewById(R.id.signatories_contracts_textview)
         internal fun bind()
         {
-            headerTextView.text = itemView.context.getString(R.string.ongoing_contract_address)
+            headerTextView.text = itemView.context.getString(R.string.ongoing_contract_for_notary)
+        }
+    }
+
+    private inner class OperationsHeaderViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView)
+    {
+        internal var headerTextView: TextView = itemView.findViewById(R.id.signatories_contracts_textview)
+        internal fun bind()
+        {
+            headerTextView.text = itemView.context.getString(R.string.ongoing_contract_operations)
         }
     }
 
@@ -124,7 +173,7 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
 
         internal fun bind(position: Int)
         {
-            val operationItem: OngoingMultisigOperation = mOngoingOperationItems[position]
+            val operationItem: OngoingMultisigOperation = mOngoingOperationItems[position - 1]
 
             contractAddressItem.text = operationItem.contractAddress
             submissionDateItem.text = operationItem.submissionDate
@@ -146,7 +195,11 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
 
         internal fun bind(position: Int)
         {
-            val operationItem: OngoingMultisigOperation = mOngoingOperationForNotaryItems[position - mOngoingOperationItems.size - HEADER_COUNT]
+            var count = 0
+            if (mOngoingOperationItems.isNotEmpty())
+                count += mOngoingOperationItems.size + 1
+
+            val operationItem: OngoingMultisigOperation = mOngoingOperationForNotaryItems[position - count - 1]
 
             contractAddressItem.text = operationItem.contractAddress
             submissionDateItem.text = operationItem.submissionDate
@@ -170,6 +223,7 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
             is OperationItemViewHolder -> holder.bind(position)
             is ForNotaryOperationItemViewHolder -> holder.bind(position)
             is OperationsForNotaryHeaderViewHolder -> holder.bind()
+            is OperationsHeaderViewHolder -> holder.bind()
         }
     }
 }
