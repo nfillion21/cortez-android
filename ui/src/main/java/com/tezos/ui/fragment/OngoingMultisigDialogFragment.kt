@@ -58,6 +58,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private var mStorage:String? = null
 
+    private var mStorageBis:String? = null
+
     private var mContract:Contract? = null
 
     data class Contract
@@ -143,6 +145,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         private const val STORAGE_DATA_KEY = "storage_data_key"
 
+        private const val STORAGE_BIS_DATA_KEY = "storage_bis_data_key"
+
         private const val CONTRACT_DATA_KEY = "contract_info_key"
 
         private const val SIGNATORIES_CAPACITY = 10
@@ -227,6 +231,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
 
+            mStorageBis = savedInstanceState.getString(STORAGE_BIS_DATA_KEY, null)
+
             val contractBundle = savedInstanceState.getBundle(CONTRACT_DATA_KEY)
             if (contractBundle != null)
             {
@@ -244,6 +250,19 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             else
             {
                 onStorageInfoComplete(error = null)
+
+                if (mSignaturesLoading)
+                {
+                    startInitSignaturesInfoLoading()
+                }
+                else
+                {
+                    onSignaturesInfoComplete(error = null)
+                }
+
+
+
+                /*
                 if (mFinalizeTransferLoading)
                 {
                     startFinalizeTransferLoading()
@@ -252,6 +271,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 {
                     onFinalizeTransferLoadComplete(null)
                 }
+                */
             }
         }
         else
@@ -276,6 +296,17 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         bullet_textview_08.text = ss
         bullet_textview_09.text = ss
         bullet_textview_10.text = ss
+
+        bullet_proposal_textview_01.text = ss
+        bullet_proposal_textview_02.text = ss
+        bullet_proposal_textview_03.text = ss
+        bullet_proposal_textview_04.text = ss
+        bullet_proposal_textview_05.text = ss
+        bullet_proposal_textview_06.text = ss
+        bullet_proposal_textview_07.text = ss
+        bullet_proposal_textview_08.text = ss
+        bullet_proposal_textview_09.text = ss
+        bullet_proposal_textview_10.text = ss
     }
 
     override fun onResume()
@@ -369,7 +400,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 //prevents from async crashes
                 if (dialogRootView != null)
                 {
-                    //addContractStorageFromJSON(o)
+                    addContractStorageBisFromJSON(o)
                     onSignaturesInfoComplete(error = null)
                 }
             },
@@ -652,6 +683,14 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         if (answer.length() > 0)
         {
             mStorage = answer.toString()
+        }
+    }
+
+    private fun addContractStorageBisFromJSON(answer: JSONObject)
+    {
+        if (answer.length() > 0)
+        {
+            mStorageBis = answer.toString()
         }
     }
 
@@ -963,6 +1002,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 }
             }
         }
+
+        validateAcceptDeclineButtons(areButtonsValid())
     }
 
     private fun refreshTextsAndLayouts()
@@ -999,7 +1040,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                             threshold_edittext.setText(getThreshold())
 
-                            validateAcceptDeclineButtons(validate = true)
+                            validateAcceptDeclineButtons(areButtonsValid())
                         }
                     }
                 }
@@ -1021,7 +1062,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                         set_baker_edittext.setText(binaryReader.getBaker())
 
-                        validateAcceptDeclineButtons(validate = true)
+                        validateAcceptDeclineButtons(areButtonsValid())
                     }
                 }
 
@@ -1045,7 +1086,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                         set_baker_edittext.visibility = View.GONE
 
-                        validateAcceptDeclineButtons(validate = true)
+                        validateAcceptDeclineButtons(areButtonsValid())
                     }
                 }
             }
@@ -1221,33 +1262,41 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         arguments?.let {
 
-            val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
-            val op = fromBundle(opBundle)
-            val binaryReader = MultisigBinaries(op.hexaOperation)
+            val fromNotary = it.getBoolean(FROM_NOTARY)
+            if (fromNotary)
+            {
+                return (!mStorage.isNullOrEmpty() && !mStorageBis.isNullOrEmpty())
+            }
+            else
+            {
+                val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
+                val op = fromBundle(opBundle)
+                val binaryReader = MultisigBinaries(op.hexaOperation)
 
-            when (binaryReader.getType()) {
-
-                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
+                when (binaryReader.getType())
                 {
-                    if (!mStorage.isNullOrEmpty())
+                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
                     {
-                        return true
+                        if (!mStorage.isNullOrEmpty())
+                        {
+                            return true
+                        }
                     }
-                }
 
-                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
-                {
-                    if (mContract != null)
+                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
                     {
-                        return true
+                        if (mContract != null)
+                        {
+                            return true
+                        }
                     }
-                }
 
-                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
-                {
-                    if (mContract != null)
+                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
                     {
-                        return true
+                        if (mContract != null)
+                        {
+                            return true
+                        }
                     }
                 }
             }
@@ -1342,6 +1391,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
+
+        outState.putString(STORAGE_BIS_DATA_KEY, mStorageBis)
 
         outState.putBundle(CONTRACT_DATA_KEY, toContractBundle(mContract))
 
