@@ -52,6 +52,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     private var mTransferPayload:String? = null
     private var mStorageInfoLoading:Boolean = false
 
+    private var mSignaturesLoading:Boolean = false
+
     private var mFinalizeTransferLoading:Boolean = false
 
     private var mStorage:String? = null
@@ -134,7 +136,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
         private const val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
 
-        private const val LOAD_STORAGE_TAG = "transfer_init"
+        private const val LOAD_SIGNATURES_TAG = "load_signatures"
+
+        private const val LOAD_STORAGE_TAG = "load_storage"
         private const val TRANSFER_FINALIZE_TAG = "transfer_finalize"
 
         private const val STORAGE_DATA_KEY = "storage_data_key"
@@ -216,6 +220,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
 
             mStorageInfoLoading = savedInstanceState.getBoolean(LOAD_STORAGE_TAG)
+
+            mSignaturesLoading = savedInstanceState.getBoolean(LOAD_SIGNATURES_TAG)
+
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
             mStorage = savedInstanceState.getString(STORAGE_DATA_KEY, null)
@@ -347,7 +354,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         cancelRequests(resetBooleans = true)
 
-        mStorageInfoLoading = true
+        mSignaturesLoading = true
 
         arguments?.let {
             val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
@@ -362,19 +369,19 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 //prevents from async crashes
                 if (dialogRootView != null)
                 {
-                    addContractStorageFromJSON(o)
-                    onStorageInfoComplete(error = null)
+                    //addContractStorageFromJSON(o)
+                    onSignaturesInfoComplete(error = null)
                 }
             },
                     Response.ErrorListener {
 
                         if (dialogRootView != null)
                         {
-                            onStorageInfoComplete(error = it)
+                            onSignaturesInfoComplete(error = it)
                         }
                     })
 
-            jsonArrayRequest.tag = LOAD_STORAGE_TAG
+            jsonArrayRequest.tag = LOAD_SIGNATURES_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
         }
     }
@@ -590,8 +597,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                             if (isFromNotary)
                             {
-                                //TODO new call
-
+                                startInitSignaturesInfoLoading()
                             }
                         }
                     },
@@ -878,6 +884,85 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         //TODO check if necessary
         refreshTextsAndLayouts()
+    }
+
+    private fun onSignaturesInfoComplete(error:VolleyError?)
+    {
+        mSignaturesLoading = false
+        transferLoading(false)
+
+        swipe_refresh_multisig_dialog_layout?.isEnabled = true
+        swipe_refresh_multisig_dialog_layout?.isRefreshing = false
+
+        if (error != null || mClickCalculate)
+        {
+            // stop the moulinette only if an error occurred
+            cancelRequests(resetBooleans = true)
+
+            //mTransferPayload = null
+
+            /*
+            fee_edittext?.isEnabled = true
+            fee_edittext?.isFocusable = false
+            fee_edittext?.isClickable = false
+            fee_edittext?.isLongClickable = false
+            fee_edittext?.hint = getString(R.string.click_for_fees)
+
+            fee_edittext?.setOnClickListener {
+                startInitContractInfoLoading()
+            }
+            */
+
+            if(error != null)
+            {
+                showSnackBar(getString(R.string.generic_error), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+            }
+        }
+        else
+        {
+            cancelRequests(true)
+        }
+
+
+        val list = getSignatoriesList()
+        if (!list.isNullOrEmpty())
+        {
+            val hasSignedTextview = listOf(
+                    has_signature_textview_01,
+                    has_signature_textview_02,
+                    has_signature_textview_03,
+                    has_signature_textview_04,
+                    has_signature_textview_05,
+                    has_signature_textview_06,
+                    has_signature_textview_07,
+                    has_signature_textview_08,
+                    has_signature_textview_09,
+                    has_signature_textview_10
+            )
+
+            if (!list.isNullOrEmpty())
+            {
+                val length = list.size
+
+                for (i in 0 until length)
+                {
+                    hasSignedTextview[i].visibility = View.VISIBLE
+                    hasSignedTextview[i].text = "Has not signed yet"
+                }
+
+                for (i in length until SIGNATORIES_CAPACITY)
+                {
+                    hasSignedTextview[i].visibility = View.GONE
+                }
+            }
+            else
+            {
+                for (it in hasSignedTextview)
+                {
+                    it.visibility = View.GONE
+                }
+            }
+        }
     }
 
     private fun refreshTextsAndLayouts()
@@ -1251,6 +1336,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
 
         outState.putBoolean(LOAD_STORAGE_TAG, mStorageInfoLoading)
+
+        outState.putBoolean(LOAD_SIGNATURES_TAG, mSignaturesLoading)
+
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
         outState.putString(STORAGE_DATA_KEY, mStorage)
@@ -1305,6 +1393,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             {
                 mStorageInfoLoading = false
                 mFinalizeTransferLoading = false
+                mSignaturesLoading = false
             }
         }
     }

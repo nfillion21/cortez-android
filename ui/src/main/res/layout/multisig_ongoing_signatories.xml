@@ -61,6 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -111,6 +112,7 @@
             android:id="@+id/has_signature_textview_02"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:visibility="gone"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
@@ -162,6 +164,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -212,6 +215,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -261,6 +265,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -311,6 +316,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -361,6 +367,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -410,6 +417,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -460,6 +468,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
@@ -510,6 +519,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_normal"
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
