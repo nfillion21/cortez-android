@@ -334,6 +334,51 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
     }
 
+    private fun startInitSignaturesInfoLoading()
+    {
+        transferLoading(true)
+
+        validateAcceptDeclineButtons(validate = false)
+
+        startGetRequestLoadSignatures()
+    }
+
+    private fun startGetRequestLoadSignatures()
+    {
+        cancelRequests(resetBooleans = true)
+
+        mStorageInfoLoading = true
+
+        arguments?.let {
+            val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
+            val op = fromBundle(opBundle)
+
+            val url = String.format(getString(R.string.contract_storage_url), op.contractAddress)
+
+            // Request a string response from the provided URL.
+            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener
+            {o ->
+
+                //prevents from async crashes
+                if (dialogRootView != null)
+                {
+                    addContractStorageFromJSON(o)
+                    onStorageInfoComplete(error = null)
+                }
+            },
+                    Response.ErrorListener {
+
+                        if (dialogRootView != null)
+                        {
+                            onStorageInfoComplete(error = it)
+                        }
+                    })
+
+            jsonArrayRequest.tag = LOAD_STORAGE_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+
     private fun startFinalizeTransferLoading()
     {
         // we need to inform the UI we are going to call transfer
@@ -526,7 +571,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val operationBundle = bundle.getBundle(ONGOING_OPERATION_KEY)
             val op = fromBundle(operationBundle)
 
-
             when (contractInfoType)
             {
                 CONTRACT_INFO_TYPE.CONTRACT_STORAGE ->
@@ -543,6 +587,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         {
                             addContractStorageFromJSON(o)
                             onStorageInfoComplete(error = null)
+
+                            if (isFromNotary)
+                            {
+                                //TODO new call
+
+                            }
                         }
                     },
                             Response.ErrorListener {
