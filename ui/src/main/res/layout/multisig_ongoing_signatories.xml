@@ -20,340 +20,498 @@
     <LinearLayout
         android:id="@+id/signatory_layout_01"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_marginTop="@dimen/spacing_micro"
-        android:layout_height="wrap_content">
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bullet_textview_01"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_01"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/bullet_textview_01"
+            android:id="@+id/has_signature_textview_01"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_01"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/signatory_layout_02"
         android:layout_width="match_parent"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bullet_textview_02"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_02"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/bullet_textview_02"
+            android:id="@+id/has_signature_textview_02"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_02"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/signatory_layout_03"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bullet_textview_03"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_03"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/bullet_textview_03"
+            android:id="@+id/has_signature_textview_03"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_03"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/signatory_layout_04"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bullet_textview_04"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_04"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/bullet_textview_04"
+            android:id="@+id/has_signature_textview_04"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_04"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
-
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/signatory_layout_05"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
 
+            <TextView
+                android:id="@+id/bullet_textview_05"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_05"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
         <TextView
-            android:id="@+id/bullet_textview_05"
+            android:id="@+id/has_signature_textview_05"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_05"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
-
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/signatory_layout_06"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        android:visibility="gone">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bullet_textview_06"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_06"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
         <TextView
-            android:id="@+id/bullet_textview_06"
+            android:id="@+id/has_signature_textview_06"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_06"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
-
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/signatory_layout_07"
         android:layout_width="match_parent"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bullet_textview_07"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_07"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/bullet_textview_07"
+            android:id="@+id/has_signature_textview_07"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_07"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
-
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/signatory_layout_08"
         android:layout_width="match_parent"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bullet_textview_08"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_08"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/bullet_textview_08"
+            android:id="@+id/has_signature_textview_08"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_08"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
-
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/signatory_layout_09"
         android:layout_width="match_parent"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bullet_textview_09"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_09"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/bullet_textview_09"
+            android:id="@+id/has_signature_textview_09"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_09"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
-
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/signatory_layout_10"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_micro"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bullet_textview_10"
+                android:layout_width="wrap_content"
+                android:layout_weight="0"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="unusedattribute,newapi" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/bullet_address_edittext_10"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:minWidth="@dimen/spacing_huge"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:hint="@string/one"
+                android:enabled="true"
+                android:inputType="numberDecimal"
+                android:focusableInTouchMode="false"
+                android:clickable="false"
+                android:longClickable="false"
+                android:focusable="false"
+                android:textColorHint="@color/tz_placeholder"
+                android:textSize="@dimen/standard_item_text_size" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/bullet_textview_10"
+            android:id="@+id/has_signature_textview_10"
             android:layout_width="wrap_content"
-            android:layout_weight="0"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/elevation_header"
-            tools:ignore="unusedattribute,newapi" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/bullet_address_edittext_10"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:minWidth="@dimen/spacing_huge"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:hint="@string/one"
-            android:enabled="true"
-            android:inputType="numberDecimal"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:longClickable="false"
-            android:focusable="false"
-            android:textColorHint="@color/tz_placeholder"
-            android:textSize="@dimen/standard_item_text_size" />
-
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+            tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
 </LinearLayout>

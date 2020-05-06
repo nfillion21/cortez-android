@@ -241,24 +241,25 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
         else
         {
-            val ss = SpannableString(" ")
-            ss.setSpan(BulletSpan(8, ContextCompat.getColor(activity!!, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-            bullet_textview_01.text = ss
-            bullet_textview_02.text = ss
-            bullet_textview_03.text = ss
-            bullet_textview_04.text = ss
-            bullet_textview_05.text = ss
-            bullet_textview_06.text = ss
-            bullet_textview_07.text = ss
-            bullet_textview_08.text = ss
-            bullet_textview_09.text = ss
-            bullet_textview_10.text = ss
 
             refreshTextsAndLayouts()
 
             startInitContractInfoLoading()
         }
+
+        val ss = SpannableString(" ")
+        ss.setSpan(BulletSpan(8, ContextCompat.getColor(activity!!, R.color.colorAccent)), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        bullet_textview_01.text = ss
+        bullet_textview_02.text = ss
+        bullet_textview_03.text = ss
+        bullet_textview_04.text = ss
+        bullet_textview_05.text = ss
+        bullet_textview_06.text = ss
+        bullet_textview_07.text = ss
+        bullet_textview_08.text = ss
+        bullet_textview_09.text = ss
+        bullet_textview_10.text = ss
     }
 
     override fun onResume()
