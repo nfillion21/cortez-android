@@ -630,6 +630,14 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             {
                                 startInitSignaturesInfoLoading()
                             }
+
+                            // contract storage c'est si on veut update signatories.
+
+                            // si isFromNotary, c'est dans tous les cas.
+
+
+                            // si isFromNotary,
+
                         }
                     },
                             Response.ErrorListener {
@@ -1005,6 +1013,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
 
         validateAcceptDeclineButtons(areButtonsValid())
+
+        refreshTextsAndLayouts()
     }
 
     private fun refreshTextsAndLayouts()
@@ -1053,7 +1063,17 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                     if (mContract != null)
                     {
-                        refreshSignatories()
+
+                        /*
+                        val fromNotary = it.getBoolean(FROM_NOTARY)
+                        if (fromNotary)
+                        {
+                            refreshSignatories()
+                            update_signatories_layout.visibility = View.VISIBLE
+                        }
+                        */
+
+
                         threshold_edittext.setText(getThreshold())
 
                         set_baker_layout.visibility = View.VISIBLE
@@ -1074,7 +1094,15 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                     if (mContract != null)
                     {
-                        refreshSignatories()
+                        /*
+                        val fromNotary = it.getBoolean(FROM_NOTARY)
+                        if (fromNotary)
+                        {
+                            refreshSignatories()
+                            update_signatories_layout.visibility = View.VISIBLE
+                        }
+                        */
+
                         threshold_edittext.setText(getThreshold())
 
                         set_baker_layout.visibility = View.VISIBLE

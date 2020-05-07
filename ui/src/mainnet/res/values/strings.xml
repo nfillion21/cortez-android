@@ -10,6 +10,7 @@
     <string name="originate_account_url" translatable="false">https://mezos.lamini.ca/mezos/mainnet/originate_account</string>
     <string name="change_delegate_url" translatable="false">https://mezos.lamini.ca/mezos/mainnet/change_delegate</string>
     <string name="contract_info_url" translatable="false">https://mezos.lamini.ca/mezos/mainnet/contract_info?ks=%1$s</string>
+    <string name="contract_info2_url" translatable="false">https://mezos.lamini.ca/mezos/mainnet/contract_info2?ks=%1$s</string>
 
     <string name="contract_storage_url" translatable="false">https://mezos.lamini.ca/tezos/mainnet/chains/main/blocks/head/context/contracts/%1$s/storage</string>
 
