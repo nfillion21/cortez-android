@@ -962,10 +962,10 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             cancelRequests(true)
         }
 
+        arguments?.let {
 
-        val list = getSignatoriesList()
-        if (!list.isNullOrEmpty())
-        {
+            val fromNotary = it.getBoolean(FROM_NOTARY)
+
             val hasSignedTextview = listOf(
                     has_signature_textview_01,
                     has_signature_textview_02,
@@ -979,8 +979,10 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     has_signature_textview_10
             )
 
-            if (!list.isNullOrEmpty())
+            val list = getSignatoriesList()
+            if (!list.isNullOrEmpty() && fromNotary)
             {
+
                 val length = list.size
 
                 for (i in 0 until length)
@@ -989,8 +991,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     hasSignedTextview[i].text = "Has not signed yet"
                 }
 
-                for (i in length until SIGNATORIES_CAPACITY)
-                {
+                for (i in length until SIGNATORIES_CAPACITY) {
                     hasSignedTextview[i].visibility = View.GONE
                 }
             }
