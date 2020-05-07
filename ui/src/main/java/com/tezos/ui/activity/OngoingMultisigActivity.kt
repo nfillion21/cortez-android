@@ -165,9 +165,9 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
 
-    override fun onOperationSelected(view: View?, operation: HomeFragment.OngoingMultisigOperation?)
+    override fun onOperationSelected(view: View?, operation: HomeFragment.OngoingMultisigOperation?, isFromNotary:Boolean)
     {
-        val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance(operation!!, isFromNotary = true)
+        val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance(operation!!, isFromNotary)
         ongoingDialogFragment.show(supportFragmentManager, OngoingMultisigDialogFragment.TAG)
     }
 

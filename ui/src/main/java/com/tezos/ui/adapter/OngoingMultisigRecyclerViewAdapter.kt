@@ -62,7 +62,7 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
 
     open interface OnItemClickListener
     {
-        open fun onOperationSelected(view: View?, operation: OngoingMultisigOperation?): Unit
+        open fun onOperationSelected(view: View?, operation: OngoingMultisigOperation?, isFromNotary:Boolean): Unit
     }
 
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener?): Unit
@@ -182,7 +182,7 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
             binaryReader.getType()
             operationTypeItem.text = binaryReader.getOperationTypeString()
 
-            itemView.setOnClickListener { view: View? -> mOnItemClickListener?.onOperationSelected(view, operationItem) }
+            itemView.setOnClickListener { view: View? -> mOnItemClickListener?.onOperationSelected(view, operationItem, isFromNotary = false) }
         }
     }
 
@@ -208,7 +208,12 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
             binaryReader.getType()
             operationTypeItem.text = binaryReader.getOperationTypeString()
 
-            itemView.setOnClickListener { view: View? -> mOnItemClickListener?.onOperationSelected(view, operationItem) }
+            itemView.setOnClickListener {
+                view: View? ->
+                run {
+                    mOnItemClickListener?.onOperationSelected(view, operationItem, isFromNotary = true)
+                }
+            }
         }
     }
 
