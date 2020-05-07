@@ -815,8 +815,20 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 {
                     val item = argsPk.getJSONObject(it)
 
-                    val pk = DataExtractor.getStringFromField(item, "bytes")
-                    list.add(pk)
+                    val hexPk = DataExtractor.getStringFromField(item, "bytes")
+                    if (!hexPk.isNullOrEmpty())
+                    {
+                        val bytes = hexPk.hexToByteArray()
+                        val hashPublicKey = bytes.slice(1 until bytes.size).toByteArray()
+                        val el = CryptoUtils.genericHashToPk(hashPublicKey)
+
+                        list.add(el)
+                    }
+                    else
+                    {
+                        val pk = DataExtractor.getStringFromField(item, "string")
+                        list.add(pk)
+                    }
                 }
 
                 return list
