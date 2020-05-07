@@ -218,6 +218,13 @@
 
                             <include layout="@layout/multisig_ongoing_signatories" />
 
+
+                            <LinearLayout
+                                android:id="@+id/storage_proposal_layout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
                             <TextView
                                 android:id="@+id/storage_proposal_title_textview"
                                 android:layout_width="wrap_content"
@@ -268,6 +275,8 @@
                             </LinearLayout>
 
                             <include layout="@layout/multisig_ongoing_proposal_signatories" />
+
+                        </LinearLayout>
 
                         </LinearLayout>
 

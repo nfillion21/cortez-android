@@ -209,7 +209,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         swipe_refresh_multisig_dialog_layout.setOnRefreshListener {
 
             arguments?.let {
-                startInitContractInfoLoading(it.getBoolean(FROM_NOTARY))
+                startInitContractInfoLoading()
             }
         }
 
@@ -238,7 +238,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             if (mStorageInfoLoading)
             {
                 arguments?.let {
-                    startInitContractInfoLoading(it.getBoolean(FROM_NOTARY))
+                    startInitContractInfoLoading()
                 }
             }
             else
@@ -273,7 +273,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             refreshTextsAndLayouts()
 
             arguments?.let {
-                startInitContractInfoLoading(it.getBoolean(FROM_NOTARY))
+                startInitContractInfoLoading()
             }
         }
 
@@ -348,7 +348,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         return inflater.inflate(R.layout.dialog_ongoing_multisig, container, false)
     }
 
-    private fun startInitContractInfoLoading(isFromNotary:Boolean)
+    private fun startInitContractInfoLoading()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
@@ -362,7 +362,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val op = fromBundle(opBundle)
 
             val binaryReader = MultisigBinaries(op.hexaOperation)
-            startGetRequestLoadContractInfo(isFromNotary, binaryReader.getType())
+            startGetRequestLoadContractInfo(binaryReader.getType())
         }
     }
 
@@ -569,7 +569,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     }
 
     // volley
-    private fun startGetRequestLoadContractInfo(isFromNotary: Boolean, operationType:MultisigBinaries.Companion.MULTISIG_BINARY_TYPE?)
+    private fun startGetRequestLoadContractInfo(operationType:MultisigBinaries.Companion.MULTISIG_BINARY_TYPE?)
     {
         cancelRequests(resetBooleans = true)
 
@@ -617,9 +617,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     addContractInfoFromJSON(o)
                     onStorageInfoComplete(error = null)
 
-                    if (isFromNotary)
-                    {
-                        startInitSignaturesInfoLoading()
+                    arguments?.let {
+
+                        if (it.getBoolean(FROM_NOTARY))
+                        {
+                            startInitSignaturesInfoLoading()
+                        }
                     }
                 }
             },
@@ -971,11 +974,10 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             val binaryReader = MultisigBinaries(op.hexaOperation)
 
-            when (binaryReader.getType()) {
-
+            when (binaryReader.getType())
+            {
                 MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
                 {
-
                     threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
                     refreshProposalSignatories(binaryReader.getSignatories())
 
@@ -989,6 +991,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             refreshSignatories()
 
                             update_signatories_layout.visibility = View.VISIBLE
+                            storage_proposal_layout.visibility = View.VISIBLE
 
                             no_baker_textview.visibility = View.GONE
 
@@ -1006,16 +1009,13 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                     if (mContract != null)
                     {
-
-                        /*
                         val fromNotary = it.getBoolean(FROM_NOTARY)
                         if (fromNotary)
                         {
                             refreshSignatories()
+                            storage_proposal_layout.visibility = View.GONE
                             update_signatories_layout.visibility = View.VISIBLE
                         }
-                        */
-
 
                         threshold_edittext.setText(getThreshold())
 
@@ -1037,14 +1037,13 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                     if (mContract != null)
                     {
-                        /*
                         val fromNotary = it.getBoolean(FROM_NOTARY)
                         if (fromNotary)
                         {
                             refreshSignatories()
                             update_signatories_layout.visibility = View.VISIBLE
+                            storage_proposal_layout.visibility = View.GONE
                         }
-                        */
 
                         threshold_edittext.setText(getThreshold())
 
