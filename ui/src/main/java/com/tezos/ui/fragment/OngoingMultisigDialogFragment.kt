@@ -4,10 +4,12 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
+import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BulletSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +27,7 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.*
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
@@ -33,6 +36,9 @@ import com.tezos.core.utils.MultisigBinaries
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.database.OngoingMultisigOperation
+import com.tezos.ui.database.Signatory
+import com.tezos.ui.database.Signature
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.fragment.ScriptFragment.Companion.CONTRACT_PUBLIC_KEY
 import com.tezos.ui.utils.*
@@ -42,6 +48,7 @@ import kotlinx.android.synthetic.main.multisig_ongoing_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
+import java.time.Instant
 
 class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 {
@@ -59,6 +66,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     private var mStorageBis:String? = null
 
     private var mContract:Contract? = null
+
+    private lateinit var database: DatabaseReference
+    private lateinit var databaseOperations: DatabaseReference
 
     data class Contract
     (
@@ -102,7 +112,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
     }
 
-    fun toContractBundle(contract: Contract?): Bundle?
+    private fun toContractBundle(contract: Contract?): Bundle?
     {
         if (contract != null)
         {
@@ -112,7 +122,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         return null
     }
 
-    fun fromContractBundle(bundle: Bundle): Contract
+    private fun fromContractBundle(bundle: Bundle): Contract
     {
         val mapper = ContractMapper(bundle)
         return mapper.mappedObjectFromBundle()
@@ -160,6 +170,50 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         putBundle(ONGOING_OPERATION_KEY, toBundle(operation))
                         putBoolean(FROM_NOTARY, isFromNotary)
                     }
+
+                    /*
+                    // Write a message to the database
+                    val database = Firebase.database
+                    val myRef = database.getReference("message")
+
+                    myRef.setValue("new test!")
+                    */
+
+                    /*
+                    {
+                        "users": {
+                            "alovelace": {
+                                "name": "Ada Lovelace",
+                                "contacts": { "ghopper": true },
+                        },
+                        "ghopper": { ... },
+                        "eclarke": { ... }
+                        }
+                    }
+                     */
+
+
+                    /*
+                    // Read from the database
+                    myRef.addValueEventListener(object : ValueEventListener
+                    {
+                        override fun onDataChange(dataSnapshot: DataSnapshot)
+                        {
+                            // This method is called once with the initial value and again
+                            // whenever data at this location is updated.
+                            val value = dataSnapshot.value
+                            Log.d("tag", "Value is: $value")
+                        }
+
+                        override fun onCancelled(error: DatabaseError)
+                        {
+                            // Failed to read value
+                            Log.w("tag", "Failed to read value.", error.toException())
+                        }
+                    })
+                    */
+                    //writeNewPost()
+                    writeNewPost()
                 }
 
         fun toBundle(operation: HomeFragment.OngoingMultisigOperation): Bundle {
@@ -173,6 +227,167 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             return mapper.mappedObjectFromBundle()
         }
     }
+
+    // [START write_fan_out]
+    private fun writeNewPost()
+    {
+        database = FirebaseDatabase.getInstance().reference
+
+        // Create new post at /user-posts/$userid/$postid and at
+        // /posts/$postid simultaneously
+
+        /*
+        val key = database.child("multisig_operations").push().key
+        if (key == null) {
+            Log.w("fail", "Couldn't get push key for posts")
+            return
+        }
+        */
+
+        val nowInEpoch =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                {
+                    Instant.now().epochSecond
+                }
+                else
+                {
+                    System.currentTimeMillis()/1000
+                }
+
+        //val signatoriesHashMap = HashMap<String, Signatory>()
+        //signatoriesHashMap["hello"] = Signatory("hello", "world")
+        val key = "KT1xyz"
+
+        val signatures = ArrayList<Signature>()
+        signatures.add(Signature("edpk1", "signatureqwerty"))
+        signatures.add(Signature("edpk2", "signatureqwerty2"))
+
+        val post = OngoingMultisigOperation(uid = key, address = "binary", binary = "hexa binary", timestamp = nowInEpoch, notary = "tz1notary", signatures = signatures)
+        val postValues = post.toMap()
+
+        val signatories = ArrayList<Signatory>()
+        signatories.add(Signatory("edpk1", "edpkpk"))
+
+        val childUpdates = HashMap<String, Any>()
+        childUpdates["/multisig_operations/$key"] = postValues
+
+        childUpdates["/signatory-operations/edpk1/$key"] = postValues
+        childUpdates["/signatory-operations/edpk2/$key"] = postValues
+        //childUpdates["/signatory-operations/$userId/$key"] = postValues
+
+        database.updateChildren(childUpdates)
+                .addOnSuccessListener {
+
+                    val v = "hello world"
+                    val v2 = "hello world"
+                    //writeNewSignatory()
+
+        }
+                .addOnFailureListener {
+
+                    val v = "hello world"
+                    val v2 = "hello world"
+                }
+
+        /*
+        If your data has a natural key, store it under its natural key. In your case the videos have an id field, which likely is unique already. So instead of storing the videos under a push ID, store them under their existing ID:
+
+        DatabaseReference mRef =  database.getReference().child("Videos").child(video.getId());
+        mRef.setValue(video);
+        */
+
+
+
+        /*
+        val database = Firebase.database
+        val myRef = database.getReference("operations")
+        myRef.setValue("KT1etc")
+         */
+        //database.child("operations").child(userId).child("username").setValue(name)
+
+        //database.child("operations").push().setValue("new KT1 again")
+
+        // probably not necessary to update like that, unless I use a specific adapter.
+    }
+
+
+    // [START write_fan_out]
+    private fun writeNewSignatory()
+    {
+        database = FirebaseDatabase.getInstance().reference
+        //databaseOperations = FirebaseDatabase.getInstance().reference.child("signatory-operations")
+
+        val key = database.child("signatory-operations").push().key
+        if (key == null) {
+            Log.w("fail", "Couldn't get push key for posts")
+            return
+        }
+
+        // Create new post at /user-posts/$userid/$postid and at
+        // /posts/$postid simultaneously
+
+        /*
+        val key = database.child("operations").push().key
+        if (key == null) {
+            Log.w("fail", "Couldn't get push key for posts")
+            return
+        }
+        */
+
+        val post = Signatory("asdasd", "dskhjsdf")
+        val postValues = post.toMap()
+
+        val childUpdates = java.util.HashMap<String, Any>()
+        childUpdates["/signatory-operations/$key"] = postValues
+        //childUpdates["/signatory-operations/$userId/$key"] = postValues
+
+        database.updateChildren(childUpdates)
+                .addOnSuccessListener {
+
+                    val v = "hello world"
+                    val v2 = "hello world"
+                    //writeNewSignatory()
+
+                }
+                .addOnFailureListener {
+
+                    val v = "hello world"
+                    val v2 = "hello world"
+                }
+    }
+
+
+    /*
+    private fun postComment()
+    {
+        //val uid = uid
+        FirebaseDatabase.getInstance().reference.child("users").child(uid)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        // Get user information
+                        val user = dataSnapshot.getValue(User::class.java)
+                        if (user == null) {
+                            return
+                        }
+
+                        val authorName = user.username
+
+                        // Create new comment object
+                        val commentText = fieldCommentText.text.toString()
+                        val comment = Comment(uid, authorName, commentText)
+
+                        // Push the comment, it will appear in the list
+                        commentsReference.push().setValue(comment)
+
+                        // Clear the field
+                        fieldCommentText.text = null
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {
+                    }
+                })
+    }
+    */
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
