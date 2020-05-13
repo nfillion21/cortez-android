@@ -213,7 +213,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     })
                     */
                     //writeNewPost()
-                    writeNewPost()
                 }
 
         fun toBundle(operation: HomeFragment.OngoingMultisigOperation): Bundle {
@@ -226,81 +225,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val mapper = HomeFragment.OngoingMultisigMapper(bundle)
             return mapper.mappedObjectFromBundle()
         }
-    }
-
-    // [START write_fan_out]
-    private fun writeNewPost()
-    {
-        database = FirebaseDatabase.getInstance().reference
-
-        val nowInEpoch =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                {
-                    Instant.now().epochSecond
-                }
-                else
-                {
-                    System.currentTimeMillis()/1000
-                }
-
-        //val signatoriesHashMap = HashMap<String, Signatory>()
-        //signatoriesHashMap["hello"] = Signatory("hello", "world")
-        val key = "KT1abc"
-
-        val signatures = HashMap<String, String?>()
-        signatures["edpk1"] = "signaturexyz"
-        signatures["edpk2"] = ""
-        signatures["edpk3"] = ""
-        signatures["edpk4"] = ""
-        signatures["edpk5"] = ""
-        signatures["edpk6"] = ""
-
-        val post = OngoingMultisigOperation(uid = key, address = "binary", binary = "hexa binary", timestamp = nowInEpoch, notary = "tz1notary", signatures = signatures)
-        val postValues = post.toMap()
-
-        val signatories = ArrayList<Signatory>()
-        signatories.add(Signatory("edpk1", "edpkpk"))
-
-        val childUpdates = HashMap<String, Any>()
-        childUpdates["/multisig_operations/$key"] = postValues
-
-        childUpdates["/signatory-operations/edpk1/$key"] = postValues
-        childUpdates["/signatory-operations/edpk2/$key"] = postValues
-        //childUpdates["/signatory-operations/$userId/$key"] = postValues
-
-        database.updateChildren(childUpdates)
-                .addOnSuccessListener {
-
-                    val v = "hello world"
-                    val v2 = "hello world"
-                    //writeNewSignatory()
-
-        }
-                .addOnFailureListener {
-
-                    val v = "hello world"
-                    val v2 = "hello world"
-                }
-
-        /*
-        If your data has a natural key, store it under its natural key. In your case the videos have an id field, which likely is unique already. So instead of storing the videos under a push ID, store them under their existing ID:
-
-        DatabaseReference mRef =  database.getReference().child("Videos").child(video.getId());
-        mRef.setValue(video);
-        */
-
-
-
-        /*
-        val database = Firebase.database
-        val myRef = database.getReference("operations")
-        myRef.setValue("KT1etc")
-         */
-        //database.child("operations").child(userId).child("username").setValue(name)
-
-        //database.child("operations").push().setValue("new KT1 again")
-
-        // probably not necessary to update like that, unless I use a specific adapter.
     }
 
 

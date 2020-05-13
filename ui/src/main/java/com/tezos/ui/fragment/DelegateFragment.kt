@@ -31,6 +31,7 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.core.content.ContextCompat
@@ -48,6 +49,8 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
@@ -56,6 +59,7 @@ import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.database.OngoingMultisigOperation
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_delegate.*
 import kotlinx.android.synthetic.main.fragment_delegate.loading_textview
@@ -69,6 +73,7 @@ import kotlinx.android.synthetic.main.redelegate_form_card_info.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.time.Instant
 import kotlin.math.roundToLong
 
 class DelegateFragment : Fragment()
@@ -105,6 +110,8 @@ class DelegateFragment : Fragment()
     private var mContractManagerLoading:Boolean = false
 
     private var mClickReloadNotary:Boolean = false
+
+    private lateinit var mDatabaseReference: DatabaseReference
 
     data class Contract
     (
@@ -270,6 +277,8 @@ class DelegateFragment : Fragment()
         redelegate_address_edittext.addTextChangedListener(GenericTextWatcher(redelegate_address_edittext))
 
         redelegate_address_edittext.onFocusChangeListener = focusChangeListener()
+
+        mDatabaseReference = FirebaseDatabase.getInstance().reference
 
         if (savedInstanceState != null)
         {
@@ -552,6 +561,110 @@ class DelegateFragment : Fragment()
         {
             startPostRequestLoadInitRemoveDelegate()
         }
+    }
+
+    private fun startFinalizeOngoingMultisigAddDelegateLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        val nowInEpoch =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                {
+                    Instant.now().epochSecond
+                }
+                else
+                {
+                    System.currentTimeMillis()/1000
+                }
+
+        //val signatoriesHashMap = HashMap<String, Signatory>()
+        //signatoriesHashMap["hello"] = Signatory("hello", "world")
+
+        val dataVisitable = Primitive(
+                Primitive.Name.Pair,
+                arrayOf(
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.chainID(getString(R.string.chain_ID)),
+                                        Visitable.address(pkh()!!)
+                                )
+                        ),
+
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.integer(getMultisigCounter()!!.toLong()),
+                                        Primitive(Primitive.Name.Right,
+                                                arrayOf(
+                                                        Primitive (Primitive.Name.Left,
+                                                                arrayOf(
+                                                                        Primitive(Primitive.Name.Some,
+                                                                                arrayOf(
+                                                                                        Visitable.keyHash(mDelegateTezosAddress!!)
+                                                                                )
+                                                                        )
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+        )
+
+        val o = ByteArrayOutputStream()
+        o.write(0x05)
+
+        val dataPacker = Packer(o)
+        dataVisitable.accept(dataPacker)
+
+        val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+        val signatures = HashMap<String, String>()
+        val signatoriesList = getSignatoriesList()
+
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+
+        for (s in signatoriesList)
+        {
+            if (s == mnemonicsData.pk)
+            {
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+                val signature = KeyPair.sign(sk, dataPack)
+
+                signatures[s] = CryptoUtils.generateEDSig(signature)
+            }
+            else
+            {
+                signatures[s] = ""
+            }
+        }
+
+        val ongoingOperation = OngoingMultisigOperation(binary = dataPack.toNoPrefixHexString(), timestamp = nowInEpoch, notary = pkhtz1()!!, signatures = signatures)
+
+        val childUpdates = HashMap<String, Any>()
+        childUpdates["/multisig_operations/${pkh()}"] = ongoingOperation.toMap()
+
+        for (s in signatoriesList)
+        {
+            childUpdates["/signatory-operations/$s/${pkh()}"] = ongoingOperation.toMap()
+        }
+
+        mDatabaseReference.updateChildren(childUpdates)
+                .addOnSuccessListener {
+
+                    val v = "hello world"
+                    val v2 = "hello world"
+                    //writeNewSignatory()
+
+                }
+                .addOnFailureListener {
+
+                    val v = "hello world"
+                    val v2 = "hello world"
+                }
     }
 
     private fun startFinalizeAddDelegateLoading()
@@ -1840,7 +1953,6 @@ class DelegateFragment : Fragment()
                                             Visitable.address(pkh()!!)
                                     )
                             ),
-
                             Primitive(Primitive.Name.Pair,
                                     arrayOf(
                                             Visitable.integer(getMultisigCounter()!!.toLong()),
@@ -2786,14 +2898,7 @@ class DelegateFragment : Fragment()
 
                 MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
                 {
-                    //startPostRequestLoadiInitRequestUpdateStorage()
-
-                    val k = "hello world"
-                    val k2 = "hello world"
-
-                    //create firebase database
-                    //validateAddButton(/*isInputDataValid() && isDelegateFeeValid()*/true)
-                    //transferLoading(loading = false)
+                    startFinalizeOngoingMultisigAddDelegateLoading()
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY -> {}
@@ -2890,14 +2995,7 @@ class DelegateFragment : Fragment()
 
                 MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
                 {
-                    //startPostRequestLoadiInitRequestUpdateStorage()
-
-                    val k = "hello world"
-                    val k2 = "hello world"
-
-                    //create firebase database
-                    //validateAddButton(/*isInputDataValid() && isDelegateFeeValid()*/true)
-                    //transferLoading(loading = false)
+                    startFinalizeOngoingMultisigAddDelegateLoading()
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY -> {}

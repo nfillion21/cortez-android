@@ -8,21 +8,15 @@ import java.util.HashMap
 @IgnoreExtraProperties
 data class OngoingMultisigOperation
 (
-        // identifier
-        var uid: String?,
-
-        // kt1
-        var address: String?,
-
         // hexa to sign
-        var binary: String?,
+        var binary: String,
 
         // creation
-        var timestamp: Long?,
+        var timestamp: Long,
 
-        var notary: String?,
+        var notary: String,
 
-        var signatures: MutableMap<String, String?> = HashMap()
+        var signatures: MutableMap<String, String> = HashMap()
 ) {
 
     // [START post_to_map]
@@ -30,8 +24,6 @@ data class OngoingMultisigOperation
     fun toMap(): Map<String, Any?>
     {
         return mapOf (
-                "uid" to uid,
-                "contract_address" to address,
                 "binary_operation" to binary,
                 "timestamp" to timestamp,
                 "notary" to notary,
