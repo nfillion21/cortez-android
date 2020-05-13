@@ -6,7 +6,7 @@ import java.util.HashMap
 
 // [START blog_user_class]
 @IgnoreExtraProperties
-data class OngoingMultisigOperation
+data class MultisigOperation
 (
         // hexa to sign
         var binary: String,
@@ -30,6 +30,21 @@ data class OngoingMultisigOperation
                 "signatures" to signatures
         )
     }
+
+    companion object {
+        @JvmStatic
+        @Exclude
+        fun fromMap(hashMap: HashMap<String, Any>): MultisigOperation
+        {
+            return MultisigOperation (
+                    binary = hashMap["binary_operation"] as String,
+                    timestamp = hashMap["timestamp"] as Long,
+                    notary = hashMap["notary"] as String,
+                    signatures = hashMap["signatures"] as MutableMap<String, String>
+            )
+        }
+    }
+
     // [END post_to_map]
 }
 // [END blog_user_class]

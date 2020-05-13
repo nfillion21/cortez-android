@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
-import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -36,9 +35,7 @@ import com.tezos.core.utils.MultisigBinaries
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.database.OngoingMultisigOperation
 import com.tezos.ui.database.Signatory
-import com.tezos.ui.database.Signature
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.fragment.ScriptFragment.Companion.CONTRACT_PUBLIC_KEY
 import com.tezos.ui.utils.*
@@ -48,7 +45,6 @@ import kotlinx.android.synthetic.main.multisig_ongoing_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.interfaces.ECPublicKey
-import java.time.Instant
 
 class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 {

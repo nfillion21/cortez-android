@@ -59,7 +59,7 @@ import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.database.OngoingMultisigOperation
+import com.tezos.ui.database.MultisigOperation
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_delegate.*
 import kotlinx.android.synthetic.main.fragment_delegate.loading_textview
@@ -642,7 +642,7 @@ class DelegateFragment : Fragment()
             }
         }
 
-        val ongoingOperation = OngoingMultisigOperation(binary = dataPack.toNoPrefixHexString(), timestamp = nowInEpoch, notary = pkhtz1()!!, signatures = signatures)
+        val ongoingOperation = MultisigOperation(binary = dataPack.toNoPrefixHexString(), timestamp = nowInEpoch, notary = pkhtz1()!!, signatures = signatures)
 
         val childUpdates = HashMap<String, Any>()
         childUpdates["/multisig_operations/${pkh()}"] = ongoingOperation.toMap()

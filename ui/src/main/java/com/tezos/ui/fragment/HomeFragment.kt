@@ -44,6 +44,7 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.StringRequest
+import com.google.firebase.database.*
 import com.tezos.core.models.Address
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.models.Operation
@@ -54,6 +55,7 @@ import com.tezos.ui.activity.CreateWalletActivity
 import com.tezos.ui.activity.OngoingMultisigActivity
 import com.tezos.ui.activity.OperationsActivity
 import com.tezos.ui.activity.RestoreWalletActivity
+import com.tezos.ui.database.MultisigOperation
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.utils.VolleySingleton
 import kotlinx.android.synthetic.main.fragment_home.*
@@ -63,6 +65,7 @@ import java.text.DateFormat
 import java.time.Instant
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 open class HomeFragment : Fragment()
 {
@@ -92,6 +95,8 @@ open class HomeFragment : Fragment()
     private var mWalletEnabled:Boolean = false
 
     private var listener: HomeListener? = null
+
+    private lateinit var notaryOperationsDatabase: DatabaseReference
 
     private var mDateFormat:DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
 
@@ -172,6 +177,18 @@ open class HomeFragment : Fragment()
         return pkh
     }
 
+    fun pk():String?
+    {
+        val hasMnemonics = Storage(activity!!).hasMnemonics()
+        if (hasMnemonics)
+        {
+            val seed = Storage(activity!!).getMnemonics()
+            return seed.pk
+        }
+
+        return null
+    }
+
     override fun onAttach(context: Context)
     {
         super.onAttach(context)
@@ -241,6 +258,10 @@ open class HomeFragment : Fragment()
         createWalletButton.setOnClickListener {
             CreateWalletActivity.start(activity!!, tzTheme!!)
         }
+
+        // Initialize Database
+        notaryOperationsDatabase = FirebaseDatabase.getInstance().reference
+                .child("signatory-operations").child(pk()!!)
 
         if (pkh == null)
         {
@@ -643,6 +664,40 @@ open class HomeFragment : Fragment()
 
         nav_progress_ongoing_operations.visibility = View.VISIBLE
 
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // Get Post object and use the values to update the UI
+                val operation = dataSnapshot.value
+
+                for (i in dataSnapshot.children)
+                {
+                    val k = i.value as HashMap<String, Any>
+                    //val k2 = i
+                    //val k3 = i
+
+                    val element = MultisigOperation.fromMap(k)
+                    val element2 = MultisigOperation.fromMap(k)
+                }
+                // ...
+                val k = dataSnapshot
+                val k2 = dataSnapshot.children
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Getting Post failed, log a message
+                //Log.w(TAG, "loadPost:onCancelled", databaseError.toException())
+                // ...
+                val k = databaseError
+                val k2 = databaseError
+            }
+        }
+        //notaryOperationsDatabase.addValueEventListener(postListener)
+        notaryOperationsDatabase.addListenerForSingleValueEvent(postListener)
+
+
+
+        /*
         val pkh = pkh()
 
         if (pkh != null)
@@ -671,6 +726,7 @@ open class HomeFragment : Fragment()
 
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
         }
+        */
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
