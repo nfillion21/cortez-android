@@ -255,6 +255,10 @@ class DelegateFragment : Fragment()
             onDelegateClick()
         }
 
+        request_delegate_button_layout.setOnClickListener {
+            onDelegateClick()
+        }
+
         remove_delegate_button_layout.setOnClickListener {
             onRemoveDelegateClick()
         }
@@ -477,7 +481,10 @@ class DelegateFragment : Fragment()
 
             MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
             {
-                startPostRequestLoadInitRequestUpdateStorage()
+                //startPostRequestLoadInitRequestUpdateStorage()
+
+                validateAddButton(isInputDataValid() && isDelegateFeeValid())
+                transferLoading(loading = false)
             }
 
             MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
@@ -587,32 +594,9 @@ class DelegateFragment : Fragment()
                 {
                     addContractInfoFromJSON(it)
 
-                    /*
-                val hasMnemonics = Storage(activity!!).hasMnemonics()
-                if (hasMnemonics)
-                {
-
-                    val seed = Storage(activity!!).getMnemonics()
-                    val isMnemonicsEmpty = seed.mnemonics.isNullOrEmpty()
-
-                    if (!isMnemonicsEmpty)
-                    {
-                        onContractInfoComplete()
-                        //TODO need to check here if we need to get salt
-                        //TODO a l'arrivee de get salt, on charge removeDelegateBlabla.
-
-                        validateAddButton(isInputDataValid() && isDelegateFeeValid())
-                        startGetRequestLoadContractStorage()
-                    }
-                    else
-                    {
-                        onContractInfoComplete()
-                    }
-                }
-                    */
-
                     onContractInfoComplete()
                     validateAddButton(isInputDataValid() && isDelegateFeeValid())
+
                     startGetRequestLoadContractStorage()
                 }
             },
@@ -2700,30 +2684,36 @@ class DelegateFragment : Fragment()
 
     private fun isDelegateFeeValid():Boolean
     {
-        val isFeeValid = false
-
-        if (fee_edittext?.text != null && !TextUtils.isEmpty(fee_edittext?.text))
+        if (askingForMultisigButton() == MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES)
         {
-            try
+            // there's no need for fees
+            return true
+        }
+        else
+        {
+            if (fee_edittext?.text != null && !TextUtils.isEmpty(fee_edittext?.text))
             {
-                //val amount = java.lang.Double.parseDouble()
-                val fee = fee_edittext.text.toString().toDouble()
-
-                if (fee >= 0.000001f)
+                try
                 {
-                    val longTransferFee = fee*1000000
-                    mDelegateFees = longTransferFee.roundToLong()
-                    return true
+                    //val amount = java.lang.Double.parseDouble()
+                    val fee = fee_edittext.text.toString().toDouble()
+
+                    if (fee >= 0.000001f)
+                    {
+                        val longTransferFee = fee*1000000
+                        mDelegateFees = longTransferFee.roundToLong()
+                        return true
+                    }
                 }
-            }
-            catch (e: NumberFormatException)
-            {
-                mDelegateFees = -1
-                return false
+                catch (e: NumberFormatException)
+                {
+                    mDelegateFees = -1
+                    return false
+                }
             }
         }
 
-        return isFeeValid
+        return false
     }
 
     private fun putEverythingInRed()
@@ -2786,7 +2776,30 @@ class DelegateFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeAddDelegateLoading()
+
+            when (askingForMultisigButton())
+            {
+                MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+                {
+                    startFinalizeAddDelegateLoading()
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+                {
+                    //startPostRequestLoadiInitRequestUpdateStorage()
+
+                    val k = "hello world"
+                    val k2 = "hello world"
+
+                    //create firebase database
+                    //validateAddButton(/*isInputDataValid() && isDelegateFeeValid()*/true)
+                    //transferLoading(loading = false)
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY -> {}
+                MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY -> {}
+                MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET -> {}
+            }
         }
         dialog.passwordVerificationListener =
                 {
@@ -2868,7 +2881,30 @@ class DelegateFragment : Fragment()
     {
         if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeAddDelegateLoading()
+            when (askingForMultisigButton())
+            {
+                MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+                {
+                    startFinalizeAddDelegateLoading()
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+                {
+                    //startPostRequestLoadiInitRequestUpdateStorage()
+
+                    val k = "hello world"
+                    val k2 = "hello world"
+
+                    //create firebase database
+                    //validateAddButton(/*isInputDataValid() && isDelegateFeeValid()*/true)
+                    //transferLoading(loading = false)
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY -> {}
+                MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY -> {}
+                MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET -> {}
+            }
+
         }
         else
         {
