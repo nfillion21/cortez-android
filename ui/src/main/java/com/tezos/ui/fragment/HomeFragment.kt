@@ -86,7 +86,7 @@ open class HomeFragment : Fragment()
     private var mRecyclerViewItems:ArrayList<Operation>? = null
     private var mBalanceItem:Double? = null
 
-    private var mOngoingMultisigItems:ArrayList<OngoingMultisigOperation>? = null
+    private var mOngoingMultisigItems:ArrayList<MultisigOperation>? = null
 
     private var mGetHistoryLoading:Boolean = false
     private var mGetBalanceLoading:Boolean = false
@@ -322,7 +322,7 @@ open class HomeFragment : Fragment()
                     }
                     else
                     {
-                        onMultisigOnGoinLoadComplete()
+                        onMultisigOnGoingLoadComplete()
                     }
                 }
             }
@@ -415,7 +415,7 @@ open class HomeFragment : Fragment()
         refreshRecyclerViewAndTextHistory()
     }
 
-    private fun onMultisigOnGoinLoadComplete()
+    private fun onMultisigOnGoingLoadComplete()
     {
         mGetMultisigOnGoing = false
 
@@ -662,25 +662,9 @@ open class HomeFragment : Fragment()
 
         val postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // Get Post object and use the values to update the UI
-                val operation = dataSnapshot.value
 
-                for (i in dataSnapshot.children)
-                {
-                    val k = i.value as HashMap<String, Any>
-                    val element = MultisigOperation.fromMap(k)
-
-                    val bundle = element.toBundle()
-
-                    val newElement = MultisigOperation.fromBundle(bundle)
-
-
-                    val element2 = MultisigOperation.fromMap(k)
-                }
-                // ...
-                val k = dataSnapshot
-                val k2 = dataSnapshot.children
-
+                addMultisigOngoingOperationsFromJSON(dataSnapshot)
+                onMultisigOnGoingLoadComplete()
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -689,6 +673,8 @@ open class HomeFragment : Fragment()
                 // ...
                 val k = databaseError
                 val k2 = databaseError
+                //showSnackbarError()
+                onMultisigOnGoingLoadComplete()
             }
         }
         //notaryOperationsDatabase.addValueEventListener(postListener)
@@ -800,8 +786,28 @@ open class HomeFragment : Fragment()
         }
     }
 
-    private fun addMultisigOngoingOperationsFromJSON(answer:JSONArray)
+    private fun addMultisigOngoingOperationsFromJSON(answer:DataSnapshot)
     {
+        //val operation = dataSnapshot.value
+        if (answer.exists() && answer.hasChildren())
+        {
+            var sortedList = arrayListOf<MultisigOperation>()
+
+            for (i in answer.children)
+            {
+                val k = i.value as HashMap<String, Any>
+                val operation = MultisigOperation.fromMap(k)
+
+                sortedList.add(operation)
+            }
+        }
+
+
+
+
+
+
+
         val response = DataExtractor.getJSONArrayFromField(answer,0)
 
         if (response.length() > 0)
