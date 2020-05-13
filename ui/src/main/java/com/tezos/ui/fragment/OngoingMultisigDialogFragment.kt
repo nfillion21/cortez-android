@@ -166,49 +166,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         putBundle(ONGOING_OPERATION_KEY, toBundle(operation))
                         putBoolean(FROM_NOTARY, isFromNotary)
                     }
-
-                    /*
-                    // Write a message to the database
-                    val database = Firebase.database
-                    val myRef = database.getReference("message")
-
-                    myRef.setValue("new test!")
-                    */
-
-                    /*
-                    {
-                        "users": {
-                            "alovelace": {
-                                "name": "Ada Lovelace",
-                                "contacts": { "ghopper": true },
-                        },
-                        "ghopper": { ... },
-                        "eclarke": { ... }
-                        }
-                    }
-                     */
-
-
-                    /*
-                    // Read from the database
-                    myRef.addValueEventListener(object : ValueEventListener
-                    {
-                        override fun onDataChange(dataSnapshot: DataSnapshot)
-                        {
-                            // This method is called once with the initial value and again
-                            // whenever data at this location is updated.
-                            val value = dataSnapshot.value
-                            Log.d("tag", "Value is: $value")
-                        }
-
-                        override fun onCancelled(error: DatabaseError)
-                        {
-                            // Failed to read value
-                            Log.w("tag", "Failed to read value.", error.toException())
-                        }
-                    })
-                    */
-                    //writeNewPost()
                 }
 
         fun toBundle(operation: HomeFragment.OngoingMultisigOperation): Bundle {
