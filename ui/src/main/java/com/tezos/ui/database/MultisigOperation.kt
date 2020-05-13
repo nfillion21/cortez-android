@@ -23,7 +23,7 @@ data class MultisigOperation
     fun toMap(): Map<String, Any?>
     {
         return mapOf (
-                "binary_operation" to binary,
+                "binary" to binary,
                 "timestamp" to timestamp,
                 "notary" to notary,
                 "signatures" to signatures
@@ -35,7 +35,7 @@ data class MultisigOperation
     {
         val ongoingOperationBundle = Bundle()
 
-        ongoingOperationBundle.putString("binary_operation", binary)
+        ongoingOperationBundle.putString("binary", binary)
         ongoingOperationBundle.putLong("timestamp", timestamp)
         ongoingOperationBundle.putString("notary", notary)
         ongoingOperationBundle.putSerializable("signatures", signatures)
@@ -49,7 +49,7 @@ data class MultisigOperation
         fun fromMap(hashMap: HashMap<String, Any>): MultisigOperation
         {
             return MultisigOperation (
-                    binary = hashMap["binary_operation"] as String,
+                    binary = hashMap["binary"] as String,
                     timestamp = hashMap["timestamp"] as Long,
                     notary = hashMap["notary"] as String,
                     signatures = hashMap["signatures"] as HashMap<String, String>

@@ -259,10 +259,6 @@ open class HomeFragment : Fragment()
             CreateWalletActivity.start(activity!!, tzTheme!!)
         }
 
-        // Initialize Database
-        notaryOperationsDatabase = FirebaseDatabase.getInstance().reference
-                .child("signatory-operations").child(pk()!!)
-
         if (pkh == null)
         {
             cancelRequest(operations = true, balance = true, multisigOnGoing = true)
@@ -672,10 +668,13 @@ open class HomeFragment : Fragment()
                 for (i in dataSnapshot.children)
                 {
                     val k = i.value as HashMap<String, Any>
-                    //val k2 = i
-                    //val k3 = i
-
                     val element = MultisigOperation.fromMap(k)
+
+                    val bundle = element.toBundle()
+
+                    val newElement = MultisigOperation.fromBundle(bundle)
+
+
                     val element2 = MultisigOperation.fromMap(k)
                 }
                 // ...
@@ -693,6 +692,10 @@ open class HomeFragment : Fragment()
             }
         }
         //notaryOperationsDatabase.addValueEventListener(postListener)
+
+        // Initialize Database
+        notaryOperationsDatabase = FirebaseDatabase.getInstance().reference
+                .child("signatory-operations").child(pk()!!)
         notaryOperationsDatabase.addListenerForSingleValueEvent(postListener)
 
 
