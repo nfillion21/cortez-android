@@ -22,7 +22,7 @@ data class OngoingMultisigOperation
 
         var notary: String?,
 
-        var signatures: List<Signature> = ArrayList()
+        var signatures: MutableMap<String, String?> = HashMap()
 ) {
 
     // [START post_to_map]

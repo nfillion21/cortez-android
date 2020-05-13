@@ -233,17 +233,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         database = FirebaseDatabase.getInstance().reference
 
-        // Create new post at /user-posts/$userid/$postid and at
-        // /posts/$postid simultaneously
-
-        /*
-        val key = database.child("multisig_operations").push().key
-        if (key == null) {
-            Log.w("fail", "Couldn't get push key for posts")
-            return
-        }
-        */
-
         val nowInEpoch =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 {
@@ -256,11 +245,15 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         //val signatoriesHashMap = HashMap<String, Signatory>()
         //signatoriesHashMap["hello"] = Signatory("hello", "world")
-        val key = "KT1xyz"
+        val key = "KT1abc"
 
-        val signatures = ArrayList<Signature>()
-        signatures.add(Signature("edpk1", "signatureqwerty"))
-        signatures.add(Signature("edpk2", "signatureqwerty2"))
+        val signatures = HashMap<String, String?>()
+        signatures["edpk1"] = "signaturexyz"
+        signatures["edpk2"] = ""
+        signatures["edpk3"] = ""
+        signatures["edpk4"] = ""
+        signatures["edpk5"] = ""
+        signatures["edpk6"] = ""
 
         val post = OngoingMultisigOperation(uid = key, address = "binary", binary = "hexa binary", timestamp = nowInEpoch, notary = "tz1notary", signatures = signatures)
         val postValues = post.toMap()
