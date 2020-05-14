@@ -35,6 +35,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.tezos.core.utils.MultisigBinaries
 import com.tezos.ui.R
+import com.tezos.ui.database.MultisigOperation
 import com.tezos.ui.fragment.HomeFragment.OngoingMultisigOperation
 
 /**
@@ -42,11 +43,11 @@ import com.tezos.ui.fragment.HomeFragment.OngoingMultisigOperation
  *
  * The adapter provides access to the items in the [OperationItemViewHolder]
  */
-class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List<OngoingMultisigOperation>, ongoingOperationForNotaryItems: List<OngoingMultisigOperation>) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
+class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List<MultisigOperation>, ongoingOperationForNotaryItems: List<MultisigOperation>) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
     // The list of message items.
-    private val mOngoingOperationItems: List<OngoingMultisigOperation> = ongoingOperationItems
-    private val mOngoingOperationForNotaryItems: List<OngoingMultisigOperation> = ongoingOperationForNotaryItems
+    private val mOngoingOperationItems: List<MultisigOperation> = ongoingOperationItems
+    private val mOngoingOperationForNotaryItems: List<MultisigOperation> = ongoingOperationForNotaryItems
 
     private var mOnItemClickListener: OnItemClickListener? = null
 
@@ -62,7 +63,7 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
 
     open interface OnItemClickListener
     {
-        open fun onOperationSelected(view: View?, operation: OngoingMultisigOperation?, isFromNotary:Boolean): Unit
+        open fun onOperationSelected(view: View?, operation: MultisigOperation?, isFromNotary:Boolean): Unit
     }
 
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener?): Unit
@@ -173,13 +174,14 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
 
         internal fun bind(position: Int)
         {
-            val operationItem: OngoingMultisigOperation = mOngoingOperationItems[position - 1]
+            val operationItem: MultisigOperation = mOngoingOperationItems[position - 1]
 
-            contractAddressItem.text = operationItem.contractAddress
-            submissionDateItem.text = operationItem.submissionDate
-
-            val binaryReader = MultisigBinaries(operationItem.hexaOperation)
+            val binaryReader = MultisigBinaries(operationItem.binary)
             binaryReader.getType()
+
+            contractAddressItem.text = binaryReader.getContractAddress()
+            submissionDateItem.text = operationItem.timestamp.toString()
+
             operationTypeItem.text = binaryReader.getOperationTypeString()
 
             itemView.setOnClickListener { view: View? -> mOnItemClickListener?.onOperationSelected(view, operationItem, isFromNotary = false) }
@@ -199,13 +201,14 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
             if (mOngoingOperationItems.isNotEmpty())
                 count += mOngoingOperationItems.size + 1
 
-            val operationItem: OngoingMultisigOperation = mOngoingOperationForNotaryItems[position - count - 1]
+            val operationItem: MultisigOperation = mOngoingOperationForNotaryItems[position - count - 1]
 
-            contractAddressItem.text = operationItem.contractAddress
-            submissionDateItem.text = operationItem.submissionDate
-
-            val binaryReader = MultisigBinaries(operationItem.hexaOperation)
+            val binaryReader = MultisigBinaries(operationItem.binary)
             binaryReader.getType()
+
+            contractAddressItem.text = binaryReader.getContractAddress()
+            submissionDateItem.text = operationItem.timestamp.toString()
+
             operationTypeItem.text = binaryReader.getOperationTypeString()
 
             itemView.setOnClickListener {

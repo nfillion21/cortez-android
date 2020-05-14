@@ -35,6 +35,7 @@ import com.tezos.core.utils.MultisigBinaries
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.database.MultisigOperation
 import com.tezos.ui.database.Signatory
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.fragment.ScriptFragment.Companion.CONTRACT_PUBLIC_KEY
@@ -160,24 +161,13 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         private const val FROM_NOTARY = "is_from_notary"
 
         @JvmStatic
-        fun newInstance(operation:HomeFragment.OngoingMultisigOperation, isFromNotary: Boolean) =
+        fun newInstance(operation: MultisigOperation, isFromNotary: Boolean) =
                 OngoingMultisigDialogFragment().apply {
                     arguments = Bundle().apply {
-                        putBundle(ONGOING_OPERATION_KEY, toBundle(operation))
+                        putBundle(ONGOING_OPERATION_KEY, operation.toBundle())
                         putBoolean(FROM_NOTARY, isFromNotary)
                     }
                 }
-
-        fun toBundle(operation: HomeFragment.OngoingMultisigOperation): Bundle {
-            val serializer = HomeFragment.OngoinMultisigSerialization(operation)
-            return serializer.getSerializedBundle()
-        }
-
-        fun fromBundle(bundle: Bundle): HomeFragment.OngoingMultisigOperation
-        {
-            val mapper = HomeFragment.OngoingMultisigMapper(bundle)
-            return mapper.mappedObjectFromBundle()
-        }
     }
 
 
@@ -444,9 +434,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         arguments?.let {
             val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
-            val op = fromBundle(opBundle)
+            val op = MultisigOperation.fromBundle(opBundle)
 
-            val binaryReader = MultisigBinaries(op.hexaOperation)
+            val binaryReader = MultisigBinaries(op.binary)
             startGetRequestLoadContractInfo(binaryReader.getType())
         }
     }
@@ -468,9 +458,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         arguments?.let {
             val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
-            val op = fromBundle(opBundle)
+            val op = MultisigOperation.fromBundle(opBundle)
 
-            val url = String.format(getString(R.string.contract_storage_url), op.contractAddress)
+            val binaryReader = MultisigBinaries(op.binary)
+            binaryReader.getType()
+
+            val url = String.format(getString(R.string.contract_storage_url), binaryReader.getContractAddress())
 
             // Request a string response from the provided URL.
             val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener
@@ -688,9 +681,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         arguments?.let { bundle ->
 
             val operationBundle = bundle.getBundle(ONGOING_OPERATION_KEY)
-            val op = fromBundle(operationBundle)
+            val op = MultisigOperation.fromBundle(operationBundle)
 
-            val url = String.format(getString(R.string.contract_info2_url), op.contractAddress)
+            val binaryReader = MultisigBinaries(op.binary)
+            binaryReader.getType()
+            val url = String.format(getString(R.string.contract_info2_url), binaryReader.getContractAddress())
 
             // Request a string response from the provided URL.
             val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener
@@ -1065,11 +1060,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         arguments?.let {
 
             val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
-            val op = fromBundle(opBundle)
+            val op = MultisigOperation.fromBundle(opBundle)
 
-            submission_item_date.text = op.submissionDate
+            submission_item_date.text = op.timestamp.toString()
 
-            val binaryReader = MultisigBinaries(op.hexaOperation)
+            val binaryReader = MultisigBinaries(op.binary)
 
             when (binaryReader.getType())
             {
@@ -1338,8 +1333,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             else
             {
                 val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
-                val op = fromBundle(opBundle)
-                val binaryReader = MultisigBinaries(op.hexaOperation)
+                val op = MultisigOperation.fromBundle(opBundle)
+                val binaryReader = MultisigBinaries(op.binary)
 
                 when (binaryReader.getType())
                 {

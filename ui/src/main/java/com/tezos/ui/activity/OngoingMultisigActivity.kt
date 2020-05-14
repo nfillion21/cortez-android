@@ -42,6 +42,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.adapter.OngoingMultisigRecyclerViewAdapter
+import com.tezos.ui.database.MultisigOperation
 import com.tezos.ui.fragment.HomeFragment
 import com.tezos.ui.fragment.OngoingMultisigDialogFragment
 import kotlinx.android.synthetic.main.activity_ongoing_multisig.*
@@ -68,30 +69,18 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
             val starter = getStartIntent(activity, list, theme.toBundle())
             ActivityCompat.startActivity(activity, starter, null)
         }
-
-        fun toBundle(ongoingOperation: HomeFragment.OngoingMultisigOperation): Bundle
-        {
-            val serializer = HomeFragment.OngoinMultisigSerialization(ongoingOperation)
-            return serializer.getSerializedBundle()
-        }
-
-        fun fromBundle(bundle: Bundle): HomeFragment.OngoingMultisigOperation
-        {
-            val mapper = HomeFragment.OngoingMultisigMapper(bundle)
-            return mapper.mappedObjectFromBundle()
-        }
     }
 
 
-    private fun bundlesToOngoingItems( bundles:ArrayList<Bundle>?): ArrayList<HomeFragment.OngoingMultisigOperation>
+    private fun bundlesToOngoingItems( bundles:ArrayList<Bundle>?): ArrayList<MultisigOperation>
     {
         if (bundles != null)
         {
-            var items = ArrayList<HomeFragment.OngoingMultisigOperation>(bundles.size)
+            var items = ArrayList<MultisigOperation>(bundles.size)
             if (bundles.isNotEmpty())
             {
                 bundles.forEach {
-                    val op = fromBundle(it)
+                    val op = MultisigOperation.fromBundle(it)
                     items.add(op)
                 }
             }
@@ -165,7 +154,7 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         mTitleBar.setTextColor(ContextCompat.getColor(this, theme.textColorPrimaryId))
     }
 
-    override fun onOperationSelected(view: View?, operation: HomeFragment.OngoingMultisigOperation?, isFromNotary:Boolean)
+    override fun onOperationSelected(view: View?, operation: MultisigOperation?, isFromNotary:Boolean)
     {
         val ongoingDialogFragment = OngoingMultisigDialogFragment.newInstance(operation!!, isFromNotary)
         ongoingDialogFragment.show(supportFragmentManager, OngoingMultisigDialogFragment.TAG)

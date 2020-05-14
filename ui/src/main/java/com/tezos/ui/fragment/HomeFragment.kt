@@ -142,16 +142,6 @@ open class HomeFragment : Fragment()
                         putBundle(CustomTheme.TAG, theme.toBundle())
                     }
                 }
-
-        fun toBundle(mnemonicsData: OngoingMultisigOperation): Bundle {
-            val serializer = OngoinMultisigSerialization(mnemonicsData)
-            return serializer.getSerializedBundle()
-        }
-
-        fun fromBundle(bundle: Bundle): OngoingMultisigOperation {
-            val mapper = OngoingMultisigMapper(bundle)
-            return mapper.mappedObjectFromBundle()
-        }
     }
 
     interface HomeListener
@@ -494,11 +484,12 @@ open class HomeFragment : Fragment()
 
             val lastOngoingOperation = mOngoingMultisigItems!![0]
 
-            ongoing_contract_textview.text = lastOngoingOperation.contractAddress
-            ongoing_submission_date_textview.text = lastOngoingOperation.submissionDate
-
-            val binaryReader = MultisigBinaries(lastOngoingOperation.hexaOperation)
+            val binaryReader = MultisigBinaries(lastOngoingOperation.binary)
             binaryReader.getType()
+
+            ongoing_contract_textview.text = binaryReader.getContractAddress()
+            ongoing_submission_date_textview.text = lastOngoingOperation.timestamp.toString()
+
             ongoing_type_textview.text = binaryReader.getOperationTypeString()
 
             empty_loading_ongoing_operations_textview.visibility = View.GONE
@@ -800,84 +791,6 @@ open class HomeFragment : Fragment()
 
                 sortedList.add(operation)
             }
-        }
-
-
-
-
-
-
-
-        val response = DataExtractor.getJSONArrayFromField(answer,0)
-
-        if (response.length() > 0)
-        {
-            var sortedList = arrayListOf<OngoingMultisigOperation>()
-
-            //for (i in 0 until response.length())
-            for (i in 0 until 4)
-            {
-                //val item = response.getJSONObject(i)
-                //val operation = Operation.fromJSONObject(item)
-
-                if (i == 0)
-                {
-                    val ongoingOperation = OngoingMultisigOperation(
-                            contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
-                            submissionDate = "24/01/1987",
-                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d10007070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e"
-                    )
-
-                    sortedList.add(ongoingOperation)
-                }
-                else if (i == 1)
-                {
-                    val ongoingOperation = OngoingMultisigOperation(
-                            contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
-                            submissionDate = "25/01/1987",
-                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d10007070007050805080707000302000000720a00000021007bce946147500e3945702697be1e69814e3b210a55d77a6a3f3c144b27ba941e0a0000002100af72f76635c9d2929ef294ca8a0f7aaeb3ef687f0f57c361947f759f466262c40a0000002100bb05f79bdb4d4917b786d9a41a156a8fb37d5949be2e7edd85abb4e8fc1fde3e"
-                    )
-
-                    sortedList.add(ongoingOperation)
-                }
-                else if (i == 2)
-                {
-                    // remove delegate
-                    val ongoingOperation = OngoingMultisigOperation(
-                            contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
-                            submissionDate = "26/01/1987",
-                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d1000707000c050805050306"
-                    )
-
-                    sortedList.add(ongoingOperation)
-                }
-                else if (i == 3)
-                {
-                    // set delegate
-                    val ongoingOperation = OngoingMultisigOperation(
-                            contractAddress = "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX",
-                            submissionDate = "27/01/1987",
-                            hexaOperation = "05070707070a000000049caecab90a0000001601588317ff8c2df3024d180109239ce16c80e6f6d100070700090508050505090a000000150018eaa9e67d24188b82b35d34d99afa6b0f780970"
-                    )
-
-                    sortedList.add(ongoingOperation)
-                }
-            }
-
-            /*
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            {
-                sortedList.sortWith(Comparator<Operation> { o1, o2 ->
-                    when {
-
-                        Date.from(Instant.parse(o1.timestamp)) > Date.from(Instant.parse(o2.timestamp)) -> -1
-                        Date.from(Instant.parse(o1.timestamp)) == Date.from(Instant.parse(o2.timestamp)) -> 0
-                        else -> 1
-                    }
-                })
-            }
-            */
-
 
             if (mOngoingMultisigItems == null)
             {
@@ -891,22 +804,14 @@ open class HomeFragment : Fragment()
 
             val lastOperation = sortedList[0]
 
-            //TODO put that
-            ongoing_contract_textview.text = lastOperation?.contractAddress
-
-            ongoing_submission_date_textview.text = lastOperation?.submissionDate
-
-            val binaryReader = MultisigBinaries(lastOperation.hexaOperation)
+            val binaryReader = MultisigBinaries(lastOperation.binary)
             binaryReader.getType()
 
             ongoing_type_textview.text = binaryReader.getOperationTypeString()
 
-            /*
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            {
-                operation_date_textview.text = mDateFormat.format(Date.from(Instant.parse(lastOperation.timestamp)))
-            }
-            */
+            ongoing_contract_textview.text = binaryReader.getContractAddress()
+
+            ongoing_submission_date_textview.text = lastOperation?.timestamp.toString()
         }
     }
 
@@ -919,6 +824,7 @@ open class HomeFragment : Fragment()
 
         val ongoingBundles = ongoingItemsToBundles(mOngoingMultisigItems)
         outState.putParcelableArrayList(ONGOING_OPERATIONS_ARRAYLIST_KEY, ongoingBundles)
+
 
         mBalanceItem?.let {
             outState.putDouble(BALANCE_FLOAT_KEY, it)
@@ -949,15 +855,15 @@ open class HomeFragment : Fragment()
         return ArrayList()
     }
 
-    private fun bundlesToOngoingItems( bundles:ArrayList<Bundle>?): ArrayList<OngoingMultisigOperation>?
+    private fun bundlesToOngoingItems( bundles:ArrayList<Bundle>?): ArrayList<MultisigOperation>?
     {
         if (bundles != null)
         {
-            var items = ArrayList<OngoingMultisigOperation>(bundles.size)
+            var items = ArrayList<MultisigOperation>(bundles.size)
             if (bundles.isNotEmpty())
             {
                 bundles.forEach {
-                    val op = fromBundle(it)
+                    val op = MultisigOperation.fromBundle(it)
                     items.add(op)
                 }
             }
@@ -967,7 +873,7 @@ open class HomeFragment : Fragment()
         return ArrayList()
     }
 
-    private fun ongoingItemsToBundles(items:ArrayList<OngoingMultisigOperation>?):ArrayList<Bundle>?
+    private fun ongoingItemsToBundles(items:ArrayList<MultisigOperation>?):ArrayList<Bundle>?
     {
         if (items != null)
         {
@@ -975,7 +881,7 @@ open class HomeFragment : Fragment()
             if (items.isNotEmpty())
             {
                 items.forEach {
-                    bundles.add(toBundle(it))
+                    bundles.add(it.toBundle())
                 }
             }
             return bundles
