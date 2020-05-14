@@ -331,21 +331,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 }
                 else
                 {
-                    onSignaturesInfoComplete(error = null)
+                    onSignaturesInfoComplete(error = null, databaseError = null)
                 }
-
-
-
-                /*
-                if (mFinalizeTransferLoading)
-                {
-                    startFinalizeTransferLoading()
-                }
-                else
-                {
-                    onFinalizeTransferLoadComplete(null)
-                }
-                */
             }
         }
         else
@@ -468,25 +455,17 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val binaryReader = MultisigBinaries(op.binary)
             binaryReader.getType()
 
-            val url = String.format(getString(R.string.contract_storage_url), binaryReader.getContractAddress())
-
-
-            val postListener = object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-
-                    //addContractStorageBisFromJSON(dataSnapshot)
+            val postListener = object : ValueEventListener
+            {
+                override fun onDataChange(dataSnapshot: DataSnapshot)
+                {
                     addMultisigOngoingOperationsFromJSON(dataSnapshot)
-                    onSignaturesInfoComplete(error = null)
+                    onSignaturesInfoComplete(error = null, databaseError = null)
                 }
 
-                override fun onCancelled(databaseError: DatabaseError) {
-                    // Getting Post failed, log a message
-                    //Log.w(TAG, "loadPost:onCancelled", databaseError.toException())
-                    // ...
-                    val k = databaseError
-                    val k2 = databaseError
-                    //showSnackbarError()
-                    //onSignaturesInfoComplete(error = null)
+                override fun onCancelled(databaseError: DatabaseError)
+                {
+                    onSignaturesInfoComplete(error = null, databaseError = databaseError)
                 }
             }
             //notaryOperationsDatabase.addValueEventListener(postListener)
@@ -987,7 +966,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         refreshTextsAndLayouts()
     }
 
-    private fun onSignaturesInfoComplete(error:VolleyError?)
+    private fun onSignaturesInfoComplete(error:VolleyError?, databaseError: DatabaseError?)
     {
         mSignaturesLoading = false
         transferLoading(false)
@@ -995,7 +974,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         swipe_refresh_multisig_dialog_layout?.isEnabled = true
         swipe_refresh_multisig_dialog_layout?.isRefreshing = false
 
-        if (error != null || mClickCalculate)
+        if (error != null || databaseError != null || mClickCalculate)
         {
             // stop the moulinette only if an error occurred
             cancelRequests(resetBooleans = true)
@@ -1014,9 +993,22 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             }
             */
 
-            if(error != null)
+            when
             {
-                showSnackBar(getString(R.string.generic_error), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                error != null ->
+                {
+                    showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                }
+
+                databaseError != null ->
+                {
+                    showSnackBar(databaseError.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                }
+
+                else ->
+                {
+                    showSnackBar(getString(R.string.generic_error), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+                }
             }
         }
         else
