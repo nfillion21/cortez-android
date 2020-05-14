@@ -23,7 +23,6 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.*
@@ -60,9 +59,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private var mFinalizeTransferLoading:Boolean = false
 
-    private var mStorageBis:String? = null
+    private var mServerOperation:MultisigOperation? = null
 
     private var mContract:Contract? = null
+
+    private lateinit var operationDatabase: DatabaseReference
 
     private lateinit var database: DatabaseReference
     private lateinit var databaseOperations: DatabaseReference
@@ -148,7 +149,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         private const val LOAD_STORAGE_TAG = "load_storage"
         private const val TRANSFER_FINALIZE_TAG = "transfer_finalize"
 
-        private const val STORAGE_BIS_DATA_KEY = "storage_bis_data_key"
+        private const val SERVER_OPERATION_KEY = "server_operation_key"
 
         private const val CONTRACT_DATA_KEY = "contract_info_key"
 
@@ -300,7 +301,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
-            mStorageBis = savedInstanceState.getString(STORAGE_BIS_DATA_KEY, null)
+            val serverOperationBundle = savedInstanceState.getBundle(SERVER_OPERATION_KEY)
+            if (serverOperationBundle != null)
+            {
+                mServerOperation = MultisigOperation.fromBundle(serverOperationBundle)
+            }
 
             val contractBundle = savedInstanceState.getBundle(CONTRACT_DATA_KEY)
             if (contractBundle != null)
@@ -465,6 +470,41 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             val url = String.format(getString(R.string.contract_storage_url), binaryReader.getContractAddress())
 
+
+            val postListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                    //addContractStorageBisFromJSON(dataSnapshot)
+                    addMultisigOngoingOperationsFromJSON(dataSnapshot)
+                    onSignaturesInfoComplete(error = null)
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // Getting Post failed, log a message
+                    //Log.w(TAG, "loadPost:onCancelled", databaseError.toException())
+                    // ...
+                    val k = databaseError
+                    val k2 = databaseError
+                    //showSnackbarError()
+                    //onSignaturesInfoComplete(error = null)
+                }
+            }
+            //notaryOperationsDatabase.addValueEventListener(postListener)
+
+            // Initialize Database
+
+            val seed = Storage(activity!!).getMnemonics()
+
+            operationDatabase = FirebaseDatabase.getInstance().reference
+                    .child("signatory-operations").child(seed.pk).child(binaryReader.getContractAddress()!!)
+            operationDatabase.addListenerForSingleValueEvent(postListener)
+
+
+
+
+
+
+            /*
             // Request a string response from the provided URL.
             val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener
             {o ->
@@ -486,6 +526,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             jsonArrayRequest.tag = LOAD_SIGNATURES_TAG
             VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+            */
         }
     }
 
@@ -653,31 +694,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         mStorageInfoLoading = true
 
-        /*
-        var contractInfoType:CONTRACT_INFO_TYPE? = null
-
-        if (isFromNotary)
-        {
-            contractInfoType = CONTRACT_INFO_TYPE.CONTRACT_STORAGE
-        }
-        else
-        {
-            when (operationType)
-            {
-                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
-                    contractInfoType = CONTRACT_INFO_TYPE.CONTRACT_STORAGE
-
-                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
-                    contractInfoType = CONTRACT_INFO_TYPE.CONTRACT_INFO
-
-                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
-                    contractInfoType = CONTRACT_INFO_TYPE.CONTRACT_INFO
-
-                else -> {""}
-            }
-        }
-        */
-
         arguments?.let { bundle ->
 
             val operationBundle = bundle.getBundle(ONGOING_OPERATION_KEY)
@@ -720,11 +736,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
     }
 
-    private fun addContractStorageBisFromJSON(answer: JSONObject)
+    private fun addMultisigOngoingOperationsFromJSON(answer:DataSnapshot)
     {
-        if (answer.length() > 0)
+        if (answer.exists() && answer.hasChildren())
         {
-            mStorageBis = answer.toString()
+            mServerOperation = MultisigOperation.fromMap(answer.value as HashMap<String, Any>)
         }
     }
 
@@ -1025,29 +1041,58 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     has_signature_textview_10
             )
 
-            val list = getSignatoriesList()
-            if (!list.isNullOrEmpty() && fromNotary)
+
+            if (mServerOperation != null)
             {
 
-                val length = list.size
+                val signatures = mServerOperation?.signatures
+                val list = getSignatoriesList()
 
-                for (i in 0 until length)
+                val keys = ArrayList(signatures?.keys)
+
+                if (list.containsAll(keys) && keys.containsAll(list))
                 {
-                    hasSignedTextview[i].visibility = View.VISIBLE
-                    hasSignedTextview[i].text = "Has not signed yet"
+                    if (!list.isNullOrEmpty() && fromNotary)
+                    {
+                        val length = list.size
+
+                        for (i in 0 until length)
+                        {
+                            val pk = list[i]
+                            hasSignedTextview[i].visibility = View.VISIBLE
+
+                            if (signatures!![pk]!!.isNotEmpty())
+                            {
+                                hasSignedTextview[i].text = "Has signed already"
+                            }
+                            else
+                            {
+                                hasSignedTextview[i].text = "Has not signed yet"
+                            }
+                        }
+
+                        for (i in length until SIGNATORIES_CAPACITY) {
+                            hasSignedTextview[i].visibility = View.GONE
+                        }
+                    }
+                    else
+                    {
+                        for (it in hasSignedTextview)
+                        {
+                            it.visibility = View.GONE
+                        }
+                    }
+                }
+                else
+                {
+                    // the operation is different than storage. cancel the operation.
+                    val k = ""
+                    val k2 = ""
+                    //TODO cancel the operation
                 }
 
-                for (i in length until SIGNATORIES_CAPACITY) {
-                    hasSignedTextview[i].visibility = View.GONE
-                }
             }
-            else
-            {
-                for (it in hasSignedTextview)
-                {
-                    it.visibility = View.GONE
-                }
-            }
+
         }
 
         validateAcceptDeclineButtons(areButtonsValid())
@@ -1328,7 +1373,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val fromNotary = it.getBoolean(FROM_NOTARY)
             if (fromNotary)
             {
-                return (mContract != null && !mStorageBis.isNullOrEmpty())
+                return (mContract != null && mServerOperation != null)
             }
             else
             {
@@ -1453,7 +1498,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
-        outState.putString(STORAGE_BIS_DATA_KEY, mStorageBis)
+        outState.putBundle(SERVER_OPERATION_KEY, mServerOperation?.toBundle())
 
         outState.putBundle(CONTRACT_DATA_KEY, toContractBundle(mContract))
 
