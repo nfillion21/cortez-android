@@ -67,7 +67,6 @@
             tools:ignore="UnusedAttribute,NewApi" />
 
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/signatory_layout_02"
         android:layout_width="match_parent"
@@ -119,7 +118,6 @@
             tools:ignore="UnusedAttribute,NewApi" />
 
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/signatory_layout_03"
         android:layout_width="match_parent"
@@ -170,7 +168,6 @@
             tools:ignore="UnusedAttribute,NewApi" />
 
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/signatory_layout_04"
         android:layout_width="match_parent"
@@ -220,8 +217,6 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
-
-
     <LinearLayout
         android:id="@+id/signatory_layout_05"
         android:layout_width="match_parent"
@@ -270,8 +265,6 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
-
-
     <LinearLayout
         android:id="@+id/signatory_layout_06"
         android:layout_width="match_parent"
@@ -321,8 +314,6 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
-
-
     <LinearLayout
         android:id="@+id/signatory_layout_07"
         android:layout_width="match_parent"
@@ -372,7 +363,6 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/signatory_layout_08"
         android:layout_width="match_parent"
@@ -422,8 +412,6 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
-
-
     <LinearLayout
         android:id="@+id/signatory_layout_09"
         android:layout_width="match_parent"
@@ -473,8 +461,6 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
-
-
     <LinearLayout
         android:id="@+id/signatory_layout_10"
         android:layout_width="match_parent"
@@ -524,4 +510,18 @@
             android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
             tools:ignore="UnusedAttribute,NewApi" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/can_confirm_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        android:layout_marginTop="@dimen/spacing_double"
+        android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
+        tools:ignore="UnusedAttribute,NewApi" />
+
+
 </LinearLayout>

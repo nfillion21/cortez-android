@@ -63,10 +63,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private var mContract:Contract? = null
 
+    private lateinit var mDatabaseReference: DatabaseReference
     private lateinit var operationDatabase: DatabaseReference
-
-    private lateinit var database: DatabaseReference
-    private lateinit var databaseOperations: DatabaseReference
 
     data class Contract
     (
@@ -172,51 +170,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     }
 
 
-    // [START write_fan_out]
-    private fun writeNewSignatory()
-    {
-        database = FirebaseDatabase.getInstance().reference
-        //databaseOperations = FirebaseDatabase.getInstance().reference.child("signatory-operations")
-
-        val key = database.child("signatory-operations").push().key
-        if (key == null) {
-            Log.w("fail", "Couldn't get push key for posts")
-            return
-        }
-
-        // Create new post at /user-posts/$userid/$postid and at
-        // /posts/$postid simultaneously
-
-        /*
-        val key = database.child("operations").push().key
-        if (key == null) {
-            Log.w("fail", "Couldn't get push key for posts")
-            return
-        }
-        */
-
-        val post = Signatory("asdasd", "dskhjsdf")
-        val postValues = post.toMap()
-
-        val childUpdates = java.util.HashMap<String, Any>()
-        childUpdates["/signatory-operations/$key"] = postValues
-        //childUpdates["/signatory-operations/$userId/$key"] = postValues
-
-        database.updateChildren(childUpdates)
-                .addOnSuccessListener {
-
-                    val v = "hello world"
-                    val v2 = "hello world"
-                    //writeNewSignatory()
-
-                }
-                .addOnFailureListener {
-
-                    val v = "hello world"
-                    val v2 = "hello world"
-                }
-    }
-
 
     /*
     private fun postComment()
@@ -276,6 +229,55 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         decline_button_layout.setOnClickListener {
             onSendClick()
+        }
+
+        decline_button_layout.setOnClickListener {
+            onSendClick()
+        }
+
+        accept_button_layout.setOnClickListener {
+
+            arguments?.let {
+                val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
+                val op = MultisigOperation.fromBundle(opBundle)
+
+                val mnemonicsData = Storage(activity!!).getMnemonics()
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+
+                val signature = KeyPair.sign(sk, op.binary.hexToByteArray())
+
+                mServerOperation!!.signatures[mnemonicsData.pk] = CryptoUtils.generateEDSig(signature)
+
+                val binaryReader = MultisigBinaries(op.binary)
+                binaryReader.getType()
+
+                val childUpdates = HashMap<String, Any>()
+                childUpdates["/multisig_operations/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
+
+                val signatures = mServerOperation?.signatures
+                val keys = ArrayList(signatures?.keys)
+
+                for (pk in keys)
+                {
+                    childUpdates["/signatory-operations/$pk/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
+                }
+
+                mDatabaseReference = FirebaseDatabase.getInstance().reference
+                mDatabaseReference.updateChildren(childUpdates)
+                        .addOnSuccessListener {
+
+                            val v = "hello world"
+                            val v2 = "hello world"
+                            //writeNewSignatory()
+
+                        }
+                        .addOnFailureListener {
+
+                            val v = "hello world"
+                            val v2 = "hello world"
+                        }
+            }
         }
 
         close_button.setOnClickListener {
@@ -375,6 +377,13 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         super.onResume()
         validateAcceptDeclineButtons(areButtonsValid())
     }
+
+    /*
+    enum class CONTRACT_INFO_TYPE
+    {
+        CONTRACT_STORAGE, CONTRACT_INFO
+    }
+    */
 
     private fun onSendClick()
     {
@@ -477,6 +486,14 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             operationDatabase = FirebaseDatabase.getInstance().reference
                     .child("signatory-operations").child(seed.pk).child(binaryReader.getContractAddress()!!)
             operationDatabase.addListenerForSingleValueEvent(postListener)
+
+
+
+
+
+
+
+
 
 
 
@@ -1033,10 +1050,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     has_signature_textview_10
             )
 
-
             if (mServerOperation != null)
             {
-
                 val signatures = mServerOperation?.signatures
                 val list = getSignatoriesList()
 
@@ -1048,6 +1063,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     {
                         val length = list.size
 
+                        var confirmedSignatures = 0
+
                         for (i in 0 until length)
                         {
                             val pk = list[i]
@@ -1055,17 +1072,69 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                             if (signatures!![pk]!!.isNotEmpty())
                             {
-                                hasSignedTextview[i].text = "Has signed already"
+                                hasSignedTextview[i].text = getString(R.string.has_signed_already)
+                                confirmedSignatures++
                             }
                             else
                             {
-                                hasSignedTextview[i].text = "Has not signed yet"
+                                hasSignedTextview[i].text = getString(R.string.has_not_signed_yet)
                             }
                         }
 
                         for (i in length until SIGNATORIES_CAPACITY) {
                             hasSignedTextview[i].visibility = View.GONE
                         }
+
+                        can_confirm_textview.visibility = View.VISIBLE
+
+                        val threshold = getThreshold()!!.toLong()
+                        val necessarySignatures = threshold - confirmedSignatures
+
+                        var text = if (threshold == necessarySignatures)
+                        {
+                            "This ongoing operation has no signature yet.\n"
+                        }
+                        else
+                        {
+                            if (confirmedSignatures == 1)
+                            {
+                                "This ongoing operation already has $confirmedSignatures signature.\n"
+                            }
+                            else
+                            {
+                                "This ongoing operation already has $confirmedSignatures signatures.\n"
+                            }
+                        }
+
+                        val text2 = if (necessarySignatures == 1L)
+                        {
+                            if (threshold == necessarySignatures)
+                            {
+                                "It needs $necessarySignatures signature before it can be confirmed by the notary."
+                            }
+                            else
+                            {
+                                "It needs $necessarySignatures more signature before it can be confirmed by the notary."
+                            }
+                        }
+                        else if (necessarySignatures >1L)
+                        {
+                            if (threshold == necessarySignatures)
+                            {
+                                "It needs $necessarySignatures signatures before it can be confirmed by the notary."
+                            }
+                            else
+                            {
+                                "It needs $necessarySignatures more signatures before it can be confirmed by the notary."
+                            }
+                        }
+                        else
+                        {
+                            "It has enough signatures to be confirmed by the notary."
+                        }
+
+                        can_confirm_textview.text = text + text2
+
                     }
                     else
                     {
@@ -1082,9 +1151,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     val k2 = ""
                     //TODO cancel the operation
                 }
-
             }
-
         }
 
         validateAcceptDeclineButtons(areButtonsValid())
@@ -1125,6 +1192,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             no_baker_textview.visibility = View.GONE
 
                             threshold_edittext.setText(getThreshold())
+
+                            //TODO notary
+                            //notary_tz1_edittext.setText(mContract.delegate)
 
                             validateAcceptDeclineButtons(areButtonsValid())
                         }
