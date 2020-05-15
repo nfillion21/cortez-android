@@ -386,8 +386,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="@dimen/spacing_double"
-                    android:padding="@dimen/spacing_normal"
+                    android:layout_margin="@dimen/spacing_normal"
                     >
 
                     <FrameLayout
@@ -463,9 +462,8 @@
                 <RelativeLayout
                     android:id="@+id/confirm_operation_button_relative_layout"
                     android:layout_width="match_parent"
-                    android:layout_marginTop="@dimen/spacing_double"
+                    android:layout_margin="@dimen/spacing_normal"
                     android:visibility="visible"
-                    android:layout_marginBottom="?attr/actionBarSize"
                     android:layout_height="?android:attr/actionBarSize">
 
                     <FrameLayout

@@ -530,6 +530,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     }
     */
 
+    private fun pk():String
+    {
+        return Storage(activity!!).getMnemonics().pk
+    }
+
     private fun onSendClick()
     {
         val dialog = AuthenticationDialog()
@@ -1272,30 +1277,54 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         {
                             if (threshold == necessarySignatures)
                             {
-                                "It needs $necessarySignatures signature before it can be confirmed by the notary."
+                                "It needs $necessarySignatures signature before it can be confirmed by the contract notary."
                             }
                             else
                             {
-                                "It needs $necessarySignatures more signature before it can be confirmed by the notary."
+                                "It needs $necessarySignatures more signature before it can be confirmed by the contract notary."
                             }
                         }
                         else if (necessarySignatures >1L)
                         {
                             if (threshold == necessarySignatures)
                             {
-                                "It needs $necessarySignatures signatures before it can be confirmed by the notary."
+                                "It needs $necessarySignatures signatures before it can be confirmed by the contract notary."
                             }
                             else
                             {
-                                "It needs $necessarySignatures more signatures before it can be confirmed by the notary."
+                                "It needs $necessarySignatures more signatures before it can be confirmed by the contract notary."
                             }
                         }
                         else
                         {
-                            "It has enough signatures to be confirmed by the notary."
+                            "It has enough signatures to be confirmed by the contract notary."
                         }
 
-                        can_confirm_textview.text = text + text2
+                        val text3 = if (signatures!![pk()]!!.isNullOrEmpty())
+                        {
+                            "\n\nYou ( ${pk().substring(IntRange(0,8))} ... ) have not signed yet."
+                        }
+                        else
+                        {
+                            "\n\nYou ( ${pk().substring(IntRange(0,8))} ... ) have signed already."
+                        }
+
+                        //val text4 =
+                        var text4 = ""
+                        if (necessarySignatures <= 0)
+                        {
+                            text4 =
+                                    if (arguments!!.getBoolean(FROM_NOTARY))
+                                    {
+                                        "\nAs a notary, you can confirm this operation."
+                                    }
+                                    else
+                                    {
+                                        "\nYou can contact the contract notary to confirm this operation."
+                                    }
+                        }
+
+                        can_confirm_textview.text = text + text2 + text3 + text4
 
                     }
                     else
@@ -1313,8 +1342,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 }
             }
         }
-
-        validateAcceptDeclineButtons(areButtonsValid())
 
         refreshTextsAndLayouts()
     }
