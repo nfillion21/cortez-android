@@ -23,9 +23,11 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.*
+import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.CustomTheme
@@ -233,6 +235,152 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         decline_button_layout.setOnClickListener {
             onSendClick()
+        }
+
+        confirm_operation_multisig_button_layout.setOnClickListener {
+
+            val opBundle = arguments!!.getBundle(ONGOING_OPERATION_KEY)
+
+            val mnemonicsData = Storage(activity!!).getMnemonics()
+
+            val url = getString(R.string.transfer_forge)
+
+            var postParams = JSONObject()
+            postParams.put("src", mnemonicsData.pkh)
+            postParams.put("src_pk", mnemonicsData.pk)
+
+            var dstObjects = JSONArray()
+
+            var dstObject = JSONObject()
+
+            val op = MultisigOperation.fromBundle(opBundle)
+            val binaryReader = MultisigBinaries(op.binary)
+            binaryReader.getType()
+            dstObject.put("dst", binaryReader.getContractAddress())
+
+            dstObject.put("amount", "0")
+
+            val spendingLimitFile = "multisig_set_delegate.json"
+            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                    .use { it ->
+                        it.readText()
+                    }
+
+            val value = JSONObject(contract)
+
+            val sigs = (value["args"] as JSONArray)[1] as JSONArray
+            sigs.remove(0)
+
+            val list = getSignatoriesList()
+
+            val signatures = mServerOperation?.signatures
+            val orderedSignatures = ArrayList<String>(signatures!!.count())
+            for (pk in list)
+            {
+                orderedSignatures.add(signatures[pk]!!)
+            }
+
+            for (sig in orderedSignatures)
+            {
+                val sigParam = JSONObject()
+
+                if (!sig.isNullOrEmpty())
+                {
+                    sigParam.put("prim", "Some")
+
+                    val argSig = JSONArray()
+                    val argSigStr = JSONObject()
+
+                    argSigStr.put("string", sig)
+                    argSig.put(argSigStr)
+                    sigParam.put("args", argSig)
+                }
+                else
+                {
+                    sigParam.put("prim", "None")
+                }
+
+                sigs.put(sigParam)
+            }
+
+            val argCounter = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+            argCounter.put("int", getMultisigCounter())
+
+            val argBaker = (((((((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+            //argBaker.put("bytes", getMultisigCounter())
+
+            var decodedValue = Base58.decode(binaryReader.getBaker())
+            var bakerBytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
+            bakerBytes = byteArrayOf(0x00) + bakerBytes
+            argBaker.put("bytes", bakerBytes.toNoPrefixHexString())
+
+            dstObject.put("parameters", value)
+
+            dstObjects.put(dstObject)
+
+            postParams.put("dsts", dstObjects)
+
+            val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
+            { answer ->
+
+                if (swipe_refresh_multisig_dialog_layout != null)
+                {
+                    val k = ""
+                    val k2 = ""
+
+
+                    /*
+                    mDelegatePayload = answer.getString("result")
+                    mDelegateFees = answer.getLong("total_fee")
+
+                    // we use this call to ask for payload and fees
+                    if (mDelegatePayload != null && mDelegateFees != -1L && activity != null)
+                    {
+                        onInitDelegateLoadComplete(null)
+
+                        val feeInTez = mDelegateFees.toDouble()/1000000.0
+                        fee_edittext?.setText(feeInTez.toString())
+
+                        validateAddButton(isInputDataValid() && isDelegateFeeValid())
+
+                    }
+                    else
+                    {
+                        val volleyError = VolleyError(getString(R.string.generic_error))
+                        onInitDelegateLoadComplete(volleyError)
+                        mClickCalculate = true
+
+                        //the call failed
+                    }
+                    */
+                }
+
+            }, Response.ErrorListener
+            {
+                if (swipe_refresh_multisig_dialog_layout != null)
+                {
+                    //onInitDelegateLoadComplete(it)
+                    val k = ""
+                    val k2 = ""
+                    //mClickCalculate = true
+                }
+            })
+            {
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String>
+                {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    return headers
+                }
+            }
+
+            cancelRequests(true)
+
+            jsObjRequest.tag = "hello"
+            //mInitDelegateLoading = true
+            VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+
         }
 
         accept_button_layout.setOnClickListener {
@@ -760,9 +908,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private fun getThreshold(): String?
     {
-        if (mContract != null)
+        if (mContract != null && !mContract?.storage.isNullOrEmpty())
         {
-            val storageJSONObject = JSONObject(mContract?.storage)
+            val storageJSONObject = JSONObject(mContract!!.storage)
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
             if (args != null)
             {
@@ -773,6 +921,19 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     return DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
                 }
             }
+        }
+
+        return null
+    }
+
+    private fun getMultisigCounter(): String?
+    {
+        if (mContract != null && !mContract?.storage.isNullOrEmpty())
+        {
+            val storageJSONObject = JSONObject(mContract!!.storage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
+
+            return DataExtractor.getStringFromField(args[0] as JSONObject, "int")
         }
 
         return null
