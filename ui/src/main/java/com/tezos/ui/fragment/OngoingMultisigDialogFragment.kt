@@ -171,8 +171,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 }
     }
 
-
-
     /*
     private fun postComment()
     {
@@ -307,7 +305,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             argCounter.put("int", getMultisigCounter())
 
             val argBaker = (((((((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
-            //argBaker.put("bytes", getMultisigCounter())
 
             var decodedValue = Base58.decode(binaryReader.getBaker())
             var bakerBytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
@@ -616,13 +613,19 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             {
                 override fun onDataChange(dataSnapshot: DataSnapshot)
                 {
-                    addMultisigOngoingOperationsFromJSON(dataSnapshot)
-                    onSignaturesInfoComplete(error = null, databaseError = null)
+                    if (swipe_refresh_multisig_dialog_layout != null)
+                    {
+                        addMultisigOngoingOperationsFromJSON(dataSnapshot)
+                        onSignaturesInfoComplete(error = null, databaseError = null)
+                    }
                 }
 
                 override fun onCancelled(databaseError: DatabaseError)
                 {
-                    onSignaturesInfoComplete(error = null, databaseError = databaseError)
+                    if (swipe_refresh_multisig_dialog_layout != null)
+                    {
+                        onSignaturesInfoComplete(error = null, databaseError = databaseError)
+                    }
                 }
             }
             //notaryOperationsDatabase.addValueEventListener(postListener)
@@ -1196,8 +1199,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         arguments?.let {
 
-            val fromNotary = it.getBoolean(FROM_NOTARY)
-
             val hasSignedTextview = listOf(
                     has_signature_textview_01,
                     has_signature_textview_02,
@@ -1220,7 +1221,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                 if (list.containsAll(keys) && keys.containsAll(list))
                 {
-                    if (!list.isNullOrEmpty() && fromNotary)
+                    if (!list.isNullOrEmpty())
                     {
                         val length = list.size
 
@@ -1308,8 +1309,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 else
                 {
                     // the operation is different than storage. cancel the operation.
-                    val k = ""
-                    val k2 = ""
                     //TODO cancel the operation
                 }
             }
@@ -1369,13 +1368,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                     if (mContract != null)
                     {
-                        val fromNotary = it.getBoolean(FROM_NOTARY)
-                        if (fromNotary)
-                        {
-                            refreshSignatories()
-                            storage_proposal_layout.visibility = View.GONE
-                            update_signatories_layout.visibility = View.VISIBLE
-                        }
+                        refreshSignatories()
+                        storage_proposal_layout.visibility = View.GONE
+                        update_signatories_layout.visibility = View.VISIBLE
 
                         threshold_edittext.setText(getThreshold())
 
@@ -1397,13 +1392,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                     if (mContract != null)
                     {
-                        val fromNotary = it.getBoolean(FROM_NOTARY)
-                        if (fromNotary)
-                        {
-                            refreshSignatories()
-                            update_signatories_layout.visibility = View.VISIBLE
-                            storage_proposal_layout.visibility = View.GONE
-                        }
+                        refreshSignatories()
+                        update_signatories_layout.visibility = View.VISIBLE
+                        storage_proposal_layout.visibility = View.GONE
 
                         threshold_edittext.setText(getThreshold())
 
@@ -1593,19 +1584,28 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         arguments?.let {
 
-            val fromNotary = it.getBoolean(FROM_NOTARY)
-            if (fromNotary)
-            {
-                return (mContract != null && mServerOperation != null)
-            }
-            else
+            if (mContract != null && mServerOperation != null)
             {
                 val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
                 val op = MultisigOperation.fromBundle(opBundle)
                 val binaryReader = MultisigBinaries(op.binary)
 
+                val signatures = mServerOperation?.signatures
+                val mnemonicsData = Storage(activity!!).getMnemonics()
+
+                if (
+                        !signatures.isNullOrEmpty()
+                        && signatures.containsKey(mnemonicsData.pk)
+                        && signatures[mnemonicsData.pk]!!.isEmpty()
+                )
+                {
+                    accept_decline_buttons_layout.visibility = View.VISIBLE
+                    return true
+                }
+
                 when (binaryReader.getType())
                 {
+                    /*
                     MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
                     {
                         if (!mContract?.storage.isNullOrEmpty())
@@ -1629,10 +1629,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             return true
                         }
                     }
+                    */
                 }
             }
         }
 
+        accept_decline_buttons_layout.visibility = View.GONE
         return false
     }
 

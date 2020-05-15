@@ -374,56 +374,6 @@
                 </androidx.core.widget.NestedScrollView>
             </LinearLayout>
 
-            <!--
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:orientation="horizontal"
-                android:background="@color/theme_red_primary"
-                android:layout_marginLeft="@dimen/spacing_double"
-                android:layout_marginRight="@dimen/spacing_double"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_weight="0"
-                    android:layout_height="wrap_content"
-                    android:elevation="@dimen/elevation_header"
-                    android:text="@string/tez"
-                    android:layout_marginEnd="@dimen/spacing_normal"
-                    android:textAppearance="@style/PaymentScreens.TextAppearance.StandardItem"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorPrimary"
-                    tools:ignore="UnusedAttribute,NewApi" />
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/fee_edittext"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:imeOptions="actionDone"
-                    android:hint="@string/neutral"
-                    android:enabled="false"
-                    android:inputType="numberDecimal"
-                    android:textColorHint="@color/tz_placeholder"
-                    android:maxLength="15"
-                    android:digits="0123456789."
-                    android:textSize="@dimen/standard_item_text_size" />
-
-            </LinearLayout>
-            -->
-
-            <!--
-            From KT1 button
-            -->
-
-            <!--
-            <View
-                android:layout_width="match_parent"
-                android:background="@color/colorAccentSecondary"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-            -->
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -431,6 +381,8 @@
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/accept_decline_buttons_layout"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
