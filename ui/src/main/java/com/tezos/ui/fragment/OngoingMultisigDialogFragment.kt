@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BulletSpan
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +36,6 @@ import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.database.MultisigOperation
-import com.tezos.ui.database.Signatory
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.fragment.ScriptFragment.Companion.CONTRACT_PUBLIC_KEY
 import com.tezos.ui.utils.*
@@ -46,6 +44,7 @@ import kotlinx.android.synthetic.main.multisig_ongoing_proposal_signatories.*
 import kotlinx.android.synthetic.main.multisig_ongoing_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.lang.Exception
 import java.security.interfaces.ECPublicKey
 
 class OngoingMultisigDialogFragment : AppCompatDialogFragment()
@@ -172,38 +171,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     }
                 }
     }
-
-    /*
-    private fun postComment()
-    {
-        //val uid = uid
-        FirebaseDatabase.getInstance().reference.child("users").child(uid)
-                .addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        // Get user information
-                        val user = dataSnapshot.getValue(User::class.java)
-                        if (user == null) {
-                            return
-                        }
-
-                        val authorName = user.username
-
-                        // Create new comment object
-                        val commentText = fieldCommentText.text.toString()
-                        val comment = Comment(uid, authorName, commentText)
-
-                        // Push the comment, it will appear in the list
-                        commentsReference.push().setValue(comment)
-
-                        // Clear the field
-                        fieldCommentText.text = null
-                    }
-
-                    override fun onCancelled(databaseError: DatabaseError) {
-                    }
-                })
-    }
-    */
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -381,53 +348,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
         }
 
-        /*
-        accept_button_layout.setOnClickListener {
-
-            arguments?.let {
-                val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
-                val op = MultisigOperation.fromBundle(opBundle)
-
-                val mnemonicsData = Storage(activity!!).getMnemonics()
-                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                val sk = CryptoUtils.generateSk(mnemonics, "")
-
-                val signature = KeyPair.sign(sk, op.binary.hexToByteArray())
-
-                mServerOperation!!.signatures[mnemonicsData.pk] = CryptoUtils.generateEDSig(signature)
-
-                val binaryReader = MultisigBinaries(op.binary)
-                binaryReader.getType()
-
-                val childUpdates = HashMap<String, Any>()
-                childUpdates["/multisig_operations/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
-
-                val signatures = mServerOperation?.signatures
-                val keys = ArrayList(signatures?.keys)
-
-                for (pk in keys)
-                {
-                    childUpdates["/signatory-operations/$pk/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
-                }
-
-                mDatabaseReference = FirebaseDatabase.getInstance().reference
-                mDatabaseReference.updateChildren(childUpdates)
-                        .addOnSuccessListener {
-
-                            val v = "hello world"
-                            val v2 = "hello world"
-                            //writeNewSignatory()
-
-                        }
-                        .addOnFailureListener {
-
-                            val v = "hello world"
-                            val v2 = "hello world"
-                        }
-            }
-        }
-        */
-
         close_button.setOnClickListener {
             dismiss()
         }
@@ -483,7 +403,16 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 }
                 else
                 {
-                    onSignaturesInfoComplete(error = null, databaseError = null)
+                    onSignaturesInfoComplete(databaseError = null)
+
+                    if (mAcceptLoading)
+                    {
+                        startAcceptOperationLoading()
+                    }
+                    else
+                    {
+                        onAcceptInfoComplete(error = null)
+                    }
                 }
             }
         }
@@ -636,7 +565,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     if (swipe_refresh_multisig_dialog_layout != null)
                     {
                         addMultisigOngoingOperationsFromJSON(dataSnapshot)
-                        onSignaturesInfoComplete(error = null, databaseError = null)
+                        onSignaturesInfoComplete(databaseError = null)
                     }
                 }
 
@@ -644,7 +573,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 {
                     if (swipe_refresh_multisig_dialog_layout != null)
                     {
-                        onSignaturesInfoComplete(error = null, databaseError = databaseError)
+                        onSignaturesInfoComplete(databaseError = databaseError)
                     }
                 }
             }
@@ -706,15 +635,18 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             mDatabaseReference.updateChildren(childUpdates)
                     .addOnSuccessListener {
 
-                        val v = "hello world"
-                        val v2 = "hello world"
-                        //writeNewSignatory()
-
+                        if (swipe_refresh_multisig_dialog_layout != null)
+                        {
+                            onAcceptInfoComplete(error = null)
+                            startInitSignaturesInfoLoading()
+                        }
                     }
-                    .addOnFailureListener {
+                    .addOnFailureListener { exception ->
 
-                        val v = "hello world"
-                        val v2 = "hello world"
+                        if (swipe_refresh_multisig_dialog_layout != null)
+                        {
+                            onAcceptInfoComplete(error = exception)
+                        }
                     }
         }
     }
@@ -1183,18 +1115,18 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         refreshTextsAndLayouts()
     }
 
-    private fun onSignaturesInfoComplete(error:VolleyError?, databaseError: DatabaseError?)
+    private fun onSignaturesInfoComplete(databaseError: DatabaseError?)
     {
         mSignaturesLoading = false
         transferLoading(false)
+        cancelRequests(resetBooleans = true)
 
         swipe_refresh_multisig_dialog_layout?.isEnabled = true
         swipe_refresh_multisig_dialog_layout?.isRefreshing = false
 
-        if (error != null || databaseError != null || mClickCalculate)
+        if (databaseError != null || mClickCalculate)
         {
             // stop the moulinette only if an error occurred
-            cancelRequests(resetBooleans = true)
 
             //mTransferPayload = null
 
@@ -1212,11 +1144,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             when
             {
-                error != null ->
-                {
-                    showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
-                }
-
                 databaseError != null ->
                 {
                     showSnackBar(databaseError.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
@@ -1230,7 +1157,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
         else
         {
-            cancelRequests(true)
         }
 
         arguments?.let {
@@ -1372,6 +1298,26 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     //TODO cancel the operation
                 }
             }
+        }
+
+        refreshTextsAndLayouts()
+    }
+
+    private fun onAcceptInfoComplete(error:Exception?)
+    {
+        mAcceptLoading = false
+        transferLoading(false)
+        cancelRequests(resetBooleans = true)
+
+        swipe_refresh_multisig_dialog_layout?.isEnabled = true
+        swipe_refresh_multisig_dialog_layout?.isRefreshing = false
+
+        if (error != null || mClickCalculate)
+        {
+            showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+        }
+        else
+        {
         }
 
         refreshTextsAndLayouts()
@@ -1539,14 +1485,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
         }
         */
-
-    private fun updateMnemonicsData(data: Storage.MnemonicsData, pk:String):String
-    {
-        with(Storage(activity!!)) {
-            saveSeed(Storage.MnemonicsData(data.pkh, pk, data.mnemonics))
-        }
-        return pk
-    }
 
     /*
     private fun onInitTransferLoadComplete(error: VolleyError?)
