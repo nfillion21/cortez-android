@@ -902,13 +902,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     addContractInfoFromJSON(o)
                     onStorageInfoComplete(error = null)
 
-                    arguments?.let {
-
-                        if (it.getBoolean(FROM_NOTARY))
-                        {
-                            startInitSignaturesInfoLoading()
-                        }
-                    }
+                    startInitSignaturesInfoLoading()
                 }
             },
                     Response.ErrorListener {
