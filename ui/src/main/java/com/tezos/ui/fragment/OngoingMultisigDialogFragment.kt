@@ -58,6 +58,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     private var mStorageInfoLoading:Boolean = false
 
     private var mSignaturesLoading:Boolean = false
+    private var mAcceptLoading:Boolean = false
 
     private var mFinalizeTransferLoading:Boolean = false
 
@@ -145,6 +146,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         private const val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
 
         private const val LOAD_SIGNATURES_TAG = "load_signatures"
+        private const val ACCEPT_OPERATION_TAG = "accept_operation"
 
         private const val LOAD_STORAGE_TAG = "load_storage"
         private const val TRANSFER_FINALIZE_TAG = "transfer_finalize"
@@ -228,11 +230,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         super.onViewCreated(view, savedInstanceState)
 
         decline_button_layout.setOnClickListener {
-            onSendClick()
+            onSendClick(VALIDATION_OPERATION_TYPE.ACCEPT_OPERATION)
         }
 
-        decline_button_layout.setOnClickListener {
-            onSendClick()
+        accept_button_layout.setOnClickListener {
+            onSendClick(VALIDATION_OPERATION_TYPE.ACCEPT_OPERATION)
         }
 
         confirm_operation_multisig_button_layout.setOnClickListener {
@@ -377,9 +379,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             jsObjRequest.tag = "hello"
             //mInitDelegateLoading = true
             VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
-
         }
 
+        /*
         accept_button_layout.setOnClickListener {
 
             arguments?.let {
@@ -424,6 +426,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         }
             }
         }
+        */
 
         close_button.setOnClickListener {
             dismiss()
@@ -445,6 +448,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             mStorageInfoLoading = savedInstanceState.getBoolean(LOAD_STORAGE_TAG)
 
             mSignaturesLoading = savedInstanceState.getBoolean(LOAD_SIGNATURES_TAG)
+
+            mAcceptLoading = savedInstanceState.getBoolean(ACCEPT_OPERATION_TAG)
 
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
@@ -523,19 +528,17 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         validateAcceptDeclineButtons(areButtonsValid())
     }
 
-    /*
-    enum class CONTRACT_INFO_TYPE
-    {
-        CONTRACT_STORAGE, CONTRACT_INFO
-    }
-    */
-
     private fun pk():String
     {
         return Storage(activity!!).getMnemonics().pk
     }
 
-    private fun onSendClick()
+    enum class VALIDATION_OPERATION_TYPE
+    {
+        ACCEPT_OPERATION, CONFIRM_OPERATION
+    }
+
+    private fun onSendClick(validate:VALIDATION_OPERATION_TYPE)
     {
         val dialog = AuthenticationDialog()
         if (listener?.isFingerprintAllowed()!! && listener?.hasEnrolledFingerprints()!!)
@@ -543,7 +546,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthentication(it)
+                validateKeyAuthentication(it, validate)
             }
             if (dialog.cryptoObjectToAuthenticateWith == null)
             {
@@ -559,7 +562,19 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeTransferLoading()
+
+            when (validate)
+            {
+                VALIDATION_OPERATION_TYPE.ACCEPT_OPERATION ->
+                {
+                    startInitAcceptOperationLoading()
+                }
+
+                VALIDATION_OPERATION_TYPE.CONFIRM_OPERATION ->
+                {
+                    startFinalizeTransferLoading()
+                }
+            }
         }
         dialog.passwordVerificationListener =
                 {
@@ -642,43 +657,65 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             operationDatabase = FirebaseDatabase.getInstance().reference
                     .child("signatory-operations").child(seed.pk).child(binaryReader.getContractAddress()!!)
             operationDatabase.addListenerForSingleValueEvent(postListener)
+        }
+    }
 
+    private fun startInitAcceptOperationLoading()
+    {
+        transferLoading(true)
 
+        validateAcceptDeclineButtons(validate = false)
 
+        startAcceptOperationLoading()
+    }
 
+    private fun startAcceptOperationLoading()
+    {
+        cancelRequests(resetBooleans = true)
 
+        mAcceptLoading = true
 
+        arguments?.let {
 
+            val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
+            val op = MultisigOperation.fromBundle(opBundle)
 
+            val mnemonicsData = Storage(activity!!).getMnemonics()
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            val sk = CryptoUtils.generateSk(mnemonics, "")
 
+            val signature = KeyPair.sign(sk, op.binary.hexToByteArray())
 
+            mServerOperation!!.signatures[mnemonicsData.pk] = CryptoUtils.generateEDSig(signature)
 
+            val binaryReader = MultisigBinaries(op.binary)
+            binaryReader.getType()
 
+            val childUpdates = HashMap<String, Any>()
+            childUpdates["/multisig_operations/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
 
+            val signatures = mServerOperation?.signatures
+            val keys = ArrayList(signatures?.keys)
 
-            /*
-            // Request a string response from the provided URL.
-            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener
-            {o ->
+            for (pk in keys)
+            {
+                childUpdates["/signatory-operations/$pk/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
+            }
 
-                //prevents from async crashes
-                if (dialogRootView != null)
-                {
-                    addContractStorageBisFromJSON(o)
-                    onSignaturesInfoComplete(error = null)
-                }
-            },
-                    Response.ErrorListener {
+            mDatabaseReference = FirebaseDatabase.getInstance().reference
+            mDatabaseReference.updateChildren(childUpdates)
+                    .addOnSuccessListener {
 
-                        if (dialogRootView != null)
-                        {
-                            onSignaturesInfoComplete(error = it)
-                        }
-                    })
+                        val v = "hello world"
+                        val v2 = "hello world"
+                        //writeNewSignatory()
 
-            jsonArrayRequest.tag = LOAD_SIGNATURES_TAG
-            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
-            */
+                    }
+                    .addOnFailureListener {
+
+                        val v = "hello world"
+                        val v2 = "hello world"
+                    }
         }
     }
 
@@ -1748,6 +1785,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         outState.putBoolean(LOAD_SIGNATURES_TAG, mSignaturesLoading)
 
+        outState.putBoolean(ACCEPT_OPERATION_TAG, mAcceptLoading)
+
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
         outState.putBundle(SERVER_OPERATION_KEY, mServerOperation?.toBundle())
@@ -1778,15 +1817,26 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
     }
 
-    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject, validate:VALIDATION_OPERATION_TYPE)
     {
         if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeTransferLoading()
+            when (validate)
+            {
+                VALIDATION_OPERATION_TYPE.ACCEPT_OPERATION ->
+                {
+                    startInitAcceptOperationLoading()
+                }
+
+                VALIDATION_OPERATION_TYPE.CONFIRM_OPERATION ->
+                {
+                    startFinalizeTransferLoading()
+                }
+            }
         }
         else
         {
-            onSendClick()
+            onSendClick(validate)
         }
     }
 
@@ -1803,6 +1853,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 mStorageInfoLoading = false
                 mFinalizeTransferLoading = false
                 mSignaturesLoading = false
+                mAcceptLoading = false
             }
         }
     }
