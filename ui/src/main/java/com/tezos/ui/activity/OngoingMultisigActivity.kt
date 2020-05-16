@@ -45,11 +45,13 @@ import com.tezos.ui.adapter.OngoingMultisigRecyclerViewAdapter
 import com.tezos.ui.database.MultisigOperation
 import com.tezos.ui.fragment.HomeFragment
 import com.tezos.ui.fragment.OngoingMultisigDialogFragment
+import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_ongoing_multisig.*
 
 class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerViewAdapter.OnItemClickListener, OngoingMultisigDialogFragment.OnOngoinMultisigDialogInteractionListener
 {
     private var mRecyclerView: RecyclerView? = null
+    private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
     companion object
     {
@@ -160,15 +162,19 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         ongoingDialogFragment.show(supportFragmentManager, OngoingMultisigDialogFragment.TAG)
     }
 
-    override fun isFingerprintAllowed(): Boolean {
-        return false
+    override fun isFingerprintAllowed():Boolean
+    {
+        return storage.isFingerprintAllowed()
     }
 
-    override fun hasEnrolledFingerprints(): Boolean {
-        return false
+    override fun hasEnrolledFingerprints():Boolean
+    {
+        return systemServices.hasEnrolledFingerprints()
     }
 
-    override fun saveFingerprintAllowed(useInFuture: Boolean) {
+    override fun saveFingerprintAllowed(useInFuture:Boolean)
+    {
+        storage.saveFingerprintAllowed(useInFuture)
     }
 
     override fun onSigSentSucceed() {
