@@ -455,6 +455,47 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         super.onResume()
         validateAcceptDeclineButtons(areButtonsValid())
+        validateConfirmEditionButton(validate = false)
+    }
+
+    private fun validateConfirmEditionButton(validate: Boolean)
+    {
+        if (activity != null)
+        {
+//val themeBundle = arguments!!.getBundle(CustomTheme.TAG)
+//val theme = CustomTheme.fromBundle(themeBundle)
+            val theme = CustomTheme(R.color.colorAccentSecondaryDark, R.color.colorAccentSecondary, R.color.colorStandardText)
+
+            if (validate)
+            {
+                confirm_operation_multisig_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                confirm_operation_multisig_button_layout.isEnabled = true
+                confirm_operation_multisig_button_layout.background = makeSelector(theme)
+
+                val drawables = confirm_operation_multisig_button.compoundDrawables
+                if (drawables != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+                }
+            }
+            else
+            {
+                confirm_operation_multisig_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+                confirm_operation_multisig_button_layout.isEnabled = false
+
+                val greyTheme = CustomTheme(R.color.dark_grey, R.color.dark_grey, R.color.dark_grey)
+                confirm_operation_multisig_button_layout.background = makeSelector(greyTheme)
+
+                val drawables = confirm_operation_multisig_button.compoundDrawables
+                if (drawables != null)
+                {
+                    val wrapDrawable = DrawableCompat.wrap(drawables[0])
+                    DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+                }
+            }
+
+        }
     }
 
     private fun pk():String
@@ -526,14 +567,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         //TODO need to handle transfers from KT1 or from tz1
 
         validateAcceptDeclineButtons(validate = false)
-
-        arguments?.let {
-            val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
-            val op = MultisigOperation.fromBundle(opBundle)
-
-            val binaryReader = MultisigBinaries(op.binary)
-            startGetRequestLoadContractInfo(binaryReader.getType())
-        }
+        startGetRequestLoadContractInfo()
     }
 
     private fun startInitSignaturesInfoLoading()
@@ -809,7 +843,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     }
 
     // volley
-    private fun startGetRequestLoadContractInfo(operationType:MultisigBinaries.Companion.MULTISIG_BINARY_TYPE?)
+    private fun startGetRequestLoadContractInfo()
     {
         cancelRequests(resetBooleans = true)
 
@@ -1111,7 +1145,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             cancelRequests(true)
         }
 
-        //TODO check if necessary
         refreshTextsAndLayouts()
     }
 
@@ -1599,34 +1632,34 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     return true
                 }
 
-                when (binaryReader.getType())
+                /*
+            when (binaryReader.getType())
+            {
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
                 {
-                    /*
-                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
+                    if (!mContract?.storage.isNullOrEmpty())
                     {
-                        if (!mContract?.storage.isNullOrEmpty())
-                        {
-                            return true
-                        }
+                        return true
                     }
-
-                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
-                    {
-                        if (mContract != null)
-                        {
-                            return true
-                        }
-                    }
-
-                    MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
-                    {
-                        if (mContract != null)
-                        {
-                            return true
-                        }
-                    }
-                    */
                 }
+
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
+                {
+                    if (mContract != null)
+                    {
+                        return true
+                    }
+                }
+
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
+                {
+                    if (mContract != null)
+                    {
+                        return true
+                    }
+                }
+            }
+                */
             }
         }
 

@@ -463,7 +463,6 @@
                     android:id="@+id/confirm_operation_button_relative_layout"
                     android:layout_width="match_parent"
                     android:layout_margin="@dimen/spacing_normal"
-                    android:visibility="visible"
                     android:layout_height="?android:attr/actionBarSize">
 
                     <FrameLayout
@@ -479,7 +478,7 @@
                             android:id="@+id/confirm_operation_multisig_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/notify_edition"
+                            android:text="@string/confirm_edition"
 
                             android:drawableStart="@drawable/ic_lock_black"
                             android:drawableLeft="@drawable/ic_lock_black"
