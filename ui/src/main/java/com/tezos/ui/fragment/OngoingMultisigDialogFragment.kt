@@ -1334,8 +1334,23 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         dstObject.put("amount", "0")
 
-        val spendingLimitFile = "multisig_set_delegate.json"
-        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+
+        val file = when (binaryReader.getType())
+        {
+            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES -> {""}
+            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
+            {
+                "multisig_set_delegate.json"
+            }
+
+            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
+            {
+                "multisig_withdraw_delegate.json"
+            }
+            else -> {""}
+        }
+
+        val contract = context!!.assets.open(file).bufferedReader()
                 .use { it ->
                     it.readText()
                 }
@@ -1344,6 +1359,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         val sigs = (value["args"] as JSONArray)[1] as JSONArray
         sigs.remove(0)
+
+
+
 
         val list = getSignatoriesList()
 
@@ -1380,18 +1398,30 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         val argCounter = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
         argCounter.put("int", getMultisigCounter())
 
-        val argBaker = (((((((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
 
-        var decodedValue = Base58.decode(binaryReader.getBaker())
-        var bakerBytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
-        bakerBytes = byteArrayOf(0x00) + bakerBytes
-        argBaker.put("bytes", bakerBytes.toNoPrefixHexString())
+        when (binaryReader.getType())
+        {
+            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES -> {}
+            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
+            {
+                val argBaker = (((((((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+
+                var decodedValue = Base58.decode(binaryReader.getBaker())
+                var bakerBytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
+                bakerBytes = byteArrayOf(0x00) + bakerBytes
+                argBaker.put("bytes", bakerBytes.toNoPrefixHexString())
+            }
+
+            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE -> {}
+            else -> {}
+        }
 
         dstObject.put("parameters", value)
 
         dstObjects.put(dstObject)
 
         postParams.put("dsts", dstObjects)
+
 
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
