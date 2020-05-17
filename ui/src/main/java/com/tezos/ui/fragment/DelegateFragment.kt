@@ -263,7 +263,17 @@ class DelegateFragment : Fragment()
         }
 
         request_delegate_button_layout.setOnClickListener {
-            onDelegateClick()
+            if (mContract != null)
+            {
+                if (mContract?.delegate != null)
+                {
+                    onRemoveDelegateClick()
+                }
+                else
+                {
+                    onDelegateClick()
+                }
+            }
         }
 
         remove_delegate_button_layout.setOnClickListener {
@@ -537,7 +547,8 @@ class DelegateFragment : Fragment()
 
                 MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
                 {
-                    startPostRequestLoadInitRequestUpdateStorage()
+                    validateRemoveDelegateButton(/*isInputDataValid() && */isDelegateFeeValid())
+                    transferLoading(loading = false)
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
@@ -563,7 +574,8 @@ class DelegateFragment : Fragment()
         }
     }
 
-    private fun startFinalizeOngoingMultisigAddDelegateLoading()
+
+    private fun startFinalizeOngoingMultisigRemoveDelegateLoading()
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(true)
@@ -578,8 +590,102 @@ class DelegateFragment : Fragment()
                     System.currentTimeMillis()/1000
                 }
 
-        //val signatoriesHashMap = HashMap<String, Signatory>()
-        //signatoriesHashMap["hello"] = Signatory("hello", "world")
+        val dataVisitable = Primitive(
+                Primitive.Name.Pair,
+                arrayOf(
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.chainID(getString(R.string.chain_ID)),
+                                        Visitable.address(pkh()!!)
+                                )
+                        ),
+
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.integer(getMultisigCounter()!!.toLong()),
+                                        Primitive(Primitive.Name.Right,
+                                                arrayOf(
+                                                        Primitive (Primitive.Name.Left,
+                                                                arrayOf(
+                                                                        Primitive(Primitive.Name.None)
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+        )
+
+        val o = ByteArrayOutputStream()
+        o.write(0x05)
+
+        val dataPacker = Packer(o)
+        dataVisitable.accept(dataPacker)
+
+        val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+        val signatures = HashMap<String, String>()
+        val signatoriesList = getSignatoriesList()
+
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+
+        for (s in signatoriesList)
+        {
+            if (s == mnemonicsData.pk)
+            {
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+                val signature = KeyPair.sign(sk, dataPack)
+
+                signatures[s] = CryptoUtils.generateEDSig(signature)
+            }
+            else
+            {
+                signatures[s] = ""
+            }
+        }
+
+        val ongoingOperation = MultisigOperation(binary = dataPack.toNoPrefixHexString(), timestamp = nowInEpoch, notary = pkhtz1()!!, signatures = signatures)
+
+        val childUpdates = HashMap<String, Any>()
+        childUpdates["/multisig_operations/${pkh()}"] = ongoingOperation.toMap()
+
+        for (s in signatoriesList)
+        {
+            childUpdates["/signatory_operations/$s/${pkh()}"] = ongoingOperation.toMap()
+        }
+
+        mDatabaseReference.updateChildren(childUpdates)
+                .addOnSuccessListener {
+
+                    val v = "hello world"
+                    val v2 = "hello world"
+                    //writeNewSignatory()
+
+                }
+                .addOnFailureListener {
+
+                    val v = "hello world"
+                    val v2 = "hello world"
+                }
+    }
+
+    private fun startFinalizeOngoingMultisigAddDelegateLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        val nowInEpoch =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                {
+                    Instant.now().epochSecond
+                }
+                else
+                {
+                    System.currentTimeMillis()/1000
+                }
 
         val dataVisitable = Primitive(
                 Primitive.Name.Pair,
@@ -649,7 +755,7 @@ class DelegateFragment : Fragment()
 
         for (s in signatoriesList)
         {
-            childUpdates["/signatory-operations/$s/${pkh()}"] = ongoingOperation.toMap()
+            childUpdates["/signatory_operations/$s/${pkh()}"] = ongoingOperation.toMap()
         }
 
         mDatabaseReference.updateChildren(childUpdates)
@@ -666,6 +772,7 @@ class DelegateFragment : Fragment()
                     val v2 = "hello world"
                 }
     }
+
 
     private fun startFinalizeAddDelegateLoading()
     {
@@ -2117,8 +2224,6 @@ class DelegateFragment : Fragment()
     }
 
 
-
-
     // volley
     private fun startPostRequestLoadInitRequestUpdateStorage()
     {
@@ -2893,12 +2998,12 @@ class DelegateFragment : Fragment()
             {
                 MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
                 {
-                    startFinalizeAddDelegateLoading()
+                    startFinalizeRemoveDelegateLoading()
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
                 {
-                    startFinalizeOngoingMultisigAddDelegateLoading()
+                    startFinalizeOngoingMultisigRemoveDelegateLoading()
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY -> {}
@@ -2937,7 +3042,23 @@ class DelegateFragment : Fragment()
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeRemoveDelegateLoading()
+
+            when (askingForMultisigButton())
+            {
+                MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+                {
+                    startFinalizeRemoveDelegateLoading()
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+                {
+                    startFinalizeOngoingMultisigRemoveDelegateLoading()
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY -> {}
+                MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY -> {}
+                MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET -> {}
+            }
         }
         dialog.passwordVerificationListener =
                 {
@@ -3014,7 +3135,22 @@ class DelegateFragment : Fragment()
     {
         if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
-            startFinalizeRemoveDelegateLoading()
+            when (askingForMultisigButton())
+            {
+                MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
+                {
+                    startFinalizeRemoveDelegateLoading()
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
+                {
+                    startFinalizeOngoingMultisigRemoveDelegateLoading()
+                }
+
+                MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY -> {}
+                MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY -> {}
+                MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET -> {}
+            }
         }
         else
         {

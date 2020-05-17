@@ -493,7 +493,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val seed = Storage(activity!!).getMnemonics()
 
             operationDatabase = FirebaseDatabase.getInstance().reference
-                    .child("signatory-operations").child(seed.pk).child(binaryReader.getContractAddress()!!)
+                    .child("signatory_operations").child(seed.pk).child(binaryReader.getContractAddress()!!)
             operationDatabase.addListenerForSingleValueEvent(postListener)
         }
     }
@@ -578,7 +578,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             for (pk in keys)
             {
-                childUpdates["/signatory-operations/$pk/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
+                childUpdates["/signatory_operations/$pk/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
             }
 
             mDatabaseReference = FirebaseDatabase.getInstance().reference
@@ -619,50 +619,29 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         val seed = Storage(activity!!).getMnemonics()
 
         //TODO we got to verify at this very moment.
-        if (areButtonsValid() && mPayload != null)
+        if (hasEnoughSignatures() && mPayload != null)
         {
             var postParams = JSONObject()
             var dstObjects = JSONArray()
             var dstObject = JSONObject()
 
-            if (true)
-            {
-                val ecKeys = retrieveECKeys()
-                val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+            val mnemonicsData = Storage(activity!!).getMnemonics()
 
-                postParams.put("src_pk", p2pk)
+            postParams.put("src", mnemonicsData.pkh)
+            postParams.put("src_pk", mnemonicsData.pk)
 
-                val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-                postParams.put("src", tz3)
+            val opBundle = arguments!!.getBundle(ONGOING_OPERATION_KEY)
+            val op = MultisigOperation.fromBundle(opBundle)
+            val binaryReader = MultisigBinaries(op.binary)
+            binaryReader.getType()
+            dstObject.put("dst", binaryReader.getContractAddress())
 
-                val kt1 = arguments!!.getString(CONTRACT_PUBLIC_KEY)
-                dstObject.put("dst", kt1)
-
-                dstObject.put("dst_account", tz3)
-
-                dstObject.put("amount", 0.toLong())
-                dstObject.put("contract_type", "slc_enclave_transfer")
-
-                //0.1 tez == 100 000 mutez
-                dstObject.put("transfer_amount", "100000".toLong())
-            }
-            else
-            {
-                val mnemonicsData = Storage(activity!!).getMnemonics()
-
-                postParams.put("src", mnemonicsData.pkh)
-                postParams.put("src_pk", mnemonicsData.pk)
-
-                dstObject.put("dst", retrieveTz3())
-
-                dstObject.put("amount", "100000".toLong())
-
-            }
+            dstObject.put("amount", "0")
 
             dstObjects.put(dstObject)
             postParams.put("dsts", dstObjects)
 
-            if (isTransferPayloadValid(mPayload!!, postParams))
+            if (/*isTransferPayloadValid(mPayload!!, postParams)*/true)
             {
                 val zeroThree = "0x03".hexToByteArray()
 
@@ -676,18 +655,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 System.arraycopy(byteArrayThree, 0, result, xLen, yLen)
 
                 var compressedSignature: ByteArray
-                if (true)
-                {
-                    val bytes = KeyPair.b2b(result)
-                    var signature = EncryptionServices().sign(bytes)
-                    compressedSignature = compressFormat(signature)
-                }
-                else
-                {
-                    val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
-                    val sk = CryptoUtils.generateSk(mnemonics, "")
-                    compressedSignature = KeyPair.sign(sk, result)
-                }
+                val mnemonics = EncryptionServices().decrypt(seed.mnemonics)
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+                compressedSignature = KeyPair.sign(sk, result)
 
                 val pLen = byteArrayThree.size
                 val sLen = compressedSignature.size
@@ -701,7 +671,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 val stringRequest = object : StringRequest(Method.POST, url,
                         Response.Listener<String> {
 
-                            if (dialogRootView != null)
+                            if (swipe_refresh_multisig_dialog_layout != null)
                             {
                                 onFinalizeTransferLoadComplete(null)
                                 dismiss()
@@ -710,7 +680,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         },
                         Response.ErrorListener
                         {
-                            if (dialogRootView != null)
+                            if (swipe_refresh_multisig_dialog_layout != null)
                             {
                                 onFinalizeTransferLoadComplete(it)
                             }
@@ -1543,13 +1513,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             */
 
             showSnackBar(getString(R.string.generic_error), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
-        }
-        else
-        {
-            transferLoading(false)
-            cancelRequests(true)
-            // it's signed, looks like it worked.
-            //transferLoading(true)
         }
     }
 

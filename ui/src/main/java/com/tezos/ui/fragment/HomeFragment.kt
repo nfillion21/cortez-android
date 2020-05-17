@@ -672,7 +672,7 @@ open class HomeFragment : Fragment()
 
         // Initialize Database
         notaryOperationsDatabase = FirebaseDatabase.getInstance().reference
-                .child("signatory-operations").child(pk()!!)
+                .child("signatory_operations").child(pk()!!)
         notaryOperationsDatabase.addListenerForSingleValueEvent(postListener)
 
 
