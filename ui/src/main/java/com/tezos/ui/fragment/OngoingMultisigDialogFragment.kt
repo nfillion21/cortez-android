@@ -53,12 +53,15 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private var mClickCalculate:Boolean = false
 
-    private var mTransferPayload:String? = null
+    private var mPayload:String? = null
+    private var mFees:Long = -1L
+
     private var mStorageInfoLoading:Boolean = false
 
     private var mSignaturesLoading:Boolean = false
     private var mAcceptLoading:Boolean = false
 
+    private var mInitTransferLoading:Boolean = false
     private var mFinalizeTransferLoading:Boolean = false
 
     private var mServerOperation:MultisigOperation? = null
@@ -142,12 +145,16 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         const val TAG = "ongoing_multisig_dialog_fragment"
 
         private const val FEES_CALCULATE_KEY = "calculate_fee_key"
-        private const val TRANSFER_PAYLOAD_KEY = "transfer_payload_key"
+
+        private const val PAYLOAD_KEY = "payload_key"
+        private const val OPERATION_FEES_KEY = "operation_fees_key"
 
         private const val LOAD_SIGNATURES_TAG = "load_signatures"
         private const val ACCEPT_OPERATION_TAG = "accept_operation"
 
         private const val LOAD_STORAGE_TAG = "load_storage"
+
+        private const val TRANSFER_INITIALIZE_TAG = "transfer_initialize"
         private const val TRANSFER_FINALIZE_TAG = "transfer_finalize"
 
         private const val SERVER_OPERATION_KEY = "server_operation_key"
@@ -205,147 +212,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
 
         confirm_operation_multisig_button_layout.setOnClickListener {
-
-            val opBundle = arguments!!.getBundle(ONGOING_OPERATION_KEY)
-
-            val mnemonicsData = Storage(activity!!).getMnemonics()
-
-            val url = getString(R.string.transfer_forge)
-
-            var postParams = JSONObject()
-            postParams.put("src", mnemonicsData.pkh)
-            postParams.put("src_pk", mnemonicsData.pk)
-
-            var dstObjects = JSONArray()
-
-            var dstObject = JSONObject()
-
-            val op = MultisigOperation.fromBundle(opBundle)
-            val binaryReader = MultisigBinaries(op.binary)
-            binaryReader.getType()
-            dstObject.put("dst", binaryReader.getContractAddress())
-
-            dstObject.put("amount", "0")
-
-            val spendingLimitFile = "multisig_set_delegate.json"
-            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                    .use { it ->
-                        it.readText()
-                    }
-
-            val value = JSONObject(contract)
-
-            val sigs = (value["args"] as JSONArray)[1] as JSONArray
-            sigs.remove(0)
-
-            val list = getSignatoriesList()
-
-            val signatures = mServerOperation?.signatures
-            val orderedSignatures = ArrayList<String>(signatures!!.count())
-            for (pk in list)
-            {
-                orderedSignatures.add(signatures[pk]!!)
-            }
-
-            for (sig in orderedSignatures)
-            {
-                val sigParam = JSONObject()
-
-                if (!sig.isNullOrEmpty())
-                {
-                    sigParam.put("prim", "Some")
-
-                    val argSig = JSONArray()
-                    val argSigStr = JSONObject()
-
-                    argSigStr.put("string", sig)
-                    argSig.put(argSigStr)
-                    sigParam.put("args", argSig)
-                }
-                else
-                {
-                    sigParam.put("prim", "None")
-                }
-
-                sigs.put(sigParam)
-            }
-
-            val argCounter = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
-            argCounter.put("int", getMultisigCounter())
-
-            val argBaker = (((((((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
-
-            var decodedValue = Base58.decode(binaryReader.getBaker())
-            var bakerBytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
-            bakerBytes = byteArrayOf(0x00) + bakerBytes
-            argBaker.put("bytes", bakerBytes.toNoPrefixHexString())
-
-            dstObject.put("parameters", value)
-
-            dstObjects.put(dstObject)
-
-            postParams.put("dsts", dstObjects)
-
-            val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
-            { answer ->
-
-                if (swipe_refresh_multisig_dialog_layout != null)
-                {
-                    val k = ""
-                    val k2 = ""
-
-
-                    /*
-                    mDelegatePayload = answer.getString("result")
-                    mDelegateFees = answer.getLong("total_fee")
-
-                    // we use this call to ask for payload and fees
-                    if (mDelegatePayload != null && mDelegateFees != -1L && activity != null)
-                    {
-                        onInitDelegateLoadComplete(null)
-
-                        val feeInTez = mDelegateFees.toDouble()/1000000.0
-                        fee_edittext?.setText(feeInTez.toString())
-
-                        validateAddButton(isInputDataValid() && isDelegateFeeValid())
-
-                    }
-                    else
-                    {
-                        val volleyError = VolleyError(getString(R.string.generic_error))
-                        onInitDelegateLoadComplete(volleyError)
-                        mClickCalculate = true
-
-                        //the call failed
-                    }
-                    */
-                }
-
-            }, Response.ErrorListener
-            {
-                if (swipe_refresh_multisig_dialog_layout != null)
-                {
-                    //onInitDelegateLoadComplete(it)
-                    val k = ""
-                    val k2 = ""
-                    //mClickCalculate = true
-                }
-            })
-            {
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): Map<String, String>
-                {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json"
-                    return headers
-                }
-            }
-
-            cancelRequests(true)
-
-            jsObjRequest.tag = "hello"
-            //mInitDelegateLoading = true
-            VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+            onSendClick(VALIDATION_OPERATION_TYPE.CONFIRM_OPERATION)
         }
 
         close_button.setOnClickListener {
@@ -363,7 +230,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         {
             mClickCalculate = savedInstanceState.getBoolean(FEES_CALCULATE_KEY, false)
 
-            mTransferPayload = savedInstanceState.getString(TRANSFER_PAYLOAD_KEY, null)
+            mPayload = savedInstanceState.getString(PAYLOAD_KEY, null)
+            mFees = savedInstanceState.getLong(OPERATION_FEES_KEY, -1L)
 
             mStorageInfoLoading = savedInstanceState.getBoolean(LOAD_STORAGE_TAG)
 
@@ -371,6 +239,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             mAcceptLoading = savedInstanceState.getBoolean(ACCEPT_OPERATION_TAG)
 
+            mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INITIALIZE_TAG)
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
             val serverOperationBundle = savedInstanceState.getBundle(SERVER_OPERATION_KEY)
@@ -455,7 +324,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         super.onResume()
         validateAcceptDeclineButtons(areButtonsValid())
-        validateConfirmEditionButton(validate = false)
+        validateConfirmEditionButton(isInputDataValid() && isFeeValid())
     }
 
     private fun validateConfirmEditionButton(validate: Boolean)
@@ -567,6 +436,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         //TODO need to handle transfers from KT1 or from tz1
 
         validateAcceptDeclineButtons(validate = false)
+        validateConfirmEditionButton(validate = false)
+
         startGetRequestLoadContractInfo()
     }
 
@@ -600,6 +471,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     {
                         addMultisigOngoingOperationsFromJSON(dataSnapshot)
                         onSignaturesInfoComplete(databaseError = null)
+
+                        if (hasEnoughSignatures())
+                        {
+                            startPostRequestLoadInitTransfer(fromNotary = true)
+                        }
                     }
                 }
 
@@ -630,6 +506,46 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         validateAcceptDeclineButtons(validate = false)
 
         startAcceptOperationLoading()
+    }
+
+    private fun hasEnoughSignatures():Boolean
+    {
+        if (mServerOperation != null)
+        {
+            val signatures = mServerOperation?.signatures
+            val list = getSignatoriesList()
+
+            val keys = ArrayList(signatures?.keys)
+
+            if (list.containsAll(keys) && keys.containsAll(list))
+            {
+                if (!list.isNullOrEmpty())
+                {
+                    val length = list.size
+
+                    var confirmedSignatures = 0
+
+                    for (i in 0 until length)
+                    {
+                        val pk = list[i]
+                        if (signatures!![pk]!!.isNotEmpty())
+                        {
+                            confirmedSignatures++
+                        }
+                    }
+
+                    val threshold = getThreshold()!!.toLong()
+                    val necessarySignatures = threshold - confirmedSignatures
+
+                    if (necessarySignatures <= 0)
+                    {
+                        return true
+                    }
+                }
+            }
+        }
+
+        return false
     }
 
     private fun startAcceptOperationLoading()
@@ -703,7 +619,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         val seed = Storage(activity!!).getMnemonics()
 
         //TODO we got to verify at this very moment.
-        if (areButtonsValid() && mTransferPayload != null)
+        if (areButtonsValid() && mPayload != null)
         {
             var postParams = JSONObject()
             var dstObjects = JSONArray()
@@ -746,11 +662,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             dstObjects.put(dstObject)
             postParams.put("dsts", dstObjects)
 
-            if (isTransferPayloadValid(mTransferPayload!!, postParams))
+            if (isTransferPayloadValid(mPayload!!, postParams))
             {
                 val zeroThree = "0x03".hexToByteArray()
 
-                val byteArrayThree = mTransferPayload!!.hexToByteArray()
+                val byteArrayThree = mPayload!!.hexToByteArray()
 
                 val xLen = zeroThree.size
                 val yLen = byteArrayThree.size
@@ -1121,7 +1037,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             // stop the moulinette only if an error occurred
             cancelRequests(resetBooleans = true)
 
-            mTransferPayload = null
+            mPayload = null
+            mFees = -1L
 
             /*
             fee_edittext?.isEnabled = true
@@ -1157,23 +1074,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         swipe_refresh_multisig_dialog_layout?.isEnabled = true
         swipe_refresh_multisig_dialog_layout?.isRefreshing = false
 
-        if (databaseError != null || mClickCalculate)
+        if (databaseError != null)
         {
-            // stop the moulinette only if an error occurred
-
             //mTransferPayload = null
-
-            /*
-            fee_edittext?.isEnabled = true
-            fee_edittext?.isFocusable = false
-            fee_edittext?.isClickable = false
-            fee_edittext?.isLongClickable = false
-            fee_edittext?.hint = getString(R.string.click_for_fees)
-
-            fee_edittext?.setOnClickListener {
-                startInitContractInfoLoading()
-            }
-            */
 
             when
             {
@@ -1449,89 +1352,200 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     }
                 }
             }
+
+            validateConfirmEditionButton(hasEnoughSignatures() && isFeeValid() && mPayload != null)
         }
     }
 
-        /*
-        private fun startPostRequestLoadInitTransfer(fromContract: Boolean)
+    private fun startPostRequestLoadInitTransfer(fromNotary: Boolean)
+    {
+        val opBundle = arguments!!.getBundle(ONGOING_OPERATION_KEY)
+
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+        val url = getString(R.string.transfer_forge)
+
+        var postParams = JSONObject()
+        postParams.put("src", mnemonicsData.pkh)
+        postParams.put("src_pk", mnemonicsData.pk)
+
+        var dstObjects = JSONArray()
+
+        var dstObject = JSONObject()
+
+        val op = MultisigOperation.fromBundle(opBundle)
+        val binaryReader = MultisigBinaries(op.binary)
+        binaryReader.getType()
+        dstObject.put("dst", binaryReader.getContractAddress())
+
+        dstObject.put("amount", "0")
+
+        val spendingLimitFile = "multisig_set_delegate.json"
+        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                .use { it ->
+                    it.readText()
+                }
+
+        val value = JSONObject(contract)
+
+        val sigs = (value["args"] as JSONArray)[1] as JSONArray
+        sigs.remove(0)
+
+        val list = getSignatoriesList()
+
+        val signatures = mServerOperation?.signatures
+        val orderedSignatures = ArrayList<String>(signatures!!.count())
+        for (pk in list)
         {
-            val mnemonicsData = Storage(activity!!).getMnemonics()
+            orderedSignatures.add(signatures[pk]!!)
+        }
 
+        for (sig in orderedSignatures)
+        {
+            val sigParam = JSONObject()
 
-
-            val url = String.format(getString(R.string.contract_storage_url), "KT1Gen5CXA9Uh5TQSGKtGYAptsZEbpCz7kKX")
-            //val url = getString(R.string.transfer_forge)
-
-            val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
-            { answer ->
-
-                if (rootView != null)
-                {
-                    mTransferPayload = answer.getString("result")
-                    mTransferFees = answer.getLong("total_fee")
-
-                    // we use this call to ask for payload and fees
-                    if (mTransferPayload != null && mTransferFees != -1L)
-                    {
-                        onInitTransferLoadComplete(null)
-
-                        val feeInTez = mTransferFees.toDouble()/1000000.0
-                        fee_edittext?.setText(feeInTez.toString())
-
-                        validateSendCentsButton(isTransferFeeValid())
-                        setTextPayButton()
-                    }
-                    else
-                    {
-                        val volleyError = VolleyError(getString(R.string.generic_error))
-                        onInitTransferLoadComplete(volleyError)
-                        mClickCalculate = true
-
-                        //the call failed
-                    }
-                }
-            }, Response.ErrorListener
+            if (!sig.isNullOrEmpty())
             {
-                if (rootView != null)
-                {
-                    onInitTransferLoadComplete(it)
+                sigParam.put("prim", "Some")
 
+                val argSig = JSONArray()
+                val argSigStr = JSONObject()
+
+                argSigStr.put("string", sig)
+                argSig.put(argSigStr)
+                sigParam.put("args", argSig)
+            }
+            else
+            {
+                sigParam.put("prim", "None")
+            }
+
+            sigs.put(sigParam)
+        }
+
+        val argCounter = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+        argCounter.put("int", getMultisigCounter())
+
+        val argBaker = (((((((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
+
+        var decodedValue = Base58.decode(binaryReader.getBaker())
+        var bakerBytes = decodedValue.slice(3 until (decodedValue.size - 4)).toByteArray()
+        bakerBytes = byteArrayOf(0x00) + bakerBytes
+        argBaker.put("bytes", bakerBytes.toNoPrefixHexString())
+
+        dstObject.put("parameters", value)
+
+        dstObjects.put(dstObject)
+
+        postParams.put("dsts", dstObjects)
+
+        val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
+        { answer ->
+
+            if (swipe_refresh_multisig_dialog_layout != null)
+            {
+                mPayload = answer.getString("result")
+                mFees = answer.getLong("total_fee")
+
+                // we use this call to ask for payload and fees
+                if (mPayload != null && mFees != -1L && activity != null)
+                {
+                    onInitTransferLoadComplete(error = null)
+
+                    val feeInTez = mFees.toDouble()/1000000.0
+                    //fee_edittext?.setText(feeInTez.toString())
+
+                    validateConfirmEditionButton(isInputDataValid() && isFeeValid())
+                }
+                else
+                {
+                    val volleyError = VolleyError(getString(R.string.generic_error))
+                    onInitTransferLoadComplete(volleyError)
                     mClickCalculate = true
-                    //Log.i("mTransferId", ""+mTransferId)
-                    //Log.i("mDelegatePayload", ""+mDelegatePayload)
-                }
-            })
-            {
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): Map<String, String>
-                {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json"
-                    return headers
+
+                    //the call failed
                 }
             }
 
-            cancelRequests(true)
-
-            jsObjRequest.tag = LOAD_STORAGE_TAG
-            mStorageInfoLoading = true
-            VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+        }, Response.ErrorListener
+        {
+            if (swipe_refresh_multisig_dialog_layout != null)
+            {
+                onInitTransferLoadComplete(it)
+                mClickCalculate = true
+            }
+        })
+        {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String>
+            {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
         }
-        */
 
-    /*
+        cancelRequests(resetBooleans = true)
+
+        jsObjRequest.tag = LOAD_STORAGE_TAG
+        mInitTransferLoading = true
+        VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
+    }
+
+    private fun isFeeValid():Boolean
+    {
+        return (mFees != -1L && mFees >= 0.000001 && mPayload != null)
+        //val isFeeValid = true
+
+        /*
+        val isFeeValid = false
+
+        if (fee_limit_edittext.text != null && !TextUtils.isEmpty(fee_limit_edittext.text))
+        {
+            try
+            {
+//val amount = java.lang.Double.parseDouble()
+                val fee = fee_limit_edittext.text.toString().toDouble()
+
+                if (fee >= 0.000001f)
+                {
+                    val longTransferFee = fee*1000000
+                    mMultisigFees = longTransferFee.roundToLong()
+                    return true
+                }
+            }
+            catch (e: NumberFormatException)
+            {
+                mMultisigFees = -1
+                return false
+            }
+        }
+
+        return isFeeValid
+        */
+    }
+
+    fun isInputDataValid(): Boolean
+    {
+        //return isDelegateAmountValid() && isDailySpendingLimitValid()
+        //TODO check if the baker on its specific edittext is the same as specified in the BinaryReader.
+        //TODO do the same with the different operations.
+        return true
+    }
+
     private fun onInitTransferLoadComplete(error: VolleyError?)
     {
         mStorageInfoLoading = false
+        transferLoading(loading = false)
+        cancelRequests(resetBooleans = true)
 
         if (error != null || mClickCalculate)
         {
             // stop the moulinette only if an error occurred
-            transferLoading(false)
-            cancelRequests(true)
 
-            mTransferPayload = null
+            mPayload = null
+            mFees = -1L
 
+            /*
             fee_edittext?.isEnabled = true
             fee_edittext?.isFocusable = false
             fee_edittext?.isClickable = false
@@ -1541,12 +1555,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             fee_edittext?.setOnClickListener {
                 startInitContractInfoLoading()
             }
+            */
 
-            if(error != null)
-            {
-                //TODO handle the show snackbar
-                showSnackBar(getString(R.string.generic_error), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
-            }
+            showSnackBar(getString(R.string.generic_error), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
         }
         else
         {
@@ -1556,7 +1567,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             //transferLoading(true)
         }
     }
-    */
 
     private fun onFinalizeTransferLoadComplete(error: VolleyError?)
     {
@@ -1569,9 +1579,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             var err: String = error.toString()
 
-            //showSnackBar(error, ContextCompat.getColor(this,
-            //android.R.color.holo_red_light), null)
-            //listener?.onTransferFailed(error)
             showSnackBar(err, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
         }
         else
@@ -1744,7 +1751,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         super.onSaveInstanceState(outState)
 
         outState.putBoolean(FEES_CALCULATE_KEY, mClickCalculate)
-        outState.putString(TRANSFER_PAYLOAD_KEY, mTransferPayload)
+        outState.putString(PAYLOAD_KEY, mPayload)
+
+        outState.putLong(OPERATION_FEES_KEY, mFees)
 
         outState.putBoolean(LOAD_STORAGE_TAG, mStorageInfoLoading)
 
@@ -1753,6 +1762,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         outState.putBoolean(ACCEPT_OPERATION_TAG, mAcceptLoading)
 
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
+
+        outState.putBoolean(TRANSFER_INITIALIZE_TAG, mInitTransferLoading)
 
         outState.putBundle(SERVER_OPERATION_KEY, mServerOperation?.toBundle())
 
@@ -1811,11 +1822,13 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         {
             val requestQueue = VolleySingleton.getInstance(activity!!.applicationContext).requestQueue
             requestQueue?.cancelAll(LOAD_STORAGE_TAG)
+            requestQueue?.cancelAll(TRANSFER_INITIALIZE_TAG)
             requestQueue?.cancelAll(TRANSFER_FINALIZE_TAG)
 
             if (resetBooleans)
             {
                 mStorageInfoLoading = false
+                mInitTransferLoading = false
                 mFinalizeTransferLoading = false
                 mSignaturesLoading = false
                 mAcceptLoading = false
