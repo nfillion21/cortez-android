@@ -258,9 +258,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             if (mStorageInfoLoading)
             {
-                arguments?.let {
-                    startInitContractInfoLoading()
-                }
+                startInitContractInfoLoading()
             }
             else
             {
@@ -276,7 +274,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                     if (mAcceptLoading)
                     {
-                        startAcceptOperationLoading()
+                        startInitAcceptOperationLoading()
                     }
                     else
                     {
@@ -446,6 +444,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         transferLoading(true)
 
         validateAcceptDeclineButtons(validate = false)
+        validateConfirmEditionButton(validate = false)
 
         startGetRequestLoadSignatures()
     }
@@ -504,6 +503,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         transferLoading(true)
 
         validateAcceptDeclineButtons(validate = false)
+        validateConfirmEditionButton(validate = false)
 
         startAcceptOperationLoading()
     }
@@ -1028,38 +1028,21 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         mStorageInfoLoading = false
         transferLoading(false)
+        cancelRequests(resetBooleans = true)
 
         swipe_refresh_multisig_dialog_layout?.isEnabled = true
         swipe_refresh_multisig_dialog_layout?.isRefreshing = false
 
         if (error != null || mClickCalculate)
         {
-            // stop the moulinette only if an error occurred
-            cancelRequests(resetBooleans = true)
 
             mPayload = null
             mFees = -1L
-
-            /*
-            fee_edittext?.isEnabled = true
-            fee_edittext?.isFocusable = false
-            fee_edittext?.isClickable = false
-            fee_edittext?.isLongClickable = false
-            fee_edittext?.hint = getString(R.string.click_for_fees)
-
-            fee_edittext?.setOnClickListener {
-                startInitContractInfoLoading()
-            }
-            */
 
             if(error != null)
             {
                 showSnackBar(getString(R.string.generic_error), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
             }
-        }
-        else
-        {
-            cancelRequests(true)
         }
 
         refreshTextsAndLayouts()
@@ -1076,7 +1059,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         if (databaseError != null)
         {
-            //mTransferPayload = null
+            mPayload = null
+            mFees = -1L
 
             when
             {
@@ -1095,20 +1079,126 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         {
         }
 
+        refreshTextsAndLayouts()
+    }
+
+    private fun onAcceptInfoComplete(error:Exception?)
+    {
+        mAcceptLoading = false
+        transferLoading(false)
+        cancelRequests(resetBooleans = true)
+
+        swipe_refresh_multisig_dialog_layout?.isEnabled = true
+        swipe_refresh_multisig_dialog_layout?.isRefreshing = false
+
+        if (error != null || mClickCalculate)
+        {
+            mPayload = null
+            mFees = -1L
+
+            showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+        }
+        else
+        {
+        }
+
+        refreshTextsAndLayouts()
+    }
+
+    private fun refreshTextsAndLayouts()
+    {
         arguments?.let {
 
-            val hasSignedTextview = listOf(
-                    has_signature_textview_01,
-                    has_signature_textview_02,
-                    has_signature_textview_03,
-                    has_signature_textview_04,
-                    has_signature_textview_05,
-                    has_signature_textview_06,
-                    has_signature_textview_07,
-                    has_signature_textview_08,
-                    has_signature_textview_09,
-                    has_signature_textview_10
-            )
+            val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
+            val op = MultisigOperation.fromBundle(opBundle)
+
+            submission_item_date.text = op.timestamp.toString()
+
+            val binaryReader = MultisigBinaries(op.binary)
+
+            when (binaryReader.getType())
+            {
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
+                {
+                    threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
+                    refreshProposalSignatories(binaryReader.getSignatories())
+
+                    contract_address_item.text = binaryReader.getContractAddress()
+                    operation_type_item.text = binaryReader.getOperationTypeString()
+
+                    if (mContract != null)
+                    {
+                        if (getThreshold() != null)
+                        {
+                            refreshSignatories()
+
+                            update_signatories_layout.visibility = View.VISIBLE
+                            storage_proposal_layout.visibility = View.VISIBLE
+
+                            no_baker_textview.visibility = View.GONE
+
+                            threshold_edittext.setText(getThreshold())
+
+                            //TODO notary
+                            //notary_tz1_edittext.setText(mContract.delegate)
+
+                            validateAcceptDeclineButtons(areButtonsValid())
+                        }
+                    }
+                }
+
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
+                {
+                    contract_address_item.text = binaryReader.getContractAddress()
+                    operation_type_item.text = binaryReader.getOperationTypeString()
+
+                    if (mContract != null)
+                    {
+                        refreshSignatories()
+                        storage_proposal_layout.visibility = View.GONE
+                        update_signatories_layout.visibility = View.VISIBLE
+
+                        threshold_edittext.setText(getThreshold())
+
+                        set_baker_layout.visibility = View.VISIBLE
+
+                        remove_baker_textview.visibility = View.GONE
+                        current_baker_textview.visibility = View.GONE
+
+                        set_baker_edittext.setText(binaryReader.getBaker())
+
+                        validateAcceptDeclineButtons(areButtonsValid())
+                    }
+                }
+
+                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
+                {
+                    contract_address_item.text = binaryReader.getContractAddress()
+                    operation_type_item.text = binaryReader.getOperationTypeString()
+
+                    if (mContract != null)
+                    {
+                        refreshSignatories()
+                        update_signatories_layout.visibility = View.VISIBLE
+                        storage_proposal_layout.visibility = View.GONE
+
+                        threshold_edittext.setText(getThreshold())
+
+                        set_baker_layout.visibility = View.VISIBLE
+
+                        set_baker_textview.visibility = View.GONE
+
+                        no_baker_textview.visibility = View.GONE
+
+                        current_baker_textview.setText(mContract?.delegate)
+
+                        set_baker_edittext.visibility = View.GONE
+
+                        validateAcceptDeclineButtons(areButtonsValid())
+                    }
+                }
+            }
+
 
             if (mServerOperation != null)
             {
@@ -1119,6 +1209,19 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                 if (list.containsAll(keys) && keys.containsAll(list))
                 {
+                    val hasSignedTextview = listOf(
+                            has_signature_textview_01,
+                            has_signature_textview_02,
+                            has_signature_textview_03,
+                            has_signature_textview_04,
+                            has_signature_textview_05,
+                            has_signature_textview_06,
+                            has_signature_textview_07,
+                            has_signature_textview_08,
+                            has_signature_textview_09,
+                            has_signature_textview_10
+                    )
+
                     if (!list.isNullOrEmpty())
                     {
                         val length = list.size
@@ -1233,127 +1336,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     // the operation is different than storage. cancel the operation.
                     //TODO cancel the operation
                 }
+
+                validateConfirmEditionButton(hasEnoughSignatures() && isFeeValid() && mPayload != null)
             }
-        }
-
-        refreshTextsAndLayouts()
-    }
-
-    private fun onAcceptInfoComplete(error:Exception?)
-    {
-        mAcceptLoading = false
-        transferLoading(false)
-        cancelRequests(resetBooleans = true)
-
-        swipe_refresh_multisig_dialog_layout?.isEnabled = true
-        swipe_refresh_multisig_dialog_layout?.isRefreshing = false
-
-        if (error != null || mClickCalculate)
-        {
-            showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
-        }
-        else
-        {
-        }
-
-        refreshTextsAndLayouts()
-    }
-
-    private fun refreshTextsAndLayouts()
-    {
-        arguments?.let {
-
-            val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
-            val op = MultisigOperation.fromBundle(opBundle)
-
-            submission_item_date.text = op.timestamp.toString()
-
-            val binaryReader = MultisigBinaries(op.binary)
-
-            when (binaryReader.getType())
-            {
-                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
-                {
-                    threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
-                    refreshProposalSignatories(binaryReader.getSignatories())
-
-                    contract_address_item.text = binaryReader.getContractAddress()
-                    operation_type_item.text = binaryReader.getOperationTypeString()
-
-                    if (mContract != null)
-                    {
-                        if (getThreshold() != null)
-                        {
-                            refreshSignatories()
-
-                            update_signatories_layout.visibility = View.VISIBLE
-                            storage_proposal_layout.visibility = View.VISIBLE
-
-                            no_baker_textview.visibility = View.GONE
-
-                            threshold_edittext.setText(getThreshold())
-
-                            //TODO notary
-                            //notary_tz1_edittext.setText(mContract.delegate)
-
-                            validateAcceptDeclineButtons(areButtonsValid())
-                        }
-                    }
-                }
-
-                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
-                {
-                    contract_address_item.text = binaryReader.getContractAddress()
-                    operation_type_item.text = binaryReader.getOperationTypeString()
-
-                    if (mContract != null)
-                    {
-                        refreshSignatories()
-                        storage_proposal_layout.visibility = View.GONE
-                        update_signatories_layout.visibility = View.VISIBLE
-
-                        threshold_edittext.setText(getThreshold())
-
-                        set_baker_layout.visibility = View.VISIBLE
-
-                        remove_baker_textview.visibility = View.GONE
-                        current_baker_textview.visibility = View.GONE
-
-                        set_baker_edittext.setText(binaryReader.getBaker())
-
-                        validateAcceptDeclineButtons(areButtonsValid())
-                    }
-                }
-
-                MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
-                {
-                    contract_address_item.text = binaryReader.getContractAddress()
-                    operation_type_item.text = binaryReader.getOperationTypeString()
-
-                    if (mContract != null)
-                    {
-                        refreshSignatories()
-                        update_signatories_layout.visibility = View.VISIBLE
-                        storage_proposal_layout.visibility = View.GONE
-
-                        threshold_edittext.setText(getThreshold())
-
-                        set_baker_layout.visibility = View.VISIBLE
-
-                        set_baker_textview.visibility = View.GONE
-
-                        no_baker_textview.visibility = View.GONE
-
-                        current_baker_textview.setText(mContract?.delegate)
-
-                        set_baker_edittext.visibility = View.GONE
-
-                        validateAcceptDeclineButtons(areButtonsValid())
-                    }
-                }
-            }
-
-            validateConfirmEditionButton(hasEnoughSignatures() && isFeeValid() && mPayload != null)
         }
     }
 
@@ -1447,14 +1432,14 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 mFees = answer.getLong("total_fee")
 
                 // we use this call to ask for payload and fees
-                if (mPayload != null && mFees != -1L && activity != null)
+                if (mPayload != null && isFeeValid() && activity != null)
                 {
                     onInitTransferLoadComplete(error = null)
 
                     val feeInTez = mFees.toDouble()/1000000.0
                     //fee_edittext?.setText(feeInTez.toString())
 
-                    validateConfirmEditionButton(isInputDataValid() && isFeeValid())
+                    validateConfirmEditionButton(hasEnoughSignatures() && isInputDataValid() && isFeeValid() && mPayload != null)
                 }
                 else
                 {
