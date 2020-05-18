@@ -279,6 +279,15 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     else
                     {
                         onAcceptInfoComplete(error = null)
+
+                        if (mInitTransferLoading)
+                        {
+                            startInitTransferLoading()
+                        }
+                        else
+                        {
+                            onInitTransferLoadComplete(error = null)
+                        }
                     }
                 }
             }
@@ -471,9 +480,9 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         addMultisigOngoingOperationsFromJSON(dataSnapshot)
                         onSignaturesInfoComplete(databaseError = null)
 
-                        if (hasEnoughSignatures())
+                        if (hasEnoughSignatures() && it.getBoolean(FROM_NOTARY))
                         {
-                            startPostRequestLoadInitTransfer(fromNotary = true)
+                            startInitTransferLoading()
                         }
                     }
                 }
@@ -507,6 +516,16 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         startAcceptOperationLoading()
     }
+
+    private fun startInitTransferLoading()
+    {
+        transferLoading(true)
+
+        validateConfirmEditionButton(validate = false)
+        startPostRequestLoadInitTransfer()
+    }
+
+
 
     private fun hasEnoughSignatures():Boolean
     {
@@ -1170,6 +1189,15 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             {
                 notary_tz1_edittext.setText(mServerOperation?.notary)
 
+                if (it.getBoolean(FROM_NOTARY))
+                {
+                    confirm_operation_button_relative_layout.visibility = View.VISIBLE
+                }
+                else
+                {
+                    confirm_operation_button_relative_layout.visibility = View.GONE
+                }
+
                 val signatures = mServerOperation?.signatures
                 val list = getSignatoriesList()
 
@@ -1310,7 +1338,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
     }
 
-    private fun startPostRequestLoadInitTransfer(fromNotary: Boolean)
+    private fun startPostRequestLoadInitTransfer()
     {
         val opBundle = arguments!!.getBundle(ONGOING_OPERATION_KEY)
 
