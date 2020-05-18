@@ -657,21 +657,19 @@ open class HomeFragment : Fragment()
 
         nav_progress_ongoing_operations.visibility = View.VISIBLE
 
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-
+        val postListener = object : ValueEventListener
+        {
+            override fun onDataChange(dataSnapshot: DataSnapshot)
+            {
                 addMultisigOngoingOperationsFromJSON(dataSnapshot)
                 onMultisigOnGoingLoadComplete(databaseError = null)
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {
-                // Getting Post failed, log a message
-                //Log.w(TAG, "loadPost:onCancelled", databaseError.toException())
-                // ...
+            override fun onCancelled(databaseError: DatabaseError)
+            {
                 onMultisigOnGoingLoadComplete(databaseError)
             }
         }
-        //notaryOperationsDatabase.addValueEventListener(postListener)
 
         // Initialize Database
         notaryOperationsDatabase = FirebaseDatabase.getInstance().reference
@@ -793,6 +791,10 @@ open class HomeFragment : Fragment()
             ongoing_contract_textview.text = binaryReader.getContractAddress()
 
             ongoing_submission_date_textview.text = lastOperation?.timestamp.toString()
+        }
+        else
+        {
+            mOngoingMultisigItems?.clear()
         }
     }
 

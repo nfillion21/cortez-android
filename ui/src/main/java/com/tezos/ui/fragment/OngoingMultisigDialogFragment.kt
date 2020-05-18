@@ -688,13 +688,39 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 var payloadsign = newResult.toNoPrefixHexString()
 
                 val stringRequest = object : StringRequest(Method.POST, url,
-                        Response.Listener<String> {
+                        Response.Listener {
 
                             if (swipe_refresh_multisig_dialog_layout != null)
                             {
                                 onFinalizeTransferLoadComplete(null)
-                                dismiss()
-                                listener?.onSigSentSucceed()
+
+                                val childUpdates = HashMap<String, Any?>()
+
+                                val binaryReader = MultisigBinaries(op.binary)
+                                binaryReader.getType()
+
+                                childUpdates["/multisig_operations/${binaryReader.getContractAddress()}"] = null
+
+                                val signatoriesList = getSignatoriesList()
+                                for (s in signatoriesList)
+                                {
+                                    childUpdates["/signatory_multisig_operations/$s/${binaryReader.getContractAddress()}"] = null
+                                }
+
+                                mDatabaseReference = FirebaseDatabase.getInstance().reference
+                                mDatabaseReference.updateChildren(childUpdates)
+                                        .addOnSuccessListener {
+
+                                            dismiss()
+                                            listener?.onSigSentSucceed()
+
+                                        }
+                                        .addOnFailureListener {
+
+                                            val v = "hello world"
+                                            val v2 = "hello world"
+                                        }
+
                             }
                         },
                         Response.ErrorListener
