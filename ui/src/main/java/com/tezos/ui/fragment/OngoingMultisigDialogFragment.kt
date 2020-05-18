@@ -61,6 +61,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     private var mSignaturesLoading:Boolean = false
     private var mAcceptLoading:Boolean = false
 
+    private var mRemoveOperationLoading:Boolean = false
+
     private var mInitTransferLoading:Boolean = false
     private var mFinalizeTransferLoading:Boolean = false
 
@@ -152,6 +154,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         private const val LOAD_SIGNATURES_TAG = "load_signatures"
         private const val ACCEPT_OPERATION_TAG = "accept_operation"
 
+        private const val REMOVE_OPERATION_TAG = "remove_operation"
+
         private const val LOAD_STORAGE_TAG = "load_storage"
 
         private const val TRANSFER_INITIALIZE_TAG = "transfer_initialize"
@@ -239,6 +243,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             mAcceptLoading = savedInstanceState.getBoolean(ACCEPT_OPERATION_TAG)
 
+            mRemoveOperationLoading = savedInstanceState.getBoolean(REMOVE_OPERATION_TAG)
+
             mInitTransferLoading = savedInstanceState.getBoolean(TRANSFER_INITIALIZE_TAG)
             mFinalizeTransferLoading = savedInstanceState.getBoolean(TRANSFER_FINALIZE_TAG)
 
@@ -287,6 +293,24 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         else
                         {
                             onInitTransferLoadComplete(error = null)
+
+                            if (mFinalizeTransferLoading)
+                            {
+                                startFinalizeTransferLoading()
+                            }
+                            else
+                            {
+                                onFinalizeTransferLoadComplete(error = null)
+
+                                if (mRemoveOperationLoading)
+                                {
+                                    startInitRemoveOngoingOperationDatabase()
+                                }
+                                else
+                                {
+                                    onRemoveOngoingOperationDatabaseComplete(error = null)
+                                }
+                            }
                         }
                     }
                 }
@@ -458,6 +482,72 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         startGetRequestLoadSignatures()
     }
 
+    private fun startInitRemoveOngoingOperationDatabase()
+    {
+        transferLoading(true)
+        mRemoveOperationLoading = true
+
+        startPostRequestRemoveOngoingOperationDatabase()
+    }
+
+    private fun startPostRequestRemoveOngoingOperationDatabase()
+    {
+        val childUpdates = HashMap<String, Any?>()
+
+        val opBundle = arguments!!.getBundle(ONGOING_OPERATION_KEY)
+        val op = MultisigOperation.fromBundle(opBundle)
+        val binaryReader = MultisigBinaries(op.binary)
+        binaryReader.getType()
+
+        childUpdates["/multisig_operations/${binaryReader.getContractAddress()}"] = null
+
+        val signatoriesList = getSignatoriesList()
+        for (s in signatoriesList)
+        {
+            childUpdates["/signatory_multisig_operations/$s/${binaryReader.getContractAddress()}"] = null
+        }
+
+        mDatabaseReference = FirebaseDatabase.getInstance().reference
+        mDatabaseReference.updateChildren(childUpdates)
+                .addOnSuccessListener {
+
+                    if (swipe_refresh_multisig_dialog_layout != null)
+                    {
+                        onRemoveOngoingOperationDatabaseComplete(error = null)
+                        dismiss()
+                        listener?.onSigSentSucceed()
+                    }
+                }
+                .addOnFailureListener {
+
+                    if (swipe_refresh_multisig_dialog_layout != null)
+                    {
+                        onRemoveOngoingOperationDatabaseComplete(error = it)
+                    }
+                }
+    }
+
+    private fun onRemoveOngoingOperationDatabaseComplete(error:Exception?)
+    {
+        mRemoveOperationLoading = false
+        transferLoading(false)
+        cancelRequests(resetBooleans = true)
+
+        swipe_refresh_multisig_dialog_layout?.isEnabled = true
+        swipe_refresh_multisig_dialog_layout?.isRefreshing = false
+
+        if (error != null || mClickCalculate)
+        {
+            mPayload = null
+            mFees = -1L
+
+            showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+        }
+
+        refreshTextsAndLayouts()
+    }
+
+
     private fun startGetRequestLoadSignatures()
     {
         cancelRequests(resetBooleans = true)
@@ -607,6 +697,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                         if (swipe_refresh_multisig_dialog_layout != null)
                         {
                             onAcceptInfoComplete(error = null)
+
+                            showSnackBar(getString(R.string.multisig_operation_accepted), ContextCompat.getColor(context!!, android.R.color.holo_green_light), ContextCompat.getColor(context!!, R.color.tz_light))
                             startInitSignaturesInfoLoading()
                         }
                     }
@@ -694,32 +786,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             {
                                 onFinalizeTransferLoadComplete(null)
 
-                                val childUpdates = HashMap<String, Any?>()
-
-                                val binaryReader = MultisigBinaries(op.binary)
-                                binaryReader.getType()
-
-                                childUpdates["/multisig_operations/${binaryReader.getContractAddress()}"] = null
-
-                                val signatoriesList = getSignatoriesList()
-                                for (s in signatoriesList)
-                                {
-                                    childUpdates["/signatory_multisig_operations/$s/${binaryReader.getContractAddress()}"] = null
-                                }
-
-                                mDatabaseReference = FirebaseDatabase.getInstance().reference
-                                mDatabaseReference.updateChildren(childUpdates)
-                                        .addOnSuccessListener {
-
-                                            dismiss()
-                                            listener?.onSigSentSucceed()
-
-                                        }
-                                        .addOnFailureListener {
-
-                                            val v = "hello world"
-                                            val v2 = "hello world"
-                                        }
+                                startInitRemoveOngoingOperationDatabase()
 
                             }
                         },
@@ -1791,6 +1858,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         outState.putBoolean(ACCEPT_OPERATION_TAG, mAcceptLoading)
 
+        outState.putBoolean(REMOVE_OPERATION_TAG, mRemoveOperationLoading)
+
         outState.putBoolean(TRANSFER_FINALIZE_TAG, mFinalizeTransferLoading)
 
         outState.putBoolean(TRANSFER_INITIALIZE_TAG, mInitTransferLoading)
@@ -1862,6 +1931,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                 mFinalizeTransferLoading = false
                 mSignaturesLoading = false
                 mAcceptLoading = false
+                mRemoveOperationLoading = false
             }
         }
     }

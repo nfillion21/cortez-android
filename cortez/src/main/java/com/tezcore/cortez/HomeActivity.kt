@@ -493,6 +493,14 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 }
             }
 
+            OngoingMultisigActivity.ACCEPT_REQUEST_CODE ->
+            {
+                if (resultCode == R.id.multisig_operation_confirmed)
+                {
+                    showSnackBar(getString(R.string.multisig_operation_confirmed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
+            }
+
             else ->
             {
             }

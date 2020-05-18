@@ -661,20 +661,28 @@ open class HomeFragment : Fragment()
         {
             override fun onDataChange(dataSnapshot: DataSnapshot)
             {
-                addMultisigOngoingOperationsFromJSON(dataSnapshot)
-                onMultisigOnGoingLoadComplete(databaseError = null)
+                if (swipe_refresh_layout != null)
+                {
+                    addMultisigOngoingOperationsFromJSON(dataSnapshot)
+                    onMultisigOnGoingLoadComplete(databaseError = null)
+                }
             }
 
             override fun onCancelled(databaseError: DatabaseError)
             {
-                onMultisigOnGoingLoadComplete(databaseError)
+                if (swipe_refresh_layout != null)
+                {
+                    onMultisigOnGoingLoadComplete(databaseError)
+                }
             }
         }
 
         // Initialize Database
         notaryOperationsDatabase = FirebaseDatabase.getInstance().reference
                 .child("signatory_multisig_operations").child(pk()!!)
-        notaryOperationsDatabase.addListenerForSingleValueEvent(postListener)
+        //notaryOperationsDatabase.addListenerForSingleValueEvent(postListener)
+        notaryOperationsDatabase.addValueEventListener(postListener)
+
 
     }
 

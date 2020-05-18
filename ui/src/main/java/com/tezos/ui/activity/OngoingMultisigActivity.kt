@@ -53,8 +53,11 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
     private var mRecyclerView: RecyclerView? = null
     private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
+
     companion object
     {
+        var ACCEPT_REQUEST_CODE = 0x3600 // arbitrary int
+
         const val ONGOING_MULTISIG_KEY = "ongoing_multisig_key"
 
         private fun getStartIntent(context: Context, list: ArrayList<Bundle>, themeBundle: Bundle): Intent
@@ -69,7 +72,8 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         fun start(activity: Activity, list: ArrayList<Bundle>, theme: CustomTheme)
         {
             val starter = getStartIntent(activity, list, theme.toBundle())
-            ActivityCompat.startActivity(activity, starter, null)
+            ActivityCompat.startActivityForResult(activity, starter, ACCEPT_REQUEST_CODE, null)
+            //ActivityCompat.startActivityForResult(activity, starter, ADD_DSL_REQUEST_CODE, null)
         }
     }
 
@@ -194,6 +198,9 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         storage.saveFingerprintAllowed(useInFuture)
     }
 
-    override fun onSigSentSucceed() {
+    override fun onSigSentSucceed()
+    {
+        setResult(R.id.multisig_operation_confirmed, null)
+        finish()
     }
 }
