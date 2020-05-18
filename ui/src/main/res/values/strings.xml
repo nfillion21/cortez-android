@@ -18,7 +18,7 @@
     <string name="amount">Amount</string>
     <string name="submission_date">Submission date</string>
     <string name="operation_type">Operation type</string>
-    <string name="ongoing_contract_address">Contract address</string>
+    <string name="ongoing_contract_address">Multisig contract address</string>
     <string name="ongoing_contract_for_notary">Ongoing operation as a notary</string>
     <string name="ongoing_contract_operations">Ongoing operations</string>
     <string name="has_signed_already">Has signed already</string>

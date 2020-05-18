@@ -654,7 +654,7 @@ class DelegateFragment : Fragment()
 
         for (s in signatoriesList)
         {
-            childUpdates["/signatory_operations/$s/${pkh()}"] = ongoingOperation.toMap()
+            childUpdates["/signatory_multisig_operations/$s/${pkh()}"] = ongoingOperation.toMap()
         }
 
         mDatabaseReference.updateChildren(childUpdates)
@@ -755,7 +755,7 @@ class DelegateFragment : Fragment()
 
         for (s in signatoriesList)
         {
-            childUpdates["/signatory_operations/$s/${pkh()}"] = ongoingOperation.toMap()
+            childUpdates["/signatory_multisig_operations/$s/${pkh()}"] = ongoingOperation.toMap()
         }
 
         mDatabaseReference.updateChildren(childUpdates)

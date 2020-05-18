@@ -493,7 +493,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val seed = Storage(activity!!).getMnemonics()
 
             operationDatabase = FirebaseDatabase.getInstance().reference
-                    .child("signatory_operations").child(seed.pk).child(binaryReader.getContractAddress()!!)
+                    .child("signatory_multisig_operations").child(seed.pk).child(binaryReader.getContractAddress()!!)
             operationDatabase.addListenerForSingleValueEvent(postListener)
         }
     }
@@ -578,7 +578,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             for (pk in keys)
             {
-                childUpdates["/signatory_operations/$pk/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
+                childUpdates["/signatory_multisig_operations/$pk/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
             }
 
             mDatabaseReference = FirebaseDatabase.getInstance().reference
@@ -1093,7 +1093,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     threshold_proposal_edittext.setText(binaryReader.getThreshold().toString())
                     refreshProposalSignatories(binaryReader.getSignatories())
 
-                    contract_address_item.text = binaryReader.getContractAddress()
+                    contract_address_edittext.setText(binaryReader.getContractAddress())
                     operation_type_item.text = binaryReader.getOperationTypeString()
 
                     if (mContract != null)
@@ -1109,9 +1109,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                             threshold_edittext.setText(getThreshold())
 
-                            //TODO notary
-                            //notary_tz1_edittext.setText(mContract.delegate)
-
                             validateAcceptDeclineButtons(areButtonsValid())
                         }
                     }
@@ -1119,7 +1116,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                 MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
                 {
-                    contract_address_item.text = binaryReader.getContractAddress()
+                    contract_address_edittext.setText(binaryReader.getContractAddress())
                     operation_type_item.text = binaryReader.getOperationTypeString()
 
                     if (mContract != null)
@@ -1143,9 +1140,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                 MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UNDELEGATE ->
                 {
-                    contract_address_item.text = binaryReader.getContractAddress()
+                    contract_address_edittext.setText(binaryReader.getContractAddress())
                     operation_type_item.text = binaryReader.getOperationTypeString()
-
                     if (mContract != null)
                     {
                         refreshSignatories()
@@ -1172,6 +1168,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             if (mServerOperation != null)
             {
+                notary_tz1_edittext.setText(mServerOperation?.notary)
+
                 val signatures = mServerOperation?.signatures
                 val list = getSignatoriesList()
 
