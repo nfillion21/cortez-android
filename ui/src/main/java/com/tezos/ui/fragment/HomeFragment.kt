@@ -312,7 +312,7 @@ open class HomeFragment : Fragment()
                     }
                     else
                     {
-                        onMultisigOnGoingLoadComplete()
+                        onMultisigOnGoingLoadComplete(databaseError = null)
                     }
                 }
             }
@@ -405,7 +405,7 @@ open class HomeFragment : Fragment()
         refreshRecyclerViewAndTextHistory()
     }
 
-    private fun onMultisigOnGoingLoadComplete()
+    private fun onMultisigOnGoingLoadComplete(databaseError: DatabaseError?)
     {
         mGetMultisigOnGoing = false
 
@@ -413,6 +413,12 @@ open class HomeFragment : Fragment()
 
         swipe_refresh_layout.isEnabled = true
         swipe_refresh_layout.isRefreshing = false
+
+
+        if (databaseError != null)
+        {
+            showSnackbarError(databaseError)
+        }
 
         refreshOngoingOperationsLayouts()
     }
@@ -655,17 +661,14 @@ open class HomeFragment : Fragment()
             override fun onDataChange(dataSnapshot: DataSnapshot) {
 
                 addMultisigOngoingOperationsFromJSON(dataSnapshot)
-                onMultisigOnGoingLoadComplete()
+                onMultisigOnGoingLoadComplete(databaseError = null)
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
                 // Getting Post failed, log a message
                 //Log.w(TAG, "loadPost:onCancelled", databaseError.toException())
                 // ...
-                val k = databaseError
-                val k2 = databaseError
-                //showSnackbarError()
-                onMultisigOnGoingLoadComplete()
+                onMultisigOnGoingLoadComplete(databaseError)
             }
         }
         //notaryOperationsDatabase.addValueEventListener(postListener)
@@ -675,38 +678,6 @@ open class HomeFragment : Fragment()
                 .child("signatory_multisig_operations").child(pk()!!)
         notaryOperationsDatabase.addListenerForSingleValueEvent(postListener)
 
-
-
-        /*
-        val pkh = pkh()
-
-        if (pkh != null)
-        {
-            val url = String.format(getString(R.string.history_url), pkh)
-
-            val jsObjRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
-            { answer ->
-
-                if (swipe_refresh_layout != null)
-                {
-                    addMultisigOngoingOperationsFromJSON(answer)
-                    onMultisigOnGoinLoadComplete()
-                }
-
-            }, Response.ErrorListener
-            { volleyError ->
-                if (swipe_refresh_layout != null)
-                {
-                    onMultisigOnGoinLoadComplete()
-                    showSnackbarError(volleyError)
-                }
-            })
-
-            jsObjRequest.tag = LOAD_MULTISIG_ONGOING_TAG
-
-            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsObjRequest)
-        }
-        */
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -723,6 +694,16 @@ open class HomeFragment : Fragment()
 
         empty_loading_operations_textview.text = getString(R.string.generic_error)
         empty_loading_balance_textview.text = getString(R.string.generic_error)
+    }
+
+    private fun showSnackbarError(error:DatabaseError)
+    {
+        var err: String = error.toString()
+
+        listener?.showSnackBar(err, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+
+        //empty_loading_operations_textview.text = getString(R.string.generic_error)
+        //empty_loading_balance_textview.text = getString(R.string.generic_error)
     }
 
     private fun addOperationItemsFromJSON(answer:JSONArray)

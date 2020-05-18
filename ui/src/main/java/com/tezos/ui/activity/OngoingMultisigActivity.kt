@@ -105,8 +105,25 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         //var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
 
         val elements = intent.getParcelableArrayListExtra<Bundle>(ONGOING_MULTISIG_KEY)
+
+        val operationsAsNotary = ArrayList<MultisigOperation>()
+        val operationsAsSignatory = ArrayList<MultisigOperation>()
+
+        for (oBundle in elements)
+        {
+            val o = MultisigOperation.fromBundle(oBundle)
+            if (o.notary == storage.getMnemonics().pkh)
+            {
+                operationsAsNotary.add(o)
+            }
+            else
+            {
+                operationsAsSignatory.add(o)
+            }
+        }
+
         //val adapter = OngoingMultisigRecyclerViewAdapter(ArrayList<HomeFragment.OngoingMultisigOperation>(), bundlesToOngoingItems(elements))
-        val adapter = OngoingMultisigRecyclerViewAdapter(bundlesToOngoingItems(elements), bundlesToOngoingItems(elements))
+        val adapter = OngoingMultisigRecyclerViewAdapter(operationsAsSignatory, operationsAsNotary)
         //val adapter = OngoingMultisigRecyclerViewAdapter(bundlesToOngoingItems(elements), ArrayList<HomeFragment.OngoingMultisigOperation>())
 
         adapter.setOnItemClickListener(this)
