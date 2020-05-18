@@ -2998,12 +2998,12 @@ class DelegateFragment : Fragment()
             {
                 MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE ->
                 {
-                    startFinalizeRemoveDelegateLoading()
+                    startFinalizeAddDelegateLoading()
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
                 {
-                    startFinalizeOngoingMultisigRemoveDelegateLoading()
+                    startFinalizeOngoingMultisigAddDelegateLoading()
                 }
 
                 MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY -> {}
