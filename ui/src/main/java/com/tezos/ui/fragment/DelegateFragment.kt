@@ -92,6 +92,8 @@ class DelegateFragment : Fragment()
 
     private var mRequestRemoveOngoingDelegateLoading:Boolean = false
 
+    private var mRequestOngoingAddDelegateLoading:Boolean = false
+
     private var mDelegatePayload:String? = null
     private var mDelegateFees:Long = -1
 
@@ -187,6 +189,7 @@ class DelegateFragment : Fragment()
         private const val STORAGE_INFO_TAG = "storage_info"
 
         private const val REQUEST_REMOVE_DELEGATE_TAG = "request_remove_delegate"
+        private const val REQUEST_ADD_DELEGATE_TAG = "request_add_delegate"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
@@ -322,6 +325,8 @@ class DelegateFragment : Fragment()
 
             mRequestRemoveOngoingDelegateLoading = savedInstanceState.getBoolean(REQUEST_REMOVE_DELEGATE_TAG)
 
+            mRequestOngoingAddDelegateLoading = savedInstanceState.getBoolean(REQUEST_ADD_DELEGATE_TAG)
+
             mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
             mContractManagerLoading = savedInstanceState.getBoolean(LOAD_CONTRACT_MANAGER_TAG)
@@ -400,6 +405,15 @@ class DelegateFragment : Fragment()
                                         else
                                         {
                                             onFinalizeOngoingMultisigRemoveDelegateComplete(error = null)
+
+                                            if (mRequestOngoingAddDelegateLoading)
+                                            {
+                                                startFinalizeOngoingMultisigAddDelegateLoading()
+                                            }
+                                            else
+                                            {
+                                                onFinalizeOngoingMultisigAddDelegateComplete(error = null)
+                                            }
                                         }
                                     }
                                 }
@@ -780,18 +794,20 @@ class DelegateFragment : Fragment()
         mDatabaseReference.updateChildren(childUpdates)
                 .addOnSuccessListener {
 
-                    val v = "hello world"
-                    val v2 = "hello world"
-                    //writeNewSignatory()
-
+                    if (swipe_refresh_layout != null)
+                    {
+                        onFinalizeOngoingMultisigAddDelegateComplete(error = null)
+                        mCallback?.finish(R.id.request_remove_delegate)
+                    }
                 }
                 .addOnFailureListener {
 
-                    val v = "hello world"
-                    val v2 = "hello world"
+                    if (swipe_refresh_layout != null)
+                    {
+                        onFinalizeOngoingMultisigAddDelegateComplete(error = it)
+                    }
                 }
     }
-
 
     private fun startFinalizeAddDelegateLoading()
     {
@@ -1184,7 +1200,23 @@ class DelegateFragment : Fragment()
 
     private fun onFinalizeOngoingMultisigRemoveDelegateComplete(error:Exception?)
     {
-        mRequestRemoveOngoingDelegateLoading = false
+        mRequestOngoingAddDelegateLoading = false
+        nav_progress?.visibility = View.GONE
+
+        swipe_refresh_layout?.isEnabled = true
+        swipe_refresh_layout?.isRefreshing = false
+
+        if (error != null)
+        {
+            showSnackBar(error)
+        }
+
+        refreshTextUnderDelegation()
+    }
+
+    private fun onFinalizeOngoingMultisigAddDelegateComplete(error:Exception?)
+    {
+        mRequestOngoingAddDelegateLoading = false
         nav_progress?.visibility = View.GONE
 
         swipe_refresh_layout?.isEnabled = true
@@ -3220,6 +3252,7 @@ class DelegateFragment : Fragment()
                 mContractInfoLoading = false
                 mStorageInfoLoading = false
                 mRequestRemoveOngoingDelegateLoading = false
+                mRequestOngoingAddDelegateLoading = false
                 mContractManagerLoading = false
             }
         }
@@ -3254,6 +3287,7 @@ class DelegateFragment : Fragment()
         outState.putBoolean(STORAGE_INFO_TAG, mStorageInfoLoading)
 
         outState.putBoolean(REQUEST_REMOVE_DELEGATE_TAG, mRequestRemoveOngoingDelegateLoading)
+        outState.putBoolean(REQUEST_ADD_DELEGATE_TAG, mRequestOngoingAddDelegateLoading)
 
         outState.putString(CONTRACT_SIG_KEY, mSig)
 
