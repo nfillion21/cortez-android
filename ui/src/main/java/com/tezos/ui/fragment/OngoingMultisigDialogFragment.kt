@@ -36,8 +36,6 @@ import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.database.MultisigOperation
-import com.tezos.ui.encryption.KeyStoreWrapper
-import com.tezos.ui.fragment.ScriptFragment.Companion.CONTRACT_PUBLIC_KEY
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.dialog_ongoing_multisig.*
 import kotlinx.android.synthetic.main.multisig_ongoing_proposal_signatories.*
@@ -45,7 +43,6 @@ import kotlinx.android.synthetic.main.multisig_ongoing_signatories.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
-import java.security.interfaces.ECPublicKey
 
 class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 {
@@ -139,7 +136,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         fun hasEnrolledFingerprints():Boolean
         fun saveFingerprintAllowed(useInFuture: Boolean)
 
-        fun onSigSentSucceed()
+        fun onMultisigOperationConfirmed()
     }
 
     companion object
@@ -515,7 +512,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     {
                         onRemoveOngoingOperationDatabaseComplete(error = null)
                         dismiss()
-                        listener?.onSigSentSucceed()
+                        listener?.onMultisigOperationConfirmed()
                     }
                 }
                 .addOnFailureListener {
@@ -833,11 +830,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val volleyError = VolleyError(getString(R.string.generic_error))
             onFinalizeTransferLoadComplete(volleyError)
         }
-    }
-
-    enum class CONTRACT_INFO_TYPE
-    {
-        CONTRACT_STORAGE, CONTRACT_INFO
     }
 
     // volley
@@ -1684,13 +1676,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
     }
 
-    private fun retrieveECKeys():ByteArray
-    {
-        var keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
-        val ecKey = keyPair!!.public as ECPublicKey
-        return ecKeyFormat(ecKey)
-    }
-
     fun showSnackBar(res:String, color:Int, textColor:Int)
     {
         val snackbar = Snackbar.make(dialogRootView, res, Snackbar.LENGTH_LONG)
@@ -1829,18 +1814,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         res.addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryDarkId)))
         res.addState(intArrayOf(), ColorDrawable(ContextCompat.getColor(activity!!, theme.colorPrimaryId)))
         return res
-    }
-
-    private fun retrieveTz3():String?
-    {
-        val keyPair = KeyStoreWrapper().getAndroidKeyStoreAsymmetricKeyPair(EncryptionServices.SPENDING_KEY)
-        if (keyPair != null)
-        {
-            val ecKey = keyPair.public as ECPublicKey
-            return CryptoUtils.generatePkhTz3(ecKeyFormat(ecKey))
-        }
-
-        return null
     }
 
     override fun onSaveInstanceState(outState: Bundle)

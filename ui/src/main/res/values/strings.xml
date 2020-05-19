@@ -127,6 +127,7 @@
     <string name="wallet_successfully_restored">Wallet successfully restored!</string>
     <string name="delegation_successfully_deleted">Delegation successfully deleted!</string>
     <string name="delegate_successfully_added">Delegate successfully added!</string>
+    <string name="remove_baker_request_created">Remove baker request created</string>
     <string name="contract_storage_successfully_updated">Spending limit contract storage successfully updated!</string>
     <string name="contract_storage_multisig_successfully_updated">Multisig contract storage successfully updated!</string>
     <string name="transfer_succeed">Transfer succeed!</string>

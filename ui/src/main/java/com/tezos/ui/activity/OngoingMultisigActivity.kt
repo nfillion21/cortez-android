@@ -198,7 +198,7 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         storage.saveFingerprintAllowed(useInFuture)
     }
 
-    override fun onSigSentSucceed()
+    override fun onMultisigOperationConfirmed()
     {
         setResult(R.id.multisig_operation_confirmed, null)
         finish()

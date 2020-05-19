@@ -90,6 +90,8 @@ class DelegateFragment : Fragment()
 
     private var mStorageInfoLoading:Boolean = false
 
+    private var mRequestRemoveOngoingDelegateLoading:Boolean = false
+
     private var mDelegatePayload:String? = null
     private var mDelegateFees:Long = -1
 
@@ -183,6 +185,8 @@ class DelegateFragment : Fragment()
 
         private const val CONTRACT_INFO_TAG = "contract_info"
         private const val STORAGE_INFO_TAG = "storage_info"
+
+        private const val REQUEST_REMOVE_DELEGATE_TAG = "request_remove_delegate"
 
         private const val DELEGATE_PAYLOAD_KEY = "transfer_payload_key"
 
@@ -316,6 +320,8 @@ class DelegateFragment : Fragment()
 
             mStorageInfoLoading = savedInstanceState.getBoolean(STORAGE_INFO_TAG)
 
+            mRequestRemoveOngoingDelegateLoading = savedInstanceState.getBoolean(REQUEST_REMOVE_DELEGATE_TAG)
+
             mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
             mContractManagerLoading = savedInstanceState.getBoolean(LOAD_CONTRACT_MANAGER_TAG)
@@ -386,6 +392,15 @@ class DelegateFragment : Fragment()
                                     else
                                     {
                                         onFinalizeDelegationLoadComplete(null)
+
+                                        if (mRequestRemoveOngoingDelegateLoading)
+                                        {
+                                            startFinalizeOngoingMultisigRemoveDelegateLoading()
+                                        }
+                                        else
+                                        {
+                                            onFinalizeOngoingMultisigRemoveDelegateComplete(error = null)
+                                        }
                                     }
                                 }
                             }
@@ -578,7 +593,8 @@ class DelegateFragment : Fragment()
     private fun startFinalizeOngoingMultisigRemoveDelegateLoading()
     {
         // we need to inform the UI we are going to call transfer
-        transferLoading(true)
+        transferLoading(loading = true)
+        mRequestRemoveOngoingDelegateLoading = true
 
         val nowInEpoch =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -660,15 +676,18 @@ class DelegateFragment : Fragment()
         mDatabaseReference.updateChildren(childUpdates)
                 .addOnSuccessListener {
 
-                    val v = "hello world"
-                    val v2 = "hello world"
-                    //writeNewSignatory()
-
+                    if (swipe_refresh_layout != null)
+                    {
+                        onFinalizeOngoingMultisigRemoveDelegateComplete(error = null)
+                        mCallback?.finish(R.id.request_remove_delegate)
+                    }
                 }
                 .addOnFailureListener {
 
-                    val v = "hello world"
-                    val v2 = "hello world"
+                    if (swipe_refresh_layout != null)
+                    {
+                        onFinalizeOngoingMultisigRemoveDelegateComplete(error = it)
+                    }
                 }
     }
 
@@ -1159,6 +1178,22 @@ class DelegateFragment : Fragment()
 
         swipe_refresh_layout?.isEnabled = true
         swipe_refresh_layout?.isRefreshing = false
+
+        refreshTextUnderDelegation()
+    }
+
+    private fun onFinalizeOngoingMultisigRemoveDelegateComplete(error:Exception?)
+    {
+        mRequestRemoveOngoingDelegateLoading = false
+        nav_progress?.visibility = View.GONE
+
+        swipe_refresh_layout?.isEnabled = true
+        swipe_refresh_layout?.isRefreshing = false
+
+        if (error != null)
+        {
+            showSnackBar(error)
+        }
 
         refreshTextUnderDelegation()
     }
@@ -1756,7 +1791,6 @@ class DelegateFragment : Fragment()
                             {
                                 //there's no need to do anything because we call finish()
                                 onFinalizeDelegationLoadComplete(null)
-
                                 mCallback?.finish(R.id.add_delegate_succeed)
                             }
                         },
@@ -2637,6 +2671,12 @@ class DelegateFragment : Fragment()
         }
     }
 
+    private fun showSnackBar(error:Exception)
+    {
+        mCallback?.showSnackBar(error.toString(), ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+        loading_textview?.text = getString(R.string.generic_error)
+    }
+
     private fun validateAddButton(validate: Boolean)
     {
         if (activity != null)
@@ -3179,6 +3219,7 @@ class DelegateFragment : Fragment()
                 mFinalizeRemoveDelegateLoading = false
                 mContractInfoLoading = false
                 mStorageInfoLoading = false
+                mRequestRemoveOngoingDelegateLoading = false
                 mContractManagerLoading = false
             }
         }
@@ -3211,6 +3252,8 @@ class DelegateFragment : Fragment()
         outState.putString(STORAGE_DATA_KEY, mStorage)
 
         outState.putBoolean(STORAGE_INFO_TAG, mStorageInfoLoading)
+
+        outState.putBoolean(REQUEST_REMOVE_DELEGATE_TAG, mRequestRemoveOngoingDelegateLoading)
 
         outState.putString(CONTRACT_SIG_KEY, mSig)
 
