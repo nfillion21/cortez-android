@@ -61,6 +61,8 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
@@ -69,6 +71,7 @@ import com.tezos.core.utils.*
 import com.tezos.ui.R
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.database.MultisigOperation
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
 import kotlinx.android.synthetic.main.fragment_script.*
@@ -136,6 +139,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     private var mContractManager:String? = null
 
     private var mSig:String? = null
+
+    private lateinit var mDatabaseReference: DatabaseReference
 
     companion object
     {
@@ -1155,12 +1160,12 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     private fun startInitUpdateMultisigStorageLoading()
     {
         // we need to inform the UI we are going to call transfer
-        transferLoading(true)
+        transferLoading(loading = true)
 
         putFeesMultisigToNegative()
 
         // validatePay cannot be valid if there is no fees
-        validateConfirmEditionMultisigButton(false)
+        validateConfirmEditionMultisigButton(validate = false)
 
         // at this point, we will update the good request.
 
@@ -1173,12 +1178,8 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
             {
-                //startPostRequestLoadInitRequestUpdateStorage()
-                //validateAddButton(isInputDataValid() && isDelegateFeeValid())
-
                 validateConfirmEditionMultisigButton(isMultisigInputDataValid())
                 transferLoading(loading = false)
-
             }
 
             MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
@@ -1219,15 +1220,13 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     {
         // we need to inform the UI we are going to call transfer
         transferLoading(loading = true)
+        //nav_progress.visibility = View.VISIBLE
 
         startPostRequestFinalizeRequestUpdateMultisigLoading()
     }
 
     private fun startPostRequestFinalizeRequestUpdateMultisigLoading()
     {
-        // we need to inform the UI we are going to call transfer
-        transferLoading(true)
-
         val nowInEpoch =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 {
@@ -1247,17 +1246,17 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                                         Visitable.address(pkh()!!)
                                 )
                         ),
-
                         Primitive(Primitive.Name.Pair,
                                 arrayOf(
-                                        Visitable.integer(getMultisigCounter()!!.toLong()),
+                                        Visitable.integer(getCounter()!!.toLong()),
                                         Primitive(Primitive.Name.Right,
                                                 arrayOf(
-                                                        Primitive (Primitive.Name.Left,
+                                                        Primitive(Primitive.Name.Right,
                                                                 arrayOf(
-                                                                        Primitive(Primitive.Name.Some,
+                                                                        Primitive(Primitive.Name.Pair,
                                                                                 arrayOf(
-                                                                                        Visitable.keyHash(mDelegateTezosAddress!!)
+                                                                                        Visitable.integer(mThreshold),
+                                                                                        VisitableSequence(mSignatoriesList.map { Visitable.publicKey(it) }.toTypedArray())
                                                                                 )
                                                                         )
                                                                 )
@@ -1268,6 +1267,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                         )
                 )
         )
+
 
         val o = ByteArrayOutputStream()
         o.write(0x05)
@@ -1309,27 +1309,24 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
             childUpdates["/signatory_multisig_operations/$s/${pkh()}"] = ongoingOperation.toMap()
         }
 
+        mDatabaseReference = FirebaseDatabase.getInstance().reference
         mDatabaseReference.updateChildren(childUpdates)
                 .addOnSuccessListener {
 
-                    if (swipe_refresh_layout != null)
+                    if (swipe_refresh_script_layout != null)
                     {
-                        onFinalizeOngoingMultisigAddDelegateComplete(error = null)
-                        mCallback?.finish(R.id.request_remove_delegate)
+                        onFinalizePostRequestMultisigUpdateComplete(error = null)
+                        mCallback?.finish(R.id.update_multisig_storage_requested)
                     }
                 }
                 .addOnFailureListener {
 
-                    if (swipe_refresh_layout != null)
+                    if (swipe_refresh_script_layout != null)
                     {
-                        onFinalizeOngoingMultisigAddDelegateComplete(error = it)
+                        onFinalizePostRequestMultisigUpdateComplete(error = it)
                     }
                 }
     }
-
-
-
-
 
     // volley
     private fun startGetRequestLoadContractInfo()
@@ -2162,6 +2159,22 @@ postParams.put("dsts", dstObjects)
         }
     }
 
+    private fun onFinalizePostRequestMultisigUpdateComplete(error:Exception?)
+    {
+        //mRequestOngoingAddDelegateLoading = false
+        cancelRequests(resetBooleans = true)
+
+        nav_progress?.visibility = View.GONE
+
+        swipe_refresh_script_layout.isEnabled = true
+        swipe_refresh_script_layout.isRefreshing = false
+
+        if (error != null)
+        {
+            showSnackBar(error, ContextCompat.getColor(activity!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
+        }
+    }
+
     private fun onInitEditLoadComplete(error:VolleyError?)
     {
         mInitUpdateStorageLoading = false
@@ -2872,6 +2885,11 @@ postParams.put("dsts", dstObjects)
 //mCallback?.showSnackBar(message, ContextCompat.getColor(context!!, android.R.color.holo_green_light), ContextCompat.getColor(context!!, R.color.tz_light))
             mCallback?.showSnackBar(message, color, textColor)
         }
+    }
+
+    private fun showSnackBar(error:Exception, color: Int, textColor: Int)
+    {
+        mCallback?.showSnackBar(error.toString(), color, textColor)
     }
 
     private fun validateConfirmEditionButton(validate: Boolean)

@@ -17,6 +17,7 @@
     <item name="request_remove_delegate" type="id" />
     <item name="update_storage_succeed" type="id" />
     <item name="update_multisig_storage_succeed" type="id" />
+    <item name="update_multisig_storage_requested" type="id" />
     <item name="add_address_failed" type="id" />
     <item name="passcode_succeed" type="id" />
     <item name="passcode_failed" type="id" />
