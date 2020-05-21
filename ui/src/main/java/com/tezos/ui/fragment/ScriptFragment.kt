@@ -461,7 +461,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             if (mStorageInfoLoading)
             {
-                refreshTextUnderDelegation(false)
+                refreshTextUnderDelegation()
                 mWalletEnabled = true
                 startStorageInfoLoading()
             }
@@ -1222,6 +1222,9 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         transferLoading(loading = true)
         //nav_progress.visibility = View.VISIBLE
 
+        validateConfirmEditionMultisigButton(validate = false)
+
+        mInitUpdateMultisigStorageLoading = true
         startPostRequestFinalizeRequestUpdateMultisigLoading()
     }
 
@@ -1599,10 +1602,10 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         swipe_refresh_script_layout?.isEnabled = true
         swipe_refresh_script_layout?.isRefreshing = false
 
-        refreshTextUnderDelegation(animating)
+        refreshTextUnderDelegation()
     }
 
-    private fun refreshTextUnderDelegation(animating:Boolean)
+    private fun refreshTextUnderDelegation()
     {
 //this method handles the data and loading texts
 
@@ -1724,7 +1727,6 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
                 switchToMultisigEditMode(mMultisigEditMode)
             }
 
-
             loading_textview?.visibility = View.GONE
             loading_textview?.text = null
         }
@@ -1802,7 +1804,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             warning_threshold_info.visibility = View.VISIBLE
 
-            var threshold = getThreshold()
+            val threshold = getThreshold()
             warning_threshold_textview.text = String.format(getString(R.string.warning_need_signatories_not_signatory_info), threshold)
 
             if (!mContractManager.isNullOrEmpty())
@@ -2164,6 +2166,7 @@ postParams.put("dsts", dstObjects)
         //mRequestOngoingAddDelegateLoading = false
         cancelRequests(resetBooleans = true)
 
+        validateConfirmEditionMultisigButton(validate = true)
         nav_progress?.visibility = View.GONE
 
         swipe_refresh_script_layout.isEnabled = true
@@ -2718,42 +2721,6 @@ postParams.put("dsts", dstObjects)
         jsObjRequest.tag = UPDATE_STORAGE_INIT_TAG
         mInitUpdateStorageLoading = true
         VolleySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(jsObjRequest)
-    }
-
-
-    // volley
-    private fun startPostRequestLoadInitRequestUpdateStorage()
-    {
-        val pkh = pkh()
-        if (pkh != null)
-        {
-            val url = String.format(getString(R.string.manager_key_url), pkh)
-
-// Request a string response from the provided URL.
-            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener<JSONArray>
-            {
-                if (swipe_refresh_script_layout != null)
-                {
-                    //addContractAddressesFromJSON(it, pkh)
-
-                    //reloadList()
-                    //onDelegatedAddressesComplete(true)
-
-                    //startGetRequestLoadMultisigAsSignatoryContracts()
-                }
-            },
-                    Response.ErrorListener {
-
-                        if (swipe_refresh_script_layout != null)
-                        {
-                            //onDelegatedAddressesComplete(false)
-                            //showSnackbarError(it)
-                        }
-                    })
-
-//jsonArrayRequest.tag = ContractsFragment.LOAD_DELEGATED_ADDRESSES_TAG
-            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
-        }
     }
 
     // volley

@@ -1448,7 +1448,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         val file = when (binaryReader.getType())
         {
-            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES -> {""}
+            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
+            {
+                "multisig_update_storage.json"
+            }
+
             MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
             {
                 "multisig_set_delegate.json"
@@ -1462,7 +1466,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         }
 
         val contract = context!!.assets.open(file).bufferedReader()
-                .use { it ->
+                .use {
                     it.readText()
                 }
 
@@ -1506,13 +1510,56 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             sigs.put(sigParam)
         }
 
+
+
+
+
+
+
+
+
+
+
         val argCounter = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
         argCounter.put("int", getMultisigCounter())
 
 
         when (binaryReader.getType())
         {
-            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES -> {}
+            MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
+            {
+
+                val argsb = (((((args[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+                val signatoriesCount = argsb[0] as JSONObject
+
+// TODO get the textfield as signatoryCount
+                signatoriesCount.put("int", mThreshold.toString())
+
+// on recupere le signatory ici
+
+// JSONArray
+
+                val signatories = argsb[1] as JSONArray
+                signatories.remove(0)
+
+                for (it in mSignatoriesList)
+                {
+//val signatory = (argsb[1] as JSONArray)[0] as JSONObject
+
+                    var decodedValue = Base58.decode(it)
+                    var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
+                    bytes = byteArrayOf(0x00) + bytes
+
+                    val signatory = JSONObject()
+                    signatory.put("bytes", bytes.toNoPrefixHexString())
+
+                    signatories.put(signatory)
+                }
+
+
+            }
+
             MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->
             {
                 val argBaker = (((((((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
