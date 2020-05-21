@@ -106,32 +106,6 @@ open class HomeFragment : Fragment()
             val submissionDate:String,
             val hexaOperation: String) : Serializable
 
-    internal class OngoinMultisigSerialization internal constructor(private val ongoingMultisigOperation: OngoingMultisigOperation)
-    {
-        internal fun getSerializedBundle():Bundle
-        {
-            val ongoingOperationBundle = Bundle()
-
-            ongoingOperationBundle.putString("contractAddress", ongoingMultisigOperation.contractAddress)
-            ongoingOperationBundle.putString("submissionDate", ongoingMultisigOperation.submissionDate)
-            ongoingOperationBundle.putString("hexaOperation", ongoingMultisigOperation.hexaOperation)
-
-            return ongoingOperationBundle
-        }
-    }
-
-    internal class OngoingMultisigMapper internal constructor(private val bundle: Bundle)
-    {
-        internal fun mappedObjectFromBundle(): OngoingMultisigOperation
-        {
-            val contractAddress = this.bundle.getString("contractAddress", null)
-            val submissionDate = this.bundle.getString("submissionDate", null)
-            val hexaOperation = this.bundle.getString("hexaOperation", null)
-
-            return OngoingMultisigOperation(contractAddress, submissionDate, hexaOperation)
-        }
-    }
-
     companion object
     {
         const val PKH_KEY = "PKH_KEY"

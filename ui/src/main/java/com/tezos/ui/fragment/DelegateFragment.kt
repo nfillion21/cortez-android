@@ -1581,24 +1581,28 @@ class DelegateFragment : Fragment()
         if (mStorage != null)
         {
             val storageJSONObject = JSONObject(mStorage)
-            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
 
-            val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
-            if (counter != null)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")// as JSONArray
+
+            if (args != null)
             {
-                val argsPk = (DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray)[1] as JSONArray
-
-                val list = ArrayList<String> ()
-
-                for (it in 0 until argsPk.length())
+                val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+                if (counter != null)
                 {
-                    val item = argsPk.getJSONObject(it)
+                    val argsPk = (DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray)[1] as JSONArray
 
-                    val pk = DataExtractor.getStringFromField(item, "string")
-                    list.add(pk)
+                    val list = ArrayList<String> ()
+
+                    for (it in 0 until argsPk.length())
+                    {
+                        val item = argsPk.getJSONObject(it)
+
+                        val pk = DataExtractor.getStringFromField(item, "string")
+                        list.add(pk)
+                    }
+
+                    return list
                 }
-
-                return list
             }
         }
 

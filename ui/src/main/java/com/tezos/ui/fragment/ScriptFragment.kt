@@ -187,6 +187,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         private const val SIGNATORIES_LIST_KEY = "signatories_list"
 
+        enum class UPDATE_ENUM
+        {
+            UPDATE_BY_ITSELF, REQUEST_UPDATE
+        }
+
         @JvmStatic
         fun newInstance(theme: CustomTheme, contract: String?) =
                 ScriptFragment().apply {
@@ -244,7 +249,11 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
         }
 
         update_multisig_button_layout.setOnClickListener {
-            onUpdateMultisigStorageClick()
+            onUpdateMultisigStorageClick(UPDATE_ENUM.UPDATE_BY_ITSELF)
+        }
+
+        request_update_multisig_button_layout.setOnClickListener {
+            onUpdateMultisigStorageClick(UPDATE_ENUM.REQUEST_UPDATE)
         }
 
         val clearButtons = listOf<ImageButton>(
@@ -1164,7 +1173,12 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
             MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES ->
             {
-                startPostRequestLoadInitRequestUpdateStorage()
+                //startPostRequestLoadInitRequestUpdateStorage()
+                //validateAddButton(isInputDataValid() && isDelegateFeeValid())
+
+                validateConfirmEditionMultisigButton(isMultisigInputDataValid())
+                transferLoading(loading = false)
+
             }
 
             MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY ->
@@ -1188,7 +1202,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     private fun startFinalizeUpdateStorageLoading()
     {
         // we need to inform the UI we are going to call transfer
-        transferLoading(true)
+        transferLoading(loading = true)
 
         startPostRequestLoadFinalizeUpdateStorage()
     }
@@ -1196,10 +1210,126 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
     private fun startFinalizeUpdateMultisigStorageLoading()
     {
         // we need to inform the UI we are going to call transfer
-        transferLoading(true)
+        transferLoading(loading = true)
 
         startPostRequestLoadFinalizeUpdateMultisigStorage()
     }
+
+    private fun startFinalizeRequestUpdateMultisigStorageLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(loading = true)
+
+        startPostRequestFinalizeRequestUpdateMultisigLoading()
+    }
+
+    private fun startPostRequestFinalizeRequestUpdateMultisigLoading()
+    {
+        // we need to inform the UI we are going to call transfer
+        transferLoading(true)
+
+        val nowInEpoch =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                {
+                    Instant.now().epochSecond
+                }
+                else
+                {
+                    System.currentTimeMillis()/1000
+                }
+
+        val dataVisitable = Primitive(
+                Primitive.Name.Pair,
+                arrayOf(
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.chainID(getString(R.string.chain_ID)),
+                                        Visitable.address(pkh()!!)
+                                )
+                        ),
+
+                        Primitive(Primitive.Name.Pair,
+                                arrayOf(
+                                        Visitable.integer(getMultisigCounter()!!.toLong()),
+                                        Primitive(Primitive.Name.Right,
+                                                arrayOf(
+                                                        Primitive (Primitive.Name.Left,
+                                                                arrayOf(
+                                                                        Primitive(Primitive.Name.Some,
+                                                                                arrayOf(
+                                                                                        Visitable.keyHash(mDelegateTezosAddress!!)
+                                                                                )
+                                                                        )
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+        )
+
+        val o = ByteArrayOutputStream()
+        o.write(0x05)
+
+        val dataPacker = Packer(o)
+        dataVisitable.accept(dataPacker)
+
+        val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+
+        val signatures = HashMap<String, String>()
+        val signatoriesList = getSignatoriesList()
+
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+
+        for (s in signatoriesList)
+        {
+            if (s == mnemonicsData.pk)
+            {
+                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                val sk = CryptoUtils.generateSk(mnemonics, "")
+                val signature = KeyPair.sign(sk, dataPack)
+
+                signatures[s] = CryptoUtils.generateEDSig(signature)
+            }
+            else
+            {
+                signatures[s] = ""
+            }
+        }
+
+        val ongoingOperation = MultisigOperation(binary = dataPack.toNoPrefixHexString(), timestamp = nowInEpoch, notary = pkhtz1()!!, signatures = signatures)
+
+        val childUpdates = HashMap<String, Any>()
+        childUpdates["/multisig_operations/${pkh()}"] = ongoingOperation.toMap()
+
+        for (s in signatoriesList)
+        {
+            childUpdates["/signatory_multisig_operations/$s/${pkh()}"] = ongoingOperation.toMap()
+        }
+
+        mDatabaseReference.updateChildren(childUpdates)
+                .addOnSuccessListener {
+
+                    if (swipe_refresh_layout != null)
+                    {
+                        onFinalizeOngoingMultisigAddDelegateComplete(error = null)
+                        mCallback?.finish(R.id.request_remove_delegate)
+                    }
+                }
+                .addOnFailureListener {
+
+                    if (swipe_refresh_layout != null)
+                    {
+                        onFinalizeOngoingMultisigAddDelegateComplete(error = it)
+                    }
+                }
+    }
+
+
+
+
 
     // volley
     private fun startGetRequestLoadContractInfo()
@@ -3528,7 +3658,7 @@ isTzAddressValid = true
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthentication(it, isSlcContract = true)
+                validateKeyAuthentication(it, isSlcContract = true, updateEnum = null)
             }
             if (dialog.cryptoObjectToAuthenticateWith == null)
             {
@@ -3553,7 +3683,7 @@ isTzAddressValid = true
         dialog.show(activity!!.supportFragmentManager, "Authentication")
     }
 
-    private fun onUpdateMultisigStorageClick()
+    private fun onUpdateMultisigStorageClick(updateEnum:UPDATE_ENUM)
     {
         val dialog = AuthenticationDialog()
         if (isFingerprintAllowed()!! && hasEnrolledFingerprints()!!)
@@ -3561,7 +3691,7 @@ isTzAddressValid = true
             dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
             dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
             dialog.fingerprintAuthenticationSuccessListener = {
-                validateKeyAuthentication(it, isSlcContract = false)
+                validateKeyAuthentication(it, isSlcContract = false, updateEnum = updateEnum)
             }
             if (dialog.cryptoObjectToAuthenticateWith == null)
             {
@@ -3577,7 +3707,19 @@ isTzAddressValid = true
             dialog.stage = AuthenticationDialog.Stage.PASSWORD
         }
         dialog.authenticationSuccessListener = {
-            startFinalizeUpdateMultisigStorageLoading()
+
+            when (updateEnum)
+            {
+                UPDATE_ENUM.UPDATE_BY_ITSELF ->
+                {
+                    startFinalizeUpdateMultisigStorageLoading()
+                }
+
+                UPDATE_ENUM.REQUEST_UPDATE ->
+                {
+                    startFinalizeRequestUpdateMultisigStorageLoading()
+                }
+            }
         }
         dialog.passwordVerificationListener =
                 {
@@ -3622,7 +3764,7 @@ isTzAddressValid = true
         return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
     }
 
-    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject, isSlcContract:Boolean)
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject, isSlcContract:Boolean, updateEnum: UPDATE_ENUM?)
     {
         if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
         {
@@ -3632,12 +3774,30 @@ isTzAddressValid = true
             }
             else
             {
-                startFinalizeUpdateMultisigStorageLoading()
+                when (updateEnum)
+                {
+                    UPDATE_ENUM.UPDATE_BY_ITSELF ->
+                    {
+                        startFinalizeUpdateMultisigStorageLoading()
+                    }
+
+                    UPDATE_ENUM.REQUEST_UPDATE ->
+                    {
+                        startFinalizeRequestUpdateMultisigStorageLoading()
+                    }
+                }
             }
         }
         else
         {
-            onUpdateSlcStorageClick()
+            if (isSlcContract)
+            {
+                onUpdateSlcStorageClick()
+            }
+            else if (updateEnum != null)
+            {
+                onUpdateMultisigStorageClick(updateEnum = updateEnum)
+            }
         }
     }
 
