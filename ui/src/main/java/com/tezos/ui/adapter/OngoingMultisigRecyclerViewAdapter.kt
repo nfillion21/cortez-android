@@ -36,7 +36,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tezos.core.utils.MultisigBinaries
 import com.tezos.ui.R
 import com.tezos.ui.database.MultisigOperation
-import com.tezos.ui.fragment.HomeFragment.OngoingMultisigOperation
 
 /**
  * The [OngoingMultisigRecyclerViewAdapter] class.
@@ -177,7 +176,6 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
             val operationItem: MultisigOperation = mOngoingOperationItems[position - 1]
 
             val binaryReader = MultisigBinaries(operationItem.binary)
-            binaryReader.getType()
 
             contractAddressItem.text = binaryReader.getContractAddress()
             submissionDateItem.text = operationItem.timestamp.toString()
@@ -204,7 +202,6 @@ class OngoingMultisigRecyclerViewAdapter constructor(ongoingOperationItems: List
             val operationItem: MultisigOperation = mOngoingOperationForNotaryItems[position - count - 1]
 
             val binaryReader = MultisigBinaries(operationItem.binary)
-            binaryReader.getType()
 
             contractAddressItem.text = binaryReader.getContractAddress()
             submissionDateItem.text = operationItem.timestamp.toString()

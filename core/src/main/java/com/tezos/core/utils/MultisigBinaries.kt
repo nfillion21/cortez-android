@@ -4,13 +4,14 @@ import com.tezos.core.crypto.CryptoUtils
 import com.tezos.ui.utils.hexToByteArray
 import java.io.ByteArrayInputStream
 
-class MultisigBinaries(val hexaInput: String)
+class MultisigBinaries(hexaInput: String)
 {
     private var mThreshold: Long? = null
     private var mContractAddress: String? = null
     private var mSignatoriesArray = ArrayList<String>()
     private var mOperationTypeString: String? = null
     private var mBaker: String? = null
+    private var mType: MULTISIG_BINARY_TYPE? = null
 
     companion object
     {
@@ -20,7 +21,7 @@ class MultisigBinaries(val hexaInput: String)
         }
     }
 
-    fun getType():MULTISIG_BINARY_TYPE?
+    init
     {
         val inputStream = ByteArrayInputStream(hexaInput?.hexToByteArray())
         inputStream.read() // 0x05
@@ -80,7 +81,7 @@ class MultisigBinaries(val hexaInput: String)
         val delegateNone = delegate?.name == Primitive.Name.None
 
         if (
-            vChainId != null && //maybe check if it's the good network id
+                vChainId != null && //maybe check if it's the good network id
                 !mContractAddress.isNullOrEmpty() &&
                 counterV != null )
         {
@@ -90,21 +91,24 @@ class MultisigBinaries(val hexaInput: String)
             )
             {
                 mOperationTypeString = "Update threshold and/or signatories"
-                return MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES
+                mType = MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES
             }
             else if (delegateNone)
             {
                 mOperationTypeString = "Undelegate"
-                return MULTISIG_BINARY_TYPE.UNDELEGATE
+                mType = MULTISIG_BINARY_TYPE.UNDELEGATE
             }
             else if (!mBaker.isNullOrEmpty() && !delegateNone)
             {
                 mOperationTypeString = "Set delegate"
-                return MULTISIG_BINARY_TYPE.SET_DELEGATE
+                mType = MULTISIG_BINARY_TYPE.SET_DELEGATE
             }
         }
+    }
 
-        return null
+    fun getType():MULTISIG_BINARY_TYPE?
+    {
+        return mType
     }
 
     fun getThreshold():Long?

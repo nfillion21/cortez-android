@@ -259,6 +259,7 @@
                                 android:id="@+id/storage_proposal_layout"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="@dimen/spacing_double"
                                 android:orientation="vertical">
 
                                 <TextView

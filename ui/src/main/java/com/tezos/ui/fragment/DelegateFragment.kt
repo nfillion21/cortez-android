@@ -681,6 +681,7 @@ class DelegateFragment : Fragment()
 
         val childUpdates = HashMap<String, Any>()
         childUpdates["/multisig_operations/${pkh()}"] = ongoingOperation.toMap()
+        childUpdates["/notary_multisig_operations/${pkhtz1()}/${pkh()}"] = ongoingOperation.toMap()
 
         for (s in signatoriesList)
         {
@@ -785,6 +786,8 @@ class DelegateFragment : Fragment()
 
         val childUpdates = HashMap<String, Any>()
         childUpdates["/multisig_operations/${pkh()}"] = ongoingOperation.toMap()
+        childUpdates["/notary_multisig_operations/${pkhtz1()}/${pkh()}"] = ongoingOperation.toMap()
+
 
         for (s in signatoriesList)
         {

@@ -494,9 +494,10 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         val opBundle = arguments!!.getBundle(ONGOING_OPERATION_KEY)
         val op = MultisigOperation.fromBundle(opBundle)
         val binaryReader = MultisigBinaries(op.binary)
-        binaryReader.getType()
 
         childUpdates["/multisig_operations/${binaryReader.getContractAddress()}"] = null
+        childUpdates["/notary_multisig_operations/${mServerOperation?.notary}/${binaryReader.getContractAddress()}"] = null
+
 
         val signatoriesList = getSignatoriesList()
         for (s in signatoriesList)
@@ -556,7 +557,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val op = MultisigOperation.fromBundle(opBundle)
 
             val binaryReader = MultisigBinaries(op.binary)
-            binaryReader.getType()
 
             val postListener = object : ValueEventListener
             {
@@ -588,8 +588,18 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             val seed = Storage(activity!!).getMnemonics()
 
-            operationDatabase = FirebaseDatabase.getInstance().reference
-                    .child("signatory_multisig_operations").child(seed.pk).child(binaryReader.getContractAddress()!!)
+            operationDatabase =
+                    if (it.getBoolean(FROM_NOTARY))
+                    {
+                        FirebaseDatabase.getInstance().reference
+                                .child("notary_multisig_operations").child(seed.pkh).child(binaryReader.getContractAddress()!!)
+                    }
+                    else
+                    {
+                        FirebaseDatabase.getInstance().reference
+                                .child("signatory_multisig_operations").child(seed.pk).child(binaryReader.getContractAddress()!!)
+                    }
+
             operationDatabase.addListenerForSingleValueEvent(postListener)
         }
     }
@@ -674,10 +684,12 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             mServerOperation!!.signatures[mnemonicsData.pk] = CryptoUtils.generateEDSig(signature)
 
             val binaryReader = MultisigBinaries(op.binary)
-            binaryReader.getType()
 
             val childUpdates = HashMap<String, Any>()
             childUpdates["/multisig_operations/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
+
+            childUpdates["/notary_multisig_operations/${mServerOperation!!.notary}/${binaryReader.getContractAddress()}"] = mServerOperation!!.toMap()
+
 
             val signatures = mServerOperation?.signatures
             val keys = ArrayList(signatures?.keys)
@@ -741,7 +753,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val opBundle = arguments!!.getBundle(ONGOING_OPERATION_KEY)
             val op = MultisigOperation.fromBundle(opBundle)
             val binaryReader = MultisigBinaries(op.binary)
-            binaryReader.getType()
             dstObject.put("dst", binaryReader.getContractAddress())
 
             dstObject.put("amount", "0")
@@ -845,7 +856,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val op = MultisigOperation.fromBundle(operationBundle)
 
             val binaryReader = MultisigBinaries(op.binary)
-            binaryReader.getType()
             val url = String.format(getString(R.string.contract_info2_url), binaryReader.getContractAddress())
 
             // Request a string response from the provided URL.
@@ -1377,13 +1387,18 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             "It has enough signatures to be confirmed by the contract notary."
                         }
 
-                        val text3 = if (signatures!![pk()]!!.isNullOrEmpty())
+                        var text3 = ""
+
+                        if (!arguments!!.getBoolean(FROM_NOTARY))
                         {
-                            "\n\nYou ( ${pk().substring(IntRange(0,8))} ... ) have not signed yet."
-                        }
-                        else
-                        {
-                            "\n\nYou ( ${pk().substring(IntRange(0,8))} ... ) have signed already."
+                            text3 += if (signatures!![pk()]!!.isNullOrEmpty())
+                            {
+                                "\n\nYou ( ${pk().substring(IntRange(0,8))} ... ) have not signed yet."
+                            }
+                            else
+                            {
+                                "\n\nYou ( ${pk().substring(IntRange(0,8))} ... ) have signed already."
+                            }
                         }
 
                         //val text4 =
@@ -1393,11 +1408,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             text4 =
                                     if (arguments!!.getBoolean(FROM_NOTARY))
                                     {
-                                        "\nAs a notary, you can confirm this operation."
+                                        "\n\nAs a notary, you can confirm this operation."
                                     }
                                     else
                                     {
-                                        "\nYou can contact the contract notary to confirm this operation."
+                                        "\n\nYou can contact the contract notary to confirm this operation."
                                     }
                         }
 
@@ -1440,7 +1455,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         val op = MultisigOperation.fromBundle(opBundle)
         val binaryReader = MultisigBinaries(op.binary)
-        binaryReader.getType()
         dstObject.put("dst", binaryReader.getContractAddress())
 
         dstObject.put("amount", "0")
@@ -1510,43 +1524,25 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             sigs.put(sigParam)
         }
 
-
-
-
-
-
-
-
-
-
-
         val argCounter = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject
         argCounter.put("int", getMultisigCounter())
-
 
         when (binaryReader.getType())
         {
             MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.UPDATE_SIGNATORIES ->
             {
 
+                val args = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
                 val argsb = (((((args[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
 
                 val signatoriesCount = argsb[0] as JSONObject
-
-// TODO get the textfield as signatoryCount
-                signatoriesCount.put("int", mThreshold.toString())
-
-// on recupere le signatory ici
-
-// JSONArray
+                signatoriesCount.put("int", binaryReader.getThreshold().toString())
 
                 val signatories = argsb[1] as JSONArray
                 signatories.remove(0)
 
-                for (it in mSignatoriesList)
+                for (it in binaryReader.getSignatories()!!)
                 {
-//val signatory = (argsb[1] as JSONArray)[0] as JSONObject
-
                     var decodedValue = Base58.decode(it)
                     var bytes = decodedValue.slice(4 until (decodedValue.size - 4)).toByteArray()
                     bytes = byteArrayOf(0x00) + bytes
@@ -1556,8 +1552,6 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                     signatories.put(signatory)
                 }
-
-
             }
 
             MultisigBinaries.Companion.MULTISIG_BINARY_TYPE.SET_DELEGATE ->

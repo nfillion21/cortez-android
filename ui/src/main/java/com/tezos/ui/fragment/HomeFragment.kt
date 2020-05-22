@@ -100,12 +100,6 @@ open class HomeFragment : Fragment()
 
     private var mDateFormat:DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
 
-
-    data class OngoingMultisigOperation(
-            val contractAddress: String,
-            val submissionDate:String,
-            val hexaOperation: String) : Serializable
-
     companion object
     {
         const val PKH_KEY = "PKH_KEY"
@@ -465,7 +459,6 @@ open class HomeFragment : Fragment()
             val lastOngoingOperation = mOngoingMultisigItems!![0]
 
             val binaryReader = MultisigBinaries(lastOngoingOperation.binary)
-            binaryReader.getType()
 
             ongoing_contract_textview.text = binaryReader.getContractAddress()
             ongoing_submission_date_textview.text = lastOngoingOperation.timestamp.toString()
@@ -562,7 +555,10 @@ open class HomeFragment : Fragment()
             override fun onAnimationCancel(animation: Animator) {}
             override fun onAnimationRepeat(animation: Animator) {}
             override fun onAnimationEnd(animation: Animator) {
-                balance_textview.text = balance.toString()
+                if (swipe_refresh_layout != null)
+                {
+                    balance_textview.text = balance.toString()
+                }
             }
         })
 
@@ -654,6 +650,7 @@ open class HomeFragment : Fragment()
         // Initialize Database
         notaryOperationsDatabase = FirebaseDatabase.getInstance().reference
                 .child("signatory_multisig_operations").child(pk()!!)
+                //.child("notary_multisig_operations").child(pkh()!!)
         //notaryOperationsDatabase.addListenerForSingleValueEvent(postListener)
         notaryOperationsDatabase.addValueEventListener(postListener)
 
@@ -766,7 +763,6 @@ open class HomeFragment : Fragment()
             val lastOperation = sortedList[0]
 
             val binaryReader = MultisigBinaries(lastOperation.binary)
-            binaryReader.getType()
 
             ongoing_type_textview.text = binaryReader.getOperationTypeString()
 
