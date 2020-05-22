@@ -149,6 +149,18 @@ open class HomeFragment : Fragment()
         return null
     }
 
+    fun pkhtz1():String?
+    {
+        val hasMnemonics = Storage(activity!!).hasMnemonics()
+        if (hasMnemonics)
+        {
+            val seed = Storage(activity!!).getMnemonics()
+            return seed.pkh
+        }
+
+        return null
+    }
+
     override fun onAttach(context: Context)
     {
         super.onAttach(context)
@@ -675,12 +687,12 @@ open class HomeFragment : Fragment()
         notaryOperationsDatabase = if (notaryCall)
         {
             FirebaseDatabase.getInstance().reference
-                    .child("signatory_multisig_operations").child(pk()!!)
+                    .child("notary_multisig_operations").child(pkhtz1()!!)
         }
         else
         {
             FirebaseDatabase.getInstance().reference
-                    .child("notary_multisig_operations").child(pkh()!!)
+                    .child("signatory_multisig_operations").child(pk()!!)
         }
 
         notaryOperationsDatabase.addValueEventListener(postListener)
