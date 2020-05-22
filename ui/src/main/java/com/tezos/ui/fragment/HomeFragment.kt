@@ -71,6 +71,7 @@ open class HomeFragment : Fragment()
 {
     private val OPERATIONS_ARRAYLIST_KEY = "operations_list"
     private val ONGOING_OPERATIONS_ARRAYLIST_KEY = "ongoing_operations_list"
+    private val ONGOING_NOTARY_OPERATIONS_ARRAYLIST_KEY = "ongoing_notary_operations_list"
     private val BALANCE_FLOAT_KEY = "balance_float_item"
 
     private val GET_OPERATIONS_LOADING_KEY = "get_operations_loading"
@@ -87,6 +88,7 @@ open class HomeFragment : Fragment()
     private var mBalanceItem:Double? = null
 
     private var mOngoingMultisigItems:ArrayList<MultisigOperation>? = null
+    private var mOngoingMultisigNotaryItems:ArrayList<MultisigOperation>? = null
 
     private var mGetHistoryLoading:Boolean = false
     private var mGetBalanceLoading:Boolean = false
@@ -191,17 +193,16 @@ open class HomeFragment : Fragment()
 
         ongoing_operation_layout?.setOnClickListener {
 
-            if (!mOngoingMultisigItems.isNullOrEmpty())
+            if (!mOngoingMultisigItems.isNullOrEmpty() || !mOngoingMultisigNotaryItems.isNullOrEmpty())
             {
-                //Toast.makeText(activity, getString(R.string.copied_your_pkh), Toast.LENGTH_SHORT).show()
-
                 val mTezosTheme = CustomTheme(
                         R.color.theme_boo_primary,
                         R.color.theme_boo_primary_dark,
                         R.color.theme_boo_text)
 
                 val bundles = ongoingItemsToBundles(mOngoingMultisigItems)
-                OngoingMultisigActivity.start(activity!!, bundles!!, mTezosTheme)
+                val bundlesNotary = ongoingItemsToBundles(mOngoingMultisigNotaryItems)
+                OngoingMultisigActivity.start(activity!!, bundles!!, bundlesNotary!!, mTezosTheme)
             }
         }
 
@@ -244,6 +245,9 @@ open class HomeFragment : Fragment()
 
             var ongoingItemsBundle = savedInstanceState.getParcelableArrayList<Bundle>(ONGOING_OPERATIONS_ARRAYLIST_KEY)
             mOngoingMultisigItems = bundlesToOngoingItems(ongoingItemsBundle)
+
+            var ongoingNotaryItemsBundle = savedInstanceState.getParcelableArrayList<Bundle>(ONGOING_NOTARY_OPERATIONS_ARRAYLIST_KEY)
+            mOngoingMultisigNotaryItems = bundlesToOngoingItems(ongoingNotaryItemsBundle)
 
             mGetBalanceLoading = savedInstanceState.getBoolean(GET_OPERATIONS_LOADING_KEY)
             mGetHistoryLoading = savedInstanceState.getBoolean(GET_BALANCE_LOADING_KEY)
@@ -291,6 +295,7 @@ open class HomeFragment : Fragment()
             //there's no need to initialize mBalanceItem
 
             mOngoingMultisigItems = ArrayList()
+            mOngoingMultisigNotaryItems = ArrayList()
 
             //TODO we will start loading only if we got a pkh
             if (pkh != null)
@@ -347,9 +352,9 @@ open class HomeFragment : Fragment()
                     mRecyclerViewItems?.clear()
                 }
 
-                if (mOngoingMultisigItems != null)
+                if (mOngoingMultisigNotaryItems != null)
                 {
-                    mOngoingMultisigItems?.clear()
+                    mOngoingMultisigNotaryItems?.clear()
                 }
 
                 if (mBalanceItem != null)
@@ -417,7 +422,7 @@ open class HomeFragment : Fragment()
     {
         swipe_refresh_layout.isEnabled = false
 
-        startGetRequestLoadMultisigOnGoingOperations()
+        startGetRequestLoadMultisigOnGoingOperations(notaryCall = false)
     }
 
     private fun refreshRecyclerViewAndTextHistory()
@@ -452,11 +457,21 @@ open class HomeFragment : Fragment()
 
     private fun refreshOngoingOperationsLayouts()
     {
-        if (!mOngoingMultisigItems.isNullOrEmpty())
+        if (!mOngoingMultisigItems.isNullOrEmpty() || !mOngoingMultisigNotaryItems.isNullOrEmpty())
         {
             ongoing_operation_layout.visibility = View.VISIBLE
 
-            val lastOngoingOperation = mOngoingMultisigItems!![0]
+
+            val lastOngoingOperation =
+
+                    if (!mOngoingMultisigNotaryItems.isNullOrEmpty())
+                    {
+                        mOngoingMultisigNotaryItems!![0]
+                    }
+                    else
+                    {
+                        mOngoingMultisigItems!![0]
+                    }
 
             val binaryReader = MultisigBinaries(lastOngoingOperation.binary)
 
@@ -617,7 +632,7 @@ open class HomeFragment : Fragment()
 
 
     // volley
-    private fun startGetRequestLoadMultisigOnGoingOperations()
+    private fun startGetRequestLoadMultisigOnGoingOperations(notaryCall:Boolean)
     {
         cancelRequest(operations = true, balance = true, multisigOnGoing = true)
 
@@ -633,8 +648,16 @@ open class HomeFragment : Fragment()
             {
                 if (swipe_refresh_layout != null)
                 {
-                    addMultisigOngoingOperationsFromJSON(dataSnapshot)
-                    onMultisigOnGoingLoadComplete(databaseError = null)
+                    addMultisigOngoingOperationsFromJSON(dataSnapshot, notaryCall = notaryCall)
+
+                    if (notaryCall)
+                    {
+                        onMultisigOnGoingLoadComplete(databaseError = null)
+                    }
+                    else
+                    {
+                        startGetRequestLoadMultisigOnGoingOperations(notaryCall = true)
+                    }
                 }
             }
 
@@ -648,13 +671,19 @@ open class HomeFragment : Fragment()
         }
 
         // Initialize Database
-        notaryOperationsDatabase = FirebaseDatabase.getInstance().reference
-                .child("signatory_multisig_operations").child(pk()!!)
-                //.child("notary_multisig_operations").child(pkh()!!)
-        //notaryOperationsDatabase.addListenerForSingleValueEvent(postListener)
+
+        notaryOperationsDatabase = if (notaryCall)
+        {
+            FirebaseDatabase.getInstance().reference
+                    .child("signatory_multisig_operations").child(pk()!!)
+        }
+        else
+        {
+            FirebaseDatabase.getInstance().reference
+                    .child("notary_multisig_operations").child(pkh()!!)
+        }
+
         notaryOperationsDatabase.addValueEventListener(postListener)
-
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -735,7 +764,7 @@ open class HomeFragment : Fragment()
         }
     }
 
-    private fun addMultisigOngoingOperationsFromJSON(answer:DataSnapshot)
+    private fun addMultisigOngoingOperationsFromJSON(answer:DataSnapshot, notaryCall: Boolean)
     {
         //val operation = dataSnapshot.value
         if (answer.exists() && answer.hasChildren())
@@ -750,14 +779,25 @@ open class HomeFragment : Fragment()
                 sortedList.add(operation)
             }
 
-            if (mOngoingMultisigItems == null)
+            if (notaryCall)
             {
-                mOngoingMultisigItems = ArrayList()
+                if (mOngoingMultisigNotaryItems == null)
+                {
+                    mOngoingMultisigNotaryItems = ArrayList()
+                }
+                mOngoingMultisigNotaryItems?.clear()
+                mOngoingMultisigNotaryItems?.addAll(sortedList)
             }
-            mOngoingMultisigItems?.clear()
+            else
+            {
+                if (mOngoingMultisigItems == null)
+                {
+                    mOngoingMultisigItems = ArrayList()
+                }
+                mOngoingMultisigItems?.clear()
 
-            //mOngoingMultisigItems?.addAll(sortedList.subList(0, minOf(10, sortedList.size)))
-            mOngoingMultisigItems?.addAll(sortedList)
+                mOngoingMultisigItems?.addAll(sortedList)
+            }
 
 
             val lastOperation = sortedList[0]
@@ -772,7 +812,14 @@ open class HomeFragment : Fragment()
         }
         else
         {
-            mOngoingMultisigItems?.clear()
+            if (notaryCall)
+            {
+                mOngoingMultisigNotaryItems?.clear()
+            }
+            else
+            {
+                mOngoingMultisigItems?.clear()
+            }
         }
     }
 
@@ -786,6 +833,8 @@ open class HomeFragment : Fragment()
         val ongoingBundles = ongoingItemsToBundles(mOngoingMultisigItems)
         outState.putParcelableArrayList(ONGOING_OPERATIONS_ARRAYLIST_KEY, ongoingBundles)
 
+        val ongoingNotaryBundles = ongoingItemsToBundles(mOngoingMultisigNotaryItems)
+        outState.putParcelableArrayList(ONGOING_NOTARY_OPERATIONS_ARRAYLIST_KEY, ongoingNotaryBundles)
 
         mBalanceItem?.let {
             outState.putDouble(BALANCE_FLOAT_KEY, it)

@@ -53,47 +53,28 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
     private var mRecyclerView: RecyclerView? = null
     private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
 
-
     companion object
     {
         var ACCEPT_REQUEST_CODE = 0x3600 // arbitrary int
 
         const val ONGOING_MULTISIG_KEY = "ongoing_multisig_key"
+        const val ONGOING_NOTARY_MULTISIG_KEY = "ongoing_notary_multisig_key"
 
-        private fun getStartIntent(context: Context, list: ArrayList<Bundle>, themeBundle: Bundle): Intent
+        private fun getStartIntent(context: Context, list: ArrayList<Bundle>, notaryList: ArrayList<Bundle>, themeBundle: Bundle): Intent
         {
             val starter = Intent(context, OngoingMultisigActivity::class.java)
             starter.putExtra(CustomTheme.TAG, themeBundle)
             starter.putParcelableArrayListExtra(ONGOING_MULTISIG_KEY, list)
+            starter.putParcelableArrayListExtra(ONGOING_NOTARY_MULTISIG_KEY, notaryList)
 
             return starter
         }
 
-        fun start(activity: Activity, list: ArrayList<Bundle>, theme: CustomTheme)
+        fun start(activity: Activity, list: ArrayList<Bundle>, notaryList: ArrayList<Bundle>, theme: CustomTheme)
         {
-            val starter = getStartIntent(activity, list, theme.toBundle())
+            val starter = getStartIntent(activity, list, notaryList, theme.toBundle())
             ActivityCompat.startActivityForResult(activity, starter, ACCEPT_REQUEST_CODE, null)
-            //ActivityCompat.startActivityForResult(activity, starter, ADD_DSL_REQUEST_CODE, null)
         }
-    }
-
-
-    private fun bundlesToOngoingItems( bundles:ArrayList<Bundle>?): ArrayList<MultisigOperation>
-    {
-        if (bundles != null)
-        {
-            var items = ArrayList<MultisigOperation>(bundles.size)
-            if (bundles.isNotEmpty())
-            {
-                bundles.forEach {
-                    val op = MultisigOperation.fromBundle(it)
-                    items.add(op)
-                }
-            }
-            return items
-        }
-
-        return ArrayList()
     }
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -109,21 +90,19 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         //var recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
 
         val elements = intent.getParcelableArrayListExtra<Bundle>(ONGOING_MULTISIG_KEY)
+        val elementsNotary = intent.getParcelableArrayListExtra<Bundle>(ONGOING_NOTARY_MULTISIG_KEY)
 
         val operationsAsNotary = ArrayList<MultisigOperation>()
         val operationsAsSignatory = ArrayList<MultisigOperation>()
 
         for (oBundle in elements)
         {
-            val o = MultisigOperation.fromBundle(oBundle)
-            if (o.notary == storage.getMnemonics().pkh)
-            {
-                operationsAsNotary.add(o)
-            }
-            else
-            {
-                operationsAsSignatory.add(o)
-            }
+            operationsAsSignatory.add(MultisigOperation.fromBundle(oBundle))
+        }
+
+        for (oBundle in elementsNotary)
+        {
+            operationsAsNotary.add(MultisigOperation.fromBundle(oBundle))
         }
 
         //val adapter = OngoingMultisigRecyclerViewAdapter(ArrayList<HomeFragment.OngoingMultisigOperation>(), bundlesToOngoingItems(elements))
