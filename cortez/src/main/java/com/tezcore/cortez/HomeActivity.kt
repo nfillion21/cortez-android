@@ -504,6 +504,10 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
                 {
                     showSnackBar(getString(R.string.multisig_operation_confirmed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
                 }
+                else if (resultCode == R.id.multisig_ongoing_operation_removed)
+                {
+                    showSnackBar(getString(R.string.multisig_ongoing_operation_removed), ContextCompat.getColor(this, android.R.color.holo_green_light), ContextCompat.getColor(this, R.color.tz_light))
+                }
             }
 
             else ->

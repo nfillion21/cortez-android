@@ -1,6 +1,7 @@
 package com.tezos.ui.fragment
 
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
@@ -13,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -137,6 +139,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         fun saveFingerprintAllowed(useInFuture: Boolean)
 
         fun onMultisigOperationConfirmed()
+        fun onMultisigOngoingOperationRemoved()
     }
 
     companion object
@@ -220,6 +223,30 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             dismiss()
         }
 
+        delete_button.setOnClickListener {
+
+            val dialogClickListener = { dialog: DialogInterface, which:Int ->
+                when (which) {
+                    DialogInterface.BUTTON_POSITIVE ->
+                    {
+                        dialog.dismiss()
+                        startInitRemoveOngoingOperationDatabase(isOperationConfirmed = false)
+                    }
+
+                    DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+                }
+            }
+
+            val builder = AlertDialog.Builder(activity!!)
+            builder.setTitle(R.string.alert_remove_ongoing_operation_title)
+                    .setMessage(getString(R.string.alert_remove_ongoing_operation))
+
+                    .setNegativeButton(android.R.string.cancel, dialogClickListener)
+                    .setPositiveButton(android.R.string.yes, dialogClickListener)
+                    .setCancelable(false)
+                    .show()
+        }
+
         swipe_refresh_multisig_dialog_layout.setOnRefreshListener {
 
             arguments?.let {
@@ -301,7 +328,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
                                 if (mRemoveOperationLoading)
                                 {
-                                    startInitRemoveOngoingOperationDatabase()
+                                    startInitRemoveOngoingOperationDatabase(isOperationConfirmed = false)
                                 }
                                 else
                                 {
@@ -320,6 +347,15 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             arguments?.let {
                 startInitContractInfoLoading()
             }
+        }
+
+        arguments?.let {
+
+            delete_button.visibility =
+                    if (it.getBoolean(FROM_NOTARY))
+                        View.VISIBLE
+                    else
+                        View.INVISIBLE
         }
 
         val ss = SpannableString(" ")
@@ -479,15 +515,15 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
         startGetRequestLoadSignatures()
     }
 
-    private fun startInitRemoveOngoingOperationDatabase()
+    private fun startInitRemoveOngoingOperationDatabase(isOperationConfirmed: Boolean)
     {
         transferLoading(true)
         mRemoveOperationLoading = true
 
-        startPostRequestRemoveOngoingOperationDatabase()
+        startPostRequestRemoveOngoingOperationDatabase(isOperationConfirmed)
     }
 
-    private fun startPostRequestRemoveOngoingOperationDatabase()
+    private fun startPostRequestRemoveOngoingOperationDatabase(isOperationConfirmed:Boolean)
     {
         val childUpdates = HashMap<String, Any?>()
 
@@ -513,7 +549,14 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                     {
                         onRemoveOngoingOperationDatabaseComplete(error = null)
                         dismiss()
-                        listener?.onMultisigOperationConfirmed()
+                        if (isOperationConfirmed)
+                        {
+                            listener?.onMultisigOperationConfirmed()
+                        }
+                        else
+                        {
+                            listener?.onMultisigOngoingOperationRemoved()
+                        }
                     }
                 }
                 .addOnFailureListener {
@@ -794,7 +837,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
                             {
                                 onFinalizeTransferLoadComplete(null)
 
-                                startInitRemoveOngoingOperationDatabase()
+                                startInitRemoveOngoingOperationDatabase(isOperationConfirmed = true)
 
                             }
                         },
@@ -1745,9 +1788,11 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
             if (mContract != null && mServerOperation != null)
             {
+                /*
                 val opBundle = it.getBundle(ONGOING_OPERATION_KEY)
                 val op = MultisigOperation.fromBundle(opBundle)
                 val binaryReader = MultisigBinaries(op.binary)
+                */
 
                 val signatures = mServerOperation?.signatures
                 val mnemonicsData = Storage(activity!!).getMnemonics()

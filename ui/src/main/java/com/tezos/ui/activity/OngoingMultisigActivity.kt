@@ -182,4 +182,10 @@ class OngoingMultisigActivity : BaseSecureActivity(), OngoingMultisigRecyclerVie
         setResult(R.id.multisig_operation_confirmed, null)
         finish()
     }
+
+    override fun onMultisigOngoingOperationRemoved()
+    {
+        setResult(R.id.multisig_ongoing_operation_removed, null)
+        finish()
+    }
 }
