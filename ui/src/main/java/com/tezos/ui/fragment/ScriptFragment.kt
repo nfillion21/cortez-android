@@ -188,7 +188,7 @@ class ScriptFragment : Fragment(), AddSignatoryDialogFragment.OnSignatorySelecto
 
         private const val CONTRACT_SIG_KEY = "contract_sig_key"
 
-        private const val SIGNATORIES_CAPACITY = 10
+        public const val SIGNATORIES_CAPACITY = 10
 
         private const val SIGNATORIES_LIST_KEY = "signatories_list"
 

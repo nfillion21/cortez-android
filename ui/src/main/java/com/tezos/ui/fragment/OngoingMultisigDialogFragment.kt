@@ -31,6 +31,7 @@ import com.google.firebase.database.*
 import com.tezos.core.crypto.Base58
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
+import com.tezos.core.models.Contract
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.DataExtractor
 import com.tezos.core.utils.MultisigBinaries
@@ -67,68 +68,10 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
     private var mServerOperation:MultisigOperation? = null
 
-    private var mContract:Contract? = null
+    private var mContract: Contract? = null
 
     private lateinit var mDatabaseReference: DatabaseReference
     private lateinit var operationDatabase: DatabaseReference
-
-    data class Contract
-    (
-            val blk: String,
-            val spendable: Boolean,
-            val delegatable: Boolean,
-            val delegate: String?,
-            val script: String,
-            val storage: String
-    )
-
-    internal class ContractSerialization internal constructor(private val contract: Contract)
-    {
-        internal fun getSerializedBundle():Bundle
-        {
-            val contractBundle = Bundle()
-
-            contractBundle.putString("blk", contract.blk)
-            contractBundle.putBoolean("spendable", contract.spendable)
-            contractBundle.putBoolean("delegatable", contract.delegatable)
-            contractBundle.putString("delegate", contract.delegate)
-            contractBundle.putString("script", contract.script)
-            contractBundle.putString("storage", contract.storage)
-
-            return contractBundle
-        }
-    }
-
-    internal class ContractMapper internal constructor(private val bundle: Bundle)
-    {
-        internal fun mappedObjectFromBundle(): Contract
-        {
-            val blk = this.bundle.getString("blk", null)
-            val spendable = this.bundle.getBoolean("spendable", false)
-            val delegatable = this.bundle.getBoolean("delegatable", false)
-            val delegate = this.bundle.getString("delegate", null)
-            val script = this.bundle.getString("script", null)
-            val storage = this.bundle.getString("storage", null)
-
-            return Contract(blk, spendable, delegatable, delegate, script, storage)
-        }
-    }
-
-    private fun toContractBundle(contract: Contract?): Bundle?
-    {
-        if (contract != null)
-        {
-            val serializer = ContractSerialization(contract)
-            return serializer.getSerializedBundle()
-        }
-        return null
-    }
-
-    private fun fromContractBundle(bundle: Bundle): Contract
-    {
-        val mapper = ContractMapper(bundle)
-        return mapper.mappedObjectFromBundle()
-    }
 
     private var mSignatoriesList:ArrayList<String> = ArrayList(SIGNATORIES_CAPACITY)
 
@@ -281,7 +224,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
             val contractBundle = savedInstanceState.getBundle(CONTRACT_DATA_KEY)
             if (contractBundle != null)
             {
-                mContract = this.fromContractBundle(contractBundle)
+                mContract = Contract.fromBundle(contractBundle)
             }
 
             mSignatoriesList = savedInstanceState.getStringArrayList(SIGNATORIES_LIST_KEY)
@@ -940,17 +883,7 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
     {
         if (answer.length() > 0)
         {
-            val contractJSON = DataExtractor.getJSONObjectFromField(answer,0)
-
-            val blk = DataExtractor.getStringFromField(contractJSON, "blk")
-            val spendable = DataExtractor.getBooleanFromField(contractJSON, "spendable")
-            val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
-            val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
-            val script = DataExtractor.getJSONObjectFromField(contractJSON, "script")
-
-            val storage = DataExtractor.getJSONObjectFromField(contractJSON, "storage")
-
-            mContract = Contract(blk as String, spendable as Boolean, delegatable as Boolean, delegate, script.toString(), storage.toString())
+            mContract = Contract.fromJSONArray(answer)
         }
     }
 
@@ -1925,7 +1858,8 @@ class OngoingMultisigDialogFragment : AppCompatDialogFragment()
 
         outState.putBundle(SERVER_OPERATION_KEY, mServerOperation?.toBundle())
 
-        outState.putBundle(CONTRACT_DATA_KEY, toContractBundle(mContract))
+        outState.putBundle(CONTRACT_DATA_KEY, mContract?.toBundle())
+
 
         outState.putStringArrayList(SIGNATORIES_LIST_KEY, mSignatoriesList)
     }

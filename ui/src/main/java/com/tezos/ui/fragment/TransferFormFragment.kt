@@ -47,12 +47,14 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.crypto.KeyPair
 import com.tezos.core.models.Account
 import com.tezos.core.models.Address
+import com.tezos.core.models.Contract
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.*
 import com.tezos.ui.R
@@ -60,8 +62,10 @@ import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.database.MultisigOperation
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
+import kotlinx.android.synthetic.main.dialog_ongoing_multisig.*
 import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
 import kotlinx.android.synthetic.main.payment_form_card_info.no_mnemonics
@@ -101,8 +105,8 @@ class TransferFormFragment : Fragment()
 
     private var mRecipientStorageInfoLoading:Boolean = false
 
-    private var mStorageSource:String? = null
-    private var mStorageRecipient:String? = null
+    private var mStorageSource:Contract? = null
+    private var mStorageRecipient:Contract? = null
 
     private var mSourceKT1withCode:Boolean = false
 
@@ -221,8 +225,17 @@ class TransferFormFragment : Fragment()
 
             mRecipientStorageInfoLoading = savedInstanceState.getBoolean(CONTRACT_SCRIPT_RECIPIENT_INFO_TAG)
 
-            mStorageSource = savedInstanceState.getString(STORAGE_DATA_SOURCE_KEY, null)
-            mStorageRecipient = savedInstanceState.getString(STORAGE_DATA_RECIPIENT_KEY, null)
+            val storageSourceBundle = savedInstanceState.getBundle(STORAGE_DATA_SOURCE_KEY)
+            if (storageSourceBundle != null)
+            {
+                mStorageSource = Contract.fromBundle(storageSourceBundle)
+            }
+
+            val storageRecipientBundle = savedInstanceState.getBundle(STORAGE_DATA_RECIPIENT_KEY)
+            if (storageRecipientBundle != null)
+            {
+                mStorageRecipient = Contract.fromBundle(storageRecipientBundle)
+            }
 
             mSourceKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_SOURCE_KEY, false)
 
@@ -401,10 +414,75 @@ class TransferFormFragment : Fragment()
         startGetRequestLoadContractInfo(isRecipient)
     }
 
+
+    // volley
+    /*
+    private fun startGetRequestLoadContractInfo()
+    {
+        cancelRequests(resetBooleans = true)
+
+        mStorageInfoLoading = true
+
+        arguments?.let { bundle ->
+
+            val operationBundle = bundle.getBundle(OngoingMultisigDialogFragment.ONGOING_OPERATION_KEY)
+            val op = MultisigOperation.fromBundle(operationBundle)
+
+            val binaryReader = MultisigBinaries(op.binary)
+            val url = String.format(getString(R.string.contract_info2_url), binaryReader.getContractAddress())
+
+            // Request a string response from the provided URL.
+            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener
+            {o ->
+
+                //prevents from async crashes
+                if (dialogRootView != null)
+                {
+                    addContractInfoFromJSON(o)
+                    onStorageInfoComplete(error = null)
+
+                    startInitSignaturesInfoLoading()
+                }
+            },
+                    Response.ErrorListener {
+
+                        if (dialogRootView != null)
+                        {
+                            onStorageInfoComplete(error = it)
+                            mClickCalculate = true
+                        }
+                    })
+
+            jsonArrayRequest.tag = OngoingMultisigDialogFragment.LOAD_STORAGE_TAG
+            VolleySingleton.getInstance(activity?.applicationContext).addToRequestQueue(jsonArrayRequest)
+        }
+    }
+    */
+
+    /*
+    private fun addContractInfoFromJSON(answer: JSONArray)
+    {
+        if (answer.length() > 0)
+        {
+            val contractJSON = DataExtractor.getJSONObjectFromField(answer,0)
+
+            val blk = DataExtractor.getStringFromField(contractJSON, "blk")
+            val spendable = DataExtractor.getBooleanFromField(contractJSON, "spendable")
+            val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
+            val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
+            val script = DataExtractor.getJSONObjectFromField(contractJSON, "script")
+
+            val storage = DataExtractor.getJSONObjectFromField(contractJSON, "storage")
+
+            mContract = OngoingMultisigDialogFragment.Contract(blk as String, spendable as Boolean, delegatable as Boolean, delegate, script.toString(), storage.toString())
+        }
+    }
+    */
+
     // volley
     private fun startGetRequestLoadContractInfo(isRecipient:Boolean)
     {
-        cancelRequests(true)
+        cancelRequests(resetBooleans = true)
 
         if (isRecipient)
         {
@@ -432,10 +510,12 @@ class TransferFormFragment : Fragment()
 
         if (pkh != null)
         {
-            val url = String.format(getString(R.string.contract_storage_url), pkh)
+            //val url = String.format(getString(R.string.contract_storage_url), pkh)
+            val url = String.format(getString(R.string.contract_info2_url), pkh)
 
             // Request a string response from the provided URL.
-            val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener<JSONObject>
+            val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null, Response.Listener
+            //val jsonArrayRequest = JsonObjectRequest(Request.Method.GET, url, null, Response.Listener<JSONObject>
             {
 
                 //prevents from async crashes
@@ -478,6 +558,7 @@ class TransferFormFragment : Fragment()
         }
     }
 
+    /*
     private fun addContractInfoFromJSON(answer: JSONObject, isRecipient: Boolean)
     {
         if (answer.length() > 0)
@@ -489,6 +570,22 @@ class TransferFormFragment : Fragment()
             else
             {
                 mStorageSource = answer.toString()
+            }
+        }
+    }
+    */
+
+    private fun addContractInfoFromJSON(answer: JSONArray, isRecipient: Boolean)
+    {
+        if (answer.length() > 0)
+        {
+            if (isRecipient)
+            {
+                mStorageRecipient = Contract.fromJSONArray(answer)
+            }
+            else
+            {
+                mStorageSource = Contract.fromJSONArray(answer)
             }
         }
     }
@@ -1796,12 +1893,13 @@ class TransferFormFragment : Fragment()
         }
         else
         {
-
             //TODO this is a KT1, default one or with code.
 
             //TODO check if our tz3 is the same as the contract tz3
 
             //TODO if there is salt, this is a spending limit contract
+
+            //TODO now we will verify askingForButton
 
             val salt = getSalt(isRecipient)
             if (salt != null && salt >= 0)
@@ -1920,6 +2018,109 @@ class TransferFormFragment : Fragment()
         //refreshLoadingArea()
     }
 
+    /*
+    private fun askingForMultisigButton(): ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM
+    {
+        // 1. on recupere le storage
+        // --> on sait si on est signataire, et si on a assez de signature ou non.
+
+        // confirm_update --> signatory && notary && threshold 1
+        // request_to_signatories --> signatory && signatory < threshold && notary || notary && not signatory
+        // notify_notary --> signatory && not notary
+        // nothgin --> not signatory, not notary.
+
+        val numberAndSpotPair = getNumberAndSpot(pk()!!)
+        if (numberAndSpotPair.first != -1)
+        {
+            var threshold = getThreshold()
+
+            if (!mContractManager.isNullOrEmpty())
+            {
+                return if (mContractManager == pkhtz1())
+                {
+                    if (threshold!!.toInt() == 1)
+                    {
+                        ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM.CONFIRM_UPDATE
+                    }
+                    else
+                    {
+                        ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES
+                    }
+                }
+                else
+                {
+                    ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM.NOTIFY_NOTARY
+                }
+            }
+            else
+            {
+                // we don't know yet if we are a notary, then we just wait.
+            }
+        }
+        else
+        {
+            if (!mContractManager.isNullOrEmpty())
+            {
+                return if (mContractManager == pkhtz1())
+                {
+                    ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES
+                }
+                else
+                {
+                    ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM.NEITHER_NOTARY_NOR_SIGNATORY
+                }
+            }
+            else
+            {
+                // we don't know yet if we are a notary, then we just wait.
+            }
+        }
+
+        return ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET
+    }
+
+    private fun getSignatoriesList(): ArrayList<String>
+    {
+        if (mStorage != null)
+        {
+            val storageJSONObject = JSONObject(mStorage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
+
+            val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+            if (counter != null)
+            {
+                val argsPk = (DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray)[1] as JSONArray
+
+                val list = ArrayList<String> ()
+
+                for (it in 0 until argsPk.length())
+                {
+                    val item = argsPk.getJSONObject(it)
+
+                    val pk = DataExtractor.getStringFromField(item, "string")
+                    list.add(pk)
+                }
+
+                return list
+            }
+        }
+
+        return ArrayList(ScriptFragment.SIGNATORIES_CAPACITY)
+    }
+
+    private fun getNumberAndSpot(publicKey:String): Pair<Int, Int>
+    {
+        val signatories = getSignatoriesList()
+        if (!signatories.isNullOrEmpty())
+        {
+            return Pair(signatories.indexOf(publicKey), signatories.size)
+        }
+
+        return Pair(-1, -1)
+    }
+    */
+
+    /*
     private fun getContractTz3(isRecipient: Boolean):String?
     {
         //TODO check if the storage follows our pattern
@@ -1954,13 +2155,14 @@ class TransferFormFragment : Fragment()
 
         return null
     }
+    */
 
     private fun getSalt(isRecipient: Boolean):Int?
     {
         //TODO check if the storage follows our pattern
         if (isRecipient && mStorageRecipient != null)
         {
-            val storageJSONObject = JSONObject(mStorageRecipient)
+            val storageJSONObject = JSONObject(mStorageRecipient?.storage)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
             if (args != null)
@@ -1991,7 +2193,7 @@ class TransferFormFragment : Fragment()
         }
         else if (!isRecipient && mStorageSource != null)
         {
-            val storageJSONObject = JSONObject(mStorageSource)
+            val storageJSONObject = JSONObject(mStorageSource?.storage)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
             if (args != null)
@@ -2626,8 +2828,8 @@ class TransferFormFragment : Fragment()
 
         outState.putBoolean(CONTRACT_SCRIPT_RECIPIENT_INFO_TAG, mRecipientStorageInfoLoading)
 
-        outState.putString(STORAGE_DATA_SOURCE_KEY, mStorageSource)
-        outState.putString(STORAGE_DATA_RECIPIENT_KEY, mStorageRecipient)
+        outState.putBundle(STORAGE_DATA_SOURCE_KEY, mStorageSource?.toBundle())
+        outState.putBundle(STORAGE_DATA_RECIPIENT_KEY, mStorageRecipient?.toBundle())
 
         outState.putBoolean(TZ_OR_KT1_SOURCE_KEY, mSourceKT1withCode)
 
