@@ -33,9 +33,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -43,6 +40,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.fragment.app.Fragment
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
@@ -62,13 +62,10 @@ import com.tezos.ui.activity.AddressBookActivity
 import com.tezos.ui.activity.TransferFormActivity
 import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.database.MultisigOperation
 import com.tezos.ui.encryption.KeyStoreWrapper
 import com.tezos.ui.utils.*
-import kotlinx.android.synthetic.main.dialog_ongoing_multisig.*
 import kotlinx.android.synthetic.main.fragment_payment_form.*
 import kotlinx.android.synthetic.main.payment_form_card_info.*
-import kotlinx.android.synthetic.main.payment_form_card_info.no_mnemonics
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -333,6 +330,17 @@ class TransferFormFragment : Fragment()
                 }
             }
         }
+    }
+
+    private fun pk():String
+    {
+        return Storage(activity!!).getMnemonics().pk
+    }
+
+    private fun pkhtz1():String?
+    {
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+        return mnemonicsData.pkh
     }
 
     private fun onInitTransferLoadComplete(error:VolleyError?)
@@ -1901,8 +1909,8 @@ class TransferFormFragment : Fragment()
 
             //TODO now we will verify askingForButton
 
-            val salt = getSalt(isRecipient)
-            if (salt != null && salt >= 0)
+
+            if (getStorageSecureKeyHash(isRecipient = isRecipient) != null)
             {
                 if (isRecipient)
                 {
@@ -1923,92 +1931,97 @@ class TransferFormFragment : Fragment()
                 }
 
                 loading_progress.visibility = View.GONE
-
-                // with this information, handle the code to sign data
-
-                /*
-                val tz3 = getTz3()
-                val contractTz3 = getContractTz3(isRecipient)
-
-                if (tz3 == null || tz3 != contractTz3)
-                {
-                    //TODO ERROR, there is no way you can spend money without the right tz3
-                    //TODO please update your contract storage in contract tab.
-                }
-                else
-                {
-                    //TODO it's ok, this phone has the keys.
-                }
-                */
+            }
+            else if (getThreshold(isRecipient == isRecipient) != null)
+            {
+                // here I need to check the user is notary or signatory only.
+                //startNotaryLoading()
             }
             else
             {
-                if (isRecipient)
-                {
-                    mRecipientKT1withCode = false
+                val mnemonicsData = Storage(activity!!).getMnemonics()
+                val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
 
-                    if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith("KT1", true))
-                    {
-                        //this is a standard source tz1/2/3
-
-                        loading_progress.visibility = View.GONE
-                        recipient_area.visibility = View.VISIBLE
-                        amount_layout.visibility = View.VISIBLE
-                    }
-                    else
-                    {
-                        //this is a KT1 with no code in it
-
-                        loading_progress.visibility = View.GONE
-                        recipient_area.visibility = View.VISIBLE
-                        amount_layout.visibility = View.VISIBLE
-
-                        mClickRecipientKT1 = false
-                    }
-                }
-                else
-                {
-                    mSourceKT1withCode = false
-
-                    arguments?.let {
-
-                        val srcAddress = it.getString(Address.TAG)
-                        if (!srcAddress.isNullOrEmpty() && !srcAddress.startsWith("KT1", true))
+                val contract =
+                        if (isRecipient)
                         {
-                            //this is a standard source tz1/2/3
-
-                            //no need to hide it anymore
-                            loading_progress.visibility = View.GONE
-                            recipient_area.visibility = View.VISIBLE
-                            amount_layout.visibility = View.GONE
+                            mStorageRecipient
                         }
                         else
                         {
-                            //it looks like it's a KT1 with no code in it.
+                            mStorageSource
+                        }
 
-                            mClickSourceKT1 = false
+                val isDefaultContract = contract?.storage.toString() == defaultContract.toString()
 
-                            // we got to handle if we have the mnemonics.
-                            val hasMnemonics = Storage(activity!!).hasMnemonics()
-                            if (hasMnemonics)
+                if (isDefaultContract)
+                {
+                    if (isRecipient)
+                    {
+                        mRecipientKT1withCode = false
+
+                        if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith("KT1", true))
+                        {
+                            //this is a standard source tz1/2/3
+
+                            loading_progress.visibility = View.GONE
+                            recipient_area.visibility = View.VISIBLE
+                            amount_layout.visibility = View.VISIBLE
+                        }
+                        else
+                        {
+                            //this is a KT1 with no code in it
+
+                            loading_progress.visibility = View.GONE
+                            recipient_area.visibility = View.VISIBLE
+                            amount_layout.visibility = View.VISIBLE
+
+                            mClickRecipientKT1 = false
+                        }
+                    }
+                    else
+                    {
+                        mSourceKT1withCode = false
+
+                        arguments?.let {
+
+                            val srcAddress = it.getString(Address.TAG)
+                            if (!srcAddress.isNullOrEmpty() && !srcAddress.startsWith("KT1", true))
                             {
-                                val seed = Storage(activity!!).getMnemonics()
+                                //this is a standard source tz1/2/3
 
-                                if (seed.mnemonics.isEmpty())
-                                {
-                                    // TODO write a text to say we cannot transfer anything.
-                                    recipient_area.visibility = View.GONE
-                                    no_mnemonics.visibility = View.VISIBLE
-                                }
-                                else
-                                {
-                                    recipient_area.visibility = View.VISIBLE
-                                }
-
+                                //no need to hide it anymore
                                 loading_progress.visibility = View.GONE
+                                recipient_area.visibility = View.VISIBLE
                                 amount_layout.visibility = View.GONE
                             }
+                            else
+                            {
+                                //it looks like it's a KT1 with no code in it.
 
+                                mClickSourceKT1 = false
+
+                                // we got to handle if we have the mnemonics.
+                                val hasMnemonics = Storage(activity!!).hasMnemonics()
+                                if (hasMnemonics)
+                                {
+                                    val seed = Storage(activity!!).getMnemonics()
+
+                                    if (seed.mnemonics.isEmpty())
+                                    {
+                                        // TODO write a text to say we cannot transfer anything.
+                                        recipient_area.visibility = View.GONE
+                                        no_mnemonics.visibility = View.VISIBLE
+                                    }
+                                    else
+                                    {
+                                        recipient_area.visibility = View.VISIBLE
+                                    }
+
+                                    loading_progress.visibility = View.GONE
+                                    amount_layout.visibility = View.GONE
+                                }
+                            }
                         }
                     }
                 }
@@ -2018,25 +2031,58 @@ class TransferFormFragment : Fragment()
         //refreshLoadingArea()
     }
 
-    /*
-    private fun askingForMultisigButton(): ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM
+    private fun getStorageSecureKeyHash(isRecipient: Boolean): String?
     {
-        // 1. on recupere le storage
-        // --> on sait si on est signataire, et si on a assez de signature ou non.
+        val contract =
+                if (isRecipient)
+                {
+                    mStorageRecipient
+                }
+                else
+                {
+                    mStorageSource
+                }
 
-        // confirm_update --> signatory && notary && threshold 1
-        // request_to_signatories --> signatory && signatory < threshold && notary || notary && not signatory
-        // notify_notary --> signatory && not notary
-        // nothgin --> not signatory, not notary.
+        if (contract != null && !contract?.storage?.isNullOrEmpty())
+        {
 
-        val numberAndSpotPair = getNumberAndSpot(pk()!!)
+            val storageJSONObject = JSONObject(contract.storage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+
+// get securekey hash
+            if (args != null)
+            {
+                val argsSecureKey = DataExtractor.getJSONArrayFromField(args[0] as JSONObject, "args")
+                if (argsSecureKey != null)
+                {
+                    val secureKeyJSONObject = argsSecureKey[0] as JSONObject
+                    return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+                }
+            }
+        }
+
+        return null
+    }
+
+    private fun askingForMultisigButton(isRecipient: Boolean): ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM
+    {
+        val contract = if (isRecipient)
+        {
+            mStorageRecipient
+        }
+        else
+        {
+            mStorageSource
+        }
+
+        val numberAndSpotPair = getNumberAndSpot(isRecipient = isRecipient, publicKey = pk())
         if (numberAndSpotPair.first != -1)
         {
-            var threshold = getThreshold()
+            var threshold = getThreshold(isRecipient = isRecipient)
 
-            if (!mContractManager.isNullOrEmpty())
+            if (!contract?.mgr.isNullOrEmpty())
             {
-                return if (mContractManager == pkhtz1())
+                return if (contract?.mgr == pkhtz1())
                 {
                     if (threshold!!.toInt() == 1)
                     {
@@ -2054,14 +2100,14 @@ class TransferFormFragment : Fragment()
             }
             else
             {
-                // we don't know yet if we are a notary, then we just wait.
+                // we should not go there.
             }
         }
         else
         {
-            if (!mContractManager.isNullOrEmpty())
+            if (!contract?.mgr.isNullOrEmpty())
             {
-                return if (mContractManager == pkhtz1())
+                return if (contract?.mgr == pkhtz1())
                 {
                     ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM.REQUEST_TO_SIGNATORIES
                 }
@@ -2079,11 +2125,51 @@ class TransferFormFragment : Fragment()
         return ScriptFragment.Companion.MULTISIG_UPDATE_STORAGE_ENUM.NO_NOTARY_YET
     }
 
-    private fun getSignatoriesList(): ArrayList<String>
+    private fun getThreshold(isRecipient: Boolean): String?
     {
-        if (mStorage != null)
+        val contract =
+                if (isRecipient)
+                {
+                    mStorageRecipient
+                }
+                else
+                {
+                    mStorageSource
+                }
+
+        if (contract != null && !contract.storage.isNullOrEmpty())
         {
-            val storageJSONObject = JSONObject(mStorage)
+            val storageJSONObject = JSONObject(contract.storage)
+            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
+            if (args != null)
+            {
+                val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
+                if (counter != null)
+                {
+                    val argsPk = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
+                    return DataExtractor.getStringFromField(argsPk[0] as JSONObject, "int")
+                }
+            }
+        }
+
+        return null
+    }
+
+    private fun getSignatoriesList(isRecipient: Boolean): ArrayList<String>
+    {
+        val contract =
+                if (isRecipient)
+                {
+                    mStorageRecipient
+                }
+                else
+                {
+                    mStorageSource
+                }
+
+        if (contract != null)
+        {
+            val storageJSONObject = JSONObject(contract.storage)
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args") as JSONArray
 
             val counter = DataExtractor.getStringFromField(args[0] as JSONObject, "int")
@@ -2108,9 +2194,9 @@ class TransferFormFragment : Fragment()
         return ArrayList(ScriptFragment.SIGNATORIES_CAPACITY)
     }
 
-    private fun getNumberAndSpot(publicKey:String): Pair<Int, Int>
+    private fun getNumberAndSpot(isRecipient: Boolean, publicKey:String): Pair<Int, Int>
     {
-        val signatories = getSignatoriesList()
+        val signatories = getSignatoriesList(isRecipient = isRecipient)
         if (!signatories.isNullOrEmpty())
         {
             return Pair(signatories.indexOf(publicKey), signatories.size)
@@ -2118,7 +2204,6 @@ class TransferFormFragment : Fragment()
 
         return Pair(-1, -1)
     }
-    */
 
     /*
     private fun getContractTz3(isRecipient: Boolean):String?
@@ -2155,45 +2240,24 @@ class TransferFormFragment : Fragment()
 
         return null
     }
-    */
+     */
 
     private fun getSalt(isRecipient: Boolean):Int?
     {
-        //TODO check if the storage follows our pattern
-        if (isRecipient && mStorageRecipient != null)
-        {
-            val storageJSONObject = JSONObject(mStorageRecipient?.storage)
-
-            val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
-            if (args != null)
-            {
-                val argsMasterKey = DataExtractor.getJSONArrayFromField(args[1] as JSONObject, "args") as JSONArray
-                val masterKeySaltJSONObject = argsMasterKey[1] as JSONObject
-
-                var canSignWithMaster = false
-                val hasMnemonics = Storage(context!!).hasMnemonics()
-                if (hasMnemonics)
+        val contract =
+                if (isRecipient)
                 {
-                    val seed = Storage(activity!!).getMnemonics()
-                    canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
-                }
-
-                val salt = if (mSourceKT1withCode && !canSignWithMaster)
-                {
-                    (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
+                    mStorageRecipient
                 }
                 else
                 {
-                    (masterKeySaltJSONObject["args"] as JSONArray)[0] as JSONObject
+                    mStorageSource
                 }
 
-
-                return DataExtractor.getStringFromField(salt, "int").toInt()
-            }
-        }
-        else if (!isRecipient && mStorageSource != null)
+        //TODO check if the storage follows our pattern
+        if (contract != null)
         {
-            val storageJSONObject = JSONObject(mStorageSource?.storage)
+            val storageJSONObject = JSONObject(contract.storage)
 
             val args = DataExtractor.getJSONArrayFromField(storageJSONObject, "args")
             if (args != null)
