@@ -105,9 +105,8 @@ class TransferFormFragment : Fragment()
     private var mStorageSource:Contract? = null
     private var mStorageRecipient:Contract? = null
 
-    private var mSourceKT1withCode:Boolean = false
-
-    private var mRecipientKT1withCode:Boolean = false
+    private var mNatureSource:ADDRESS_NATURE_ENUM? = null
+    private var mNatureRecipient:ADDRESS_NATURE_ENUM? = null
 
     private var mSig:String? = null
 
@@ -150,11 +149,15 @@ class TransferFormFragment : Fragment()
         private const val STORAGE_DATA_SOURCE_KEY = "storage_data_source_key"
         private const val STORAGE_DATA_RECIPIENT_KEY = "storage_data_recipient_key"
 
-        private const val TZ_OR_KT1_SOURCE_KEY = "tz_or_kt1_source_key"
-
-        private const val TZ_OR_KT1_RECIPIENT_KEY = "tz_or_kt1_recipient_key"
+        private const val NATURE_SOURCE_KEY = "nature_source_key"
+        private const val NATURE_RECIPIENT_KEY = "nature_recipient_key"
 
         private const val CONTRACT_SIG_KEY = "contract_sig_key"
+
+        enum class ADDRESS_NATURE_ENUM
+        {
+            TZ, KT1_DEFAULT_DELEGATION, KT1_DAILY_SPENDING_LIMIT, KT1_MULTISIG
+        }
     }
 
     interface OnTransferListener
@@ -234,9 +237,11 @@ class TransferFormFragment : Fragment()
                 mStorageRecipient = Contract.fromBundle(storageRecipientBundle)
             }
 
-            mSourceKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_SOURCE_KEY, false)
+            mNatureSource = savedInstanceState.getSerializable(NATURE_SOURCE_KEY) as ADDRESS_NATURE_ENUM?
+            mNatureSource = savedInstanceState.getSerializable(NATURE_RECIPIENT_KEY) as ADDRESS_NATURE_ENUM?
 
-            mRecipientKT1withCode = savedInstanceState.getBoolean(TZ_OR_KT1_RECIPIENT_KEY, false)
+            //mNatureSource = savedInstanceState.getBoolean(NATURE_SOURCE_KEY, false)
+            //mNatureRecipient = savedInstanceState.getBoolean(NATURE_RECIPIENT_KEY, false)
 
             mSig = savedInstanceState.getString(CONTRACT_SIG_KEY, null)
 
@@ -626,12 +631,32 @@ class TransferFormFragment : Fragment()
         val url = getString(R.string.transfer_forge)
         var postParams = JSONObject()
 
-        if (mSourceKT1withCode)
+        // if kt1withcode
+
+        when (mNatureSource)
+        {
+            ADDRESS_NATURE_ENUM.TZ -> {}
+            ADDRESS_NATURE_ENUM.KT1_DEFAULT_DELEGATION -> {}
+            ADDRESS_NATURE_ENUM.KT1_DAILY_SPENDING_LIMIT ->
+            {
+
+                when (mNatureRecipient)
+                {
+                    ADDRESS_NATURE_ENUM.TZ -> {}
+                    ADDRESS_NATURE_ENUM.KT1_DEFAULT_DELEGATION -> {}
+                    ADDRESS_NATURE_ENUM.KT1_DAILY_SPENDING_LIMIT -> {}
+                    ADDRESS_NATURE_ENUM.KT1_MULTISIG -> {}
+                }
+            }
+            ADDRESS_NATURE_ENUM.KT1_MULTISIG -> {}
+        }
+
+        if (mNatureSource)
         {
             //TODO need to try if it does work
             //I need to send some tez to an SLC, from an SLC.
 
-            if (mRecipientKT1withCode)
+            if (mNatureRecipient)
             {
                 var canSignWithMaster = false
                 val hasMnemonics = Storage(context!!).hasMnemonics()
@@ -1627,7 +1652,7 @@ class TransferFormFragment : Fragment()
             if (beginsWith?.toLowerCase(Locale.US) == "kt1")
             {
 
-                if (mSourceKT1withCode && !canSignWithMaster)
+                if (mNatureSource && !canSignWithMaster)
                 {
                     val ecKeys = retrieveECKeys()
                     val p2pk = CryptoUtils.generateP2Pk(ecKeys)
@@ -1658,9 +1683,9 @@ class TransferFormFragment : Fragment()
 
                 if (destBeginsWith?.toLowerCase(Locale.US) == "kt1")
                 {
-                    if (mSourceKT1withCode)
+                    if (mNatureSource)
                     {
-                        if (mRecipientKT1withCode)
+                        if (mNatureRecipient)
                         {
                             if (canSignWithMaster)
                             {
@@ -1692,7 +1717,7 @@ class TransferFormFragment : Fragment()
                 }
                 else
                 {
-                    if (mSourceKT1withCode)
+                    if (mNatureSource)
                     {
                         if (canSignWithMaster)
                         {
@@ -1760,7 +1785,7 @@ class TransferFormFragment : Fragment()
                     canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
                 }
 
-                var compressedSignature = if (mSourceKT1withCode && !canSignWithMaster)
+                var compressedSignature = if (mNatureSource && !canSignWithMaster)
                 {
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
@@ -1909,13 +1934,12 @@ class TransferFormFragment : Fragment()
 
             //TODO now we will verify askingForButton
 
-
             if (getStorageSecureKeyHash(isRecipient = isRecipient) != null)
             {
                 if (isRecipient)
                 {
                     // the recipient is a KT1 with code
-                    mRecipientKT1withCode = true
+                    mNatureRecipient = true
 
                     recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.VISIBLE
@@ -1924,7 +1948,7 @@ class TransferFormFragment : Fragment()
                 {
                     // the source is a KT1 with code
 
-                    mSourceKT1withCode = true
+                    mNatureSource = true
 
                     recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.GONE
@@ -1932,10 +1956,27 @@ class TransferFormFragment : Fragment()
 
                 loading_progress.visibility = View.GONE
             }
-            else if (getThreshold(isRecipient == isRecipient) != null)
+            else if (getThreshold(isRecipient = isRecipient) != null)
             {
-                // here I need to check the user is notary or signatory only.
-                //startNotaryLoading()
+                if (isRecipient)
+                {
+                    // the recipient is a KT1 with code
+                    mNatureRecipient = true
+
+                    recipient_area.visibility = View.VISIBLE
+                    amount_layout.visibility = View.VISIBLE
+                }
+                else
+                {
+                    // the source is a KT1 with code
+
+                    mNatureSource = true
+
+                    recipient_area.visibility = View.VISIBLE
+                    amount_layout.visibility = View.GONE
+                }
+
+                loading_progress.visibility = View.GONE
             }
             else
             {
@@ -1958,9 +1999,9 @@ class TransferFormFragment : Fragment()
                 {
                     if (isRecipient)
                     {
-                        mRecipientKT1withCode = false
+                        mNatureRecipient = false
 
-                        if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith("KT1", true))
+                        if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith(prefix = "KT1", ignoreCase = true))
                         {
                             //this is a standard source tz1/2/3
 
@@ -1981,7 +2022,7 @@ class TransferFormFragment : Fragment()
                     }
                     else
                     {
-                        mSourceKT1withCode = false
+                        mNatureSource = false
 
                         arguments?.let {
 
@@ -2273,7 +2314,7 @@ class TransferFormFragment : Fragment()
                     canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
                 }
 
-                val salt = if (mSourceKT1withCode && !canSignWithMaster)
+                val salt = if (mNatureSource && !canSignWithMaster)
                 {
                     (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
                 }
@@ -2895,9 +2936,8 @@ class TransferFormFragment : Fragment()
         outState.putBundle(STORAGE_DATA_SOURCE_KEY, mStorageSource?.toBundle())
         outState.putBundle(STORAGE_DATA_RECIPIENT_KEY, mStorageRecipient?.toBundle())
 
-        outState.putBoolean(TZ_OR_KT1_SOURCE_KEY, mSourceKT1withCode)
-
-        outState.putBoolean(TZ_OR_KT1_RECIPIENT_KEY, mRecipientKT1withCode)
+        outState.putSerializable(NATURE_SOURCE_KEY, mNatureSource)
+        outState.putSerializable(NATURE_RECIPIENT_KEY, mNatureRecipient)
 
         outState.putString(CONTRACT_SIG_KEY, mSig)
     }
