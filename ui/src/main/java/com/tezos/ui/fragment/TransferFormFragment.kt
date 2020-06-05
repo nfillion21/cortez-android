@@ -105,8 +105,8 @@ class TransferFormFragment : Fragment()
     private var mStorageSource:Contract? = null
     private var mStorageRecipient:Contract? = null
 
-    private var mNatureSource:ADDRESS_NATURE_ENUM? = null
-    private var mNatureRecipient:ADDRESS_NATURE_ENUM? = null
+    private var mNatureSource:NATURE_ADDRESS_ENUM? = null
+    private var mNatureRecipient:NATURE_ADDRESS_ENUM? = null
 
     private var mSig:String? = null
 
@@ -154,7 +154,7 @@ class TransferFormFragment : Fragment()
 
         private const val CONTRACT_SIG_KEY = "contract_sig_key"
 
-        enum class ADDRESS_NATURE_ENUM
+        enum class NATURE_ADDRESS_ENUM
         {
             TZ, KT1_DEFAULT_DELEGATION, KT1_DAILY_SPENDING_LIMIT, KT1_MULTISIG
         }
@@ -237,8 +237,8 @@ class TransferFormFragment : Fragment()
                 mStorageRecipient = Contract.fromBundle(storageRecipientBundle)
             }
 
-            mNatureSource = savedInstanceState.getSerializable(NATURE_SOURCE_KEY) as ADDRESS_NATURE_ENUM?
-            mNatureSource = savedInstanceState.getSerializable(NATURE_RECIPIENT_KEY) as ADDRESS_NATURE_ENUM?
+            mNatureSource = savedInstanceState.getSerializable(NATURE_SOURCE_KEY) as NATURE_ADDRESS_ENUM?
+            mNatureSource = savedInstanceState.getSerializable(NATURE_RECIPIENT_KEY) as NATURE_ADDRESS_ENUM?
 
             //mNatureSource = savedInstanceState.getBoolean(NATURE_SOURCE_KEY, false)
             //mNatureRecipient = savedInstanceState.getBoolean(NATURE_RECIPIENT_KEY, false)
@@ -635,894 +635,20 @@ class TransferFormFragment : Fragment()
 
         when (mNatureSource)
         {
-            ADDRESS_NATURE_ENUM.TZ -> {}
-            ADDRESS_NATURE_ENUM.KT1_DEFAULT_DELEGATION -> {}
-            ADDRESS_NATURE_ENUM.KT1_DAILY_SPENDING_LIMIT ->
-            {
+            NATURE_ADDRESS_ENUM.TZ -> {
 
-                when (mNatureRecipient)
+                val mnemonicsData = Storage(activity!!).getMnemonics()
+
+                val pk = if (mnemonicsData.pk.isNullOrEmpty())
                 {
-                    ADDRESS_NATURE_ENUM.TZ -> {}
-                    ADDRESS_NATURE_ENUM.KT1_DEFAULT_DELEGATION -> {}
-                    ADDRESS_NATURE_ENUM.KT1_DAILY_SPENDING_LIMIT -> {}
-                    ADDRESS_NATURE_ENUM.KT1_MULTISIG -> {}
-                }
-            }
-            ADDRESS_NATURE_ENUM.KT1_MULTISIG -> {}
-        }
-
-        if (mNatureSource)
-        {
-            //TODO need to try if it does work
-            //I need to send some tez to an SLC, from an SLC.
-
-            if (mNatureRecipient)
-            {
-                var canSignWithMaster = false
-                val hasMnemonics = Storage(context!!).hasMnemonics()
-                if (hasMnemonics)
-                {
-                    val seed = Storage(activity!!).getMnemonics()
-                    canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
-                }
-
-                if (canSignWithMaster)
-                {
-
-                    val mnemonicsData = Storage(activity!!).getMnemonics()
-                    val pk = if (mnemonicsData.pk.isNullOrEmpty())
-                    {
-                        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                        updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
-                    }
-                    else
-                    {
-                        mnemonicsData.pk
-                    }
-
-                    val pkh = mnemonicsData.pkh
-
-                    postParams.put("src_pk", pk)
-                    postParams.put("src", pkh)
-
-                    val kt1 = arguments!!.getString(Address.TAG)
-
-                    var dstObjects = JSONArray()
-
-                    var dstObject = JSONObject()
-
-                    dstObject.put("dst", kt1)
-                    dstObject.put("amount", "0")
-
-                    dstObject.put("entrypoint", "appel_clef_maitresse")
-
-
-                    // use the tz1 to transfer
-
-                    val dataVisitable = Primitive(
-                            Primitive.Name.Right,
-                            arrayOf(
-                                    Primitive(Primitive.Name.Pair,
-                                            arrayOf(
-                                                    Visitable.sequenceOf(
-                                                            Primitive(
-                                                                    Primitive.Name.DIP,
-                                                                    arrayOf(
-
-                                                                            Visitable.sequenceOf(
-
-                                                                                    Primitive(Primitive.Name.NIL,
-                                                                                            arrayOf(
-                                                                                                    Primitive(Primitive.Name.operation)
-                                                                                            )
-                                                                                    ),
-                                                                                    Primitive(Primitive.Name.PUSH,
-                                                                                            arrayOf(
-                                                                                                    Primitive(Primitive.Name.address),
-                                                                                                    Visitable.address(mDstAccount!!)
-                                                                                            )
-                                                                                    ),
-                                                                                    Primitive(Primitive.Name.CONTRACT,
-                                                                                            arrayOf(Primitive(Primitive.Name.unit))
-                                                                                    ),
-                                                                                    Visitable.sequenceOf(
-                                                                                            Primitive(Primitive.Name.IF_NONE,
-                                                                                                    arrayOf(
-
-                                                                                                            Visitable.sequenceOf(
-                                                                                                                    Visitable.sequenceOf(
-                                                                                                                            Primitive(Primitive.Name.UNIT),
-                                                                                                                            Primitive(Primitive.Name.FAILWITH)
-                                                                                                                    )
-                                                                                                            ),
-                                                                                                            Visitable.sequenceOf()
-                                                                                                    )
-                                                                                            )
-                                                                                    ),
-                                                                                    Primitive(Primitive.Name.PUSH,
-                                                                                            arrayOf(
-                                                                                                    Primitive(Primitive.Name.mutez),
-                                                                                                    Visitable.integer((mTransferAmount*1000000).roundToLong())
-                                                                                            )
-                                                                                    )
-                                                                            )
-                                                                    )
-                                                            ),
-                                                            Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                                            Primitive(Primitive.Name.CONS)
-                                                    ),
-                                                    Visitable.keyHash(pkh)
-                                            )
-                                    )
-                            )
-                    )
-
-                    val o = ByteArrayOutputStream()
-                    o.write(0x05)
-
-                    val dataPacker = Packer(o)
-                    dataVisitable.accept(dataPacker)
-
-                    val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                    val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
-                            arrayOf(
-                                    Visitable.address(kt1!!),
-                                    Visitable.chainID(getString(R.string.chain_ID))
-                            )
-                    )
-
-                    val output = ByteArrayOutputStream()
-                    output.write(0x05)
-
-                    val p = Packer(output)
-                    addressAndChainVisitable.accept(p)
-
-                    val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
-
-
-                    var saltVisitable: Visitable? = null
-                    val salt = getSalt(isRecipient = false)
-                    if (salt != null)
-                    {
-                        saltVisitable = Visitable.integer(salt.toLong())
-                    }
-
-                    val outputStream = ByteArrayOutputStream()
-                    outputStream.write(0x05)
-
-                    val packer = Packer(outputStream)
-                    saltVisitable!!.accept(packer)
-
-                    val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
-
                     val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                    val sk = CryptoUtils.generateSk(mnemonics, "")
-
-                    val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
-
-                    val edsig = CryptoUtils.generateEDSig(signature)
-
-                    val spendingLimitFile = "spending_limit_massive_transfer_to_kt1.json"
-                    val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                            .use {
-                                it.readText()
-                            }
-
-                    val value = JSONObject(contract)
-
-                    val argsSig = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-                    val argPk = argsSig[0] as JSONObject
-                    argPk.put("string", pk)
-
-                    val argSig = argsSig[1] as JSONObject
-                    argSig.put("string", edsig)
-
-                    mSig = edsig
-
-                    val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    argsMasterKey.put("string", pkh)
-
-                    val argsTz = ((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray
-
-                    val argAddress = ((argsTz[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    argAddress.put("string", mDstAccount)
-
-                    val argAmount = ((argsTz[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    argAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
-
-                    dstObject.put("parameters", value)
-
-                    dstObjects.put(dstObject)
-
-                    postParams.put("dsts", dstObjects)
-
+                    updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
                 }
                 else
                 {
-                    val kt1 = arguments!!.getString(Address.TAG)
-
-                    val ecKeys = retrieveECKeys()
-                    if (ecKeys == null)
-                    {
-                        val volleyError = VolleyError(getString(R.string.generic_error))
-                        onInitTransferLoadComplete(volleyError)
-                        mClickCalculate = true
-
-                        return
-                    }
-
-                    val p2pk = CryptoUtils.generateP2Pk(ecKeys)
-                    val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-
-                    postParams.put("src_pk", p2pk)
-                    postParams.put("src", tz3)
-
-                    var dstObjects = JSONArray()
-
-                    var dstObject = JSONObject()
-
-                    dstObject.put("dst", kt1)
-                    dstObject.put("amount", "0")
-
-                    dstObject.put("entrypoint", "transfer")
-
-                    val dataVisitable = Primitive(
-                            Primitive.Name.Pair,
-                            arrayOf(
-                                    Visitable.sequenceOf(
-                                            Primitive(
-                                                    Primitive.Name.Pair,
-                                                    arrayOf(
-                                                            Visitable.integer((mTransferAmount*1000000).roundToLong()),
-                                                            Visitable.address(mDstAccount!!)
-                                                    )
-                                            )
-                                    ),
-                                    Visitable.keyHash(tz3)
-                            )
-                    )
-
-                    val o = ByteArrayOutputStream()
-                    o.write(0x05)
-
-                    val dataPacker = Packer(o)
-                    dataVisitable.accept(dataPacker)
-
-                    val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                    val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
-                            arrayOf(
-                                    Visitable.address(kt1!!),
-                                    Visitable.chainID(getString(R.string.chain_ID))
-                            )
-                    )
-
-                    val output = ByteArrayOutputStream()
-                    output.write(0x05)
-
-                    val p = Packer(output)
-                    addressAndChainVisitable.accept(p)
-
-                    val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
-
-
-                    var saltVisitable: Visitable? = null
-                    val salt = getSalt(isRecipient = false)
-                    if (salt != null)
-                    {
-                        saltVisitable = Visitable.integer(salt.toLong())
-                    }
-
-                    val outputStream = ByteArrayOutputStream()
-                    outputStream.write(0x05)
-
-                    val packer = Packer(outputStream)
-                    saltVisitable!!.accept(packer)
-
-                    val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
-
-                    val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
-
-                    val signatureTz3 = EncryptionServices().sign(signedData)
-                    val compressedSignature = compressFormat(signatureTz3)
-                    val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
-
-
-
-                    val spendingLimitFile = "spending_limit_transfer.json"
-                    val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                            .use {
-                                it.readText()
-                            }
-
-                    val value = JSONObject(contract)
-
-                    val argsSend = (((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-
-                    val argsSendAmount = argsSend[0] as JSONObject
-                    argsSendAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
-
-                    val argsSendContract = argsSend[1] as JSONObject
-                    argsSendContract.put("string", mDstAccount)
-
-                    val argsSendTz = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    argsSendTz.put("string", tz3)
-
-                    val argsSig = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
-
-                    val argsSigPk = argsSig[0] as JSONObject
-                    argsSigPk.put("string", p2pk)
-
-                    val argsSigSig = argsSig[1] as JSONObject
-                    argsSigSig.put("string", p2sig)
-
-                    mSig = p2sig
-
-                    dstObject.put("parameters", value)
-
-                    dstObjects.put(dstObject)
-
-                    postParams.put("dsts", dstObjects)
-
-                }
-            }
-            else
-            {
-                var canSignWithMaster = false
-                val hasMnemonics = Storage(context!!).hasMnemonics()
-                if (hasMnemonics)
-                {
-                    val seed = Storage(activity!!).getMnemonics()
-                    canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
+                    mnemonicsData.pk
                 }
 
-                if (canSignWithMaster)
-                {
-
-                    val beginsWith = mDstAccount?.slice(0 until 3)
-
-                    //this one is a standard KT1
-                    if (beginsWith?.toLowerCase(Locale.US) == "kt1")
-                    {
-                        val mnemonicsData = Storage(activity!!).getMnemonics()
-                        val pk = if (mnemonicsData.pk.isNullOrEmpty())
-                        {
-                            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
-                        }
-                        else
-                        {
-                            mnemonicsData.pk
-                        }
-
-                        val pkh = mnemonicsData.pkh
-
-                        postParams.put("src_pk", pk)
-                        postParams.put("src", pkh)
-
-                        val kt1 = arguments!!.getString(Address.TAG)
-
-                        var dstObjects = JSONArray()
-
-                        var dstObject = JSONObject()
-
-                        dstObject.put("dst", kt1)
-                        dstObject.put("amount", "0")
-
-                        dstObject.put("entrypoint", "appel_clef_maitresse")
-
-
-                        // use the tz1 to transfer
-
-                        val dataVisitable = Primitive(
-                                Primitive.Name.Right,
-                                arrayOf(
-                                        Primitive(Primitive.Name.Pair,
-                                                arrayOf(
-                                                        Visitable.sequenceOf(
-                                                                Primitive(
-                                                                        Primitive.Name.DIP,
-                                                                        arrayOf(
-
-                                                                                Visitable.sequenceOf(
-
-                                                                                        Primitive(Primitive.Name.NIL,
-                                                                                                arrayOf(
-                                                                                                        Primitive(Primitive.Name.operation)
-                                                                                                )
-                                                                                        ),
-                                                                                        Primitive(Primitive.Name.PUSH,
-                                                                                                arrayOf(
-                                                                                                        Primitive(Primitive.Name.address),
-                                                                                                        Visitable.address(mDstAccount!!)
-                                                                                                )
-                                                                                        ),
-                                                                                        Primitive(Primitive.Name.CONTRACT,
-                                                                                                arrayOf(Primitive(Primitive.Name.unit))
-                                                                                        ),
-                                                                                        Visitable.sequenceOf(
-                                                                                                Primitive(Primitive.Name.IF_NONE,
-                                                                                                        arrayOf(
-
-                                                                                                                Visitable.sequenceOf(
-                                                                                                                        Visitable.sequenceOf(
-                                                                                                                                Primitive(Primitive.Name.UNIT),
-                                                                                                                                Primitive(Primitive.Name.FAILWITH)
-                                                                                                                        )
-                                                                                                                ),
-                                                                                                                Visitable.sequenceOf()
-                                                                                                        )
-                                                                                                )
-                                                                                        ),
-                                                                                        Primitive(Primitive.Name.PUSH,
-                                                                                                arrayOf(
-                                                                                                        Primitive(Primitive.Name.mutez),
-                                                                                                        Visitable.integer((mTransferAmount*1000000).roundToLong())
-                                                                                                )
-                                                                                        )
-                                                                                )
-                                                                        )
-                                                                ),
-                                                                Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                                                Primitive(Primitive.Name.CONS)
-                                                        ),
-                                                        Visitable.keyHash(pkh)
-                                                )
-                                        )
-                                )
-                        )
-
-                        val o = ByteArrayOutputStream()
-                        o.write(0x05)
-
-                        val dataPacker = Packer(o)
-                        dataVisitable.accept(dataPacker)
-
-                        val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                        val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
-                                arrayOf(
-                                        Visitable.address(kt1!!),
-                                        Visitable.chainID(getString(R.string.chain_ID))
-                                )
-                        )
-
-                        val output = ByteArrayOutputStream()
-                        output.write(0x05)
-
-                        val p = Packer(output)
-                        addressAndChainVisitable.accept(p)
-
-                        val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
-
-
-                        var saltVisitable: Visitable? = null
-                        val salt = getSalt(isRecipient = false)
-                        if (salt != null)
-                        {
-                            saltVisitable = Visitable.integer(salt.toLong())
-                        }
-
-                        val outputStream = ByteArrayOutputStream()
-                        outputStream.write(0x05)
-
-                        val packer = Packer(outputStream)
-                        saltVisitable!!.accept(packer)
-
-                        val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
-
-                        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                        val sk = CryptoUtils.generateSk(mnemonics, "")
-
-                        val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
-
-                        val edsig = CryptoUtils.generateEDSig(signature)
-
-                        val spendingLimitFile = "spending_limit_massive_transfer_to_kt1.json"
-                        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                                .use {
-                                    it.readText()
-                                }
-
-                        val value = JSONObject(contract)
-
-                        val argsSig = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-                        val argPk = argsSig[0] as JSONObject
-                        argPk.put("string", pk)
-
-                        val argSig = argsSig[1] as JSONObject
-                        argSig.put("string", edsig)
-                        mSig = edsig
-
-                        val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                        argsMasterKey.put("string", pkh)
-
-                        val argsTz = ((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray
-
-                        val argAddress = ((argsTz[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                        argAddress.put("string", mDstAccount)
-
-                        val argAmount = ((argsTz[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                        argAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
-
-                        dstObject.put("parameters", value)
-
-                        dstObjects.put(dstObject)
-
-                        postParams.put("dsts", dstObjects)
-
-                    }
-                    else
-                    {
-
-                        val mnemonicsData = Storage(activity!!).getMnemonics()
-
-                        val pk = if (mnemonicsData.pk.isNullOrEmpty())
-                        {
-                            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
-                        }
-                        else
-                        {
-                            mnemonicsData.pk
-                        }
-
-                        val pkh = mnemonicsData.pkh
-
-                        postParams.put("src_pk", pk)
-                        postParams.put("src", pkh)
-
-                        val kt1 = arguments!!.getString(Address.TAG)
-
-                        var dstObjects = JSONArray()
-
-                        var dstObject = JSONObject()
-
-                        dstObject.put("dst", kt1)
-                        dstObject.put("amount", "0")
-
-                        dstObject.put("entrypoint", "appel_clef_maitresse")
-
-
-                        // use the tz1 to transfer
-
-                        val dataVisitable = Primitive(
-                                Primitive.Name.Right,
-                                arrayOf(
-                                        Primitive(
-                                                Primitive.Name.Pair,
-                                                arrayOf(
-
-                                                        Visitable.sequenceOf(
-
-                                                                Primitive(
-                                                                        Primitive.Name.DIP,
-                                                                        arrayOf(
-                                                                                Visitable.sequenceOf(
-
-                                                                                        Primitive(Primitive.Name.NIL,
-                                                                                                arrayOf(Primitive(Primitive.Name.operation))
-                                                                                        ),
-
-                                                                                        Primitive(Primitive.Name.PUSH,
-                                                                                                arrayOf(
-                                                                                                        Primitive(Primitive.Name.key_hash),
-                                                                                                        Visitable.keyHash(mDstAccount!!)
-                                                                                                )
-                                                                                        ),
-                                                                                        Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
-                                                                                        Primitive(Primitive.Name.PUSH,
-                                                                                                arrayOf(
-                                                                                                        Primitive(Primitive.Name.mutez),
-                                                                                                        Visitable.integer((mTransferAmount*1000000).roundToLong())
-                                                                                                )
-                                                                                        )
-                                                                                )
-                                                                        )
-                                                                ),
-                                                                Primitive(Primitive.Name.TRANSFER_TOKENS),
-                                                                Primitive(Primitive.Name.CONS)
-                                                        ),
-                                                        Visitable.keyHash(pkh)
-                                                )
-                                        )
-                                )
-                        )
-
-                        val o = ByteArrayOutputStream()
-                        o.write(0x05)
-
-                        val dataPacker = Packer(o)
-                        dataVisitable.accept(dataPacker)
-
-                        val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                        //val packCompare = "0505080707020000003a051f020000002f053d036d0743035d0a000000150002298c03ed7d454a101eb7022bc95f7e5f41ac78031e0743036a0080c0a8ca9a3a034d031b0a0000001500dbd1087b133e63b9e320d20be9d1469621b6d682".hexToByteArray()
-
-                        val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
-                                arrayOf(
-                                        Visitable.address(kt1!!),
-                                        Visitable.chainID(getString(R.string.chain_ID))
-                                )
-                        )
-
-                        val output = ByteArrayOutputStream()
-                        output.write(0x05)
-
-                        val p = Packer(output)
-                        addressAndChainVisitable.accept(p)
-
-                        val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
-
-
-                        var saltVisitable: Visitable? = null
-                        val salt = getSalt(isRecipient = false)
-                        if (salt != null)
-                        {
-                            saltVisitable = Visitable.integer(salt.toLong())
-                        }
-
-                        val outputStream = ByteArrayOutputStream()
-                        outputStream.write(0x05)
-
-                        val packer = Packer(outputStream)
-                        saltVisitable!!.accept(packer)
-
-                        val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
-
-                        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                        val sk = CryptoUtils.generateSk(mnemonics, "")
-
-                        val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
-
-                        val edsig = CryptoUtils.generateEDSig(signature)
-
-                        val spendingLimitFile = "spending_limit_massive_transfer.json"
-                        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                                .use {
-                                    it.readText()
-                                }
-
-                        val value = JSONObject(contract)
-
-                        val argsSig = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-                        val argPk = argsSig[0] as JSONObject
-                        argPk.put("string", pk)
-
-                        val argSig = argsSig[1] as JSONObject
-                        argSig.put("string", edsig)
-
-                        mSig = edsig
-
-                        val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-
-                        val keyHash = argsTz[1] as JSONObject
-                        keyHash.put("string", pkh)
-
-                        val arggs = ((((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0]) as JSONObject)["args"] as JSONArray)[0] as JSONArray)
-                        val masterKeyHash = ((arggs[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                        masterKeyHash.put("string", mDstAccount)
-
-                        val mutezArgs = ((arggs[3] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                        mutezArgs.put("int", (mTransferAmount*1000000).roundToLong().toString())
-
-                        dstObject.put("parameters", value)
-
-                        dstObjects.put(dstObject)
-
-                        postParams.put("dsts", dstObjects)
-
-                    }
-                }
-                else
-                {
-                    // use the tz3 to transfer
-
-                    val ecKeys = retrieveECKeys()
-                    if (ecKeys == null)
-                    {
-                        val volleyError = VolleyError(getString(R.string.generic_error))
-                        onInitTransferLoadComplete(volleyError)
-                        mClickCalculate = true
-
-                        return
-                    }
-                    val p2pk = CryptoUtils.generateP2Pk(ecKeys)
-                    postParams.put("src_pk", p2pk)
-                    val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-                    postParams.put("src", tz3)
-
-                    val kt1 = arguments!!.getString(Address.TAG)
-
-                    var dstObjects = JSONArray()
-
-                    var dstObject = JSONObject()
-
-                    dstObject.put("dst", arguments!!.getString(Address.TAG))
-                    dstObject.put("amount", "0")
-
-                    dstObject.put("entrypoint", "transfer")
-
-                    val dataVisitable = Primitive(
-                            Primitive.Name.Pair,
-                            arrayOf(
-                                    Visitable.sequenceOf(
-                                            Primitive(
-                                                    Primitive.Name.Pair,
-                                                    arrayOf(
-                                                            Visitable.integer((mTransferAmount*1000000).roundToLong()),
-                                                            Visitable.address(mDstAccount!!)
-                                                    )
-                                            )
-                                    ),
-                                    Visitable.keyHash(tz3)
-                            )
-                    )
-
-                    val o = ByteArrayOutputStream()
-                    o.write(0x05)
-
-                    val dataPacker = Packer(o)
-                    dataVisitable.accept(dataPacker)
-
-                    val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
-
-                    val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
-                            arrayOf(
-                                    Visitable.address(kt1!!),
-                                    Visitable.chainID(getString(R.string.chain_ID))
-                            )
-                    )
-
-                    val output = ByteArrayOutputStream()
-                    output.write(0x05)
-
-                    val p = Packer(output)
-                    addressAndChainVisitable.accept(p)
-
-                    val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
-
-
-
-                    var saltVisitable: Visitable? = null
-                    val salt = getSalt(isRecipient = false)
-                    if (salt != null)
-                    {
-                        saltVisitable = Visitable.integer(salt.toLong())
-                    }
-
-                    val outputStream = ByteArrayOutputStream()
-                    outputStream.write(0x05)
-
-                    val packer = Packer(outputStream)
-                    saltVisitable!!.accept(packer)
-
-                    val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
-
-
-                    val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
-
-                    val signature = EncryptionServices().sign(signedData)
-                    val compressedSignature = compressFormat(signature)
-
-                    val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
-
-                    val spendingLimitFile = "spending_limit_transfer.json"
-                    val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                            .use {
-                                it.readText()
-                            }
-
-                    val value = JSONObject(contract)
-
-                    val args = value["args"] as JSONArray
-
-                    val firstParamArgs = (args[0] as JSONObject)["args"] as JSONArray
-
-                    val amountAndContract = ((firstParamArgs[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
-                    val amount = amountAndContract[0] as JSONObject
-                    amount.put("int", (mTransferAmount*1000000).roundToLong().toString())
-
-                    val contractKT1 = amountAndContract[1] as JSONObject
-                    contractKT1.put("string", mDstAccount)
-
-                    val dst = firstParamArgs[1] as JSONObject
-                    dst.put("string", tz3)
-
-                    val secondParamArgs = (args[1] as JSONObject)["args"] as JSONArray
-
-                    val pk = secondParamArgs[0] as JSONObject
-                    pk.put("string", p2pk)
-
-                    val sig = secondParamArgs[1] as JSONObject
-                    sig.put("string", p2sig)
-
-                    mSig = p2sig
-
-                    dstObject.put("parameters", value)
-
-                    dstObjects.put(dstObject)
-
-                    postParams.put("dsts", dstObjects)
-                }
-            }
-        }
-        else
-        {
-            val mnemonicsData = Storage(activity!!).getMnemonics()
-
-            val pk = if (mnemonicsData.pk.isNullOrEmpty())
-            {
-                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-                updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
-            }
-            else
-            {
-                mnemonicsData.pk
-            }
-
-            val beginsWith = mSrcAccount?.slice(0 until 3)
-
-
-            //this one is a standard KT1
-            if (beginsWith?.toLowerCase(Locale.US) == "kt1")
-            {
-                postParams.put("src", mnemonicsData.pkh)
-                postParams.put("src_pk", pk)
-
-                var dstObjects = JSONArray()
-
-                var dstObject = JSONObject()
-                dstObject.put("dst", mSrcAccount)
-                dstObject.put("amount", "0")
-
-                dstObject.put("entrypoint", "do")
-
-                val destBeginsWith = mDstAccount?.slice(0 until 3)
-
-                var value:JSONArray
-
-                if (destBeginsWith?.toLowerCase(Locale.US) == "kt1")
-                {
-                    val spendingLimitFile = "standard_to_standard_transfer.json"
-                    val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                            .use {
-                                it.readText()
-                            }
-
-                    value = JSONArray(contract)
-                    val dstValue = ((value[2] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-
-                    dstValue.put("string", mDstAccount)
-
-                    val dstAmount = ((value[5] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    dstAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
-                }
-                else
-                {
-                    val spendingLimitFile = "standard_to_implicit_transfer.json"
-                    val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
-                            .use {
-                                it.readText()
-                            }
-
-                    value = JSONArray(contract)
-                    val dstValue = ((value[2] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    dstValue.put("string", mDstAccount)
-
-                    val dstAmount = ((value[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
-                    dstAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
-                }
-
-                dstObject.put("parameters", value)
-
-                dstObjects.put(dstObject)
-
-                postParams.put("dsts", dstObjects)
-            }
-            else
-            {
                 postParams.put("src", mSrcAccount)
                 postParams.put("src_pk", pk)
 
@@ -1536,8 +662,1125 @@ class TransferFormFragment : Fragment()
                 dstObjects.put(dstObject)
 
                 postParams.put("dsts", dstObjects)
+
+
+
+
+
+
+
+
+
+            }
+            NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION -> {
+
+                when (mNatureRecipient)
+                {
+                    NATURE_ADDRESS_ENUM.TZ -> {
+
+                        val mnemonicsData = Storage(activity!!).getMnemonics()
+
+                        val pk = if (mnemonicsData.pk.isNullOrEmpty())
+                        {
+                            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+                        }
+                        else
+                        {
+                            mnemonicsData.pk
+                        }
+
+                        postParams.put("src", mnemonicsData.pkh)
+                        postParams.put("src_pk", pk)
+
+                        var dstObjects = JSONArray()
+
+                        var dstObject = JSONObject()
+                        dstObject.put("dst", mSrcAccount)
+                        dstObject.put("amount", "0")
+
+                        dstObject.put("entrypoint", "do")
+
+                        var value:JSONArray
+
+                        val spendingLimitFile = "standard_to_implicit_transfer.json"
+                        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                                .use {
+                                    it.readText()
+                                }
+
+                        value = JSONArray(contract)
+                        val dstValue = ((value[2] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                        dstValue.put("string", mDstAccount)
+
+                        val dstAmount = ((value[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                        dstAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                        dstObject.put("parameters", value)
+
+                        dstObjects.put(dstObject)
+
+                        postParams.put("dsts", dstObjects)
+
+
+                    }
+                    NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION -> {
+
+
+                        val mnemonicsData = Storage(activity!!).getMnemonics()
+
+                        val pk = if (mnemonicsData.pk.isNullOrEmpty())
+                        {
+                            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+                        }
+                        else
+                        {
+                            mnemonicsData.pk
+                        }
+
+                        postParams.put("src", mnemonicsData.pkh)
+                        postParams.put("src_pk", pk)
+
+                        var dstObjects = JSONArray()
+
+                        var dstObject = JSONObject()
+                        dstObject.put("dst", mSrcAccount)
+                        dstObject.put("amount", "0")
+
+                        dstObject.put("entrypoint", "do")
+
+                        var value:JSONArray
+                        val spendingLimitFile = "standard_to_standard_transfer.json"
+                        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                                .use {
+                                    it.readText()
+                                }
+
+                        value = JSONArray(contract)
+                        val dstValue = ((value[2] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+
+                        dstValue.put("string", mDstAccount)
+
+                        val dstAmount = ((value[5] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                        dstAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                        dstObject.put("parameters", value)
+
+                        dstObjects.put(dstObject)
+
+                        postParams.put("dsts", dstObjects)
+
+
+                    }
+                    NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT -> {
+
+                        val mnemonicsData = Storage(activity!!).getMnemonics()
+
+                        val pk = if (mnemonicsData.pk.isNullOrEmpty())
+                        {
+                            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                            updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+                        }
+                        else
+                        {
+                            mnemonicsData.pk
+                        }
+
+                        postParams.put("src", mnemonicsData.pkh)
+                        postParams.put("src_pk", pk)
+
+                        var dstObjects = JSONArray()
+
+                        var dstObject = JSONObject()
+                        dstObject.put("dst", mSrcAccount)
+                        dstObject.put("amount", "0")
+
+                        dstObject.put("entrypoint", "do")
+
+                        var value:JSONArray
+                        val spendingLimitFile = "standard_to_standard_transfer.json"
+                        val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                                .use {
+                                    it.readText()
+                                }
+
+                        value = JSONArray(contract)
+                        val dstValue = ((value[2] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+
+                        dstValue.put("string", mDstAccount)
+
+                        val dstAmount = ((value[5] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                        dstAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                        dstObject.put("parameters", value)
+
+                        dstObjects.put(dstObject)
+
+                        postParams.put("dsts", dstObjects)
+
+                    }
+                    NATURE_ADDRESS_ENUM.KT1_MULTISIG -> {}
+                }
+
+            }
+            NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT ->
+            {
+
+                when (mNatureRecipient)
+                {
+                    NATURE_ADDRESS_ENUM.TZ -> {
+
+                        var canSignWithMaster = false
+                        val hasMnemonics = Storage(context!!).hasMnemonics()
+                        if (hasMnemonics)
+                        {
+                            val seed = Storage(activity!!).getMnemonics()
+                            canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
+                        }
+
+                        if (canSignWithMaster)
+                        {
+
+                            val beginsWith = mDstAccount?.slice(0 until 3)
+
+                            //this one is a standard KT1
+                            val mnemonicsData = Storage(activity!!).getMnemonics()
+
+                            val pk = if (mnemonicsData.pk.isNullOrEmpty())
+                            {
+                                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                                updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+                            }
+                            else
+                            {
+                                mnemonicsData.pk
+                            }
+
+                            val pkh = mnemonicsData.pkh
+
+                            postParams.put("src_pk", pk)
+                            postParams.put("src", pkh)
+
+                            val kt1 = arguments!!.getString(Address.TAG)
+
+                            var dstObjects = JSONArray()
+
+                            var dstObject = JSONObject()
+
+                            dstObject.put("dst", kt1)
+                            dstObject.put("amount", "0")
+
+                            dstObject.put("entrypoint", "appel_clef_maitresse")
+
+
+                            // use the tz1 to transfer
+
+                            val dataVisitable = Primitive(
+                                    Primitive.Name.Right,
+                                    arrayOf(
+                                            Primitive(
+                                                    Primitive.Name.Pair,
+                                                    arrayOf(
+
+                                                            Visitable.sequenceOf(
+
+                                                                    Primitive(
+                                                                            Primitive.Name.DIP,
+                                                                            arrayOf(
+                                                                                    Visitable.sequenceOf(
+
+                                                                                            Primitive(Primitive.Name.NIL,
+                                                                                                    arrayOf(Primitive(Primitive.Name.operation))
+                                                                                            ),
+
+                                                                                            Primitive(Primitive.Name.PUSH,
+                                                                                                    arrayOf(
+                                                                                                            Primitive(Primitive.Name.key_hash),
+                                                                                                            Visitable.keyHash(mDstAccount!!)
+                                                                                                    )
+                                                                                            ),
+                                                                                            Primitive(Primitive.Name.IMPLICIT_ACCOUNT),
+                                                                                            Primitive(Primitive.Name.PUSH,
+                                                                                                    arrayOf(
+                                                                                                            Primitive(Primitive.Name.mutez),
+                                                                                                            Visitable.integer((mTransferAmount*1000000).roundToLong())
+                                                                                                    )
+                                                                                            )
+                                                                                    )
+                                                                            )
+                                                                    ),
+                                                                    Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                                    Primitive(Primitive.Name.CONS)
+                                                            ),
+                                                            Visitable.keyHash(pkh)
+                                                    )
+                                            )
+                                    )
+                            )
+
+                            val o = ByteArrayOutputStream()
+                            o.write(0x05)
+
+                            val dataPacker = Packer(o)
+                            dataVisitable.accept(dataPacker)
+
+                            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+                            //val packCompare = "0505080707020000003a051f020000002f053d036d0743035d0a000000150002298c03ed7d454a101eb7022bc95f7e5f41ac78031e0743036a0080c0a8ca9a3a034d031b0a0000001500dbd1087b133e63b9e320d20be9d1469621b6d682".hexToByteArray()
+
+                            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.address(kt1!!),
+                                            Visitable.chainID(getString(R.string.chain_ID))
+                                    )
+                            )
+
+                            val output = ByteArrayOutputStream()
+                            output.write(0x05)
+
+                            val p = Packer(output)
+                            addressAndChainVisitable.accept(p)
+
+                            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+                            var saltVisitable: Visitable? = null
+                            val salt = getSalt(isRecipient = false)
+                            if (salt != null)
+                            {
+                                saltVisitable = Visitable.integer(salt.toLong())
+                            }
+
+                            val outputStream = ByteArrayOutputStream()
+                            outputStream.write(0x05)
+
+                            val packer = Packer(outputStream)
+                            saltVisitable!!.accept(packer)
+
+                            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+                            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                            val sk = CryptoUtils.generateSk(mnemonics, "")
+
+                            val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+
+                            val edsig = CryptoUtils.generateEDSig(signature)
+
+                            val spendingLimitFile = "spending_limit_massive_transfer.json"
+                            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                                    .use {
+                                        it.readText()
+                                    }
+
+                            val value = JSONObject(contract)
+
+                            val argsSig = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                            val argPk = argsSig[0] as JSONObject
+                            argPk.put("string", pk)
+
+                            val argSig = argsSig[1] as JSONObject
+                            argSig.put("string", edsig)
+
+                            mSig = edsig
+
+                            val argsTz = ((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+                            val keyHash = argsTz[1] as JSONObject
+                            keyHash.put("string", pkh)
+
+                            val arggs = ((((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0]) as JSONObject)["args"] as JSONArray)[0] as JSONArray)
+                            val masterKeyHash = ((arggs[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                            masterKeyHash.put("string", mDstAccount)
+
+                            val mutezArgs = ((arggs[3] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                            mutezArgs.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                            dstObject.put("parameters", value)
+
+                            dstObjects.put(dstObject)
+
+                            postParams.put("dsts", dstObjects)
+                        }
+                        else
+                        {
+                            // use the tz3 to transfer
+
+                            val ecKeys = retrieveECKeys()
+                            if (ecKeys == null)
+                            {
+                                val volleyError = VolleyError(getString(R.string.generic_error))
+                                onInitTransferLoadComplete(volleyError)
+                                mClickCalculate = true
+
+                                return
+                            }
+                            val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                            postParams.put("src_pk", p2pk)
+                            val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                            postParams.put("src", tz3)
+
+                            val kt1 = arguments!!.getString(Address.TAG)
+
+                            var dstObjects = JSONArray()
+
+                            var dstObject = JSONObject()
+
+                            dstObject.put("dst", arguments!!.getString(Address.TAG))
+                            dstObject.put("amount", "0")
+
+                            dstObject.put("entrypoint", "transfer")
+
+                            val dataVisitable = Primitive(
+                                    Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.sequenceOf(
+                                                    Primitive(
+                                                            Primitive.Name.Pair,
+                                                            arrayOf(
+                                                                    Visitable.integer((mTransferAmount*1000000).roundToLong()),
+                                                                    Visitable.address(mDstAccount!!)
+                                                            )
+                                                    )
+                                            ),
+                                            Visitable.keyHash(tz3)
+                                    )
+                            )
+
+                            val o = ByteArrayOutputStream()
+                            o.write(0x05)
+
+                            val dataPacker = Packer(o)
+                            dataVisitable.accept(dataPacker)
+
+                            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+                            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.address(kt1!!),
+                                            Visitable.chainID(getString(R.string.chain_ID))
+                                    )
+                            )
+
+                            val output = ByteArrayOutputStream()
+                            output.write(0x05)
+
+                            val p = Packer(output)
+                            addressAndChainVisitable.accept(p)
+
+                            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+
+                            var saltVisitable: Visitable? = null
+                            val salt = getSalt(isRecipient = false)
+                            if (salt != null)
+                            {
+                                saltVisitable = Visitable.integer(salt.toLong())
+                            }
+
+                            val outputStream = ByteArrayOutputStream()
+                            outputStream.write(0x05)
+
+                            val packer = Packer(outputStream)
+                            saltVisitable!!.accept(packer)
+
+                            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+
+                            val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+
+                            val signature = EncryptionServices().sign(signedData)
+                            val compressedSignature = compressFormat(signature)
+
+                            val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
+
+                            val spendingLimitFile = "spending_limit_transfer.json"
+                            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                                    .use {
+                                        it.readText()
+                                    }
+
+                            val value = JSONObject(contract)
+
+                            val args = value["args"] as JSONArray
+
+                            val firstParamArgs = (args[0] as JSONObject)["args"] as JSONArray
+
+                            val amountAndContract = ((firstParamArgs[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                            val amount = amountAndContract[0] as JSONObject
+                            amount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                            val contractKT1 = amountAndContract[1] as JSONObject
+                            contractKT1.put("string", mDstAccount)
+
+                            val dst = firstParamArgs[1] as JSONObject
+                            dst.put("string", tz3)
+
+                            val secondParamArgs = (args[1] as JSONObject)["args"] as JSONArray
+
+                            val pk = secondParamArgs[0] as JSONObject
+                            pk.put("string", p2pk)
+
+                            val sig = secondParamArgs[1] as JSONObject
+                            sig.put("string", p2sig)
+
+                            mSig = p2sig
+
+                            dstObject.put("parameters", value)
+
+                            dstObjects.put(dstObject)
+
+                            postParams.put("dsts", dstObjects)
+                        }
+
+                    }
+                    NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION -> {
+
+                        var canSignWithMaster = false
+                        val hasMnemonics = Storage(context!!).hasMnemonics()
+                        if (hasMnemonics)
+                        {
+                            val seed = Storage(activity!!).getMnemonics()
+                            canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
+                        }
+
+                        if (canSignWithMaster)
+                        {
+                            val mnemonicsData = Storage(activity!!).getMnemonics()
+                            val pk = if (mnemonicsData.pk.isNullOrEmpty())
+                            {
+                                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                                updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+                            }
+                            else
+                            {
+                                mnemonicsData.pk
+                            }
+
+                            val pkh = mnemonicsData.pkh
+
+                            postParams.put("src_pk", pk)
+                            postParams.put("src", pkh)
+
+                            val kt1 = arguments!!.getString(Address.TAG)
+
+                            var dstObjects = JSONArray()
+
+                            var dstObject = JSONObject()
+
+                            dstObject.put("dst", kt1)
+                            dstObject.put("amount", "0")
+
+                            dstObject.put("entrypoint", "appel_clef_maitresse")
+
+
+                            // use the tz1 to transfer
+
+                            val dataVisitable = Primitive(
+                                    Primitive.Name.Right,
+                                    arrayOf(
+                                            Primitive(Primitive.Name.Pair,
+                                                    arrayOf(
+                                                            Visitable.sequenceOf(
+                                                                    Primitive(
+                                                                            Primitive.Name.DIP,
+                                                                            arrayOf(
+
+                                                                                    Visitable.sequenceOf(
+
+                                                                                            Primitive(Primitive.Name.NIL,
+                                                                                                    arrayOf(
+                                                                                                            Primitive(Primitive.Name.operation)
+                                                                                                    )
+                                                                                            ),
+                                                                                            Primitive(Primitive.Name.PUSH,
+                                                                                                    arrayOf(
+                                                                                                            Primitive(Primitive.Name.address),
+                                                                                                            Visitable.address(mDstAccount!!)
+                                                                                                    )
+                                                                                            ),
+                                                                                            Primitive(Primitive.Name.CONTRACT,
+                                                                                                    arrayOf(Primitive(Primitive.Name.unit))
+                                                                                            ),
+                                                                                            Visitable.sequenceOf(
+                                                                                                    Primitive(Primitive.Name.IF_NONE,
+                                                                                                            arrayOf(
+
+                                                                                                                    Visitable.sequenceOf(
+                                                                                                                            Visitable.sequenceOf(
+                                                                                                                                    Primitive(Primitive.Name.UNIT),
+                                                                                                                                    Primitive(Primitive.Name.FAILWITH)
+                                                                                                                            )
+                                                                                                                    ),
+                                                                                                                    Visitable.sequenceOf()
+                                                                                                            )
+                                                                                                    )
+                                                                                            ),
+                                                                                            Primitive(Primitive.Name.PUSH,
+                                                                                                    arrayOf(
+                                                                                                            Primitive(Primitive.Name.mutez),
+                                                                                                            Visitable.integer((mTransferAmount*1000000).roundToLong())
+                                                                                                    )
+                                                                                            )
+                                                                                    )
+                                                                            )
+                                                                    ),
+                                                                    Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                                    Primitive(Primitive.Name.CONS)
+                                                            ),
+                                                            Visitable.keyHash(pkh)
+                                                    )
+                                            )
+                                    )
+                            )
+
+                            val o = ByteArrayOutputStream()
+                            o.write(0x05)
+
+                            val dataPacker = Packer(o)
+                            dataVisitable.accept(dataPacker)
+
+                            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+                            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.address(kt1!!),
+                                            Visitable.chainID(getString(R.string.chain_ID))
+                                    )
+                            )
+
+                            val output = ByteArrayOutputStream()
+                            output.write(0x05)
+
+                            val p = Packer(output)
+                            addressAndChainVisitable.accept(p)
+
+                            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+                            var saltVisitable: Visitable? = null
+                            val salt = getSalt(isRecipient = false)
+                            if (salt != null)
+                            {
+                                saltVisitable = Visitable.integer(salt.toLong())
+                            }
+
+                            val outputStream = ByteArrayOutputStream()
+                            outputStream.write(0x05)
+
+                            val packer = Packer(outputStream)
+                            saltVisitable!!.accept(packer)
+
+                            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+                            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                            val sk = CryptoUtils.generateSk(mnemonics, "")
+
+                            val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+
+                            val edsig = CryptoUtils.generateEDSig(signature)
+
+                            val spendingLimitFile = "spending_limit_massive_transfer_to_kt1.json"
+                            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                                    .use {
+                                        it.readText()
+                                    }
+
+                            val value = JSONObject(contract)
+
+                            val argsSig = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                            val argPk = argsSig[0] as JSONObject
+                            argPk.put("string", pk)
+
+                            val argSig = argsSig[1] as JSONObject
+                            argSig.put("string", edsig)
+                            mSig = edsig
+
+                            val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                            argsMasterKey.put("string", pkh)
+
+                            val argsTz = ((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray
+
+                            val argAddress = ((argsTz[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                            argAddress.put("string", mDstAccount)
+
+                            val argAmount = ((argsTz[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                            argAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                            dstObject.put("parameters", value)
+
+                            dstObjects.put(dstObject)
+
+                            postParams.put("dsts", dstObjects)
+
+                        }
+                        else
+                        {
+                            // use the tz3 to transfer
+
+                            val ecKeys = retrieveECKeys()
+                            if (ecKeys == null)
+                            {
+                                val volleyError = VolleyError(getString(R.string.generic_error))
+                                onInitTransferLoadComplete(volleyError)
+                                mClickCalculate = true
+
+                                return
+                            }
+                            val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                            postParams.put("src_pk", p2pk)
+                            val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                            postParams.put("src", tz3)
+
+                            val kt1 = arguments!!.getString(Address.TAG)
+
+                            var dstObjects = JSONArray()
+
+                            var dstObject = JSONObject()
+
+                            dstObject.put("dst", arguments!!.getString(Address.TAG))
+                            dstObject.put("amount", "0")
+
+                            dstObject.put("entrypoint", "transfer")
+
+                            val dataVisitable = Primitive(
+                                    Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.sequenceOf(
+                                                    Primitive(
+                                                            Primitive.Name.Pair,
+                                                            arrayOf(
+                                                                    Visitable.integer((mTransferAmount*1000000).roundToLong()),
+                                                                    Visitable.address(mDstAccount!!)
+                                                            )
+                                                    )
+                                            ),
+                                            Visitable.keyHash(tz3)
+                                    )
+                            )
+
+                            val o = ByteArrayOutputStream()
+                            o.write(0x05)
+
+                            val dataPacker = Packer(o)
+                            dataVisitable.accept(dataPacker)
+
+                            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+                            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.address(kt1!!),
+                                            Visitable.chainID(getString(R.string.chain_ID))
+                                    )
+                            )
+
+                            val output = ByteArrayOutputStream()
+                            output.write(0x05)
+
+                            val p = Packer(output)
+                            addressAndChainVisitable.accept(p)
+
+                            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+
+                            var saltVisitable: Visitable? = null
+                            val salt = getSalt(isRecipient = false)
+                            if (salt != null)
+                            {
+                                saltVisitable = Visitable.integer(salt.toLong())
+                            }
+
+                            val outputStream = ByteArrayOutputStream()
+                            outputStream.write(0x05)
+
+                            val packer = Packer(outputStream)
+                            saltVisitable!!.accept(packer)
+
+                            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+
+                            val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+
+                            val signature = EncryptionServices().sign(signedData)
+                            val compressedSignature = compressFormat(signature)
+
+                            val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
+
+                            val spendingLimitFile = "spending_limit_transfer.json"
+                            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                                    .use {
+                                        it.readText()
+                                    }
+
+                            val value = JSONObject(contract)
+
+                            val args = value["args"] as JSONArray
+
+                            val firstParamArgs = (args[0] as JSONObject)["args"] as JSONArray
+
+                            val amountAndContract = ((firstParamArgs[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                            val amount = amountAndContract[0] as JSONObject
+                            amount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                            val contractKT1 = amountAndContract[1] as JSONObject
+                            contractKT1.put("string", mDstAccount)
+
+                            val dst = firstParamArgs[1] as JSONObject
+                            dst.put("string", tz3)
+
+                            val secondParamArgs = (args[1] as JSONObject)["args"] as JSONArray
+
+                            val pk = secondParamArgs[0] as JSONObject
+                            pk.put("string", p2pk)
+
+                            val sig = secondParamArgs[1] as JSONObject
+                            sig.put("string", p2sig)
+
+                            mSig = p2sig
+
+                            dstObject.put("parameters", value)
+
+                            dstObjects.put(dstObject)
+
+                            postParams.put("dsts", dstObjects)
+                        }
+
+                    }
+                    NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT -> {
+
+                        var canSignWithMaster = false
+                        val hasMnemonics = Storage(context!!).hasMnemonics()
+                        if (hasMnemonics)
+                        {
+                            val seed = Storage(activity!!).getMnemonics()
+                            canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
+                        }
+
+                        if (canSignWithMaster)
+                        {
+
+                            val mnemonicsData = Storage(activity!!).getMnemonics()
+                            val pk = if (mnemonicsData.pk.isNullOrEmpty())
+                            {
+                                val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                                updateMnemonicsData(mnemonicsData, CryptoUtils.generatePk(mnemonics, ""))
+                            }
+                            else
+                            {
+                                mnemonicsData.pk
+                            }
+
+                            val pkh = mnemonicsData.pkh
+
+                            postParams.put("src_pk", pk)
+                            postParams.put("src", pkh)
+
+                            val kt1 = arguments!!.getString(Address.TAG)
+
+                            var dstObjects = JSONArray()
+
+                            var dstObject = JSONObject()
+
+                            dstObject.put("dst", kt1)
+                            dstObject.put("amount", "0")
+
+                            dstObject.put("entrypoint", "appel_clef_maitresse")
+
+
+                            // use the tz1 to transfer
+
+                            val dataVisitable = Primitive(
+                                    Primitive.Name.Right,
+                                    arrayOf(
+                                            Primitive(Primitive.Name.Pair,
+                                                    arrayOf(
+                                                            Visitable.sequenceOf(
+                                                                    Primitive(
+                                                                            Primitive.Name.DIP,
+                                                                            arrayOf(
+
+                                                                                    Visitable.sequenceOf(
+
+                                                                                            Primitive(Primitive.Name.NIL,
+                                                                                                    arrayOf(
+                                                                                                            Primitive(Primitive.Name.operation)
+                                                                                                    )
+                                                                                            ),
+                                                                                            Primitive(Primitive.Name.PUSH,
+                                                                                                    arrayOf(
+                                                                                                            Primitive(Primitive.Name.address),
+                                                                                                            Visitable.address(mDstAccount!!)
+                                                                                                    )
+                                                                                            ),
+                                                                                            Primitive(Primitive.Name.CONTRACT,
+                                                                                                    arrayOf(Primitive(Primitive.Name.unit))
+                                                                                            ),
+                                                                                            Visitable.sequenceOf(
+                                                                                                    Primitive(Primitive.Name.IF_NONE,
+                                                                                                            arrayOf(
+
+                                                                                                                    Visitable.sequenceOf(
+                                                                                                                            Visitable.sequenceOf(
+                                                                                                                                    Primitive(Primitive.Name.UNIT),
+                                                                                                                                    Primitive(Primitive.Name.FAILWITH)
+                                                                                                                            )
+                                                                                                                    ),
+                                                                                                                    Visitable.sequenceOf()
+                                                                                                            )
+                                                                                                    )
+                                                                                            ),
+                                                                                            Primitive(Primitive.Name.PUSH,
+                                                                                                    arrayOf(
+                                                                                                            Primitive(Primitive.Name.mutez),
+                                                                                                            Visitable.integer((mTransferAmount*1000000).roundToLong())
+                                                                                                    )
+                                                                                            )
+                                                                                    )
+                                                                            )
+                                                                    ),
+                                                                    Primitive(Primitive.Name.TRANSFER_TOKENS),
+                                                                    Primitive(Primitive.Name.CONS)
+                                                            ),
+                                                            Visitable.keyHash(pkh)
+                                                    )
+                                            )
+                                    )
+                            )
+
+                            val o = ByteArrayOutputStream()
+                            o.write(0x05)
+
+                            val dataPacker = Packer(o)
+                            dataVisitable.accept(dataPacker)
+
+                            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+                            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.address(kt1!!),
+                                            Visitable.chainID(getString(R.string.chain_ID))
+                                    )
+                            )
+
+                            val output = ByteArrayOutputStream()
+                            output.write(0x05)
+
+                            val p = Packer(output)
+                            addressAndChainVisitable.accept(p)
+
+                            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+                            var saltVisitable: Visitable? = null
+                            val salt = getSalt(isRecipient = false)
+                            if (salt != null)
+                            {
+                                saltVisitable = Visitable.integer(salt.toLong())
+                            }
+
+                            val outputStream = ByteArrayOutputStream()
+                            outputStream.write(0x05)
+
+                            val packer = Packer(outputStream)
+                            saltVisitable!!.accept(packer)
+
+                            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+                            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+                            val sk = CryptoUtils.generateSk(mnemonics, "")
+
+                            val signature = KeyPair.sign(sk, dataPack + addressAndChainPack + saltPack)
+
+                            val edsig = CryptoUtils.generateEDSig(signature)
+
+                            val spendingLimitFile = "spending_limit_massive_transfer_to_kt1.json"
+                            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                                    .use {
+                                        it.readText()
+                                    }
+
+                            val value = JSONObject(contract)
+
+                            val argsSig = ((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+                            val argPk = argsSig[0] as JSONObject
+                            argPk.put("string", pk)
+
+                            val argSig = argsSig[1] as JSONObject
+                            argSig.put("string", edsig)
+
+                            mSig = edsig
+
+                            val argsMasterKey = (((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                            argsMasterKey.put("string", pkh)
+
+                            val argsTz = ((((((((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray
+
+                            val argAddress = ((argsTz[1] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                            argAddress.put("string", mDstAccount)
+
+                            val argAmount = ((argsTz[4] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                            argAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                            dstObject.put("parameters", value)
+
+                            dstObjects.put(dstObject)
+
+                            postParams.put("dsts", dstObjects)
+
+                        }
+                        else
+                        {
+                            val kt1 = arguments!!.getString(Address.TAG)
+
+                            val ecKeys = retrieveECKeys()
+                            if (ecKeys == null)
+                            {
+                                val volleyError = VolleyError(getString(R.string.generic_error))
+                                onInitTransferLoadComplete(volleyError)
+                                mClickCalculate = true
+
+                                return
+                            }
+
+                            val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                            val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+
+                            postParams.put("src_pk", p2pk)
+                            postParams.put("src", tz3)
+
+                            var dstObjects = JSONArray()
+
+                            var dstObject = JSONObject()
+
+                            dstObject.put("dst", kt1)
+                            dstObject.put("amount", "0")
+
+                            dstObject.put("entrypoint", "transfer")
+
+                            val dataVisitable = Primitive(
+                                    Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.sequenceOf(
+                                                    Primitive(
+                                                            Primitive.Name.Pair,
+                                                            arrayOf(
+                                                                    Visitable.integer((mTransferAmount*1000000).roundToLong()),
+                                                                    Visitable.address(mDstAccount!!)
+                                                            )
+                                                    )
+                                            ),
+                                            Visitable.keyHash(tz3)
+                                    )
+                            )
+
+                            val o = ByteArrayOutputStream()
+                            o.write(0x05)
+
+                            val dataPacker = Packer(o)
+                            dataVisitable.accept(dataPacker)
+
+                            val dataPack = (dataPacker.output as ByteArrayOutputStream).toByteArray()
+
+                            val addressAndChainVisitable = Primitive(Primitive.Name.Pair,
+                                    arrayOf(
+                                            Visitable.address(kt1!!),
+                                            Visitable.chainID(getString(R.string.chain_ID))
+                                    )
+                            )
+
+                            val output = ByteArrayOutputStream()
+                            output.write(0x05)
+
+                            val p = Packer(output)
+                            addressAndChainVisitable.accept(p)
+
+                            val addressAndChainPack = (p.output as ByteArrayOutputStream).toByteArray()
+
+
+                            var saltVisitable: Visitable? = null
+                            val salt = getSalt(isRecipient = false)
+                            if (salt != null)
+                            {
+                                saltVisitable = Visitable.integer(salt.toLong())
+                            }
+
+                            val outputStream = ByteArrayOutputStream()
+                            outputStream.write(0x05)
+
+                            val packer = Packer(outputStream)
+                            saltVisitable!!.accept(packer)
+
+                            val saltPack = (packer.output as ByteArrayOutputStream).toByteArray()
+
+                            val signedData = KeyPair.b2b("0x".hexToByteArray()+dataPack + addressAndChainPack + saltPack)
+
+                            val signatureTz3 = EncryptionServices().sign(signedData)
+                            val compressedSignature = compressFormat(signatureTz3)
+                            val p2sig = CryptoUtils.generateP2Sig(compressedSignature)
+
+
+
+                            val spendingLimitFile = "spending_limit_transfer.json"
+                            val contract = context!!.assets.open(spendingLimitFile).bufferedReader()
+                                    .use {
+                                        it.readText()
+                                    }
+
+                            val value = JSONObject(contract)
+
+                            val argsSend = (((((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[0] as JSONArray)[0] as JSONObject)["args"] as JSONArray
+
+                            val argsSendAmount = argsSend[0] as JSONObject
+                            argsSendAmount.put("int", (mTransferAmount*1000000).roundToLong().toString())
+
+                            val argsSendContract = argsSend[1] as JSONObject
+                            argsSendContract.put("string", mDstAccount)
+
+                            val argsSendTz = (((value["args"] as JSONArray)[0] as JSONObject)["args"] as JSONArray)[1] as JSONObject
+                            argsSendTz.put("string", tz3)
+
+                            val argsSig = ((value["args"] as JSONArray)[1] as JSONObject)["args"] as JSONArray
+
+                            val argsSigPk = argsSig[0] as JSONObject
+                            argsSigPk.put("string", p2pk)
+
+                            val argsSigSig = argsSig[1] as JSONObject
+                            argsSigSig.put("string", p2sig)
+
+                            mSig = p2sig
+
+                            dstObject.put("parameters", value)
+
+                            dstObjects.put(dstObject)
+
+                            postParams.put("dsts", dstObjects)
+
+                        }
+
+                    }
+                    NATURE_ADDRESS_ENUM.KT1_MULTISIG -> {}
+                }
+            }
+            NATURE_ADDRESS_ENUM.KT1_MULTISIG -> {}
+        }
+
+        /*
+        if (mNatureSource) {
+            //TODO need to try if it does work
+            //I need to send some tez to an SLC, from an SLC.
+
+            if (mNatureRecipient) {
+            } else
+            {
+
             }
         }
+        else
+        {
+        }
+        */
 
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
@@ -1939,7 +2182,7 @@ class TransferFormFragment : Fragment()
                 if (isRecipient)
                 {
                     // the recipient is a KT1 with code
-                    mNatureRecipient = true
+                    mNatureRecipient = NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT
 
                     recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.VISIBLE
@@ -1948,7 +2191,7 @@ class TransferFormFragment : Fragment()
                 {
                     // the source is a KT1 with code
 
-                    mNatureSource = true
+                    mNatureSource = NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT
 
                     recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.GONE
@@ -1961,7 +2204,7 @@ class TransferFormFragment : Fragment()
                 if (isRecipient)
                 {
                     // the recipient is a KT1 with code
-                    mNatureRecipient = true
+                    mNatureRecipient = NATURE_ADDRESS_ENUM.KT1_MULTISIG
 
                     recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.VISIBLE
@@ -1970,7 +2213,7 @@ class TransferFormFragment : Fragment()
                 {
                     // the source is a KT1 with code
 
-                    mNatureSource = true
+                    mNatureSource = NATURE_ADDRESS_ENUM.KT1_MULTISIG
 
                     recipient_area.visibility = View.VISIBLE
                     amount_layout.visibility = View.GONE
@@ -1999,7 +2242,7 @@ class TransferFormFragment : Fragment()
                 {
                     if (isRecipient)
                     {
-                        mNatureRecipient = false
+                        mNatureRecipient = NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION
 
                         if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith(prefix = "KT1", ignoreCase = true))
                         {
@@ -2022,7 +2265,7 @@ class TransferFormFragment : Fragment()
                     }
                     else
                     {
-                        mNatureSource = false
+                        mNatureSource = NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION
 
                         arguments?.let {
 
