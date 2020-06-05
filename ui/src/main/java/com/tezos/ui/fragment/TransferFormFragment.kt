@@ -265,6 +265,57 @@ class TransferFormFragment : Fragment()
                     dstAddress = dst?.pubKeyHash
                 }
 
+                var loading = false
+
+                if (!srcAddress.isNullOrEmpty())
+                {
+                    if (srcAddress.startsWith("kt1", ignoreCase = true))
+                    {
+                        loading = true
+                        startStorageInfoLoading(isRecipient = false)
+                    }
+                    else
+                    {
+                        mNatureSource = NATURE_ADDRESS_ENUM.TZ
+                    }
+                }
+
+                else if (!dstAddress.isNullOrEmpty())
+                {
+                    if (dstAddress.startsWith("kt1", ignoreCase = true))
+                    {
+                        loading = true
+                        startStorageInfoLoading(isRecipient = true)
+                    }
+                    else
+                    {
+                        mNatureRecipient = NATURE_ADDRESS_ENUM.TZ
+                    }
+                }
+
+                if (!loading)
+                {
+                    //no need to hide it anymore
+                    loading_progress.visibility = View.GONE
+                    recipient_area.visibility = View.VISIBLE
+                    amount_layout.visibility = View.GONE
+                }
+            }
+
+
+            /*
+            arguments?.let {
+
+                val srcAddress = it.getString(Address.TAG)
+                var dstAddress:String? = null
+
+                val bundle = it.getBundle(TransferFormActivity.DST_ADDRESS_KEY)
+                if (bundle != null)
+                {
+                    val dst = Address.fromBundle(bundle)
+                    dstAddress = dst?.pubKeyHash
+                }
+
                 if (!srcAddress.isNullOrEmpty() && srcAddress.startsWith("KT1", true))
                 {
                     startStorageInfoLoading(false)
@@ -281,6 +332,8 @@ class TransferFormFragment : Fragment()
                     amount_layout.visibility = View.GONE
                 }
             }
+            */
+
         }
     }
 
@@ -298,21 +351,22 @@ class TransferFormFragment : Fragment()
 
         if (mSourceStorageInfoLoading)
         {
-            startStorageInfoLoading(false)
+            startStorageInfoLoading(isRecipient = false)
         }
         else
         {
-            onStorageInfoComplete(null, false)
+            onStorageInfoComplete(error = null, isRecipient = false)
 
             if (mRecipientStorageInfoLoading)
             {
-                startStorageInfoLoading(true)
+                startStorageInfoLoading(isRecipient = true)
             }
             else
             {
+
                 if (mDstAccount != null)
                 {
-                    onStorageInfoComplete(null, true)
+                    onStorageInfoComplete(error = null, isRecipient = true)
                 }
 
                 //TODO we got to keep in mind there's an id already.
@@ -535,7 +589,7 @@ class TransferFormFragment : Fragment()
                 if (content != null)
                 {
                     addContractInfoFromJSON(it, isRecipient)
-                    onStorageInfoComplete(null, isRecipient)
+                    onStorageInfoComplete(error = null, isRecipient = isRecipient)
                 }
             },
                     Response.ErrorListener {
@@ -1766,22 +1820,6 @@ class TransferFormFragment : Fragment()
             NATURE_ADDRESS_ENUM.KT1_MULTISIG -> {}
         }
 
-        /*
-        if (mNatureSource) {
-            //TODO need to try if it does work
-            //I need to send some tez to an SLC, from an SLC.
-
-            if (mNatureRecipient) {
-            } else
-            {
-
-            }
-        }
-        else
-        {
-        }
-        */
-
         val jsObjRequest = object : JsonObjectRequest(Method.POST, url, postParams, Response.Listener<JSONObject>
         { answer ->
 
@@ -1891,45 +1929,108 @@ class TransferFormFragment : Fragment()
                 canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
             }
 
-            val beginsWith = mSrcAccount?.slice(0 until 3)
-            if (beginsWith?.toLowerCase(Locale.US) == "kt1")
+            when (mNatureSource)
             {
+                NATURE_ADDRESS_ENUM.TZ -> {
 
-                if (mNatureSource && !canSignWithMaster)
-                {
-                    val ecKeys = retrieveECKeys()
-                    val p2pk = CryptoUtils.generateP2Pk(ecKeys)
-                    postParams.put("src_pk", p2pk)
-                    val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
-                    postParams.put("src", tz3)
+                    postParams.put("src", mSrcAccount)
+
+                    //TODO it won't be pk with contract transfer
+                    postParams.put("src_pk", mnemonicsData.pk)
+
+                    var dstObjects = JSONArray()
+
+                    var dstObject = JSONObject()
+                    dstObject.put("dst", mDstAccount)
+
+                    val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
+                    dstObject.put("amount", mutezAmount)
+
+                    dstObject.put("fee", mTransferFees)
+
+                    dstObjects.put(dstObject)
+
+                    postParams.put("dsts", dstObjects)
+
                 }
-                else
+                NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION ->
                 {
                     postParams.put("src", mnemonicsData.pkh)
                     postParams.put("src_pk", mnemonicsData.pk)
+
+                    var dstObjects = JSONArray()
+
+                    var dstObject = JSONObject()
+                    dstObject.put("dst", mSrcAccount)
+                    dstObject.put("dst_account", mDstAccount)
+                    dstObject.put("amount", 0.toLong())
+
+                    val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
+                    dstObject.put("transfer_amount", mutezAmount)
+
+                    dstObject.put("fee", mTransferFees)
+
+                    dstObject.put("contract_type", "kt1_to_kt1")
+
+                    dstObjects.put(dstObject)
+
+                    postParams.put("dsts", dstObjects)
+
                 }
 
-                var dstObjects = JSONArray()
-
-                var dstObject = JSONObject()
-                dstObject.put("dst", mSrcAccount)
-                dstObject.put("dst_account", mDstAccount)
-                dstObject.put("amount", 0.toLong())
-
-                val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
-                dstObject.put("transfer_amount", mutezAmount)
-
-                dstObject.put("fee", mTransferFees)
-
-                val destBeginsWith = mDstAccount?.slice(0 until 3)
-
-
-                if (destBeginsWith?.toLowerCase(Locale.US) == "kt1")
+                NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT ->
                 {
-                    if (mNatureSource)
+                    when (mNatureRecipient)
                     {
-                        if (mNatureRecipient)
+                        NATURE_ADDRESS_ENUM.TZ ->
                         {
+                            postParams.put("src", mnemonicsData.pkh)
+                            postParams.put("src_pk", mnemonicsData.pk)
+
+                            var dstObjects = JSONArray()
+
+                            var dstObject = JSONObject()
+                            dstObject.put("dst", mSrcAccount)
+                            dstObject.put("dst_account", mDstAccount)
+                            dstObject.put("amount", 0.toLong())
+
+                            val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
+                            dstObject.put("transfer_amount", mutezAmount)
+
+                            dstObject.put("fee", mTransferFees)
+
+                            if (canSignWithMaster)
+                            {
+                                dstObject.put("contract_type", "slc_master_to_tz")
+                            }
+                            else
+                            {
+                                dstObject.put("contract_type", "slc_enclave_transfer")
+                            }
+                            dstObject.put("edsig", mSig)
+
+                            dstObjects.put(dstObject)
+
+                            postParams.put("dsts", dstObjects)
+                        }
+
+                        NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION ->
+                        {
+                            postParams.put("src", mnemonicsData.pkh)
+                            postParams.put("src_pk", mnemonicsData.pk)
+
+                            var dstObjects = JSONArray()
+
+                            var dstObject = JSONObject()
+                            dstObject.put("dst", mSrcAccount)
+                            dstObject.put("dst_account", mDstAccount)
+                            dstObject.put("amount", 0.toLong())
+
+                            val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
+                            dstObject.put("transfer_amount", mutezAmount)
+
+                            dstObject.put("fee", mTransferFees)
+
                             if (canSignWithMaster)
                             {
                                 dstObject.put("contract_type", "slc_master_to_kt1")
@@ -1938,9 +2039,42 @@ class TransferFormFragment : Fragment()
                             {
                                 dstObject.put("contract_type", "slc_enclave_transfer")
                             }
+
+                            dstObject.put("edsig", mSig)
+
+                            dstObjects.put(dstObject)
+
+                            postParams.put("dsts", dstObjects)
                         }
-                        else
+
+                        NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT ->
                         {
+                            if (!canSignWithMaster)
+                            {
+                                val ecKeys = retrieveECKeys()
+                                val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                                postParams.put("src_pk", p2pk)
+                                val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                                postParams.put("src", tz3)
+                            }
+                            else
+                            {
+                                postParams.put("src", mnemonicsData.pkh)
+                                postParams.put("src_pk", mnemonicsData.pk)
+                            }
+
+                            var dstObjects = JSONArray()
+
+                            var dstObject = JSONObject()
+                            dstObject.put("dst", mSrcAccount)
+                            dstObject.put("dst_account", mDstAccount)
+                            dstObject.put("amount", 0.toLong())
+
+                            val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
+                            dstObject.put("transfer_amount", mutezAmount)
+
+                            dstObject.put("fee", mTransferFees)
+
                             if (canSignWithMaster)
                             {
                                 dstObject.put("contract_type", "slc_master_to_kt1")
@@ -1949,59 +2083,19 @@ class TransferFormFragment : Fragment()
                             {
                                 dstObject.put("contract_type", "slc_enclave_transfer")
                             }
-                        }
 
-                        dstObject.put("edsig", mSig)
-                    }
-                    else
-                    {
-                        dstObject.put("contract_type", "kt1_to_kt1")
-                    }
-                }
-                else
-                {
-                    if (mNatureSource)
-                    {
-                        if (canSignWithMaster)
-                        {
-                            dstObject.put("contract_type", "slc_master_to_tz")
+                            dstObject.put("edsig", mSig)
+
+                            dstObjects.put(dstObject)
+
+                            postParams.put("dsts", dstObjects)
+
                         }
-                        else
-                        {
-                            dstObject.put("contract_type", "slc_enclave_transfer")
-                        }
-                        dstObject.put("edsig", mSig)
-                    }
-                    else
-                    {
-                        dstObject.put("contract_type", "kt1_to_tz")
+                        NATURE_ADDRESS_ENUM.KT1_MULTISIG -> {}
                     }
                 }
 
-                dstObjects.put(dstObject)
-
-                postParams.put("dsts", dstObjects)
-            }
-            else
-            {
-                postParams.put("src", mSrcAccount)
-
-                //TODO it won't be pk with contract transfer
-                postParams.put("src_pk", mnemonicsData.pk)
-
-                var dstObjects = JSONArray()
-
-                var dstObject = JSONObject()
-                dstObject.put("dst", mDstAccount)
-
-                val mutezAmount = (mTransferAmount*1000000.0).roundToLong()
-                dstObject.put("amount", mutezAmount)
-
-                dstObject.put("fee", mTransferFees)
-
-                dstObjects.put(dstObject)
-
-                postParams.put("dsts", dstObjects)
+                NATURE_ADDRESS_ENUM.KT1_MULTISIG -> {}
             }
 
 
@@ -2028,7 +2122,7 @@ class TransferFormFragment : Fragment()
                     canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
                 }
 
-                var compressedSignature = if (mNatureSource && !canSignWithMaster)
+                var compressedSignature = if (mNatureSource == NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT && !canSignWithMaster)
                 {
                     val bytes = KeyPair.b2b(result)
                     var signature = EncryptionServices().sign(bytes)
@@ -2557,7 +2651,7 @@ class TransferFormFragment : Fragment()
                     canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
                 }
 
-                val salt = if (mNatureSource && !canSignWithMaster)
+                val salt = if (mNatureSource == NATURE_ADDRESS_ENUM.KT1_MULTISIG && !canSignWithMaster)
                 {
                     (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
                 }
@@ -2727,7 +2821,7 @@ class TransferFormFragment : Fragment()
 
                     //TODO verify this address is a KT1 and check its storage.
                     //TODO if it's not a KT1, there's no need to
-                    if (!mDstAccount.isNullOrEmpty() && mDstAccount!!.startsWith("KT1", true))
+                    if (!mDstAccount.isNullOrEmpty() && mDstAccount!!.startsWith("kt1", true))
                     {
                         /*
                         if (!mSourceKT1withCode)
