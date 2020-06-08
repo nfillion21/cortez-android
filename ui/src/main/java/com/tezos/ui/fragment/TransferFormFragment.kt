@@ -478,7 +478,7 @@ class TransferFormFragment : Fragment()
         refresh_KT1_recipient_layout.visibility = View.GONE
         mClickRecipientKT1 = false
 
-        startGetRequestLoadContractInfo(isRecipient)
+        startGetRequestLoadContractInfo(isRecipient = isRecipient)
     }
 
 
@@ -2434,7 +2434,16 @@ class TransferFormFragment : Fragment()
                 if (argsSecureKey != null)
                 {
                     val secureKeyJSONObject = argsSecureKey[0] as JSONObject
-                    return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+
+                    val secureKey = DataExtractor.getStringFromField(secureKeyJSONObject, "bytes")
+                    if (!secureKey.isNullOrEmpty())
+                    {
+                        return secureKey
+                    }
+                    else
+                    {
+                        return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+                    }
                 }
             }
         }
@@ -2838,7 +2847,7 @@ class TransferFormFragment : Fragment()
                         }
                         */
 
-                        startStorageInfoLoading(true)
+                        startStorageInfoLoading(isRecipient = true)
                     }
                     else
                     {
