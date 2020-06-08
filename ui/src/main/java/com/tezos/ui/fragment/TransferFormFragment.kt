@@ -896,8 +896,6 @@ class TransferFormFragment : Fragment()
                         if (canSignWithMaster)
                         {
 
-                            val beginsWith = mDstAccount?.slice(0 until 3)
-
                             //this one is a standard KT1
                             val mnemonicsData = Storage(activity!!).getMnemonics()
 
@@ -1984,8 +1982,19 @@ class TransferFormFragment : Fragment()
                     {
                         NATURE_ADDRESS_ENUM.TZ ->
                         {
-                            postParams.put("src", mnemonicsData.pkh)
-                            postParams.put("src_pk", mnemonicsData.pk)
+                            if (!canSignWithMaster)
+                            {
+                                val ecKeys = retrieveECKeys()
+                                val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                                postParams.put("src_pk", p2pk)
+                                val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                                postParams.put("src", tz3)
+                            }
+                            else
+                            {
+                                postParams.put("src", mnemonicsData.pkh)
+                                postParams.put("src_pk", mnemonicsData.pk)
+                            }
 
                             var dstObjects = JSONArray()
 
@@ -2016,8 +2025,20 @@ class TransferFormFragment : Fragment()
 
                         NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION ->
                         {
-                            postParams.put("src", mnemonicsData.pkh)
-                            postParams.put("src_pk", mnemonicsData.pk)
+
+                            if (!canSignWithMaster)
+                            {
+                                val ecKeys = retrieveECKeys()
+                                val p2pk = CryptoUtils.generateP2Pk(ecKeys)
+                                postParams.put("src_pk", p2pk)
+                                val tz3 = CryptoUtils.generatePkhTz3(ecKeys)
+                                postParams.put("src", tz3)
+                            }
+                            else
+                            {
+                                postParams.put("src", mnemonicsData.pkh)
+                                postParams.put("src_pk", mnemonicsData.pk)
+                            }
 
                             var dstObjects = JSONArray()
 
@@ -2288,7 +2309,7 @@ class TransferFormFragment : Fragment()
                     mNatureSource = NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT
 
                     recipient_area.visibility = View.VISIBLE
-                    amount_layout.visibility = View.GONE
+                    //amount_layout.visibility = View.GONE
                 }
 
                 loading_progress.visibility = View.GONE
@@ -2660,7 +2681,7 @@ class TransferFormFragment : Fragment()
                     canSignWithMaster = !seed.mnemonics.isNullOrEmpty()
                 }
 
-                val salt = if (mNatureSource == NATURE_ADDRESS_ENUM.KT1_MULTISIG && !canSignWithMaster)
+                val salt = if (mNatureSource == NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT && !canSignWithMaster)
                 {
                     (masterKeySaltJSONObject["args"] as JSONArray)[1] as JSONObject
                 }
@@ -2851,6 +2872,7 @@ class TransferFormFragment : Fragment()
                     }
                     else
                     {
+                        mNatureRecipient = NATURE_ADDRESS_ENUM.TZ
                         //no need to hide it anymore
                         loading_progress.visibility = View.GONE
                         recipient_area.visibility = View.VISIBLE
