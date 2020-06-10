@@ -301,39 +301,6 @@ class TransferFormFragment : Fragment()
                     amount_layout.visibility = View.GONE
                 }
             }
-
-
-            /*
-            arguments?.let {
-
-                val srcAddress = it.getString(Address.TAG)
-                var dstAddress:String? = null
-
-                val bundle = it.getBundle(TransferFormActivity.DST_ADDRESS_KEY)
-                if (bundle != null)
-                {
-                    val dst = Address.fromBundle(bundle)
-                    dstAddress = dst?.pubKeyHash
-                }
-
-                if (!srcAddress.isNullOrEmpty() && srcAddress.startsWith("KT1", true))
-                {
-                    startStorageInfoLoading(false)
-                }
-                else if (!dstAddress.isNullOrEmpty() && dstAddress.startsWith("kt1", true))
-                {
-                    startStorageInfoLoading(true)
-                }
-                else
-                {
-                    //no need to hide it anymore
-                    loading_progress.visibility = View.GONE
-                    recipient_area.visibility = View.VISIBLE
-                    amount_layout.visibility = View.GONE
-                }
-            }
-            */
-
         }
     }
 
@@ -2219,12 +2186,33 @@ class TransferFormFragment : Fragment()
 
                     dstObject.put("fee", mTransferFees)
 
-                    dstObject.put("contract_type", "kt1_to_kt1")
 
                     dstObjects.put(dstObject)
 
                     postParams.put("dsts", dstObjects)
 
+                    when (mNatureRecipient)
+                    {
+                        NATURE_ADDRESS_ENUM.TZ ->
+                        {
+                            dstObject.put("contract_type", "kt1_to_tz")
+                        }
+
+                        NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION ->
+                        {
+                            dstObject.put("contract_type", "kt1_to_kt1")
+                        }
+
+                        NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT ->
+                        {
+                            dstObject.put("contract_type", "kt1_to_kt1")
+                        }
+
+                        NATURE_ADDRESS_ENUM.KT1_MULTISIG ->
+                        {
+
+                        }
+                    }
                 }
 
                 NATURE_ADDRESS_ENUM.KT1_DAILY_SPENDING_LIMIT ->
@@ -2640,6 +2628,7 @@ class TransferFormFragment : Fragment()
                                 recipient_area.visibility = View.VISIBLE
                                 amount_layout.visibility = View.VISIBLE
 
+                                //TODO handle this better
                                 mClickRecipientKT1 = false
                             }
                         }
@@ -2650,7 +2639,7 @@ class TransferFormFragment : Fragment()
                             arguments?.let {
 
                                 val srcAddress = it.getString(Address.TAG)
-                                if (!srcAddress.isNullOrEmpty() && !srcAddress.startsWith("KT1", true))
+                                if (!srcAddress.isNullOrEmpty() && !srcAddress.startsWith("kt1", true))
                                 {
                                     //this is a standard source tz1/2/3
 
@@ -2683,7 +2672,6 @@ class TransferFormFragment : Fragment()
                                         }
 
                                         loading_progress.visibility = View.GONE
-                                        amount_layout.visibility = View.GONE
                                     }
                                 }
                             }
