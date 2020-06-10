@@ -2590,7 +2590,6 @@ class TransferFormFragment : Fragment()
             else
             {
                 val mnemonicsData = Storage(activity!!).getMnemonics()
-                val defaultContract = JSONObject().put("string", mnemonicsData.pkh)
 
                 val contract =
                         if (isRecipient)
@@ -2602,78 +2601,95 @@ class TransferFormFragment : Fragment()
                             mStorageSource
                         }
 
-                val isDefaultContract = contract?.storage.toString() == defaultContract.toString()
-
-                if (isDefaultContract)
+                if (contract != null)
                 {
-                    if (isRecipient)
+                    val element = JSONObject(contract.storage)
+                    val pkh = DataExtractor.getStringFromField(element, "bytes")
+                    val el = if (!pkh.isNullOrEmpty())
                     {
-                        mNatureRecipient = NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION
-
-                        if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith(prefix = "KT1", ignoreCase = true))
-                        {
-                            //this is a standard source tz1/2/3
-
-                            loading_progress.visibility = View.GONE
-                            recipient_area.visibility = View.VISIBLE
-                            amount_layout.visibility = View.VISIBLE
-                        }
-                        else
-                        {
-                            //this is a KT1 with no code in it
-
-                            loading_progress.visibility = View.GONE
-                            recipient_area.visibility = View.VISIBLE
-                            amount_layout.visibility = View.VISIBLE
-
-                            mClickRecipientKT1 = false
-                        }
+                        val bytes = pkh.hexToByteArray()
+                        val hashPublicKey = bytes.slice(1 until bytes.size).toByteArray()
+                        CryptoUtils.genericHashToPkh(hashPublicKey)
                     }
                     else
                     {
-                        mNatureSource = NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION
+                        DataExtractor.getStringFromField(element, "string")
+                    }
 
-                        arguments?.let {
+                    val isDefaultContract = el == mnemonicsData.pkh
 
-                            val srcAddress = it.getString(Address.TAG)
-                            if (!srcAddress.isNullOrEmpty() && !srcAddress.startsWith("KT1", true))
+                    if (isDefaultContract)
+                    {
+                        if (isRecipient)
+                        {
+                            mNatureRecipient = NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION
+
+                            if (!mDstAccount.isNullOrEmpty() && !mDstAccount!!.startsWith(prefix = "KT1", ignoreCase = true))
                             {
                                 //this is a standard source tz1/2/3
 
-                                //no need to hide it anymore
                                 loading_progress.visibility = View.GONE
                                 recipient_area.visibility = View.VISIBLE
-                                amount_layout.visibility = View.GONE
+                                amount_layout.visibility = View.VISIBLE
                             }
                             else
                             {
-                                //it looks like it's a KT1 with no code in it.
+                                //this is a KT1 with no code in it
 
-                                mClickSourceKT1 = false
+                                loading_progress.visibility = View.GONE
+                                recipient_area.visibility = View.VISIBLE
+                                amount_layout.visibility = View.VISIBLE
 
-                                // we got to handle if we have the mnemonics.
-                                val hasMnemonics = Storage(activity!!).hasMnemonics()
-                                if (hasMnemonics)
+                                mClickRecipientKT1 = false
+                            }
+                        }
+                        else
+                        {
+                            mNatureSource = NATURE_ADDRESS_ENUM.KT1_DEFAULT_DELEGATION
+
+                            arguments?.let {
+
+                                val srcAddress = it.getString(Address.TAG)
+                                if (!srcAddress.isNullOrEmpty() && !srcAddress.startsWith("KT1", true))
                                 {
-                                    val seed = Storage(activity!!).getMnemonics()
+                                    //this is a standard source tz1/2/3
 
-                                    if (seed.mnemonics.isEmpty())
-                                    {
-                                        // TODO write a text to say we cannot transfer anything.
-                                        recipient_area.visibility = View.GONE
-                                        no_mnemonics.visibility = View.VISIBLE
-                                    }
-                                    else
-                                    {
-                                        recipient_area.visibility = View.VISIBLE
-                                    }
-
+                                    //no need to hide it anymore
                                     loading_progress.visibility = View.GONE
+                                    recipient_area.visibility = View.VISIBLE
                                     amount_layout.visibility = View.GONE
+                                }
+                                else
+                                {
+                                    //it looks like it's a KT1 with no code in it.
+
+                                    mClickSourceKT1 = false
+
+                                    // we got to handle if we have the mnemonics.
+                                    val hasMnemonics = Storage(activity!!).hasMnemonics()
+                                    if (hasMnemonics)
+                                    {
+                                        val seed = Storage(activity!!).getMnemonics()
+
+                                        if (seed.mnemonics.isEmpty())
+                                        {
+                                            // TODO write a text to say we cannot transfer anything.
+                                            recipient_area.visibility = View.GONE
+                                            no_mnemonics.visibility = View.VISIBLE
+                                        }
+                                        else
+                                        {
+                                            recipient_area.visibility = View.VISIBLE
+                                        }
+
+                                        loading_progress.visibility = View.GONE
+                                        amount_layout.visibility = View.GONE
+                                    }
                                 }
                             }
                         }
                     }
+
                 }
             }
         }
@@ -2708,13 +2724,10 @@ class TransferFormFragment : Fragment()
                     val secureKeyJSONObject = argsSecureKey[0] as JSONObject
 
                     val secureKey = DataExtractor.getStringFromField(secureKeyJSONObject, "bytes")
-                    if (!secureKey.isNullOrEmpty())
-                    {
-                        return secureKey
-                    }
-                    else
-                    {
-                        return DataExtractor.getStringFromField(secureKeyJSONObject, "string")
+                    return if (!secureKey.isNullOrEmpty()) {
+                        secureKey
+                    } else {
+                        DataExtractor.getStringFromField(secureKeyJSONObject, "string")
                     }
                 }
             }
