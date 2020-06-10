@@ -3,6 +3,7 @@ package com.tezos.core.models
 import android.os.Bundle
 import com.tezos.core.utils.DataExtractor
 import org.json.JSONArray
+import org.json.JSONObject
 
 data class Contract
 (
@@ -49,7 +50,16 @@ data class Contract
             val delegatable = DataExtractor.getBooleanFromField(contractJSON, "delegatable")
             val delegate = DataExtractor.getStringFromField(contractJSON, "delegate")
             val script = DataExtractor.getJSONObjectFromField(contractJSON, "script")
-            val storage = DataExtractor.getJSONObjectFromField(contractJSON, "storage")
+
+            val storage =
+                    if (DataExtractor.getJSONObjectFromField(contractJSON, "storage") != null)
+                    {
+                        DataExtractor.getJSONObjectFromField(contractJSON, "storage")
+                    }
+                    else
+                    {
+                        DataExtractor.getJSONObjectFromField(script, "storage")
+                    }
 
             return Contract(
                     blk = blk,
