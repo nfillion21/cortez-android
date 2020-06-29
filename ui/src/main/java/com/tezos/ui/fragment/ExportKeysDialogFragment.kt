@@ -38,7 +38,8 @@ class ExportKeysDialogFragment : AppCompatDialogFragment()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        setStyle(DialogFragment.STYLE_NORMAL, 0)
+        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.DialogFullScreenTheme)
+
         arguments?.let {
         }
         //isCancelable = false

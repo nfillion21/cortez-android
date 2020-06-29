@@ -78,6 +78,15 @@
     <style name="PaymentScreens.PublicKeyActivity">
     </style>
 
+    <style name="DialogFullScreenTheme" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowMinWidthMinor">100%</item>
+        <item name="android:windowMinWidthMajor">100%</item>
+    </style>
+
     <style name="AuthenticationDialog" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowFixedWidthMinor">90%</item>
