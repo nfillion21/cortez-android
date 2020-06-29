@@ -37,23 +37,20 @@ import android.graphics.drawable.StateListDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
 import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.fragment.SearchWordDialogFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_key_management.*
-import kotlinx.android.synthetic.main.activity_key_management.exit_button
-import kotlinx.android.synthetic.main.activity_key_management.exit_button_layout
 
 
 class KeyManagementActivity : BaseSecureActivity()
@@ -204,6 +201,7 @@ class KeyManagementActivity : BaseSecureActivity()
             without_mnemonics_layout.visibility = if (hasMasterkey) View.GONE else View.VISIBLE
 
             mnemonics_info_textview.visibility = View.GONE
+            export_24_words_button.visibility = if (hasMasterkey) View.VISIBLE else View.GONE
         }
         else
         {
@@ -211,6 +209,7 @@ class KeyManagementActivity : BaseSecureActivity()
             without_mnemonics_layout.visibility = View.GONE
 
             mnemonics_info_textview.visibility = View.VISIBLE
+            export_24_words_button.visibility = View.GONE
         }
     }
 
