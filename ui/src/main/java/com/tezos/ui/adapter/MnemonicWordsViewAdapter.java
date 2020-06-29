@@ -196,9 +196,12 @@ public class MnemonicWordsViewAdapter extends RecyclerView.Adapter<RecyclerView.
                 }
 
                 int finalWordNumberInt = wordNumberInt;
-                holder.itemView.setOnClickListener(v ->
-                        mOnItemClickListener.onClick(v, finalWordNumberInt)
-                );
+                if (mOnItemClickListener != null)
+                {
+                    holder.itemView.setOnClickListener(v ->
+                            mOnItemClickListener.onClick(v, finalWordNumberInt)
+                    );
+                }
 
                 String wordNumber = String.format(mActivity.getString(R.string.word_info), ++wordNumberInt);
                 wordItemHolder.wordNumberItem.setText(wordNumber);

@@ -49,6 +49,8 @@ import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
 import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.fragment.ExportKeysDialogFragment
+import com.tezos.ui.fragment.SendCentsFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_key_management.*
 
@@ -132,6 +134,16 @@ class KeyManagementActivity : BaseSecureActivity()
                     .setPositiveButton(android.R.string.yes, dialogClickListener)
                     .setCancelable(false)
                     .show()
+        }
+
+        export_24_words_button.setOnClickListener {
+            val theme = CustomTheme(
+                    R.color.colorPrimaryDark,
+                    R.color.colorPrimaryDark,
+                    R.color.colorTitleText)
+
+            val exportKeysDialogFragment = ExportKeysDialogFragment.newInstance(theme = theme)
+            exportKeysDialogFragment.show(supportFragmentManager, SendCentsFragment.TAG)
         }
 
         remove_24_words_button.setOnClickListener {
