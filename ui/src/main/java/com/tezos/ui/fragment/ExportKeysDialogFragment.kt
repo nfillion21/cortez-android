@@ -1,17 +1,23 @@
 package com.tezos.ui.fragment
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDialogFragment
+import androidx.core.text.TextUtilsCompat
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
+import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.adapter.MnemonicWordsViewAdapter
+import com.tezos.ui.authentication.EncryptionServices
+import com.tezos.ui.utils.Storage
 import com.tezos.ui.widget.OffsetDecoration
 import java.util.*
+import kotlin.collections.ArrayList
 
 class ExportKeysDialogFragment : AppCompatDialogFragment()
 {
@@ -60,13 +66,16 @@ class ExportKeysDialogFragment : AppCompatDialogFragment()
             */
         }
 
-        val words: MutableList<String?> = ArrayList(MNEMONICS_WORDS_NUMBER)
-        for (i in 0 until MNEMONICS_WORDS_NUMBER)
-        {
-            words.add(null)
-        }
-        mAdapter!!.updateWords(words, null)
+        val mnemonicsData = Storage(activity!!).getMnemonics()
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+        val k2 = stringToWords(mnemonics)
+
+        mAdapter!!.updateWords(k2, null)
     }
+
+    private fun stringToWords(s : String) = s.trim().splitToSequence(' ')
+            .filter { it.isNotEmpty() } // or: .filter { it.isNotBlank() }
+            .toList()
 
     private fun setUpWordGrid(wordsView: RecyclerView) {
         val spacing = context!!.resources
