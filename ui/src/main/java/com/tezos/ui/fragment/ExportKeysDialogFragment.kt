@@ -1,15 +1,12 @@
 package com.tezos.ui.fragment
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDialogFragment
-import androidx.core.text.TextUtilsCompat
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
-import com.tezos.core.crypto.CryptoUtils
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.adapter.MnemonicWordsViewAdapter
@@ -17,7 +14,6 @@ import com.tezos.ui.authentication.EncryptionServices
 import com.tezos.ui.utils.Storage
 import com.tezos.ui.widget.OffsetDecoration
 import java.util.*
-import kotlin.collections.ArrayList
 
 class ExportKeysDialogFragment : AppCompatDialogFragment()
 {
@@ -26,6 +22,8 @@ class ExportKeysDialogFragment : AppCompatDialogFragment()
     companion object
     {
         const val TAG = "export_keys_dialog_fragment"
+
+        private const val WORDS_KEY = "words_key"
 
         private const val MNEMONICS_WORDS_NUMBER = 24
 
@@ -38,7 +36,6 @@ class ExportKeysDialogFragment : AppCompatDialogFragment()
                         putBundle(CustomTheme.TAG, bundleTheme)
                     }
                 }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -58,19 +55,19 @@ class ExportKeysDialogFragment : AppCompatDialogFragment()
 
         if (savedInstanceState != null)
         {
-            /*
-            val words = savedInstanceState.getStringArrayList(RestoreWalletFragment.WORDS_KEY)
+            val words = savedInstanceState.getStringArrayList(WORDS_KEY)
             if (words != null) {
-                mAdapter.updateWords(words, null)
+                mAdapter!!.updateWords(words, null)
             }
-            */
         }
+        else
+        {
+            val mnemonicsData = Storage(activity!!).getMnemonics()
+            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+            val k2 = stringToWords(mnemonics)
 
-        val mnemonicsData = Storage(activity!!).getMnemonics()
-        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-        val k2 = stringToWords(mnemonics)
-
-        mAdapter!!.updateWords(k2, null)
+            mAdapter!!.updateWords(k2, null)
+        }
     }
 
     private fun stringToWords(s : String) = s.trim().splitToSequence(' ')
@@ -96,6 +93,12 @@ class ExportKeysDialogFragment : AppCompatDialogFragment()
     override fun onSaveInstanceState(outState: Bundle)
     {
         super.onSaveInstanceState(outState)
+
+        val words = mAdapter!!.words
+        if (words != null)
+        {
+            outState.putStringArrayList(WORDS_KEY, mAdapter!!.words as ArrayList<String?>)
+        }
     }
 
     override fun onDestroy()
