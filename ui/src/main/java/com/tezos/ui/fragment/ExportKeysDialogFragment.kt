@@ -10,10 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tezos.core.models.CustomTheme
 import com.tezos.ui.R
 import com.tezos.ui.adapter.MnemonicWordsViewAdapter
-import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.utils.Storage
 import com.tezos.ui.widget.OffsetDecoration
-import java.util.*
 
 class ExportKeysDialogFragment : AppCompatDialogFragment()
 {
@@ -23,17 +20,19 @@ class ExportKeysDialogFragment : AppCompatDialogFragment()
     {
         const val TAG = "export_keys_dialog_fragment"
 
-        private const val WORDS_KEY = "words_key"
+        private const val MNEMONICS_KEY = "mnemonics_key"
 
         private const val MNEMONICS_WORDS_NUMBER = 24
 
         @JvmStatic
-        fun newInstance(theme: CustomTheme) =
+        fun newInstance(mnemonics:String, theme: CustomTheme) =
                 ExportKeysDialogFragment().apply {
                     arguments = Bundle().apply {
 
                         val bundleTheme = theme.toBundle()
                         putBundle(CustomTheme.TAG, bundleTheme)
+
+                        putString(MNEMONICS_KEY, mnemonics)
                     }
                 }
     }
@@ -53,20 +52,9 @@ class ExportKeysDialogFragment : AppCompatDialogFragment()
         val mRecyclerView: RecyclerView = view.findViewById(R.id.words)
         setUpWordGrid(mRecyclerView)
 
-        if (savedInstanceState != null)
-        {
-            val words = savedInstanceState.getStringArrayList(WORDS_KEY)
-            if (words != null) {
-                mAdapter!!.updateWords(words, null)
-            }
-        }
-        else
-        {
-            val mnemonicsData = Storage(activity!!).getMnemonics()
-            val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
-            val k2 = stringToWords(mnemonics)
-
-            mAdapter!!.updateWords(k2, null)
+        arguments?.let {
+            it.getString(MNEMONICS_KEY)
+            mAdapter!!.updateWords(stringToWords(it.getString(MNEMONICS_KEY)), null)
         }
     }
 
@@ -93,12 +81,6 @@ class ExportKeysDialogFragment : AppCompatDialogFragment()
     override fun onSaveInstanceState(outState: Bundle)
     {
         super.onSaveInstanceState(outState)
-
-        val words = mAdapter!!.words
-        if (words != null)
-        {
-            outState.putStringArrayList(WORDS_KEY, mAdapter!!.words as ArrayList<String?>)
-        }
     }
 
     override fun onDestroy()
