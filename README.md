@@ -11,8 +11,7 @@ Feel free to download it on Google Play:
 
 - Create and restore a Tezos wallet
 - Keep track of public key hashes in a simple address book
-- Allows you to receive or send ꜩ to any of these addresses
-- Consult your operations history or that of one of your contacts
+- Consult your operations history
 
 ## Security
 
