@@ -284,7 +284,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
             mAdapter.updateWords(zebras, null);
         }
-        //*
+        /*
         else if (position == 0 && word.equalsIgnoreCase("link"))
         {
             List<String> link = Arrays.asList(
