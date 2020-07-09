@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.5.2
+-----
+* Export seed phrase now available.
+
 1.5.1
 -----
 * Add Firebase sdk tools.

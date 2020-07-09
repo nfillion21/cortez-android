@@ -1,7 +1,7 @@
 <resources>
 
     <string name="about_info">
-        Cortez for Android is a native mobile wallet for the Tezos blockchain.\n\nDeveloped in Paris by Nomadic Labs (https://nomadic-labs.com), this native Android app aims to bring maximum security and best user experience the Android operating system can bring to its users.\n\nCortez is 100&#37; open source. Check it out at https://gitlab.com/tezos/cortez-android\n\nFeel free to mail us by clicking on the button below.
+        Cortez for Android is a native mobile wallet for the Tezos blockchain.\n\nDeveloped in Paris, this native Android app aims to bring maximum security and best user experience the Android operating system can bring to its users.\n\nCortez is 100&#37; open source. Check it out at https://gitlab.com/nomadic-labs/cortez-android\n\nFeel free to mail us by clicking on the button below.
         </string>
 
 </resources>

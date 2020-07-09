@@ -406,7 +406,7 @@ public class RestoreWalletFragment extends Fragment implements MnemonicWordsView
 
             mAdapter.updateWords(link, null);
         }
-         */
+         //*/
 
         boolean isValid = CryptoUtils.validateMnemonics(mAdapter.getWords());
         if (isValid)
