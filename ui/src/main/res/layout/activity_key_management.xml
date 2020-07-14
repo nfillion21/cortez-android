@@ -170,6 +170,21 @@
                         android:layout_marginLeft="@dimen/spacing_double"
                         />
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/export_24_words_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/PaymentScreens.RoundedButton"
+                    android:text="@string/export_your_24_words"
+                    android:visibility="visible"
+                    android:drawableLeft="@drawable/ic_lock_black"
+                    android:paddingLeft="@dimen/spacing_double"
+                    android:paddingRight="@dimen/spacing_double"
+                    android:layout_marginRight="@dimen/spacing_double"
+                    android:layout_marginLeft="@dimen/spacing_double"
+                    />
+
             </LinearLayout>
 
         </ScrollView>

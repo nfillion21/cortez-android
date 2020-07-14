@@ -34,30 +34,32 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
+import android.hardware.fingerprint.FingerprintManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import com.tezos.core.models.CustomTheme
 import com.tezos.core.utils.ApiLevelHelper
 import com.tezos.ui.R
+import com.tezos.ui.authentication.AuthenticationDialog
 import com.tezos.ui.authentication.EncryptionServices
-import com.tezos.ui.fragment.SearchWordDialogFragment
+import com.tezos.ui.fragment.ExportKeysDialogFragment
 import com.tezos.ui.utils.Storage
 import kotlinx.android.synthetic.main.activity_key_management.*
-import kotlinx.android.synthetic.main.activity_key_management.exit_button
-import kotlinx.android.synthetic.main.activity_key_management.exit_button_layout
 
 
 class KeyManagementActivity : BaseSecureActivity()
 {
+    private val storage: Storage by lazy(LazyThreadSafetyMode.NONE) { Storage(applicationContext) }
+
     companion object
     {
         private val KEY_MANAGEMENT_TAG = "KeyManagementTag"
@@ -78,29 +80,6 @@ class KeyManagementActivity : BaseSecureActivity()
             return starter
         }
     }
-
-    /*
-    companion object
-    {
-        private val TAG_SETTINGS = "SettingsTag"
-
-        var SETTINGS_REQUEST_CODE = 0x2500 // arbitrary int
-
-        private fun getStartIntent(context: Context, themeBundle: Bundle): Intent
-        {
-            val starter = Intent(context, SettingsActivity::class.java)
-            starter.putExtra(CustomTheme.TAG, themeBundle)
-
-            return starter
-        }
-
-        fun start(activity: Activity, theme: CustomTheme)
-        {
-            val starter = getStartIntent(activity, theme.toBundle())
-            ActivityCompat.startActivityForResult(activity, starter, SETTINGS_REQUEST_CODE, null)
-        }
-    }
-    */
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -135,6 +114,12 @@ class KeyManagementActivity : BaseSecureActivity()
                     .setPositiveButton(android.R.string.yes, dialogClickListener)
                     .setCancelable(false)
                     .show()
+        }
+
+        export_24_words_button.setOnClickListener {
+
+
+            onExportWordsClick()
         }
 
         remove_24_words_button.setOnClickListener {
@@ -204,6 +189,7 @@ class KeyManagementActivity : BaseSecureActivity()
             without_mnemonics_layout.visibility = if (hasMasterkey) View.GONE else View.VISIBLE
 
             mnemonics_info_textview.visibility = View.GONE
+            export_24_words_button.visibility = if (hasMasterkey) View.VISIBLE else View.GONE
         }
         else
         {
@@ -211,6 +197,7 @@ class KeyManagementActivity : BaseSecureActivity()
             without_mnemonics_layout.visibility = View.GONE
 
             mnemonics_info_textview.visibility = View.VISIBLE
+            export_24_words_button.visibility = View.GONE
         }
     }
 
@@ -226,6 +213,59 @@ class KeyManagementActivity : BaseSecureActivity()
 
         setResult(R.id.logout_succeed, null)
         finish()
+    }
+
+    private fun onExportWordsClick()
+    {
+        val dialog = AuthenticationDialog()
+        if (isFingerprintAllowed() && hasEnrolledFingerprints())
+        {
+            dialog.cryptoObjectToAuthenticateWith = EncryptionServices().prepareFingerprintCryptoObject()
+            dialog.fingerprintInvalidationListener = { onFingerprintInvalidation(it) }
+            dialog.fingerprintAuthenticationSuccessListener = {
+                validateKeyAuthentication(it)
+            }
+            if (dialog.cryptoObjectToAuthenticateWith == null)
+            {
+                dialog.stage = AuthenticationDialog.Stage.NEW_FINGERPRINT_ENROLLED
+            }
+            else
+            {
+                dialog.stage = AuthenticationDialog.Stage.FINGERPRINT
+            }
+        }
+        else
+        {
+            dialog.stage = AuthenticationDialog.Stage.PASSWORD
+        }
+        dialog.authenticationSuccessListener = {
+            displayWords()
+        }
+        dialog.passwordVerificationListener =
+                {
+                    validatePassword(it)
+                }
+        dialog.show(supportFragmentManager, "Authentication")
+    }
+
+    private fun validatePassword(inputtedPassword: String): Boolean
+    {
+        val storage = Storage(this)
+        return EncryptionServices().decrypt(storage.getPassword()) == inputtedPassword
+    }
+
+    private fun displayWords()
+    {
+        val theme = CustomTheme(
+                R.color.colorPrimaryDark,
+                R.color.colorPrimaryDark,
+                R.color.colorTitleText)
+
+        val mnemonicsData = Storage(this).getMnemonics()
+        val mnemonics = EncryptionServices().decrypt(mnemonicsData.mnemonics)
+
+        val exportKeysDialogFragment = ExportKeysDialogFragment.newInstance(mnemonics = mnemonics,theme = theme)
+        exportKeysDialogFragment.show(supportFragmentManager, ExportKeysDialogFragment.TAG)
     }
 
     private fun onMasterKeyRemovedSeed()
@@ -305,6 +345,43 @@ class KeyManagementActivity : BaseSecureActivity()
         mCloseButton.setColorFilter(ContextCompat.getColor(this, R.color.theme_tezos_text))
         mCloseButton.setOnClickListener {
             finish()
+        }
+    }
+
+
+    fun isFingerprintAllowed():Boolean
+    {
+        return storage.isFingerprintAllowed()
+    }
+
+    fun hasEnrolledFingerprints():Boolean
+    {
+        return systemServices.hasEnrolledFingerprints()
+    }
+
+    fun saveFingerprintAllowed(useInFuture:Boolean)
+    {
+        storage.saveFingerprintAllowed(useInFuture)
+    }
+
+    private fun onFingerprintInvalidation(useInFuture: Boolean)
+    {
+        saveFingerprintAllowed(useInFuture)
+        if (useInFuture)
+        {
+            EncryptionServices().createFingerprintKey()
+        }
+    }
+
+    private fun validateKeyAuthentication(cryptoObject: FingerprintManager.CryptoObject)
+    {
+        if (EncryptionServices().validateFingerprintAuthentication(cryptoObject))
+        {
+            displayWords()
+        }
+        else
+        {
+            onExportWordsClick()
         }
     }
 

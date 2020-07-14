@@ -122,6 +122,7 @@
     <string name="add_multisig_signatory">Add a signatory</string>
     <string name="restore_your_24_words">Restore your 24 words</string>
     <string name="remove_your_24_words">Remove your master key</string>
+    <string name="export_your_24_words">Export your 24 words</string>
     <string name="share_via">Share via</string>
     <string name="wallet_successfully_created">Wallet successfully created!</string>
     <string name="wallet_successfully_restored">Wallet successfully restored!</string>
