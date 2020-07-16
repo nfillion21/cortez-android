@@ -2943,14 +2943,21 @@ class TransferFormFragment : Fragment()
         }
 
         pay_button_layout.visibility = View.VISIBLE
-
-        val moneyString = getString(R.string.pay, "ꜩ")
-
-        pay_button.text = moneyString
-
         pay_button_layout.setOnClickListener {
             onPayClick()
         }
+
+        request_pay_button_layout.visibility = View.VISIBLE
+        request_pay_button_layout.setOnClickListener {
+            onPayClick()
+        }
+
+        val moneyString = getString(R.string.pay, "ꜩ")
+        pay_button.text = moneyString
+
+        val moneyStringRequest = getString(R.string.request_pay, "ꜩ")
+        request_pay_button.text = moneyStringRequest
+
 
         putEverythingInRed()
 
@@ -2995,12 +3002,14 @@ class TransferFormFragment : Fragment()
         if (loading)
         {
             pay_button_layout.visibility = View.GONE
+            request_pay_button_layout.visibility = View.GONE
             empty.visibility = View.VISIBLE
             //amount_transfer.isEnabled = false
         }
         else
         {
             pay_button_layout.visibility = View.VISIBLE
+            request_pay_button_layout.visibility = View.VISIBLE
             empty.visibility = View.INVISIBLE
             //amount_transfer.isEnabled = true
         }
@@ -3260,6 +3269,14 @@ class TransferFormFragment : Fragment()
             val drawables = pay_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+
+            request_pay_button.setTextColor(ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
+            request_pay_button_layout.isEnabled = true
+            request_pay_button_layout.background = makeSelector(theme)
+
+            val drawablesRequest = request_pay_button.compoundDrawables
+            val wrapDrawableRequest = DrawableCompat.wrap(drawablesRequest[0])
+            DrawableCompat.setTint(wrapDrawableRequest, ContextCompat.getColor(activity!!, theme.textColorPrimaryId))
         }
         else
         {
@@ -3271,6 +3288,15 @@ class TransferFormFragment : Fragment()
             val drawables = pay_button.compoundDrawables
             val wrapDrawable = DrawableCompat.wrap(drawables[0])
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(activity!!, android.R.color.white))
+
+
+            request_pay_button.setTextColor(ContextCompat.getColor(activity!!, android.R.color.white))
+            request_pay_button_layout.isEnabled = false
+            request_pay_button_layout.background = makeSelector(greyTheme)
+
+            val drawablesRequest = request_pay_button.compoundDrawables
+            val wrapDrawableRequest = DrawableCompat.wrap(drawablesRequest[0])
+            DrawableCompat.setTint(wrapDrawableRequest, ContextCompat.getColor(activity!!, android.R.color.white))
         }
     }
 
@@ -3366,6 +3392,7 @@ class TransferFormFragment : Fragment()
     private fun putPayButtonToNull()
     {
         pay_button.text = getString(R.string.pay, "")
+        request_pay_button.text = getString(R.string.request_pay, "")
     }
 
 // put everything in RED
@@ -3380,6 +3407,7 @@ class TransferFormFragment : Fragment()
         {
             color = R.color.tz_error
             pay_button.text = getString(R.string.pay, "")
+            request_pay_button.text = getString(R.string.request_pay, "")
         }
         else
         {
@@ -3433,6 +3461,7 @@ class TransferFormFragment : Fragment()
         val moneyFormatted2 = "$amount ꜩ"
 //String moneyFormatted3 = Double.toString(amountDouble) + " ꜩ";
         pay_button.text = getString(R.string.pay, moneyFormatted2)
+        request_pay_button.text = getString(R.string.request_pay, moneyFormatted2)
     }
 
     /**

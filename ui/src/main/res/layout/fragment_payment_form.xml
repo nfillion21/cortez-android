@@ -41,6 +41,40 @@
             android:layout_height="?android:attr/actionBarSize">
 
             <FrameLayout
+                android:id="@+id/request_pay_button_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                style="@style/PaymentScreens.Button"
+                android:enabled="false"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                >
+
+                <Button
+                    android:id="@+id/request_pay_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:drawableLeft="@drawable/ic_lock_black"
+                    android:drawableStart="@drawable/ic_lock_black"
+                    android:drawablePadding="@dimen/spacing_normal"
+                    android:drawableTint="@color/colorTitleText"
+                    android:layout_gravity="center"
+                    android:enabled="false"
+                    android:textStyle="bold"
+                    android:textAppearance="@style/PaymentScreens.TextAppearance.AmountItem"
+
+                    android:background="@null"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    />
+
+            </FrameLayout>
+
+
+            <FrameLayout
                 android:id="@+id/pay_button_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

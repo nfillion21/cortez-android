@@ -2,6 +2,7 @@
     <string name="app_name">ui</string>
     <string name="content_description" translatable="false">Content description</string>
     <string name="pay">Send %1$s</string>
+    <string name="request_pay">Request sending %1$s</string>
     <string name="delegate_format">Delegate %1$s</string>
     <string name="select_source">Select source transfer</string>
     <string name="select_recipient">Select recipient</string>
@@ -41,6 +42,8 @@
     <string name="notify_add_delegation">Notify add delegation</string>
     <string name="request_remove_delegate">Request remove delegate</string>
     <string name="request_add_delegation">Request add delegation</string>
+
+    <string name="request_pay_button">Request pay</string>
     <string name="spending_limit_reset">The spending limit is reset.</string>
     <string name="fee">Fee</string>
     <string name="item_address">Address</string>
