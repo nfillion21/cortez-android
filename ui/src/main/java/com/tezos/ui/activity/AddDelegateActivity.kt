@@ -567,7 +567,7 @@ class AddDelegateActivity : BaseSecureActivity()
 
     private fun showSnackBar(error:VolleyError?)
     {
-        var errorStr: String? = error?.toString() ?: getString(R.string.generic_error)
+        var errorStr: String? = getString(R.string.generic_error)
 
         val snackbar = Snackbar.make(findViewById(R.id.content), errorStr.toString(), Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,

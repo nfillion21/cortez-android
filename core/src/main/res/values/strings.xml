@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">core</string>
     <string name="network_error">Network error</string>
+    <!--
     <string name="generic_error">An error occurred</string>
+    -->
+    <string name="generic_error" translatable="false">The Cortez Wallet will be discontinued on Feb 16 2021.\n\nPlease ensure you keep access to your tez by exporting your key, or transferring your tez to another wallet.</string>
 </resources>

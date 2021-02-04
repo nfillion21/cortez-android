@@ -14,4 +14,6 @@
     <string name="contract_storage_url" translatable="false">https://mezos.lamini.ca/tezos/mainnet/chains/main/blocks/head/context/contracts/%1$s/storage</string>
 
     <string name="chain_ID" translatable="false">NetXdQprcVkpaWU</string>
+
+    <string name="the_end" translatable="false">The Cortez Wallet will be discontinued on Feb 16 2021.\n\nPlease ensure you keep access to your tez by exporting your key, or transferring your tez to another wallet.</string>
 </resources>

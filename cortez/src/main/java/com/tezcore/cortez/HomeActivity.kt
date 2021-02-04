@@ -260,6 +260,22 @@ class HomeActivity : BaseSecureActivity(), AddressBookFragment.OnCardSelectedLis
         }
 
         initActionBar(mTezosTheme)
+
+        helloTheEnd()
+    }
+
+    fun helloTheEnd()
+    {
+        AlertDialog.Builder(this)
+                //.setTitle(R.string.exit)
+                .setMessage(R.string.the_end)
+                .setNeutralButton(R.string.how_to_export){
+                    _,
+                    _ ->
+                    KeyManagementActivity.start(this, mTezosTheme)
+                }
+                .setNegativeButton(android.R.string.yes, null)
+                .show()
     }
 
     /**

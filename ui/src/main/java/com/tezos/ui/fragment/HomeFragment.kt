@@ -555,7 +555,7 @@ open class HomeFragment : Fragment()
 
     private fun showSnackbarError(error:VolleyError?)
     {
-        var err: String? = error?.toString() ?: getString(R.string.generic_error)
+        var err: String? = getString(R.string.generic_error)
 
         listener?.showSnackBar(err!!, ContextCompat.getColor(context!!, android.R.color.holo_red_light), ContextCompat.getColor(context!!, R.color.tz_light))
 
