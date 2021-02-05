@@ -46,11 +46,11 @@ android {
             storePassword keystoreAlphanetProperties['storePassword']
         }
     }
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId 'com.tezcore.cortez'
         minSdkVersion 23
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 24
         versionName "1.5.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
