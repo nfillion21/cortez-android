@@ -1,7 +1,7 @@
 # Cortez for Android
 
 **Information:**  
-Cortez is still active but not maintained by [Nomadic Labs](https://nomadic-labs.com/) anymore.
+[As announced](https://twitter.com/LabosNomades/status/1328374480029306880), the Cortez Wallet will be discontinued on Feb 16 2021. Please ensure you keep access to your tez by [exporting your key](https://blog.nomadic-labs.com/cortez-end-of-support.html), or transferring your tez to another wallet.
 
 **Cortez for Android** is a mobile wallet for the Tezos blockchain.
 
