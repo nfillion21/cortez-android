@@ -223,7 +223,7 @@ class TransferFormActivity : BaseSecureActivity(), TransferFormFragment.OnTransf
 
     override fun onTransferFailed(error: VolleyError?)
     {
-        var err: String = error?.toString() ?: getString(R.string.generic_error)
+        var err: String = getString(R.string.generic_error)
 
         showSnackBar(err, ContextCompat.getColor(this,
                 android.R.color.holo_red_light), null)

@@ -644,14 +644,7 @@ class AddLimitsActivity : BaseSecureActivity()
 
     private fun showSnackBar(error:VolleyError?)
     {
-        var error: String? = if (error != null)
-        {
-            error.toString()
-        }
-        else
-        {
-            getString(R.string.generic_error)
-        }
+        getString(R.string.generic_error)
 
         val snackbar = Snackbar.make(findViewById(R.id.content), error.toString(), Snackbar.LENGTH_LONG)
         snackbar.view.setBackgroundColor((ContextCompat.getColor(this,

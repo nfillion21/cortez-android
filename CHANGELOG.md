@@ -1,6 +1,10 @@
 Cortez wallet for Android change log and release notes
 ================================================
 
+1.5.3
+-----
+* [As announced](https://twitter.com/LabosNomades/status/1328374480029306880), the Cortez Wallet will be discontinued on Feb 16 2021. Please ensure you keep access to your tez by [exporting your key](https://blog.nomadic-labs.com/cortez-end-of-support.html), or transferring your tez to another wallet.
+
 1.5.2
 -----
 * Export seed phrase now available.
